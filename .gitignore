@@ -1,0 +1,58 @@
+# ==========================================
+#   Phlegmatic Git Ignore Configuration
+# ==========================================
+
+# Compiled Binaries & Build Folders
+bin/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+*.pdb
+*.ilk
+*.exp
+
+# Object & Intermediate Files
+*.o
+*.obj
+*.d
+
+# Static Libraries (Ignore local builds, but retain vendor Raylib libraries)
+*.a
+*.lib
+!vendor/raylib/lib/*.a
+
+# CMake Artifacts
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeScripts/
+Testing/
+Makefile
+compile_commands.json
+CTestTestfile.cmake
+_deps/
+
+# IDE & Editor Specific
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.vs/
+.idea/
+*.sln
+*.vcxproj*
+*.user
+*.suo
+
+# Operating System Files
+[Dd]esktop.ini
+[Tt]humbs.db
+.DS_Store
+
+# Temporary & Log Files
+*.log
+*.tmp
+*.bak
+*.cache
