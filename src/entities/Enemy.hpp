@@ -50,11 +50,19 @@ public:
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS; }
+    bool HasMeleeHitbox() const {
+        if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
+        if (type == EnemyType::INQUISITOR_BOSS) {
+            return isPerformingMeleeSmite;
+        }
+        return true; // SLASHER, BRUTE, CHARGER
+    }
     std::string GetName() const;
 
 private:
     EnemyType type;
     EnemyState state;
+    bool isPerformingMeleeSmite;
 
     Vector2 position;
     Vector2 velocity;

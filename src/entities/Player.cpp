@@ -167,7 +167,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 }
 
 void Player::TriggerDash(ParticleSystem& particles) {
-    if (isDashing || dashCooldown > 0.0f) return;
+    if (isDashing) return;
+
+    if (dashCooldown > 0.0f) {
+        particles.SpawnFloatingText(position, "DASH CD!", Color{ 140, 210, 255, 240 }, 14.0f);
+        return;
+    }
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.dashStaminaCost) return;
@@ -227,8 +232,13 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
+    if (heavyCooldown > 0.0f) {
+        particles.SpawnFloatingText(position, "HEAVY CD!", Color{ 255, 140, 60, 240 }, 14.0f);
+        return;
+    }
+
     WeaponStats stats = GetWeaponStats(currentWeapon);
-    if (heavyCooldown > 0.0f || stamina < stats.heavyStamina) return;
+    if (stamina < stats.heavyStamina) return;
 
     stamina -= stats.heavyStamina;
     heavyCooldown = stats.heavyCooldown;

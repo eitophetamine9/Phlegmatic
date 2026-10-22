@@ -48,25 +48,25 @@ A fast-paced, skill-based C++ top-down action RPG environment built with **Rayli
 
 ## Weapon Arsenal
 
-Each weapon features custom attack arcs, damage profiles, windups, and passive attributes:
+Each weapon features custom attack arcs, damage profiles, windups, heavy cooldowns, and dash passives:
 
 ### 1. Broadsword (Balanced Stance)
 * **Design**: Versatile blade with dependable range and fluid recovery.
 * **Light Attack**: 25 damage, 75px reach, 110° arc, 0.22s duration.
-* **Heavy Attack**: 65 damage, 115px reach, 140° sweeping cleave, heavy knockback.
-* **Stamina**: Balanced 14 stamina per light swing, 32 per heavy swing.
+* **Heavy Attack**: 65 damage, 115px reach, 140° sweeping cleave, heavy knockback (1.90s cooldown).
+* **Dash**: 0.85s cooldown, 20 stamina.
 
 ### 2. Dual Daggers (Agility & Flurry)
 * **Design**: Fast-cadence twin daggers built for hit-and-run evasion.
 * **Light Attack**: 18 damage, 62px reach, rapid twin-slash cadence.
-* **Heavy Attack**: 52 damage, 75px reach, 360° twin-blade whirlwind spin.
-* **Passive Bonus**: Dash stamina cost reduced to 12 (from 18), dash cooldown reduced to 0.42s (from 0.55s).
+* **Heavy Attack**: 52 damage, 75px reach, 360° twin-blade whirlwind spin (1.20s cooldown).
+* **Dash**: 0.50s cooldown, 14 stamina.
 
 ### 3. War Mace (Crushing Poise & Shockwaves)
 * **Design**: Massive two-handed bludgeon designed to crush heavy enemy armor.
 * **Light Attack**: 40 damage, 82px reach, high enemy poise damage.
-* **Heavy Attack**: 95 damage, 135px reach, devastating earth-tremor ground slam.
-* **Stamina**: Heavy commitment (24 stamina light, 48 stamina heavy).
+* **Heavy Attack**: 95 damage, 135px reach, devastating earth-tremor ground slam (3.20s cooldown).
+* **Dash**: 1.25s cooldown, 26 stamina.
 
 ---
 

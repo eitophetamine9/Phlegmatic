@@ -15,6 +15,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
     burstShotsRemaining = 0;
     burstIntervalTimer = 0.0f;
     kitingRange = 0.0f;
+    isPerformingMeleeSmite = false;
 
     switch (type) {
         case EnemyType::SLASHER:
@@ -65,11 +66,11 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 18.0f;
             maxHealth = 60.0f;
             moveSpeed = 150.0f;
-            attackRange = 380.0f;
-            kitingRange = 220.0f;
-            windupDuration = 0.80f;
-            strikeDuration = 0.14f;
-            recoveryDuration = 0.85f;
+            attackRange = 360.0f;
+            kitingRange = 200.0f;
+            windupDuration = 0.52f;
+            strikeDuration = 0.12f;
+            recoveryDuration = 0.65f;
             stunDuration = 1.8f;
             telegraph.shape = TelegraphShape::LINE;
             telegraph.radius = attackRange;
@@ -82,10 +83,10 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             maxHealth = 75.0f;
             moveSpeed = 125.0f;
             attackRange = 320.0f;
-            kitingRange = 180.0f;
-            windupDuration = 1.05f;
-            strikeDuration = 0.18f;
-            recoveryDuration = 0.95f;
+            kitingRange = 170.0f;
+            windupDuration = 0.68f;
+            strikeDuration = 0.14f;
+            recoveryDuration = 0.70f;
             stunDuration = 2.0f;
             telegraph.shape = TelegraphShape::CONE;
             telegraph.radius = attackRange;
@@ -99,9 +100,9 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             moveSpeed = 85.0f;
             attackRange = 420.0f;
             kitingRange = 0.0f;
-            windupDuration = 1.10f;
-            strikeDuration = 0.25f;
-            recoveryDuration = 0.75f;
+            windupDuration = 0.70f;
+            strikeDuration = 0.22f;
+            recoveryDuration = 0.70f;
             stunDuration = 1.4f;
             telegraph.shape = TelegraphShape::CIRCLE;
             telegraph.radius = 180.0f;
@@ -163,21 +164,30 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 // Setup Boss attack phase telegraph
                 if (type == EnemyType::INQUISITOR_BOSS) {
                     if (bossAttackPhase == 0) {
-                        // Nova phase
+                        // Nova phase (Pure ranged)
+                        windupDuration = 0.72f;
+                        stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::CIRCLE;
                         telegraph.radius = 180.0f;
                         telegraph.warningColor = Color{ 255, 190, 40, 160 };
+                        isPerformingMeleeSmite = false;
                     } else if (bossAttackPhase == 1) {
-                        // Arcane Beam phase
+                        // Arcane Beam phase (Pure ranged)
+                        windupDuration = 0.52f;
+                        stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
                         telegraph.radius = 460.0f;
                         telegraph.width = 36.0f;
                         telegraph.warningColor = Color{ 220, 50, 90, 170 };
+                        isPerformingMeleeSmite = false;
                     } else {
-                        // Teleport & Smite phase
+                        // Teleport & Smite phase (Melee shockwave + shards)
+                        windupDuration = 0.70f;
+                        stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::CIRCLE;
                         telegraph.radius = 190.0f;
                         telegraph.warningColor = Color{ 255, 60, 60, 180 };
+                        isPerformingMeleeSmite = true;
                     }
                 }
             } else {
@@ -232,11 +242,11 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     float rad = facingAngle * DEG2RAD;
                     particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 70, 70, 255 });
                 } else if (type == EnemyType::ARCHER) {
-                    // Fire high-speed piercing bolt
+                    // Fire high-speed piercing bolt (fast, smooth parry window)
                     float rad = facingAngle * DEG2RAD;
                     Vector2 dir = { cosf(rad), sinf(rad) };
                     Vector2 spawnPos = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
-                    Vector2 projVel = { dir.x * 580.0f, dir.y * 580.0f };
+                    Vector2 projVel = { dir.x * 520.0f, dir.y * 520.0f };
 
                     outProjectiles.emplace_back(spawnPos, projVel, 6.0f, 20.0f, ProjectileType::BOLT, false);
                     SoundFX::PlayProjectileShoot();
@@ -244,12 +254,12 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 } else if (type == EnemyType::PYROMANCER) {
                     // Fire 3 void orbs in a fan spread
                     float baseRad = facingAngle * DEG2RAD;
-                    float angles[3] = { baseRad - 0.32f, baseRad, baseRad + 0.32f };
+                    float angles[3] = { baseRad - 0.30f, baseRad, baseRad + 0.30f };
 
                     for (int i = 0; i < 3; i++) {
                         Vector2 dir = { cosf(angles[i]), sinf(angles[i]) };
                         Vector2 spawnPos = { position.x + dir.x * (radius + 6.0f), position.y + dir.y * (radius + 6.0f) };
-                        Vector2 projVel = { dir.x * 320.0f, dir.y * 320.0f };
+                        Vector2 projVel = { dir.x * 290.0f, dir.y * 290.0f };
                         outProjectiles.emplace_back(spawnPos, projVel, 8.0f, 16.0f, ProjectileType::VOID_ORB, false);
                     }
                     SoundFX::PlayProjectileShoot();
@@ -261,7 +271,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                             float starAngle = ((float)i * 30.0f) * DEG2RAD;
                             Vector2 dir = { cosf(starAngle), sinf(starAngle) };
                             Vector2 spawnPos = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
-                            Vector2 projVel = { dir.x * 320.0f, dir.y * 320.0f };
+                            Vector2 projVel = { dir.x * 290.0f, dir.y * 290.0f };
                             outProjectiles.emplace_back(spawnPos, projVel, 9.0f, 22.0f, ProjectileType::NOVA_STAR, false);
                         }
                         SoundFX::PlayProjectileShoot();
@@ -270,11 +280,11 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     } else if (bossAttackPhase == 1) {
                         // Arcane Beam: 3 rapid beam shards in tight spread
                         float baseRad = facingAngle * DEG2RAD;
-                        float angles[3] = { baseRad - 0.10f, baseRad, baseRad + 0.10f };
+                        float angles[3] = { baseRad - 0.08f, baseRad, baseRad + 0.08f };
                         for (int i = 0; i < 3; i++) {
                             Vector2 dir = { cosf(angles[i]), sinf(angles[i]) };
                             Vector2 spawnPos = { position.x + dir.x * (radius + 10.0f), position.y + dir.y * (radius + 10.0f) };
-                            Vector2 projVel = { dir.x * 640.0f, dir.y * 640.0f };
+                            Vector2 projVel = { dir.x * 580.0f, dir.y * 580.0f };
                             outProjectiles.emplace_back(spawnPos, projVel, 7.0f, 26.0f, ProjectileType::BEAM_SHARD, false);
                         }
                         SoundFX::PlayProjectileShoot();
@@ -288,7 +298,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                             float shardAngle = ((float)i * 45.0f) * DEG2RAD;
                             Vector2 dir = { cosf(shardAngle), sinf(shardAngle) };
                             Vector2 spawnPos = { position.x + dir.x * (radius + 6.0f), position.y + dir.y * (radius + 6.0f) };
-                            Vector2 projVel = { dir.x * 350.0f, dir.y * 350.0f };
+                            Vector2 projVel = { dir.x * 320.0f, dir.y * 320.0f };
                             outProjectiles.emplace_back(spawnPos, projVel, 7.0f, 18.0f, ProjectileType::BEAM_SHARD, false);
                         }
                         SoundFX::PlayHeavyAttack();
@@ -311,6 +321,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 state = EnemyState::RECOVERY;
                 stateTimer = recoveryDuration;
                 velocity = { 0.0f, 0.0f };
+                isPerformingMeleeSmite = false;
             }
             break;
         }
