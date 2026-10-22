@@ -1,8 +1,9 @@
 #pragma once
 #include "raylib.h"
-#include "Combat.hpp"
-#include "Map.hpp"
-#include "Particles.hpp"
+#include "../combat/CombatTypes.hpp"
+#include "../combat/Weapon.hpp"
+#include "../world/Map.hpp"
+#include "../core/Particles.hpp"
 
 class Player {
 public:
@@ -12,7 +13,8 @@ public:
     void Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles);
     void Draw() const;
 
-    // Combat triggers
+    // Movement & Combat triggers
+    void TriggerDash(ParticleSystem& particles);
     void TriggerLightAttack(ParticleSystem& particles);
     void TriggerHeavyAttack(ParticleSystem& particles);
     void TriggerParry(ParticleSystem& particles);
@@ -20,6 +22,10 @@ public:
     // Damage handling
     bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles);
     void Heal(float amount);
+
+    // Weapon equipment
+    void SetWeapon(WeaponType newWeapon);
+    WeaponType GetWeapon() const { return currentWeapon; }
 
     // Getters
     Vector2 GetPosition() const { return position; }
@@ -30,8 +36,12 @@ public:
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
     bool IsParrying() const { return isParrying; }
+    bool IsDashing() const { return isDashing; }
     bool IsAlive() const { return health > 0.0f; }
     bool HasCounterBuff() const { return counterBuffTimer > 0.0f; }
+
+    float GetDashCooldown() const { return dashCooldown; }
+    float GetParryCooldown() const { return parryCooldown; }
 
     const AttackInfo& GetCurrentAttack() const { return currentAttack; }
     bool IsAttacking() const { return currentAttack.type != AttackType::NONE; }
@@ -43,7 +53,9 @@ private:
     Vector2 position;
     Vector2 velocity;
     float radius;
-    float facingAngle; // in degrees
+    float facingAngle;
+
+    WeaponType currentWeapon;
 
     // Stats
     float health;
@@ -51,19 +63,24 @@ private:
     float stamina;
     float maxStamina;
 
-    // Action Timers
+    // Action Timers & States
     float lightCooldown;
     float heavyCooldown;
     float parryCooldown;
     float parryTimer;
     bool isParrying;
-    float counterBuffTimer; // Buff after successful parry
+    float counterBuffTimer;
+
+    // Dash state (Q Key)
+    float dashCooldown;
+    float dashTimer;
+    bool isDashing;
+    Vector2 dashDir;
 
     // Attack state
     AttackInfo currentAttack;
     float heavyWindupTimer;
     bool isHeavyWindingUp;
 
-    // Movement animation
     float walkCycle;
 };

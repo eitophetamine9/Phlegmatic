@@ -7,38 +7,25 @@
 ![Platform](https://img.shields.io/badge/Platform-Windows%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
-A high-performance C++ top-down action RPG environment built with **Raylib 6.2** and **MinGW-w64 (GCC 16)**. Features telegraphed enemy attack cones/circles/lines, active timing-based parrying, dynamic camera tracking, particle feedback, procedural sound synthesis, and a modular Storyboard narrative system.
+A fast-paced, skill-based C++ top-down action RPG environment built with **Raylib 6.2** and **MinGW-w64 (GCC 16)**. Features deliberate observation, spatial awareness, active timing-based defense, an interactive armory hub with 3 weapons, clear enemy attack telegraphs, real-time projectile physics, and a multi-phase boss encounter.
 
 ---
 
-## Game Concept & Design Philosophy
+## Key Features
 
-### The "Phlegmatic" Ethos
-In classical temperament theory, the **phlegmatic** disposition denotes a calm, composed, unemotional demeanor under extreme pressure. 
-
-In *Phlegmatic*, this philosophy directly drives the core combat loop. Unlike conventional button-mashing hack-and-slash games where players spam dodges and rapid clicks, *Phlegmatic* is built around **deliberate observation, spatial awareness, and composure**:
-
-1. **Telegraphed Intent (No Cheap Hits)**:
-   - Every enemy action is announced via bold, high-contrast geometric ground telegraphs (cones, rings, directional beams).
-   - Telegraphs fill dynamically from 0% to 100%, communicating the exact millisecond of impact.
-   - The battlefield is readable at all times, making every hit taken a lesson in positioning rather than unpredictable RNG.
-
-2. **The Art of the Parry (Composure Over Panic)**:
-   - Standing inside an enemy's active telegraph is terrifying—yet that is precisely where the greatest rewards lie.
-   - Pressing **`[Q]`** activates a precise parry window. Rather than running away, standing your ground and deflecting the strike at the apex of its charge completely nullifies incoming damage, plays a resonant metallic chime, and shatters the enemy's stance (`STAGGERED! / DEFENSE BROKEN!`).
-   - Successful parries grant an immediate **+50% Counter-Attack Damage Buff**, incentivizing mastery over avoidance.
-
-3. **Tactical Attack Cadence**:
-   - **Light Attacks (`L-Click`)**: Agile, low-stamina slashes designed for poking, testing enemy poise, and swift recovery.
-   - **Heavy Attacks (`R-Click`)**: Devastating lunging cleaves with significant windup. High risk, but deals massive damage and huge knockback, especially against staggered foes.
-
-4. **Storyboard-Driven Progression**:
-   - Designed to tell an episodic narrative through combat trials and arena encounters.
-   - Built-in Storyboard System with an interactive overlay (**`[TAB]`** or **`[F1]`**) to track narrative context, trial objectives, and combat directives as you progress through each chapter.
-
-5. **Asset-Agnostic Modular Architecture**:
-   - All hitboxes, combat vectors, and collision calculations are decoupled from visual rendering.
-   - The game ships with sleek, stylized procedural vector silhouettes and particle effects, ready to seamlessly transition to custom sprite sheets and tilesets whenever you drop them in.
+* **Title Screen GUI**: Dark fantasy start screen with an animated **PLAY GAME** button and direct access to the **CONTROLS** modal.
+* **Armory Sanctuary (Lobby Hub)**:
+  * Safe sanctuary to experiment with movement, attacks, and parry timings before entering battle.
+  * **3 Weapon Pedestals**: Switch active weapon at any time with `[E]` or mouse click.
+  * **Training Dummy**: Test light/heavy attacks, damage numbers, and poise stagger with zero risk.
+  * **Arena Portal**: Step into the glowing northern ring or press `[E]` to begin arena trials.
+* **Precision Combat System**:
+  * **`Q` Key — Dash**: Directional roll/burst with **invulnerability frames (i-frames)** that harmlessly phases through melee sweeps and projectiles (`EVADED`).
+  * **`F` Key — Timed Parry**: Active 0.28s guard window with radiant cyan-gold barrier. Deflecting melee strikes **staggers attackers (`DEFENSE BROKEN!`) for 2.0s** and grants an immediate **+50% Counter-Attack Damage Buff**.
+  * **Projectile Parry Reflection**: Parrying enemy spells and arrows deflects them directly back toward your cursor with amplified counter damage.
+* **In-Game Controls Overlay**: Press **`[C]`** or **`[TAB]`** at any time (in Title, Lobby, or Arena) to open an interactive glassmorphic controls guide.
+* **Geometric Attack Telegraphs**: Enemies announce all upcoming attacks on the arena floor (cones, lines, circles) that fill dynamically from 0% to 100% before striking.
+* **Multi-Phase Boss Encounter**: **The Grand Inquisitor** (500 HP) featuring a dedicated boss health bar and three distinct combat phases (12-way Projectile Nova, focused Arcane Beam, and Teleport Ground Smite).
 
 ---
 
@@ -46,25 +33,84 @@ In *Phlegmatic*, this philosophy directly drives the core combat loop. Unlike co
 
 | Action | Key / Input | Gameplay Role |
 | :--- | :--- | :--- |
-| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional smooth movement with environment collision. |
-| **Aiming** | `Mouse Cursor` | Character faces and aims weapon/attacks towards the reticle. |
-| **Light Attack** | `Left Mouse Button` | Quick curved slash (110° arc). Low stamina cost, fast recovery. |
-| **Heavy Attack** | `Right Mouse Button` | Charged cleave/thrust (140° arc, 115px range). Heavy damage & knockback. |
-| **Parry** | `Q Key` (Timely Window) | Enters a 0.28s defensive stance. Timing it with an incoming strike deflects damage, stuns the attacker, and grants +50% counter damage. |
-| **Storyboard Overlay** | `[TAB]` or `[F1]` | Toggles the Storyboard Modal to inspect chapters, lore notes, and combat trials. Cycle acts with `[LEFT]` / `[RIGHT]` / `[E]`. |
-| **Restart / Respawn** | `[R] Key` | Instantly respawns player and resets the current combat wave. |
+| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional smooth movement with map wall and pillar collisions. |
+| **Aiming** | `Mouse Cursor` | Reticle targeting for weapon swings, dashes, and parry deflections. |
+| **Light Attack** | `Left Mouse Button` | Agile slash/thrust. Low stamina cost, swift recovery cadence. |
+| **Heavy Attack** | `Right Mouse Button` | High-impact cleave/slam. High damage, enemy poise stagger, and knockback. |
+| **Dash** | `Q Key` | Fast directional burst with **i-frames** (`EVADED`) to dodge sweeps and projectiles. |
+| **Parry** | `F Key` | 0.28s defensive guard. Staggers melee foes for 2.0s and **reflects incoming projectiles**. |
+| **Interact** | `E Key` / `Left Click` | Equip weapons at pedestals in the Lobby, or step into the Arena Portal. |
+| **Controls Menu** | `C Key` or `TAB` | Toggle the in-game interactive controls guide at any time. |
+| **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the combat trial. |
+| **Return to Lobby** | `L Key` or `ESC` | Leave the arena and return to the Armory Sanctuary. |
 
 ---
 
-## Enemy Telegraph Archetypes
+## Weapon Arsenal
 
-Enemies visually project their upcoming attacks on the arena floor before striking:
+Each weapon features custom attack arcs, damage profiles, windups, and passive attributes:
 
-| Enemy Type | Telegraph Shape | Attack Nature | Counter Strategy |
+### 1. Broadsword (Balanced Stance)
+* **Design**: Versatile blade with dependable range and fluid recovery.
+* **Light Attack**: 25 damage, 75px reach, 110° arc, 0.22s duration.
+* **Heavy Attack**: 65 damage, 115px reach, 140° sweeping cleave, heavy knockback.
+* **Stamina**: Balanced 14 stamina per light swing, 32 per heavy swing.
+
+### 2. Dual Daggers (Agility & Flurry)
+* **Design**: Fast-cadence twin daggers built for hit-and-run evasion.
+* **Light Attack**: 18 damage, 62px reach, rapid twin-slash cadence.
+* **Heavy Attack**: 52 damage, 75px reach, 360° twin-blade whirlwind spin.
+* **Passive Bonus**: Dash stamina cost reduced to 12 (from 18), dash cooldown reduced to 0.42s (from 0.55s).
+
+### 3. War Mace (Crushing Poise & Shockwaves)
+* **Design**: Massive two-handed bludgeon designed to crush heavy enemy armor.
+* **Light Attack**: 40 damage, 82px reach, high enemy poise damage.
+* **Heavy Attack**: 95 damage, 135px reach, devastating earth-tremor ground slam.
+* **Stamina**: Heavy commitment (24 stamina light, 48 stamina heavy).
+
+---
+
+## Enemies & Boss Encounters
+
+| Enemy | Type | Telegraph Shape | Combat Behavior & Strategy |
 | :--- | :--- | :--- | :--- |
-| **Slasher Sentinel** | **Amber/Red Cone** (95° sweep, 115px) | Swift horizontal blade cleave. | Sidestep behind the enemy or tap `[Q]` just as the cone reaches 100% fill. |
-| **Brute Crusher** | **Pulsing Circle** (150px AoE ring) | Heavy ground slam with lingering shockwave. | Dash outside the expanding perimeter or time a parry to break its massive poise. |
-| **Vanguard Charger** | **Linear Beam** (50px width, 240px length) | High-velocity forward dash thrust. | Step perpendicularly out of the path, or parry head-on to interrupt the charge. |
+| **Cultist Slasher** | Melee Vanguard | Amber/Red Cone (95°, 115px) | Aggressive forward blade slash. Sidestep or time `[F]` to stagger. |
+| **Shadow Charger** | Dash Melee | Linear Path (50px width, 240px) | High-speed dash thrust. Step perpendicular to path or parry head-on. |
+| **Iron Brute** | Heavy Crusher | Expanding Circle (150px AoE) | Tremor ground slam. Dash clear with `[Q]` or break poise with War Mace. |
+| **Deathseeker Archer** | Ranged Kiting | Red Laser Line (380px range) | Backs away if approached; fires high-velocity piercing bolts. |
+| **Void Pyromancer** | Occult Caster | Arcane Fan Sector (320px) | Fires a 3-way fan spread of void orbs. Evade with `[Q]` or reflect with `[F]`. |
+| **The Grand Inquisitor** | **Grand Boss** | Multi-Phase Telegraphs | 500 HP boss with gold-rimmed top health bar. Rotates between **12-way Projectile Nova**, **3-shot Arcane Beam**, and **Teleport & Cataclysmic Smite**. |
+
+---
+
+## Quick Start & Running
+
+Standalone precompiled binaries are included in the repository:
+
+### Running the Executable:
+* **Option 1**: Double-click [`phlegmatic.exe`](phlegmatic.exe) in the project root.
+* **Option 2**: Run [`run.bat`](run.bat):
+  ```powershell
+  .\run.bat
+  ```
+* **Option 3**: Run [`bin/phlegmatic.exe`](bin/phlegmatic.exe):
+  ```powershell
+  .\bin\phlegmatic.exe
+  ```
+
+### Building from Source:
+* **Batch Build (MinGW-w64 GCC)**:
+  ```powershell
+  .\build.bat
+  ```
+  *Compiles all source files with `-O2 -static` and outputs both `phlegmatic.exe` and `bin\phlegmatic.exe`.*
+
+* **CMake Build**:
+  ```powershell
+  cmake -B build -G Ninja
+  cmake --build build
+  .\build\phlegmatic.exe
+  ```
 
 ---
 
@@ -72,73 +118,58 @@ Enemies visually project their upcoming attacks on the arena floor before striki
 
 ```
 Phlegmatic/
-├── .gitignore              # Configured for GitHub (ignores binaries, keeps vendor libs)
-├── LICENSE                 # MIT License
-├── CMakeLists.txt          # Cross-platform CMake configuration
-├── build.bat               # One-click Windows compilation script
-├── run.bat                 # Launches bin/phlegmatic.exe
-├── assets/                 # Drop custom PNG assets here (see assets/README.md)
-│   └── README.md
+├── phlegmatic.exe              # Standalone executable in project root
+├── bin/
+│   └── phlegmatic.exe          # Standalone executable in bin/
+├── build.bat                   # Automated MinGW-w64 compilation script
+├── run.bat                     # Quick launcher script
+├── CMakeLists.txt              # Cross-platform CMake configuration
 ├── vendor/
-│   └── raylib/             # Raylib 6.2 headers and static libraries (MinGW-w64)
-│       ├── include/
-│       └── lib/
+│   └── raylib/                 # Precompiled Raylib 6.2 headers & static libraries
 └── src/
-    ├── main.cpp            # Application entry point
-    ├── Game.hpp / .cpp     # Game loop, camera lerp, wave manager, HUD
-    ├── Player.hpp / .cpp   # Movement physics, attack arcs, parry timing, stamina
-    ├── Enemy.hpp / .cpp    # State machine, telegraph geometry, stagger reaction
-    ├── Combat.hpp          # AttackInfo, TelegraphIndicator definitions
-    ├── Map.hpp / .cpp      # Arena bounds, stone pillars, collision, ambient lighting
-    ├── Particles.hpp / .cpp# Screen shake, floating damage text, sparks, slash trails
-    ├── SoundFX.hpp / .cpp  # Procedural sound synthesis (clangs, swooshes, alerts)
-    ├── AssetManager.hpp/.cpp# Custom texture loader + procedural vector silhouettes
-    ├── Storyboard.hpp / .cpp# Narrative acts, trial tracker, and [TAB] modal
-    └── Config.hpp          # Game balancing constants and tuning parameters
+    ├── main.cpp                # Program entry point & window lifecycle
+    │
+    ├── core/                   # Engine audio, particle system, and configuration
+    │   ├── Config.hpp          # Game constants, window size, weapon baseline stats
+    │   ├── SoundFX.hpp / .cpp  # Procedural audio synthesis (clangs, swooshes, alerts)
+    │   └── Particles.hpp / .cpp# Screen shake, floating damage text, spark bursts
+    │
+    ├── combat/                 # Weapons, combat math, and projectile engine
+    │   ├── CombatTypes.hpp     # AttackInfo, TelegraphIndicator, enums
+    │   ├── Weapon.hpp          # Sword, Daggers, and Mace definitions & scalings
+    │   └── Projectile.hpp / .cpp# Real-time projectile physics, walls, parry reflection
+    │
+    ├── world/                  # Level geometry and interactive world objects
+    │   ├── Map.hpp / .cpp      # Lobby sanctuary and combat arena layouts
+    │   └── Interactable.hpp    # Weapon pedestals, training dummy, arena portal
+    │
+    ├── entities/               # Player character and enemy AI state machines
+    │   ├── Player.hpp / .cpp   # WASD movement, Q Dash (i-frames), F Parry, attacks
+    │   └── Enemy.hpp / .cpp    # 5 enemy archetypes + The Grand Inquisitor Boss
+    │
+    ├── rendering/              # Procedural silhouettes and asset loader
+    │   └── AssetManager.hpp / .cpp# Sprite loader + procedural vector silhouettes
+    │
+    └── states/                 # State management and UI rendering
+        ├── GameState.hpp       # State enums (TITLE_SCREEN, LOBBY, ARENA, etc.)
+        ├── Game.hpp / .cpp     # Master game loop & combat collision coordinator
+        └── UI.hpp / .cpp       # Title screen, Controls menu, Combat HUD, Boss bar
 ```
 
 ---
 
-## How to Build & Run
+## Custom Assets Integration
 
-### Quick Windows Run:
-Simply double-click or run:
-```powershell
-.\run.bat
-```
-*(If the binary has not yet been built, `run.bat` automatically invokes `build.bat` first).*
-
-### Direct Build:
-```powershell
-.\build.bat
-```
-Produces an optimized, standalone binary at `bin\phlegmatic.exe` with static standard libraries.
-
-### CMake Build (Ninja / Make):
-```powershell
-cmake -B build -G Ninja
-cmake --build build
-.\build\phlegmatic.exe
-```
-
----
-
-## Integrating Custom Assets
-
-The engine is built so you can plug in your own artwork at any time without touching core game logic:
-1. Place your PNG files in the [`assets/`](file:///c:/Users/Erick/Phlegmatic/assets/) directory:
-   - `assets/player.png` - Character sprite / spritesheet
-   - `assets/enemy_melee.png` - Slasher enemy sprite
-   - `assets/enemy_brute.png` - Brute crusher boss sprite
-   - `assets/tileset.png` - Arena floor tileset
-2. [`AssetManager`](file:///c:/Users/Erick/Phlegmatic/src/AssetManager.cpp) automatically detects and binds them on startup.
-3. If any asset is absent, the engine gracefully falls back to its procedural silhouette renderers.
+The engine is asset-agnostic and ready for custom artwork:
+1. Place custom PNG files into the [`assets/`](assets/) directory:
+   - `assets/player.png` — Player character sprite
+   - `assets/enemy_melee.png` — Slasher enemy sprite
+   - `assets/tileset.png` — Arena floor tileset
+2. `AssetManager` automatically detects and binds them on boot, replacing the built-in vector silhouettes.
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE) - see the [`LICENSE`](file:///c:/Users/Erick/Phlegmatic/LICENSE) file for details.
-
-### Third-Party Libraries
-- **[Raylib](https://www.raylib.com/)**: Licensed under the zlib/libpng license. Copyright (c) Ramon Santamaria (@raysan5).
+This project is licensed under the [MIT License](LICENSE) - see the [`LICENSE`](LICENSE) file for details.
+Third-party library [Raylib](https://www.raylib.com/) is licensed under the zlib/libpng license.
