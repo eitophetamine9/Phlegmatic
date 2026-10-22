@@ -1,13 +1,19 @@
 #pragma once
 #include "raylib.h"
 #include "../combat/CombatTypes.hpp"
+#include "../combat/Projectile.hpp"
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
+#include <vector>
+#include <string>
 
 enum class EnemyType {
-    SLASHER,  // Cone sector telegraph
-    BRUTE,    // Circle AoE ground slam telegraph
-    CHARGER   // Linear dash thrust telegraph
+    SLASHER,         // Cone sector telegraph (Melee)
+    BRUTE,           // Circle AoE ground slam telegraph (Heavy Melee)
+    CHARGER,         // Linear dash thrust telegraph (Dash Melee)
+    ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
+    PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
+    INQUISITOR_BOSS  // Grand Boss: Nova, Beam, Teleport Smite
 };
 
 enum class EnemyState {
@@ -23,7 +29,7 @@ class Enemy {
 public:
     Enemy(EnemyType type, Vector2 startPos);
 
-    void Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSystem& particles);
+    void Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSystem& particles, std::vector<Projectile>& outProjectiles);
     void Draw() const;
     void DrawTelegraph() const;
 
@@ -43,6 +49,9 @@ public:
     float GetMaxHealth() const { return maxHealth; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS; }
+    std::string GetName() const;
+
 private:
     EnemyType type;
     EnemyState state;
@@ -57,6 +66,7 @@ private:
     float moveSpeed;
 
     float attackRange;
+    float kitingRange;
     float windupDuration;
     float strikeDuration;
     float recoveryDuration;
@@ -65,6 +75,11 @@ private:
     float stateTimer;
     bool hasDamagedPlayer;
     bool warnedSound;
+
+    // Boss & Ranged mechanics
+    int bossAttackPhase;
+    int burstShotsRemaining;
+    float burstIntervalTimer;
 
     TelegraphIndicator telegraph;
 };

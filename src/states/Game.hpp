@@ -8,6 +8,7 @@
 #include "../world/Interactable.hpp"
 #include "../core/Particles.hpp"
 #include "../rendering/AssetManager.hpp"
+#include "../combat/Projectile.hpp"
 #include <vector>
 
 class Game {
@@ -36,6 +37,7 @@ private:
     ParticleSystem particles;
     AssetManager assetManager;
     std::vector<Enemy> enemies;
+    std::vector<Projectile> projectiles;
 
     // Lobby Elements
     std::vector<WeaponPedestal> pedestals;

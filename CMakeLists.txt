@@ -12,6 +12,7 @@ set(SOURCES
     src/rendering/AssetManager.cpp
     src/entities/Player.cpp
     src/entities/Enemy.cpp
+    src/combat/Projectile.cpp
     src/states/UI.cpp
     src/states/Game.cpp
 )

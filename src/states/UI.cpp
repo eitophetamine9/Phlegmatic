@@ -299,6 +299,36 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
+void GameUI::DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp) {
+    const float barW = 540.0f;
+    const float barH = 18.0f;
+    float barX = ((float)windowWidth - barW) * 0.5f;
+    float barY = 64.0f;
+
+    // Outer backing plate
+    DrawRectangleRounded(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 38.0f }, 0.2f, 4, Color{ 16, 12, 20, 230 });
+    DrawRectangleRoundedLines(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 38.0f }, 0.2f, 4, Color{ 140, 90, 40, 240 });
+
+    // Boss Name & Crest
+    int nameW = MeasureText(bossName.c_str(), 14);
+    DrawText(bossName.c_str(), (int)(barX + (barW - nameW) * 0.5f), (int)barY - 20, 14, Color{ 255, 215, 80, 255 });
+
+    // Bar background
+    DrawRectangleRounded(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 35, 15, 22, 240 });
+
+    // Bar fill
+    float hpPercent = fmaxf(0.0f, fminf(1.0f, hp / maxHp));
+    DrawRectangleRounded(Rectangle{ barX, barY, barW * hpPercent, barH }, 0.2f, 4, Color{ 220, 45, 65, 255 });
+
+    // Golden frame
+    DrawRectangleRoundedLines(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 255, 200, 60, 220 });
+
+    // HP textual value
+    std::string valStr = std::to_string((int)hp) + " / " + std::to_string((int)maxHp);
+    int valW = MeasureText(valStr.c_str(), 10);
+    DrawText(valStr.c_str(), (int)(barX + (barW - valW) * 0.5f), (int)barY + 4, 10, Color{ 255, 255, 255, 240 });
+}
+
 void GameUI::DrawGameOver(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 20, 5, 8, 210 });
     int titleW = MeasureText("FALLEN IN BATTLE", 38);

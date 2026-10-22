@@ -14,6 +14,7 @@ public:
 
     static void DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, bool isNearPedestal, const std::string& nearWeaponName);
     static void DrawCombatHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, bool isParrying, bool hasCounterBuff, int currentWave, int totalWaves);
+    static void DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp);
     static void DrawGameOver(int windowWidth, int windowHeight);
     static void DrawVictory(int windowWidth, int windowHeight);
 };
