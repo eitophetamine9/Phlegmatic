@@ -11,12 +11,11 @@ public:
     void Init();
     void Unload();
 
-    // Check if custom asset was provided
     bool HasTexture(const std::string& key) const;
     Texture2D GetTexture(const std::string& key) const;
     void LoadCustomTexture(const std::string& key, const std::string& filepath);
 
-    // Procedural Fallback Renderers (Sleek silhouettes ready for texture replacement)
+    // Procedural Fallback Renderers
     static void DrawEntityShadow(Vector2 position, float radius);
     static void DrawPlayerSilhouette(Vector2 position, float rotationAngle, Color bodyColor, bool isParrying, bool isAttacking);
     static void DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned);

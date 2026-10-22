@@ -4,7 +4,6 @@
 #include <cmath>
 
 void ParticleSystem::Update(float dt) {
-    // Screen shake update
     if (shakeTimer > 0.0f) {
         shakeTimer -= dt;
         if (shakeTimer <= 0.0f) {
@@ -12,11 +11,10 @@ void ParticleSystem::Update(float dt) {
         }
     }
 
-    // Particles update
     for (size_t i = 0; i < particles.size();) {
         particles[i].position.x += particles[i].velocity.x * dt;
         particles[i].position.y += particles[i].velocity.y * dt;
-        particles[i].velocity.x *= 0.92f; // damping
+        particles[i].velocity.x *= 0.92f;
         particles[i].velocity.y *= 0.92f;
         particles[i].life -= dt;
 
@@ -28,9 +26,8 @@ void ParticleSystem::Update(float dt) {
         }
     }
 
-    // Floating text update
     for (size_t i = 0; i < floatingTexts.size();) {
-        floatingTexts[i].position.y -= 40.0f * dt; // Float up
+        floatingTexts[i].position.y -= 40.0f * dt;
         floatingTexts[i].life -= dt;
 
         if (floatingTexts[i].life <= 0.0f) {
@@ -43,7 +40,6 @@ void ParticleSystem::Update(float dt) {
 }
 
 void ParticleSystem::Draw() const {
-    // Draw particles
     for (const auto& p : particles) {
         float alphaFactor = (p.life / p.maxLife);
         Color c = p.color;
@@ -51,7 +47,6 @@ void ParticleSystem::Draw() const {
         DrawCircleV(p.position, p.size * (0.5f + 0.5f * alphaFactor), c);
     }
 
-    // Draw floating texts
     for (const auto& ft : floatingTexts) {
         float alphaFactor = (ft.life / ft.maxLife);
         Color c = ft.color;
@@ -79,12 +74,26 @@ void ParticleSystem::SpawnSparks(Vector2 pos, Color color, int count, float spee
 }
 
 void ParticleSystem::SpawnParryBurst(Vector2 pos) {
-    // Golden sparks
     SpawnSparks(pos, Color{ 255, 230, 80, 255 }, 24, 260.0f);
-    // Cyan shield sparks
     SpawnSparks(pos, Color{ 80, 240, 255, 255 }, 18, 200.0f);
-    // High-impact screen shake
     AddScreenShake(7.0f, 0.22f);
+}
+
+void ParticleSystem::SpawnDashTrail(Vector2 pos, Vector2 dir, Color color) {
+    for (int i = 0; i < 4; i++) {
+        float offsetAngle = (((float)rand() / (float)RAND_MAX) - 0.5f) * 0.6f;
+        float baseAngle = atan2f(-dir.y, -dir.x) + offsetAngle;
+        float spd = 40.0f + 40.0f * ((float)rand() / (float)RAND_MAX);
+        float life = 0.16f + 0.14f * ((float)rand() / (float)RAND_MAX);
+        particles.push_back({
+            pos,
+            { cosf(baseAngle) * spd, sinf(baseAngle) * spd },
+            color,
+            5.0f,
+            life,
+            life
+        });
+    }
 }
 
 void ParticleSystem::SpawnSlashTrail(Vector2 pos, Vector2 dir, Color color) {

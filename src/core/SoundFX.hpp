@@ -13,6 +13,11 @@ public:
     static void PlayHitImpact();
     static void PlayTelegraphWarning();
     static void PlayEnemyDeath();
+    static void PlayDash();
+    static void PlayProjectileShoot();
+    static void PlayProjectileReflect();
+    static void PlayEquipWeapon();
+    static void PlayButtonClick();
 
 private:
     static bool initialized;
@@ -23,6 +28,11 @@ private:
     static Sound sndHitImpact;
     static Sound sndTelegraph;
     static Sound sndEnemyDeath;
+    static Sound sndDash;
+    static Sound sndProjectileShoot;
+    static Sound sndProjectileReflect;
+    static Sound sndEquipWeapon;
+    static Sound sndButtonClick;
 
     static Sound GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType);
 };

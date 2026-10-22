@@ -15,7 +15,6 @@ public:
     void DrawFloor() const;
     void DrawWallsAndPillars() const;
 
-    // Collision checking
     bool CheckCircleCollision(Vector2 pos, float radius) const;
     Vector2 ResolveCollision(Vector2 oldPos, Vector2 newPos, float radius) const;
 

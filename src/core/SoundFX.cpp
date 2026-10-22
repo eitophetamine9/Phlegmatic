@@ -14,6 +14,11 @@ Sound SoundFX::sndParryMiss = { 0 };
 Sound SoundFX::sndHitImpact = { 0 };
 Sound SoundFX::sndTelegraph = { 0 };
 Sound SoundFX::sndEnemyDeath = { 0 };
+Sound SoundFX::sndDash = { 0 };
+Sound SoundFX::sndProjectileShoot = { 0 };
+Sound SoundFX::sndProjectileReflect = { 0 };
+Sound SoundFX::sndEquipWeapon = { 0 };
+Sound SoundFX::sndButtonClick = { 0 };
 
 Sound SoundFX::GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType) {
     const int sampleRate = 44100;
@@ -31,9 +36,8 @@ Sound SoundFX::GenerateTone(float startFreq, float endFreq, float duration, floa
         phase += dt;
         if (phase > 1.0f) phase -= 1.0f;
 
-        // Exponential decay envelope
         float envelope = (1.0f - t);
-        if (waveType == 2) envelope = envelope * envelope; // sharper decay
+        if (waveType == 2) envelope = envelope * envelope;
 
         float sampleVal = 0.0f;
         if (waveType == 0) { // Sine wave
@@ -65,13 +69,18 @@ void SoundFX::Init() {
     if (initialized) return;
     InitAudioDevice();
 
-    sndLightAttack = GenerateTone(350.0f, 180.0f, 0.12f, 0.35f, 3);   // Quick swoosh
-    sndHeavyAttack = GenerateTone(180.0f, 70.0f, 0.22f, 0.50f, 3);    // Deep swoosh
-    sndParrySuccess = GenerateTone(880.0f, 1320.0f, 0.35f, 0.65f, 2); // Resonant metallic chime
-    sndParryMiss = GenerateTone(220.0f, 140.0f, 0.15f, 0.30f, 0);     // Low thud
-    sndHitImpact = GenerateTone(240.0f, 80.0f, 0.18f, 0.55f, 1);      // Punchy impact
-    sndTelegraph = GenerateTone(600.0f, 750.0f, 0.09f, 0.28f, 0);     // Warning pulse beep
-    sndEnemyDeath = GenerateTone(150.0f, 40.0f, 0.40f, 0.60f, 1);     // Shatter rumble
+    sndLightAttack = GenerateTone(350.0f, 180.0f, 0.12f, 0.35f, 3);
+    sndHeavyAttack = GenerateTone(180.0f, 70.0f, 0.22f, 0.50f, 3);
+    sndParrySuccess = GenerateTone(880.0f, 1320.0f, 0.35f, 0.65f, 2);
+    sndParryMiss = GenerateTone(220.0f, 140.0f, 0.15f, 0.30f, 0);
+    sndHitImpact = GenerateTone(240.0f, 80.0f, 0.18f, 0.55f, 1);
+    sndTelegraph = GenerateTone(600.0f, 750.0f, 0.09f, 0.28f, 0);
+    sndEnemyDeath = GenerateTone(150.0f, 40.0f, 0.40f, 0.60f, 1);
+    sndDash = GenerateTone(450.0f, 200.0f, 0.14f, 0.40f, 3);
+    sndProjectileShoot = GenerateTone(500.0f, 900.0f, 0.11f, 0.35f, 1);
+    sndProjectileReflect = GenerateTone(1200.0f, 1800.0f, 0.25f, 0.70f, 2);
+    sndEquipWeapon = GenerateTone(300.0f, 600.0f, 0.18f, 0.50f, 2);
+    sndButtonClick = GenerateTone(520.0f, 780.0f, 0.08f, 0.35f, 0);
 
     initialized = true;
 }
@@ -85,35 +94,25 @@ void SoundFX::Close() {
     UnloadSound(sndHitImpact);
     UnloadSound(sndTelegraph);
     UnloadSound(sndEnemyDeath);
+    UnloadSound(sndDash);
+    UnloadSound(sndProjectileShoot);
+    UnloadSound(sndProjectileReflect);
+    UnloadSound(sndEquipWeapon);
+    UnloadSound(sndButtonClick);
 
     CloseAudioDevice();
     initialized = false;
 }
 
-void SoundFX::PlayLightAttack() {
-    if (initialized) PlaySound(sndLightAttack);
-}
-
-void SoundFX::PlayHeavyAttack() {
-    if (initialized) PlaySound(sndHeavyAttack);
-}
-
-void SoundFX::PlayParrySuccess() {
-    if (initialized) PlaySound(sndParrySuccess);
-}
-
-void SoundFX::PlayParryMiss() {
-    if (initialized) PlaySound(sndParryMiss);
-}
-
-void SoundFX::PlayHitImpact() {
-    if (initialized) PlaySound(sndHitImpact);
-}
-
-void SoundFX::PlayTelegraphWarning() {
-    if (initialized) PlaySound(sndTelegraph);
-}
-
-void SoundFX::PlayEnemyDeath() {
-    if (initialized) PlaySound(sndEnemyDeath);
-}
+void SoundFX::PlayLightAttack() { if (initialized) PlaySound(sndLightAttack); }
+void SoundFX::PlayHeavyAttack() { if (initialized) PlaySound(sndHeavyAttack); }
+void SoundFX::PlayParrySuccess() { if (initialized) PlaySound(sndParrySuccess); }
+void SoundFX::PlayParryMiss() { if (initialized) PlaySound(sndParryMiss); }
+void SoundFX::PlayHitImpact() { if (initialized) PlaySound(sndHitImpact); }
+void SoundFX::PlayTelegraphWarning() { if (initialized) PlaySound(sndTelegraph); }
+void SoundFX::PlayEnemyDeath() { if (initialized) PlaySound(sndEnemyDeath); }
+void SoundFX::PlayDash() { if (initialized) PlaySound(sndDash); }
+void SoundFX::PlayProjectileShoot() { if (initialized) PlaySound(sndProjectileShoot); }
+void SoundFX::PlayProjectileReflect() { if (initialized) PlaySound(sndProjectileReflect); }
+void SoundFX::PlayEquipWeapon() { if (initialized) PlaySound(sndEquipWeapon); }
+void SoundFX::PlayButtonClick() { if (initialized) PlaySound(sndButtonClick); }

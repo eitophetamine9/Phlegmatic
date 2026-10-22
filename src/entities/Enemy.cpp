@@ -1,6 +1,6 @@
 #include "Enemy.hpp"
-#include "SoundFX.hpp"
-#include "AssetManager.hpp"
+#include "../core/SoundFX.hpp"
+#include "../rendering/AssetManager.hpp"
 #include "raymath.h"
 #include <cmath>
 
@@ -68,10 +68,8 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
     float dy = playerPos.y - position.y;
     float distToPlayer = sqrtf(dx * dx + dy * dy);
 
-    // Update facing towards player unless mid-strike
     if (state == EnemyState::IDLE_CHASE || state == EnemyState::TELEGRAPH_WINDUP) {
         if (state == EnemyState::TELEGRAPH_WINDUP) {
-            // Slower tracking during windup so player can sidestep or time parry
             float targetAngle = atan2f(dy, dx) * RAD2DEG;
             float angleDiff = targetAngle - facingAngle;
             while (angleDiff > 180.0f) angleDiff -= 360.0f;
@@ -82,18 +80,15 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         }
     }
 
-    // State Machine
     switch (state) {
         case EnemyState::IDLE_CHASE: {
             if (distToPlayer <= attackRange * 0.95f) {
-                // Start Telegraph Windup!
                 state = EnemyState::TELEGRAPH_WINDUP;
                 stateTimer = windupDuration;
                 hasDamagedPlayer = false;
                 warnedSound = false;
                 velocity = { 0.0f, 0.0f };
             } else {
-                // Chase player
                 Vector2 moveDir = Vector2Normalize({ dx, dy });
                 velocity.x = moveDir.x * moveSpeed;
                 velocity.y = moveDir.y * moveSpeed;
@@ -113,19 +108,16 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 warnedSound = true;
             }
 
-            // Windup sparks near full charge
             if (progress > 0.7f && GetRandomValue(0, 3) == 0) {
                 particles.SpawnSparks(position, Color{ 255, 80, 50, 200 }, 1, 30.0f);
             }
 
             if (stateTimer <= 0.0f) {
-                // Strike begins!
                 state = EnemyState::STRIKE;
                 stateTimer = strikeDuration;
                 hasDamagedPlayer = false;
 
                 if (type == EnemyType::CHARGER) {
-                    // Dash forward along line
                     float rad = facingAngle * DEG2RAD;
                     velocity = { cosf(rad) * 600.0f, sinf(rad) * 600.0f };
                     particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 140, 40, 255 });
@@ -178,7 +170,6 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
             break;
     }
 
-    // Apply movement & resolve collisions with map
     Vector2 nextPos = { position.x + velocity.x * dt, position.y + velocity.y * dt };
     position = map.ResolveCollision(position, nextPos, radius);
 }
@@ -186,7 +177,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
 void Enemy::OnParried(ParticleSystem& particles) {
     state = EnemyState::STUNNED;
     stateTimer = stunDuration;
-    hasDamagedPlayer = true; // Prevents dealing damage to player
+    hasDamagedPlayer = true;
     velocity = { 0.0f, 0.0f };
 
     particles.SpawnFloatingText({ position.x, position.y - 25.0f }, "STAGGERED!", Color{ 255, 230, 80, 255 }, 24.0f);
@@ -196,7 +187,6 @@ void Enemy::OnParried(ParticleSystem& particles) {
 bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles) {
     if (state == EnemyState::DEAD) return false;
 
-    // Bonus damage if attacked while stunned
     if (state == EnemyState::STUNNED) {
         amount *= 1.5f;
         particles.SpawnFloatingText({ position.x, position.y - 30.0f }, "CRIT!", Color{ 255, 220, 0, 255 }, 20.0f);
@@ -231,7 +221,6 @@ bool Enemy::CheckHit(const AttackInfo& attack) const {
 
     if (dist > attack.range + radius) return false;
 
-    // Arc check
     float hitAngle = atan2f(dy, dx) * RAD2DEG;
     float diff = fabsf(hitAngle - attack.angle);
     while (diff > 180.0f) diff = 360.0f - diff;
@@ -252,13 +241,10 @@ void Enemy::DrawTelegraph() const {
             float startAngle = telegraph.angle - telegraph.arcAngle * 0.5f;
             float endAngle = telegraph.angle + telegraph.arcAngle * 0.5f;
 
-            // Outer telegraph perimeter
             DrawCircleSectorLines(position, telegraph.radius, startAngle, endAngle, 20, activeOutline);
-            // Filled danger area that expands/intensifies with progress
             float currentRadius = telegraph.radius * (0.3f + 0.7f * telegraph.progress);
             DrawCircleSector(position, currentRadius, startAngle, endAngle, 20, dangerFill);
 
-            // Warning range boundary arc
             float rad1 = startAngle * DEG2RAD;
             float rad2 = endAngle * DEG2RAD;
             Vector2 p1 = { position.x + cosf(rad1) * telegraph.radius, position.y + sinf(rad1) * telegraph.radius };
@@ -269,11 +255,9 @@ void Enemy::DrawTelegraph() const {
         }
 
         case TelegraphShape::CIRCLE: {
-            // Ground slam expanding ring
             DrawCircleLines((int)position.x, (int)position.y, telegraph.radius, activeOutline);
             DrawCircleLines((int)position.x, (int)position.y, telegraph.radius + 2.0f, Color{ 255, 60, 60, 180 });
 
-            // Expanding inner danger fill
             float currentRadius = telegraph.radius * telegraph.progress;
             DrawCircle((int)position.x, (int)position.y, currentRadius, dangerFill);
             break;
@@ -290,13 +274,11 @@ void Enemy::DrawTelegraph() const {
             Vector2 c3 = { c2.x + dir.x * telegraph.radius, c2.y + dir.y * telegraph.radius };
             Vector2 c4 = { c1.x + dir.x * telegraph.radius, c1.y + dir.y * telegraph.radius };
 
-            // Outline
             DrawLineEx(c1, c2, 2.0f, activeOutline);
             DrawLineEx(c2, c3, 2.0f, activeOutline);
             DrawLineEx(c3, c4, 2.0f, activeOutline);
             DrawLineEx(c4, c1, 2.0f, activeOutline);
 
-            // Filling beam
             float fillLength = telegraph.radius * telegraph.progress;
             Vector2 f3 = { c2.x + dir.x * fillLength, c2.y + dir.y * fillLength };
             Vector2 f4 = { c1.x + dir.x * fillLength, c1.y + dir.y * fillLength };
@@ -310,25 +292,22 @@ void Enemy::DrawTelegraph() const {
 void Enemy::Draw() const {
     if (state == EnemyState::DEAD) return;
 
-    Color bodyColor = Color{ 160, 40, 50, 255 }; // Slasher crimson
+    Color bodyColor = Color{ 160, 40, 50, 255 };
     if (type == EnemyType::BRUTE) {
-        bodyColor = Color{ 110, 30, 45, 255 }; // Brute deep dark red
+        bodyColor = Color{ 110, 30, 45, 255 };
     } else if (type == EnemyType::CHARGER) {
-        bodyColor = Color{ 180, 80, 30, 255 }; // Charger rust orange
+        bodyColor = Color{ 180, 80, 30, 255 };
     }
 
     bool isStunned = (state == EnemyState::STUNNED);
     AssetManager::DrawEnemySilhouette(position, facingAngle, bodyColor, radius, isStunned);
 
-    // Health Bar above enemy
     const float barWidth = radius * 2.2f;
     const float barHeight = 5.0f;
     float barX = position.x - barWidth * 0.5f;
     float barY = position.y - radius - 16.0f;
 
-    // Background bar
     DrawRectangle((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 20, 20, 26, 220 });
-    // Health fill
     float healthPercent = fmaxf(0.0f, health / maxHealth);
     Color hpColor = (state == EnemyState::STUNNED) ? Color{ 255, 220, 40, 255 } : Color{ 220, 50, 60, 255 };
     DrawRectangle((int)barX, (int)barY, (int)(barWidth * healthPercent), (int)barHeight, hpColor);

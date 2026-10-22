@@ -1,11 +1,12 @@
 #pragma once
 #include "raylib.h"
-#include "Player.hpp"
-#include "Enemy.hpp"
-#include "Map.hpp"
-#include "Particles.hpp"
-#include "AssetManager.hpp"
-#include "Storyboard.hpp"
+#include "GameState.hpp"
+#include "UI.hpp"
+#include "../entities/Player.hpp"
+#include "../entities/Enemy.hpp"
+#include "../world/Map.hpp"
+#include "../core/Particles.hpp"
+#include "../rendering/AssetManager.hpp"
 #include <vector>
 
 class Game {
@@ -19,22 +20,19 @@ private:
     void Init();
     void Update(float dt);
     void Render();
-    void RenderUI();
 
     void SpawnWave(int waveNumber);
     void CheckCombatCollisions();
     void ResetGame();
 
+    GameState currentState;
     Camera2D camera;
     Player player;
     GameMap map;
     ParticleSystem particles;
     AssetManager assetManager;
-    StoryboardSystem storyboard;
     std::vector<Enemy> enemies;
 
     int currentWave;
     float waveTimer;
-    bool isGameOver;
-    bool isVictory;
 };
