@@ -41,7 +41,10 @@ public:
     bool HasCounterBuff() const { return counterBuffTimer > 0.0f; }
 
     float GetDashCooldown() const { return dashCooldown; }
+    float GetMaxDashCooldown() const { return GetWeaponStats(currentWeapon).dashCooldown; }
     float GetParryCooldown() const { return parryCooldown; }
+    float GetHeavyCooldown() const { return heavyCooldown; }
+    float GetMaxHeavyCooldown() const { return GetWeaponStats(currentWeapon).heavyCooldown; }
 
     const AttackInfo& GetCurrentAttack() const { return currentAttack; }
     bool IsAttacking() const { return currentAttack.type != AttackType::NONE; }

@@ -162,7 +162,7 @@ bool GameUI::DrawControlsModal(int windowWidth, int windowHeight, Vector2 mouseP
     return false;
 }
 
-void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, bool isNearPedestal, const std::string& nearWeaponName) {
+void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName) {
     // Top Lobby Banner
     const float bannerW = 680.0f;
     const float bannerH = 46.0f;
@@ -214,7 +214,7 @@ void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float max
     // Player HUD Panel (Bottom Left)
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 110.0f;
-    const float hudWidth = 280.0f;
+    const float hudWidth = 310.0f;
     const float hudHeight = 86.0f;
 
     DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 210 });
@@ -222,25 +222,38 @@ void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float max
 
     float hpPercent = fmaxf(0.0f, hp / maxHp);
     DrawText("HEALTH", (int)hudX + 14, (int)hudY + 12, 11, Color{ 230, 80, 90, 255 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 12, 185, 12, Color{ 30, 20, 24, 220 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 12, (int)(185 * hpPercent), 12, Color{ 235, 55, 75, 255 });
-    DrawRectangleLines((int)hudX + 70, (int)hudY + 12, 185, 12, Color{ 80, 40, 50, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 30, 20, 24, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, (int)(215 * hpPercent), 12, Color{ 235, 55, 75, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 80, 40, 50, 220 });
 
     float stamPercent = fmaxf(0.0f, stamina / maxStamina);
     DrawText("STAMINA", (int)hudX + 14, (int)hudY + 32, 11, Color{ 255, 210, 80, 255 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 32, 185, 12, Color{ 35, 30, 15, 220 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 32, (int)(185 * stamPercent), 12, Color{ 255, 195, 45, 255 });
-    DrawRectangleLines((int)hudX + 70, (int)hudY + 32, 185, 12, Color{ 90, 75, 30, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 35, 30, 15, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, (int)(215 * stamPercent), 12, Color{ 255, 195, 45, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 90, 75, 30, 220 });
 
-    std::string dashStatus = (dashCooldown <= 0.0f) ? "[Q] Dash Ready" : "[Q] Dash CD";
-    std::string parryStatus = (parryCooldown <= 0.0f) ? "[F] Parry Ready" : "[F] Parry CD";
-    DrawText((dashStatus + "  |  " + parryStatus).c_str(), (int)hudX + 14, (int)hudY + 58, 11, Color{ 150, 180, 210, 220 });
+    char dashBuf[32];
+    char parryBuf[32];
+    char heavyBuf[32];
+    char statusBuf[128];
+
+    if (dashCooldown <= 0.0f) snprintf(dashBuf, sizeof(dashBuf), "[Q] Dash");
+    else snprintf(dashBuf, sizeof(dashBuf), "[Q] %.1fs", dashCooldown);
+
+    if (parryCooldown <= 0.0f) snprintf(parryBuf, sizeof(parryBuf), "[F] Parry");
+    else snprintf(parryBuf, sizeof(parryBuf), "[F] %.1fs", parryCooldown);
+
+    if (heavyCooldown <= 0.0f) snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] Heavy");
+    else snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] %.1fs", heavyCooldown);
+
+    snprintf(statusBuf, sizeof(statusBuf), "%s  |  %s  |  %s", dashBuf, parryBuf, heavyBuf);
+    DrawText(statusBuf, (int)hudX + 14, (int)hudY + 58, 10, Color{ 170, 205, 235, 240 });
 }
 
-void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, bool isParrying, bool hasCounterBuff, int currentWave, int totalWaves) {
+void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, int currentWave, int totalWaves) {
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 110.0f;
-    const float hudWidth = 280.0f;
+    const float hudWidth = 310.0f;
     const float hudHeight = 86.0f;
 
     DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 210 });
@@ -248,24 +261,37 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
 
     float hpPercent = fmaxf(0.0f, hp / maxHp);
     DrawText("HEALTH", (int)hudX + 14, (int)hudY + 12, 11, Color{ 230, 80, 90, 255 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 12, 185, 12, Color{ 30, 20, 24, 220 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 12, (int)(185 * hpPercent), 12, Color{ 235, 55, 75, 255 });
-    DrawRectangleLines((int)hudX + 70, (int)hudY + 12, 185, 12, Color{ 80, 40, 50, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 30, 20, 24, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, (int)(215 * hpPercent), 12, Color{ 235, 55, 75, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 80, 40, 50, 220 });
 
     float stamPercent = fmaxf(0.0f, stamina / maxStamina);
     DrawText("STAMINA", (int)hudX + 14, (int)hudY + 32, 11, Color{ 255, 210, 80, 255 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 32, 185, 12, Color{ 35, 30, 15, 220 });
-    DrawRectangle((int)hudX + 70, (int)hudY + 32, (int)(185 * stamPercent), 12, Color{ 255, 195, 45, 255 });
-    DrawRectangleLines((int)hudX + 70, (int)hudY + 32, 185, 12, Color{ 90, 75, 30, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 35, 30, 15, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, (int)(215 * stamPercent), 12, Color{ 255, 195, 45, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 90, 75, 30, 220 });
 
     if (hasCounterBuff) {
-        DrawText("COUNTER BUFF: +50% DAMAGE!", (int)hudX + 14, (int)hudY + 58, 12, Color{ 255, 230, 80, 255 });
+        DrawText("COUNTER BUFF: +50% DAMAGE!", (int)hudX + 14, (int)hudY + 58, 11, Color{ 255, 230, 80, 255 });
     } else if (isParrying) {
-        DrawText("PARRY WINDOW ACTIVE!", (int)hudX + 14, (int)hudY + 58, 12, Color{ 80, 240, 255, 255 });
+        DrawText("PARRY WINDOW ACTIVE!", (int)hudX + 14, (int)hudY + 58, 11, Color{ 80, 240, 255, 255 });
     } else {
-        std::string dashStatus = (dashCooldown <= 0.0f) ? "[Q] Dash Ready" : "[Q] Dash CD";
-        std::string parryStatus = (parryCooldown <= 0.0f) ? "[F] Parry Ready" : "[F] Parry CD";
-        DrawText((dashStatus + "  |  " + parryStatus).c_str(), (int)hudX + 14, (int)hudY + 58, 11, Color{ 150, 180, 210, 220 });
+        char dashBuf[32];
+        char parryBuf[32];
+        char heavyBuf[32];
+        char statusBuf[128];
+
+        if (dashCooldown <= 0.0f) snprintf(dashBuf, sizeof(dashBuf), "[Q] Dash");
+        else snprintf(dashBuf, sizeof(dashBuf), "[Q] %.1fs", dashCooldown);
+
+        if (parryCooldown <= 0.0f) snprintf(parryBuf, sizeof(parryBuf), "[F] Parry");
+        else snprintf(parryBuf, sizeof(parryBuf), "[F] %.1fs", parryCooldown);
+
+        if (heavyCooldown <= 0.0f) snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] Heavy");
+        else snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] %.1fs", heavyCooldown);
+
+        snprintf(statusBuf, sizeof(statusBuf), "%s  |  %s  |  %s", dashBuf, parryBuf, heavyBuf);
+        DrawText(statusBuf, (int)hudX + 14, (int)hudY + 58, 10, Color{ 170, 205, 235, 240 });
     }
 
     // Active Weapon Badge (Bottom Right)

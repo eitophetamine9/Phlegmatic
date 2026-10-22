@@ -119,9 +119,10 @@ void Game::CheckCombatCollisions() {
     Vector2 playerPos = player.GetPosition();
     float playerRadius = player.GetRadius();
 
-    // 2. Enemy melee strikes vs player
+    // 2. Enemy melee strikes vs player (ONLY pure melee strikes, NOT ranged attacks!)
     for (auto& enemy : enemies) {
         if (!enemy.IsAlive() || !enemy.IsInStrike()) continue;
+        if (!enemy.HasMeleeHitbox()) continue; // Skip ranged enemies; their projectiles deal damage!
 
         TelegraphIndicator tel = enemy.GetTelegraph();
         bool playerHit = false;
@@ -452,7 +453,7 @@ void Game::Render() {
             }
         }
 
-        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), nearAny, nearName);
+        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), nearAny, nearName);
 
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mousePos, false);
@@ -491,7 +492,7 @@ void Game::Render() {
     DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
-    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.IsParrying(), player.HasCounterBuff(), currentWave, 3);
+    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), currentWave, 3);
 
     // Boss Health Bar during Boss Wave
     for (const auto& enemy : enemies) {
