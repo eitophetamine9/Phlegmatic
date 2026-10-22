@@ -5,6 +5,7 @@
 #include "../entities/Player.hpp"
 #include "../entities/Enemy.hpp"
 #include "../world/Map.hpp"
+#include "../world/Interactable.hpp"
 #include "../core/Particles.hpp"
 #include "../rendering/AssetManager.hpp"
 #include <vector>
@@ -21,9 +22,10 @@ private:
     void Update(float dt);
     void Render();
 
+    void EnterLobby();
+    void EnterArena();
     void SpawnWave(int waveNumber);
     void CheckCombatCollisions();
-    void ResetGame();
 
     GameState currentState;
     Camera2D camera;
@@ -32,6 +34,11 @@ private:
     ParticleSystem particles;
     AssetManager assetManager;
     std::vector<Enemy> enemies;
+
+    // Lobby Elements
+    std::vector<WeaponPedestal> pedestals;
+    TrainingDummy dummy;
+    ArenaPortal portal;
 
     int currentWave;
     float waveTimer;

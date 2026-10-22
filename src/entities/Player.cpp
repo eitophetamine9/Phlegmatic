@@ -298,36 +298,104 @@ void Player::Draw() const {
     if (counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
     if (isDashing) bodyColor = Color{ 100, 200, 255, 180 };
 
-    AssetManager::DrawPlayerSilhouette(position, facingAngle, bodyColor, isParrying, IsAttacking());
+    AssetManager::DrawPlayerSilhouette(position, facingAngle, bodyColor, isParrying, isDashing);
 
-    float swordAngle = facingAngle + 35.0f;
-    Vector2 swordOrigin = {
-        position.x + cosf(facingAngle * DEG2RAD) * 12.0f - sinf(facingAngle * DEG2RAD) * 10.0f,
-        position.y + sinf(facingAngle * DEG2RAD) * 12.0f + cosf(facingAngle * DEG2RAD) * 10.0f
+    Vector2 dir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+    Vector2 normal = { -dir.y, dir.x };
+
+    Vector2 rightHand = {
+        position.x + dir.x * 12.0f + normal.x * 11.0f,
+        position.y + dir.y * 12.0f + normal.y * 11.0f
+    };
+    Vector2 leftHand = {
+        position.x + dir.x * 12.0f - normal.x * 11.0f,
+        position.y + dir.y * 12.0f - normal.y * 11.0f
     };
 
-    if (currentAttack.type == AttackType::LIGHT) {
-        float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-        swordAngle = facingAngle - 50.0f + progress * currentAttack.arcAngle;
-        AssetManager::DrawSword(swordOrigin, swordAngle, 38.0f, Color{ 230, 240, 255, 255 }, Color{ 0, 229, 255, 200 });
+    if (currentWeapon == WeaponType::SWORD) {
+        float swordAngle = facingAngle + 35.0f;
+        if (currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            swordAngle = facingAngle - 50.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawSword(rightHand, swordAngle, 38.0f, Color{ 230, 240, 255, 255 }, Color{ 0, 229, 255, 200 });
 
-        float startAngle = facingAngle - 50.0f;
-        float sweepAngle = progress * currentAttack.arcAngle;
-        DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 0, 220, 255, 60 });
-        DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 120, 245, 255, 180 });
-    } else if (currentAttack.type == AttackType::HEAVY) {
-        float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-        swordAngle = facingAngle - 60.0f + progress * currentAttack.arcAngle;
-        AssetManager::DrawSword(swordOrigin, swordAngle, 50.0f, Color{ 255, 240, 190, 255 }, Color{ 255, 180, 40, 220 });
+            float startAngle = facingAngle - 50.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 0, 220, 255, 60 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 120, 245, 255, 180 });
+        } else if (currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            swordAngle = facingAngle - 60.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawSword(rightHand, swordAngle, 48.0f, Color{ 255, 240, 190, 255 }, Color{ 255, 180, 40, 220 });
 
-        float startAngle = facingAngle - 60.0f;
-        float sweepAngle = progress * currentAttack.arcAngle;
-        DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 180, 40, 80 });
-        DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 230, 100, 220 });
-    } else if (isHeavyWindingUp) {
-        swordAngle = facingAngle - 90.0f;
-        AssetManager::DrawSword(swordOrigin, swordAngle, 45.0f, Color{ 255, 200, 80, 255 }, Color{ 255, 120, 20, 200 });
-    } else {
-        AssetManager::DrawSword(swordOrigin, swordAngle, 34.0f, Color{ 210, 220, 235, 255 }, Color{ 80, 140, 200, 120 });
+            float startAngle = facingAngle - 60.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 180, 40, 80 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 230, 100, 220 });
+        } else if (isHeavyWindingUp) {
+            swordAngle = facingAngle - 85.0f;
+            AssetManager::DrawSword(rightHand, swordAngle, 42.0f, Color{ 255, 200, 80, 255 }, Color{ 255, 120, 20, 200 });
+        } else {
+            AssetManager::DrawSword(rightHand, swordAngle, 34.0f, Color{ 210, 220, 235, 255 }, Color{ 80, 140, 200, 120 });
+        }
+    } else if (currentWeapon == WeaponType::DAGGERS) {
+        float angleL = facingAngle - 25.0f;
+        float angleR = facingAngle + 25.0f;
+
+        if (currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            angleR = facingAngle - 30.0f + progress * 80.0f;
+            angleL = facingAngle + 30.0f - progress * 80.0f;
+
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 255, 220, 255 }, Color{ 60, 240, 180, 200 });
+
+            float startAngle = facingAngle - 45.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 60, 240, 180, 60 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 120, 255, 200, 180 });
+        } else if (currentAttack.type == AttackType::HEAVY) {
+            // 360 Whirlwind spin
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            float spinAngle = facingAngle + progress * 360.0f;
+            angleR = spinAngle;
+            angleL = spinAngle + 180.0f;
+
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 200, 255 }, Color{ 80, 255, 160, 220 });
+            DrawCircleLines((int)position.x, (int)position.y, currentAttack.range, Color{ 80, 255, 160, 180 });
+            DrawCircle((int)position.x, (int)position.y, currentAttack.range * progress, Color{ 60, 240, 180, 40 });
+        } else if (isHeavyWindingUp) {
+            angleL = facingAngle - 70.0f;
+            angleR = facingAngle - 50.0f;
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 140, 255 }, Color{ 140, 240, 60, 200 });
+        } else {
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 240, 220, 255 }, Color{ 60, 200, 160, 140 });
+        }
+    } else if (currentWeapon == WeaponType::MACE) {
+        float maceAngle = facingAngle + 40.0f;
+        if (currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            maceAngle = facingAngle - 40.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawMace(rightHand, maceAngle, 42.0f, Color{ 230, 180, 120, 255 }, Color{ 255, 140, 40, 200 });
+
+            float startAngle = facingAngle - 40.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 255, 140, 40, 60 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 255, 180, 80, 180 });
+        } else if (currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            maceAngle = facingAngle - 70.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawMace(rightHand, maceAngle, 52.0f, Color{ 255, 200, 140, 255 }, Color{ 255, 90, 30, 240 });
+
+            // Earthshattering slam shockwave
+            float startAngle = facingAngle - 70.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 90, 30, 80 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 140, 50, 220 });
+        } else if (isHeavyWindingUp) {
+            maceAngle = facingAngle - 100.0f;
+            AssetManager::DrawMace(rightHand, maceAngle, 46.0f, Color{ 255, 160, 60, 255 }, Color{ 255, 60, 20, 220 });
+        } else {
+            AssetManager::DrawMace(rightHand, maceAngle, 38.0f, Color{ 210, 170, 130, 255 }, Color{ 200, 120, 50, 120 });
+        }
     }
 }

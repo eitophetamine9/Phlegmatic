@@ -22,20 +22,41 @@ void Game::Init() {
     SoundFX::Init();
     assetManager.Init();
 
-    camera.target = player.GetPosition();
+    // Setup Lobby Pedestals
+    pedestals.clear();
+    pedestals.push_back({ { 650.0f, 650.0f }, WeaponType::SWORD });
+    pedestals.push_back({ { 800.0f, 590.0f }, WeaponType::DAGGERS });
+    pedestals.push_back({ { 950.0f, 650.0f }, WeaponType::MACE });
+
+    dummy.position = { 800.0f, 810.0f };
+    portal.position = { 800.0f, 430.0f };
+
+    camera.target = { 800.0f, 600.0f };
     camera.offset = { (float)Config::WINDOW_WIDTH * 0.5f, (float)Config::WINDOW_HEIGHT * 0.5f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
-    ResetGame();
     currentState = GameState::TITLE_SCREEN;
 }
 
-void Game::ResetGame() {
+void Game::EnterLobby() {
+    map.Init(MapEnvironment::LOBBY);
+    player.Init({ 800.0f, 740.0f });
+    camera.target = player.GetPosition();
+    currentState = GameState::LOBBY;
+    particles.SpawnFloatingText(player.GetPosition(), "LOBBY SANCTUARY", Color{ 255, 220, 100, 255 }, 24.0f);
+}
+
+void Game::EnterArena() {
+    map.Init(MapEnvironment::ARENA);
     player.Init({ 1200.0f, 900.0f });
+    camera.target = player.GetPosition();
     currentWave = 1;
     waveTimer = 0.0f;
     SpawnWave(currentWave);
+    currentState = GameState::ARENA;
+    SoundFX::PlayEquipWeapon();
+    particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 25, 220.0f);
 }
 
 void Game::SpawnWave(int waveNumber) {
@@ -143,34 +164,95 @@ void Game::CheckCombatCollisions() {
 void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
 
-    // TITLE SCREEN STATE
+    // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
         bool clickedPlay = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         if (clickedPlay) {
-            ResetGame();
-            currentState = GameState::ARENA;
+            EnterLobby();
         }
         return;
     }
 
-    // GAME OVER & VICTORY STATES
-    if (currentState == GameState::GAME_OVER || currentState == GameState::VICTORY) {
-        if (IsKeyPressed(KEY_R)) {
-            ResetGame();
-            currentState = GameState::ARENA;
+    // 2. LOBBY STATE
+    if (currentState == GameState::LOBBY) {
+        Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
+
+        // Player Actions
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            player.TriggerLightAttack(particles);
         }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            player.TriggerHeavyAttack(particles);
+        }
+        if (IsKeyPressed(KEY_Q)) {
+            player.TriggerDash(particles);
+        }
+        if (IsKeyPressed(KEY_F)) {
+            player.TriggerParry(particles);
+        }
+
+        player.Update(dt, map, mouseWorld, particles);
+        dummy.Update(dt);
+
+        // Test attacks on Training Dummy
+        if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
+            if (dummy.CheckHit(player.GetCurrentAttack(), particles)) {
+                player.SetAttackHit();
+                particles.AddScreenShake(2.5f, 0.1f);
+            }
+        }
+
+        // Weapon Pedestal Interactions
+        for (const auto& ped : pedestals) {
+            bool near = ped.CheckInteraction(player.GetPosition());
+            bool clicked = CheckCollisionPointCircle(mouseWorld, ped.position, ped.radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+            if ((near && IsKeyPressed(KEY_E)) || clicked) {
+                if (player.GetWeapon() != ped.weapon) {
+                    player.SetWeapon(ped.weapon);
+                    WeaponStats st = GetWeaponStats(ped.weapon);
+                    particles.SpawnFloatingText(player.GetPosition(), "EQUIPPED: " + st.name, Color{ 255, 220, 80, 255 }, 22.0f);
+                    particles.SpawnSparks(ped.position, Color{ 100, 220, 255, 255 }, 16, 120.0f);
+                }
+            }
+        }
+
+        // Arena Portal Interaction
+        if (portal.CheckPlayerInside(player.GetPosition()) || (Vector2Distance(player.GetPosition(), portal.position) < 80.0f && IsKeyPressed(KEY_E))) {
+            EnterArena();
+            return;
+        }
+
         if (IsKeyPressed(KEY_ESCAPE)) {
             currentState = GameState::TITLE_SCREEN;
+            return;
+        }
+
+        particles.Update(dt);
+
+        Vector2 shake = particles.GetScreenShakeOffset();
+        Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
+        camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
+        return;
+    }
+
+    // 3. GAME OVER & VICTORY STATES
+    if (currentState == GameState::GAME_OVER || currentState == GameState::VICTORY) {
+        if (IsKeyPressed(KEY_R)) {
+            EnterArena();
+        }
+        if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE)) {
+            EnterLobby();
         }
         return;
     }
 
-    // ARENA STATE
+    // 4. ARENA STATE
     if (IsKeyPressed(KEY_R)) {
-        ResetGame();
+        EnterArena();
     }
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        currentState = GameState::TITLE_SCREEN;
+    if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE)) {
+        EnterLobby();
         return;
     }
 
@@ -181,11 +263,6 @@ void Game::Update(float dt) {
 
     Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 
-    // Player inputs:
-    // Left Click: Light Attack
-    // Right Click: Heavy Attack
-    // Q: Dash
-    // F: Parry
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player.TriggerLightAttack(particles);
     }
@@ -234,6 +311,7 @@ void Game::Update(float dt) {
 void Game::Render() {
     BeginDrawing();
 
+    // TITLE SCREEN
     if (currentState == GameState::TITLE_SCREEN) {
         Vector2 mouseScreen = GetMousePosition();
         GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, false);
@@ -241,7 +319,59 @@ void Game::Render() {
         return;
     }
 
-    // World Rendering
+    float time = (float)GetTime();
+    int w = Config::WINDOW_WIDTH;
+    int h = Config::WINDOW_HEIGHT;
+
+    // LOBBY RENDERING
+    if (currentState == GameState::LOBBY) {
+        BeginMode2D(camera);
+        map.DrawFloor();
+
+        // Draw Arena Portal
+        portal.Draw(time);
+
+        // Draw Pedestals
+        Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
+        for (const auto& ped : pedestals) {
+            bool isSel = (player.GetWeapon() == ped.weapon);
+            bool isHov = CheckCollisionPointCircle(mouseWorld, ped.position, ped.radius) || ped.CheckInteraction(player.GetPosition());
+            AssetManager::DrawWeaponPedestal(ped.position, ped.weapon, isSel, isHov, time);
+        }
+
+        // Draw Training Dummy
+        dummy.Draw();
+
+        map.DrawWallsAndPillars();
+
+        // Draw Player
+        player.Draw();
+
+        particles.Draw();
+        EndMode2D();
+
+        // Lobby HUD
+        Vector2 mousePos = GetMousePosition();
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
+
+        bool nearAny = false;
+        std::string nearName = "";
+        for (const auto& ped : pedestals) {
+            if (ped.CheckInteraction(player.GetPosition())) {
+                nearAny = true;
+                nearName = GetWeaponStats(ped.weapon).name;
+                break;
+            }
+        }
+
+        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), nearAny, nearName);
+
+        EndDrawing();
+        return;
+    }
+
+    // ARENA RENDERING
     BeginMode2D(camera);
     map.DrawFloor();
 
@@ -262,11 +392,7 @@ void Game::Render() {
     particles.Draw();
     EndMode2D();
 
-    // HUD & Screen UI
-    int w = Config::WINDOW_WIDTH;
-    int h = Config::WINDOW_HEIGHT;
-
-    // Crosshair
+    // Arena Screen UI
     Vector2 mousePos = GetMousePosition();
     DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
