@@ -37,10 +37,13 @@ g++ -std=c++17 -O2 -static ^
     -o bin\phlegmatic.exe
 
 if %ERRORLEVEL% EQU 0 (
+    copy bin\phlegmatic.exe phlegmatic.exe >nul 2>nul
     echo.
     echo ==========================================
     echo   BUILD SUCCESSFUL
-    echo   Executable: bin\phlegmatic.exe
+    echo   Executables:
+    echo     - phlegmatic.exe [Project Root]
+    echo     - bin\phlegmatic.exe
     echo ==========================================
     exit /b 0
 ) else (
