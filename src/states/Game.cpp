@@ -5,7 +5,7 @@
 #include <cmath>
 #include <string>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), currentWave(1), waveTimer(0.0f) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), currentWave(1), waveTimer(0.0f) {
 }
 
 Game::~Game() {
@@ -22,7 +22,6 @@ void Game::Init() {
     SoundFX::Init();
     assetManager.Init();
 
-    // Setup Lobby Pedestals
     pedestals.clear();
     pedestals.push_back({ { 650.0f, 650.0f }, WeaponType::SWORD });
     pedestals.push_back({ { 800.0f, 590.0f }, WeaponType::DAGGERS });
@@ -37,6 +36,7 @@ void Game::Init() {
     camera.zoom = 1.0f;
 
     currentState = GameState::TITLE_SCREEN;
+    showControlsModal = false;
 }
 
 void Game::EnterLobby() {
@@ -44,6 +44,7 @@ void Game::EnterLobby() {
     player.Init({ 800.0f, 740.0f });
     camera.target = player.GetPosition();
     currentState = GameState::LOBBY;
+    showControlsModal = false;
     particles.SpawnFloatingText(player.GetPosition(), "LOBBY SANCTUARY", Color{ 255, 220, 100, 255 }, 24.0f);
 }
 
@@ -55,6 +56,7 @@ void Game::EnterArena() {
     waveTimer = 0.0f;
     SpawnWave(currentWave);
     currentState = GameState::ARENA;
+    showControlsModal = false;
     SoundFX::PlayEquipWeapon();
     particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 25, 220.0f);
 }
@@ -164,11 +166,27 @@ void Game::CheckCombatCollisions() {
 void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
 
+    // Toggle Controls Menu modal
+    if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_TAB)) {
+        showControlsModal = !showControlsModal;
+        if (showControlsModal) SoundFX::PlayButtonClick();
+    }
+
+    if (showControlsModal) {
+        bool close = GameUI::DrawControlsModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        if (close) {
+            showControlsModal = false;
+        }
+        return;
+    }
+
     // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
-        bool clickedPlay = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
-        if (clickedPlay) {
+        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        if (action == 1) {
             EnterLobby();
+        } else if (action == 2) {
+            showControlsModal = true;
         }
         return;
     }
@@ -177,7 +195,6 @@ void Game::Update(float dt) {
     if (currentState == GameState::LOBBY) {
         Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 
-        // Player Actions
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             player.TriggerLightAttack(particles);
         }
@@ -194,7 +211,6 @@ void Game::Update(float dt) {
         player.Update(dt, map, mouseWorld, particles);
         dummy.Update(dt);
 
-        // Test attacks on Training Dummy
         if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
             if (dummy.CheckHit(player.GetCurrentAttack(), particles)) {
                 player.SetAttackHit();
@@ -202,7 +218,6 @@ void Game::Update(float dt) {
             }
         }
 
-        // Weapon Pedestal Interactions
         for (const auto& ped : pedestals) {
             bool near = ped.CheckInteraction(player.GetPosition());
             bool clicked = CheckCollisionPointCircle(mouseWorld, ped.position, ped.radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
@@ -217,7 +232,6 @@ void Game::Update(float dt) {
             }
         }
 
-        // Arena Portal Interaction
         if (portal.CheckPlayerInside(player.GetPosition()) || (Vector2Distance(player.GetPosition(), portal.position) < 80.0f && IsKeyPressed(KEY_E))) {
             EnterArena();
             return;
@@ -311,27 +325,27 @@ void Game::Update(float dt) {
 void Game::Render() {
     BeginDrawing();
 
-    // TITLE SCREEN
+    int w = Config::WINDOW_WIDTH;
+    int h = Config::WINDOW_HEIGHT;
+    float time = (float)GetTime();
+
     if (currentState == GameState::TITLE_SCREEN) {
         Vector2 mouseScreen = GetMousePosition();
-        GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, false);
+        GameUI::DrawTitleScreen(w, h, mouseScreen, false);
+
+        if (showControlsModal) {
+            GameUI::DrawControlsModal(w, h, mouseScreen, false);
+        }
         EndDrawing();
         return;
     }
 
-    float time = (float)GetTime();
-    int w = Config::WINDOW_WIDTH;
-    int h = Config::WINDOW_HEIGHT;
-
-    // LOBBY RENDERING
     if (currentState == GameState::LOBBY) {
         BeginMode2D(camera);
         map.DrawFloor();
 
-        // Draw Arena Portal
         portal.Draw(time);
 
-        // Draw Pedestals
         Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
         for (const auto& ped : pedestals) {
             bool isSel = (player.GetWeapon() == ped.weapon);
@@ -339,18 +353,12 @@ void Game::Render() {
             AssetManager::DrawWeaponPedestal(ped.position, ped.weapon, isSel, isHov, time);
         }
 
-        // Draw Training Dummy
         dummy.Draw();
-
         map.DrawWallsAndPillars();
-
-        // Draw Player
         player.Draw();
-
         particles.Draw();
         EndMode2D();
 
-        // Lobby HUD
         Vector2 mousePos = GetMousePosition();
         DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
         DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
@@ -366,6 +374,10 @@ void Game::Render() {
         }
 
         GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), nearAny, nearName);
+
+        if (showControlsModal) {
+            GameUI::DrawControlsModal(w, h, mousePos, false);
+        }
 
         EndDrawing();
         return;
@@ -392,7 +404,6 @@ void Game::Render() {
     particles.Draw();
     EndMode2D();
 
-    // Arena Screen UI
     Vector2 mousePos = GetMousePosition();
     DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
@@ -403,6 +414,10 @@ void Game::Render() {
         GameUI::DrawGameOver(w, h);
     } else if (currentState == GameState::VICTORY) {
         GameUI::DrawVictory(w, h);
+    }
+
+    if (showControlsModal) {
+        GameUI::DrawControlsModal(w, h, mousePos, false);
     }
 
     EndDrawing();

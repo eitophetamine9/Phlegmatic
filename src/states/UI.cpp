@@ -3,12 +3,12 @@
 #include "../combat/Weapon.hpp"
 #include <cmath>
 
-bool GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
+int GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 12, 14, 20, 255 });
 
     float time = (float)GetTime();
 
-    Vector2 center = { (float)windowWidth * 0.5f, (float)windowHeight * 0.42f };
+    Vector2 center = { (float)windowWidth * 0.5f, (float)windowHeight * 0.40f };
     float pulse = 1.0f + 0.04f * sinf(time * 2.5f);
     DrawCircleLines((int)center.x, (int)center.y, 280.0f * pulse, Color{ 35, 45, 65, 120 });
     DrawCircleLines((int)center.x, (int)center.y, 160.0f * pulse, Color{ 50, 70, 105, 140 });
@@ -24,40 +24,140 @@ bool GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos
     int subW = MeasureText(subtitle, subSize);
     DrawText(subtitle, (int)(center.x - subW * 0.5f), (int)(center.y - 50), subSize, Color{ 180, 200, 230, 230 });
 
-    const float btnWidth = 260.0f;
-    const float btnHeight = 60.0f;
+    // Buttons Container
+    const float btnWidth = 240.0f;
+    const float btnHeight = 52.0f;
     float btnX = center.x - btnWidth * 0.5f;
-    float btnY = center.y + 20.0f;
 
-    Rectangle btnRec = { btnX, btnY, btnWidth, btnHeight };
-    bool isHovered = CheckCollisionPointRec(mousePos, btnRec);
+    // 1. PLAY BUTTON
+    float playY = center.y + 15.0f;
+    Rectangle playRec = { btnX, playY, btnWidth, btnHeight };
+    bool playHovered = CheckCollisionPointRec(mousePos, playRec);
 
-    Color btnBg = isHovered ? Color{ 45, 75, 130, 255 } : Color{ 25, 35, 55, 230 };
-    Color btnBorder = isHovered ? Color{ 100, 220, 255, 255 } : Color{ 60, 85, 125, 255 };
-
-    DrawRectangleRounded(btnRec, 0.25f, 6, btnBg);
-    DrawRectangleRoundedLines(btnRec, 0.25f, 6, btnBorder);
+    Color playBg = playHovered ? Color{ 45, 75, 130, 255 } : Color{ 25, 35, 55, 230 };
+    Color playBorder = playHovered ? Color{ 100, 220, 255, 255 } : Color{ 60, 85, 125, 255 };
+    DrawRectangleRounded(playRec, 0.25f, 6, playBg);
+    DrawRectangleRoundedLines(playRec, 0.25f, 6, playBorder);
 
     const char* playText = "PLAY";
-    int playSize = 26;
+    int playSize = 24;
     int playW = MeasureText(playText, playSize);
-    DrawText(playText, (int)(center.x - playW * 0.5f), (int)(btnY + 16), playSize, isHovered ? Color{ 255, 255, 255, 255 } : Color{ 210, 230, 255, 240 });
+    DrawText(playText, (int)(center.x - playW * 0.5f), (int)(playY + 14), playSize, playHovered ? Color{ 255, 255, 255, 255 } : Color{ 210, 230, 255, 240 });
 
-    const float ctrlW = 620.0f;
-    const float ctrlH = 90.0f;
-    float ctrlX = center.x - ctrlW * 0.5f;
-    float ctrlY = (float)windowHeight - ctrlH - 30.0f;
+    // 2. CONTROLS BUTTON
+    float ctrlBtnY = playY + btnHeight + 16.0f;
+    Rectangle ctrlRec = { btnX, ctrlBtnY, btnWidth, btnHeight };
+    bool ctrlHovered = CheckCollisionPointRec(mousePos, ctrlRec);
 
-    DrawRectangleRounded(Rectangle{ ctrlX, ctrlY, ctrlW, ctrlH }, 0.15f, 6, Color{ 18, 22, 32, 220 });
-    DrawRectangleRoundedLines(Rectangle{ ctrlX, ctrlY, ctrlW, ctrlH }, 0.15f, 6, Color{ 45, 58, 80, 220 });
+    Color ctrlBg = ctrlHovered ? Color{ 40, 55, 80, 255 } : Color{ 20, 28, 42, 230 };
+    Color ctrlBorder = ctrlHovered ? Color{ 255, 215, 80, 255 } : Color{ 50, 70, 95, 255 };
+    DrawRectangleRounded(ctrlRec, 0.25f, 6, ctrlBg);
+    DrawRectangleRoundedLines(ctrlRec, 0.25f, 6, ctrlBorder);
 
-    DrawText("CONTROLS:", (int)ctrlX + 20, (int)ctrlY + 12, 13, Color{ 255, 215, 80, 255 });
-    DrawText("WASD / Arrows: Move  |  Mouse: Aim  |  L-Click: Light Attack  |  R-Click: Heavy Attack", (int)ctrlX + 20, (int)ctrlY + 36, 13, Color{ 210, 225, 245, 230 });
-    DrawText("Q: Dash (Evasion / i-frames)  |  F: Timely Parry (Reflect & Stagger)  |  R: Reset", (int)ctrlX + 20, (int)ctrlY + 58, 13, Color{ 120, 230, 255, 240 });
+    const char* ctrlText = "CONTROLS";
+    int ctrlSize = 20;
+    int ctrlW = MeasureText(ctrlText, ctrlSize);
+    DrawText(ctrlText, (int)(center.x - ctrlW * 0.5f), (int)(ctrlBtnY + 16), ctrlSize, ctrlHovered ? Color{ 255, 230, 100, 255 } : Color{ 180, 205, 235, 230 });
 
-    if (isHovered && isMousePressed) {
+    // Quick Hint at bottom
+    const char* hint = "Press [PLAY] to enter the Armory Sanctuary (Lobby)";
+    int hintW = MeasureText(hint, 13);
+    DrawText(hint, (int)(center.x - hintW * 0.5f), (int)(windowHeight - 45), 13, Color{ 140, 165, 195, 200 });
+
+    if (isMousePressed) {
+        if (playHovered) {
+            SoundFX::PlayButtonClick();
+            return 1; // Play
+        }
+        if (ctrlHovered) {
+            SoundFX::PlayButtonClick();
+            return 2; // Controls
+        }
+    }
+    return 0;
+}
+
+bool GameUI::DrawControlsModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
+    // Dim background
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 16, 225 });
+
+    const float modalW = 760.0f;
+    const float modalH = 530.0f;
+    float modalX = ((float)windowWidth - modalW) * 0.5f;
+    float modalY = ((float)windowHeight - modalH) * 0.5f;
+
+    DrawRectangleRounded(Rectangle{ modalX, modalY, modalW, modalH }, 0.08f, 8, Color{ 16, 20, 30, 252 });
+    DrawRectangleRoundedLines(Rectangle{ modalX, modalY, modalW, modalH }, 0.08f, 8, Color{ 60, 80, 115, 255 });
+
+    // Header
+    DrawText("CONTROLS & COMBAT MECHANICS", (int)modalX + 32, (int)modalY + 24, 22, Color{ 255, 220, 90, 255 });
+    DrawText("Master movement, evasive dashes, and timely parries to dominate the arena.", (int)modalX + 32, (int)modalY + 52, 12, Color{ 170, 190, 215, 220 });
+    DrawLine((int)modalX + 32, (int)modalY + 74, (int)(modalX + modalW - 32), (int)modalY + 74, Color{ 40, 52, 75, 255 });
+
+    // Controls Table Content
+    struct ControlItem {
+        const char* key;
+        const char* action;
+        const char* details;
+        Color badgeColor;
+    };
+
+    ControlItem items[] = {
+        { "WASD / Arrows", "Movement", "Fluid 8-directional movement with obstacle collision physics.", Color{ 80, 140, 220, 255 } },
+        { "Mouse Cursor",  "Aiming",   "Player rotates facing direction and directs attacks towards reticle.", Color{ 80, 140, 220, 255 } },
+        { "Left Click",    "Light Atk","Fast, agile combo slash arc. Low stamina, rapid recovery.", Color{ 100, 220, 255, 255 } },
+        { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
+        { "Q Key",         "DASH",     "High-velocity directional dash with i-frames (invulnerability). Evade attacks!", Color{ 120, 240, 180, 255 } },
+        { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
+        { "E Key",         "Interact", "Equip weapon at pedestals (Sword, Daggers, Mace) or enter Arena Portal.", Color{ 200, 150, 255, 255 } },
+        { "C / TAB Key",   "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
+        { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
+    };
+
+    float startY = modalY + 90.0f;
+    float rowHeight = 38.0f;
+
+    for (int i = 0; i < 9; i++) {
+        float rowY = startY + (float)i * rowHeight;
+
+        // Alternate row background
+        if (i % 2 == 1) {
+            DrawRectangle((int)modalX + 30, (int)rowY, (int)(modalW - 60), (int)rowHeight - 4, Color{ 22, 28, 42, 140 });
+        }
+
+        // Key Badge
+        float badgeW = 120.0f;
+        DrawRectangleRounded(Rectangle{ modalX + 36, rowY + 3, badgeW, 24 }, 0.25f, 4, Color{ 30, 38, 54, 255 });
+        DrawRectangleRoundedLines(Rectangle{ modalX + 36, rowY + 3, badgeW, 24 }, 0.25f, 4, items[i].badgeColor);
+        int kw = MeasureText(items[i].key, 11);
+        DrawText(items[i].key, (int)(modalX + 36 + (badgeW - kw) * 0.5f), (int)rowY + 9, 11, items[i].badgeColor);
+
+        // Action
+        DrawText(items[i].action, (int)modalX + 175, (int)rowY + 9, 12, Color{ 255, 255, 255, 255 });
+
+        // Details
+        DrawText(items[i].details, (int)modalX + 265, (int)rowY + 9, 11, Color{ 185, 205, 230, 220 });
+    }
+
+    // Interactive CLOSE Button at Bottom
+    const float closeW = 160.0f;
+    const float closeH = 38.0f;
+    float closeX = modalX + (modalW - closeW) * 0.5f;
+    float closeY = modalY + modalH - 52.0f;
+
+    Rectangle closeRec = { closeX, closeY, closeW, closeH };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeRec);
+
+    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 30, 40, 60, 240 });
+    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 100, 220, 255, 255 } : Color{ 60, 80, 110, 255 });
+
+    const char* clText = "CLOSE [ESC / C]";
+    int clW = MeasureText(clText, 12);
+    DrawText(clText, (int)(closeX + (closeW - clW) * 0.5f), (int)(closeY + 13), 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 220, 245, 220 });
+
+    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_C) || IsKeyPressed(KEY_TAB)) {
         SoundFX::PlayButtonClick();
-        return true;
+        return true; // Close requested
     }
     return false;
 }
@@ -77,6 +177,11 @@ void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float max
 
     const char* hint = "Equip weapons at pedestals [E]  |  Step into North Portal to Enter Arena";
     DrawText(hint, (int)bannerX + 16, (int)bannerY + 26, 12, Color{ 200, 220, 245, 220 });
+
+    // Controls button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 
     // Interaction prompt popup if standing near pedestal
     if (isNearPedestal) {
@@ -187,6 +292,11 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     std::string waveStr = "COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves);
     int waveW = MeasureText(waveStr.c_str(), 14);
     DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
+
+    // Controls hint top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
 void GameUI::DrawGameOver(int windowWidth, int windowHeight) {

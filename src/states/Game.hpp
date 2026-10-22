@@ -28,6 +28,8 @@ private:
     void CheckCombatCollisions();
 
     GameState currentState;
+    bool showControlsModal;
+
     Camera2D camera;
     Player player;
     GameMap map;
