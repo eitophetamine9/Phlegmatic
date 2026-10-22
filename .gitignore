@@ -3,9 +3,11 @@
 # ==========================================
 
 # Compiled Binaries & Build Folders
-bin/
+bin/*
+!bin/phlegmatic.exe
 build/
 *.exe
+!bin/phlegmatic.exe
 *.dll
 *.so
 *.dylib
