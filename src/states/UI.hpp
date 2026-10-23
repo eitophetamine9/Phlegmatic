@@ -22,4 +22,11 @@ public:
     static void DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp);
     static void DrawGameOver(int windowWidth, int windowHeight);
     static void DrawVictory(int windowWidth, int windowHeight);
+
+    // Zil Defeat Branching Modal
+    // Returns 0 = None, 1 = Retry Duel, 2 = Accept Spare & Proceed
+    static int DrawZilDefeatModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool canRetry);
+
+    // Cinematic Boss Dialogue Banner
+    static void DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor);
 };

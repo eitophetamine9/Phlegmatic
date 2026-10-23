@@ -760,3 +760,121 @@ bool GameUI::DrawInventoryModal(int windowWidth, int windowHeight, Vector2 mouse
 
     return false;
 }
+
+int GameUI::DrawZilDefeatModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool canRetry) {
+    // Dark ominous background overlay
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 4, 6, 225 });
+
+    float modalW = 740.0f;
+    float modalH = 430.0f;
+    float modalX = ((float)windowWidth - modalW) * 0.5f;
+    float modalY = ((float)windowHeight - modalH) * 0.5f;
+
+    // Outer backing card
+    DrawRectangleRounded(Rectangle{ modalX, modalY, modalW, modalH }, 0.05f, 8, Color{ 18, 12, 16, 252 });
+    DrawRectangleRoundedLines(Rectangle{ modalX, modalY, modalW, modalH }, 0.05f, 8, Color{ 220, 110, 45, 240 });
+    DrawRectangleRoundedLines(Rectangle{ modalX + 4, modalY + 4, modalW - 8, modalH - 8 }, 0.045f, 8, Color{ 60, 35, 40, 180 });
+
+    // Filigree corner accents
+    Color cornerCol = Color{ 255, 160, 50, 240 };
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 38, modalY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 12, modalY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 38, modalY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 12, modalY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+
+    // Header Title
+    int headerW = MeasureText("DEFEAT // ZIL'S JUDGMENT", 20);
+    DrawText("DEFEAT // ZIL'S JUDGMENT", (int)(modalX + (modalW - headerW) * 0.5f), (int)modalY + 28, 20, Color{ 255, 90, 70, 255 });
+    DrawLine((int)modalX + 50, (int)modalY + 62, (int)(modalX + modalW - 50), (int)modalY + 62, Color{ 140, 70, 30, 200 });
+
+    int choiceResult = 0;
+
+    if (canRetry) {
+        // Flavor Subtitle
+        int subW = MeasureText("THE FALLEN CRUSADER STANDS VICTORIOUS", 15);
+        DrawText("THE FALLEN CRUSADER STANDS VICTORIOUS", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 255, 205, 80, 255 });
+
+        // Narrative speech
+        std::string quoteText =
+            "“You fought with fierce intent, wanderer, but Truth Seeker remains unyielding in these hands.\n\n"
+            "Will you rise once more and test your blade... or yield and carry onward into Zyphden?”";
+        DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
+
+        // Lore footnote
+        const char* noteText = "Honor bound: You are granted a singular retry duel to claim the legendary blade.";
+        int noteW = MeasureText(noteText, 11);
+        DrawText(noteText, (int)(modalX + (modalW - noteW) * 0.5f), (int)modalY + 280, 11, Color{ 255, 170, 60, 220 });
+
+        // Button 1: Retry Battle
+        Rectangle btnRetry = { modalX + 50.0f, modalY + 330.0f, 300.0f, 54.0f };
+        bool hoverRetry = CheckCollisionPointRec(mousePos, btnRetry);
+        DrawRectangleRounded(btnRetry, 0.2f, 6, hoverRetry ? Color{ 90, 35, 20, 255 } : Color{ 45, 22, 16, 240 });
+        DrawRectangleRoundedLines(btnRetry, 0.2f, 6, hoverRetry ? Color{ 255, 190, 70, 255 } : Color{ 220, 120, 40, 230 });
+        int btn1W = MeasureText("RETRY DUEL [1 REMAINING]", 14);
+        DrawText("RETRY DUEL [1 REMAINING]", (int)(btnRetry.x + (btnRetry.width - btn1W) * 0.5f), (int)btnRetry.y + 19, 14, hoverRetry ? Color{ 255, 255, 255, 255 } : Color{ 255, 215, 100, 240 });
+
+        // Button 2: Accept Spare & Proceed
+        Rectangle btnProceed = { modalX + 390.0f, modalY + 330.0f, 300.0f, 54.0f };
+        bool hoverProceed = CheckCollisionPointRec(mousePos, btnProceed);
+        DrawRectangleRounded(btnProceed, 0.2f, 6, hoverProceed ? Color{ 35, 55, 85, 255 } : Color{ 22, 28, 42, 240 });
+        DrawRectangleRoundedLines(btnProceed, 0.2f, 6, hoverProceed ? Color{ 140, 210, 255, 255 } : Color{ 90, 130, 180, 230 });
+        int btn2W = MeasureText("ACCEPT SPARE & PROCEED", 14);
+        DrawText("ACCEPT SPARE & PROCEED", (int)(btnProceed.x + (btnProceed.width - btn2W) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 180, 215, 255, 240 });
+
+        if (isMousePressed) {
+            if (hoverRetry) {
+                SoundFX::PlayButtonClick();
+                choiceResult = 1;
+            } else if (hoverProceed) {
+                SoundFX::PlayButtonClick();
+                choiceResult = 2;
+            }
+        }
+    } else {
+        // Defeated on Retry Screen
+        int subW = MeasureText("SPARED BY THE CORRUPTED CRUSADER", 15);
+        DrawText("SPARED BY THE CORRUPTED CRUSADER", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 140, 210, 255, 255 });
+
+        std::string quoteText =
+            "“You have exhausted your trials, yet your spirit refuses to be extinguished.\n\n"
+            "I shall not strike down one who dares to question the Lord Liege. Keep your broadsword and walk through the northern gate into Zyphden.\n\n"
+            "Seek the scattered chronicles... and pierce the truth of King Charlz.”";
+        DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
+
+        // Single Button: Proceed
+        Rectangle btnProceed = { modalX + 170.0f, modalY + 330.0f, 400.0f, 54.0f };
+        bool hoverProceed = CheckCollisionPointRec(mousePos, btnProceed);
+        DrawRectangleRounded(btnProceed, 0.2f, 6, hoverProceed ? Color{ 35, 60, 95, 255 } : Color{ 24, 32, 50, 240 });
+        DrawRectangleRoundedLines(btnProceed, 0.2f, 6, hoverProceed ? Color{ 140, 220, 255, 255 } : Color{ 100, 150, 210, 230 });
+        int btnW = MeasureText("PROCEED INTO THE REALM OF ZYPHDEN", 14);
+        DrawText("PROCEED INTO THE REALM OF ZYPHDEN", (int)(btnProceed.x + (btnProceed.width - btnW) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 190, 225, 255, 240 });
+
+        if (isMousePressed && hoverProceed) {
+            SoundFX::PlayButtonClick();
+            choiceResult = 2;
+        }
+    }
+
+    return choiceResult;
+}
+
+void GameUI::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {
+    float bannerW = 820.0f;
+    float bannerH = 74.0f;
+    float bannerX = ((float)windowWidth - bannerW) * 0.5f;
+    float bannerY = (float)windowHeight - 165.0f;
+
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 12, 15, 22, 235 });
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, accentColor);
+
+    // Speaker Name
+    DrawText(speaker.c_str(), (int)bannerX + 22, (int)bannerY + 12, 11, accentColor);
+
+    // Text Quote
+    DrawText(text.c_str(), (int)bannerX + 22, (int)bannerY + 32, 14, Color{ 240, 244, 255, 250 });
+}
+

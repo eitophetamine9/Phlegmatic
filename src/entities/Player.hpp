@@ -23,6 +23,7 @@ public:
     // Damage handling
     bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles);
     void Heal(float amount);
+    void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
     // Weapon equipment
     void SetWeapon(WeaponType newWeapon);

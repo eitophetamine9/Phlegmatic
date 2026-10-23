@@ -56,4 +56,15 @@ private:
 
     int currentWave;
     float waveTimer;
+
+    // Zil Boss Encounter & Branching Logic
+    bool zilEncounterActive;
+    bool zilDefeated;
+    bool zilSparedPlayer;
+    bool hasUsedZilRetry;
+    bool showZilDefeatModal;
+    float zilDialogueTimer;
+    std::string zilDialogueSpeaker;
+    std::string zilDialogueText;
+    Color zilDialogueColor;
 };

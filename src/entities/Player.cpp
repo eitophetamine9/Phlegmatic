@@ -46,6 +46,18 @@ void Player::Init(Vector2 startPos) {
     counterBuffTimer = 0.0f;
 }
 
+void Player::Revive(Vector2 startPos, float hpPercent) {
+    position = startPos;
+    health = maxHealth * hpPercent;
+    stamina = maxStamina;
+    velocity = { 0.0f, 0.0f };
+    currentAttack.type = AttackType::NONE;
+    isParrying = false;
+    isDashing = false;
+    isHeavyWindingUp = false;
+    counterBuffTimer = 0.0f;
+}
+
 void Player::SetWeapon(WeaponType newWeapon) {
     currentWeapon = newWeapon;
     inventory.UnlockWeapon(newWeapon);

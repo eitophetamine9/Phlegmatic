@@ -165,10 +165,10 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::GATE_OPENED: {
-            currentObjectiveText = "THE HIGH ALTAR: The sanctuary portcullis is open! Advance north into the Upper Sanctum.";
-            currentControlHint = "Walk through the northern gateway [Y <= 170]";
+            currentObjectiveText = "THE HIGH ALTAR: The sanctuary steps are clear! Advance north to the High Altar.";
+            currentControlHint = "Climb the steps north [Y <= 420]";
 
-            if (playerPos.y <= 170.0f) {
+            if (playerPos.y <= 420.0f) {
                 currentStep = TutorialStep::COMPLETED;
                 particles.SpawnFloatingText(playerPos, "CHAPTER 1: THE INNER SANCTUM", Color{ 255, 215, 80, 255 }, 26.0f);
                 SoundFX::PlayButtonClick();
