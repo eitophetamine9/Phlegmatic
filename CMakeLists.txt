@@ -9,11 +9,16 @@ set(SOURCES
     src/core/SoundFX.cpp
     src/core/Particles.cpp
     src/world/Map.cpp
+    src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp
     src/entities/Player.cpp
     src/entities/Enemy.cpp
     src/combat/Projectile.cpp
     src/combat/Inventory.cpp
+    src/combat/CollisionSystem.cpp
+    src/states/TitleUI.cpp
+    src/states/HUD.cpp
+    src/states/ModalUI.cpp
     src/states/UI.cpp
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp

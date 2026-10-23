@@ -13,6 +13,9 @@
 #include "Tutorial.hpp"
 #include <vector>
 
+#include "../combat/CollisionSystem.hpp"
+#include "../world/WaveManager.hpp"
+
 class Game {
 public:
     Game();
@@ -28,8 +31,6 @@ private:
     void EnterRuinedCastle();
     void EnterLobby();
     void EnterArena();
-    void SpawnWave(int waveNumber);
-    void CheckCombatCollisions();
 
     GameState currentState;
     bool showControlsModal;
@@ -54,8 +55,8 @@ private:
     Cutscene cutscene;
     TutorialManager tutorial;
 
-    int currentWave;
-    float waveTimer;
+    // Combat & Arena Managers
+    WaveManager waveManager;
 
     // Zil Boss Encounter & Branching Logic
     bool zilEncounterActive;

@@ -6,7 +6,7 @@
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), inventoryActiveTab(0), inventorySelectedFragment(0), currentWave(1), waveTimer(0.0f) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), inventoryActiveTab(0), inventorySelectedFragment(0) {
 }
 
 Game::~Game() {
@@ -108,186 +108,13 @@ void Game::EnterArena() {
     map.Init(MapEnvironment::ARENA);
     player.Init({ 1200.0f, 900.0f });
     camera.target = player.GetPosition();
-    currentWave = 1;
-    waveTimer = 0.0f;
     projectiles.clear();
     particles.Clear();
-    SpawnWave(currentWave);
+    waveManager.SpawnWave(1, enemies, projectiles, particles);
     currentState = GameState::ARENA;
     showControlsModal = false;
     SoundFX::PlayEquipWeapon();
     particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 12, 180.0f);
-}
-
-void Game::SpawnWave(int waveNumber) {
-    enemies.clear();
-    projectiles.clear();
-    Vector2 center = { 1200.0f, 900.0f };
-
-    if (waveNumber == 1) {
-        // Wave 1: 2 Slashers & 2 Archers
-        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x - 280.0f, center.y - 120.0f });
-        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x + 280.0f, center.y - 120.0f });
-        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x - 360.0f, center.y + 160.0f });
-        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x + 360.0f, center.y + 160.0f });
-        particles.SpawnFloatingText(center, "WAVE 1: MELEE & ARCHERS", Color{ 255, 220, 80, 255 }, 24.0f);
-    } else if (waveNumber == 2) {
-        // Wave 2: 1 Brute, 2 Chargers, 2 Pyromancers
-        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x, center.y - 280.0f });
-        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x - 380.0f, center.y });
-        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x + 380.0f, center.y });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 240.0f, center.y + 240.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 240.0f, center.y + 240.0f });
-        particles.SpawnFloatingText(center, "WAVE 2: CHARGERS & PYROMANCERS", Color{ 100, 240, 255, 255 }, 24.0f);
-    } else if (waveNumber >= 3) {
-        // Wave 3: The Grand Inquisitor Boss & 2 Pyromancer acolytes
-        enemies.emplace_back(EnemyType::INQUISITOR_BOSS, Vector2{ center.x, center.y - 240.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 320.0f, center.y + 180.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 320.0f, center.y + 180.0f });
-        particles.SpawnFloatingText(center, "WAVE 3: THE GRAND INQUISITOR", Color{ 255, 60, 60, 255 }, 28.0f);
-    }
-}
-
-void Game::CheckCombatCollisions() {
-    // 1. Player melee attack vs enemies
-    if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
-        const auto& attack = player.GetCurrentAttack();
-        bool hitAny = false;
-
-        for (auto& enemy : enemies) {
-            if (enemy.IsAlive() && enemy.CheckHit(attack)) {
-                Vector2 knockbackDir = Vector2Normalize({
-                    enemy.GetPosition().x - player.GetPosition().x,
-                    enemy.GetPosition().y - player.GetPosition().y
-                });
-                enemy.TakeDamage(attack.damage, knockbackDir, particles);
-                hitAny = true;
-            }
-        }
-
-        if (hitAny) {
-            player.SetAttackHit();
-            particles.AddScreenShake(attack.type == AttackType::HEAVY ? 5.0f : 2.5f, 0.1f);
-        }
-    }
-
-    Vector2 playerPos = player.GetPosition();
-    float playerRadius = player.GetRadius();
-
-    // 2. Enemy melee strikes vs player (ONLY pure melee strikes, NOT ranged attacks!)
-    for (auto& enemy : enemies) {
-        if (!enemy.IsAlive() || !enemy.IsInStrike()) continue;
-        if (!enemy.HasMeleeHitbox()) continue; // Skip ranged enemies; their projectiles deal damage!
-
-        TelegraphIndicator tel = enemy.GetTelegraph();
-        bool playerHit = false;
-
-        if (tel.shape == TelegraphShape::CONE) {
-            float dx = playerPos.x - enemy.GetPosition().x;
-            float dy = playerPos.y - enemy.GetPosition().y;
-            float dist = sqrtf(dx * dx + dy * dy);
-            if (dist <= tel.radius + playerRadius) {
-                float hitAngle = atan2f(dy, dx) * RAD2DEG;
-                float diff = fabsf(hitAngle - tel.angle);
-                while (diff > 180.0f) diff = 360.0f - diff;
-                if (diff <= (tel.arcAngle * 0.5f + 12.0f)) {
-                    playerHit = true;
-                }
-            }
-        } else if (tel.shape == TelegraphShape::CIRCLE) {
-            float dx = playerPos.x - enemy.GetPosition().x;
-            float dy = playerPos.y - enemy.GetPosition().y;
-            float dist = sqrtf(dx * dx + dy * dy);
-            if (dist <= tel.radius + playerRadius) {
-                playerHit = true;
-            }
-        } else if (tel.shape == TelegraphShape::LINE) {
-            float rad = tel.angle * DEG2RAD;
-            Vector2 dir = { cosf(rad), sinf(rad) };
-            Vector2 normal = { -dir.y, dir.x };
-            Vector2 toPlayer = { playerPos.x - enemy.GetPosition().x, playerPos.y - enemy.GetPosition().y };
-            float projDist = toPlayer.x * dir.x + toPlayer.y * dir.y;
-            float perpDist = fabsf(toPlayer.x * normal.x + toPlayer.y * normal.y);
-            if (projDist >= -playerRadius && projDist <= tel.radius + playerRadius && perpDist <= (tel.width * 0.5f + playerRadius)) {
-                playerHit = true;
-            }
-        }
-
-        if (playerHit) {
-            enemy.MarkDamagedPlayer();
-            Vector2 knockbackDir = Vector2Normalize({
-                playerPos.x - enemy.GetPosition().x,
-                playerPos.y - enemy.GetPosition().y
-            });
-
-            float baseDamage = 18.0f;
-            if (enemy.GetType() == EnemyType::BRUTE) baseDamage = 38.0f;
-            else if (enemy.GetType() == EnemyType::CHARGER) baseDamage = 22.0f;
-            else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDamage = 45.0f;
-            else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDamage = 32.0f;
-
-            bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
-            if (!tookDamage && player.IsParrying()) {
-                enemy.OnParried(particles);
-            }
-        }
-    }
-
-    // 3. Projectile Collisions
-    for (auto& proj : projectiles) {
-        if (!proj.IsActive()) continue;
-
-        if (!proj.IsFromPlayer()) {
-            // Enemy projectile vs Player
-            float dx = playerPos.x - proj.GetPosition().x;
-            float dy = playerPos.y - proj.GetPosition().y;
-            float dist = sqrtf(dx * dx + dy * dy);
-
-            if (dist <= playerRadius + proj.GetRadius()) {
-                if (player.IsDashing()) {
-                    // Q Dash invulnerability frames: Evaded!
-                    particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
-                    proj.Destroy();
-                } else if (player.IsParrying()) {
-                    // F Parry reflection!
-                    Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
-                    Vector2 aimDir = Vector2Normalize({ mouseWorld.x - playerPos.x, mouseWorld.y - playerPos.y });
-                    if (Vector2Length(aimDir) < 0.1f) {
-                        aimDir = Vector2Normalize({ -proj.GetVelocity().x, -proj.GetVelocity().y });
-                    }
-                    Vector2 reflectedVel = { aimDir.x * 680.0f, aimDir.y * 680.0f };
-                    proj.Reflect(reflectedVel);
-                    SoundFX::PlayProjectileReflect();
-                    particles.SpawnSparks(proj.GetPosition(), Color{ 80, 240, 255, 255 }, 18, 160.0f);
-                    particles.SpawnFloatingText(playerPos, "PROJECTILE REFLECTED!", Color{ 80, 240, 255, 255 }, 22.0f);
-                    particles.AddScreenShake(3.5f, 0.12f);
-                } else {
-                    // Hit player
-                    Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    player.TakeDamage(proj.GetDamage(), knockDir, particles);
-                    proj.Destroy();
-                }
-            }
-        } else {
-            // Reflected Player projectile vs Enemies
-            for (auto& enemy : enemies) {
-                if (!enemy.IsAlive()) continue;
-
-                float dx = enemy.GetPosition().x - proj.GetPosition().x;
-                float dy = enemy.GetPosition().y - proj.GetPosition().y;
-                float dist = sqrtf(dx * dx + dy * dy);
-
-                if (dist <= enemy.GetRadius() + proj.GetRadius()) {
-                    Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    enemy.TakeDamage(proj.GetDamage(), knockDir, particles);
-                    particles.SpawnSparks(proj.GetPosition(), Color{ 100, 230, 255, 255 }, 14, 130.0f);
-                    particles.SpawnFloatingText(enemy.GetPosition(), "COUNTER HIT!", Color{ 255, 220, 40, 255 }, 20.0f);
-                    proj.Destroy();
-                    break;
-                }
-            }
-        }
-    }
 }
 
 void Game::Update(float dt) {
@@ -494,7 +321,7 @@ void Game::Update(float dt) {
             return !p.IsActive();
         }), projectiles.end());
 
-        CheckCombatCollisions();
+        CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
 
         // Tutorial progression
         tutorial.Update(dt, player, map, particles, enemies, projectiles);
@@ -705,21 +532,15 @@ void Game::Update(float dt) {
         return !p.IsActive();
     }), projectiles.end());
 
-    if (aliveCount == 0 && currentState == GameState::ARENA) {
-        waveTimer += dt;
-        if (waveTimer >= 1.5f) {
-            waveTimer = 0.0f;
-            currentWave++;
-            if (currentWave <= 3) {
-                SpawnWave(currentWave);
-            } else {
-                currentState = GameState::VICTORY;
-                particles.SpawnFloatingText(player.GetPosition(), "ARENA CLEARED!", Color{ 255, 230, 80, 255 }, 30.0f);
-            }
+    bool victory = false;
+    if (waveManager.Update(dt, aliveCount, enemies, projectiles, particles, { 1200.0f, 900.0f }, victory)) {
+        if (victory) {
+            currentState = GameState::VICTORY;
+            particles.SpawnFloatingText(player.GetPosition(), "ARENA CLEARED!", Color{ 255, 230, 80, 255 }, 30.0f);
         }
     }
 
-    CheckCombatCollisions();
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
     particles.Update(dt);
 
     Vector2 shake = particles.GetScreenShakeOffset();
@@ -900,7 +721,7 @@ void Game::Render() {
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), currentWave, 3, hasUnread);
+    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
 
     // Boss Health Bar during Boss Wave
     for (const auto& enemy : enemies) {

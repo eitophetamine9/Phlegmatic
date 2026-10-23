@@ -159,10 +159,12 @@ Phlegmatic/
     │   ├── CombatTypes.hpp     # AttackInfo, TelegraphIndicator, enums
     │   ├── Weapon.hpp          # Broadsword, Daggers, Mace, and Truth Seeker definitions
     │   ├── Inventory.hpp / .cpp# Lore fragment collection, journal tracking, unread flags
+    │   ├── CollisionSystem.hpp / .cpp# Melee hit registration, i-frame evade, parry reflection
     │   └── Projectile.hpp / .cpp# Real-time projectile physics, walls, parry reflection
     │
     ├── world/                  # Level geometry and interactive world objects
     │   ├── Map.hpp / .cpp      # Ruined Castle, Lobby sanctuary, and Arena layouts
+    │   ├── WaveManager.hpp / .cpp# Wave progression, enemy spawning, and arena trials
     │   └── Interactable.hpp    # Weapon pedestals, training dummy, arena portal
     │
     ├── entities/               # Player character and enemy AI state machines
@@ -174,10 +176,13 @@ Phlegmatic/
     │
     └── states/                 # State management and UI rendering
         ├── GameState.hpp       # State enums (TITLE_SCREEN, PROLOGUE_CUTSCENE, RUINED_CASTLE, etc.)
-        ├── Game.hpp / .cpp     # Master game loop & combat collision coordinator
+        ├── Game.hpp / .cpp     # Master game loop & state coordinator
         ├── Cutscene.hpp / .cpp # Prologue dark fantasy narrative renderer
         ├── Tutorial.hpp / .cpp # Chapter 1 step tracker & interactive pop-up modals
-        └── UI.hpp / .cpp       # Title screen, Controls modal, Lore Journal, Boss health bars
+        ├── TitleUI.hpp / .cpp  # Title screen with Campaign & Test Arena buttons
+        ├── HUD.hpp / .cpp      # Combat HUD, Lobby HUD, Boss health & dialogue banners
+        ├── ModalUI.hpp / .cpp  # Controls modal, Lore Journal, Zil defeat & gateway epilogue
+        └── UI.hpp / .cpp       # Unified UI facade maintaining backwards-compatible API
 ```
 
 ---
