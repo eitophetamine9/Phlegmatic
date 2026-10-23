@@ -161,31 +161,39 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     // Daggers Lunge Update
     if (isDaggerLunging) {
         daggerLungeTimer -= dt;
-        velocity.x = daggerLungeDir.x * 480.0f;
-        velocity.y = daggerLungeDir.y * 480.0f;
+        velocity.x = daggerLungeDir.x * 660.0f; // Buffed forward lunge speed
+        velocity.y = daggerLungeDir.y * 660.0f;
+
+        // Keep lunge attack origin and angle synchronized with moving player
+        currentAttack.origin = position;
+        currentAttack.angle = facingAngle;
+
         particles.SpawnSparks(position, Color{ 140, 240, 200, 200 }, 2, 40.0f);
+        particles.SpawnSlashTrail(position, daggerLungeDir, Color{ 80, 255, 170, 180 });
 
         if (daggerLungeTimer <= 0.0f) {
             isDaggerLunging = false;
+            heavyStage = 2;
             // Instantaneous 360 whirlwind spin attack!
             currentAttack.type = AttackType::HEAVY;
             currentAttack.weapon = WeaponType::DAGGERS;
             currentAttack.origin = position;
             currentAttack.angle = facingAngle;
-            currentAttack.range = 85.0f;
+            currentAttack.range = 95.0f; // Buffed whirlwind range
             currentAttack.arcAngle = 360.0f;
-            currentAttack.damage = counterBuffTimer > 0.0f ? (58.0f * 1.5f) : 58.0f;
-            currentAttack.knockback = 260.0f;
-            currentAttack.duration = 0.10f;
-            currentAttack.timer = 0.10f;
+            currentAttack.isLineBox = false;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (68.0f * 1.5f) : 68.0f; // Buffed spin damage
+            currentAttack.knockback = 280.0f;
+            currentAttack.duration = 0.12f;
+            currentAttack.timer = 0.12f;
             currentAttack.hasHit = false;
             currentAttack.defensePierce = 0.0f;
             currentAttack.isFrontalCircle = false;
             currentAttack.hasShockwave = false;
 
-            SoundFX::PlayHeavyAttack();
-            particles.AddScreenShake(3.5f, 0.12f);
-            particles.SpawnSparks(position, Color{ 100, 255, 180, 255 }, 24, 180.0f);
+            SoundFX::PlayCrusaderClash();
+            particles.AddScreenShake(4.5f, 0.14f);
+            particles.SpawnSparks(position, Color{ 100, 255, 180, 255 }, 28, 200.0f);
         }
     }
 
@@ -513,14 +521,35 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
 
     if (currentWeapon == WeaponType::DAGGERS) {
-        // Dual Daggers: Lunge forward before spinning!
+        // Dual Daggers: Buffed high-speed piercing lunge forward!
         isDaggerLunging = true;
-        daggerLungeTimer = 0.18f;
+        daggerLungeTimer = 0.20f;
         daggerLungeDir = forwardDir;
         isHeavyWindingUp = false;
+        heavyStage = 1;
+
+        // Stage 1 Attack: Forward Piercing Lunge deals damage!
+        currentAttack.type = AttackType::HEAVY;
+        currentAttack.weapon = WeaponType::DAGGERS;
+        currentAttack.origin = position;
+        currentAttack.angle = facingAngle;
+        currentAttack.range = 85.0f;
+        currentAttack.width = 48.0f;
+        currentAttack.isLineBox = true;
+        currentAttack.arcAngle = 0.0f;
+        currentAttack.damage = counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f;
+        currentAttack.knockback = 180.0f;
+        currentAttack.duration = 0.20f;
+        currentAttack.timer = 0.20f;
+        currentAttack.hasHit = false;
+        currentAttack.defensePierce = 0.0f;
+        currentAttack.isFrontalCircle = false;
+        currentAttack.hasShockwave = false;
 
         SoundFX::PlayDash();
-        particles.SpawnSparks(position, Color{ 80, 240, 180, 255 }, 12, 120.0f);
+        particles.AddScreenShake(2.5f, 0.10f);
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 255, 170, 220 });
+        particles.SpawnSparks(position, Color{ 80, 240, 180, 255 }, 14, 130.0f);
         return;
     }
 
@@ -568,8 +597,8 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
 }
 
 bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
-    // Invulnerable during Dash
-    if (isDashing) {
+    // Invulnerable during Dash & Dagger Lunge
+    if (isDashing || isDaggerLunging) {
         particles.SpawnFloatingText(position, "EVADED", Color{ 120, 240, 255, 255 }, 18.0f);
         return false;
     }

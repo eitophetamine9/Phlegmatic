@@ -37,9 +37,9 @@ inline WeaponStats GetWeaponStats(WeaponType type) {
         case WeaponType::DAGGERS:
             return {
                 "Dual Daggers",
-                "Swift twin-blade flurry with 0 stamina light attacks. Heavy attack lunges forward before an instant 360 whirlwind spin.",
+                "Swift twin-blade flurry with 0 stamina light attacks. Heavy attack executes a high-speed piercing lunge into an instant 360 whirlwind spin.",
                 22.0f, 65.0f, 95.0f, 0.14f, 0.18f, 0.0f,
-                58.0f, 85.0f, 360.0f, 0.18f, 0.10f, 1.80f, 20.0f,
+                110.0f, 95.0f, 360.0f, 0.20f, 0.12f, 1.80f, 20.0f,
                 14.0f, 0.50f
             };
         case WeaponType::MACE:

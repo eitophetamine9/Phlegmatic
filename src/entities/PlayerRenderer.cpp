@@ -84,12 +84,36 @@ void PlayerRenderer::Draw(const Player& player) {
         float angleR = player.facingAngle + 25.0f;
 
         if (player.isDaggerLunging) {
-            // Speed trail while lunging forward
-            angleL = player.facingAngle - 80.0f;
-            angleR = player.facingAngle + 80.0f;
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 140, 255, 200, 255 }, Color{ 60, 240, 160, 220 });
-            Vector2 backDir = { -cosf(player.facingAngle * DEG2RAD), -sinf(player.facingAngle * DEG2RAD) };
-            DrawLineEx(player.position, { player.position.x + backDir.x * 35.0f, player.position.y + backDir.y * 35.0f }, 3.0f, Color{ 100, 255, 180, 160 });
+            // Forward twin thrust blades and piercing energy slash during lunge
+            angleL = player.facingAngle - 15.0f;
+            angleR = player.facingAngle + 15.0f;
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 160, 255, 210, 255 }, Color{ 80, 255, 170, 240 });
+
+            float rad = player.facingAngle * DEG2RAD;
+            Vector2 dir = { cosf(rad), sinf(rad) };
+            Vector2 normal = { -dir.y, dir.x };
+            float halfWidth = 24.0f;
+            float lungeRange = 85.0f;
+
+            // Piercing forward wind-cut box
+            Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+            Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+            Vector2 c3 = { c2.x + dir.x * lungeRange, c2.y + dir.y * lungeRange };
+            Vector2 c4 = { c1.x + dir.x * lungeRange, c1.y + dir.y * lungeRange };
+
+            DrawTriangle(c1, c2, c3, Color{ 80, 255, 170, 55 });
+            DrawTriangle(c1, c3, c4, Color{ 80, 255, 170, 55 });
+            DrawLineEx(c1, c4, 2.0f, Color{ 120, 255, 190, 220 });
+            DrawLineEx(c2, c3, 2.0f, Color{ 120, 255, 190, 220 });
+            DrawLineEx(c4, c3, 2.5f, Color{ 160, 255, 210, 240 });
+
+            // Trailing dash lines
+            Vector2 backDir = { -dir.x, -dir.y };
+            DrawLineEx(player.position, { player.position.x + backDir.x * 45.0f, player.position.y + backDir.y * 45.0f }, 3.5f, Color{ 100, 255, 180, 200 });
+            DrawLineEx({ player.position.x - normal.x * 12.0f, player.position.y - normal.y * 12.0f },
+                       { player.position.x + backDir.x * 35.0f - normal.x * 12.0f, player.position.y + backDir.y * 35.0f - normal.y * 12.0f }, 2.0f, Color{ 80, 240, 160, 150 });
+            DrawLineEx({ player.position.x + normal.x * 12.0f, player.position.y + normal.y * 12.0f },
+                       { player.position.x + backDir.x * 35.0f + normal.x * 12.0f, player.position.y + backDir.y * 35.0f + normal.y * 12.0f }, 2.0f, Color{ 80, 240, 160, 150 });
         } else if (player.currentAttack.type == AttackType::LIGHT) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
             angleR = player.facingAngle - 30.0f + progress * 80.0f;

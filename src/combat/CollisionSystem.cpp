@@ -120,8 +120,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             float dist = sqrtf(dx * dx + dy * dy);
 
             if (dist <= playerRadius + proj.GetRadius()) {
-                if (player.IsDashing()) {
-                    // Q Dash invulnerability frames: Evaded!
+                if (player.IsDashing() || player.IsDaggerLunging()) {
+                    // Dash / Dagger Lunge invulnerability frames: Evaded!
                     particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
                     proj.Destroy();
                 } else if (player.IsParrying()) {

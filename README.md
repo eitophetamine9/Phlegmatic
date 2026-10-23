@@ -93,7 +93,7 @@
 | **Unarmed** | Bare Fists | None | None | 0.75s (15 stam) | Starting tutorial state. Search the courtyard altar to claim a weapon. |
 | **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc, 14 stam) | 85 dmg (2-Stage cleave) | 0.85s (20 stam) | Dependable reach. **Heavy**: Stage 1 wide 150° cleave followed by Stage 2 upward shock slash line/box AoE (2.1s cd). |
 | **Truth Seeker** | Legendary Holy Blade | 46 / 60 dmg (2-Hit Combo) | 140 dmg (Dual 360° + Holy Beam) | 0.65s (16 stam) | **Light**: Slash into radiant upward slice (line/box AoE). **Heavy**: Rapid dual 360° dawnfire sweeps + holy beam projectile (10% defense pierce, 3.8s cd). |
-| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 55 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attack cadence. **Heavy**: High-velocity forward lunge burst into instant 360° whirlwind (1.8s cd). |
+| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 110 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attacks. **Heavy**: High-velocity piercing lunge (**42 dmg + i-frames**) into instant 360° whirlwind (**68 dmg**, 95px range, 1.8s cd). |
 | **War Mace** | Crushing Poise | 52 dmg (Frontal Circle Smack) | 155 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack followed by 360° tremor shockwave (**ignores 25% enemy defense**, 3.6s cd). |
 
 > [!NOTE]
@@ -107,14 +107,14 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Cultist Slasher** | Melee Vanguard | 8 | Amber/Red Cone (95°, 115px) | Forward blade slash. Sidestep or time `[F]` right before impact to stagger. |
 | **Deathseeker Archer** | Ranged Kiting | 6 | Red Laser Aim Line (360px range) | Backs away if approached; fires high-velocity piercing bolts. |
-| **Void Pyromancer** | Occult Caster | 10 | 3-Way Trajectory Aim Lines (320px) | Shows exact projectile flight paths. Fires 3 void orbs. Evade with `[Q]` or reflect with `[F]`. |
+| **Void Pyromancer** | Occult Caster | 10 | 3-Way Trajectory & Landing Tinges (320px) | Displays exact trajectory lines and glowing landing tinges that flare bright right before casting void orbs. Evade with `[Q]` or reflect with `[F]`. |
 | **Shadow Charger** | Dash Melee | 12 | Linear Path (50px width, 240px) | High-speed dash thrust. Step perpendicular to path or parry head-on. |
 | **The Grand Inquisitor** | **Arena Boss** | 26 | Multi-Phase Trajectories & Tremor AoE | 500 HP boss rotating between **12-way Radial Star Trajectories**, **Linear Beam Shard**, and **Cataclysmic Smite AoE**. |
 | **Zil the Corrupted Crusader** | **Chapter 1 Boss** | 28 | Cone Cleave, Charge Path & 3-Way Flame Trajectories | 380 HP fallen crusader guarding the portcullis. Dynamic moveset with melee cleaves, shield charges, and 3-way flame waves. |
 | **Iron Brute** | Heavy Crusher | 32 | Expanding Circle (150px AoE) | High armor tank. Tremor ground slam. Dash clear with `[Q]` or pierce armor with War Mace Earthshaker. |
 
 > [!TIP]
-> **Visual Clarity Rule**: Filled Cone AoEs are reserved strictly for attacks that deal direct melee/cleave damage within that sector. Projectiles display precise trajectory laser lines indicating their exact flight paths, allowing clean evasion between projectiles.
+> **Visual Clarity Rule**: Filled Cone AoEs are reserved strictly for attacks that deal direct melee/cleave damage within that sector. Projectiles display subtle trajectory guide lines and a glowing impact landing tinge that intensifies as the attack is about to be casted, allowing clean precision dodging.
 
 ---
 
