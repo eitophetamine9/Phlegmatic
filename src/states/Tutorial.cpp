@@ -123,7 +123,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
                 chest.opened = true;
                 hasOpenedChest = true;
                 player.GetInventory().UnlockFragment("frag_02");
-                SoundFX::PlayEquipWeapon();
+                SoundFX::PlayLoreDiscovery();
                 particles.SpawnSparks(chest.position, Color{ 255, 215, 80, 255 }, 28, 180.0f);
                 particles.SpawnFloatingText(chest.position, "LORE DISCOVERED: FRAGMENT II!", Color{ 255, 220, 80, 255 }, 24.0f);
                 particles.SpawnFloatingText(playerPos, "PRESS [I] TO READ JOURNAL", Color{ 120, 230, 255, 255 }, 22.0f);
@@ -159,7 +159,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
                 currentStep = TutorialStep::GATE_OPENED;
                 map.SetGateOpen(true);
                 particles.SpawnFloatingText({ 800.0f, 250.0f }, "PORTCULLIS UNLOCKED!", Color{ 255, 220, 80, 255 }, 28.0f);
-                SoundFX::PlayButtonClick();
+                SoundFX::PlayGateOpen();
             }
             break;
         }

@@ -360,7 +360,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         float rad = facingAngle * DEG2RAD;
                         particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 170, 40, 255 });
                         particles.AddScreenShake(5.0f, 0.18f);
-                        SoundFX::PlayHeavyAttack();
+                        SoundFX::PlayCrusaderClash();
                     } else if (bossAttackPhase == 1) {
                         // Shield Charge: dash forward
                         float rad = facingAngle * DEG2RAD;
@@ -368,6 +368,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 120, 40, 255 });
                         particles.AddScreenShake(4.5f, 0.15f);
                         SoundFX::PlayDash();
+                        SoundFX::PlayCrusaderClash();
                     } else {
                         // Corrupted Flame Wave: release 3 corrupted flame projectiles
                         float baseRad = facingAngle * DEG2RAD;

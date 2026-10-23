@@ -18,6 +18,11 @@ public:
     static void PlayProjectileReflect();
     static void PlayEquipWeapon();
     static void PlayButtonClick();
+    static void PlayCutsceneChime();
+    static void PlayLoreDiscovery();
+    static void PlayCrusaderClash();
+    static void PlayTruthSeekerResonance();
+    static void PlayGateOpen();
 
 private:
     static bool initialized;
@@ -33,6 +38,11 @@ private:
     static Sound sndProjectileReflect;
     static Sound sndEquipWeapon;
     static Sound sndButtonClick;
+    static Sound sndCutsceneChime;
+    static Sound sndLoreDiscovery;
+    static Sound sndCrusaderClash;
+    static Sound sndTruthSeekerResonance;
+    static Sound sndGateOpen;
 
     static Sound GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType);
 };

@@ -61,7 +61,11 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
 void Player::SetWeapon(WeaponType newWeapon) {
     currentWeapon = newWeapon;
     inventory.UnlockWeapon(newWeapon);
-    SoundFX::PlayEquipWeapon();
+    if (newWeapon == WeaponType::TRUTH_SEEKER) {
+        SoundFX::PlayTruthSeekerResonance();
+    } else {
+        SoundFX::PlayEquipWeapon();
+    }
 }
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {

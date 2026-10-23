@@ -93,7 +93,7 @@ bool Cutscene::Update(float dt) {
             visibleChars = 0;
             charTimer = 0.0f;
             fadeAlpha = 0.2f;
-            SoundFX::PlayButtonClick();
+            SoundFX::PlayCutsceneChime();
 
             if (currentSegmentIndex >= (int)segments.size()) {
                 finished = true;

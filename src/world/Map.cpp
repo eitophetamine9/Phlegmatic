@@ -296,18 +296,48 @@ void GameMap::DrawRuinedCastleWalls() const {
         DrawCircle((int)(gateX + gateW * 0.5f), (int)(gateY + gateH * 0.5f), 12.0f, Color{ 200, 60, 60, 220 });
         DrawCircleLines((int)(gateX + gateW * 0.5f), (int)(gateY + gateH * 0.5f), 14.0f, Color{ 255, 100, 80, 255 });
     } else {
-        // Open gate with golden dawn glow
+        // Open gate with golden dawn glow & overland path to Zyphden
         float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
+
+        // Overland road extending north into Zyphden
+        Rectangle roadRec = { gateX, bounds.y - 70.0f, gateW, 70.0f };
+        DrawRectangleRec(roadRec, Color{ 30, 42, 58, 240 });
+        DrawRectangleLinesEx(roadRec, 2.0f, Color{ 70, 95, 130, 240 });
+
+        // Overgrown moss and stone pavers
+        for (int p = 0; p < 4; p++) {
+            float py = bounds.y - 15.0f - (float)p * 16.0f;
+            DrawLineEx({ gateX + 10.0f, py }, { gateX + gateW - 10.0f, py }, 2.0f, Color{ 50, 70, 95, 200 });
+        }
+
+        // Portcullis threshold
         DrawRectangle((int)gateX, (int)gateY, (int)gateW, (int)gateH, Color{ 40, 60, 95, 220 });
-        DrawCircleGradient(Vector2{ gateX + gateW * 0.5f, gateY + gateH * 0.5f }, 80.0f, Color{ 255, 215, 80, (unsigned char)(120 * pulse) }, Color{ 0, 0, 0, 0 });
-        DrawText("SANCTUARY OPEN", (int)gateX + 26, (int)gateY + 8, 12, Color{ 255, 230, 120, 255 });
+        DrawCircleGradient(Vector2{ gateX + gateW * 0.5f, gateY + gateH * 0.5f }, 90.0f, Color{ 255, 215, 80, (unsigned char)(140 * pulse) }, Color{ 0, 0, 0, 0 });
+
+        // Pathway archway pillars & lanterns
+        DrawCircle((int)gateX - 8, (int)bounds.y - 40, 16.0f, Color{ 55, 68, 92, 255 });
+        DrawCircle((int)(gateX + gateW + 8), (int)bounds.y - 40, 16.0f, Color{ 55, 68, 92, 255 });
+        DrawCircle((int)gateX - 8, (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
+        DrawCircle((int)(gateX + gateW + 8), (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
+
+        DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
+        DrawText("Step through to advance", (int)gateX + 22, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
     }
 }
 
 bool GameMap::CheckCircleCollision(Vector2 pos, float radius) const {
+    // Ruined Castle Northern Gateway Corridor check (allows stepping out into Zyphden)
+    bool inGateCorridor = (currentEnv == MapEnvironment::RUINED_CASTLE && gateOpen &&
+                           pos.x >= 710.0f + radius && pos.x <= 890.0f - radius &&
+                           pos.y >= bounds.y - 80.0f && pos.y <= bounds.y + 10.0f);
+
+    if (!inGateCorridor && (pos.y - radius < bounds.y)) {
+        return true;
+    }
+
     // Outer boundaries
     if (pos.x - radius < bounds.x || pos.x + radius > bounds.x + bounds.width ||
-        pos.y - radius < bounds.y || pos.y + radius > bounds.y + bounds.height) {
+        pos.y + radius > bounds.y + bounds.height) {
         return true;
     }
 

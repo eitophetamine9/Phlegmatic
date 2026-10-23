@@ -878,3 +878,164 @@ void GameUI::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std
     DrawText(text.c_str(), (int)bannerX + 22, (int)bannerY + 32, 14, Color{ 240, 244, 255, 250 });
 }
 
+int GameUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player) {
+    // Atmospheric dark backdrop overlay
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 11, 18, 240 });
+
+    float cardW = 1060.0f;
+    float cardH = 650.0f;
+    float cardX = ((float)windowWidth - cardW) * 0.5f;
+    float cardY = ((float)windowHeight - cardH) * 0.5f;
+
+    // Outer backing card & filigree border
+    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 14, 18, 28, 252 });
+    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 215, 175, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.035f, 8, Color{ 48, 65, 96, 180 });
+
+    // Gold corner filigree
+    Color cornerCol = Color{ 255, 215, 80, 240 };
+    DrawLineEx({ cardX + 12, cardY + 12 }, { cardX + 38, cardY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 12, cardY + 12 }, { cardX + 12, cardY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 12, cardY + 12 }, { cardX + cardW - 38, cardY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 12, cardY + 12 }, { cardX + cardW - 12, cardY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 12, cardY + cardH - 12 }, { cardX + 38, cardY + cardH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 12, cardY + cardH - 12 }, { cardX + 12, cardY + cardH - 38 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 12, cardY + cardH - 12 }, { cardX + cardW - 38, cardY + cardH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 12, cardY + cardH - 12 }, { cardX + cardW - 12, cardY + cardH - 38 }, 2.0f, cornerCol);
+
+    // Header Title
+    int headerW = MeasureText("CHAPTER 1 COMPLETE // THE GATES TO ZYPHDEN UNLOCKED", 22);
+    DrawText("CHAPTER 1 COMPLETE // THE GATES TO ZYPHDEN UNLOCKED", (int)(cardX + (cardW - headerW) * 0.5f), (int)cardY + 28, 22, Color{ 255, 215, 80, 255 });
+    
+    const char* subQuote = "“The ancient sanctuary lies behind you. The vast overland wilderness of Tydeshire awaits.”";
+    int subW = MeasureText(subQuote, 13);
+    DrawText(subQuote, (int)(cardX + (cardW - subW) * 0.5f), (int)cardY + 58, 13, Color{ 160, 215, 245, 230 });
+    DrawLine((int)cardX + 40, (int)cardY + 84, (int)(cardX + cardW - 40), (int)cardY + 84, Color{ 140, 110, 50, 200 });
+
+    // Section 1: The 5 Kingdoms Overland Realm Map Preview
+    DrawText("OVERLAND ATLAS // THE FIVE KINGDOMS OF TYDESHIRE", (int)cardX + 44, (int)cardY + 98, 12, Color{ 255, 195, 75, 255 });
+
+    struct KingdomCard {
+        std::string name;
+        std::string status;
+        std::string desc;
+        Color color;
+        bool unlocked;
+    };
+
+    KingdomCard realms[5] = {
+        { "ZYPHDEN", "UNLOCKED", "Windborne Spires & Ancient Altars", Color{ 100, 230, 185, 255 }, true },
+        { "AZSHDEN", "LOCKED", "Sunken Bastion & Coastal Keeps", Color{ 80, 160, 240, 180 }, false },
+        { "FLEURSHDEN", "LOCKED", "Blooming Thorns & Royal Knights", Color{ 235, 120, 165, 180 }, false },
+        { "NOIRDEN", "LOCKED", "Shrouded Obsidian Peaks", Color{ 180, 115, 245, 180 }, false },
+        { "CITADEL", "LOCKED", "Throne of Charlz the Lord Liege", Color{ 255, 75, 85, 180 }, false }
+    };
+
+    float rcardW = (cardW - 88.0f - 40.0f) / 5.0f;
+    float rcardH = 150.0f;
+    float rcardY = cardY + 124.0f;
+
+    for (int k = 0; k < 5; k++) {
+        float rcardX = cardX + 44.0f + (float)k * (rcardW + 10.0f);
+        Rectangle rrec = { rcardX, rcardY, rcardW, rcardH };
+
+        Color fillCol = realms[k].unlocked ? Color{ 22, 38, 48, 250 } : Color{ 16, 20, 30, 240 };
+        DrawRectangleRounded(rrec, 0.12f, 4, fillCol);
+        DrawRectangleRoundedLines(rrec, 0.12f, 4, realms[k].unlocked ? realms[k].color : Color{ 50, 65, 90, 200 });
+
+        // Kingdom Title
+        DrawText(realms[k].name.c_str(), (int)rcardX + 12, (int)rcardY + 16, 14, realms[k].color);
+
+        // Status pill
+        Color statusBg = realms[k].unlocked ? Color{ 30, 80, 60, 240 } : Color{ 35, 40, 55, 220 };
+        DrawRectangleRounded(Rectangle{ rcardX + 12, rcardY + 38, 85, 20 }, 0.3f, 4, statusBg);
+        DrawText(realms[k].status.c_str(), (int)rcardX + 18, (int)rcardY + 42, 10, realms[k].unlocked ? Color{ 140, 255, 200, 255 } : Color{ 160, 175, 200, 220 });
+
+        // Description
+        DrawJournalWrappedText(realms[k].desc, (int)rcardX + 12, (int)rcardY + 68, (int)rcardW - 24, 11, 4, Color{ 190, 205, 225, 230 });
+    }
+
+    // Section 2: Hero's Chronicle & Armory Status
+    float sec2Y = cardY + 300.0f;
+    DrawLine((int)cardX + 40, (int)sec2Y, (int)(cardX + cardW - 40), (int)sec2Y, Color{ 50, 68, 96, 200 });
+
+    float col1X = cardX + 44.0f;
+    float col1W = (cardW - 88.0f - 24.0f) * 0.5f;
+    float col2X = col1X + col1W + 24.0f;
+    float col2W = col1W;
+
+    // Armory Status Box
+    Rectangle armoryBox = { col1X, sec2Y + 20.0f, col1W, 200.0f };
+    DrawRectangleRounded(armoryBox, 0.08f, 6, Color{ 18, 24, 36, 240 });
+    DrawRectangleRoundedLines(armoryBox, 0.08f, 6, Color{ 80, 110, 160, 200 });
+
+    DrawText("CHOSEN WEAPON & LEGENDARY ARSENAL", (int)col1X + 20, (int)sec2Y + 36, 12, Color{ 255, 205, 80, 255 });
+    WeaponStats wStats = GetWeaponStats(player.GetWeapon());
+    DrawText(wStats.name.c_str(), (int)col1X + 20, (int)sec2Y + 58, 18, (player.GetWeapon() == WeaponType::TRUTH_SEEKER) ? Color{ 255, 225, 100, 255 } : Color{ 220, 235, 255, 255 });
+
+    std::string wStatsStr = "Damage: " + std::to_string((int)wStats.lightDamage) + " Light / " + std::to_string((int)wStats.heavyDamage) + " Heavy  |  Speed: " + std::to_string((int)(1.0f / wStats.lightCooldown)) + " atk/s";
+    DrawText(wStatsStr.c_str(), (int)col1X + 20, (int)sec2Y + 84, 12, Color{ 160, 190, 220, 230 });
+
+    if (player.GetWeapon() == WeaponType::TRUTH_SEEKER) {
+        DrawText("SPECIAL: Dawnfire Rune Blade (+60% Counter Bonus on Parry)", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 255, 175, 45, 255 });
+        DrawText("Earned by defeating Zil the Corrupted Crusader at the High Altar.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 180, 210, 240, 220 });
+    } else {
+        DrawText("SPECIAL: Basic steel armament. Spared by Zil the Corrupted Crusader.", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 160, 200, 240, 220 });
+        DrawText("Carried into the borderlands to begin the journey.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 150, 175, 200, 200 });
+    }
+
+    // Chronicle Fragments Box
+    Rectangle chronoBox = { col2X, sec2Y + 20.0f, col2W, 200.0f };
+    DrawRectangleRounded(chronoBox, 0.08f, 6, Color{ 18, 24, 36, 240 });
+    DrawRectangleRoundedLines(chronoBox, 0.08f, 6, Color{ 80, 110, 160, 200 });
+
+    int discoveredCount = 0;
+    for (const auto& frag : player.GetInventory().GetFragments()) {
+        if (frag.discovered) discoveredCount++;
+    }
+
+    DrawText("CHRONICLES OF TYDESHIRE // LORE PROGRESS", (int)col2X + 20, (int)sec2Y + 36, 12, Color{ 255, 205, 80, 255 });
+    std::string fragScoreStr = "Discovered Fragments: " + std::to_string(discoveredCount) + " / 4";
+    DrawText(fragScoreStr.c_str(), (int)col2X + 20, (int)sec2Y + 58, 18, Color{ 140, 220, 255, 255 });
+
+    DrawText("Fragment I: The 500-Year Chaos - Uncovered", (int)col2X + 20, (int)sec2Y + 86, 11, Color{ 200, 225, 245, 240 });
+    DrawText("Fragment II: The Five Realms of Charlz - Uncovered", (int)col2X + 20, (int)sec2Y + 104, 11, Color{ 200, 225, 245, 240 });
+    
+    bool hasFrag3 = player.GetInventory().GetFragments().size() > 2 && player.GetInventory().GetFragments()[2].discovered;
+    DrawText(hasFrag3 ? "Fragment III: The King's Madness - Uncovered" : "Fragment III: The King's Madness - Shrouded (Defeat Zil)", (int)col2X + 20, (int)sec2Y + 122, 11, hasFrag3 ? Color{ 255, 215, 80, 240 } : Color{ 130, 145, 170, 200 });
+
+    DrawText("Tip: Press [I] anywhere in the world to open your Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
+
+    // Action Buttons
+    int choiceResult = 0;
+
+    // Button 1: Re-enter Ruined Castle
+    Rectangle btnCastle = { cardX + 160.0f, cardY + 550.0f, 340.0f, 54.0f };
+    bool hoverCastle = CheckCollisionPointRec(mousePos, btnCastle);
+    DrawRectangleRounded(btnCastle, 0.2f, 6, hoverCastle ? Color{ 40, 60, 95, 255 } : Color{ 24, 34, 52, 240 });
+    DrawRectangleRoundedLines(btnCastle, 0.2f, 6, hoverCastle ? Color{ 140, 220, 255, 255 } : Color{ 80, 125, 180, 230 });
+    int btn1W = MeasureText("RE-ENTER RUINED CASTLE", 14);
+    DrawText("RE-ENTER RUINED CASTLE", (int)(btnCastle.x + (btnCastle.width - btn1W) * 0.5f), (int)btnCastle.y + 19, 14, hoverCastle ? Color{ 255, 255, 255, 255 } : Color{ 200, 230, 255, 240 });
+
+    // Button 2: Return to Sanctuary Lobby
+    Rectangle btnLobby = { cardX + 560.0f, cardY + 550.0f, 340.0f, 54.0f };
+    bool hoverLobby = CheckCollisionPointRec(mousePos, btnLobby);
+    DrawRectangleRounded(btnLobby, 0.2f, 6, hoverLobby ? Color{ 75, 45, 25, 255 } : Color{ 42, 26, 18, 240 });
+    DrawRectangleRoundedLines(btnLobby, 0.2f, 6, hoverLobby ? Color{ 255, 190, 70, 255 } : Color{ 205, 125, 50, 230 });
+    int btn2W = MeasureText("RETURN TO SANCTUARY LOBBY", 14);
+    DrawText("RETURN TO SANCTUARY LOBBY", (int)(btnLobby.x + (btnLobby.width - btn2W) * 0.5f), (int)btnLobby.y + 19, 14, hoverLobby ? Color{ 255, 255, 255, 255 } : Color{ 255, 220, 110, 240 });
+
+    if (isMousePressed) {
+        if (hoverCastle) {
+            SoundFX::PlayButtonClick();
+            choiceResult = 1;
+        } else if (hoverLobby) {
+            SoundFX::PlayButtonClick();
+            choiceResult = 2;
+        }
+    }
+
+    return choiceResult;
+}
+
+

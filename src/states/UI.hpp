@@ -29,4 +29,8 @@ public:
 
     // Cinematic Boss Dialogue Banner
     static void DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor);
+
+    // Open World Borderlands Gateway Epilogue Screen
+    // Returns: 0 = None, 1 = Re-enter Castle, 2 = Return to Lobby
+    static int DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player);
 };

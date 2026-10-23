@@ -7,5 +7,6 @@ enum class GameState {
     LOBBY,
     ARENA,
     GAME_OVER,
-    VICTORY
+    VICTORY,
+    BORDERLANDS_GATE
 };

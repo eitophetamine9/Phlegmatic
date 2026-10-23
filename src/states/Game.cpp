@@ -505,9 +505,32 @@ void Game::Update(float dt) {
             zilDialogueTimer -= dt;
         }
 
+        // Check if player walks through northern open gateway into Zyphden
+        if (map.IsGateOpen() && player.GetPosition().y <= map.GetBounds().y - 20.0f) {
+            currentState = GameState::BORDERLANDS_GATE;
+            SoundFX::PlayGateOpen();
+            particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
+            return;
+        }
+
         // Camera follow
         camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
         camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
+        return;
+    }
+
+    // 1.9 BORDERLANDS GATEWAY EPILOGUE STATE
+    if (currentState == GameState::BORDERLANDS_GATE) {
+        int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
+        if (choice == 1) { // Re-enter Ruined Castle to explore
+            currentState = GameState::RUINED_CASTLE;
+            player.Revive({ 800.0f, 320.0f }, 1.0f);
+            camera.target = player.GetPosition();
+            return;
+        } else if (choice == 2) { // Return to Lobby
+            EnterLobby();
+            return;
+        }
         return;
     }
 
@@ -671,6 +694,13 @@ void Game::Render() {
 
     if (currentState == GameState::PROLOGUE_CUTSCENE) {
         cutscene.Draw(w, h);
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::BORDERLANDS_GATE) {
+        Vector2 mousePos = GetMousePosition();
+        GameUI::DrawBorderlandsGateway(w, h, mousePos, false, player);
         EndDrawing();
         return;
     }
