@@ -98,7 +98,13 @@
 | **War Mace** | Crushing Poise | 52 dmg (Frontal Circle Smack) | 155 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack followed by 360° tremor shockwave (**ignores 25% enemy defense**, 3.6s cd). |
 
 > [!NOTE]
-> In **Chapter 1: Ruined Castle**, the player begins unarmed with zero weapons in inventory. The Crusader's Broadsword is claimed at the central altar plinth, and the legendary **Truth Seeker** is claimed by triumphing over Zil the Corrupted Crusader. After the tutorial, Truth Seeker is permanently retained in your arsenal for the Hub and Test Arena.
+> In **Chapter 1: Ruined Castle**, the player begins unarmed with zero weapons in inventory. The Crusader's Broadsword is claimed at the central altar plinth, and all **4 Lore Fragments** are hidden as interactive world artifacts across the castle ruins:
+> 1. **Fragment I: The Great Unification** (`frag_01`): Ancient Chronicle Stele near the southern Awakening Courtyard.
+> 2. **Fragment II: The Shadow over Zyphden** (`frag_02`): Ancient Relic Chest in the eastern alcove across the stone bridge.
+> 3. **Fragment III: Zil's Holy Oath** (`frag_03`): Sun-Crusader Inscribed Relic in the western ruins (and awarded upon defeating Zil).
+> 4. **Fragment IV: The Five Broken Seals** (`frag_04`): Royal Obsidian Reliquary in the northwest library alcove.
+> 
+> The High Altar is sealed by a **Sanctuary Ward** that blocks access to the upper dais until the first tutorial enemy (**Ruin Sentinel**) is officially slain. After defeating the sentinel and conquering Zil the Corrupted Crusader, the legendary **Truth Seeker** is retained permanently in your arsenal.
 
 ---
 

@@ -166,9 +166,20 @@ void RuinedCastleHandler::Update(
     // Tutorial progression
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
 
-    // Zil Boss Encounter Trigger
-    // Zil Boss Encounter Trigger (Cannot bypass Zil by skipping tutorial)
-    if (!zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
+    // High Altar Steps Barrier (Cannot enter until first tutorial enemy is officially beaten)
+    if (!tutorial.HasDefeatedTutorialEnemy() && player.GetPosition().y <= 430.0f) {
+        player.SetPosition({ player.GetPosition().x, 435.0f });
+        static float barrierWarningTimer = 0.0f;
+        barrierWarningTimer -= dt;
+        if (barrierWarningTimer <= 0.0f) {
+            particles.SpawnFloatingText(player.GetPosition(), "DAIS SEALED — DEFEAT THE SANCTUARY SENTINEL FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+            SoundFX::PlayHitImpact();
+            barrierWarningTimer = 1.5f;
+        }
+    }
+
+    // Zil Boss Encounter Trigger (Strictly requires first tutorial enemy officially defeated)
+    if (tutorial.HasDefeatedTutorialEnemy() && !zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
         if (player.GetPosition().y <= 420.0f) {
             zilEncounterActive = true;
             enemies.clear();
@@ -272,6 +283,16 @@ void RuinedCastleHandler::Render(
 
     BeginMode2D(camera);
     map.DrawFloor();
+
+    // Runic Ward across High Altar steps if sentinel not yet defeated
+    if (!tutorial.HasDefeatedTutorialEnemy()) {
+        float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
+        DrawLineEx({ 580.0f, 430.0f }, { 1020.0f, 430.0f }, 3.5f, Color{ 220, 60, 60, (unsigned char)(160 + 80 * pulse) });
+        DrawCircleGradient(Vector2{ 800.0f, 430.0f }, 70.0f, Color{ 200, 40, 40, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
+        const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
+        int wtw = MeasureText(wardText, 10);
+        DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+    }
 
     tutorial.DrawWorldElements(time);
 

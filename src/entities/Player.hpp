@@ -31,8 +31,9 @@ public:
     void SetWeapon(WeaponType newWeapon);
     WeaponType GetWeapon() const { return currentWeapon; }
 
-    // Getters
+    // Position
     Vector2 GetPosition() const { return position; }
+    void SetPosition(Vector2 pos) { position = pos; }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     float GetHealth() const { return health; }

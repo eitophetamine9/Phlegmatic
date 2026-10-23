@@ -30,7 +30,7 @@ void Inventory::InitDefault() {
         "The Land of Tydeshire",
         "In the 500th year of unending strife, King Charlz unified the realms...",
         "In the 500th year of unending strife, King Charlz crushed the warring factions beneath his warhammer. By solemn decree at the High Summit, four sovereign kings knelt before the throne of Charlz the Lord Liege.\n\nThe realms of Azshden, Fleurshden, Zyphden, and Noirden were chartered in blood and silver. For three golden decades, heralds sang of an eternal peace, and borders stood without blood.",
-        true, // Discovered upon awakening from the prologue
+        false, // Discovered in tutorial by inspecting the Chronicle Stele
         false
     });
 
