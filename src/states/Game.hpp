@@ -31,6 +31,9 @@ private:
 
     GameState currentState;
     bool showControlsModal;
+    bool showInventoryModal;
+    int inventoryActiveTab;
+    int inventorySelectedFragment;
 
     Camera2D camera;
     Player player;

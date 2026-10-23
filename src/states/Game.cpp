@@ -6,7 +6,7 @@
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), currentWave(1), waveTimer(0.0f) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), inventoryActiveTab(0), inventorySelectedFragment(0), currentWave(1), waveTimer(0.0f) {
 }
 
 Game::~Game() {
@@ -238,15 +238,52 @@ void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
 
     // Toggle Controls Menu modal
-    if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_TAB)) {
+    if (IsKeyPressed(KEY_C)) {
         showControlsModal = !showControlsModal;
-        if (showControlsModal) SoundFX::PlayButtonClick();
+        if (showControlsModal) {
+            showInventoryModal = false;
+            SoundFX::PlayButtonClick();
+        }
+    }
+
+    // Toggle Inventory & Lore Journal modal
+    if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
+        showInventoryModal = !showInventoryModal;
+        if (showInventoryModal) {
+            showControlsModal = false;
+            SoundFX::PlayButtonClick();
+        }
+    }
+
+    // Check HUD top right button clicks in Lobby & Arena
+    if (!showControlsModal && !showInventoryModal) {
+        if (currentState == GameState::LOBBY || currentState == GameState::ARENA) {
+            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 275), 16.0f, 120.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 140), 16.0f, 116.0f, 32.0f };
+            if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showInventoryModal = true;
+                showControlsModal = false;
+                SoundFX::PlayButtonClick();
+            } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showControlsModal = true;
+                showInventoryModal = false;
+                SoundFX::PlayButtonClick();
+            }
+        }
     }
 
     if (showControlsModal) {
         bool close = GameUI::DrawControlsModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         if (close) {
             showControlsModal = false;
+        }
+        return;
+    }
+
+    if (showInventoryModal) {
+        bool close = GameUI::DrawInventoryModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
+        if (close) {
+            showInventoryModal = false;
         }
         return;
     }
@@ -468,10 +505,13 @@ void Game::Render() {
             }
         }
 
-        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), nearAny, nearName);
+        bool hasUnread = player.GetInventory().HasUnreadFragments();
+        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), nearAny, nearName, hasUnread);
 
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mousePos, false);
+        } else if (showInventoryModal) {
+            GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
         }
 
         EndDrawing();
@@ -507,7 +547,8 @@ void Game::Render() {
     DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
-    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), currentWave, 3);
+    bool hasUnread = player.GetInventory().HasUnreadFragments();
+    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), currentWave, 3, hasUnread);
 
     // Boss Health Bar during Boss Wave
     for (const auto& enemy : enemies) {
@@ -525,6 +566,8 @@ void Game::Render() {
 
     if (showControlsModal) {
         GameUI::DrawControlsModal(w, h, mousePos, false);
+    } else if (showInventoryModal) {
+        GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
     }
 
     EndDrawing();

@@ -13,6 +13,7 @@ set(SOURCES
     src/entities/Player.cpp
     src/entities/Enemy.cpp
     src/combat/Projectile.cpp
+    src/combat/Inventory.cpp
     src/states/UI.cpp
     src/states/Cutscene.cpp
     src/states/Game.cpp

@@ -48,6 +48,7 @@ void Player::Init(Vector2 startPos) {
 
 void Player::SetWeapon(WeaponType newWeapon) {
     currentWeapon = newWeapon;
+    inventory.UnlockWeapon(newWeapon);
     SoundFX::PlayEquipWeapon();
 }
 
@@ -112,7 +113,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.range = stats.heavyRange;
             currentAttack.arcAngle = stats.heavyArc;
             currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
-            currentAttack.knockback = (currentWeapon == WeaponType::MACE) ? 380.0f : 260.0f;
+            currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 400.0f : 260.0f;
             currentAttack.duration = stats.heavyDuration;
             currentAttack.timer = stats.heavyDuration;
             currentAttack.hasHit = false;
@@ -120,8 +121,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             SoundFX::PlayHeavyAttack();
 
             Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-            particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 180, 50, 255 });
-            particles.AddScreenShake(currentWeapon == WeaponType::MACE ? 6.0f : 3.5f, 0.14f);
+            particles.SpawnSlashTrail(position, forwardDir, (currentWeapon == WeaponType::TRUTH_SEEKER) ? Color{ 255, 220, 60, 255 } : Color{ 255, 180, 50, 255 });
+            particles.AddScreenShake((currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 6.0f : 3.5f, 0.14f);
 
             velocity.x += forwardDir.x * 220.0f;
             velocity.y += forwardDir.y * 220.0f;
@@ -215,7 +216,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.range = stats.lightRange;
     currentAttack.arcAngle = stats.lightArc;
     currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
-    currentAttack.knockback = (currentWeapon == WeaponType::MACE) ? 180.0f : 120.0f;
+    currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 200.0f : 120.0f;
     currentAttack.duration = stats.lightDuration;
     currentAttack.timer = stats.lightDuration;
     currentAttack.hasHit = false;
@@ -406,6 +407,32 @@ void Player::Draw() const {
             AssetManager::DrawMace(rightHand, maceAngle, 46.0f, Color{ 255, 160, 60, 255 }, Color{ 255, 60, 20, 220 });
         } else {
             AssetManager::DrawMace(rightHand, maceAngle, 38.0f, Color{ 210, 170, 130, 255 }, Color{ 200, 120, 50, 120 });
+        }
+    } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+        float swordAngle = facingAngle + 35.0f;
+        if (currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            swordAngle = facingAngle - 55.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawSword(rightHand, swordAngle, 46.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 210, 50, 240 });
+
+            float startAngle = facingAngle - 55.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 215, 60, 75 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 240, 120, 220 });
+        } else if (currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
+            swordAngle = facingAngle - 70.0f + progress * currentAttack.arcAngle;
+            AssetManager::DrawSword(rightHand, swordAngle, 56.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 170, 20, 255 });
+
+            float startAngle = facingAngle - 70.0f;
+            float sweepAngle = progress * currentAttack.arcAngle;
+            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 180, 30, 90 });
+            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 235, 100, 240 });
+        } else if (isHeavyWindingUp) {
+            swordAngle = facingAngle - 90.0f;
+            AssetManager::DrawSword(rightHand, swordAngle, 50.0f, Color{ 255, 220, 80, 255 }, Color{ 255, 140, 10, 240 });
+        } else {
+            AssetManager::DrawSword(rightHand, swordAngle, 42.0f, Color{ 255, 225, 120, 255 }, Color{ 255, 190, 40, 180 });
         }
     }
 }

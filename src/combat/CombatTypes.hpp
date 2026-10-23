@@ -4,7 +4,8 @@
 enum class WeaponType {
     SWORD,
     DAGGERS,
-    MACE
+    MACE,
+    TRUTH_SEEKER
 };
 
 enum class AttackType {

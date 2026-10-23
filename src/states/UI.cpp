@@ -1,7 +1,10 @@
 #include "UI.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/Weapon.hpp"
+#include "../entities/Player.hpp"
+#include "../rendering/AssetManager.hpp"
 #include <cmath>
+#include <sstream>
 
 int GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 12, 14, 20, 255 });
@@ -162,7 +165,7 @@ bool GameUI::DrawControlsModal(int windowWidth, int windowHeight, Vector2 mouseP
     return false;
 }
 
-void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName) {
+void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
     // Top Lobby Banner
     const float bannerW = 680.0f;
     const float bannerH = 46.0f;
@@ -177,6 +180,14 @@ void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float max
 
     const char* hint = "Equip weapons at pedestals [E]  |  Step into North Portal to Enter Arena";
     DrawText(hint, (int)bannerX + 16, (int)bannerY + 26, 12, Color{ 200, 220, 245, 220 });
+
+    // Journal & Lore button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    if (hasUnreadLore) {
+        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+    }
 
     // Controls button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -250,7 +261,7 @@ void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float max
     DrawText(statusBuf, (int)hudX + 14, (int)hudY + 58, 10, Color{ 170, 205, 235, 240 });
 }
 
-void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, int currentWave, int totalWaves) {
+void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, int currentWave, int totalWaves, bool hasUnreadLore) {
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 110.0f;
     const float hudWidth = 310.0f;
@@ -319,6 +330,14 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     int waveW = MeasureText(waveStr.c_str(), 14);
     DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
 
+    // Journal & Lore button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    if (hasUnreadLore) {
+        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+    }
+
     // Controls hint top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
@@ -369,4 +388,375 @@ void GameUI::DrawVictory(int windowWidth, int windowHeight) {
     DrawText("ARENA CLEARED", (windowWidth - titleW) / 2, windowHeight / 2 - 40, 38, Color{ 255, 225, 80, 255 });
     int subW = MeasureText("Press [R] to Replay  |  [L] Return to Lobby", 18);
     DrawText("Press [R] to Replay  |  [L] Return to Lobby", (windowWidth - subW) / 2, windowHeight / 2 + 18, 18, Color{ 210, 240, 225, 230 });
+}
+
+static void DrawJournalWrappedText(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color) {
+    std::istringstream stream(text);
+    std::string paragraph;
+    int currentY = posY;
+
+    while (std::getline(stream, paragraph)) {
+        if (paragraph.empty()) {
+            currentY += fontSize + lineSpacing;
+            continue;
+        }
+
+        std::istringstream wordStream(paragraph);
+        std::string word;
+        std::string currentLine = "";
+
+        while (wordStream >> word) {
+            std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
+            int testWidth = MeasureText(testLine.c_str(), fontSize);
+
+            if (testWidth > maxLineWidth && !currentLine.empty()) {
+                DrawText(currentLine.c_str(), posX, currentY, fontSize, color);
+                currentY += fontSize + lineSpacing;
+                currentLine = word;
+            } else {
+                currentLine = testLine;
+            }
+        }
+
+        if (!currentLine.empty()) {
+            DrawText(currentLine.c_str(), posX, currentY, fontSize, color);
+            currentY += fontSize + lineSpacing;
+        }
+    }
+}
+
+bool GameUI::DrawInventoryModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player, int& activeTab, int& selectedFragmentIndex) {
+    // Dimmed cinematic backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 9, 14, 215 });
+
+    float modalW = 1080.0f;
+    float modalH = 640.0f;
+    float modalX = ((float)windowWidth - modalW) * 0.5f;
+    float modalY = ((float)windowHeight - modalH) * 0.5f;
+
+    // Outer backing card & filigree borders
+    DrawRectangleRounded(Rectangle{ modalX, modalY, modalW, modalH }, 0.04f, 8, Color{ 14, 17, 26, 250 });
+    DrawRectangleRoundedLines(Rectangle{ modalX, modalY, modalW, modalH }, 0.04f, 8, Color{ 205, 165, 75, 230 });
+    DrawRectangleRoundedLines(Rectangle{ modalX + 4, modalY + 4, modalW - 8, modalH - 8 }, 0.035f, 8, Color{ 45, 58, 82, 180 });
+
+    // Golden corner filigree
+    Color cornerCol = Color{ 255, 215, 80, 240 };
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 38, modalY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 12, modalY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 38, modalY + 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 12, modalY + 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+
+    // Modal Header
+    DrawText("CHRONICLES & ARMORY OF TYDESHIRE", (int)modalX + 36, (int)modalY + 20, 22, Color{ 255, 220, 90, 255 });
+    DrawText("Manage royal armaments, inspect combat stats, and read uncovered lore fragments.", (int)modalX + 36, (int)modalY + 48, 12, Color{ 175, 195, 220, 220 });
+
+    // Close Button [ESC / I]
+    const float closeW = 120.0f;
+    const float closeH = 32.0f;
+    float closeX = modalX + modalW - closeW - 32.0f;
+    float closeY = modalY + 22.0f;
+    Rectangle closeRec = { closeX, closeY, closeW, closeH };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeRec);
+
+    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
+    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
+    DrawText("CLOSE [ESC/I]", (int)closeX + 16, (int)closeY + 9, 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
+
+    bool closeClicked = (isCloseHov && isMousePressed);
+
+    // Tab Navigation Bar
+    float tabY = modalY + 76.0f;
+    DrawLine((int)modalX + 32, (int)tabY + 34, (int)(modalX + modalW - 32), (int)tabY + 34, Color{ 45, 58, 82, 255 });
+
+    // Tab 1: Equipment & Arsenal
+    Rectangle tab1Rec = { modalX + 36, tabY, 230.0f, 34.0f };
+    bool isTab1Hov = CheckCollisionPointRec(mousePos, tab1Rec);
+    if ((isTab1Hov && isMousePressed) || IsKeyPressed(KEY_ONE)) {
+        activeTab = 0;
+        SoundFX::PlayButtonClick();
+    }
+
+    if (activeTab == 0) {
+        DrawRectangleRounded(tab1Rec, 0.2f, 4, Color{ 32, 42, 64, 255 });
+        DrawRectangleRoundedLines(tab1Rec, 0.2f, 4, Color{ 255, 215, 80, 240 });
+        DrawText("1. EQUIPMENT & ARSENAL", (int)tab1Rec.x + 16, (int)tab1Rec.y + 10, 13, Color{ 255, 225, 100, 255 });
+    } else {
+        DrawRectangleRounded(tab1Rec, 0.2f, 4, isTab1Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
+        DrawText("1. EQUIPMENT & ARSENAL", (int)tab1Rec.x + 16, (int)tab1Rec.y + 10, 13, isTab1Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
+    }
+
+    // Tab 2: Lore Journal
+    Rectangle tab2Rec = { modalX + 276, tabY, 210.0f, 34.0f };
+    bool isTab2Hov = CheckCollisionPointRec(mousePos, tab2Rec);
+    if ((isTab2Hov && isMousePressed) || IsKeyPressed(KEY_TWO)) {
+        activeTab = 1;
+        SoundFX::PlayButtonClick();
+    }
+
+    bool hasUnread = player.GetInventory().HasUnreadFragments();
+    std::string tab2Label = hasUnread ? "2. LORE JOURNAL (!)" : "2. LORE JOURNAL";
+
+    if (activeTab == 1) {
+        DrawRectangleRounded(tab2Rec, 0.2f, 4, Color{ 32, 42, 64, 255 });
+        DrawRectangleRoundedLines(tab2Rec, 0.2f, 4, Color{ 255, 215, 80, 240 });
+        DrawText(tab2Label.c_str(), (int)tab2Rec.x + 16, (int)tab2Rec.y + 10, 13, Color{ 255, 225, 100, 255 });
+    } else {
+        DrawRectangleRounded(tab2Rec, 0.2f, 4, isTab2Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
+        DrawText(tab2Label.c_str(), (int)tab2Rec.x + 16, (int)tab2Rec.y + 10, 13, hasUnread ? Color{ 255, 215, 80, 255 } : (isTab2Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 }));
+    }
+
+    // TAB CONTENT AREA
+    float contentY = modalY + 125.0f;
+
+    if (activeTab == 0) {
+        // TAB 0: EQUIPMENT & ARSENAL
+        // Left Column: Active Weapon & Arsenal (width = 510)
+        float col1X = modalX + 36.0f;
+        float col1W = 510.0f;
+
+        // Active Weapon Card
+        WeaponType curW = player.GetWeapon();
+        WeaponStats curStats = GetWeaponStats(curW);
+
+        DrawRectangleRounded(Rectangle{ col1X, contentY, col1W, 160.0f }, 0.08f, 6, Color{ 20, 25, 38, 220 });
+        DrawRectangleRoundedLines(Rectangle{ col1X, contentY, col1W, 160.0f }, 0.08f, 6, (curW == WeaponType::TRUTH_SEEKER) ? Color{ 255, 215, 80, 240 } : Color{ 65, 85, 120, 230 });
+
+        DrawText("CURRENTLY EQUIPPED:", (int)col1X + 18, (int)contentY + 14, 11, Color{ 255, 215, 80, 255 });
+        DrawText(curStats.name.c_str(), (int)col1X + 18, (int)contentY + 30, 20, Color{ 255, 255, 255, 255 });
+
+        const char* rarityText = (curW == WeaponType::TRUTH_SEEKER) ? "[LEGENDARY ROYAL RELIC]" : "[STANDARD COMBAT WEAPON]";
+        Color rarityColor = (curW == WeaponType::TRUTH_SEEKER) ? Color{ 255, 215, 70, 255 } : Color{ 100, 220, 255, 240 };
+        DrawText(rarityText, (int)col1X + 18 + MeasureText(curStats.name.c_str(), 20) + 12, (int)contentY + 36, 11, rarityColor);
+
+        // Stats grid
+        std::string lightStr = "Light Attack: " + std::to_string((int)curStats.lightDamage) + " Dmg | Arc: " + std::to_string((int)curStats.lightArc) + " deg | Reach: " + std::to_string((int)curStats.lightRange);
+        std::string heavyStr = "Heavy Attack: " + std::to_string((int)curStats.heavyDamage) + " Dmg | CD: " + std::to_string((int)curStats.heavyCooldown) + "s | Reach: " + std::to_string((int)curStats.heavyRange);
+        std::string dashStr = "Dash Recovery: " + std::to_string((int)curStats.dashCooldown) + "s cooldown | Stamina: " + std::to_string((int)curStats.dashStaminaCost) + " SP";
+
+        DrawText(lightStr.c_str(), (int)col1X + 18, (int)contentY + 62, 11, Color{ 130, 230, 255, 240 });
+        DrawText(heavyStr.c_str(), (int)col1X + 18, (int)contentY + 80, 11, Color{ 255, 185, 80, 240 });
+        DrawText(dashStr.c_str(), (int)col1X + 18, (int)contentY + 98, 11, Color{ 160, 240, 180, 240 });
+        DrawText(curStats.description.c_str(), (int)col1X + 18, (int)contentY + 124, 10, Color{ 185, 205, 225, 200 });
+
+        // Arsenal Bag Section
+        float arsenalY = contentY + 176.0f;
+        DrawText("WEAPON ARSENAL (Click unlocked weapon to equip):", (int)col1X, (int)arsenalY, 13, Color{ 255, 220, 100, 255 });
+
+        struct WeaponEntry {
+            WeaponType type;
+            const char* title;
+            const char* tag;
+        };
+        WeaponEntry arsenalList[] = {
+            { WeaponType::SWORD, "Broadsword", "Balanced reach & recovery" },
+            { WeaponType::DAGGERS, "Dual Daggers", "Swift twin flurry & 360 spin" },
+            { WeaponType::MACE, "War Mace", "Heavy poise crushing slam" },
+            { WeaponType::TRUTH_SEEKER, "Truth Seeker", "Holy royal blade of King Charlz" }
+        };
+
+        for (int i = 0; i < 4; i++) {
+            float itemY = arsenalY + 24.0f + (float)i * 68.0f;
+            Rectangle itemRec = { col1X, itemY, col1W, 58.0f };
+            bool isHov = CheckCollisionPointRec(mousePos, itemRec);
+            bool isEquipped = (curW == arsenalList[i].type);
+            bool isUnlocked = player.GetInventory().HasWeapon(arsenalList[i].type);
+
+            Color bg = isEquipped ? Color{ 36, 46, 68, 255 } : (isHov && isUnlocked ? Color{ 28, 38, 56, 240 } : Color{ 18, 22, 32, 200 });
+            Color border = isEquipped ? Color{ 255, 215, 80, 255 } : (isHov && isUnlocked ? Color{ 100, 220, 255, 255 } : Color{ 48, 62, 85, 180 });
+
+            DrawRectangleRounded(itemRec, 0.15f, 4, bg);
+            DrawRectangleRoundedLines(itemRec, 0.15f, 4, border);
+
+            if (isUnlocked) {
+                DrawText(arsenalList[i].title, (int)itemRec.x + 16, (int)itemRec.y + 12, 14, isEquipped ? Color{ 255, 225, 100, 255 } : Color{ 240, 245, 255, 255 });
+                DrawText(arsenalList[i].tag, (int)itemRec.x + 16, (int)itemRec.y + 32, 11, Color{ 160, 185, 210, 200 });
+
+                if (isEquipped) {
+                    DrawText("[EQUIPPED]", (int)(itemRec.x + itemRec.width - 100), (int)itemRec.y + 20, 12, Color{ 255, 215, 80, 255 });
+                } else if (isHov) {
+                    DrawText("[CLICK TO EQUIP]", (int)(itemRec.x + itemRec.width - 140), (int)itemRec.y + 20, 12, Color{ 100, 240, 255, 255 });
+                }
+
+                if (isHov && isMousePressed && !isEquipped) {
+                    player.SetWeapon(arsenalList[i].type);
+                }
+            } else {
+                // Locked Weapon
+                DrawText(arsenalList[i].title, (int)itemRec.x + 16, (int)itemRec.y + 12, 14, Color{ 110, 120, 135, 255 });
+                DrawText("[LOCKED - Defeat Zil in the Castle Ruins to claim]", (int)itemRec.x + 16, (int)itemRec.y + 32, 11, Color{ 200, 90, 80, 220 });
+            }
+        }
+
+        // Right Column: Knight Attributes & Relics (width = 470)
+        float col2X = modalX + 575.0f;
+        float col2W = 470.0f;
+
+        DrawRectangleRounded(Rectangle{ col2X, contentY, col2W, 220.0f }, 0.08f, 6, Color{ 18, 23, 34, 220 });
+        DrawRectangleRoundedLines(Rectangle{ col2X, contentY, col2W, 220.0f }, 0.08f, 6, Color{ 55, 75, 105, 230 });
+
+        DrawText("KNIGHT COMBAT ATTRIBUTES", (int)col2X + 20, (int)contentY + 16, 14, Color{ 255, 220, 90, 255 });
+        DrawLine((int)col2X + 20, (int)contentY + 38, (int)(col2X + col2W - 20), (int)contentY + 38, Color{ 40, 52, 75, 255 });
+
+        // Health Bar & values
+        float hpPerc = fmaxf(0.0f, player.GetHealth() / player.GetMaxHealth());
+        DrawText("Health Points:", (int)col2X + 20, (int)contentY + 52, 11, Color{ 230, 90, 100, 255 });
+        DrawRectangle((int)col2X + 130, (int)contentY + 52, 200, 12, Color{ 35, 20, 25, 220 });
+        DrawRectangle((int)col2X + 130, (int)contentY + 52, (int)(200 * hpPerc), 12, Color{ 235, 55, 75, 255 });
+        std::string hpStr = std::to_string((int)player.GetHealth()) + " / " + std::to_string((int)player.GetMaxHealth());
+        DrawText(hpStr.c_str(), (int)col2X + 345, (int)contentY + 52, 11, Color{ 255, 255, 255, 240 });
+
+        // Stamina Bar & values
+        float stPerc = fmaxf(0.0f, player.GetStamina() / player.GetMaxStamina());
+        DrawText("Stamina:", (int)col2X + 20, (int)contentY + 76, 11, Color{ 255, 210, 80, 255 });
+        DrawRectangle((int)col2X + 130, (int)contentY + 76, 200, 12, Color{ 35, 30, 15, 220 });
+        DrawRectangle((int)col2X + 130, (int)contentY + 76, (int)(200 * stPerc), 12, Color{ 255, 195, 45, 255 });
+        std::string stStr = std::to_string((int)player.GetStamina()) + " / " + std::to_string((int)player.GetMaxStamina());
+        DrawText(stStr.c_str(), (int)col2X + 345, (int)contentY + 76, 11, Color{ 255, 255, 255, 240 });
+
+        // Passive mechanics
+        DrawText("Dodge Invulnerability:", (int)col2X + 20, (int)contentY + 104, 11, Color{ 140, 210, 255, 240 });
+        DrawText("0.18s evasive i-frames on [Q] Dash", (int)col2X + 175, (int)contentY + 104, 11, Color{ 240, 245, 255, 255 });
+
+        DrawText("Parry Guard Window:", (int)col2X + 20, (int)contentY + 128, 11, Color{ 140, 210, 255, 240 });
+        DrawText("0.28s active deflect window on [F] Key", (int)col2X + 175, (int)contentY + 128, 11, Color{ 240, 245, 255, 255 });
+
+        DrawText("Counter-Attack Bonus:", (int)col2X + 20, (int)contentY + 152, 11, Color{ 140, 210, 255, 240 });
+        DrawText("+50% damage boost following parries", (int)col2X + 175, (int)contentY + 152, 11, Color{ 255, 220, 80, 255 });
+
+        DrawText("Movement Speed:", (int)col2X + 20, (int)contentY + 176, 11, Color{ 140, 210, 255, 240 });
+        DrawText("280 units/sec (8-directional physics)", (int)col2X + 175, (int)contentY + 176, 11, Color{ 240, 245, 255, 255 });
+
+        // Relics & Quest Items Section
+        float relicsY = contentY + 236.0f;
+        DrawRectangleRounded(Rectangle{ col2X, relicsY, col2W, 230.0f }, 0.08f, 6, Color{ 18, 23, 34, 220 });
+        DrawRectangleRoundedLines(Rectangle{ col2X, relicsY, col2W, 230.0f }, 0.08f, 6, Color{ 55, 75, 105, 230 });
+
+        DrawText("RELICS & KEY QUEST ITEMS", (int)col2X + 20, (int)relicsY + 16, 14, Color{ 255, 220, 90, 255 });
+        DrawLine((int)col2X + 20, (int)relicsY + 38, (int)(col2X + col2W - 20), (int)relicsY + 38, Color{ 40, 52, 75, 255 });
+
+        const auto& qItems = player.GetInventory().GetQuestItems();
+        if (qItems.empty()) {
+            DrawText("No quest artifacts collected yet.", (int)col2X + 20, (int)relicsY + 54, 12, Color{ 150, 165, 185, 200 });
+        } else {
+            for (size_t i = 0; i < qItems.size() && i < 3; i++) {
+                float qy = relicsY + 50.0f + (float)i * 54.0f;
+                DrawRectangleRounded(Rectangle{ col2X + 16, qy, col2W - 32, 46.0f }, 0.15f, 4, Color{ 24, 30, 44, 180 });
+                DrawText(qItems[i].name.c_str(), (int)col2X + 28, (int)qy + 8, 12, qItems[i].rarityColor);
+                DrawText(qItems[i].description.c_str(), (int)col2X + 28, (int)qy + 26, 10, Color{ 180, 200, 220, 220 });
+            }
+        }
+    } else {
+        // TAB 1: LORE JOURNAL
+        // Left Column: List of Lore Fragments
+        float col1X = modalX + 36.0f;
+        float col1W = 360.0f;
+        const auto& frags = player.GetInventory().GetFragments();
+        int totalFrags = (int)frags.size();
+        int discoveredFrags = player.GetInventory().GetDiscoveredFragmentCount();
+
+        std::string listTitle = "LORE FRAGMENTS (" + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " FOUND)";
+        DrawText(listTitle.c_str(), (int)col1X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
+
+        for (int i = 0; i < totalFrags; i++) {
+            float fragY = contentY + 24.0f + (float)i * 105.0f;
+            Rectangle fragRec = { col1X, fragY, col1W, 96.0f };
+            bool isHov = CheckCollisionPointRec(mousePos, fragRec);
+            bool isSel = (selectedFragmentIndex == i);
+
+            Color bg = isSel ? Color{ 36, 46, 68, 255 } : (isHov ? Color{ 26, 34, 52, 220 } : Color{ 18, 22, 32, 200 });
+            Color border = isSel ? Color{ 255, 215, 80, 255 } : (isHov ? Color{ 100, 220, 255, 240 } : Color{ 48, 62, 85, 180 });
+
+            DrawRectangleRounded(fragRec, 0.12f, 4, bg);
+            DrawRectangleRoundedLines(fragRec, 0.12f, 4, border);
+
+            if (frags[i].discovered) {
+                // Realm tag
+                std::string realmTag = "[" + frags[i].realm + "]";
+                DrawText(realmTag.c_str(), (int)fragRec.x + 14, (int)fragRec.y + 10, 10, Color{ 100, 220, 255, 240 });
+
+                // Title
+                DrawText(frags[i].title.c_str(), (int)fragRec.x + 14, (int)fragRec.y + 26, 13, isSel ? Color{ 255, 225, 100, 255 } : Color{ 240, 245, 255, 255 });
+
+                // Preview
+                std::string prev = frags[i].preview;
+                if (prev.length() > 52) prev = prev.substr(0, 49) + "...";
+                DrawText(prev.c_str(), (int)fragRec.x + 14, (int)fragRec.y + 50, 10, Color{ 170, 190, 215, 200 });
+
+                // Unread Badge
+                if (!frags[i].isRead) {
+                    DrawRectangleRounded(Rectangle{ fragRec.x + fragRec.width - 55.0f, fragRec.y + 10.0f, 42.0f, 18.0f }, 0.3f, 4, Color{ 180, 130, 20, 255 });
+                    DrawText("NEW", (int)(fragRec.x + fragRec.width - 47.0f), (int)fragRec.y + 13.0f, 10, Color{ 255, 245, 200, 255 });
+                }
+
+                if (isHov && isMousePressed) {
+                    selectedFragmentIndex = i;
+                    player.GetInventory().MarkFragmentRead(frags[i].id);
+                    SoundFX::PlayButtonClick();
+                }
+            } else {
+                // Undiscovered Fragment
+                DrawText("[UNDISCOVERED FRAGMENT]", (int)fragRec.x + 14, (int)fragRec.y + 16, 12, Color{ 120, 135, 155, 255 });
+                DrawText("Search ruins and battlements across Tydeshire", (int)fragRec.x + 14, (int)fragRec.y + 40, 10, Color{ 90, 105, 125, 200 });
+                DrawText("to uncover this lost chronicle.", (int)fragRec.x + 14, (int)fragRec.y + 56, 10, Color{ 90, 105, 125, 200 });
+
+                if (isHov && isMousePressed) {
+                    selectedFragmentIndex = i;
+                    SoundFX::PlayButtonClick();
+                }
+            }
+        }
+
+        // Right Column: Reading Manuscript Panel (width = 620, height = 440)
+        float col2X = modalX + 420.0f;
+        float col2W = 620.0f;
+        float col2H = 440.0f;
+
+        DrawRectangleRounded(Rectangle{ col2X, contentY, col2W, col2H }, 0.05f, 6, Color{ 20, 24, 36, 245 });
+        DrawRectangleRoundedLines(Rectangle{ col2X, contentY, col2W, col2H }, 0.05f, 6, Color{ 180, 140, 60, 220 });
+        DrawRectangleRoundedLines(Rectangle{ col2X + 4, contentY + 4, col2W - 8, col2H - 8 }, 0.04f, 6, Color{ 50, 65, 90, 180 });
+
+        if (selectedFragmentIndex >= 0 && selectedFragmentIndex < totalFrags) {
+            const auto& curFrag = frags[selectedFragmentIndex];
+            if (curFrag.discovered) {
+                // Illuminated Realm Heading
+                std::string originStr = "HISTORICAL RECORD // " + curFrag.realm;
+                DrawText(originStr.c_str(), (int)col2X + 28, (int)contentY + 24, 11, Color{ 120, 220, 255, 240 });
+
+                // Fragment Title in Gold
+                DrawText(curFrag.title.c_str(), (int)col2X + 28, (int)contentY + 44, 20, Color{ 255, 215, 80, 255 });
+                DrawLine((int)col2X + 28, (int)contentY + 76, (int)(col2X + col2W - 28), (int)contentY + 76, Color{ 160, 125, 55, 220 });
+
+                // Narrative wrapped text
+                DrawJournalWrappedText(curFrag.fullText, (int)col2X + 28, (int)contentY + 98, (int)col2W - 56, 14, 8, Color{ 230, 238, 250, 245 });
+
+                // Footer quote
+                DrawLine((int)col2X + 28, (int)(contentY + col2H - 46), (int)(col2X + col2W - 28), (int)(contentY + col2H - 46), Color{ 50, 65, 90, 180 });
+                const char* footQuote = "“The true history of Tydeshire has been scattered. Seek the ruins for meaning.”";
+                DrawText(footQuote, (int)col2X + 28, (int)(contentY + col2H - 32), 11, Color{ 200, 170, 90, 220 });
+            } else {
+                // Undiscovered State Reading Screen
+                int uhW = MeasureText("THIS CHRONICLE FRAGMENT REMAINS SHROUDED", 16);
+                DrawText("THIS CHRONICLE FRAGMENT REMAINS SHROUDED", (int)(col2X + (col2W - uhW) * 0.5f), (int)contentY + 160, 16, Color{ 215, 90, 80, 255 });
+
+                const char* unDesc1 = "The parchment detailing this epoch was torn asunder during the Lord Liege's madness.";
+                int ud1W = MeasureText(unDesc1, 12);
+                DrawText(unDesc1, (int)(col2X + (col2W - ud1W) * 0.5f), (int)contentY + 200, 12, Color{ 170, 190, 215, 220 });
+
+                const char* unDesc2 = "Defeat corrupted crusaders and search forgotten shrines across the Land of Tydeshire to recover it.";
+                int ud2W = MeasureText(unDesc2, 12);
+                DrawText(unDesc2, (int)(col2X + (col2W - ud2W) * 0.5f), (int)contentY + 224, 12, Color{ 150, 170, 195, 200 });
+            }
+        }
+    }
+
+    if (closeClicked || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_I)) {
+        SoundFX::PlayButtonClick();
+        return true;
+    }
+
+    return false;
 }

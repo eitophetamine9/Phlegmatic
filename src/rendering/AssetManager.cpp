@@ -223,6 +223,11 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
         const char* name = "WAR MACE";
         int w = MeasureText(name, 11);
         DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+    } else if (weapon == WeaponType::TRUTH_SEEKER) {
+        DrawSword({ weaponAnchor.x - 16.0f, weaponAnchor.y + 16.0f }, -45.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 200, 50, 240 });
+        const char* name = "TRUTH SEEKER";
+        int w = MeasureText(name, 11);
+        DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, Color{ 255, 215, 70, 255 });
     }
 
     if (isSelected) {
