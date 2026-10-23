@@ -55,7 +55,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
         DrawRectangleRounded(arenaRec, 0.25f, 6, arenaBg);
         DrawRectangleRoundedLines(arenaRec, 0.25f, 6, arenaBorder);
 
-        const char* arenaText = "TEST ARENA (3 WAVES)";
+        const char* arenaText = "TEST ARENA - 5 STAGES";
         int arenaSize = 17;
         int arenaW = MeasureText(arenaText, arenaSize);
         DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 15), arenaSize, arenaHovered ? Color{ 255, 255, 255, 255 } : Color{ 235, 205, 255, 240 });
@@ -69,7 +69,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
         DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 16), arenaSize, Color{ 110, 120, 140, 180 });
 
         if (arenaHovered) {
-            const char* lockMsg = "Duel Zil in Chapter 1 (Win or accept Spare) to unlock the 3-Wave Combat Arena";
+            const char* lockMsg = "Duel Zil's Fragment in Chapter 1 to unlock the 5-Stage Combat Arena";
             int lmW = MeasureText(lockMsg, 11);
             DrawText(lockMsg, (int)(center.x - lmW * 0.5f), (int)(windowHeight - 72), 11, Color{ 255, 180, 70, 240 });
         }
@@ -92,7 +92,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
 
     // Quick Hint at bottom
     const char* hint = isArenaUnlocked
-        ? "Select [PLAY CAMPAIGN] for Story Chapter 1  |  [TEST ARENA] for the original 3 waves"
+        ? "Select [PLAY CAMPAIGN] for Story Chapter 1  |  [TEST ARENA] for the 5-Stage Arena"
         : "Press [PLAY CAMPAIGN] to begin Chapter 1: The Ruined Castle";
     int hintW = MeasureText(hint, 13);
     DrawText(hint, (int)(center.x - hintW * 0.5f), (int)(windowHeight - 45), 13, Color{ 140, 165, 195, 200 });

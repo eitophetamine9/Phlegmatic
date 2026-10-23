@@ -120,18 +120,18 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::ZIL_BOSS:
             radius = 28.0f;
             maxHealth = 380.0f;
-            defense = 28.0f; // Corrupted crusader armor (~22% reduction)
+            defense = 28.0f; // 1% power remnant crusader armor (~22% reduction)
             moveSpeed = 105.0f;
             attackRange = 175.0f;
             kitingRange = 0.0f;
-            windupDuration = 0.70f;
+            windupDuration = 0.65f;
             strikeDuration = 0.20f;
             recoveryDuration = 0.65f;
             stunDuration = 1.6f;
-            telegraph.shape = TelegraphShape::CONE;
-            telegraph.arcAngle = 125.0f;
-            telegraph.radius = 115.0f;
-            telegraph.warningColor = Color{ 255, 170, 40, 180 };
+            telegraph.shape = TelegraphShape::LINE;
+            telegraph.radius = 175.0f;
+            telegraph.width = 54.0f;
+            telegraph.warningColor = Color{ 255, 215, 80, 190 };
             bossAttackPhase = 0;
             isPerformingMeleeSmite = true;
             break;
@@ -148,7 +148,7 @@ std::string Enemy::GetName() const {
         case EnemyType::ARCHER: return "DEATHSEEKER ARCHER";
         case EnemyType::PYROMANCER: return "VOID PYROMANCER";
         case EnemyType::INQUISITOR_BOSS: return "THE GRAND INQUISITOR";
-        case EnemyType::ZIL_BOSS: return "ZIL THE CORRUPTED CRUSADER";
+        case EnemyType::ZIL_BOSS: return "ZIL'S FRAGMENT";
     }
     return "UNKNOWN";
 }
@@ -220,34 +220,33 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ZIL_BOSS) {
+                    // Truth Seeker signature 3-phase combat pattern:
                     if (bossAttackPhase == 0) {
-                        // Heavy Crusader Cleave (High-arc cone, parriable melee)
-                        windupDuration = 0.75f;
-                        stateTimer = windupDuration;
-                        telegraph.shape = TelegraphShape::CONE;
-                        telegraph.arcAngle = 125.0f;
-                        telegraph.radius = 120.0f;
-                        telegraph.warningColor = Color{ 255, 160, 40, 180 };
-                        isPerformingMeleeSmite = true;
-                    } else if (bossAttackPhase == 1) {
-                        // Shield Bash Charge (Linear charge)
+                        // Truth Seeker Light Combo: Upward Radiant Slice (Line / Box AoE)
                         windupDuration = 0.65f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
-                        telegraph.radius = 240.0f;
+                        telegraph.radius = 175.0f;
                         telegraph.width = 54.0f;
-                        telegraph.warningColor = Color{ 255, 100, 30, 190 };
+                        telegraph.warningColor = Color{ 255, 215, 80, 190 };
+                        isPerformingMeleeSmite = true;
+                    } else if (bossAttackPhase == 1) {
+                        // Truth Seeker Heavy Stage 1: Full 360 Dawnfire Tremor Sweep (Circle AoE)
+                        windupDuration = 0.75f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 150.0f;
+                        telegraph.warningColor = Color{ 255, 175, 45, 190 };
                         isPerformingMeleeSmite = true;
                     } else {
-                        // Corrupted Flame Wave (3 flame projectiles)
-                        windupDuration = 0.60f;
+                        // Truth Seeker Heavy Stage 2: Holy Beam Blast (Radiant Piercing Beam Projectile)
+                        windupDuration = 0.65f;
                         stateTimer = windupDuration;
-                        telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
-                        telegraph.spreadCount = 3;
-                        telegraph.spreadAngle = 0.25f;
-                        telegraph.radius = 320.0f;
-                        telegraph.warningColor = Color{ 255, 90, 40, 200 };
-                        isPerformingMeleeSmite = false; // damage comes from flame projectiles
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 350.0f;
+                        telegraph.width = 24.0f;
+                        telegraph.warningColor = Color{ 120, 230, 255, 210 };
+                        isPerformingMeleeSmite = false; // Projectile deals damage!
                     }
                 }
             } else {
@@ -367,32 +366,26 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     // Cycle boss attack phase
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
                 } else if (type == EnemyType::ZIL_BOSS) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+
                     if (bossAttackPhase == 0) {
-                        // Heavy Cleave: visual slash trail + screen shake
-                        float rad = facingAngle * DEG2RAD;
-                        particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 170, 40, 255 });
-                        particles.AddScreenShake(5.0f, 0.18f);
+                        // Phase 0: Truth Seeker Upward Radiant Slice (Line / Box strike)
+                        particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 220, 90, 255 });
+                        particles.AddScreenShake(4.5f, 0.15f);
                         SoundFX::PlayCrusaderClash();
                     } else if (bossAttackPhase == 1) {
-                        // Shield Charge: dash forward
-                        float rad = facingAngle * DEG2RAD;
-                        velocity = { cosf(rad) * 620.0f, sinf(rad) * 620.0f };
-                        particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 120, 40, 255 });
-                        particles.AddScreenShake(4.5f, 0.15f);
-                        SoundFX::PlayDash();
-                        SoundFX::PlayCrusaderClash();
+                        // Phase 1: Truth Seeker Dawnfire 360 Tremor Sweep
+                        particles.SpawnSparks(position, Color{ 255, 185, 50, 255 }, 24, 160.0f);
+                        particles.AddScreenShake(6.0f, 0.20f);
+                        SoundFX::PlayHeavyAttack();
                     } else {
-                        // Corrupted Flame Wave: release 3 corrupted flame projectiles
-                        float baseRad = facingAngle * DEG2RAD;
-                        float angles[3] = { baseRad - 0.25f, baseRad, baseRad + 0.25f };
-                        for (int i = 0; i < 3; i++) {
-                            Vector2 dir = { cosf(angles[i]), sinf(angles[i]) };
-                            Vector2 spawnPos = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
-                            Vector2 projVel = { dir.x * 340.0f, dir.y * 340.0f };
-                            outProjectiles.emplace_back(spawnPos, projVel, 8.0f, 22.0f, ProjectileType::VOID_ORB, false);
-                        }
+                        // Phase 2: Truth Seeker Holy Beam Projectile
+                        Vector2 spawnPos = { position.x + forwardDir.x * (radius + 10.0f), position.y + forwardDir.y * (radius + 10.0f) };
+                        Vector2 projVel = { forwardDir.x * 380.0f, forwardDir.y * 380.0f };
+                        outProjectiles.emplace_back(spawnPos, projVel, 9.0f, 26.0f, ProjectileType::HOLY_BEAM, false);
                         SoundFX::PlayProjectileShoot();
-                        particles.SpawnSparks(position, Color{ 220, 60, 200, 255 }, 14, 120.0f);
+                        particles.SpawnSparks(spawnPos, Color{ 140, 235, 255, 255 }, 16, 140.0f);
                         particles.AddScreenShake(3.5f, 0.12f);
                     }
                     // Cycle boss attack phase

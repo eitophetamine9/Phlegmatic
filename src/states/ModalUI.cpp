@@ -70,9 +70,9 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
         { "Mouse Cursor",  "Aiming",   "Player rotates facing direction and directs attacks towards reticle.", Color{ 80, 140, 220, 255 } },
         { "Left Click",    "Light Atk","Fast, agile combo slash arc. Low stamina, rapid recovery.", Color{ 100, 220, 255, 255 } },
         { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
-        { "Q Key",         "DASH",     "High-velocity directional dash with i-frames (invulnerability). Evade attacks!", Color{ 120, 240, 180, 255 } },
+        { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
         { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
-        { "E Key",         "Interact", "Equip weapon at pedestals (Sword, Daggers, Mace) or enter Arena Portal.", Color{ 200, 150, 255, 255 } },
+        { "E Key",         "Interact", "Equip weapon at pedestals or enter Arena Portal.", Color{ 200, 150, 255, 255 } },
         { "C / TAB Key",   "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
         { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
     };
@@ -244,7 +244,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             { WeaponType::SWORD, "Crusader's Broadsword" },
             { WeaponType::DAGGERS, "Dual Daggers" },
             { WeaponType::MACE, "War Mace" },
-            { WeaponType::TRUTH_SEEKER, "Truth Seeker (Legendary Holy Blade)" }
+            { WeaponType::TRUTH_SEEKER, "Truth Seeker (Partial)" }
         };
 
         for (int i = 0; i < 4; i++) {
@@ -265,7 +265,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             std::string subDesc = isUnlocked
                 ? (isEquipped ? "[EQUIPPED ACTIVE BLADE]" : "Click or press [E] in lobby to equip")
-                : "Locked // Defeat Zil the Corrupted Crusader in Chapter 1";
+                : "Locked // Defeat Zil's Fragment in Chapter 1";
             DrawText(subDesc.c_str(), (int)col1X + 16, (int)itemY + 34, 10, isEquipped ? Color{ 255, 220, 100, 255 } : (isUnlocked ? Color{ 160, 190, 220, 220 } : Color{ 210, 90, 90, 220 }));
 
             if (isUnlocked && !isEquipped && isHov && isMousePressed) {
@@ -289,7 +289,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText(hpStr.c_str(), (int)col2X + 175, (int)contentY + 36, 11, Color{ 255, 255, 255, 255 });
 
         DrawText("Armor Defense:", (int)col2X + 20, (int)contentY + 56, 11, Color{ 140, 210, 255, 240 });
-        std::string defStr = std::to_string((int)player.GetDefense()) + " (~13% Damage Mitigation)";
+        std::string defStr = std::to_string((int)player.GetDefense()) + " - ~13% Damage Mitigation";
         DrawText(defStr.c_str(), (int)col2X + 175, (int)contentY + 56, 11, Color{ 100, 240, 200, 255 });
 
         DrawText("Stamina Pool:", (int)col2X + 20, (int)contentY + 76, 11, Color{ 140, 210, 255, 240 });
@@ -297,7 +297,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText(stamStr.c_str(), (int)col2X + 175, (int)contentY + 76, 11, Color{ 255, 255, 255, 255 });
 
         DrawText("Stamina Regen:", (int)col2X + 20, (int)contentY + 96, 11, Color{ 140, 210, 255, 240 });
-        DrawText("35 / sec (Regenerates during neutral)", (int)col2X + 175, (int)contentY + 96, 11, Color{ 255, 255, 255, 255 });
+        DrawText("35 / sec - Regenerates during neutral", (int)col2X + 175, (int)contentY + 96, 11, Color{ 255, 255, 255, 255 });
 
         DrawText("Dodge Invulnerability:", (int)col2X + 20, (int)contentY + 116, 11, Color{ 140, 210, 255, 240 });
         DrawText("0.18s evasive i-frames on [Q] Dash", (int)col2X + 175, (int)contentY + 116, 11, Color{ 240, 245, 255, 255 });
@@ -309,7 +309,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("+50% damage boost following parries", (int)col2X + 175, (int)contentY + 160, 11, Color{ 255, 220, 80, 255 });
 
         DrawText("Movement Speed:", (int)col2X + 20, (int)contentY + 182, 11, Color{ 140, 210, 255, 240 });
-        DrawText("280 units/sec (8-directional physics)", (int)col2X + 175, (int)contentY + 182, 11, Color{ 240, 245, 255, 255 });
+        DrawText("280 units/sec - 8-directional physics", (int)col2X + 175, (int)contentY + 182, 11, Color{ 240, 245, 255, 255 });
 
         // Relics & Quest Items Section
         float relicsY = contentY + 236.0f;
@@ -338,7 +338,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         int totalFrags = (int)frags.size();
         int discoveredFrags = player.GetInventory().GetDiscoveredFragmentCount();
 
-        std::string listTitle = "LORE FRAGMENTS (" + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " FOUND)";
+        std::string listTitle = "LORE FRAGMENTS: " + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " FOUND";
         DrawText(listTitle.c_str(), (int)col1X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
 
         for (int i = 0; i < totalFrags; i++) {
@@ -443,22 +443,22 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
 
-    int headerW = MeasureText("DEFEAT // ZIL'S JUDGMENT", 20);
-    DrawText("DEFEAT // ZIL'S JUDGMENT", (int)(modalX + (modalW - headerW) * 0.5f), (int)modalY + 28, 20, Color{ 255, 90, 70, 255 });
+    int headerW = MeasureText("DEFEAT // ZIL'S FRAGMENT [1% TRUE POWER]", 20);
+    DrawText("DEFEAT // ZIL'S FRAGMENT [1% TRUE POWER]", (int)(modalX + (modalW - headerW) * 0.5f), (int)modalY + 28, 20, Color{ 255, 90, 70, 255 });
     DrawLine((int)modalX + 50, (int)modalY + 62, (int)(modalX + modalW - 50), (int)modalY + 62, Color{ 140, 70, 30, 200 });
 
     int choiceResult = 0;
 
     if (canRetry) {
-        int subW = MeasureText("THE FALLEN CRUSADER STANDS VICTORIOUS", 15);
-        DrawText("THE FALLEN CRUSADER STANDS VICTORIOUS", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 255, 205, 80, 255 });
+        int subW = MeasureText("ZIL'S FRAGMENT STANDS VICTORIOUS", 15);
+        DrawText("ZIL'S FRAGMENT STANDS VICTORIOUS", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 255, 205, 80, 255 });
 
         std::string quoteText =
-            "“You fought with fierce intent, wanderer, but Truth Seeker remains unyielding in these hands.\n\n"
-            "Will you rise once more and test your blade... or yield and carry onward into Zyphden?”";
+            "You fought with fierce intent, wanderer, but Truth Seeker remains unyielding in this fragment's grasp.\n\n"
+            "Will you rise once more and test your blade... or yield and regroup?";
         DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
 
-        const char* noteText = "Honor bound: You are granted a singular retry duel to claim the legendary blade.";
+        const char* noteText = "Honor bound: You are granted a singular retry duel to claim Truth Seeker (Partial).";
         int noteW = MeasureText(noteText, 11);
         DrawText(noteText, (int)(modalX + (modalW - noteW) * 0.5f), (int)modalY + 280, 11, Color{ 255, 170, 60, 220 });
 
@@ -473,8 +473,8 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
         bool hoverProceed = CheckCollisionPointRec(mousePos, btnProceed);
         DrawRectangleRounded(btnProceed, 0.2f, 6, hoverProceed ? Color{ 35, 55, 85, 255 } : Color{ 22, 28, 42, 240 });
         DrawRectangleRoundedLines(btnProceed, 0.2f, 6, hoverProceed ? Color{ 140, 210, 255, 255 } : Color{ 90, 130, 180, 230 });
-        int btn2W = MeasureText("ACCEPT SPARE & PROCEED", 14);
-        DrawText("ACCEPT SPARE & PROCEED", (int)(btnProceed.x + (btnProceed.width - btn2W) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 180, 215, 255, 240 });
+        int btn2W = MeasureText("ACCEPT SPARE & REGROUP", 14);
+        DrawText("ACCEPT SPARE & REGROUP", (int)(btnProceed.x + (btnProceed.width - btn2W) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 180, 215, 255, 240 });
 
         if (isMousePressed) {
             if (hoverRetry) {
@@ -486,13 +486,12 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
             }
         }
     } else {
-        int subW = MeasureText("SPARED BY THE CORRUPTED CRUSADER", 15);
-        DrawText("SPARED BY THE CORRUPTED CRUSADER", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 140, 210, 255, 255 });
+        int subW = MeasureText("SPARED BY ZIL'S FRAGMENT", 15);
+        DrawText("SPARED BY ZIL'S FRAGMENT", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 140, 210, 255, 255 });
 
         std::string quoteText =
-            "“You have exhausted your trials, yet your spirit refuses to be extinguished.\n\n"
-            "I shall not strike down one who dares to question the Lord Liege. Keep your broadsword and walk through the northern gate into Zyphden.\n\n"
-            "Seek the scattered chronicles... and pierce the truth of King Charlz.”";
+            "You have exhausted your trials, yet your spirit refuses to be extinguished.\n\n"
+            "Regroup, wanderer. Only by conquering this fragment can you claim Truth Seeker (Partial) and advance to Zyphden.";
         DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
 
         Rectangle btnProceed = { modalX + 170.0f, modalY + 330.0f, 400.0f, 54.0f };
@@ -600,10 +599,10 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     DrawText(wStatsStr.c_str(), (int)col1X + 20, (int)sec2Y + 84, 12, Color{ 160, 190, 220, 230 });
 
     if (player.GetWeapon() == WeaponType::TRUTH_SEEKER) {
-        DrawText("SPECIAL: Dawnfire Rune Blade (2-Hit Light Combo + Area Shockwave)", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 255, 175, 45, 255 });
-        DrawText("Earned by defeating Zil the Corrupted Crusader at the High Altar.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 180, 210, 240, 220 });
+        DrawText("SPECIAL: Dawnfire Rune Blade [2-Hit Light Combo + Area Shockwave]", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 255, 175, 45, 255 });
+        DrawText("Earned by defeating Zil's Fragment at the High Altar.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 180, 210, 240, 220 });
     } else {
-        DrawText("SPECIAL: Basic steel armament. Spared by Zil the Corrupted Crusader.", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 160, 200, 240, 220 });
+        DrawText("SPECIAL: Basic steel armament. Spared by Zil's Fragment.", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 160, 200, 240, 220 });
         DrawText("Carried into the borderlands to begin the journey.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 150, 175, 200, 200 });
     }
 
@@ -624,7 +623,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     DrawText("Fragment II: The Five Realms of Charlz - Uncovered", (int)col2X + 20, (int)sec2Y + 104, 11, Color{ 200, 225, 245, 240 });
     
     bool hasFrag3 = player.GetInventory().GetFragments().size() > 2 && player.GetInventory().GetFragments()[2].discovered;
-    DrawText(hasFrag3 ? "Fragment III: The King's Madness - Uncovered" : "Fragment III: The King's Madness - Shrouded (Defeat Zil)", (int)col2X + 20, (int)sec2Y + 122, 11, hasFrag3 ? Color{ 255, 215, 80, 240 } : Color{ 130, 145, 170, 200 });
+    DrawText(hasFrag3 ? "Fragment III: Zil's Holy Oath - Uncovered" : "Fragment III: Zil's Holy Oath - Shrouded [Defeat Zil's Fragment]", (int)col2X + 20, (int)sec2Y + 122, 11, hasFrag3 ? Color{ 255, 215, 80, 240 } : Color{ 130, 145, 170, 200 });
 
     DrawText("Tip: Press [I] anywhere in the world to open your Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
 

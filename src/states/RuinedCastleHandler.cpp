@@ -64,8 +64,8 @@ void RuinedCastleHandler::Update(
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
             zilEncounterActive = true;
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Rise then, and face Truth Seeker once more!”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Rise then, and face Truth Seeker once more!";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
             zilDialogueTimer = 4.0f;
             particles.SpawnFloatingText({ 800.0f, 290.0f }, "DUEL RESTARTED!", Color{ 255, 200, 60, 255 }, 24.0f);
@@ -78,11 +78,11 @@ void RuinedCastleHandler::Update(
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“You possess spirit, wanderer... but Truth Seeker only yields to one who can conquer me. Regroup and challenge me again!”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "You possess spirit, wanderer... but Truth Seeker yields only to one who can conquer me. Regroup and challenge me again!";
             zilDialogueColor = Color{ 140, 210, 255, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL — MUST DEFEAT ZIL TO PASS!", Color{ 140, 220, 255, 255 }, 24.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL'S FRAGMENT - MUST DEFEAT TO PASS!", Color{ 140, 220, 255, 255 }, 24.0f);
             return;
         }
         return;
@@ -185,8 +185,8 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Halt, intruder! None shall pass to Zyphden without testing their blade against Truth Seeker!”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Halt, intruder! You face a mere fragment possessing 1% of my true power... yet Truth Seeker's blade shall test your resolve!";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
             zilDialogueTimer = 5.0f;
             particles.AddScreenShake(6.0f, 0.25f);
@@ -212,19 +212,19 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
 
-            // Award Truth Seeker!
+            // Award Truth Seeker (Partial)!
             player.GetInventory().UnlockWeapon(WeaponType::TRUTH_SEEKER);
             player.SetWeapon(WeaponType::TRUTH_SEEKER);
 
-            // Unlock Lore Fragment III: The King's Madness
+            // Unlock Lore Fragment III: Zil's Holy Oath
             player.GetInventory().UnlockFragment("frag_03");
 
             map.SetGateOpen(true);
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“You possess the resolve... Take Truth Seeker and pierce the illusions of Charlz...”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Even at 1% of my power, you persevered... Claim Truth Seeker (Partial) and uncover the madness of King Charlz.";
             zilDialogueColor = Color{ 255, 215, 60, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED 'TRUTH SEEKER'!", Color{ 255, 215, 60, 255 }, 26.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
             particles.AddScreenShake(7.0f, 0.3f);
         }
     }
@@ -252,7 +252,7 @@ void RuinedCastleHandler::Update(
     // If player attempts to interact at the gate before defeating Zil
     if (!zilDefeated && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
-        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED — MUST DEFEAT ZIL TO ADVANCE!", Color{ 255, 80, 80, 255 }, 20.0f);
+        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED - MUST DEFEAT ZIL'S FRAGMENT TO ADVANCE!", Color{ 255, 80, 80, 255 }, 20.0f);
         SoundFX::PlayHitImpact();
     }
 

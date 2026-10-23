@@ -167,7 +167,7 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Vector2 normal = { -dir.y, dir.x };
         Vector2 swordHand = { enemy.position.x + normal.x * (enemy.radius * 0.75f), enemy.position.y + normal.y * (enemy.radius * 0.75f) };
 
-        // Zil wields the legendary broadsword "Truth Seeker"!
+        // Zil's Fragment wields Truth Seeker (Partial)!
         AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 170, 30, 220 });
 
         // Crusader shoulder pauldrons

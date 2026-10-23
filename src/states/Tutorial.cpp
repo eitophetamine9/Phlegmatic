@@ -160,7 +160,7 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
         case TutorialStep::GATE_OPENED:
             popupTitle = "THE UPPER SANCTUARY UNSEALED";
             popupBody = "With the Ruin Sentinel vanquished, the ward across the High Altar steps has dissipated.\n\nClimb the carved stone steps north onto the elevated high dais to face the keeper of Truth Seeker.";
-            popupHint = "Advance north up the steps [Y <= 420] to confront Zil";
+            popupHint = "Advance north up the steps [Y <= 420] to confront Zil's Fragment";
             break;
         case TutorialStep::COMPLETED:
             showPopup = false;
@@ -371,7 +371,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
         case TutorialStep::GATE_OPENED: {
             currentObjectiveText = "THE HIGH ALTAR: The sanctuary steps are clear! Advance north to the High Altar.";
-            currentControlHint = "Climb the steps north [Y <= 420] to confront Zil";
+            currentControlHint = "Climb the steps north [Y <= 420] to confront Zil's Fragment";
 
             if (playerPos.y <= 420.0f) {
                 currentStep = TutorialStep::COMPLETED;
@@ -381,7 +381,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::COMPLETED: {
-            currentObjectiveText = "ZIL'S SANCTUARY: Prepare for battle against Zil the Corrupted Crusader.";
+            currentObjectiveText = "ZIL'S SANCTUARY: Prepare for battle against Zil's Fragment [1% True Power].";
             currentControlHint = "Combat ready";
             break;
         }

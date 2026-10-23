@@ -49,7 +49,7 @@ void Inventory::InitDefault() {
         "Fragment III: Zil's Holy Oath",
         "Ruined Castle of the Vanguard",
         "Zil, once first champion of the Sun Vanguard, swore to purge the corruption...",
-        "Zil, once first champion of the Sun Vanguard, swore an unbroken oath to purge the dark madness that seized King Charlz.\n\nYet within these desecrated castle halls, the miasma took root in his righteous heart. Now clutching the sacred royal broadsword 'Truth Seeker', he slays all who draw near, believing he alone guards the realm from absolute ruin.",
+        "Zil, once first champion of the Sun Vanguard, swore an unbroken oath to purge the dark madness that seized King Charlz.\n\nWithin these desecrated castle halls, a remnant fragment possessing 1% of his true power guards the holy blade 'Truth Seeker (Partial)'. Believing he alone guards the realm from absolute ruin, he slays all who draw near.",
         false,
         false
     });

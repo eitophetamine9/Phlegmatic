@@ -52,8 +52,8 @@ inline WeaponStats GetWeaponStats(WeaponType type) {
             };
         case WeaponType::TRUTH_SEEKER:
             return {
-                "Truth Seeker",
-                "Legendary holy broadsword. Features a fluid 2-hit combo (horizontal sweep into upward radiant slice) and dual 360 dawnfire heavy swings firing a 10% defense piercing beam.",
+                "Truth Seeker (Partial)",
+                "Legendary holy broadsword fragment containing 1% of the primordial blade power. Features a fluid 2-hit combo: horizontal sweep into upward radiant slice, and dual 360 dawnfire heavy swings firing a 10% defense piercing beam.",
                 46.0f, 98.0f, 130.0f, 0.22f, 0.26f, 14.0f,
                 120.0f, 145.0f, 360.0f, 0.35f, 0.40f, 3.80f, 36.0f,
                 16.0f, 0.65f

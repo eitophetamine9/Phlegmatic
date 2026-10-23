@@ -14,7 +14,7 @@ enum class EnemyType {
     ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
     PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
     INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
-    ZIL_BOSS         // Zil the Corrupted Crusader: Cleave, Charge, Flame Wave
+    ZIL_BOSS         // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
 };
 
 enum class EnemyState {

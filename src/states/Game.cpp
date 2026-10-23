@@ -290,7 +290,7 @@ void Game::Update(float dt) {
 
             if ((near && IsKeyPressed(KEY_E)) || clicked) {
                 if (ped.weapon == WeaponType::TRUTH_SEEKER && !player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
-                    particles.SpawnFloatingText(player.GetPosition(), "LOCKED — DEFEAT ZIL IN CHAPTER 1!", Color{ 255, 90, 90, 255 }, 20.0f);
+                    particles.SpawnFloatingText(player.GetPosition(), "LOCKED - DEFEAT ZIL'S FRAGMENT IN CHAPTER 1!", Color{ 255, 90, 90, 255 }, 20.0f);
                     SoundFX::PlayHitImpact();
                 } else if (player.GetWeapon() != ped.weapon) {
                     player.SetWeapon(ped.weapon);

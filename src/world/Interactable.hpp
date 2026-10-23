@@ -191,7 +191,7 @@ struct AdhesiveBandage {
         DrawCircle((int)glintX, (int)glintY, 2.0f, Color{ 255, 255, 255, (unsigned char)(180 + 75 * sinf(bobTimer * 6.0f)) });
 
         // Name tag
-        const char* label = "ADHESIVE BANDAGE (+30 HP)";
+        const char* label = "ADHESIVE BANDAGE +30 HP";
         int w = MeasureText(label, 10);
         DrawText(label, (int)(drawPos.x - w * 0.5f), (int)(drawPos.y - radius - 16.0f), 10, Color{ 120, 255, 170, 220 });
     }
