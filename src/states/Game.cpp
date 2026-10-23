@@ -271,42 +271,13 @@ void Game::CheckCombatCollisions() {
 void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
 
-    // Toggle Controls Menu modal
-    if (IsKeyPressed(KEY_C)) {
-        showControlsModal = !showControlsModal;
-        if (showControlsModal) {
-            showInventoryModal = false;
-            SoundFX::PlayButtonClick();
-        }
-    }
-
-    // Toggle Inventory & Lore Journal modal
-    if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
-        showInventoryModal = !showInventoryModal;
-        if (showInventoryModal) {
+    // If Controls Modal is active
+    if (showControlsModal) {
+        if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_TAB)) {
             showControlsModal = false;
             SoundFX::PlayButtonClick();
+            return;
         }
-    }
-
-    // Check HUD top right button clicks in Lobby & Arena
-    if (!showControlsModal && !showInventoryModal) {
-        if (currentState == GameState::LOBBY || currentState == GameState::ARENA) {
-            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 275), 16.0f, 120.0f, 32.0f };
-            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 140), 16.0f, 116.0f, 32.0f };
-            if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                showInventoryModal = true;
-                showControlsModal = false;
-                SoundFX::PlayButtonClick();
-            } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                showControlsModal = true;
-                showInventoryModal = false;
-                SoundFX::PlayButtonClick();
-            }
-        }
-    }
-
-    if (showControlsModal) {
         bool close = GameUI::DrawControlsModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         if (close) {
             showControlsModal = false;
@@ -314,12 +285,55 @@ void Game::Update(float dt) {
         return;
     }
 
+    // If Inventory & Lore Journal Modal is active
     if (showInventoryModal) {
+        if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ESCAPE)) {
+            showInventoryModal = false;
+            SoundFX::PlayButtonClick();
+            return;
+        }
         bool close = GameUI::DrawInventoryModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
         if (close) {
             showInventoryModal = false;
         }
         return;
+    }
+
+    // Toggle Controls Menu modal when closed
+    if (IsKeyPressed(KEY_C)) {
+        showControlsModal = true;
+        showInventoryModal = false;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
+    // Toggle Inventory & Lore Journal modal when closed
+    if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
+        showInventoryModal = true;
+        showControlsModal = false;
+        inventoryActiveTab = 1; // Direct directly to Lore Journal tab
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
+    // Check HUD top right button clicks in Ruined Castle, Lobby & Arena
+    if (!showControlsModal && !showInventoryModal) {
+        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA) {
+            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 275), 16.0f, 120.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 140), 16.0f, 116.0f, 32.0f };
+            if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showInventoryModal = true;
+                showControlsModal = false;
+                inventoryActiveTab = 1;
+                SoundFX::PlayButtonClick();
+                return;
+            } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showControlsModal = true;
+                showInventoryModal = false;
+                SoundFX::PlayButtonClick();
+                return;
+            }
+        }
     }
 
     // 1. TITLE SCREEN STATE

@@ -158,7 +158,7 @@ bool GameUI::DrawControlsModal(int windowWidth, int windowHeight, Vector2 mouseP
     int clW = MeasureText(clText, 12);
     DrawText(clText, (int)(closeX + (closeW - clW) * 0.5f), (int)(closeY + 13), 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 220, 245, 220 });
 
-    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_C) || IsKeyPressed(KEY_TAB)) {
+    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
         SoundFX::PlayButtonClick();
         return true; // Close requested
     }
@@ -753,7 +753,7 @@ bool GameUI::DrawInventoryModal(int windowWidth, int windowHeight, Vector2 mouse
         }
     }
 
-    if (closeClicked || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_I)) {
+    if (closeClicked || IsKeyPressed(KEY_ESCAPE)) {
         SoundFX::PlayButtonClick();
         return true;
     }
