@@ -33,6 +33,7 @@ public:
     void SpawnDashTrail(Vector2 pos, Vector2 dir, Color color);
     void SpawnSlashTrail(Vector2 pos, Vector2 dir, Color color);
     void SpawnFloatingText(Vector2 pos, const std::string& text, Color color, float size = 20.0f);
+    void Clear();
 
     // Screen shake
     void AddScreenShake(float intensity, float duration);

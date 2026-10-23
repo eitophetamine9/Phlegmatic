@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "../combat/CombatTypes.hpp"
 #include "../combat/Weapon.hpp"
+#include "../combat/Inventory.hpp"
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 
@@ -22,6 +23,7 @@ public:
     // Damage handling
     bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles);
     void Heal(float amount);
+    void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
     // Weapon equipment
     void SetWeapon(WeaponType newWeapon);
@@ -52,6 +54,12 @@ public:
     void SetAttackHit() { currentAttack.hasHit = true; }
     void OnParrySuccessful(ParticleSystem& particles);
 
+    // Inventory & Lore
+    Inventory& GetInventory() { return inventory; }
+    const Inventory& GetInventory() const { return inventory; }
+
+    friend class PlayerRenderer;
+
 private:
     Vector2 position;
     Vector2 velocity;
@@ -59,6 +67,7 @@ private:
     float facingAngle;
 
     WeaponType currentWeapon;
+    Inventory inventory;
 
     // Stats
     float health;

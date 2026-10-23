@@ -42,6 +42,14 @@ inline WeaponStats GetWeaponStats(WeaponType type) {
                 95.0f, 135.0f, 150.0f, 0.26f, 0.38f, 3.20f, 42.0f,
                 26.0f, 1.25f
             };
+        case WeaponType::TRUTH_SEEKER:
+            return {
+                "Truth Seeker",
+                "Legendary royal greatsword radiating holy dawnfire. Colossal reach, crushing impact, and superior recovery.",
+                48.0f, 95.0f, 130.0f, 0.20f, 0.28f, 16.0f,
+                115.0f, 140.0f, 160.0f, 0.22f, 0.32f, 2.20f, 36.0f,
+                16.0f, 0.65f
+            };
         case WeaponType::SWORD:
         default:
             return {

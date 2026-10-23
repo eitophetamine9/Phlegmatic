@@ -1,4 +1,5 @@
 #include "Enemy.hpp"
+#include "EnemyRenderer.hpp"
 #include "../core/SoundFX.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "raymath.h"
@@ -108,6 +109,24 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.radius = 180.0f;
             telegraph.warningColor = Color{ 255, 180, 40, 170 };
             break;
+
+        case EnemyType::ZIL_BOSS:
+            radius = 28.0f;
+            maxHealth = 380.0f;
+            moveSpeed = 105.0f;
+            attackRange = 175.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.70f;
+            strikeDuration = 0.20f;
+            recoveryDuration = 0.65f;
+            stunDuration = 1.6f;
+            telegraph.shape = TelegraphShape::CONE;
+            telegraph.arcAngle = 125.0f;
+            telegraph.radius = 115.0f;
+            telegraph.warningColor = Color{ 255, 170, 40, 180 };
+            bossAttackPhase = 0;
+            isPerformingMeleeSmite = true;
+            break;
     }
 
     health = maxHealth;
@@ -121,6 +140,7 @@ std::string Enemy::GetName() const {
         case EnemyType::ARCHER: return "DEATHSEEKER ARCHER";
         case EnemyType::PYROMANCER: return "VOID PYROMANCER";
         case EnemyType::INQUISITOR_BOSS: return "THE GRAND INQUISITOR";
+        case EnemyType::ZIL_BOSS: return "ZIL THE CORRUPTED CRUSADER";
     }
     return "UNKNOWN";
 }
@@ -188,6 +208,35 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.radius = 190.0f;
                         telegraph.warningColor = Color{ 255, 60, 60, 180 };
                         isPerformingMeleeSmite = true;
+                    }
+                } else if (type == EnemyType::ZIL_BOSS) {
+                    if (bossAttackPhase == 0) {
+                        // Heavy Crusader Cleave (High-arc cone, parriable melee)
+                        windupDuration = 0.75f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CONE;
+                        telegraph.arcAngle = 125.0f;
+                        telegraph.radius = 120.0f;
+                        telegraph.warningColor = Color{ 255, 160, 40, 180 };
+                        isPerformingMeleeSmite = true;
+                    } else if (bossAttackPhase == 1) {
+                        // Shield Bash Charge (Linear charge)
+                        windupDuration = 0.65f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 240.0f;
+                        telegraph.width = 54.0f;
+                        telegraph.warningColor = Color{ 255, 100, 30, 190 };
+                        isPerformingMeleeSmite = true;
+                    } else {
+                        // Corrupted Flame Wave (Sweeping blade releasing flame projectiles)
+                        windupDuration = 0.60f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CONE;
+                        telegraph.arcAngle = 65.0f;
+                        telegraph.radius = 300.0f;
+                        telegraph.warningColor = Color{ 220, 60, 200, 180 };
+                        isPerformingMeleeSmite = false; // damage comes from flame projectiles
                     }
                 }
             } else {
@@ -306,6 +355,37 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
 
                     // Cycle boss attack phase
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
+                } else if (type == EnemyType::ZIL_BOSS) {
+                    if (bossAttackPhase == 0) {
+                        // Heavy Cleave: visual slash trail + screen shake
+                        float rad = facingAngle * DEG2RAD;
+                        particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 170, 40, 255 });
+                        particles.AddScreenShake(5.0f, 0.18f);
+                        SoundFX::PlayCrusaderClash();
+                    } else if (bossAttackPhase == 1) {
+                        // Shield Charge: dash forward
+                        float rad = facingAngle * DEG2RAD;
+                        velocity = { cosf(rad) * 620.0f, sinf(rad) * 620.0f };
+                        particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 120, 40, 255 });
+                        particles.AddScreenShake(4.5f, 0.15f);
+                        SoundFX::PlayDash();
+                        SoundFX::PlayCrusaderClash();
+                    } else {
+                        // Corrupted Flame Wave: release 3 corrupted flame projectiles
+                        float baseRad = facingAngle * DEG2RAD;
+                        float angles[3] = { baseRad - 0.25f, baseRad, baseRad + 0.25f };
+                        for (int i = 0; i < 3; i++) {
+                            Vector2 dir = { cosf(angles[i]), sinf(angles[i]) };
+                            Vector2 spawnPos = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
+                            Vector2 projVel = { dir.x * 340.0f, dir.y * 340.0f };
+                            outProjectiles.emplace_back(spawnPos, projVel, 8.0f, 22.0f, ProjectileType::VOID_ORB, false);
+                        }
+                        SoundFX::PlayProjectileShoot();
+                        particles.SpawnSparks(position, Color{ 220, 60, 200, 255 }, 14, 120.0f);
+                        particles.AddScreenShake(3.5f, 0.12f);
+                    }
+                    // Cycle boss attack phase
+                    bossAttackPhase = (bossAttackPhase + 1) % 3;
                 }
             }
             break;
@@ -410,112 +490,10 @@ bool Enemy::CheckHit(const AttackInfo& attack) const {
 }
 
 void Enemy::DrawTelegraph() const {
-    if (state != EnemyState::TELEGRAPH_WINDUP && state != EnemyState::STRIKE) return;
-
-    float alphaProgress = (state == EnemyState::STRIKE) ? 0.95f : telegraph.progress;
-    Color activeOutline = Color{ 255, 230, 90, 240 };
-    Color dangerFill = telegraph.warningColor;
-    dangerFill.a = (unsigned char)(dangerFill.a * alphaProgress);
-
-    switch (telegraph.shape) {
-        case TelegraphShape::CONE: {
-            float startAngle = telegraph.angle - telegraph.arcAngle * 0.5f;
-            float endAngle = telegraph.angle + telegraph.arcAngle * 0.5f;
-
-            DrawCircleSectorLines(position, telegraph.radius, startAngle, endAngle, 20, activeOutline);
-            float currentRadius = telegraph.radius * (0.3f + 0.7f * telegraph.progress);
-            DrawCircleSector(position, currentRadius, startAngle, endAngle, 20, dangerFill);
-
-            float rad1 = startAngle * DEG2RAD;
-            float rad2 = endAngle * DEG2RAD;
-            Vector2 p1 = { position.x + cosf(rad1) * telegraph.radius, position.y + sinf(rad1) * telegraph.radius };
-            Vector2 p2 = { position.x + cosf(rad2) * telegraph.radius, position.y + sinf(rad2) * telegraph.radius };
-            DrawLineEx(position, p1, 2.0f, activeOutline);
-            DrawLineEx(position, p2, 2.0f, activeOutline);
-            break;
-        }
-
-        case TelegraphShape::CIRCLE: {
-            DrawCircleLines((int)position.x, (int)position.y, telegraph.radius, activeOutline);
-            DrawCircleLines((int)position.x, (int)position.y, telegraph.radius + 2.0f, Color{ 255, 60, 60, 180 });
-
-            float currentRadius = telegraph.radius * telegraph.progress;
-            DrawCircle((int)position.x, (int)position.y, currentRadius, dangerFill);
-            break;
-        }
-
-        case TelegraphShape::LINE: {
-            float rad = telegraph.angle * DEG2RAD;
-            Vector2 dir = { cosf(rad), sinf(rad) };
-            Vector2 normal = { -dir.y, dir.x };
-            float halfWidth = telegraph.width * 0.5f;
-
-            Vector2 c1 = { position.x - normal.x * halfWidth, position.y - normal.y * halfWidth };
-            Vector2 c2 = { position.x + normal.x * halfWidth, position.y + normal.y * halfWidth };
-            Vector2 c3 = { c2.x + dir.x * telegraph.radius, c2.y + dir.y * telegraph.radius };
-            Vector2 c4 = { c1.x + dir.x * telegraph.radius, c1.y + dir.y * telegraph.radius };
-
-            DrawLineEx(c1, c2, 2.0f, activeOutline);
-            DrawLineEx(c2, c3, 2.0f, activeOutline);
-            DrawLineEx(c3, c4, 2.0f, activeOutline);
-            DrawLineEx(c4, c1, 2.0f, activeOutline);
-
-            float fillLength = telegraph.radius * telegraph.progress;
-            Vector2 f3 = { c2.x + dir.x * fillLength, c2.y + dir.y * fillLength };
-            Vector2 f4 = { c1.x + dir.x * fillLength, c1.y + dir.y * fillLength };
-            DrawTriangle(c1, c2, f3, dangerFill);
-            DrawTriangle(c1, f3, f4, dangerFill);
-            break;
-        }
-    }
+    EnemyRenderer::DrawTelegraph(*this);
 }
 
 void Enemy::Draw() const {
-    if (state == EnemyState::DEAD) return;
-
-    Color bodyColor = Color{ 160, 40, 50, 255 };
-    if (type == EnemyType::BRUTE) {
-        bodyColor = Color{ 110, 30, 45, 255 };
-    } else if (type == EnemyType::CHARGER) {
-        bodyColor = Color{ 180, 80, 30, 255 };
-    } else if (type == EnemyType::ARCHER) {
-        bodyColor = Color{ 40, 110, 85, 255 }; // Forest stealth hunter
-    } else if (type == EnemyType::PYROMANCER) {
-        bodyColor = Color{ 95, 30, 140, 255 }; // Occult purple void
-    } else if (type == EnemyType::INQUISITOR_BOSS) {
-        bodyColor = Color{ 60, 20, 35, 255 }; // Imperial dark crimson & gold
-    }
-
-    bool isStunned = (state == EnemyState::STUNNED);
-    AssetManager::DrawEnemySilhouette(position, facingAngle, bodyColor, radius, isStunned);
-
-    // Boss special crown and aura
-    if (type == EnemyType::INQUISITOR_BOSS) {
-        float time = (float)GetTime() * 4.0f;
-        float auraPulse = radius + 8.0f + 3.0f * sinf(time);
-        DrawCircleLines((int)position.x, (int)position.y, auraPulse, Color{ 255, 215, 60, 140 });
-
-        // Boss runic crown spikes
-        float rad = facingAngle * DEG2RAD;
-        Vector2 dir = { cosf(rad), sinf(rad) };
-        Vector2 normal = { -dir.y, dir.x };
-        Vector2 crownCenter = { position.x + dir.x * 8.0f, position.y + dir.y * 8.0f };
-        DrawCircleV(crownCenter, 6.0f, Color{ 255, 215, 60, 255 });
-        DrawCircleV({ crownCenter.x - normal.x * 9.0f, crownCenter.y - normal.y * 9.0f }, 4.0f, Color{ 255, 180, 40, 240 });
-        DrawCircleV({ crownCenter.x + normal.x * 9.0f, crownCenter.y + normal.y * 9.0f }, 4.0f, Color{ 255, 180, 40, 240 });
-    }
-
-    // Overhead Health Bar (for normal enemies; boss has master top bar)
-    if (type != EnemyType::INQUISITOR_BOSS) {
-        const float barWidth = radius * 2.2f;
-        const float barHeight = 5.0f;
-        float barX = position.x - barWidth * 0.5f;
-        float barY = position.y - radius - 16.0f;
-
-        DrawRectangle((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 20, 20, 26, 220 });
-        float healthPercent = fmaxf(0.0f, health / maxHealth);
-        Color hpColor = (state == EnemyState::STUNNED) ? Color{ 255, 220, 40, 255 } : Color{ 220, 50, 60, 255 };
-        DrawRectangle((int)barX, (int)barY, (int)(barWidth * healthPercent), (int)barHeight, hpColor);
-        DrawRectangleLines((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 40, 45, 60, 200 });
-    }
+    EnemyRenderer::Draw(*this);
 }
+

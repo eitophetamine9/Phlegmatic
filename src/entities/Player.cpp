@@ -1,4 +1,5 @@
 #include "Player.hpp"
+#include "PlayerRenderer.hpp"
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../rendering/AssetManager.hpp"
@@ -46,9 +47,26 @@ void Player::Init(Vector2 startPos) {
     counterBuffTimer = 0.0f;
 }
 
+void Player::Revive(Vector2 startPos, float hpPercent) {
+    position = startPos;
+    health = maxHealth * hpPercent;
+    stamina = maxStamina;
+    velocity = { 0.0f, 0.0f };
+    currentAttack.type = AttackType::NONE;
+    isParrying = false;
+    isDashing = false;
+    isHeavyWindingUp = false;
+    counterBuffTimer = 0.0f;
+}
+
 void Player::SetWeapon(WeaponType newWeapon) {
     currentWeapon = newWeapon;
-    SoundFX::PlayEquipWeapon();
+    inventory.UnlockWeapon(newWeapon);
+    if (newWeapon == WeaponType::TRUTH_SEEKER) {
+        SoundFX::PlayTruthSeekerResonance();
+    } else {
+        SoundFX::PlayEquipWeapon();
+    }
 }
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
@@ -112,7 +130,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.range = stats.heavyRange;
             currentAttack.arcAngle = stats.heavyArc;
             currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
-            currentAttack.knockback = (currentWeapon == WeaponType::MACE) ? 380.0f : 260.0f;
+            currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 400.0f : 260.0f;
             currentAttack.duration = stats.heavyDuration;
             currentAttack.timer = stats.heavyDuration;
             currentAttack.hasHit = false;
@@ -120,8 +138,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             SoundFX::PlayHeavyAttack();
 
             Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-            particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 180, 50, 255 });
-            particles.AddScreenShake(currentWeapon == WeaponType::MACE ? 6.0f : 3.5f, 0.14f);
+            particles.SpawnSlashTrail(position, forwardDir, (currentWeapon == WeaponType::TRUTH_SEEKER) ? Color{ 255, 220, 60, 255 } : Color{ 255, 180, 50, 255 });
+            particles.AddScreenShake((currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 6.0f : 3.5f, 0.14f);
 
             velocity.x += forwardDir.x * 220.0f;
             velocity.y += forwardDir.y * 220.0f;
@@ -168,11 +186,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 void Player::TriggerDash(ParticleSystem& particles) {
     if (isDashing) return;
-
-    if (dashCooldown > 0.0f) {
-        particles.SpawnFloatingText(position, "DASH CD!", Color{ 140, 210, 255, 240 }, 14.0f);
-        return;
-    }
+    if (dashCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.dashStaminaCost) return;
@@ -196,7 +210,6 @@ void Player::TriggerDash(ParticleSystem& particles) {
     }
 
     SoundFX::PlayDash();
-    particles.SpawnFloatingText(position, "DASH", Color{ 120, 230, 255, 255 }, 16.0f);
 }
 
 void Player::TriggerLightAttack(ParticleSystem& particles) {
@@ -215,7 +228,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.range = stats.lightRange;
     currentAttack.arcAngle = stats.lightArc;
     currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
-    currentAttack.knockback = (currentWeapon == WeaponType::MACE) ? 180.0f : 120.0f;
+    currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 200.0f : 120.0f;
     currentAttack.duration = stats.lightDuration;
     currentAttack.timer = stats.lightDuration;
     currentAttack.hasHit = false;
@@ -231,11 +244,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
-
-    if (heavyCooldown > 0.0f) {
-        particles.SpawnFloatingText(position, "HEAVY CD!", Color{ 255, 140, 60, 240 }, 14.0f);
-        return;
-    }
+    if (heavyCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.heavyStamina) return;
@@ -244,8 +253,6 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     heavyCooldown = stats.heavyCooldown;
     isHeavyWindingUp = true;
     heavyWindupTimer = stats.heavyWindup;
-
-    particles.SpawnFloatingText(position, "CHARGE!", Color{ 255, 200, 60, 255 }, 18.0f);
 }
 
 void Player::TriggerParry(ParticleSystem& particles) {
@@ -258,7 +265,6 @@ void Player::TriggerParry(ParticleSystem& particles) {
     parryCooldown = Config::PARRY_COOLDOWN;
 
     SoundFX::PlayParryMiss();
-    particles.SpawnFloatingText(position, "PARRY STANCE", Color{ 100, 240, 255, 255 }, 18.0f);
 }
 
 void Player::OnParrySuccessful(ParticleSystem& particles) {
@@ -304,108 +310,6 @@ void Player::Heal(float amount) {
 }
 
 void Player::Draw() const {
-    Color bodyColor = Color{ 40, 110, 210, 255 };
-    if (counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
-    if (isDashing) bodyColor = Color{ 100, 200, 255, 180 };
-
-    AssetManager::DrawPlayerSilhouette(position, facingAngle, bodyColor, isParrying, isDashing);
-
-    Vector2 dir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-    Vector2 normal = { -dir.y, dir.x };
-
-    Vector2 rightHand = {
-        position.x + dir.x * 12.0f + normal.x * 11.0f,
-        position.y + dir.y * 12.0f + normal.y * 11.0f
-    };
-    Vector2 leftHand = {
-        position.x + dir.x * 12.0f - normal.x * 11.0f,
-        position.y + dir.y * 12.0f - normal.y * 11.0f
-    };
-
-    if (currentWeapon == WeaponType::SWORD) {
-        float swordAngle = facingAngle + 35.0f;
-        if (currentAttack.type == AttackType::LIGHT) {
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            swordAngle = facingAngle - 50.0f + progress * currentAttack.arcAngle;
-            AssetManager::DrawSword(rightHand, swordAngle, 38.0f, Color{ 230, 240, 255, 255 }, Color{ 0, 229, 255, 200 });
-
-            float startAngle = facingAngle - 50.0f;
-            float sweepAngle = progress * currentAttack.arcAngle;
-            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 0, 220, 255, 60 });
-            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 120, 245, 255, 180 });
-        } else if (currentAttack.type == AttackType::HEAVY) {
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            swordAngle = facingAngle - 60.0f + progress * currentAttack.arcAngle;
-            AssetManager::DrawSword(rightHand, swordAngle, 48.0f, Color{ 255, 240, 190, 255 }, Color{ 255, 180, 40, 220 });
-
-            float startAngle = facingAngle - 60.0f;
-            float sweepAngle = progress * currentAttack.arcAngle;
-            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 180, 40, 80 });
-            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 230, 100, 220 });
-        } else if (isHeavyWindingUp) {
-            swordAngle = facingAngle - 85.0f;
-            AssetManager::DrawSword(rightHand, swordAngle, 42.0f, Color{ 255, 200, 80, 255 }, Color{ 255, 120, 20, 200 });
-        } else {
-            AssetManager::DrawSword(rightHand, swordAngle, 34.0f, Color{ 210, 220, 235, 255 }, Color{ 80, 140, 200, 120 });
-        }
-    } else if (currentWeapon == WeaponType::DAGGERS) {
-        float angleL = facingAngle - 25.0f;
-        float angleR = facingAngle + 25.0f;
-
-        if (currentAttack.type == AttackType::LIGHT) {
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            angleR = facingAngle - 30.0f + progress * 80.0f;
-            angleL = facingAngle + 30.0f - progress * 80.0f;
-
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 255, 220, 255 }, Color{ 60, 240, 180, 200 });
-
-            float startAngle = facingAngle - 45.0f;
-            float sweepAngle = progress * currentAttack.arcAngle;
-            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 60, 240, 180, 60 });
-            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 120, 255, 200, 180 });
-        } else if (currentAttack.type == AttackType::HEAVY) {
-            // 360 Whirlwind spin
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            float spinAngle = facingAngle + progress * 360.0f;
-            angleR = spinAngle;
-            angleL = spinAngle + 180.0f;
-
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 200, 255 }, Color{ 80, 255, 160, 220 });
-            DrawCircleLines((int)position.x, (int)position.y, currentAttack.range, Color{ 80, 255, 160, 180 });
-            DrawCircle((int)position.x, (int)position.y, currentAttack.range * progress, Color{ 60, 240, 180, 40 });
-        } else if (isHeavyWindingUp) {
-            angleL = facingAngle - 70.0f;
-            angleR = facingAngle - 50.0f;
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 140, 255 }, Color{ 140, 240, 60, 200 });
-        } else {
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 240, 220, 255 }, Color{ 60, 200, 160, 140 });
-        }
-    } else if (currentWeapon == WeaponType::MACE) {
-        float maceAngle = facingAngle + 40.0f;
-        if (currentAttack.type == AttackType::LIGHT) {
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            maceAngle = facingAngle - 40.0f + progress * currentAttack.arcAngle;
-            AssetManager::DrawMace(rightHand, maceAngle, 42.0f, Color{ 230, 180, 120, 255 }, Color{ 255, 140, 40, 200 });
-
-            float startAngle = facingAngle - 40.0f;
-            float sweepAngle = progress * currentAttack.arcAngle;
-            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 255, 140, 40, 60 });
-            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 255, 180, 80, 180 });
-        } else if (currentAttack.type == AttackType::HEAVY) {
-            float progress = 1.0f - (currentAttack.timer / currentAttack.duration);
-            maceAngle = facingAngle - 70.0f + progress * currentAttack.arcAngle;
-            AssetManager::DrawMace(rightHand, maceAngle, 52.0f, Color{ 255, 200, 140, 255 }, Color{ 255, 90, 30, 240 });
-
-            // Earthshattering slam shockwave
-            float startAngle = facingAngle - 70.0f;
-            float sweepAngle = progress * currentAttack.arcAngle;
-            DrawCircleSector(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 90, 30, 80 });
-            DrawCircleSectorLines(position, currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 140, 50, 220 });
-        } else if (isHeavyWindingUp) {
-            maceAngle = facingAngle - 100.0f;
-            AssetManager::DrawMace(rightHand, maceAngle, 46.0f, Color{ 255, 160, 60, 255 }, Color{ 255, 60, 20, 220 });
-        } else {
-            AssetManager::DrawMace(rightHand, maceAngle, 38.0f, Color{ 210, 170, 130, 255 }, Color{ 200, 120, 50, 120 });
-        }
-    }
+    PlayerRenderer::Draw(*this);
 }
+

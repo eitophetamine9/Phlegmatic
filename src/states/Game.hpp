@@ -9,7 +9,13 @@
 #include "../core/Particles.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "../combat/Projectile.hpp"
+#include "Cutscene.hpp"
+#include "Tutorial.hpp"
 #include <vector>
+
+#include "../combat/CollisionSystem.hpp"
+#include "../world/WaveManager.hpp"
+#include "RuinedCastleHandler.hpp"
 
 class Game {
 public:
@@ -23,13 +29,15 @@ private:
     void Update(float dt);
     void Render();
 
+    void EnterRuinedCastle();
     void EnterLobby();
     void EnterArena();
-    void SpawnWave(int waveNumber);
-    void CheckCombatCollisions();
 
     GameState currentState;
     bool showControlsModal;
+    bool showInventoryModal;
+    int inventoryActiveTab;
+    int inventorySelectedFragment;
 
     Camera2D camera;
     Player player;
@@ -44,6 +52,16 @@ private:
     TrainingDummy dummy;
     ArenaPortal portal;
 
-    int currentWave;
-    float waveTimer;
+    // Narrative & Cutscenes
+    Cutscene cutscene;
+    TutorialManager tutorial;
+
+    // Combat & Arena Managers
+    WaveManager waveManager;
+    RuinedCastleHandler ruinedCastleHandler;
+
+    // Test Arena Unlock
+    bool testArenaUnlocked;
+    void SaveArenaUnlock();
+    bool LoadArenaUnlock();
 };

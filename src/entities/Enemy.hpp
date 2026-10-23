@@ -13,7 +13,8 @@ enum class EnemyType {
     CHARGER,         // Linear dash thrust telegraph (Dash Melee)
     ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
     PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
-    INQUISITOR_BOSS  // Grand Boss: Nova, Beam, Teleport Smite
+    INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
+    ZIL_BOSS         // Zil the Corrupted Crusader: Cleave, Charge, Flame Wave
 };
 
 enum class EnemyState {
@@ -49,15 +50,17 @@ public:
     float GetMaxHealth() const { return maxHealth; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
-    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS; }
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS; }
     bool HasMeleeHitbox() const {
         if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
-        if (type == EnemyType::INQUISITOR_BOSS) {
+        if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS) {
             return isPerformingMeleeSmite;
         }
         return true; // SLASHER, BRUTE, CHARGER
     }
     std::string GetName() const;
+
+    friend class EnemyRenderer;
 
 private:
     EnemyType type;
