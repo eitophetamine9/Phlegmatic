@@ -87,22 +87,35 @@ void EnemyRenderer::DrawTelegraph(const Enemy& enemy) {
                 Vector2 end = { start.x + dir.x * enemy.telegraph.radius, start.y + dir.y * enemy.telegraph.radius };
 
                 Color laserCol = enemy.telegraph.warningColor;
-                laserCol.a = (unsigned char)(160 * alphaProgress);
-                DrawLineEx(start, end, 2.0f, laserCol);
+                laserCol.a = (unsigned char)(100 * alphaProgress);
+                DrawLineEx(start, end, 1.5f, laserCol);
 
-                // Laser aim guide dots
+                // Subtle aim guide dots along trajectory
                 for (int d = 1; d <= 4; d++) {
                     float dotFrac = (float)d * 0.25f;
                     Vector2 midDot = { start.x + dir.x * (enemy.telegraph.radius * dotFrac), start.y + dir.y * (enemy.telegraph.radius * dotFrac) };
-                    DrawCircleV(midDot, 2.0f, laserCol);
+                    DrawCircleV(midDot, 1.5f, laserCol);
                 }
 
-                // Charging projectile tracking indicator traveling along line
-                float curDist = enemy.telegraph.radius * enemy.telegraph.progress;
-                Vector2 dotPos = { start.x + dir.x * curDist, start.y + dir.y * curDist };
-                DrawCircleV(dotPos, 5.0f, activeOutline);
-                DrawCircleLines((int)dotPos.x, (int)dotPos.y, 7.0f, activeOutline);
-                DrawCircleV(end, 3.5f, laserCol);
+                // Landing tinge where attack will land (no traveling orb)
+                // Gets significantly brighter as the attack is about to be casted
+                float progress = enemy.telegraph.progress;
+                float brightness = progress * progress; // Quadratic flare right before release
+                float tingeRadius = 12.0f + 8.0f * progress;
+
+                Color tingeOuter = enemy.telegraph.warningColor;
+                tingeOuter.a = 0;
+
+                Color tingeGlow = enemy.telegraph.warningColor;
+                tingeGlow.a = (unsigned char)(30 + 190 * brightness);
+
+                // Soft ground gradient tinge where attack lands
+                DrawCircleGradient(end, tingeRadius, tingeGlow, tingeOuter);
+                DrawCircleLines((int)end.x, (int)end.y, tingeRadius * 0.7f, Color{ tingeGlow.r, tingeGlow.g, tingeGlow.b, (unsigned char)(50 + 190 * brightness) });
+
+                // Core illumination that flares bright right before cast
+                Color coreColor = Color{ 255, 255, 255, (unsigned char)(50 + 205 * brightness) };
+                DrawCircleV(end, 2.0f + 3.0f * brightness, coreColor);
             }
             break;
         }
@@ -154,7 +167,7 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Vector2 normal = { -dir.y, dir.x };
         Vector2 swordHand = { enemy.position.x + normal.x * (enemy.radius * 0.75f), enemy.position.y + normal.y * (enemy.radius * 0.75f) };
 
-        // Zil wields the legendary broadsword "Truth Seeker"!
+        // Zil's Fragment wields Truth Seeker (Partial)!
         AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 170, 30, 220 });
 
         // Crusader shoulder pauldrons

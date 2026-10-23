@@ -41,6 +41,7 @@ void Game::Init() {
     showControlsModal = false;
     ruinedCastleHandler.Reset();
     testArenaUnlocked = LoadArenaUnlock();
+    bandageSpawnTimer = 14.0f;
 }
 
 void Game::SaveArenaUnlock() {
@@ -113,6 +114,12 @@ void Game::EnterArena() {
     camera.target = player.GetPosition();
     projectiles.clear();
     particles.Clear();
+    arenaBandages.clear();
+    bandageSpawnTimer = 14.0f;
+    AdhesiveBandage initBandage;
+    initBandage.position = { 1200.0f, 1050.0f };
+    arenaBandages.push_back(initBandage);
+
     waveManager.SpawnWave(1, enemies, projectiles, particles);
     currentState = GameState::ARENA;
     showControlsModal = false;
@@ -122,6 +129,15 @@ void Game::EnterArena() {
 
 void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
+
+    // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
+    if (IsKeyPressed(KEY_GRAVE)) {
+        currentState = GameState::TITLE_SCREEN;
+        showControlsModal = false;
+        showInventoryModal = false;
+        SoundFX::PlayButtonClick();
+        return;
+    }
 
     // If Controls Modal is active
     if (showControlsModal) {
@@ -197,7 +213,9 @@ void Game::Update(float dt) {
         } else if (action == 2) {
             showControlsModal = true;
         } else if (action == 3) {
-            EnterArena();
+            if (testArenaUnlocked) {
+                EnterArena();
+            }
         }
         return;
     }
@@ -225,8 +243,13 @@ void Game::Update(float dt) {
     if (currentState == GameState::BORDERLANDS_GATE) {
         int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
         if (choice == 1 || IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { // Arena Test
-            EnterArena();
-            return;
+            if (testArenaUnlocked) {
+                EnterArena();
+                return;
+            } else {
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            }
         } else if (choice == 2 || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_H) || IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) { // Back to Hub
             EnterLobby();
             return;
@@ -266,7 +289,10 @@ void Game::Update(float dt) {
             bool clicked = CheckCollisionPointCircle(mouseWorld, ped.position, ped.radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
             if ((near && IsKeyPressed(KEY_E)) || clicked) {
-                if (player.GetWeapon() != ped.weapon) {
+                if (ped.weapon == WeaponType::TRUTH_SEEKER && !player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
+                    particles.SpawnFloatingText(player.GetPosition(), "LOCKED - DEFEAT ZIL'S FRAGMENT IN CHAPTER 1!", Color{ 255, 90, 90, 255 }, 20.0f);
+                    SoundFX::PlayHitImpact();
+                } else if (player.GetWeapon() != ped.weapon) {
                     player.SetWeapon(ped.weapon);
                     WeaponStats st = GetWeaponStats(ped.weapon);
                     particles.SpawnFloatingText(player.GetPosition(), "EQUIPPED: " + st.name, Color{ 255, 220, 80, 255 }, 22.0f);
@@ -276,8 +302,13 @@ void Game::Update(float dt) {
         }
 
         if (portal.CheckPlayerInside(player.GetPosition()) || (Vector2Distance(player.GetPosition(), portal.position) < 80.0f && IsKeyPressed(KEY_E))) {
-            EnterArena();
-            return;
+            if (!testArenaUnlocked) {
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            } else {
+                EnterArena();
+                return;
+            }
         }
 
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -335,6 +366,12 @@ void Game::Update(float dt) {
 
     player.Update(dt, map, mouseWorld, particles);
 
+    // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
+    for (const auto& p : player.GetSpawnedProjectiles()) {
+        projectiles.push_back(p);
+    }
+    player.GetSpawnedProjectiles().clear();
+
     int aliveCount = 0;
     for (auto& enemy : enemies) {
         if (enemy.IsAlive()) {
@@ -360,7 +397,56 @@ void Game::Update(float dt) {
         }
     }
 
+    std::vector<bool> enemyAliveBefore(enemies.size());
+    for (size_t i = 0; i < enemies.size(); i++) {
+        enemyAliveBefore[i] = enemies[i].IsAlive();
+    }
+
     CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+
+    // Chance to drop adhesive bandage on enemy defeat
+    for (size_t i = 0; i < enemies.size(); i++) {
+        if (enemyAliveBefore[i] && !enemies[i].IsAlive()) {
+            if (arenaBandages.size() < 4 && (rand() % 100) < 35) {
+                AdhesiveBandage b;
+                b.position = enemies[i].GetPosition();
+                arenaBandages.push_back(b);
+                particles.SpawnSparks(b.position, Color{ 80, 255, 140, 255 }, 14, 110.0f);
+            }
+        }
+    }
+
+    // Periodic Arena Adhesive Bandage Spawning
+    bandageSpawnTimer -= dt;
+    if (bandageSpawnTimer <= 0.0f) {
+        bandageSpawnTimer = 18.0f;
+        if (arenaBandages.size() < 4) {
+            float rx = 900.0f + (float)(rand() % 600);
+            float ry = 650.0f + (float)(rand() % 500);
+            AdhesiveBandage b;
+            b.position = { rx, ry };
+            arenaBandages.push_back(b);
+            particles.SpawnSparks(b.position, Color{ 100, 255, 160, 255 }, 16, 120.0f);
+            particles.SpawnFloatingText(b.position, "+ BANDAGE SPAWNED +", Color{ 120, 255, 170, 240 }, 18.0f);
+        }
+    }
+
+    // Update & Pickup Adhesive Bandages
+    for (auto& b : arenaBandages) {
+        if (!b.active) continue;
+        b.Update(dt);
+        if (b.CheckPickup(player.GetPosition())) {
+            player.Heal(b.healAmount);
+            particles.SpawnFloatingText(player.GetPosition(), "+30 HP [BANDAGE]", Color{ 80, 255, 140, 255 }, 24.0f);
+            particles.SpawnSparks(b.position, Color{ 100, 255, 160, 255 }, 20, 150.0f);
+            SoundFX::PlayParrySuccess();
+            b.active = false;
+        }
+    }
+    arenaBandages.erase(std::remove_if(arenaBandages.begin(), arenaBandages.end(), [](const AdhesiveBandage& b) {
+        return !b.active;
+    }), arenaBandages.end());
+
     particles.Update(dt);
 
     Vector2 shake = particles.GetScreenShakeOffset();
@@ -416,7 +502,7 @@ void Game::Render() {
         BeginMode2D(camera);
         map.DrawFloor();
 
-        portal.Draw(time);
+        portal.Draw(time, testArenaUnlocked);
 
         Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
         for (const auto& ped : pedestals) {
@@ -467,6 +553,10 @@ void Game::Render() {
     }
 
     map.DrawWallsAndPillars();
+
+    for (const auto& b : arenaBandages) {
+        b.Draw();
+    }
 
     for (const auto& proj : projectiles) {
         proj.Draw();

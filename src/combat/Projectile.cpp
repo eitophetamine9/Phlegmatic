@@ -3,8 +3,8 @@
 #include "raymath.h"
 #include <cmath>
 
-Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, ProjectileType type, bool isFromPlayer)
-    : position(pos), velocity(vel), radius(radius), damage(damage), type(type), isFromPlayer(isFromPlayer), active(true), lifetime(0.0f) {
+Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, ProjectileType type, bool isFromPlayer, float defensePierce)
+    : position(pos), velocity(vel), radius(radius), damage(damage), type(type), isFromPlayer(isFromPlayer), defensePierce(defensePierce), active(true), lifetime(0.0f) {
     
     switch (type) {
         case ProjectileType::BOLT:
@@ -22,6 +22,10 @@ Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, Pro
         case ProjectileType::BEAM_SHARD:
             maxLifetime = 1.8f;
             color = isFromPlayer ? Color{ 100, 240, 255, 255 } : Color{ 255, 60, 90, 255 };
+            break;
+        case ProjectileType::HOLY_BEAM:
+            maxLifetime = 1.5f;
+            color = Color{ 255, 225, 90, 255 }; // Radiant holy dawnfire
             break;
     }
 }
@@ -126,6 +130,20 @@ void Projectile::Draw() const {
             DrawTriangle(tip, sideL, sideR, color);
             DrawTriangle(tail, sideR, sideL, color);
             DrawLineEx(tail, tip, 2.0f, Color{ 255, 255, 255, 240 });
+            break;
+        }
+
+        case ProjectileType::HOLY_BEAM: {
+            // Radiant dawnfire sword beam
+            Vector2 tip = { position.x + dir.x * (radius * 3.5f), position.y + dir.y * (radius * 3.5f) };
+            Vector2 tail = { position.x - dir.x * (radius * 2.0f), position.y - dir.y * (radius * 2.0f) };
+            Vector2 wingL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.4f), position.y - dir.y * 2.0f - normal.y * (radius * 1.4f) };
+            Vector2 wingR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.4f), position.y - dir.y * 2.0f + normal.y * (radius * 1.4f) };
+
+            DrawCircleGradient(position, radius * 2.2f, Color{ 255, 220, 60, 110 }, Color{ 0, 0, 0, 0 });
+            DrawTriangle(tip, wingL, wingR, Color{ 255, 215, 80, 240 });
+            DrawLineEx(tail, tip, 3.5f, Color{ 255, 245, 180, 255 });
+            DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
             break;
         }
     }

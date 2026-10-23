@@ -39,6 +39,11 @@ struct AttackInfo {
     bool hasShockwave = false;
     Vector2 shockwavePos = { 0.0f, 0.0f };
     float shockwaveRadius = 0.0f;
+    float defensePierce = 0.0f;
+    bool isFrontalCircle = false;
+    Vector2 circleCenter = { 0.0f, 0.0f };
+    float circleRadius = 0.0f;
+    bool isLineBox = false;
 };
 
 struct TelegraphIndicator {

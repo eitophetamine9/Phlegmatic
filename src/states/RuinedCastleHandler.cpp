@@ -39,6 +39,13 @@ void RuinedCastleHandler::Update(
 ) {
     Vector2 mouseScreen = GetMousePosition();
 
+    // Shortcut: '~' returns to Title Screen
+    if (IsKeyPressed(KEY_GRAVE)) {
+        currentState = GameState::TITLE_SCREEN;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
     // Interactive Tutorial Pop-up Modal (pauses combat and gameplay while visible)
     if (tutorial.HasActivePopup()) {
         tutorial.DrawPopup(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
@@ -57,28 +64,25 @@ void RuinedCastleHandler::Update(
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
             zilEncounterActive = true;
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Rise then, and face Truth Seeker once more!”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Rise then, and face Truth Seeker once more!";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
             zilDialogueTimer = 4.0f;
             particles.SpawnFloatingText({ 800.0f, 290.0f }, "DUEL RESTARTED!", Color{ 255, 200, 60, 255 }, 24.0f);
             return;
-        } else if (choice == 2) { // Accept Spare & Proceed
-            testArenaUnlocked = true;
-            if (onSaveArenaUnlock) onSaveArenaUnlock();
+        } else if (choice == 2) { // Accept Spare & Regroup
             showZilDefeatModal = false;
             zilEncounterActive = false;
             zilSparedPlayer = true;
-            player.Revive({ 800.0f, 420.0f }, 0.6f);
+            player.Revive({ 800.0f, 520.0f }, 0.6f);
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
-            map.SetGateOpen(true);
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Go then, wanderer. Carry your blade north into Zyphden... uncover the truth of Charlz.”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "You possess spirit, wanderer... but Truth Seeker yields only to one who can conquer me. Regroup and challenge me again!";
             zilDialogueColor = Color{ 140, 210, 255, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL — NORTH GATE OPEN!", Color{ 140, 220, 255, 255 }, 24.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL'S FRAGMENT - MUST DEFEAT TO PASS!", Color{ 140, 220, 255, 255 }, 24.0f);
             return;
         }
         return;
@@ -136,6 +140,12 @@ void RuinedCastleHandler::Update(
 
     player.Update(dt, map, mouseWorld, particles);
 
+    // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
+    for (const auto& p : player.GetSpawnedProjectiles()) {
+        projectiles.push_back(p);
+    }
+    player.GetSpawnedProjectiles().clear();
+
     // Update enemies
     for (auto& enemy : enemies) {
         enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
@@ -156,15 +166,27 @@ void RuinedCastleHandler::Update(
     // Tutorial progression
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
 
-    // Zil Boss Encounter Trigger
-    if (tutorial.GetStep() == TutorialStep::COMPLETED && !zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
+    // High Altar Steps Barrier (Cannot enter until first tutorial enemy is officially beaten)
+    if (!tutorial.HasDefeatedTutorialEnemy() && player.GetPosition().y <= 430.0f) {
+        player.SetPosition({ player.GetPosition().x, 435.0f });
+        static float barrierWarningTimer = 0.0f;
+        barrierWarningTimer -= dt;
+        if (barrierWarningTimer <= 0.0f) {
+            particles.SpawnFloatingText(player.GetPosition(), "DAIS SEALED — DEFEAT THE SANCTUARY SENTINEL FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+            SoundFX::PlayHitImpact();
+            barrierWarningTimer = 1.5f;
+        }
+    }
+
+    // Zil Boss Encounter Trigger (Strictly requires first tutorial enemy officially defeated)
+    if (tutorial.HasDefeatedTutorialEnemy() && !zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
         if (player.GetPosition().y <= 420.0f) {
             zilEncounterActive = true;
             enemies.clear();
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Halt, intruder! None shall pass to Zyphden without testing their blade against Truth Seeker!”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Halt, intruder! You face a mere fragment possessing 1% of my true power... yet Truth Seeker's blade shall test your resolve!";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
             zilDialogueTimer = 5.0f;
             particles.AddScreenShake(6.0f, 0.25f);
@@ -190,19 +212,19 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
 
-            // Award Truth Seeker!
+            // Award Truth Seeker (Partial)!
             player.GetInventory().UnlockWeapon(WeaponType::TRUTH_SEEKER);
             player.SetWeapon(WeaponType::TRUTH_SEEKER);
 
-            // Unlock Lore Fragment III: The King's Madness
+            // Unlock Lore Fragment III: Zil's Holy Oath
             player.GetInventory().UnlockFragment("frag_03");
 
             map.SetGateOpen(true);
-            zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“You possess the resolve... Take Truth Seeker and pierce the illusions of Charlz...”";
+            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
+            zilDialogueText = "Even at 1% of my power, you persevered... Claim Truth Seeker (Partial) and uncover the madness of King Charlz.";
             zilDialogueColor = Color{ 255, 215, 60, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED 'TRUTH SEEKER'!", Color{ 255, 215, 60, 255 }, 26.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
             particles.AddScreenShake(7.0f, 0.3f);
         }
     }
@@ -212,11 +234,11 @@ void RuinedCastleHandler::Update(
         zilDialogueTimer -= dt;
     }
 
-    // Check if player walks through northern open gateway into Zyphden
-    bool atNorthernGate = map.IsGateOpen() &&
+    // Check if player walks through northern open gateway into Zyphden (REQUIRES ZIL DEFEATED)
+    bool atNorthernGate = zilDefeated && map.IsGateOpen() &&
                           (player.GetPosition().y <= map.GetBounds().y + 60.0f &&
                            player.GetPosition().x >= 670.0f && player.GetPosition().x <= 930.0f);
-    bool interactGate = map.IsGateOpen() &&
+    bool interactGate = zilDefeated && map.IsGateOpen() &&
                         (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
@@ -225,6 +247,13 @@ void RuinedCastleHandler::Update(
         SoundFX::PlayGateOpen();
         particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
         return;
+    }
+
+    // If player attempts to interact at the gate before defeating Zil
+    if (!zilDefeated && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
+        (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED - MUST DEFEAT ZIL'S FRAGMENT TO ADVANCE!", Color{ 255, 80, 80, 255 }, 20.0f);
+        SoundFX::PlayHitImpact();
     }
 
     // Camera follow
@@ -254,6 +283,16 @@ void RuinedCastleHandler::Render(
 
     BeginMode2D(camera);
     map.DrawFloor();
+
+    // Runic Ward across High Altar steps if sentinel not yet defeated
+    if (!tutorial.HasDefeatedTutorialEnemy()) {
+        float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
+        DrawLineEx({ 580.0f, 430.0f }, { 1020.0f, 430.0f }, 3.5f, Color{ 220, 60, 60, (unsigned char)(160 + 80 * pulse) });
+        DrawCircleGradient(Vector2{ 800.0f, 430.0f }, 70.0f, Color{ 200, 40, 40, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
+        const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
+        int wtw = MeasureText(wardText, 10);
+        DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+    }
 
     tutorial.DrawWorldElements(time);
 

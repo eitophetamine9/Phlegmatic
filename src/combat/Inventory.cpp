@@ -30,7 +30,7 @@ void Inventory::InitDefault() {
         "The Land of Tydeshire",
         "In the 500th year of unending strife, King Charlz unified the realms...",
         "In the 500th year of unending strife, King Charlz crushed the warring factions beneath his warhammer. By solemn decree at the High Summit, four sovereign kings knelt before the throne of Charlz the Lord Liege.\n\nThe realms of Azshden, Fleurshden, Zyphden, and Noirden were chartered in blood and silver. For three golden decades, heralds sang of an eternal peace, and borders stood without blood.",
-        true, // Discovered upon awakening from the prologue
+        false, // Discovered in tutorial by inspecting the Chronicle Stele
         false
     });
 
@@ -49,7 +49,7 @@ void Inventory::InitDefault() {
         "Fragment III: Zil's Holy Oath",
         "Ruined Castle of the Vanguard",
         "Zil, once first champion of the Sun Vanguard, swore to purge the corruption...",
-        "Zil, once first champion of the Sun Vanguard, swore an unbroken oath to purge the dark madness that seized King Charlz.\n\nYet within these desecrated castle halls, the miasma took root in his righteous heart. Now clutching the sacred royal broadsword 'Truth Seeker', he slays all who draw near, believing he alone guards the realm from absolute ruin.",
+        "Zil, once first champion of the Sun Vanguard, swore an unbroken oath to purge the dark madness that seized King Charlz.\n\nWithin these desecrated castle halls, a remnant fragment possessing 1% of his true power guards the holy blade 'Truth Seeker (Partial)'. Believing he alone guards the realm from absolute ruin, he slays all who draw near.",
         false,
         false
     });

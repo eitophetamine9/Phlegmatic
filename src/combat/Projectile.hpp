@@ -7,12 +7,13 @@ enum class ProjectileType {
     BOLT,         // Archer's piercing bolt
     VOID_ORB,     // Pyromancer's occult orb
     NOVA_STAR,    // Boss radial star
-    BEAM_SHARD    // Boss focused beam / shard
+    BEAM_SHARD,   // Boss focused beam / shard
+    HOLY_BEAM     // Truth Seeker piercing holy beam
 };
 
 class Projectile {
 public:
-    Projectile(Vector2 pos, Vector2 vel, float radius, float damage, ProjectileType type, bool isFromPlayer = false);
+    Projectile(Vector2 pos, Vector2 vel, float radius, float damage, ProjectileType type, bool isFromPlayer = false, float defensePierce = 0.0f);
 
     void Update(float dt, const GameMap& map, ParticleSystem& particles);
     void Draw() const;
@@ -28,6 +29,8 @@ public:
     float GetDamage() const { return damage; }
     bool IsFromPlayer() const { return isFromPlayer; }
     ProjectileType GetType() const { return type; }
+    float GetDefensePierce() const { return defensePierce; }
+    void SetDefensePierce(float p) { defensePierce = p; }
 
 private:
     Vector2 position;
@@ -36,6 +39,7 @@ private:
     float damage;
     ProjectileType type;
     bool isFromPlayer;
+    float defensePierce;
     bool active;
     float lifetime;
     float maxLifetime;

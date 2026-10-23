@@ -37,34 +37,34 @@ inline WeaponStats GetWeaponStats(WeaponType type) {
         case WeaponType::DAGGERS:
             return {
                 "Dual Daggers",
-                "Fast twin-slash flurry. 360 whirlwind heavy. Swift dash with reduced stamina cost.",
-                18.0f, 62.0f, 95.0f, 0.14f, 0.20f, 9.0f,
-                52.0f, 75.0f, 360.0f, 0.12f, 0.24f, 1.20f, 22.0f,
+                "Swift twin-blade flurry with 0 stamina light attacks. Heavy attack executes a high-speed piercing lunge into an instant 360 whirlwind spin.",
+                22.0f, 65.0f, 95.0f, 0.14f, 0.18f, 0.0f,
+                110.0f, 95.0f, 360.0f, 0.20f, 0.12f, 1.80f, 20.0f,
                 14.0f, 0.50f
             };
         case WeaponType::MACE:
             return {
                 "War Mace",
-                "Heavy blunt crusher. Massive stagger poise damage and earth-shattering slam.",
-                40.0f, 82.0f, 85.0f, 0.28f, 0.45f, 22.0f,
-                95.0f, 135.0f, 150.0f, 0.26f, 0.38f, 3.20f, 42.0f,
+                "Crushing heavy warhammer. Basic attack smacks in a frontal circle. Heavy attack charges an amplified smack into a 360 shockwave ignoring 25% defense.",
+                52.0f, 80.0f, 85.0f, 0.28f, 0.52f, 22.0f,
+                155.0f, 150.0f, 360.0f, 0.45f, 0.35f, 3.60f, 40.0f,
                 26.0f, 1.25f
             };
         case WeaponType::TRUTH_SEEKER:
             return {
-                "Truth Seeker",
-                "Legendary holy broadsword. Features a fluid 2-hit light attack combo and a slower, cataclysmic area shockwave heavy slam.",
-                46.0f, 98.0f, 130.0f, 0.22f, 0.26f, 15.0f,
-                125.0f, 155.0f, 160.0f, 0.45f, 0.35f, 2.60f, 38.0f,
+                "Truth Seeker (Partial)",
+                "Legendary holy broadsword fragment containing 1% of the primordial blade power. Features a fluid 2-hit combo: horizontal sweep into upward radiant slice, and dual 360 dawnfire heavy swings firing a 10% defense piercing beam.",
+                46.0f, 98.0f, 130.0f, 0.22f, 0.26f, 14.0f,
+                120.0f, 145.0f, 360.0f, 0.35f, 0.40f, 3.80f, 36.0f,
                 16.0f, 0.65f
             };
         case WeaponType::SWORD:
         default:
             return {
                 "Broadsword",
-                "Balanced martial blade. Reliable reach, sweeping arcs, and steady recovery.",
+                "Balanced martial blade. Heavy attack executes a wide cleave followed by a brutal upward shock slash.",
                 25.0f, 75.0f, 110.0f, 0.22f, 0.35f, 15.0f,
-                65.0f, 115.0f, 140.0f, 0.18f, 0.30f, 1.90f, 32.0f,
+                85.0f, 125.0f, 160.0f, 0.22f, 0.38f, 2.10f, 32.0f,
                 20.0f, 0.85f
             };
     }
