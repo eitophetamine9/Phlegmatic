@@ -321,18 +321,25 @@ void GameMap::DrawRuinedCastleWalls() const {
         DrawCircle((int)(gateX + gateW + 8), (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
 
         DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
-        DrawText("Step through to advance", (int)gateX + 22, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
+        DrawText("Step through or Press [E] to advance", (int)gateX + 2, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
     }
 }
 
 bool GameMap::CheckCircleCollision(Vector2 pos, float radius) const {
     // Ruined Castle Northern Gateway Corridor check (allows stepping out into Zyphden)
     bool inGateCorridor = (currentEnv == MapEnvironment::RUINED_CASTLE && gateOpen &&
-                           pos.x >= 710.0f + radius && pos.x <= 890.0f - radius &&
-                           pos.y >= bounds.y - 80.0f && pos.y <= bounds.y + 10.0f);
+                           pos.x >= 700.0f && pos.x <= 900.0f &&
+                           pos.y >= bounds.y - 120.0f);
 
     if (!inGateCorridor && (pos.y - radius < bounds.y)) {
         return true;
+    }
+
+    // Corridor side walls and northern dead-end barrier when north of bounds.y
+    if (currentEnv == MapEnvironment::RUINED_CASTLE && gateOpen && pos.y < bounds.y) {
+        if (pos.x - radius < 705.0f || pos.x + radius > 895.0f || pos.y - radius < bounds.y - 80.0f) {
+            return true;
+        }
     }
 
     // Outer boundaries

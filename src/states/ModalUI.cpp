@@ -630,15 +630,15 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     bool hoverArena = CheckCollisionPointRec(mousePos, btnArena);
     DrawRectangleRounded(btnArena, 0.2f, 6, hoverArena ? Color{ 40, 75, 115, 255 } : Color{ 24, 44, 72, 240 });
     DrawRectangleRoundedLines(btnArena, 0.2f, 6, hoverArena ? Color{ 140, 230, 255, 255 } : Color{ 80, 155, 220, 230 });
-    int btn1W = MeasureText("ENTER TEST ARENA", 15);
-    DrawText("ENTER TEST ARENA", (int)(btnArena.x + (btnArena.width - btn1W) * 0.5f), (int)btnArena.y + 19, 15, hoverArena ? Color{ 255, 255, 255, 255 } : Color{ 200, 240, 255, 240 });
+    int btn1W = MeasureText("[1] ENTER TEST ARENA", 15);
+    DrawText("[1] ENTER TEST ARENA", (int)(btnArena.x + (btnArena.width - btn1W) * 0.5f), (int)btnArena.y + 19, 15, hoverArena ? Color{ 255, 255, 255, 255 } : Color{ 200, 240, 255, 240 });
 
     Rectangle btnHub = { cardX + 560.0f, cardY + 550.0f, 340.0f, 54.0f };
     bool hoverHub = CheckCollisionPointRec(mousePos, btnHub);
     DrawRectangleRounded(btnHub, 0.2f, 6, hoverHub ? Color{ 75, 45, 25, 255 } : Color{ 42, 26, 18, 240 });
     DrawRectangleRoundedLines(btnHub, 0.2f, 6, hoverHub ? Color{ 255, 190, 70, 255 } : Color{ 205, 125, 50, 230 });
-    int btn2W = MeasureText("BACK TO HUB", 15);
-    DrawText("BACK TO HUB", (int)(btnHub.x + (btnHub.width - btn2W) * 0.5f), (int)btnHub.y + 19, 15, hoverHub ? Color{ 255, 255, 255, 255 } : Color{ 255, 220, 110, 240 });
+    int btn2W = MeasureText("[2] BACK TO HUB", 15);
+    DrawText("[2] BACK TO HUB", (int)(btnHub.x + (btnHub.width - btn2W) * 0.5f), (int)btnHub.y + 19, 15, hoverHub ? Color{ 255, 255, 255, 255 } : Color{ 255, 220, 110, 240 });
 
     if (isMousePressed) {
         if (hoverArena) {

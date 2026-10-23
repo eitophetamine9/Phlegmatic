@@ -213,8 +213,14 @@ void RuinedCastleHandler::Update(
     }
 
     // Check if player walks through northern open gateway into Zyphden
-    if (map.IsGateOpen() && player.GetPosition().y <= map.GetBounds().y + 15.0f &&
-        player.GetPosition().x >= 690.0f && player.GetPosition().x <= 910.0f) {
+    bool atNorthernGate = map.IsGateOpen() &&
+                          (player.GetPosition().y <= map.GetBounds().y + 60.0f &&
+                           player.GetPosition().x >= 670.0f && player.GetPosition().x <= 930.0f);
+    bool interactGate = map.IsGateOpen() &&
+                        (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
+                        (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
+
+    if (atNorthernGate || interactGate) {
         currentState = GameState::BORDERLANDS_GATE;
         SoundFX::PlayGateOpen();
         particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);

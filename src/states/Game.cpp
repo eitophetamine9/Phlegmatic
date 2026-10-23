@@ -224,10 +224,10 @@ void Game::Update(float dt) {
     // 1.9 BORDERLANDS GATEWAY EPILOGUE STATE
     if (currentState == GameState::BORDERLANDS_GATE) {
         int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
-        if (choice == 1) { // Arena Test
+        if (choice == 1 || IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { // Arena Test
             EnterArena();
             return;
-        } else if (choice == 2) { // Back to Hub
+        } else if (choice == 2 || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_H) || IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) { // Back to Hub
             EnterLobby();
             return;
         }
@@ -393,6 +393,10 @@ void Game::Render() {
     }
 
     if (currentState == GameState::BORDERLANDS_GATE) {
+        ruinedCastleHandler.Render(
+            camera, map, enemies, projectiles, player, particles, tutorial,
+            w, h, false, false, 0, 0
+        );
         Vector2 mousePos = GetMousePosition();
         GameUI::DrawBorderlandsGateway(w, h, mousePos, false, player);
         EndDrawing();
