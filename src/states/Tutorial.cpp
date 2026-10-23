@@ -2,6 +2,7 @@
 #include "../core/SoundFX.hpp"
 #include "../rendering/AssetManager.hpp"
 #include <cmath>
+#include <sstream>
 
 void AncientChest::Draw(float time) const {
     // Drop shadow
@@ -38,6 +39,46 @@ TutorialManager::TutorialManager() {
     Init();
 }
 
+void TutorialManager::TriggerStepPopup(TutorialStep step) {
+    showPopup = true;
+    switch (step) {
+        case TutorialStep::AWAKENING:
+            popupTitle = "AWAKENING IN THE RUINS";
+            popupBody = "You awaken upon the weathered flagstones of the Ruined Castle of Zyphden.\n\nUse your movement keys to regain your footing and traverse the sanctuary courtyard.";
+            popupHint = "[W, A, S, D] or Arrow Keys to Move";
+            break;
+        case TutorialStep::WEAPON_STAND:
+            popupTitle = "THE ANCIENT WEAPON STAND";
+            popupBody = "An illuminated stone altar stands ahead in the courtyard center.\n\nApproach the glowing blade and press [E] to claim the Crusader's Broadsword.";
+            popupHint = "Walk up and press [E] to Claim Broadsword";
+            break;
+        case TutorialStep::COMBAT_BASICS:
+            popupTitle = "SWORDPLAY & MARTIAL ARTS";
+            popupBody = "The broadsword is balanced for both rapid slashes and heavy cleaves.\n\nTest both attack styles now to prepare for hostile fortress sentinels.";
+            popupHint = "[Left Click] Light Attack  |  [Right Click] Heavy Cleave";
+            break;
+        case TutorialStep::LORE_DISCOVERY:
+            popupTitle = "THE SCATTERED CHRONICLES";
+            popupBody = "The history of Tydeshire was shattered into fragments when King Charlz went mad.\n\nCross the eastern stone bridge to inspect the ancient relic chest.";
+            popupHint = "[E] Open Relic Chest  |  [I] Open Lore Journal";
+            break;
+        case TutorialStep::DEFENSE_SENTINEL:
+            popupTitle = "DEFENSE TRIAL: DASH & PARRY";
+            popupBody = "A Ruin Sentinel has awakened to test your vigilance!\n\n• Dash [Q]: Swift evasion with invulnerability frames.\n• Parry [F]: Timed deflection right before impact staggers foes and grants +50% Counter Damage!";
+            popupHint = "[Q] Dash (Evade)  |  [F] Parry (Timed Deflection)";
+            break;
+        case TutorialStep::GATE_OPENED:
+            popupTitle = "THE UPPER SANCTUARY UNSEALED";
+            popupBody = "The iron portcullis has retracted into the fortress walls.\n\nClimb the three carved stone steps north onto the elevated high dais to face the keeper.";
+            popupHint = "Advance north up the steps [Y <= 420]";
+            break;
+        case TutorialStep::COMPLETED:
+            showPopup = false;
+            break;
+    }
+    SoundFX::PlayCutsceneChime();
+}
+
 void TutorialManager::Init() {
     currentStep = TutorialStep::AWAKENING;
     initialPlayerPos = { 800.0f, 1180.0f };
@@ -59,6 +100,8 @@ void TutorialManager::Init() {
 
     currentObjectiveText = "AWAKENING: Move through the ruined courtyard using [W, A, S, D].";
     currentControlHint = "[W, A, S, D] / Arrow Keys to Move";
+
+    TriggerStepPopup(TutorialStep::AWAKENING);
 }
 
 void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSystem& particles, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles) {
@@ -72,8 +115,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             float distFromStart = Vector2Distance(playerPos, initialPlayerPos);
             if (distFromStart > 85.0f) {
                 currentStep = TutorialStep::WEAPON_STAND;
-                particles.SpawnFloatingText(playerPos, "OBJECTIVE UPDATED!", Color{ 255, 220, 80, 255 }, 22.0f);
-                SoundFX::PlayButtonClick();
+                TriggerStepPopup(TutorialStep::WEAPON_STAND);
             }
             break;
         }
@@ -86,10 +128,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             if (distToStand <= 55.0f && IsKeyPressed(KEY_E)) {
                 hasClaimedWeapon = true;
                 player.SetWeapon(WeaponType::SWORD);
-                SoundFX::PlayEquipWeapon();
-                particles.SpawnSparks(weaponStandPos, Color{ 255, 215, 80, 255 }, 25, 170.0f);
-                particles.SpawnFloatingText(playerPos, "BROADSWORD CLAIMED!", Color{ 255, 220, 80, 255 }, 24.0f);
                 currentStep = TutorialStep::COMBAT_BASICS;
+                TriggerStepPopup(TutorialStep::COMBAT_BASICS);
             }
             break;
         }
@@ -100,17 +140,14 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
             if (player.GetCurrentAttack().type == AttackType::LIGHT && lightAttacksLanded == 0) {
                 lightAttacksLanded = 1;
-                particles.SpawnFloatingText(playerPos, "LIGHT ATTACK TESTED!", Color{ 100, 220, 255, 255 }, 20.0f);
             }
             if (player.GetCurrentAttack().type == AttackType::HEAVY && heavyAttacksLanded == 0) {
                 heavyAttacksLanded = 1;
-                particles.SpawnFloatingText(playerPos, "HEAVY CLEAVE TESTED!", Color{ 255, 180, 60, 255 }, 20.0f);
             }
 
             if (lightAttacksLanded > 0 && heavyAttacksLanded > 0) {
                 currentStep = TutorialStep::LORE_DISCOVERY;
-                particles.SpawnFloatingText(playerPos, "OBJECTIVE COMPLETED!", Color{ 255, 220, 80, 255 }, 22.0f);
-                SoundFX::PlayButtonClick();
+                TriggerStepPopup(TutorialStep::LORE_DISCOVERY);
             }
             break;
         }
@@ -124,10 +161,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
                 hasOpenedChest = true;
                 player.GetInventory().UnlockFragment("frag_02");
                 SoundFX::PlayLoreDiscovery();
-                particles.SpawnSparks(chest.position, Color{ 255, 215, 80, 255 }, 28, 180.0f);
-                particles.SpawnFloatingText(chest.position, "LORE DISCOVERED: FRAGMENT II!", Color{ 255, 220, 80, 255 }, 24.0f);
-                particles.SpawnFloatingText(playerPos, "PRESS [I] TO READ JOURNAL", Color{ 120, 230, 255, 255 }, 22.0f);
                 currentStep = TutorialStep::DEFENSE_SENTINEL;
+                TriggerStepPopup(TutorialStep::DEFENSE_SENTINEL);
             }
             break;
         }
@@ -139,8 +174,6 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             if (!sentinelSpawned) {
                 sentinelSpawned = true;
                 enemies.emplace_back(EnemyType::SLASHER, Vector2{ 800.0f, 620.0f });
-                particles.SpawnSparks({ 800.0f, 620.0f }, Color{ 140, 200, 255, 255 }, 22, 160.0f);
-                particles.SpawnFloatingText({ 800.0f, 620.0f }, "RUIN SENTINEL AWAKENED", Color{ 140, 200, 255, 255 }, 24.0f);
             }
 
             if (player.HasCounterBuff()) {
@@ -158,8 +191,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             if (!sentinelAlive || parriesAchieved >= 2) {
                 currentStep = TutorialStep::GATE_OPENED;
                 map.SetGateOpen(true);
-                particles.SpawnFloatingText({ 800.0f, 250.0f }, "PORTCULLIS UNLOCKED!", Color{ 255, 220, 80, 255 }, 28.0f);
                 SoundFX::PlayGateOpen();
+                TriggerStepPopup(TutorialStep::GATE_OPENED);
             }
             break;
         }
@@ -170,7 +203,6 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
             if (playerPos.y <= 420.0f) {
                 currentStep = TutorialStep::COMPLETED;
-                particles.SpawnFloatingText(playerPos, "CHAPTER 1: THE INNER SANCTUM", Color{ 255, 215, 80, 255 }, 26.0f);
                 SoundFX::PlayButtonClick();
             }
             break;
@@ -241,4 +273,77 @@ void TutorialManager::DrawHUD(int windowWidth, int windowHeight) const {
 
     DrawText(currentObjectiveText.c_str(), (int)bannerX + 20, (int)bannerY + 26, 13, Color{ 255, 255, 255, 255 });
     DrawText(currentControlHint.c_str(), (int)bannerX + 20, (int)bannerY + 43, 10, Color{ 120, 220, 255, 220 });
+}
+
+bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
+    if (!showPopup) return false;
+
+    // Dark backdrop overlay
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 8, 14, 215 });
+
+    float cardW = 680.0f;
+    float cardH = 370.0f;
+    float cardX = ((float)windowWidth - cardW) * 0.5f;
+    float cardY = ((float)windowHeight - cardH) * 0.5f;
+
+    // Outer backing card
+    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 16, 20, 30, 252 });
+    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 215, 175, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.045f, 8, Color{ 50, 68, 98, 180 });
+
+    // Gold corner accents
+    Color cornerCol = Color{ 255, 215, 80, 240 };
+    DrawLineEx({ cardX + 10, cardY + 10 }, { cardX + 30, cardY + 10 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 10, cardY + 10 }, { cardX + 10, cardY + 30 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 10, cardY + 10 }, { cardX + cardW - 30, cardY + 10 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 10, cardY + 10 }, { cardX + cardW - 10, cardY + 30 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 10, cardY + cardH - 10 }, { cardX + 30, cardY + cardH - 10 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 10, cardY + cardH - 10 }, { cardX + 10, cardY + cardH - 30 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 10, cardY + cardH - 10 }, { cardX + cardW - 30, cardY + cardH - 10 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 10, cardY + cardH - 10 }, { cardX + cardW - 10, cardY + cardH - 30 }, 2.0f, cornerCol);
+
+    // Illuminated Category
+    DrawText("TUTORIAL ARCHIVES // CHAPTER 1", (int)cardX + 36, (int)cardY + 24, 11, Color{ 120, 220, 255, 240 });
+
+    // Title in Gold
+    DrawText(popupTitle.c_str(), (int)cardX + 36, (int)cardY + 44, 20, Color{ 255, 215, 80, 255 });
+    DrawLine((int)cardX + 36, (int)cardY + 74, (int)(cardX + cardW - 36), (int)cardY + 74, Color{ 140, 110, 50, 200 });
+
+    // Body Text
+    std::istringstream stream(popupBody);
+    std::string paragraph;
+    int currentY = (int)cardY + 92;
+    while (std::getline(stream, paragraph)) {
+        if (paragraph.empty()) {
+            currentY += 12;
+            continue;
+        }
+        DrawText(paragraph.c_str(), (int)cardX + 36, currentY, 14, Color{ 235, 240, 250, 245 });
+        currentY += 22;
+    }
+
+    // Keybindings highlight box
+    Rectangle hintRec = { cardX + 36.0f, cardY + 220.0f, cardW - 72.0f, 44.0f };
+    DrawRectangleRounded(hintRec, 0.2f, 4, Color{ 24, 32, 48, 240 });
+    DrawRectangleRoundedLines(hintRec, 0.2f, 4, Color{ 80, 120, 175, 200 });
+    DrawText(popupHint.c_str(), (int)cardX + 54, (int)cardY + 234, 13, Color{ 140, 230, 255, 255 });
+
+    // Button: Resume / Proceed
+    Rectangle btnRec = { cardX + (cardW - 300.0f) * 0.5f, cardY + 290.0f, 300.0f, 48.0f };
+    bool hovered = CheckCollisionPointRec(mousePos, btnRec);
+    DrawRectangleRounded(btnRec, 0.2f, 6, hovered ? Color{ 55, 85, 135, 255 } : Color{ 30, 48, 75, 240 });
+    DrawRectangleRoundedLines(btnRec, 0.2f, 6, hovered ? Color{ 180, 230, 255, 255 } : Color{ 120, 180, 240, 220 });
+
+    const char* btnLabel = "RESUME [SPACE / CLICK]";
+    int bw = MeasureText(btnLabel, 14);
+    DrawText(btnLabel, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)btnRec.y + 16, 14, hovered ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
+
+    bool dismiss = (isMousePressed && hovered) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
+    if (dismiss) {
+        showPopup = false;
+        SoundFX::PlayButtonClick();
+        return true;
+    }
+
+    return false;
 }

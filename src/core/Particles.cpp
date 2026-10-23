@@ -57,16 +57,25 @@ void ParticleSystem::Draw() const {
     }
 }
 
+void ParticleSystem::Clear() {
+    particles.clear();
+    floatingTexts.clear();
+    shakeTimer = 0.0f;
+    shakeIntensity = 0.0f;
+}
+
 void ParticleSystem::SpawnSparks(Vector2 pos, Color color, int count, float speed) {
-    for (int i = 0; i < count; i++) {
+    if (particles.size() > 140) return;
+    int actualCount = count > 8 ? 8 : count;
+    for (int i = 0; i < actualCount; i++) {
         float angle = ((float)rand() / (float)RAND_MAX) * 2.0f * PI;
-        float spd = speed * (0.4f + 0.6f * ((float)rand() / (float)RAND_MAX));
-        float life = 0.25f + 0.25f * ((float)rand() / (float)RAND_MAX);
+        float spd = speed * (0.35f + 0.65f * ((float)rand() / (float)RAND_MAX));
+        float life = 0.18f + 0.16f * ((float)rand() / (float)RAND_MAX);
         particles.push_back({
             pos,
             { cosf(angle) * spd, sinf(angle) * spd },
             color,
-            3.5f + ((float)rand() / (float)RAND_MAX) * 2.5f,
+            2.5f + ((float)rand() / (float)RAND_MAX) * 1.5f,
             life,
             life
         });
@@ -74,22 +83,22 @@ void ParticleSystem::SpawnSparks(Vector2 pos, Color color, int count, float spee
 }
 
 void ParticleSystem::SpawnParryBurst(Vector2 pos) {
-    SpawnSparks(pos, Color{ 255, 230, 80, 255 }, 24, 260.0f);
-    SpawnSparks(pos, Color{ 80, 240, 255, 255 }, 18, 200.0f);
-    AddScreenShake(7.0f, 0.22f);
+    SpawnSparks(pos, Color{ 255, 230, 80, 255 }, 12, 220.0f);
+    SpawnSparks(pos, Color{ 80, 240, 255, 255 }, 8, 180.0f);
+    AddScreenShake(6.0f, 0.18f);
 }
 
 void ParticleSystem::SpawnDashTrail(Vector2 pos, Vector2 dir, Color color) {
-    for (int i = 0; i < 4; i++) {
-        float offsetAngle = (((float)rand() / (float)RAND_MAX) - 0.5f) * 0.6f;
+    for (int i = 0; i < 2; i++) {
+        float offsetAngle = (((float)rand() / (float)RAND_MAX) - 0.5f) * 0.4f;
         float baseAngle = atan2f(-dir.y, -dir.x) + offsetAngle;
-        float spd = 40.0f + 40.0f * ((float)rand() / (float)RAND_MAX);
-        float life = 0.16f + 0.14f * ((float)rand() / (float)RAND_MAX);
+        float spd = 30.0f + 30.0f * ((float)rand() / (float)RAND_MAX);
+        float life = 0.12f + 0.10f * ((float)rand() / (float)RAND_MAX);
         particles.push_back({
             pos,
             { cosf(baseAngle) * spd, sinf(baseAngle) * spd },
             color,
-            5.0f,
+            3.5f,
             life,
             life
         });
@@ -97,16 +106,16 @@ void ParticleSystem::SpawnDashTrail(Vector2 pos, Vector2 dir, Color color) {
 }
 
 void ParticleSystem::SpawnSlashTrail(Vector2 pos, Vector2 dir, Color color) {
-    for (int i = 0; i < 6; i++) {
-        float offsetAngle = (((float)rand() / (float)RAND_MAX) - 0.5f) * 0.8f;
+    for (int i = 0; i < 3; i++) {
+        float offsetAngle = (((float)rand() / (float)RAND_MAX) - 0.5f) * 0.5f;
         float baseAngle = atan2f(dir.y, dir.x) + offsetAngle;
-        float spd = 60.0f + 60.0f * ((float)rand() / (float)RAND_MAX);
-        float life = 0.15f + 0.15f * ((float)rand() / (float)RAND_MAX);
+        float spd = 45.0f + 45.0f * ((float)rand() / (float)RAND_MAX);
+        float life = 0.12f + 0.10f * ((float)rand() / (float)RAND_MAX);
         particles.push_back({
             pos,
             { cosf(baseAngle) * spd, sinf(baseAngle) * spd },
             color,
-            4.0f,
+            3.0f,
             life,
             life
         });
@@ -114,13 +123,17 @@ void ParticleSystem::SpawnSlashTrail(Vector2 pos, Vector2 dir, Color color) {
 }
 
 void ParticleSystem::SpawnFloatingText(Vector2 pos, const std::string& text, Color color, float size) {
+    // Keep max 4 floating texts to eliminate clutter
+    if (floatingTexts.size() >= 4) {
+        floatingTexts.erase(floatingTexts.begin());
+    }
     floatingTexts.push_back({
         pos,
         text,
         color,
         size,
-        0.85f,
-        0.85f
+        0.55f, // quick clean fade
+        0.55f
     });
 }
 

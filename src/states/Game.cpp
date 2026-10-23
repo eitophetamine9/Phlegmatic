@@ -67,8 +67,8 @@ void Game::EnterRuinedCastle() {
     zilDialogueColor = WHITE;
     enemies.clear();
     projectiles.clear();
+    particles.Clear();
     tutorial.Init();
-    particles.SpawnFloatingText(player.GetPosition(), "CHAPTER 1: THE RUINED CASTLE", Color{ 255, 215, 80, 255 }, 24.0f);
 }
 
 void Game::EnterLobby() {
@@ -78,6 +78,7 @@ void Game::EnterLobby() {
     currentState = GameState::LOBBY;
     showControlsModal = false;
     projectiles.clear();
+    particles.Clear();
     particles.SpawnFloatingText(player.GetPosition(), "LOBBY SANCTUARY", Color{ 255, 220, 100, 255 }, 24.0f);
 }
 
@@ -88,11 +89,12 @@ void Game::EnterArena() {
     currentWave = 1;
     waveTimer = 0.0f;
     projectiles.clear();
+    particles.Clear();
     SpawnWave(currentWave);
     currentState = GameState::ARENA;
     showControlsModal = false;
     SoundFX::PlayEquipWeapon();
-    particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 25, 220.0f);
+    particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 12, 180.0f);
 }
 
 void Game::SpawnWave(int waveNumber) {
@@ -342,6 +344,12 @@ void Game::Update(float dt) {
 
     // 1.8 RUINED CASTLE CHAPTER 1 STATE
     if (currentState == GameState::RUINED_CASTLE) {
+        // Interactive Tutorial Pop-up Modal (pauses combat and gameplay while visible)
+        if (tutorial.HasActivePopup()) {
+            tutorial.DrawPopup(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+            return;
+        }
+
         // Handle Zil Defeat Modal Interaction
         if (showZilDefeatModal) {
             int choice = GameUI::DrawZilDefeatModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), !hasUsedZilRetry);
@@ -516,6 +524,9 @@ void Game::Update(float dt) {
         // Camera follow
         camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
         camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
+
+        // Particle and floating text decay
+        particles.Update(dt);
         return;
     }
 
@@ -761,6 +772,8 @@ void Game::Render() {
             GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
         } else if (showZilDefeatModal) {
             GameUI::DrawZilDefeatModal(w, h, mousePos, false, !hasUsedZilRetry);
+        } else if (tutorial.HasActivePopup()) {
+            tutorial.DrawPopup(w, h, mousePos, false);
         } else if (!player.IsAlive() && !zilEncounterActive) {
             GameUI::DrawGameOver(w, h);
         }

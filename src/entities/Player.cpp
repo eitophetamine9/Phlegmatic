@@ -185,11 +185,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 void Player::TriggerDash(ParticleSystem& particles) {
     if (isDashing) return;
-
-    if (dashCooldown > 0.0f) {
-        particles.SpawnFloatingText(position, "DASH CD!", Color{ 140, 210, 255, 240 }, 14.0f);
-        return;
-    }
+    if (dashCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.dashStaminaCost) return;
@@ -213,7 +209,6 @@ void Player::TriggerDash(ParticleSystem& particles) {
     }
 
     SoundFX::PlayDash();
-    particles.SpawnFloatingText(position, "DASH", Color{ 120, 230, 255, 255 }, 16.0f);
 }
 
 void Player::TriggerLightAttack(ParticleSystem& particles) {
@@ -248,11 +243,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
-
-    if (heavyCooldown > 0.0f) {
-        particles.SpawnFloatingText(position, "HEAVY CD!", Color{ 255, 140, 60, 240 }, 14.0f);
-        return;
-    }
+    if (heavyCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.heavyStamina) return;
@@ -261,8 +252,6 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     heavyCooldown = stats.heavyCooldown;
     isHeavyWindingUp = true;
     heavyWindupTimer = stats.heavyWindup;
-
-    particles.SpawnFloatingText(position, "CHARGE!", Color{ 255, 200, 60, 255 }, 18.0f);
 }
 
 void Player::TriggerParry(ParticleSystem& particles) {
@@ -275,7 +264,6 @@ void Player::TriggerParry(ParticleSystem& particles) {
     parryCooldown = Config::PARRY_COOLDOWN;
 
     SoundFX::PlayParryMiss();
-    particles.SpawnFloatingText(position, "PARRY STANCE", Color{ 100, 240, 255, 255 }, 18.0f);
 }
 
 void Player::OnParrySuccessful(ParticleSystem& particles) {

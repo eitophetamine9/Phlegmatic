@@ -38,6 +38,10 @@ public:
     void Update(float dt, Player& player, GameMap& map, ParticleSystem& particles, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles);
     void DrawWorldElements(float time) const;
     void DrawHUD(int windowWidth, int windowHeight) const;
+    bool DrawPopup(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed);
+
+    bool HasActivePopup() const { return showPopup; }
+    void DismissPopup() { showPopup = false; }
 
     TutorialStep GetStep() const { return currentStep; }
     bool IsCompleted() const { return currentStep == TutorialStep::COMPLETED; }
@@ -46,6 +50,8 @@ public:
 
     AncientChest& GetChest() { return chest; }
     Vector2 GetWeaponStandPos() const { return weaponStandPos; }
+
+    void TriggerStepPopup(TutorialStep step);
 
 private:
     TutorialStep currentStep;
@@ -67,4 +73,10 @@ private:
     float stepTransitionTimer;
     std::string currentObjectiveText;
     std::string currentControlHint;
+
+    // Pop-up modal state
+    bool showPopup;
+    std::string popupTitle;
+    std::string popupBody;
+    std::string popupHint;
 };
