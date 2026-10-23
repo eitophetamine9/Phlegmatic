@@ -56,9 +56,9 @@
 * **Combat Arena & Wave Defense Mode (Expanded to 5 Waves)**:
   * 5 escalating combat waves featuring mixed vanguard formations, high-threat charger vanguards, dual-brute shockwaves, kiting snipers, and culminating in **The Grand Inquisitor** boss trial on Wave 5.
   * **Adhesive Bandages (+30 HP)**: Glowing medical pickups spawn periodically across the arena floor and drop upon defeating enemies, providing tactical healing sustain during prolonged trials.
-* **Test Arena Mode (Main Menu)**:
-  * Unlocked on the Title Screen once the player either **defeats Zil** or **faces him in duel and accepts his spare**.
-  * Grants instant access to all 5 arena combat trials directly from the main menu for continuous weapon and defense testing.
+* **Test Arena Mode (Main Menu & Lobby)**:
+  * Unlocked on the Title Screen and Lobby once the player completes Chapter 1 and **defeats Zil the Corrupted Crusader**.
+  * Grants instant access to all 5 arena combat trials directly from the main menu or the Lobby portal for continuous weapon and defense testing.
 * **Streamlined Objectives HUD**:
   * Tutorial quest objectives are cleanly pinned to the top-left margin to preserve central combat visibility.
 * **Armor Defense & Mitigation System**:
@@ -81,6 +81,7 @@
 | **Interact** | `E Key` / `Left Click` | Claim weapons, open ancient relic chests, and trigger portal transit. |
 | **Lore Journal** | `I Key` or `TAB` | Toggle the in-game chronicles codex, armor stats, and weapon inventory. |
 | **Controls Guide** | `C Key` | Toggle the quick-reference controls overlay modal. |
+| **Title Screen** | `~ Key` (Tilde / Grave) | Instantly return to the Title Screen from any map or combat state. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the combat trial. |
 | **Return to Lobby** | `L Key` or `ESC` | Return to the Armory Sanctuary. |
 
@@ -93,7 +94,7 @@
 | **Unarmed** | Bare Fists | None | None | 0.75s (15 stam) | Starting tutorial state. Search the courtyard altar to claim a weapon. |
 | **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc, 14 stam) | 85 dmg (2-Stage cleave) | 0.85s (20 stam) | Dependable reach. **Heavy**: Stage 1 wide 150° cleave followed by Stage 2 upward shock slash line/box AoE (2.1s cd). |
 | **Truth Seeker** | Legendary Holy Blade | 46 / 60 dmg (2-Hit Combo) | 140 dmg (Dual 360° + Holy Beam) | 0.65s (16 stam) | **Light**: Slash into radiant upward slice (line/box AoE). **Heavy**: Rapid dual 360° dawnfire sweeps + holy beam projectile (10% defense pierce, 3.8s cd). |
-| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 110 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attacks. **Heavy**: High-velocity piercing lunge (**42 dmg + i-frames**) into instant 360° whirlwind (**68 dmg**, 95px range, 1.8s cd). |
+| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 110 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attacks. **Heavy**: High-velocity piercing lunge (**42 dmg + i-frames**, procs forward regardless of WASD movement) into instant 360° whirlwind (**68 dmg**, 95px range, 1.8s cd). |
 | **War Mace** | Crushing Poise | 52 dmg (Frontal Circle Smack) | 155 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack followed by 360° tremor shockwave (**ignores 25% enemy defense**, 3.6s cd). |
 
 > [!NOTE]

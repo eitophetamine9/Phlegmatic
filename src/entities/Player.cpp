@@ -365,8 +365,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         }
     }
 
-    // Normal movement when not dashing
-    if (!isDashing) {
+    // Normal movement when not dashing or dagger lunging
+    if (!isDashing && !isDaggerLunging) {
         Vector2 moveDir = { 0.0f, 0.0f };
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    moveDir.y -= 1.0f;
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  moveDir.y += 1.0f;
@@ -509,7 +509,8 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (currentWeapon == WeaponType::NONE) return;
-    if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging || currentAttack.type != AttackType::NONE) return;
+    if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging) return;
+    if (currentAttack.type != AttackType::NONE && currentWeapon != WeaponType::DAGGERS) return;
     if (heavyCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
@@ -525,6 +526,8 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
         isDaggerLunging = true;
         daggerLungeTimer = 0.20f;
         daggerLungeDir = forwardDir;
+        velocity.x = forwardDir.x * 660.0f;
+        velocity.y = forwardDir.y * 660.0f;
         isHeavyWindingUp = false;
         heavyStage = 1;
 

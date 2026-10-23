@@ -130,6 +130,15 @@ void Game::EnterArena() {
 void Game::Update(float dt) {
     Vector2 mouseScreen = GetMousePosition();
 
+    // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
+    if (IsKeyPressed(KEY_GRAVE)) {
+        currentState = GameState::TITLE_SCREEN;
+        showControlsModal = false;
+        showInventoryModal = false;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
     // If Controls Modal is active
     if (showControlsModal) {
         if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_TAB)) {
@@ -204,7 +213,9 @@ void Game::Update(float dt) {
         } else if (action == 2) {
             showControlsModal = true;
         } else if (action == 3) {
-            EnterArena();
+            if (testArenaUnlocked) {
+                EnterArena();
+            }
         }
         return;
     }
@@ -232,8 +243,13 @@ void Game::Update(float dt) {
     if (currentState == GameState::BORDERLANDS_GATE) {
         int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
         if (choice == 1 || IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { // Arena Test
-            EnterArena();
-            return;
+            if (testArenaUnlocked) {
+                EnterArena();
+                return;
+            } else {
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            }
         } else if (choice == 2 || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_H) || IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) { // Back to Hub
             EnterLobby();
             return;
@@ -273,7 +289,10 @@ void Game::Update(float dt) {
             bool clicked = CheckCollisionPointCircle(mouseWorld, ped.position, ped.radius) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
             if ((near && IsKeyPressed(KEY_E)) || clicked) {
-                if (player.GetWeapon() != ped.weapon) {
+                if (ped.weapon == WeaponType::TRUTH_SEEKER && !player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
+                    particles.SpawnFloatingText(player.GetPosition(), "LOCKED — DEFEAT ZIL IN CHAPTER 1!", Color{ 255, 90, 90, 255 }, 20.0f);
+                    SoundFX::PlayHitImpact();
+                } else if (player.GetWeapon() != ped.weapon) {
                     player.SetWeapon(ped.weapon);
                     WeaponStats st = GetWeaponStats(ped.weapon);
                     particles.SpawnFloatingText(player.GetPosition(), "EQUIPPED: " + st.name, Color{ 255, 220, 80, 255 }, 22.0f);
@@ -283,8 +302,13 @@ void Game::Update(float dt) {
         }
 
         if (portal.CheckPlayerInside(player.GetPosition()) || (Vector2Distance(player.GetPosition(), portal.position) < 80.0f && IsKeyPressed(KEY_E))) {
-            EnterArena();
-            return;
+            if (!testArenaUnlocked) {
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            } else {
+                EnterArena();
+                return;
+            }
         }
 
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -478,7 +502,7 @@ void Game::Render() {
         BeginMode2D(camera);
         map.DrawFloor();
 
-        portal.Draw(time);
+        portal.Draw(time, testArenaUnlocked);
 
         Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
         for (const auto& ped : pedestals) {

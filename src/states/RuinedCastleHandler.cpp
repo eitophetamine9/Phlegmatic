@@ -39,6 +39,13 @@ void RuinedCastleHandler::Update(
 ) {
     Vector2 mouseScreen = GetMousePosition();
 
+    // Shortcut: '~' returns to Title Screen
+    if (IsKeyPressed(KEY_GRAVE)) {
+        currentState = GameState::TITLE_SCREEN;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
     // Interactive Tutorial Pop-up Modal (pauses combat and gameplay while visible)
     if (tutorial.HasActivePopup()) {
         tutorial.DrawPopup(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
@@ -63,22 +70,19 @@ void RuinedCastleHandler::Update(
             zilDialogueTimer = 4.0f;
             particles.SpawnFloatingText({ 800.0f, 290.0f }, "DUEL RESTARTED!", Color{ 255, 200, 60, 255 }, 24.0f);
             return;
-        } else if (choice == 2) { // Accept Spare & Proceed
-            testArenaUnlocked = true;
-            if (onSaveArenaUnlock) onSaveArenaUnlock();
+        } else if (choice == 2) { // Accept Spare & Regroup
             showZilDefeatModal = false;
             zilEncounterActive = false;
             zilSparedPlayer = true;
-            player.Revive({ 800.0f, 420.0f }, 0.6f);
+            player.Revive({ 800.0f, 520.0f }, 0.6f);
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
-            map.SetGateOpen(true);
             zilDialogueSpeaker = "ZIL THE CORRUPTED CRUSADER";
-            zilDialogueText = "“Go then, wanderer. Carry your blade north into Zyphden... uncover the truth of Charlz.”";
+            zilDialogueText = "“You possess spirit, wanderer... but Truth Seeker only yields to one who can conquer me. Regroup and challenge me again!”";
             zilDialogueColor = Color{ 140, 210, 255, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL — NORTH GATE OPEN!", Color{ 140, 220, 255, 255 }, 24.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL — MUST DEFEAT ZIL TO PASS!", Color{ 140, 220, 255, 255 }, 24.0f);
             return;
         }
         return;
@@ -163,7 +167,8 @@ void RuinedCastleHandler::Update(
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
 
     // Zil Boss Encounter Trigger
-    if (tutorial.GetStep() == TutorialStep::COMPLETED && !zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
+    // Zil Boss Encounter Trigger (Cannot bypass Zil by skipping tutorial)
+    if (!zilEncounterActive && !zilDefeated && !zilSparedPlayer) {
         if (player.GetPosition().y <= 420.0f) {
             zilEncounterActive = true;
             enemies.clear();
@@ -218,11 +223,11 @@ void RuinedCastleHandler::Update(
         zilDialogueTimer -= dt;
     }
 
-    // Check if player walks through northern open gateway into Zyphden
-    bool atNorthernGate = map.IsGateOpen() &&
+    // Check if player walks through northern open gateway into Zyphden (REQUIRES ZIL DEFEATED)
+    bool atNorthernGate = zilDefeated && map.IsGateOpen() &&
                           (player.GetPosition().y <= map.GetBounds().y + 60.0f &&
                            player.GetPosition().x >= 670.0f && player.GetPosition().x <= 930.0f);
-    bool interactGate = map.IsGateOpen() &&
+    bool interactGate = zilDefeated && map.IsGateOpen() &&
                         (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
@@ -231,6 +236,13 @@ void RuinedCastleHandler::Update(
         SoundFX::PlayGateOpen();
         particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
         return;
+    }
+
+    // If player attempts to interact at the gate before defeating Zil
+    if (!zilDefeated && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
+        (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED — MUST DEFEAT ZIL TO ADVANCE!", Color{ 255, 80, 80, 255 }, 20.0f);
+        SoundFX::PlayHitImpact();
     }
 
     // Camera follow

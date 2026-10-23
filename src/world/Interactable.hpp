@@ -110,25 +110,37 @@ struct ArenaPortal {
         return Vector2Distance(playerPos, position) <= radius;
     }
 
-    void Draw(float time) const {
-        // Glowing portal rings
+    void Draw(float time, bool isUnlocked = true) const {
         float pulse = 1.0f + 0.06f * sinf(time * 3.5f);
-        DrawCircleGradient(position, radius * 1.5f * pulse, Color{ 80, 160, 255, 55 }, Color{ 0, 0, 0, 0 });
-        DrawCircleLines((int)position.x, (int)position.y, radius * pulse, Color{ 100, 220, 255, 240 });
-        DrawCircleLines((int)position.x, (int)position.y, radius * 0.7f, Color{ 70, 140, 255, 180 });
-        DrawCircleV(position, radius * 0.45f, Color{ 30, 60, 110, 180 });
+        if (isUnlocked) {
+            // Glowing portal rings
+            DrawCircleGradient(position, radius * 1.5f * pulse, Color{ 80, 160, 255, 55 }, Color{ 0, 0, 0, 0 });
+            DrawCircleLines((int)position.x, (int)position.y, radius * pulse, Color{ 100, 220, 255, 240 });
+            DrawCircleLines((int)position.x, (int)position.y, radius * 0.7f, Color{ 70, 140, 255, 180 });
+            DrawCircleV(position, radius * 0.45f, Color{ 30, 60, 110, 180 });
 
-        // Rotating magical runes
-        for (int i = 0; i < 4; i++) {
-            float angle = time * 1.8f + (float)i * (PI * 0.5f);
-            Vector2 runePos = { position.x + cosf(angle) * (radius * 0.82f), position.y + sinf(angle) * (radius * 0.82f) };
-            DrawCircleV(runePos, 4.5f, Color{ 140, 240, 255, 240 });
+            // Rotating magical runes
+            for (int i = 0; i < 4; i++) {
+                float angle = time * 1.8f + (float)i * (PI * 0.5f);
+                Vector2 runePos = { position.x + cosf(angle) * (radius * 0.82f), position.y + sinf(angle) * (radius * 0.82f) };
+                DrawCircleV(runePos, 4.5f, Color{ 140, 240, 255, 240 });
+            }
+
+            // Text prompt
+            const char* label = "ENTER ARENA";
+            int w = MeasureText(label, 12);
+            DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 12, Color{ 255, 255, 255, 255 });
+        } else {
+            // Locked red runic barrier
+            DrawCircleGradient(position, radius * 1.25f, Color{ 160, 30, 40, 45 }, Color{ 0, 0, 0, 0 });
+            DrawCircleLines((int)position.x, (int)position.y, radius, Color{ 170, 50, 50, 200 });
+            DrawCircleLines((int)position.x, (int)position.y, radius * 0.65f, Color{ 120, 35, 35, 160 });
+            DrawCircleV(position, radius * 0.35f, Color{ 45, 15, 20, 220 });
+
+            const char* label = "ARENA [LOCKED]";
+            int w = MeasureText(label, 11);
+            DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 11, Color{ 240, 100, 100, 220 });
         }
-
-        // Text prompt
-        const char* label = "ENTER ARENA";
-        int w = MeasureText(label, 12);
-        DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 12, Color{ 255, 255, 255, 255 });
     }
 };
 

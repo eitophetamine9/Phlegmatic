@@ -191,8 +191,6 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
             if (!sentinelAlive || parriesAchieved >= 2) {
                 currentStep = TutorialStep::GATE_OPENED;
-                map.SetGateOpen(true);
-                SoundFX::PlayGateOpen();
                 TriggerStepPopup(TutorialStep::GATE_OPENED);
             }
             break;
@@ -218,9 +216,9 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 }
 
 void TutorialManager::SkipToBoss(GameMap& map) {
+    (void)map;
     hasClaimedWeapon = true;
     chest.opened = true;
-    map.SetGateOpen(true);
     currentStep = TutorialStep::COMPLETED;
 }
 
