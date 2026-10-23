@@ -14,11 +14,28 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         bool hitAny = false;
 
         for (auto& enemy : enemies) {
-            if (enemy.IsAlive() && enemy.CheckHit(attack)) {
+            if (!enemy.IsAlive()) continue;
+
+            bool hit = enemy.CheckHit(attack);
+
+            // Also check Truth Seeker holy shockwave area
+            if (!hit && attack.hasShockwave) {
+                float sdx = enemy.GetPosition().x - attack.shockwavePos.x;
+                float sdy = enemy.GetPosition().y - attack.shockwavePos.y;
+                float sdistSq = sdx * sdx + sdy * sdy;
+                float maxSafe = attack.shockwaveRadius + enemy.GetRadius();
+                if (sdistSq <= maxSafe * maxSafe) {
+                    hit = true;
+                }
+            }
+
+            if (hit) {
+                Vector2 knockOrigin = (attack.hasShockwave && !enemy.CheckHit(attack)) ? attack.shockwavePos : player.GetPosition();
                 Vector2 knockbackDir = Vector2Normalize({
-                    enemy.GetPosition().x - player.GetPosition().x,
-                    enemy.GetPosition().y - player.GetPosition().y
+                    enemy.GetPosition().x - knockOrigin.x,
+                    enemy.GetPosition().y - knockOrigin.y
                 });
+                if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
                 enemy.TakeDamage(attack.damage, knockbackDir, particles);
                 hitAny = true;
             }
@@ -26,7 +43,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
 
         if (hitAny) {
             player.SetAttackHit();
-            particles.AddScreenShake(attack.type == AttackType::HEAVY ? 5.0f : 2.5f, 0.1f);
+            particles.AddScreenShake(attack.type == AttackType::HEAVY ? 6.0f : 2.5f, 0.12f);
         }
     }
 

@@ -24,9 +24,10 @@ void Game::Init() {
     assetManager.Init();
 
     pedestals.clear();
-    pedestals.push_back({ { 650.0f, 650.0f }, WeaponType::SWORD });
-    pedestals.push_back({ { 800.0f, 590.0f }, WeaponType::DAGGERS });
-    pedestals.push_back({ { 950.0f, 650.0f }, WeaponType::MACE });
+    pedestals.push_back({ { 600.0f, 650.0f }, WeaponType::SWORD });
+    pedestals.push_back({ { 730.0f, 590.0f }, WeaponType::DAGGERS });
+    pedestals.push_back({ { 870.0f, 590.0f }, WeaponType::MACE });
+    pedestals.push_back({ { 1000.0f, 650.0f }, WeaponType::TRUTH_SEEKER });
 
     dummy.position = { 800.0f, 810.0f };
     portal.position = { 800.0f, 430.0f };
@@ -66,6 +67,8 @@ bool Game::LoadArenaUnlock() {
 void Game::EnterRuinedCastle() {
     map.Init(MapEnvironment::RUINED_CASTLE);
     player.Init({ 800.0f, 1180.0f });
+    player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
+    player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
     camera.target = player.GetPosition();
     currentState = GameState::RUINED_CASTLE;
     showControlsModal = false;
@@ -79,7 +82,15 @@ void Game::EnterRuinedCastle() {
 
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
+    WeaponType keepWeapon = player.GetWeapon();
     player.Init({ 800.0f, 740.0f });
+    if (keepWeapon != WeaponType::NONE) {
+        player.SetWeapon(keepWeapon);
+    } else if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
+        player.SetWeapon(WeaponType::TRUTH_SEEKER);
+    } else if (player.GetInventory().HasWeapon(WeaponType::SWORD)) {
+        player.SetWeapon(WeaponType::SWORD);
+    }
     camera.target = player.GetPosition();
     currentState = GameState::LOBBY;
     showControlsModal = false;
@@ -90,7 +101,15 @@ void Game::EnterLobby() {
 
 void Game::EnterArena() {
     map.Init(MapEnvironment::ARENA);
+    WeaponType keepWeapon = player.GetWeapon();
     player.Init({ 1200.0f, 900.0f });
+    if (keepWeapon != WeaponType::NONE) {
+        player.SetWeapon(keepWeapon);
+    } else if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
+        player.SetWeapon(WeaponType::TRUTH_SEEKER);
+    } else if (player.GetInventory().HasWeapon(WeaponType::SWORD)) {
+        player.SetWeapon(WeaponType::SWORD);
+    }
     camera.target = player.GetPosition();
     projectiles.clear();
     particles.Clear();
@@ -205,12 +224,10 @@ void Game::Update(float dt) {
     // 1.9 BORDERLANDS GATEWAY EPILOGUE STATE
     if (currentState == GameState::BORDERLANDS_GATE) {
         int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
-        if (choice == 1) { // Re-enter Ruined Castle to explore
-            currentState = GameState::RUINED_CASTLE;
-            player.Revive({ 800.0f, 320.0f }, 1.0f);
-            camera.target = player.GetPosition();
+        if (choice == 1) { // Arena Test
+            EnterArena();
             return;
-        } else if (choice == 2) { // Return to Lobby
+        } else if (choice == 2) { // Back to Hub
             EnterLobby();
             return;
         }
@@ -225,7 +242,7 @@ void Game::Update(float dt) {
             player.TriggerLightAttack(particles);
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-            player.TriggerHeavyAttack(particles);
+            player.TriggerHeavyAttack(particles, mouseWorld);
         }
         if (IsKeyPressed(KEY_Q)) {
             player.TriggerDash(particles);
@@ -307,7 +324,7 @@ void Game::Update(float dt) {
         player.TriggerLightAttack(particles);
     }
     if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
-        player.TriggerHeavyAttack(particles);
+        player.TriggerHeavyAttack(particles, mouseWorld);
     }
     if (IsKeyPressed(KEY_Q)) {
         player.TriggerDash(particles);

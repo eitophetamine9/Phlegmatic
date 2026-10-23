@@ -2,6 +2,7 @@
 #include "raylib.h"
 
 enum class WeaponType {
+    NONE,
     SWORD,
     DAGGERS,
     MACE,
@@ -17,7 +18,8 @@ enum class AttackType {
 enum class TelegraphShape {
     CONE,
     CIRCLE,
-    LINE
+    LINE,
+    PROJECTILE_SPREAD
 };
 
 struct AttackInfo {
@@ -33,6 +35,10 @@ struct AttackInfo {
     float timer = 0.0f;
     float duration = 0.0f;
     bool hasHit = false;
+    int comboStep = 1;
+    bool hasShockwave = false;
+    Vector2 shockwavePos = { 0.0f, 0.0f };
+    float shockwaveRadius = 0.0f;
 };
 
 struct TelegraphIndicator {
@@ -44,4 +50,6 @@ struct TelegraphIndicator {
     float width = 0.0f;
     float progress = 0.0f;
     Color warningColor = Color{ 255, 60, 60, 160 };
+    int spreadCount = 3;
+    float spreadAngle = 0.25f; // in radians
 };

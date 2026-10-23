@@ -30,6 +30,7 @@ public:
     // Weapon Arsenal
     bool HasWeapon(WeaponType type) const;
     void UnlockWeapon(WeaponType type);
+    void ClearWeapons() { unlockedWeapons.clear(); }
     const std::vector<WeaponType>& GetUnlockedWeapons() const { return unlockedWeapons; }
 
     // Lore Fragments

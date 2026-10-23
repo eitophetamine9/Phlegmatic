@@ -128,6 +128,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             if (distToStand <= 55.0f && IsKeyPressed(KEY_E)) {
                 hasClaimedWeapon = true;
                 player.SetWeapon(WeaponType::SWORD);
+                player.GetInventory().UnlockWeapon(WeaponType::SWORD);
                 currentStep = TutorialStep::COMBAT_BASICS;
                 TriggerStepPopup(TutorialStep::COMBAT_BASICS);
             }

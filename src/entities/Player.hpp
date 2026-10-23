@@ -17,7 +17,7 @@ public:
     // Movement & Combat triggers
     void TriggerDash(ParticleSystem& particles);
     void TriggerLightAttack(ParticleSystem& particles);
-    void TriggerHeavyAttack(ParticleSystem& particles);
+    void TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos = { 0.0f, 0.0f });
     void TriggerParry(ParticleSystem& particles);
 
     // Damage handling
@@ -53,6 +53,13 @@ public:
 
     void SetAttackHit() { currentAttack.hasHit = true; }
     void OnParrySuccessful(ParticleSystem& particles);
+
+    int GetComboStep() const { return comboStep; }
+    bool IsShockwaveActive() const { return shockwaveActive; }
+    Vector2 GetShockwavePos() const { return shockwavePos; }
+    float GetShockwaveRadius() const { return shockwaveRadius; }
+    Vector2 GetHeavyTargetPos() const { return heavyTargetPos; }
+    bool IsHeavyWindingUp() const { return isHeavyWindingUp; }
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
@@ -93,6 +100,16 @@ private:
     AttackInfo currentAttack;
     float heavyWindupTimer;
     bool isHeavyWindingUp;
+    Vector2 heavyTargetPos;
+
+    int comboStep;
+    float comboTimer;
+
+    // Shockwave AoE state (Truth Seeker heavy)
+    bool shockwaveActive;
+    float shockwaveTimer;
+    float shockwaveRadius;
+    Vector2 shockwavePos;
 
     float walkCycle;
 };

@@ -89,10 +89,11 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             strikeDuration = 0.14f;
             recoveryDuration = 0.70f;
             stunDuration = 2.0f;
-            telegraph.shape = TelegraphShape::CONE;
+            telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
             telegraph.radius = attackRange;
-            telegraph.arcAngle = 55.0f;
-            telegraph.warningColor = Color{ 190, 70, 255, 160 };
+            telegraph.spreadCount = 3;
+            telegraph.spreadAngle = 0.30f;
+            telegraph.warningColor = Color{ 190, 70, 255, 180 };
             break;
 
         case EnemyType::INQUISITOR_BOSS:
@@ -184,15 +185,17 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 // Setup Boss attack phase telegraph
                 if (type == EnemyType::INQUISITOR_BOSS) {
                     if (bossAttackPhase == 0) {
-                        // Nova phase (Pure ranged)
+                        // Nova phase (Pure ranged 12-way radial star burst)
                         windupDuration = 0.72f;
                         stateTimer = windupDuration;
-                        telegraph.shape = TelegraphShape::CIRCLE;
-                        telegraph.radius = 180.0f;
-                        telegraph.warningColor = Color{ 255, 190, 40, 160 };
+                        telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
+                        telegraph.radius = 280.0f;
+                        telegraph.spreadCount = 12;
+                        telegraph.spreadAngle = 0.5236f;
+                        telegraph.warningColor = Color{ 255, 190, 40, 180 };
                         isPerformingMeleeSmite = false;
                     } else if (bossAttackPhase == 1) {
-                        // Arcane Beam phase (Pure ranged)
+                        // Arcane Beam phase (Pure ranged linear beam)
                         windupDuration = 0.52f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
@@ -229,13 +232,14 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.warningColor = Color{ 255, 100, 30, 190 };
                         isPerformingMeleeSmite = true;
                     } else {
-                        // Corrupted Flame Wave (Sweeping blade releasing flame projectiles)
+                        // Corrupted Flame Wave (3 flame projectiles)
                         windupDuration = 0.60f;
                         stateTimer = windupDuration;
-                        telegraph.shape = TelegraphShape::CONE;
-                        telegraph.arcAngle = 65.0f;
-                        telegraph.radius = 300.0f;
-                        telegraph.warningColor = Color{ 220, 60, 200, 180 };
+                        telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
+                        telegraph.spreadCount = 3;
+                        telegraph.spreadAngle = 0.25f;
+                        telegraph.radius = 320.0f;
+                        telegraph.warningColor = Color{ 255, 90, 40, 200 };
                         isPerformingMeleeSmite = false; // damage comes from flame projectiles
                     }
                 }

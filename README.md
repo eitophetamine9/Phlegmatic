@@ -83,10 +83,14 @@
 
 | Weapon | Stance Style | Light Atk | Heavy Atk | Dash Cooldown | Passives & Special Properties |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc) | 65 dmg (140° cleave) | 0.85s (20 stam) | Dependable reach, consistent recovery cadence. |
-| **Truth Seeker** | Legendary Blade | 34 dmg (120° arc) | 90 dmg (160° cleave) | 0.70s (18 stam) | Ancient holy steel; strikes with radiant azure trails and +15% stagger duration. |
-| **Dual Daggers** | Agility Flurry | 18 dmg (rapid twin-hit) | 52 dmg (360° whirlwind) | 0.50s (14 stam) | High attack cadence, low stamina drain, fastest dash. |
-| **War Mace** | Crushing Poise | 40 dmg (heavy bludgeon) | 95 dmg (ground tremor) | 1.25s (26 stam) | High poise destruction, breaks through enemy shields. |
+| **Unarmed** | Bare Fists | None | None | 0.75s (15 stam) | Starting tutorial state. Search the courtyard altar to claim a weapon. |
+| **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc) | 65 dmg (140° cleave) | 0.85s (20 stam) | Dependable reach, consistent recovery cadence. Claimed at courtyard altar. |
+| **Truth Seeker** | Legendary Holy Blade | 46 / 60 dmg (2-Hit Combo) | 125 dmg (Area Shockwave) | 0.65s (16 stam) | **2-Hit Light Combo** (Golden sweep into Radiant Azure upswing) + **Slower Area Holy Shockwave Heavy Slam** targeting designated cursor area. Persists into Hub and Arena. |
+| **Dual Daggers** | Agility Flurry | 18 dmg (rapid twin-hit) | 52 dmg (360° whirlwind) | 0.50s (14 stam) | High attack cadence, low stamina drain, fastest dash. Available in Sanctuary Hub. |
+| **War Mace** | Crushing Poise | 40 dmg (heavy bludgeon) | 95 dmg (ground tremor) | 1.25s (26 stam) | High poise destruction, breaks through enemy shields. Available in Sanctuary Hub. |
+
+> [!NOTE]
+> In **Chapter 1: Ruined Castle**, the player begins unarmed with zero weapons in inventory. The Crusader's Broadsword is claimed at the central altar plinth, and the legendary **Truth Seeker** is claimed by triumphing over Zil the Corrupted Crusader. After the tutorial, Truth Seeker is permanently retained in your arsenal for the Hub and Test Arena.
 
 ---
 
@@ -94,13 +98,16 @@
 
 | Enemy | Archetype | Telegraph Shape | Combat Behavior & Defeat Strategy |
 | :--- | :--- | :--- | :--- |
-| **Cultist Slasher** | Melee Vanguard | Amber/Red Cone (95°, 115px) | Forward blade slash. Sidestep or time `[F]` right before impact to stagger. |
+| **Cultist Slasher** | Melee Vanguard | Amber/Red Cone (95°, 115px) | Forward blade slash. Sidestep or time `[F]` right before impact to stagger. *Cone AoE indicates direct melee sweep range.* |
 | **Shadow Charger** | Dash Melee | Linear Path (50px width, 240px) | High-speed dash thrust. Step perpendicular to path or parry head-on. |
 | **Iron Brute** | Heavy Crusher | Expanding Circle (150px AoE) | Tremor ground slam. Dash clear with `[Q]` or break poise with War Mace. |
-| **Deathseeker Archer** | Ranged Kiting | Red Laser Line (380px range) | Backs away if approached; fires high-velocity piercing bolts. |
-| **Void Pyromancer** | Occult Caster | Arcane Fan Sector (320px) | Fires a 3-way fan spread of void orbs. Evade with `[Q]` or reflect with `[F]`. |
-| **Zil the Corrupted Crusader** | **Chapter 1 Boss** | Dynamic Slashes & Shield Bashes | 420 HP fallen crusader guarding the portcullis. Tests sword mastery and deflection. |
-| **The Grand Inquisitor** | **Arena Boss** | Multi-Phase Telegraphs | 500 HP boss rotating between **12-way Projectile Nova**, **Arcane Beam**, and **Cataclysmic Smite**. |
+| **Deathseeker Archer** | Ranged Kiting | Red Laser Aim Line (360px range) | Backs away if approached; fires high-velocity piercing bolts. |
+| **Void Pyromancer** | Occult Caster | 3-Way Trajectory Aim Lines (320px) | Shows exact projectile flight paths instead of a confusing cone AoE. Fires 3 void orbs. Evade with `[Q]` or reflect with `[F]`. |
+| **Zil the Corrupted Crusader** | **Chapter 1 Boss** | Cone Cleave, Charge Path & 3-Way Flame Trajectories | 380 HP fallen crusader guarding the portcullis. Dynamic moveset with melee cleaves, shield charges, and 3-way flame waves with precision trajectory indicators. |
+| **The Grand Inquisitor** | **Arena Boss** | Multi-Phase Trajectories & Tremor AoE | 500 HP boss rotating between **12-way Radial Star Trajectories**, **Linear Beam Shard**, and **Cataclysmic Smite AoE**. |
+
+> [!TIP]
+> **Visual Clarity Rule**: Filled Cone AoEs are reserved strictly for attacks that deal direct melee/cleave damage within that sector. Projectiles display precise trajectory laser lines indicating their exact flight paths, allowing clean evasion between projectiles.
 
 ---
 

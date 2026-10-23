@@ -529,10 +529,10 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     DrawLineEx({ cardX + cardW - 12, cardY + cardH - 12 }, { cardX + cardW - 38, cardY + cardH - 12 }, 2.0f, cornerCol);
     DrawLineEx({ cardX + cardW - 12, cardY + cardH - 12 }, { cardX + cardW - 12, cardY + cardH - 38 }, 2.0f, cornerCol);
 
-    int headerW = MeasureText("CHAPTER 1 COMPLETE // THE GATES TO ZYPHDEN UNLOCKED", 22);
-    DrawText("CHAPTER 1 COMPLETE // THE GATES TO ZYPHDEN UNLOCKED", (int)(cardX + (cardW - headerW) * 0.5f), (int)cardY + 28, 22, Color{ 255, 215, 80, 255 });
+    int headerW = MeasureText("CHAPTER 1 COMPLETE // STORY IN DEVELOPMENT", 22);
+    DrawText("CHAPTER 1 COMPLETE // STORY IN DEVELOPMENT", (int)(cardX + (cardW - headerW) * 0.5f), (int)cardY + 28, 22, Color{ 255, 215, 80, 255 });
     
-    const char* subQuote = "“The ancient sanctuary lies behind you. The vast overland wilderness of Tydeshire awaits.”";
+    const char* subQuote = "“The northern road into Zyphden and the remaining kingdoms of Tydeshire is currently in development.”";
     int subW = MeasureText(subQuote, 13);
     DrawText(subQuote, (int)(cardX + (cardW - subW) * 0.5f), (int)cardY + 58, 13, Color{ 160, 215, 245, 230 });
     DrawLine((int)cardX + 40, (int)cardY + 84, (int)(cardX + cardW - 40), (int)cardY + 84, Color{ 140, 110, 50, 200 });
@@ -548,7 +548,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     };
 
     KingdomCard realms[5] = {
-        { "ZYPHDEN", "UNLOCKED", "Windborne Spires & Ancient Altars", Color{ 100, 230, 185, 255 }, true },
+        { "ZYPHDEN", "IN DEV", "Windborne Spires & Ancient Altars", Color{ 100, 230, 185, 255 }, true },
         { "AZSHDEN", "LOCKED", "Sunken Bastion & Coastal Keeps", Color{ 80, 160, 240, 180 }, false },
         { "FLEURSHDEN", "LOCKED", "Blooming Thorns & Royal Knights", Color{ 235, 120, 165, 180 }, false },
         { "NOIRDEN", "LOCKED", "Shrouded Obsidian Peaks", Color{ 180, 115, 245, 180 }, false },
@@ -596,7 +596,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
     DrawText(wStatsStr.c_str(), (int)col1X + 20, (int)sec2Y + 84, 12, Color{ 160, 190, 220, 230 });
 
     if (player.GetWeapon() == WeaponType::TRUTH_SEEKER) {
-        DrawText("SPECIAL: Dawnfire Rune Blade (+60% Counter Bonus on Parry)", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 255, 175, 45, 255 });
+        DrawText("SPECIAL: Dawnfire Rune Blade (2-Hit Light Combo + Area Shockwave)", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 255, 175, 45, 255 });
         DrawText("Earned by defeating Zil the Corrupted Crusader at the High Altar.", (int)col1X + 20, (int)sec2Y + 126, 11, Color{ 180, 210, 240, 220 });
     } else {
         DrawText("SPECIAL: Basic steel armament. Spared by Zil the Corrupted Crusader.", (int)col1X + 20, (int)sec2Y + 106, 11, Color{ 160, 200, 240, 220 });
@@ -626,25 +626,25 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
     int choiceResult = 0;
 
-    Rectangle btnCastle = { cardX + 160.0f, cardY + 550.0f, 340.0f, 54.0f };
-    bool hoverCastle = CheckCollisionPointRec(mousePos, btnCastle);
-    DrawRectangleRounded(btnCastle, 0.2f, 6, hoverCastle ? Color{ 40, 60, 95, 255 } : Color{ 24, 34, 52, 240 });
-    DrawRectangleRoundedLines(btnCastle, 0.2f, 6, hoverCastle ? Color{ 140, 220, 255, 255 } : Color{ 80, 125, 180, 230 });
-    int btn1W = MeasureText("RE-ENTER RUINED CASTLE", 14);
-    DrawText("RE-ENTER RUINED CASTLE", (int)(btnCastle.x + (btnCastle.width - btn1W) * 0.5f), (int)btnCastle.y + 19, 14, hoverCastle ? Color{ 255, 255, 255, 255 } : Color{ 200, 230, 255, 240 });
+    Rectangle btnArena = { cardX + 160.0f, cardY + 550.0f, 340.0f, 54.0f };
+    bool hoverArena = CheckCollisionPointRec(mousePos, btnArena);
+    DrawRectangleRounded(btnArena, 0.2f, 6, hoverArena ? Color{ 40, 75, 115, 255 } : Color{ 24, 44, 72, 240 });
+    DrawRectangleRoundedLines(btnArena, 0.2f, 6, hoverArena ? Color{ 140, 230, 255, 255 } : Color{ 80, 155, 220, 230 });
+    int btn1W = MeasureText("ENTER TEST ARENA", 15);
+    DrawText("ENTER TEST ARENA", (int)(btnArena.x + (btnArena.width - btn1W) * 0.5f), (int)btnArena.y + 19, 15, hoverArena ? Color{ 255, 255, 255, 255 } : Color{ 200, 240, 255, 240 });
 
-    Rectangle btnLobby = { cardX + 560.0f, cardY + 550.0f, 340.0f, 54.0f };
-    bool hoverLobby = CheckCollisionPointRec(mousePos, btnLobby);
-    DrawRectangleRounded(btnLobby, 0.2f, 6, hoverLobby ? Color{ 75, 45, 25, 255 } : Color{ 42, 26, 18, 240 });
-    DrawRectangleRoundedLines(btnLobby, 0.2f, 6, hoverLobby ? Color{ 255, 190, 70, 255 } : Color{ 205, 125, 50, 230 });
-    int btn2W = MeasureText("RETURN TO SANCTUARY LOBBY", 14);
-    DrawText("RETURN TO SANCTUARY LOBBY", (int)(btnLobby.x + (btnLobby.width - btn2W) * 0.5f), (int)btnLobby.y + 19, 14, hoverLobby ? Color{ 255, 255, 255, 255 } : Color{ 255, 220, 110, 240 });
+    Rectangle btnHub = { cardX + 560.0f, cardY + 550.0f, 340.0f, 54.0f };
+    bool hoverHub = CheckCollisionPointRec(mousePos, btnHub);
+    DrawRectangleRounded(btnHub, 0.2f, 6, hoverHub ? Color{ 75, 45, 25, 255 } : Color{ 42, 26, 18, 240 });
+    DrawRectangleRoundedLines(btnHub, 0.2f, 6, hoverHub ? Color{ 255, 190, 70, 255 } : Color{ 205, 125, 50, 230 });
+    int btn2W = MeasureText("BACK TO HUB", 15);
+    DrawText("BACK TO HUB", (int)(btnHub.x + (btnHub.width - btn2W) * 0.5f), (int)btnHub.y + 19, 15, hoverHub ? Color{ 255, 255, 255, 255 } : Color{ 255, 220, 110, 240 });
 
     if (isMousePressed) {
-        if (hoverCastle) {
+        if (hoverArena) {
             SoundFX::PlayButtonClick();
             choiceResult = 1;
-        } else if (hoverLobby) {
+        } else if (hoverHub) {
             SoundFX::PlayButtonClick();
             choiceResult = 2;
         }

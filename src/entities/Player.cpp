@@ -33,6 +33,14 @@ Player::Player() {
     heavyWindupTimer = 0.0f;
     isHeavyWindingUp = false;
     walkCycle = 0.0f;
+
+    comboStep = 1;
+    comboTimer = 0.0f;
+    heavyTargetPos = { 0.0f, 0.0f };
+    shockwaveActive = false;
+    shockwaveTimer = 0.0f;
+    shockwaveRadius = 0.0f;
+    shockwavePos = { 0.0f, 0.0f };
 }
 
 void Player::Init(Vector2 startPos) {
@@ -45,6 +53,10 @@ void Player::Init(Vector2 startPos) {
     isDashing = false;
     isHeavyWindingUp = false;
     counterBuffTimer = 0.0f;
+    comboStep = 1;
+    comboTimer = 0.0f;
+    shockwaveActive = false;
+    shockwaveTimer = 0.0f;
 }
 
 void Player::Revive(Vector2 startPos, float hpPercent) {
@@ -57,6 +69,10 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     isDashing = false;
     isHeavyWindingUp = false;
     counterBuffTimer = 0.0f;
+    comboStep = 1;
+    comboTimer = 0.0f;
+    shockwaveActive = false;
+    shockwaveTimer = 0.0f;
 }
 
 void Player::SetWeapon(WeaponType newWeapon) {
@@ -114,10 +130,31 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         }
     }
 
+    // Combo timer decay
+    if (comboTimer > 0.0f) {
+        comboTimer -= dt;
+        if (comboTimer <= 0.0f) {
+            comboStep = 1;
+        }
+    }
+
+    // Shockwave timer decay
+    if (shockwaveTimer > 0.0f) {
+        shockwaveTimer -= dt;
+        if (shockwaveTimer <= 0.0f) {
+            shockwaveActive = false;
+        }
+    }
+
     // Heavy attack windup
     if (isHeavyWindingUp) {
         heavyWindupTimer -= dt;
-        particles.SpawnSparks(position, Color{ 255, 200, 60, 200 }, 1, 40.0f);
+        if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+            particles.SpawnSparks(position, Color{ 255, 220, 60, 220 }, 2, 50.0f);
+            particles.SpawnSparks(heavyTargetPos, Color{ 255, 180, 40, 180 }, 2, 40.0f);
+        } else {
+            particles.SpawnSparks(position, Color{ 255, 200, 60, 200 }, 1, 40.0f);
+        }
 
         if (heavyWindupTimer <= 0.0f) {
             isHeavyWindingUp = false;
@@ -130,16 +167,34 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.range = stats.heavyRange;
             currentAttack.arcAngle = stats.heavyArc;
             currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
-            currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 400.0f : 260.0f;
+            currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 420.0f : 260.0f;
             currentAttack.duration = stats.heavyDuration;
             currentAttack.timer = stats.heavyDuration;
             currentAttack.hasHit = false;
 
-            SoundFX::PlayHeavyAttack();
+            if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+                // Cataclysmic Holy Shockwave at target area!
+                shockwaveActive = true;
+                shockwaveTimer = 0.40f;
+                shockwaveRadius = 135.0f;
+                shockwavePos = heavyTargetPos;
+                currentAttack.hasShockwave = true;
+                currentAttack.shockwavePos = heavyTargetPos;
+                currentAttack.shockwaveRadius = 135.0f;
+
+                SoundFX::PlayHeavyAttack();
+                SoundFX::PlayCrusaderClash();
+                particles.SpawnSparks(heavyTargetPos, Color{ 255, 230, 80, 255 }, 35, 220.0f);
+                particles.SpawnSparks(heavyTargetPos, Color{ 255, 120, 30, 255 }, 20, 160.0f);
+                particles.AddScreenShake(9.0f, 0.28f);
+            } else {
+                currentAttack.hasShockwave = false;
+                SoundFX::PlayHeavyAttack();
+                particles.AddScreenShake((currentWeapon == WeaponType::MACE) ? 6.0f : 3.5f, 0.14f);
+            }
 
             Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
             particles.SpawnSlashTrail(position, forwardDir, (currentWeapon == WeaponType::TRUTH_SEEKER) ? Color{ 255, 220, 60, 255 } : Color{ 255, 180, 50, 255 });
-            particles.AddScreenShake((currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 6.0f : 3.5f, 0.14f);
 
             velocity.x += forwardDir.x * 220.0f;
             velocity.y += forwardDir.y * 220.0f;
@@ -213,6 +268,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
 }
 
 void Player::TriggerLightAttack(ParticleSystem& particles) {
+    if (currentWeapon == WeaponType::NONE) return;
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
@@ -221,6 +277,18 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     stamina -= stats.lightStamina;
     lightCooldown = stats.lightCooldown;
 
+    // Truth Seeker 2-hit combo logic
+    if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+        if (comboTimer > 0.0f && comboStep == 1) {
+            comboStep = 2;
+        } else {
+            comboStep = 1;
+        }
+        comboTimer = stats.lightDuration + 0.45f;
+    } else {
+        comboStep = 1;
+    }
+
     currentAttack.type = AttackType::LIGHT;
     currentAttack.weapon = currentWeapon;
     currentAttack.origin = position;
@@ -228,7 +296,17 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.range = stats.lightRange;
     currentAttack.arcAngle = stats.lightArc;
     currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
-    currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 200.0f : 120.0f;
+    currentAttack.comboStep = comboStep;
+    currentAttack.hasShockwave = false;
+
+    if (currentWeapon == WeaponType::TRUTH_SEEKER && comboStep == 2) {
+        currentAttack.damage *= 1.30f; // 2nd swing deals +30% damage!
+        currentAttack.range *= 1.12f;
+        currentAttack.knockback = 280.0f;
+    } else {
+        currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 200.0f : 120.0f;
+    }
+
     currentAttack.duration = stats.lightDuration;
     currentAttack.timer = stats.lightDuration;
     currentAttack.hasHit = false;
@@ -236,13 +314,23 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     SoundFX::PlayLightAttack();
 
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-    particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 220, 255, 255 });
+    if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+        if (comboStep == 2) {
+            particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 220, 80, 255 });
+            particles.SpawnSparks(position, Color{ 140, 220, 255, 255 }, 10, 140.0f);
+        } else {
+            particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 230, 255, 255 });
+        }
+    } else {
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 220, 255, 255 });
+    }
 
     velocity.x += forwardDir.x * 110.0f;
     velocity.y += forwardDir.y * 110.0f;
 }
 
-void Player::TriggerHeavyAttack(ParticleSystem& particles) {
+void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
+    if (currentWeapon == WeaponType::NONE) return;
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
     if (heavyCooldown > 0.0f) return;
 
@@ -253,6 +341,21 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles) {
     heavyCooldown = stats.heavyCooldown;
     isHeavyWindingUp = true;
     heavyWindupTimer = stats.heavyWindup;
+
+    Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+    if (targetPos.x != 0.0f || targetPos.y != 0.0f) {
+        float tdx = targetPos.x - position.x;
+        float tdy = targetPos.y - position.y;
+        float tdist = sqrtf(tdx * tdx + tdy * tdy);
+        float maxRange = 175.0f;
+        if (tdist > maxRange) {
+            heavyTargetPos = { position.x + (tdx / tdist) * maxRange, position.y + (tdy / tdist) * maxRange };
+        } else {
+            heavyTargetPos = targetPos;
+        }
+    } else {
+        heavyTargetPos = { position.x + forwardDir.x * 135.0f, position.y + forwardDir.y * 135.0f };
+    }
 }
 
 void Player::TriggerParry(ParticleSystem& particles) {

@@ -26,6 +26,14 @@ struct WeaponStats {
 
 inline WeaponStats GetWeaponStats(WeaponType type) {
     switch (type) {
+        case WeaponType::NONE:
+            return {
+                "Unarmed",
+                "Empty hands. Search the castle courtyard or ancient altar to claim a weapon.",
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                15.0f, 0.75f
+            };
         case WeaponType::DAGGERS:
             return {
                 "Dual Daggers",
@@ -45,9 +53,9 @@ inline WeaponStats GetWeaponStats(WeaponType type) {
         case WeaponType::TRUTH_SEEKER:
             return {
                 "Truth Seeker",
-                "Legendary royal greatsword radiating holy dawnfire. Colossal reach, crushing impact, and superior recovery.",
-                48.0f, 95.0f, 130.0f, 0.20f, 0.28f, 16.0f,
-                115.0f, 140.0f, 160.0f, 0.22f, 0.32f, 2.20f, 36.0f,
+                "Legendary holy broadsword. Features a fluid 2-hit light attack combo and a slower, cataclysmic area shockwave heavy slam.",
+                46.0f, 98.0f, 130.0f, 0.22f, 0.26f, 15.0f,
+                125.0f, 155.0f, 160.0f, 0.45f, 0.35f, 2.60f, 38.0f,
                 16.0f, 0.65f
             };
         case WeaponType::SWORD:

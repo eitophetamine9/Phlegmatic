@@ -111,7 +111,7 @@ void RuinedCastleHandler::Update(
         }
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             if (tutorial.HasClaimedWeapon()) {
-                player.TriggerHeavyAttack(particles);
+                player.TriggerHeavyAttack(particles, mouseWorld);
             } else {
                 particles.SpawnFloatingText(player.GetPosition(), "CLAIM BLADE FIRST [E]!", Color{ 255, 180, 80, 240 }, 16.0f);
             }
@@ -213,7 +213,8 @@ void RuinedCastleHandler::Update(
     }
 
     // Check if player walks through northern open gateway into Zyphden
-    if (map.IsGateOpen() && player.GetPosition().y <= map.GetBounds().y - 20.0f) {
+    if (map.IsGateOpen() && player.GetPosition().y <= map.GetBounds().y + 15.0f &&
+        player.GetPosition().x >= 690.0f && player.GetPosition().x <= 910.0f) {
         currentState = GameState::BORDERLANDS_GATE;
         SoundFX::PlayGateOpen();
         particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);

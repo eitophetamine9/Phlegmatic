@@ -112,13 +112,26 @@ void PlayerRenderer::Draw(const Player& player) {
         float swordAngle = player.facingAngle + 35.0f;
         if (player.currentAttack.type == AttackType::LIGHT) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-            swordAngle = player.facingAngle - 55.0f + progress * player.currentAttack.arcAngle;
-            AssetManager::DrawSword(rightHand, swordAngle, 46.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 210, 50, 240 });
 
-            float startAngle = player.facingAngle - 55.0f;
-            float sweepAngle = progress * player.currentAttack.arcAngle;
-            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 215, 60, 75 });
-            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 240, 120, 220 });
+            if (player.comboStep == 2) {
+                // 2nd Light Attack: Upward radiant reverse sweep!
+                swordAngle = player.facingAngle + 60.0f - progress * player.currentAttack.arcAngle;
+                AssetManager::DrawSword(rightHand, swordAngle, 48.0f, Color{ 210, 245, 255, 255 }, Color{ 60, 220, 255, 250 });
+
+                float startAngle = player.facingAngle - player.currentAttack.arcAngle * 0.5f;
+                float sweepAngle = progress * player.currentAttack.arcAngle;
+                DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 80, 220, 255, 85 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 140, 245, 255, 230 });
+            } else {
+                // 1st Light Attack: Downward golden sweep
+                swordAngle = player.facingAngle - 55.0f + progress * player.currentAttack.arcAngle;
+                AssetManager::DrawSword(rightHand, swordAngle, 46.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 210, 50, 240 });
+
+                float startAngle = player.facingAngle - 55.0f;
+                float sweepAngle = progress * player.currentAttack.arcAngle;
+                DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 215, 60, 75 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 240, 120, 220 });
+            }
         } else if (player.currentAttack.type == AttackType::HEAVY) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
             swordAngle = player.facingAngle - 70.0f + progress * player.currentAttack.arcAngle;
@@ -129,10 +142,27 @@ void PlayerRenderer::Draw(const Player& player) {
             DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 180, 30, 90 });
             DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 235, 100, 240 });
         } else if (player.isHeavyWindingUp) {
-            swordAngle = player.facingAngle - 90.0f;
-            AssetManager::DrawSword(rightHand, swordAngle, 50.0f, Color{ 255, 220, 80, 255 }, Color{ 255, 140, 10, 240 });
+            swordAngle = player.facingAngle - 95.0f;
+            AssetManager::DrawSword(rightHand, swordAngle, 52.0f, Color{ 255, 220, 80, 255 }, Color{ 255, 140, 10, 240 });
+
+            // Render targeting shockwave rune at heavyTargetPos!
+            float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 12.0f);
+            DrawCircleLines((int)player.heavyTargetPos.x, (int)player.heavyTargetPos.y, 40.0f + pulse * 10.0f, Color{ 255, 215, 60, 220 });
+            DrawCircle((int)player.heavyTargetPos.x, (int)player.heavyTargetPos.y, 16.0f, Color{ 255, 180, 40, (unsigned char)(100 * pulse) });
+            DrawLine((int)player.heavyTargetPos.x - 25, (int)player.heavyTargetPos.y, (int)player.heavyTargetPos.x + 25, (int)player.heavyTargetPos.y, Color{ 255, 230, 80, 220 });
+            DrawLine((int)player.heavyTargetPos.x, (int)player.heavyTargetPos.y - 25, (int)player.heavyTargetPos.x, (int)player.heavyTargetPos.y + 25, Color{ 255, 230, 80, 220 });
         } else {
             AssetManager::DrawSword(rightHand, swordAngle, 42.0f, Color{ 255, 225, 120, 255 }, Color{ 255, 190, 40, 180 });
+        }
+
+        // Draw active shockwave ring if expanding
+        if (player.shockwaveActive) {
+            float shockProgress = 1.0f - (player.shockwaveTimer / 0.40f);
+            float curRadius = player.shockwaveRadius * shockProgress;
+            unsigned char alpha = (unsigned char)(255 * (1.0f - shockProgress));
+            DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius, Color{ 255, 225, 80, alpha });
+            DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.75f, Color{ 255, 160, 30, (unsigned char)(alpha * 0.8f) });
+            DrawCircle((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.4f, Color{ 255, 210, 60, (unsigned char)(alpha * 0.25f) });
         }
     }
 }

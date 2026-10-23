@@ -62,6 +62,50 @@ void EnemyRenderer::DrawTelegraph(const Enemy& enemy) {
             DrawTriangle(c1, f3, f4, dangerFill);
             break;
         }
+
+        case TelegraphShape::PROJECTILE_SPREAD: {
+            // Precise trajectory aim lines for each projectile instead of confusing cone AoE
+            float baseRad = enemy.telegraph.angle * DEG2RAD;
+            int count = enemy.telegraph.spreadCount > 0 ? enemy.telegraph.spreadCount : 3;
+            float step = enemy.telegraph.spreadAngle;
+
+            for (int i = 0; i < count; i++) {
+                float curAngle;
+                if (count == 1) {
+                    curAngle = baseRad;
+                } else if (count == 12) {
+                    // Full radial nova
+                    curAngle = ((float)i * 30.0f) * DEG2RAD;
+                } else {
+                    // Centered fan spread
+                    float offset = (float)i - (float)(count - 1) * 0.5f;
+                    curAngle = baseRad + offset * step;
+                }
+
+                Vector2 dir = { cosf(curAngle), sinf(curAngle) };
+                Vector2 start = { enemy.position.x + dir.x * (enemy.radius + 6.0f), enemy.position.y + dir.y * (enemy.radius + 6.0f) };
+                Vector2 end = { start.x + dir.x * enemy.telegraph.radius, start.y + dir.y * enemy.telegraph.radius };
+
+                Color laserCol = enemy.telegraph.warningColor;
+                laserCol.a = (unsigned char)(160 * alphaProgress);
+                DrawLineEx(start, end, 2.0f, laserCol);
+
+                // Laser aim guide dots
+                for (int d = 1; d <= 4; d++) {
+                    float dotFrac = (float)d * 0.25f;
+                    Vector2 midDot = { start.x + dir.x * (enemy.telegraph.radius * dotFrac), start.y + dir.y * (enemy.telegraph.radius * dotFrac) };
+                    DrawCircleV(midDot, 2.0f, laserCol);
+                }
+
+                // Charging projectile tracking indicator traveling along line
+                float curDist = enemy.telegraph.radius * enemy.telegraph.progress;
+                Vector2 dotPos = { start.x + dir.x * curDist, start.y + dir.y * curDist };
+                DrawCircleV(dotPos, 5.0f, activeOutline);
+                DrawCircleLines((int)dotPos.x, (int)dotPos.y, 7.0f, activeOutline);
+                DrawCircleV(end, 3.5f, laserCol);
+            }
+            break;
+        }
     }
 }
 
