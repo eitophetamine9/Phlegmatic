@@ -40,6 +40,19 @@ void Game::Init() {
     showControlsModal = false;
 }
 
+void Game::EnterRuinedCastle() {
+    map.Init(MapEnvironment::RUINED_CASTLE);
+    player.Init({ 800.0f, 1180.0f });
+    camera.target = player.GetPosition();
+    currentState = GameState::RUINED_CASTLE;
+    showControlsModal = false;
+    showInventoryModal = false;
+    enemies.clear();
+    projectiles.clear();
+    tutorial.Init();
+    particles.SpawnFloatingText(player.GetPosition(), "CHAPTER 1: THE RUINED CASTLE", Color{ 255, 215, 80, 255 }, 24.0f);
+}
+
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
     player.Init({ 800.0f, 740.0f });
@@ -303,8 +316,71 @@ void Game::Update(float dt) {
     // 1.5 PROLOGUE CUTSCENE STATE
     if (currentState == GameState::PROLOGUE_CUTSCENE) {
         if (cutscene.Update(dt)) {
-            EnterLobby();
+            EnterRuinedCastle();
         }
+        return;
+    }
+
+    // 1.8 RUINED CASTLE CHAPTER 1 STATE
+    if (currentState == GameState::RUINED_CASTLE) {
+        Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            if (tutorial.HasClaimedWeapon()) {
+                player.TriggerLightAttack(particles);
+            } else {
+                particles.SpawnFloatingText(player.GetPosition(), "CLAIM BLADE FIRST [E]!", Color{ 255, 180, 80, 240 }, 16.0f);
+            }
+        }
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            if (tutorial.HasClaimedWeapon()) {
+                player.TriggerHeavyAttack(particles);
+            } else {
+                particles.SpawnFloatingText(player.GetPosition(), "CLAIM BLADE FIRST [E]!", Color{ 255, 180, 80, 240 }, 16.0f);
+            }
+        }
+        if (IsKeyPressed(KEY_Q)) {
+            player.TriggerDash(particles);
+        }
+        if (IsKeyPressed(KEY_F)) {
+            player.TriggerParry(particles);
+        }
+
+        // Shortcuts
+        if (IsKeyPressed(KEY_L)) {
+            EnterLobby();
+            return;
+        }
+        if (IsKeyPressed(KEY_R)) {
+            EnterRuinedCastle();
+            return;
+        }
+
+        player.Update(dt, map, mouseWorld, particles);
+
+        // Update enemies
+        for (auto& enemy : enemies) {
+            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+        }
+
+        // Update projectiles
+        for (auto& proj : projectiles) {
+            if (proj.IsActive()) {
+                proj.Update(dt, map, particles);
+            }
+        }
+        projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const Projectile& p) {
+            return !p.IsActive();
+        }), projectiles.end());
+
+        CheckCombatCollisions();
+
+        // Tutorial progression
+        tutorial.Update(dt, player, map, particles, enemies, projectiles);
+
+        // Camera follow
+        camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
+        camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
         return;
     }
 
@@ -468,6 +544,53 @@ void Game::Render() {
 
     if (currentState == GameState::PROLOGUE_CUTSCENE) {
         cutscene.Draw(w, h);
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::RUINED_CASTLE) {
+        BeginMode2D(camera);
+        map.DrawFloor();
+
+        tutorial.DrawWorldElements(time);
+
+        for (const auto& enemy : enemies) {
+            enemy.DrawTelegraph();
+        }
+
+        map.DrawWallsAndPillars();
+
+        for (const auto& proj : projectiles) {
+            proj.Draw();
+        }
+
+        for (const auto& enemy : enemies) {
+            enemy.Draw();
+        }
+
+        if (player.IsAlive()) {
+            player.Draw();
+        }
+
+        particles.Draw();
+        EndMode2D();
+
+        Vector2 mousePos = GetMousePosition();
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
+
+        // Tutorial Guidance Banner at top center
+        tutorial.DrawHUD(w, h);
+
+        bool hasUnread = player.GetInventory().HasUnreadFragments();
+        GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), 1, 1, hasUnread);
+
+        if (showControlsModal) {
+            GameUI::DrawControlsModal(w, h, mousePos, false);
+        } else if (showInventoryModal) {
+            GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+        }
+
         EndDrawing();
         return;
     }

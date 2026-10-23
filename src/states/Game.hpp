@@ -10,6 +10,7 @@
 #include "../rendering/AssetManager.hpp"
 #include "../combat/Projectile.hpp"
 #include "Cutscene.hpp"
+#include "Tutorial.hpp"
 #include <vector>
 
 class Game {
@@ -24,6 +25,7 @@ private:
     void Update(float dt);
     void Render();
 
+    void EnterRuinedCastle();
     void EnterLobby();
     void EnterArena();
     void SpawnWave(int waveNumber);
@@ -50,6 +52,7 @@ private:
 
     // Narrative & Cutscenes
     Cutscene cutscene;
+    TutorialManager tutorial;
 
     int currentWave;
     float waveTimer;

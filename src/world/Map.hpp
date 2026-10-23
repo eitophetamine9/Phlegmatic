@@ -4,12 +4,17 @@
 
 enum class MapEnvironment {
     LOBBY,
-    ARENA
+    ARENA,
+    RUINED_CASTLE
 };
 
 struct Pillar {
     Vector2 position;
     float radius;
+};
+
+struct WallObstacle {
+    Rectangle rect;
 };
 
 class GameMap {
@@ -26,9 +31,17 @@ public:
     Rectangle GetBounds() const { return bounds; }
     MapEnvironment GetEnvironment() const { return currentEnv; }
 
+    void SetGateOpen(bool open) { gateOpen = open; }
+    bool IsGateOpen() const { return gateOpen; }
+
 private:
     MapEnvironment currentEnv;
     Rectangle bounds;
     std::vector<Pillar> pillars;
     std::vector<Vector2> torches;
+    std::vector<WallObstacle> obstacles;
+    bool gateOpen = false;
+
+    void DrawRuinedCastleFloor() const;
+    void DrawRuinedCastleWalls() const;
 };

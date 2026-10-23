@@ -16,6 +16,7 @@ set(SOURCES
     src/combat/Inventory.cpp
     src/states/UI.cpp
     src/states/Cutscene.cpp
+    src/states/Tutorial.cpp
     src/states/Game.cpp
 )
 
