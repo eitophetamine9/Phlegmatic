@@ -23,6 +23,7 @@ g++ -std=c++17 -O2 -static ^
     src\entities\Enemy.cpp ^
     src\combat\Projectile.cpp ^
     src\states\UI.cpp ^
+    src\states\Cutscene.cpp ^
     src\states\Game.cpp ^
     -Isrc ^
     -Isrc\core ^

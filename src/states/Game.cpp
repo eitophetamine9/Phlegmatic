@@ -255,9 +255,18 @@ void Game::Update(float dt) {
     if (currentState == GameState::TITLE_SCREEN) {
         int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         if (action == 1) {
-            EnterLobby();
+            cutscene.Reset();
+            currentState = GameState::PROLOGUE_CUTSCENE;
         } else if (action == 2) {
             showControlsModal = true;
+        }
+        return;
+    }
+
+    // 1.5 PROLOGUE CUTSCENE STATE
+    if (currentState == GameState::PROLOGUE_CUTSCENE) {
+        if (cutscene.Update(dt)) {
+            EnterLobby();
         }
         return;
     }
@@ -416,6 +425,12 @@ void Game::Render() {
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mouseScreen, false);
         }
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::PROLOGUE_CUTSCENE) {
+        cutscene.Draw(w, h);
         EndDrawing();
         return;
     }

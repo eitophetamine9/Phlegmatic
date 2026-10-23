@@ -9,6 +9,7 @@
 #include "../core/Particles.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "../combat/Projectile.hpp"
+#include "Cutscene.hpp"
 #include <vector>
 
 class Game {
@@ -43,6 +44,9 @@ private:
     std::vector<WeaponPedestal> pedestals;
     TrainingDummy dummy;
     ArenaPortal portal;
+
+    // Narrative & Cutscenes
+    Cutscene cutscene;
 
     int currentWave;
     float waveTimer;
