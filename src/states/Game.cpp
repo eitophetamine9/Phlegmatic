@@ -41,6 +41,7 @@ void Game::Init() {
     showControlsModal = false;
     ruinedCastleHandler.Reset();
     testArenaUnlocked = LoadArenaUnlock();
+    bandageSpawnTimer = 14.0f;
 }
 
 void Game::SaveArenaUnlock() {
@@ -113,6 +114,12 @@ void Game::EnterArena() {
     camera.target = player.GetPosition();
     projectiles.clear();
     particles.Clear();
+    arenaBandages.clear();
+    bandageSpawnTimer = 14.0f;
+    AdhesiveBandage initBandage;
+    initBandage.position = { 1200.0f, 1050.0f };
+    arenaBandages.push_back(initBandage);
+
     waveManager.SpawnWave(1, enemies, projectiles, particles);
     currentState = GameState::ARENA;
     showControlsModal = false;
@@ -366,7 +373,56 @@ void Game::Update(float dt) {
         }
     }
 
+    std::vector<bool> enemyAliveBefore(enemies.size());
+    for (size_t i = 0; i < enemies.size(); i++) {
+        enemyAliveBefore[i] = enemies[i].IsAlive();
+    }
+
     CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+
+    // Chance to drop adhesive bandage on enemy defeat
+    for (size_t i = 0; i < enemies.size(); i++) {
+        if (enemyAliveBefore[i] && !enemies[i].IsAlive()) {
+            if (arenaBandages.size() < 4 && (rand() % 100) < 35) {
+                AdhesiveBandage b;
+                b.position = enemies[i].GetPosition();
+                arenaBandages.push_back(b);
+                particles.SpawnSparks(b.position, Color{ 80, 255, 140, 255 }, 14, 110.0f);
+            }
+        }
+    }
+
+    // Periodic Arena Adhesive Bandage Spawning
+    bandageSpawnTimer -= dt;
+    if (bandageSpawnTimer <= 0.0f) {
+        bandageSpawnTimer = 18.0f;
+        if (arenaBandages.size() < 4) {
+            float rx = 900.0f + (float)(rand() % 600);
+            float ry = 650.0f + (float)(rand() % 500);
+            AdhesiveBandage b;
+            b.position = { rx, ry };
+            arenaBandages.push_back(b);
+            particles.SpawnSparks(b.position, Color{ 100, 255, 160, 255 }, 16, 120.0f);
+            particles.SpawnFloatingText(b.position, "+ BANDAGE SPAWNED +", Color{ 120, 255, 170, 240 }, 18.0f);
+        }
+    }
+
+    // Update & Pickup Adhesive Bandages
+    for (auto& b : arenaBandages) {
+        if (!b.active) continue;
+        b.Update(dt);
+        if (b.CheckPickup(player.GetPosition())) {
+            player.Heal(b.healAmount);
+            particles.SpawnFloatingText(player.GetPosition(), "+30 HP [BANDAGE]", Color{ 80, 255, 140, 255 }, 24.0f);
+            particles.SpawnSparks(b.position, Color{ 100, 255, 160, 255 }, 20, 150.0f);
+            SoundFX::PlayParrySuccess();
+            b.active = false;
+        }
+    }
+    arenaBandages.erase(std::remove_if(arenaBandages.begin(), arenaBandages.end(), [](const AdhesiveBandage& b) {
+        return !b.active;
+    }), arenaBandages.end());
+
     particles.Update(dt);
 
     Vector2 shake = particles.GetScreenShakeOffset();
@@ -473,6 +529,10 @@ void Game::Render() {
     }
 
     map.DrawWallsAndPillars();
+
+    for (const auto& b : arenaBandages) {
+        b.Draw();
+    }
 
     for (const auto& proj : projectiles) {
         proj.Draw();

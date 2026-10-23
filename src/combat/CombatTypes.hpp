@@ -43,6 +43,7 @@ struct AttackInfo {
     bool isFrontalCircle = false;
     Vector2 circleCenter = { 0.0f, 0.0f };
     float circleRadius = 0.0f;
+    bool isLineBox = false;
 };
 
 struct TelegraphIndicator {

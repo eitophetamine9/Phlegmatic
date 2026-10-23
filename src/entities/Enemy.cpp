@@ -499,6 +499,17 @@ bool Enemy::CheckHit(const AttackInfo& attack) const {
         return (dx * dx + dy * dy) <= (maxDist * maxDist);
     }
 
+    if (attack.isLineBox) {
+        float rad = attack.angle * DEG2RAD;
+        Vector2 dir = { cosf(rad), sinf(rad) };
+        Vector2 normal = { -dir.y, dir.x };
+        Vector2 toEnemy = { position.x - attack.origin.x, position.y - attack.origin.y };
+        float forwardDist = toEnemy.x * dir.x + toEnemy.y * dir.y;
+        float lateralDist = fabsf(toEnemy.x * normal.x + toEnemy.y * normal.y);
+        return (forwardDist >= -radius && forwardDist <= (attack.range + radius) &&
+                lateralDist <= (attack.width * 0.5f + radius));
+    }
+
     float dx = position.x - attack.origin.x;
     float dy = position.y - attack.origin.y;
     float distSq = dx * dx + dy * dy;

@@ -313,11 +313,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     particles.AddScreenShake(9.0f, 0.28f);
                     particles.SpawnSparks(position, Color{ 255, 120, 30, 255 }, 35, 240.0f);
                 } else if (currentWeapon == WeaponType::SWORD) {
-                    // Broadsword Heavy Stage 2: Followup upward shock slash (like Brute's shock slash)
+                    // Broadsword Heavy Stage 2: Followup upward shock slash (line/box AoE)
                     heavyStage = 2;
                     currentAttack.type = AttackType::HEAVY;
-                    currentAttack.range = 105.0f;
-                    currentAttack.arcAngle = 115.0f;
+                    currentAttack.range = 135.0f;
+                    currentAttack.width = 50.0f;
+                    currentAttack.isLineBox = true;
+                    currentAttack.arcAngle = 0.0f;
                     currentAttack.damage = counterBuffTimer > 0.0f ? (48.0f * 1.5f) : 48.0f;
                     currentAttack.knockback = 300.0f;
                     currentAttack.duration = 0.18f;
@@ -464,9 +466,11 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 170, 60, 255 }, 12, 100.0f);
     } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
         if (comboStep == 2) {
-            // Hit 2: Upward radiant slice (similar in shape to broadsword upward slash, but weaker and smaller AoE)
-            currentAttack.arcAngle = 100.0f;
-            currentAttack.range = 80.0f;
+            // Hit 2: Upward radiant slice (line/box AoE, smaller than broadsword)
+            currentAttack.isLineBox = true;
+            currentAttack.range = 105.0f;
+            currentAttack.width = 40.0f;
+            currentAttack.arcAngle = 0.0f;
             currentAttack.damage = counterBuffTimer > 0.0f ? (36.0f * 1.5f) : 36.0f;
             currentAttack.knockback = 260.0f;
 

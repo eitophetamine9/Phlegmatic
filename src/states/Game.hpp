@@ -59,6 +59,8 @@ private:
     // Combat & Arena Managers
     WaveManager waveManager;
     RuinedCastleHandler ruinedCastleHandler;
+    std::vector<AdhesiveBandage> arenaBandages;
+    float bandageSpawnTimer;
 
     // Test Arena Unlock
     bool testArenaUnlocked;

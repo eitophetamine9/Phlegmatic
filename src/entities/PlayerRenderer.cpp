@@ -37,14 +37,32 @@ void PlayerRenderer::Draw(const Player& player) {
         } else if (player.currentAttack.type == AttackType::HEAVY) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
             if (player.heavyStage == 2) {
-                // Stage 2: Upward shock slash (similar to Brute's shock slash)
-                swordAngle = player.facingAngle + 55.0f - progress * player.currentAttack.arcAngle;
+                // Stage 2: Upward shock slash (LINE / BOX AoE)
+                swordAngle = player.facingAngle + 60.0f - progress * 120.0f;
                 AssetManager::DrawSword(rightHand, swordAngle, 46.0f, Color{ 255, 245, 200, 255 }, Color{ 255, 200, 50, 240 });
 
-                float startAngle = player.facingAngle - player.currentAttack.arcAngle * 0.5f;
-                float sweepAngle = progress * player.currentAttack.arcAngle;
-                DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 200, 60, 90 });
-                DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 255, 230, 110, 230 });
+                float rad = player.facingAngle * DEG2RAD;
+                Vector2 dir = { cosf(rad), sinf(rad) };
+                Vector2 normal = { -dir.y, dir.x };
+                float halfWidth = (player.currentAttack.width > 0.0f ? player.currentAttack.width : 50.0f) * 0.5f;
+                float length = player.currentAttack.range;
+
+                Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+                Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+                Vector2 c3 = { c2.x + dir.x * length, c2.y + dir.y * length };
+                Vector2 c4 = { c1.x + dir.x * length, c1.y + dir.y * length };
+
+                // Filled luminous box and crisp shockwave outlines
+                DrawTriangle(c1, c2, c3, Color{ 255, 190, 50, (unsigned char)(80 * (1.0f - progress * 0.5f)) });
+                DrawTriangle(c1, c3, c4, Color{ 255, 190, 50, (unsigned char)(80 * (1.0f - progress * 0.5f)) });
+                DrawLineEx(c1, c2, 2.5f, Color{ 255, 230, 110, 230 });
+                DrawLineEx(c2, c3, 2.5f, Color{ 255, 230, 110, 230 });
+                DrawLineEx(c3, c4, 2.5f, Color{ 255, 230, 110, 230 });
+                DrawLineEx(c4, c1, 2.5f, Color{ 255, 230, 110, 230 });
+
+                // Central upward shock slash line
+                Vector2 beamEnd = { player.position.x + dir.x * length * progress, player.position.y + dir.y * length * progress };
+                DrawLineEx(player.position, beamEnd, 4.0f, Color{ 255, 250, 180, 255 });
             } else {
                 // Stage 1: Wide cleave
                 swordAngle = player.facingAngle - 80.0f + progress * player.currentAttack.arcAngle;
@@ -132,14 +150,32 @@ void PlayerRenderer::Draw(const Player& player) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
 
             if (player.comboStep == 2) {
-                // 2nd Light Attack: Upward radiant slice (weaker & smaller than broadsword upward slash)
-                swordAngle = player.facingAngle + 50.0f - progress * player.currentAttack.arcAngle;
+                // 2nd Light Attack: Upward radiant slice (LINE / BOX AoE)
+                swordAngle = player.facingAngle + 50.0f - progress * 100.0f;
                 AssetManager::DrawSword(rightHand, swordAngle, 44.0f, Color{ 210, 245, 255, 255 }, Color{ 60, 220, 255, 250 });
 
-                float startAngle = player.facingAngle - player.currentAttack.arcAngle * 0.5f;
-                float sweepAngle = progress * player.currentAttack.arcAngle;
-                DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 80, 220, 255, 80 });
-                DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 140, 245, 255, 220 });
+                float rad = player.facingAngle * DEG2RAD;
+                Vector2 dir = { cosf(rad), sinf(rad) };
+                Vector2 normal = { -dir.y, dir.x };
+                float halfWidth = (player.currentAttack.width > 0.0f ? player.currentAttack.width : 40.0f) * 0.5f;
+                float length = player.currentAttack.range;
+
+                Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+                Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+                Vector2 c3 = { c2.x + dir.x * length, c2.y + dir.y * length };
+                Vector2 c4 = { c1.x + dir.x * length, c1.y + dir.y * length };
+
+                // Filled radiant azure box and crisp outlines
+                DrawTriangle(c1, c2, c3, Color{ 60, 220, 255, (unsigned char)(75 * (1.0f - progress * 0.5f)) });
+                DrawTriangle(c1, c3, c4, Color{ 60, 220, 255, (unsigned char)(75 * (1.0f - progress * 0.5f)) });
+                DrawLineEx(c1, c2, 2.5f, Color{ 140, 245, 255, 230 });
+                DrawLineEx(c2, c3, 2.5f, Color{ 140, 245, 255, 230 });
+                DrawLineEx(c3, c4, 2.5f, Color{ 140, 245, 255, 230 });
+                DrawLineEx(c4, c1, 2.5f, Color{ 140, 245, 255, 230 });
+
+                // Central radiant upward slice line
+                Vector2 beamEnd = { player.position.x + dir.x * length * progress, player.position.y + dir.y * length * progress };
+                DrawLineEx(player.position, beamEnd, 3.5f, Color{ 230, 255, 255, 255 });
             } else {
                 // 1st Light Attack: Downward golden sweep
                 swordAngle = player.facingAngle - 55.0f + progress * player.currentAttack.arcAngle;
