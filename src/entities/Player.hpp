@@ -3,8 +3,10 @@
 #include "../combat/CombatTypes.hpp"
 #include "../combat/Weapon.hpp"
 #include "../combat/Inventory.hpp"
+#include "../combat/Projectile.hpp"
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
+#include <vector>
 
 class Player {
 public:
@@ -21,7 +23,7 @@ public:
     void TriggerParry(ParticleSystem& particles);
 
     // Damage handling
-    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles);
+    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f);
     void Heal(float amount);
     void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
@@ -54,12 +56,20 @@ public:
     void SetAttackHit() { currentAttack.hasHit = true; }
     void OnParrySuccessful(ParticleSystem& particles);
 
+    float GetDefense() const { return defense; }
+
     int GetComboStep() const { return comboStep; }
+    int GetHeavyStage() const { return heavyStage; }
+    bool IsDaggerLunging() const { return isDaggerLunging; }
     bool IsShockwaveActive() const { return shockwaveActive; }
     Vector2 GetShockwavePos() const { return shockwavePos; }
     float GetShockwaveRadius() const { return shockwaveRadius; }
     Vector2 GetHeavyTargetPos() const { return heavyTargetPos; }
     bool IsHeavyWindingUp() const { return isHeavyWindingUp; }
+
+    // Projectile management
+    std::vector<Projectile>& GetSpawnedProjectiles() { return spawnedProjectiles; }
+    const std::vector<Projectile>& GetSpawnedProjectiles() const { return spawnedProjectiles; }
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
@@ -81,6 +91,7 @@ private:
     float maxHealth;
     float stamina;
     float maxStamina;
+    float defense;
 
     // Action Timers & States
     float lightCooldown;
@@ -96,20 +107,30 @@ private:
     bool isDashing;
     Vector2 dashDir;
 
+    // Daggers Lunge
+    bool isDaggerLunging;
+    float daggerLungeTimer;
+    Vector2 daggerLungeDir;
+
     // Attack state
     AttackInfo currentAttack;
     float heavyWindupTimer;
     bool isHeavyWindingUp;
     Vector2 heavyTargetPos;
+    int heavyStage;
+    float heavyStageTimer;
 
     int comboStep;
     float comboTimer;
 
-    // Shockwave AoE state (Truth Seeker heavy)
+    // Shockwave AoE state
     bool shockwaveActive;
     float shockwaveTimer;
     float shockwaveRadius;
     Vector2 shockwavePos;
+
+    // Spawned projectiles queue (for ranged weapon effects)
+    std::vector<Projectile> spawnedProjectiles;
 
     float walkCycle;
 };

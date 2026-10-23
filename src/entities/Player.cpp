@@ -17,6 +17,7 @@ Player::Player() {
     maxHealth = Config::PLAYER_MAX_HEALTH;
     stamina = Config::PLAYER_MAX_STAMINA;
     maxStamina = Config::PLAYER_MAX_STAMINA;
+    defense = 15.0f; // Base player armor (mitigates ~13% raw damage)
 
     lightCooldown = 0.0f;
     heavyCooldown = 0.0f;
@@ -30,8 +31,14 @@ Player::Player() {
     isDashing = false;
     dashDir = { 0.0f, 0.0f };
 
+    isDaggerLunging = false;
+    daggerLungeTimer = 0.0f;
+    daggerLungeDir = { 0.0f, 0.0f };
+
     heavyWindupTimer = 0.0f;
     isHeavyWindingUp = false;
+    heavyStage = 1;
+    heavyStageTimer = 0.0f;
     walkCycle = 0.0f;
 
     comboStep = 1;
@@ -41,6 +48,7 @@ Player::Player() {
     shockwaveTimer = 0.0f;
     shockwaveRadius = 0.0f;
     shockwavePos = { 0.0f, 0.0f };
+    spawnedProjectiles.clear();
 }
 
 void Player::Init(Vector2 startPos) {
@@ -51,12 +59,16 @@ void Player::Init(Vector2 startPos) {
     currentAttack.type = AttackType::NONE;
     isParrying = false;
     isDashing = false;
+    isDaggerLunging = false;
     isHeavyWindingUp = false;
+    heavyStage = 1;
+    heavyStageTimer = 0.0f;
     counterBuffTimer = 0.0f;
     comboStep = 1;
     comboTimer = 0.0f;
     shockwaveActive = false;
     shockwaveTimer = 0.0f;
+    spawnedProjectiles.clear();
 }
 
 void Player::Revive(Vector2 startPos, float hpPercent) {
@@ -146,12 +158,44 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         }
     }
 
+    // Daggers Lunge Update
+    if (isDaggerLunging) {
+        daggerLungeTimer -= dt;
+        velocity.x = daggerLungeDir.x * 480.0f;
+        velocity.y = daggerLungeDir.y * 480.0f;
+        particles.SpawnSparks(position, Color{ 140, 240, 200, 200 }, 2, 40.0f);
+
+        if (daggerLungeTimer <= 0.0f) {
+            isDaggerLunging = false;
+            // Instantaneous 360 whirlwind spin attack!
+            currentAttack.type = AttackType::HEAVY;
+            currentAttack.weapon = WeaponType::DAGGERS;
+            currentAttack.origin = position;
+            currentAttack.angle = facingAngle;
+            currentAttack.range = 85.0f;
+            currentAttack.arcAngle = 360.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (58.0f * 1.5f) : 58.0f;
+            currentAttack.knockback = 260.0f;
+            currentAttack.duration = 0.10f;
+            currentAttack.timer = 0.10f;
+            currentAttack.hasHit = false;
+            currentAttack.defensePierce = 0.0f;
+            currentAttack.isFrontalCircle = false;
+            currentAttack.hasShockwave = false;
+
+            SoundFX::PlayHeavyAttack();
+            particles.AddScreenShake(3.5f, 0.12f);
+            particles.SpawnSparks(position, Color{ 100, 255, 180, 255 }, 24, 180.0f);
+        }
+    }
+
     // Heavy attack windup
     if (isHeavyWindingUp) {
         heavyWindupTimer -= dt;
         if (currentWeapon == WeaponType::TRUTH_SEEKER) {
             particles.SpawnSparks(position, Color{ 255, 220, 60, 220 }, 2, 50.0f);
-            particles.SpawnSparks(heavyTargetPos, Color{ 255, 180, 40, 180 }, 2, 40.0f);
+        } else if (currentWeapon == WeaponType::MACE) {
+            particles.SpawnSparks(position, Color{ 255, 140, 40, 200 }, 2, 45.0f);
         } else {
             particles.SpawnSparks(position, Color{ 255, 200, 60, 200 }, 1, 40.0f);
         }
@@ -159,54 +203,155 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         if (heavyWindupTimer <= 0.0f) {
             isHeavyWindingUp = false;
             WeaponStats stats = GetWeaponStats(currentWeapon);
+            heavyStage = 1;
+
+            Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
 
             currentAttack.type = AttackType::HEAVY;
             currentAttack.weapon = currentWeapon;
             currentAttack.origin = position;
             currentAttack.angle = facingAngle;
-            currentAttack.range = stats.heavyRange;
-            currentAttack.arcAngle = stats.heavyArc;
-            currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
-            currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 420.0f : 260.0f;
-            currentAttack.duration = stats.heavyDuration;
-            currentAttack.timer = stats.heavyDuration;
             currentAttack.hasHit = false;
+            currentAttack.defensePierce = 0.0f;
+            currentAttack.hasShockwave = false;
+            currentAttack.isFrontalCircle = false;
 
-            if (currentWeapon == WeaponType::TRUTH_SEEKER) {
-                // Cataclysmic Holy Shockwave at target area!
-                shockwaveActive = true;
-                shockwaveTimer = 0.40f;
-                shockwaveRadius = 135.0f;
-                shockwavePos = heavyTargetPos;
-                currentAttack.hasShockwave = true;
-                currentAttack.shockwavePos = heavyTargetPos;
-                currentAttack.shockwaveRadius = 135.0f;
+            if (currentWeapon == WeaponType::MACE) {
+                // War Mace Heavy Stage 1: Giant Frontal Smack
+                currentAttack.isFrontalCircle = true;
+                currentAttack.circleRadius = 85.0f;
+                currentAttack.circleCenter = { position.x + forwardDir.x * 70.0f, position.y + forwardDir.y * 70.0f };
+                currentAttack.range = 155.0f;
+                currentAttack.arcAngle = 180.0f;
+                currentAttack.damage = counterBuffTimer > 0.0f ? (75.0f * 1.5f) : 75.0f;
+                currentAttack.knockback = 380.0f;
+                currentAttack.duration = 0.16f;
+                currentAttack.timer = 0.16f;
+
+                SoundFX::PlayHeavyAttack();
+                particles.AddScreenShake(7.0f, 0.20f);
+                particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 160, 50, 255 }, 24, 180.0f);
+            } else if (currentWeapon == WeaponType::SWORD) {
+                // Broadsword Heavy Stage 1: Wide Slash
+                currentAttack.range = 125.0f;
+                currentAttack.arcAngle = 160.0f;
+                currentAttack.damage = counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f;
+                currentAttack.knockback = 240.0f;
+                currentAttack.duration = 0.16f;
+                currentAttack.timer = 0.16f;
+
+                SoundFX::PlayHeavyAttack();
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 190, 60, 255 });
+                velocity.x += forwardDir.x * 180.0f;
+                velocity.y += forwardDir.y * 180.0f;
+            } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+                // Truth Seeker Heavy Stage 1: Full 360 circle AoE swing 1
+                currentAttack.range = 135.0f;
+                currentAttack.arcAngle = 360.0f;
+                currentAttack.damage = counterBuffTimer > 0.0f ? (60.0f * 1.5f) : 60.0f;
+                currentAttack.knockback = 360.0f;
+                currentAttack.duration = 0.18f;
+                currentAttack.timer = 0.18f;
+
+                // Simultaneously shoot 1 holy projectile with 10% defense pierce
+                Vector2 spawnPos = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
+                Vector2 projVel = { forwardDir.x * 580.0f, forwardDir.y * 580.0f };
+                spawnedProjectiles.emplace_back(spawnPos, projVel, 9.0f, 45.0f, ProjectileType::HOLY_BEAM, true, 0.10f);
 
                 SoundFX::PlayHeavyAttack();
                 SoundFX::PlayCrusaderClash();
-                particles.SpawnSparks(heavyTargetPos, Color{ 255, 230, 80, 255 }, 35, 220.0f);
-                particles.SpawnSparks(heavyTargetPos, Color{ 255, 120, 30, 255 }, 20, 160.0f);
-                particles.AddScreenShake(9.0f, 0.28f);
+                particles.AddScreenShake(6.5f, 0.20f);
+                particles.SpawnSparks(position, Color{ 255, 230, 80, 255 }, 28, 200.0f);
             } else {
-                currentAttack.hasShockwave = false;
+                currentAttack.range = stats.heavyRange;
+                currentAttack.arcAngle = stats.heavyArc;
+                currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
+                currentAttack.knockback = 260.0f;
+                currentAttack.duration = stats.heavyDuration;
+                currentAttack.timer = stats.heavyDuration;
+
                 SoundFX::PlayHeavyAttack();
-                particles.AddScreenShake((currentWeapon == WeaponType::MACE) ? 6.0f : 3.5f, 0.14f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 180, 50, 255 });
+                velocity.x += forwardDir.x * 200.0f;
+                velocity.y += forwardDir.y * 200.0f;
             }
-
-            Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-            particles.SpawnSlashTrail(position, forwardDir, (currentWeapon == WeaponType::TRUTH_SEEKER) ? Color{ 255, 220, 60, 255 } : Color{ 255, 180, 50, 255 });
-
-            velocity.x += forwardDir.x * 220.0f;
-            velocity.y += forwardDir.y * 220.0f;
         }
     }
 
-    // Current attack duration
+    // Current attack duration & multi-stage attack transitions
     if (currentAttack.type != AttackType::NONE) {
         currentAttack.timer -= dt;
         currentAttack.origin = position;
         if (currentAttack.timer <= 0.0f) {
-            currentAttack.type = AttackType::NONE;
+            // Check for Stage 2 follow-ups
+            if (currentAttack.type == AttackType::HEAVY && heavyStage == 1) {
+                Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+
+                if (currentWeapon == WeaponType::MACE) {
+                    // War Mace Heavy Stage 2: Followup full 360 AoE with 25% defense pierce!
+                    heavyStage = 2;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isFrontalCircle = false;
+                    currentAttack.range = 150.0f;
+                    currentAttack.arcAngle = 360.0f;
+                    currentAttack.damage = counterBuffTimer > 0.0f ? (80.0f * 1.5f) : 80.0f;
+                    currentAttack.knockback = 460.0f;
+                    currentAttack.duration = 0.22f;
+                    currentAttack.timer = 0.22f;
+                    currentAttack.hasHit = false;
+                    currentAttack.defensePierce = 0.25f; // IGNORES 25% DEFENSE!
+                    currentAttack.hasShockwave = true;
+                    currentAttack.shockwavePos = position;
+                    currentAttack.shockwaveRadius = 150.0f;
+
+                    shockwaveActive = true;
+                    shockwaveTimer = 0.38f;
+                    shockwaveRadius = 150.0f;
+                    shockwavePos = position;
+
+                    SoundFX::PlayCrusaderClash();
+                    particles.AddScreenShake(9.0f, 0.28f);
+                    particles.SpawnSparks(position, Color{ 255, 120, 30, 255 }, 35, 240.0f);
+                } else if (currentWeapon == WeaponType::SWORD) {
+                    // Broadsword Heavy Stage 2: Followup upward shock slash (like Brute's shock slash)
+                    heavyStage = 2;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.range = 105.0f;
+                    currentAttack.arcAngle = 115.0f;
+                    currentAttack.damage = counterBuffTimer > 0.0f ? (48.0f * 1.5f) : 48.0f;
+                    currentAttack.knockback = 300.0f;
+                    currentAttack.duration = 0.18f;
+                    currentAttack.timer = 0.18f;
+                    currentAttack.hasHit = false;
+
+                    SoundFX::PlayCrusaderClash();
+                    particles.AddScreenShake(5.0f, 0.16f);
+                    particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 230, 110, 255 });
+                    particles.SpawnSparks(position, Color{ 255, 200, 60, 255 }, 16, 160.0f);
+                } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+                    // Truth Seeker Heavy Stage 2: Second consecutive 360 full circle AoE swing!
+                    heavyStage = 2;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.range = 145.0f;
+                    currentAttack.arcAngle = 360.0f;
+                    currentAttack.damage = counterBuffTimer > 0.0f ? (65.0f * 1.5f) : 65.0f;
+                    currentAttack.knockback = 380.0f;
+                    currentAttack.duration = 0.20f;
+                    currentAttack.timer = 0.20f;
+                    currentAttack.hasHit = false;
+                    currentAttack.defensePierce = 0.0f;
+
+                    SoundFX::PlayHeavyAttack();
+                    particles.AddScreenShake(7.0f, 0.22f);
+                    particles.SpawnSparks(position, Color{ 255, 240, 100, 255 }, 30, 220.0f);
+                } else {
+                    currentAttack.type = AttackType::NONE;
+                    heavyStage = 1;
+                }
+            } else {
+                currentAttack.type = AttackType::NONE;
+                heavyStage = 1;
+            }
         }
     }
 
@@ -272,12 +417,14 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
-    if (lightCooldown > 0.0f || stamina < stats.lightStamina) return;
-
-    stamina -= stats.lightStamina;
+    // Daggers light attack costs 0 stamina
+    if (currentWeapon != WeaponType::DAGGERS) {
+        if (stamina < stats.lightStamina) return;
+        stamina -= stats.lightStamina;
+    }
     lightCooldown = stats.lightCooldown;
 
-    // Truth Seeker 2-hit combo logic
+    // Truth Seeker 2-hit combo tracking
     if (currentWeapon == WeaponType::TRUTH_SEEKER) {
         if (comboTimer > 0.0f && comboStep == 1) {
             comboStep = 2;
@@ -289,6 +436,8 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         comboStep = 1;
     }
 
+    Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+
     currentAttack.type = AttackType::LIGHT;
     currentAttack.weapon = currentWeapon;
     currentAttack.origin = position;
@@ -298,32 +447,49 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
     currentAttack.comboStep = comboStep;
     currentAttack.hasShockwave = false;
+    currentAttack.isFrontalCircle = false;
+    currentAttack.defensePierce = 0.0f;
 
-    if (currentWeapon == WeaponType::TRUTH_SEEKER && comboStep == 2) {
-        currentAttack.damage *= 1.30f; // 2nd swing deals +30% damage!
-        currentAttack.range *= 1.12f;
+    if (currentWeapon == WeaponType::MACE) {
+        // War Mace Light: Frontal circular smack
+        currentAttack.isFrontalCircle = true;
+        currentAttack.circleRadius = 50.0f;
+        currentAttack.circleCenter = { position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f };
+        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        currentAttack.range = 105.0f;
         currentAttack.knockback = 280.0f;
+
+        SoundFX::PlayLightAttack();
+        particles.AddScreenShake(3.5f, 0.12f);
+        particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 170, 60, 255 }, 12, 100.0f);
+    } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+        if (comboStep == 2) {
+            // Hit 2: Upward radiant slice (similar in shape to broadsword upward slash, but weaker and smaller AoE)
+            currentAttack.arcAngle = 100.0f;
+            currentAttack.range = 80.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (36.0f * 1.5f) : 36.0f;
+            currentAttack.knockback = 260.0f;
+
+            SoundFX::PlayLightAttack();
+            particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 230, 90, 255 });
+            particles.SpawnSparks(position, Color{ 140, 220, 255, 255 }, 12, 140.0f);
+        } else {
+            // Hit 1: Original golden horizontal sweep
+            currentAttack.damage = counterBuffTimer > 0.0f ? (46.0f * 1.5f) : 46.0f;
+            currentAttack.knockback = 200.0f;
+
+            SoundFX::PlayLightAttack();
+            particles.SpawnSlashTrail(position, forwardDir, Color{ 120, 230, 255, 255 });
+        }
     } else {
-        currentAttack.knockback = (currentWeapon == WeaponType::MACE || currentWeapon == WeaponType::TRUTH_SEEKER) ? 200.0f : 120.0f;
+        currentAttack.knockback = 130.0f;
+        SoundFX::PlayLightAttack();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 220, 255, 255 });
     }
 
     currentAttack.duration = stats.lightDuration;
     currentAttack.timer = stats.lightDuration;
     currentAttack.hasHit = false;
-
-    SoundFX::PlayLightAttack();
-
-    Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-    if (currentWeapon == WeaponType::TRUTH_SEEKER) {
-        if (comboStep == 2) {
-            particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 220, 80, 255 });
-            particles.SpawnSparks(position, Color{ 140, 220, 255, 255 }, 10, 140.0f);
-        } else {
-            particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 230, 255, 255 });
-        }
-    } else {
-        particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 220, 255, 255 });
-    }
 
     velocity.x += forwardDir.x * 110.0f;
     velocity.y += forwardDir.y * 110.0f;
@@ -331,7 +497,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (currentWeapon == WeaponType::NONE) return;
-    if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
+    if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging || currentAttack.type != AttackType::NONE) return;
     if (heavyCooldown > 0.0f) return;
 
     WeaponStats stats = GetWeaponStats(currentWeapon);
@@ -339,10 +505,25 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 
     stamina -= stats.heavyStamina;
     heavyCooldown = stats.heavyCooldown;
-    isHeavyWindingUp = true;
-    heavyWindupTimer = stats.heavyWindup;
 
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+
+    if (currentWeapon == WeaponType::DAGGERS) {
+        // Dual Daggers: Lunge forward before spinning!
+        isDaggerLunging = true;
+        daggerLungeTimer = 0.18f;
+        daggerLungeDir = forwardDir;
+        isHeavyWindingUp = false;
+
+        SoundFX::PlayDash();
+        particles.SpawnSparks(position, Color{ 80, 240, 180, 255 }, 12, 120.0f);
+        return;
+    }
+
+    isHeavyWindingUp = true;
+    heavyWindupTimer = stats.heavyWindup;
+    heavyStage = 1;
+
     if (targetPos.x != 0.0f || targetPos.y != 0.0f) {
         float tdx = targetPos.x - position.x;
         float tdy = targetPos.y - position.y;
@@ -359,7 +540,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 }
 
 void Player::TriggerParry(ParticleSystem& particles) {
-    if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
+    if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging || currentAttack.type != AttackType::NONE) return;
     if (parryCooldown > 0.0f || stamina < Config::PARRY_STAMINA_COST) return;
 
     stamina -= Config::PARRY_STAMINA_COST;
@@ -382,7 +563,7 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
     particles.SpawnFloatingText(position, "PERFECT PARRY!", Color{ 255, 230, 80, 255 }, 26.0f);
 }
 
-bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles) {
+bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
     // Invulnerable during Dash
     if (isDashing) {
         particles.SpawnFloatingText(position, "EVADED", Color{ 120, 240, 255, 255 }, 18.0f);
@@ -395,13 +576,18 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         return false;
     }
 
-    health -= amount;
+    // Apply Player Defense with diminishing returns
+    float effDef = defense * fmaxf(0.0f, 1.0f - defensePierce);
+    float damageFactor = 100.0f / (100.0f + effDef);
+    float finalAmount = amount * damageFactor;
+
+    health -= finalAmount;
     if (health < 0.0f) health = 0.0f;
 
     SoundFX::PlayHitImpact();
     particles.AddScreenShake(6.0f, 0.18f);
     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 15, 160.0f);
-    particles.SpawnFloatingText(position, "-" + std::to_string((int)amount), Color{ 255, 60, 60, 255 }, 22.0f);
+    particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 60, 60, 255 }, 22.0f);
 
     velocity.x += knockbackDir.x * 240.0f;
     velocity.y += knockbackDir.y * 240.0f;

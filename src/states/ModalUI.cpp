@@ -280,32 +280,36 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         DrawText("MARTIAL ATTRIBUTES & RATINGS", (int)col2X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
 
-        Rectangle statsBox = { col2X, contentY + 24.0f, col2W, 195.0f };
+        Rectangle statsBox = { col2X, contentY + 24.0f, col2W, 205.0f };
         DrawRectangleRounded(statsBox, 0.08f, 6, Color{ 18, 23, 34, 220 });
         DrawRectangleRoundedLines(statsBox, 0.08f, 6, Color{ 55, 75, 105, 230 });
 
-        DrawText("Base Health:", (int)col2X + 20, (int)contentY + 40, 11, Color{ 140, 210, 255, 240 });
+        DrawText("Base Health:", (int)col2X + 20, (int)contentY + 36, 11, Color{ 140, 210, 255, 240 });
         std::string hpStr = std::to_string((int)player.GetMaxHealth()) + " HP";
-        DrawText(hpStr.c_str(), (int)col2X + 175, (int)contentY + 40, 11, Color{ 255, 255, 255, 255 });
+        DrawText(hpStr.c_str(), (int)col2X + 175, (int)contentY + 36, 11, Color{ 255, 255, 255, 255 });
 
-        DrawText("Stamina Pool:", (int)col2X + 20, (int)contentY + 62, 11, Color{ 140, 210, 255, 240 });
+        DrawText("Armor Defense:", (int)col2X + 20, (int)contentY + 56, 11, Color{ 140, 210, 255, 240 });
+        std::string defStr = std::to_string((int)player.GetDefense()) + " (~13% Damage Mitigation)";
+        DrawText(defStr.c_str(), (int)col2X + 175, (int)contentY + 56, 11, Color{ 100, 240, 200, 255 });
+
+        DrawText("Stamina Pool:", (int)col2X + 20, (int)contentY + 76, 11, Color{ 140, 210, 255, 240 });
         std::string stamStr = std::to_string((int)player.GetMaxStamina()) + " SP";
-        DrawText(stamStr.c_str(), (int)col2X + 175, (int)contentY + 62, 11, Color{ 255, 255, 255, 255 });
+        DrawText(stamStr.c_str(), (int)col2X + 175, (int)contentY + 76, 11, Color{ 255, 255, 255, 255 });
 
-        DrawText("Stamina Regen:", (int)col2X + 20, (int)contentY + 84, 11, Color{ 140, 210, 255, 240 });
-        DrawText("35 / sec (Regenerates during neutral)", (int)col2X + 175, (int)contentY + 84, 11, Color{ 255, 255, 255, 255 });
+        DrawText("Stamina Regen:", (int)col2X + 20, (int)contentY + 96, 11, Color{ 140, 210, 255, 240 });
+        DrawText("35 / sec (Regenerates during neutral)", (int)col2X + 175, (int)contentY + 96, 11, Color{ 255, 255, 255, 255 });
 
-        DrawText("Dodge Invulnerability:", (int)col2X + 20, (int)contentY + 104, 11, Color{ 140, 210, 255, 240 });
-        DrawText("0.18s evasive i-frames on [Q] Dash", (int)col2X + 175, (int)contentY + 104, 11, Color{ 240, 245, 255, 255 });
+        DrawText("Dodge Invulnerability:", (int)col2X + 20, (int)contentY + 116, 11, Color{ 140, 210, 255, 240 });
+        DrawText("0.18s evasive i-frames on [Q] Dash", (int)col2X + 175, (int)contentY + 116, 11, Color{ 240, 245, 255, 255 });
 
-        DrawText("Parry Guard Window:", (int)col2X + 20, (int)contentY + 128, 11, Color{ 140, 210, 255, 240 });
-        DrawText("0.28s active deflect window on [F] Key", (int)col2X + 175, (int)contentY + 128, 11, Color{ 240, 245, 255, 255 });
+        DrawText("Parry Guard Window:", (int)col2X + 20, (int)contentY + 138, 11, Color{ 140, 210, 255, 240 });
+        DrawText("0.28s active deflect window on [F] Key", (int)col2X + 175, (int)contentY + 138, 11, Color{ 240, 245, 255, 255 });
 
-        DrawText("Counter-Attack Bonus:", (int)col2X + 20, (int)contentY + 152, 11, Color{ 140, 210, 255, 240 });
-        DrawText("+50% damage boost following parries", (int)col2X + 175, (int)contentY + 152, 11, Color{ 255, 220, 80, 255 });
+        DrawText("Counter-Attack Bonus:", (int)col2X + 20, (int)contentY + 160, 11, Color{ 140, 210, 255, 240 });
+        DrawText("+50% damage boost following parries", (int)col2X + 175, (int)contentY + 160, 11, Color{ 255, 220, 80, 255 });
 
-        DrawText("Movement Speed:", (int)col2X + 20, (int)contentY + 176, 11, Color{ 140, 210, 255, 240 });
-        DrawText("280 units/sec (8-directional physics)", (int)col2X + 175, (int)contentY + 176, 11, Color{ 240, 245, 255, 255 });
+        DrawText("Movement Speed:", (int)col2X + 20, (int)contentY + 182, 11, Color{ 140, 210, 255, 240 });
+        DrawText("280 units/sec (8-directional physics)", (int)col2X + 175, (int)contentY + 182, 11, Color{ 240, 245, 255, 255 });
 
         // Relics & Quest Items Section
         float relicsY = contentY + 236.0f;

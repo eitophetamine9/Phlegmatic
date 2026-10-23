@@ -22,5 +22,5 @@ public:
 private:
     int currentWave;
     float waveTimer;
-    const int totalWaves = 3;
+    const int totalWaves = 5;
 };

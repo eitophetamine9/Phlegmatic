@@ -36,7 +36,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                enemy.TakeDamage(attack.damage, knockbackDir, particles);
+                enemy.TakeDamage(attack.damage, knockbackDir, particles, attack.defensePierce);
                 hitAny = true;
             }
         }
@@ -155,7 +155,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
 
                 if (dist <= enemy.GetRadius() + proj.GetRadius()) {
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    enemy.TakeDamage(proj.GetDamage(), knockDir, particles);
+                    enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce());
                     particles.SpawnSparks(proj.GetPosition(), Color{ 100, 230, 255, 255 }, 14, 130.0f);
                     particles.SpawnFloatingText(enemy.GetPosition(), "COUNTER HIT!", Color{ 255, 220, 40, 255 }, 20.0f);
                     proj.Destroy();

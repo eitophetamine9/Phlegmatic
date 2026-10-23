@@ -38,7 +38,7 @@ public:
     void MarkDamagedPlayer() { hasDamagedPlayer = true; }
     void OnParried(ParticleSystem& particles);
 
-    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles);
+    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f);
     bool CheckHit(const AttackInfo& attack) const;
 
     Vector2 GetPosition() const { return position; }
@@ -48,6 +48,7 @@ public:
     bool IsAlive() const { return state != EnemyState::DEAD; }
     float GetHealth() const { return health; }
     float GetMaxHealth() const { return maxHealth; }
+    float GetDefense() const { return defense; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS; }
@@ -74,6 +75,7 @@ private:
 
     float health;
     float maxHealth;
+    float defense;
     float moveSpeed;
 
     float attackRange;

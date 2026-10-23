@@ -257,10 +257,10 @@ void TutorialManager::DrawWorldElements(float time) const {
 void TutorialManager::DrawHUD(int windowWidth, int windowHeight) const {
     if (currentStep == TutorialStep::COMPLETED) return;
 
-    // Top Cinematic Tutorial Banner
-    const float bannerW = 740.0f;
-    const float bannerH = 58.0f;
-    float bannerX = ((float)windowWidth - bannerW) * 0.5f;
+    // Left-aligned Cinematic Tutorial Objectives Banner
+    const float bannerW = 590.0f;
+    const float bannerH = 62.0f;
+    float bannerX = 24.0f;
     float bannerY = 16.0f;
 
     DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 14, 18, 28, 235 });
@@ -269,11 +269,11 @@ void TutorialManager::DrawHUD(int windowWidth, int windowHeight) const {
 
     int stepNum = 1 + (int)currentStep;
     if (stepNum > 6) stepNum = 6;
-    std::string chapterHeader = "CHAPTER 1: THE RUINED CASTLE OF ZYPHDEN  |  TUTORIAL STEP " + std::to_string(stepNum) + "/6";
-    DrawText(chapterHeader.c_str(), (int)bannerX + 20, (int)bannerY + 10, 11, Color{ 255, 215, 80, 255 });
+    std::string chapterHeader = "CHAPTER 1: RUINED CASTLE OF ZYPHDEN  |  OBJECTIVE " + std::to_string(stepNum) + "/6";
+    DrawText(chapterHeader.c_str(), (int)bannerX + 16, (int)bannerY + 10, 11, Color{ 255, 215, 80, 255 });
 
-    DrawText(currentObjectiveText.c_str(), (int)bannerX + 20, (int)bannerY + 26, 13, Color{ 255, 255, 255, 255 });
-    DrawText(currentControlHint.c_str(), (int)bannerX + 20, (int)bannerY + 43, 10, Color{ 120, 220, 255, 220 });
+    DrawText(currentObjectiveText.c_str(), (int)bannerX + 16, (int)bannerY + 27, 12, Color{ 255, 255, 255, 255 });
+    DrawText(currentControlHint.c_str(), (int)bannerX + 16, (int)bannerY + 44, 10, Color{ 120, 220, 255, 220 });
 }
 
 bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {

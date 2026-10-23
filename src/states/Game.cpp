@@ -335,6 +335,12 @@ void Game::Update(float dt) {
 
     player.Update(dt, map, mouseWorld, particles);
 
+    // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
+    for (const auto& p : player.GetSpawnedProjectiles()) {
+        projectiles.push_back(p);
+    }
+    player.GetSpawnedProjectiles().clear();
+
     int aliveCount = 0;
     for (auto& enemy : enemies) {
         if (enemy.IsAlive()) {

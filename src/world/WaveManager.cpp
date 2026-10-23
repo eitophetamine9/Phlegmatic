@@ -18,26 +18,45 @@ void WaveManager::SpawnWave(int waveNumber, std::vector<Enemy>& enemies, std::ve
     waveTimer = 0.0f;
 
     if (waveNumber == 1) {
-        // Wave 1: 2 Slashers & 2 Archers
-        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x - 280.0f, center.y - 120.0f });
-        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x + 280.0f, center.y - 120.0f });
-        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x - 360.0f, center.y + 160.0f });
-        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x + 360.0f, center.y + 160.0f });
-        particles.SpawnFloatingText(center, "WAVE 1: MELEE & ARCHERS", Color{ 255, 220, 80, 255 }, 24.0f);
+        // Wave 1: Vanguard Skirmish (3 Slashers & 2 Archers)
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x - 260.0f, center.y - 100.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x + 260.0f, center.y - 100.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x, center.y - 180.0f });
+        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x - 380.0f, center.y + 160.0f });
+        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x + 380.0f, center.y + 160.0f });
+        particles.SpawnFloatingText(center, "WAVE 1: VANGUARD SKIRMISH", Color{ 255, 220, 80, 255 }, 24.0f);
     } else if (waveNumber == 2) {
-        // Wave 2: 1 Brute, 2 Chargers, 2 Pyromancers
-        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x, center.y - 280.0f });
-        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x - 380.0f, center.y });
-        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x + 380.0f, center.y });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 240.0f, center.y + 240.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 240.0f, center.y + 240.0f });
-        particles.SpawnFloatingText(center, "WAVE 2: CHARGERS & PYROMANCERS", Color{ 100, 240, 255, 255 }, 24.0f);
-    } else if (waveNumber >= 3) {
-        // Wave 3: The Grand Inquisitor Boss & 2 Pyromancer acolytes
-        enemies.emplace_back(EnemyType::INQUISITOR_BOSS, Vector2{ center.x, center.y - 240.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 320.0f, center.y + 180.0f });
-        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 320.0f, center.y + 180.0f });
-        particles.SpawnFloatingText(center, "WAVE 3: THE GRAND INQUISITOR", Color{ 255, 60, 60, 255 }, 28.0f);
+        // Wave 2: Ranged Artillery & Flankers (2 Chargers & 3 Pyromancers)
+        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x - 360.0f, center.y });
+        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x + 360.0f, center.y });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 220.0f, center.y - 200.0f });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 220.0f, center.y - 200.0f });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x, center.y + 220.0f });
+        particles.SpawnFloatingText(center, "WAVE 2: FLANKERS & OCCULT PYROMANCERS", Color{ 100, 240, 255, 255 }, 24.0f);
+    } else if (waveNumber == 3) {
+        // Wave 3: The Armored Phalanx (2 Iron Brutes & 2 Archers)
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x - 220.0f, center.y - 140.0f });
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x + 220.0f, center.y - 140.0f });
+        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x - 350.0f, center.y + 180.0f });
+        enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x + 350.0f, center.y + 180.0f });
+        particles.SpawnFloatingText(center, "WAVE 3: THE ARMORED PHALANX", Color{ 255, 140, 50, 255 }, 24.0f);
+    } else if (waveNumber == 4) {
+        // Wave 4: Chaos Legion Elite (1 Brute, 2 Chargers, 2 Pyromancers, 2 Slashers)
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x, center.y - 240.0f });
+        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x - 340.0f, center.y - 50.0f });
+        enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x + 340.0f, center.y - 50.0f });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 250.0f, center.y + 180.0f });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 250.0f, center.y + 180.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x - 120.0f, center.y + 200.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x + 120.0f, center.y + 200.0f });
+        particles.SpawnFloatingText(center, "WAVE 4: CHAOS LEGION ELITE", Color{ 240, 80, 160, 255 }, 26.0f);
+    } else if (waveNumber >= 5) {
+        // Wave 5: The Grand Inquisitor Boss Trial (Boss + 1 Iron Brute Guard + 2 Pyromancers)
+        enemies.emplace_back(EnemyType::INQUISITOR_BOSS, Vector2{ center.x, center.y - 250.0f });
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x, center.y + 160.0f });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 300.0f, center.y });
+        enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 300.0f, center.y });
+        particles.SpawnFloatingText(center, "WAVE 5: THE GRAND INQUISITOR", Color{ 255, 60, 60, 255 }, 28.0f);
     }
 }
 

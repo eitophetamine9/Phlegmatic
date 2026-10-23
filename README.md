@@ -53,11 +53,17 @@
     - Chainmail & plate armor blunt impact thuds.
     - Crossbow string releases with wooden timber creaks.
     - Deep medieval war horns and portcullis iron chain rumbles.
-* **Combat Arena & Wave Defense Mode**:
-  * 3 escalating waves of melee vanguards, agile kiting archers, void pyromancers, and **The Grand Inquisitor** boss.
+* **Combat Arena & Wave Defense Mode (Expanded to 5 Waves)**:
+  * 5 escalating combat waves featuring mixed vanguard formations, high-threat charger vanguards, dual-brute shockwaves, kiting snipers, and culminating in **The Grand Inquisitor** boss trial on Wave 5.
 * **Test Arena Mode (Main Menu)**:
   * Unlocked on the Title Screen once the player either **defeats Zil** or **faces him in duel and accepts his spare**.
-  * Grants instant access to the original 3-wave combat trials directly from the main menu for continuous weapon and defense testing.
+  * Grants instant access to all 5 arena combat trials directly from the main menu for continuous weapon and defense testing.
+* **Streamlined Objectives HUD**:
+  * Tutorial quest objectives are cleanly pinned to the top-left margin to preserve central combat visibility.
+* **Armor Defense & Mitigation System**:
+  * Both player and enemy archetypes possess innate armor defense values that attenuate incoming damage using diminishing returns:
+    $$\text{Damage} = \text{RawDamage} \times \left(\frac{100}{100 + \text{Defense} \times (1 - \text{Pierce})}\right)$$
+  * The player character starts with **15 Defense (~13% mitigation)**, visible in the Lore & Inventory codex (`[I]`). Certain heavy strikes (e.g., War Mace Earthshaker, Truth Seeker Holy Beam) feature defense penetration.
 
 ---
 
@@ -67,12 +73,12 @@
 | :--- | :--- | :--- |
 | **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid wall and pillar collisions. |
 | **Aiming** | `Mouse Cursor` | Reticle targeting for sword thrusts, dashes, and parry reflections. |
-| **Light Attack** | `Left Mouse Button` | Swift slash/thrust. Low stamina cost, rapid recovery cadence. |
-| **Heavy Cleave** | `Right Mouse Button` | High-damage sweep. Causes heavy stagger and knockback (cooldown). |
+| **Light Attack** | `Left Mouse Button` | Swift slash/thrust. Low/zero stamina cost, rapid recovery cadence. |
+| **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage attacks, lunges, shockwaves). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **i-frames** (`EVADED`) to dodge sweeps & missiles. |
 | **Timed Parry** | `F Key` | 0.28s guard. Staggers melee foes for 2.0s and **reflects incoming projectiles**. |
 | **Interact** | `E Key` / `Left Click` | Claim weapons, open ancient relic chests, and trigger portal transit. |
-| **Lore Journal** | `I Key` or `TAB` | Toggle the in-game chronicles codex and weapon inventory at any time. |
+| **Lore Journal** | `I Key` or `TAB` | Toggle the in-game chronicles codex, armor stats, and weapon inventory. |
 | **Controls Guide** | `C Key` | Toggle the quick-reference controls overlay modal. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the combat trial. |
 | **Return to Lobby** | `L Key` or `ESC` | Return to the Armory Sanctuary. |
@@ -84,10 +90,10 @@
 | Weapon | Stance Style | Light Atk | Heavy Atk | Dash Cooldown | Passives & Special Properties |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Unarmed** | Bare Fists | None | None | 0.75s (15 stam) | Starting tutorial state. Search the courtyard altar to claim a weapon. |
-| **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc) | 65 dmg (140° cleave) | 0.85s (20 stam) | Dependable reach, consistent recovery cadence. Claimed at courtyard altar. |
-| **Truth Seeker** | Legendary Holy Blade | 46 / 60 dmg (2-Hit Combo) | 125 dmg (Area Shockwave) | 0.65s (16 stam) | **2-Hit Light Combo** (Golden sweep into Radiant Azure upswing) + **Slower Area Holy Shockwave Heavy Slam** targeting designated cursor area. Persists into Hub and Arena. |
-| **Dual Daggers** | Agility Flurry | 18 dmg (rapid twin-hit) | 52 dmg (360° whirlwind) | 0.50s (14 stam) | High attack cadence, low stamina drain, fastest dash. Available in Sanctuary Hub. |
-| **War Mace** | Crushing Poise | 40 dmg (heavy bludgeon) | 95 dmg (ground tremor) | 1.25s (26 stam) | High poise destruction, breaks through enemy shields. Available in Sanctuary Hub. |
+| **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc, 14 stam) | 85 dmg (2-Stage cleave) | 0.85s (20 stam) | Dependable reach. **Heavy**: Stage 1 wide 150° cleave followed by Stage 2 upward shock slash cone. (2.1s cd). |
+| **Truth Seeker** | Legendary Holy Blade | 46 / 60 dmg (2-Hit Combo) | 140 dmg (Dual 360° + Holy Beam) | 0.65s (16 stam) | **Light**: Slash into radiant upward slice. **Heavy**: Rapid dual 360° dawnfire sweeps + holy beam projectile (10% defense pierce, 3.8s cd). |
+| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 55 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attack cadence. **Heavy**: High-velocity forward lunge burst into instant 360° whirlwind (1.8s cd). |
+| **War Mace** | Crushing Poise | 52 dmg (Frontal Circle Smack) | 155 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack followed by 360° tremor shockwave (**ignores 25% enemy defense**, 3.6s cd). |
 
 > [!NOTE]
 > In **Chapter 1: Ruined Castle**, the player begins unarmed with zero weapons in inventory. The Crusader's Broadsword is claimed at the central altar plinth, and the legendary **Truth Seeker** is claimed by triumphing over Zil the Corrupted Crusader. After the tutorial, Truth Seeker is permanently retained in your arsenal for the Hub and Test Arena.
@@ -96,15 +102,15 @@
 
 ## Enemies & Boss Encounters
 
-| Enemy | Archetype | Telegraph Shape | Combat Behavior & Defeat Strategy |
-| :--- | :--- | :--- | :--- |
-| **Cultist Slasher** | Melee Vanguard | Amber/Red Cone (95°, 115px) | Forward blade slash. Sidestep or time `[F]` right before impact to stagger. *Cone AoE indicates direct melee sweep range.* |
-| **Shadow Charger** | Dash Melee | Linear Path (50px width, 240px) | High-speed dash thrust. Step perpendicular to path or parry head-on. |
-| **Iron Brute** | Heavy Crusher | Expanding Circle (150px AoE) | Tremor ground slam. Dash clear with `[Q]` or break poise with War Mace. |
-| **Deathseeker Archer** | Ranged Kiting | Red Laser Aim Line (360px range) | Backs away if approached; fires high-velocity piercing bolts. |
-| **Void Pyromancer** | Occult Caster | 3-Way Trajectory Aim Lines (320px) | Shows exact projectile flight paths instead of a confusing cone AoE. Fires 3 void orbs. Evade with `[Q]` or reflect with `[F]`. |
-| **Zil the Corrupted Crusader** | **Chapter 1 Boss** | Cone Cleave, Charge Path & 3-Way Flame Trajectories | 380 HP fallen crusader guarding the portcullis. Dynamic moveset with melee cleaves, shield charges, and 3-way flame waves with precision trajectory indicators. |
-| **The Grand Inquisitor** | **Arena Boss** | Multi-Phase Trajectories & Tremor AoE | 500 HP boss rotating between **12-way Radial Star Trajectories**, **Linear Beam Shard**, and **Cataclysmic Smite AoE**. |
+| Enemy | Archetype | Defense | Telegraph Shape | Combat Behavior & Defeat Strategy |
+| :--- | :--- | :--- | :--- | :--- |
+| **Cultist Slasher** | Melee Vanguard | 8 | Amber/Red Cone (95°, 115px) | Forward blade slash. Sidestep or time `[F]` right before impact to stagger. |
+| **Deathseeker Archer** | Ranged Kiting | 6 | Red Laser Aim Line (360px range) | Backs away if approached; fires high-velocity piercing bolts. |
+| **Void Pyromancer** | Occult Caster | 10 | 3-Way Trajectory Aim Lines (320px) | Shows exact projectile flight paths. Fires 3 void orbs. Evade with `[Q]` or reflect with `[F]`. |
+| **Shadow Charger** | Dash Melee | 12 | Linear Path (50px width, 240px) | High-speed dash thrust. Step perpendicular to path or parry head-on. |
+| **The Grand Inquisitor** | **Arena Boss** | 26 | Multi-Phase Trajectories & Tremor AoE | 500 HP boss rotating between **12-way Radial Star Trajectories**, **Linear Beam Shard**, and **Cataclysmic Smite AoE**. |
+| **Zil the Corrupted Crusader** | **Chapter 1 Boss** | 28 | Cone Cleave, Charge Path & 3-Way Flame Trajectories | 380 HP fallen crusader guarding the portcullis. Dynamic moveset with melee cleaves, shield charges, and 3-way flame waves. |
+| **Iron Brute** | Heavy Crusher | 32 | Expanding Circle (150px AoE) | High armor tank. Tremor ground slam. Dash clear with `[Q]` or pierce armor with War Mace Earthshaker. |
 
 > [!TIP]
 > **Visual Clarity Rule**: Filled Cone AoEs are reserved strictly for attacks that deal direct melee/cleave damage within that sector. Projectiles display precise trajectory laser lines indicating their exact flight paths, allowing clean evasion between projectiles.

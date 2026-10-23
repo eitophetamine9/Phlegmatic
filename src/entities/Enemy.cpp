@@ -22,6 +22,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::SLASHER:
             radius = 20.0f;
             maxHealth = 80.0f;
+            defense = 8.0f; // Light armor (~7% reduction)
             moveSpeed = 165.0f;
             attackRange = 115.0f;
             windupDuration = 0.85f;
@@ -37,6 +38,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::BRUTE:
             radius = 30.0f;
             maxHealth = 190.0f;
+            defense = 32.0f; // Heavy plate armor (~24% reduction)
             moveSpeed = 100.0f;
             attackRange = 150.0f;
             windupDuration = 1.25f;
@@ -51,6 +53,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::CHARGER:
             radius = 18.0f;
             maxHealth = 65.0f;
+            defense = 12.0f; // Reinforced vanguard (~11% reduction)
             moveSpeed = 190.0f;
             attackRange = 240.0f;
             windupDuration = 0.70f;
@@ -66,6 +69,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::ARCHER:
             radius = 18.0f;
             maxHealth = 60.0f;
+            defense = 6.0f; // Fragile leather (~5% reduction)
             moveSpeed = 150.0f;
             attackRange = 360.0f;
             kitingRange = 200.0f;
@@ -82,6 +86,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::PYROMANCER:
             radius = 20.0f;
             maxHealth = 75.0f;
+            defense = 10.0f; // Occult robes (~9% reduction)
             moveSpeed = 125.0f;
             attackRange = 320.0f;
             kitingRange = 170.0f;
@@ -99,6 +104,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::INQUISITOR_BOSS:
             radius = 36.0f;
             maxHealth = 500.0f;
+            defense = 26.0f; // Imperial regalia (~21% reduction)
             moveSpeed = 85.0f;
             attackRange = 420.0f;
             kitingRange = 0.0f;
@@ -114,6 +120,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
         case EnemyType::ZIL_BOSS:
             radius = 28.0f;
             maxHealth = 380.0f;
+            defense = 28.0f; // Corrupted crusader armor (~22% reduction)
             moveSpeed = 105.0f;
             attackRange = 175.0f;
             kitingRange = 0.0f;
@@ -448,7 +455,7 @@ void Enemy::OnParried(ParticleSystem& particles) {
     particles.SpawnFloatingText({ position.x, position.y - 5.0f }, "DEFENSE BROKEN!", Color{ 255, 120, 60, 255 }, 16.0f);
 }
 
-bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles) {
+bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
     if (state == EnemyState::DEAD) return false;
 
     if (state == EnemyState::STUNNED) {
@@ -456,10 +463,15 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
         particles.SpawnFloatingText({ position.x, position.y - 30.0f }, "CRIT!", Color{ 255, 220, 0, 255 }, 20.0f);
     }
 
-    health -= amount;
+    // Apply Enemy Defense formula with defense pierce
+    float effDef = defense * fmaxf(0.0f, 1.0f - defensePierce);
+    float damageFactor = 100.0f / (100.0f + effDef);
+    float finalAmount = amount * damageFactor;
+
+    health -= finalAmount;
     SoundFX::PlayHitImpact();
     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 12, 120.0f);
-    particles.SpawnFloatingText(position, "-" + std::to_string((int)amount), Color{ 255, 240, 240, 255 }, 20.0f);
+    particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 240, 240, 255 }, 20.0f);
 
     float knockMult = (type == EnemyType::INQUISITOR_BOSS) ? 40.0f : ((type == EnemyType::BRUTE) ? 80.0f : 180.0f);
     velocity.x += knockbackDir.x * knockMult;
@@ -480,11 +492,21 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
 bool Enemy::CheckHit(const AttackInfo& attack) const {
     if (state == EnemyState::DEAD || attack.type == AttackType::NONE) return false;
 
+    if (attack.isFrontalCircle) {
+        float dx = position.x - attack.circleCenter.x;
+        float dy = position.y - attack.circleCenter.y;
+        float maxDist = radius + attack.circleRadius;
+        return (dx * dx + dy * dy) <= (maxDist * maxDist);
+    }
+
     float dx = position.x - attack.origin.x;
     float dy = position.y - attack.origin.y;
-    float dist = sqrtf(dx * dx + dy * dy);
+    float distSq = dx * dx + dy * dy;
+    float maxDist = attack.range + radius;
 
-    if (dist > attack.range + radius) return false;
+    if (distSq > maxDist * maxDist) return false;
+
+    if (attack.arcAngle >= 360.0f) return true;
 
     float hitAngle = atan2f(dy, dx) * RAD2DEG;
     float diff = fabsf(hitAngle - attack.angle);

@@ -136,6 +136,12 @@ void RuinedCastleHandler::Update(
 
     player.Update(dt, map, mouseWorld, particles);
 
+    // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
+    for (const auto& p : player.GetSpawnedProjectiles()) {
+        projectiles.push_back(p);
+    }
+    player.GetSpawnedProjectiles().clear();
+
     // Update enemies
     for (auto& enemy : enemies) {
         enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
