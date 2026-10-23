@@ -8,8 +8,8 @@ class Player;
 
 class GameUI {
 public:
-    // Returns 0 = None, 1 = Play, 2 = Controls
-    static int DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed);
+    // Returns 0 = None, 1 = Play, 2 = Controls, 3 = Test Arena
+    static int DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked = false);
 
     // Controls Menu Modal (Accessible from Title, Lobby, and Arena)
     static bool DrawControlsModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed);

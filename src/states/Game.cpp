@@ -47,6 +47,28 @@ void Game::Init() {
     zilDialogueSpeaker = "";
     zilDialogueText = "";
     zilDialogueColor = WHITE;
+    testArenaUnlocked = LoadArenaUnlock();
+}
+
+void Game::SaveArenaUnlock() {
+    FILE* f = fopen("arena_unlock.dat", "w");
+    if (f) {
+        fprintf(f, "1\n");
+        fclose(f);
+    }
+}
+
+bool Game::LoadArenaUnlock() {
+    FILE* f = fopen("arena_unlock.dat", "r");
+    if (f) {
+        int v = 0;
+        if (fscanf(f, "%d", &v) == 1 && v == 1) {
+            fclose(f);
+            return true;
+        }
+        fclose(f);
+    }
+    return false;
 }
 
 void Game::EnterRuinedCastle() {
@@ -338,12 +360,14 @@ void Game::Update(float dt) {
 
     // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
-        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked);
         if (action == 1) {
             cutscene.Reset();
             currentState = GameState::PROLOGUE_CUTSCENE;
         } else if (action == 2) {
             showControlsModal = true;
+        } else if (action == 3) {
+            EnterArena();
         }
         return;
     }
@@ -383,6 +407,8 @@ void Game::Update(float dt) {
                 particles.SpawnFloatingText({ 800.0f, 290.0f }, "DUEL RESTARTED!", Color{ 255, 200, 60, 255 }, 24.0f);
                 return;
             } else if (choice == 2) { // Accept Spare & Proceed
+                testArenaUnlocked = true;
+                SaveArenaUnlock();
                 showZilDefeatModal = false;
                 zilEncounterActive = false;
                 zilSparedPlayer = true;
@@ -501,6 +527,8 @@ void Game::Update(float dt) {
 
             if (!zilAlive && !zilDefeated) {
                 zilDefeated = true;
+                testArenaUnlocked = true;
+                SaveArenaUnlock();
                 zilEncounterActive = false;
                 enemies.clear();
                 projectiles.clear();
@@ -708,7 +736,7 @@ void Game::Render() {
 
     if (currentState == GameState::TITLE_SCREEN) {
         Vector2 mouseScreen = GetMousePosition();
-        GameUI::DrawTitleScreen(w, h, mouseScreen, false);
+        GameUI::DrawTitleScreen(w, h, mouseScreen, false, testArenaUnlocked);
 
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mouseScreen, false);

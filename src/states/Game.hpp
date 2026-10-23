@@ -67,4 +67,9 @@ private:
     std::string zilDialogueSpeaker;
     std::string zilDialogueText;
     Color zilDialogueColor;
+
+    // Test Arena Unlock
+    bool testArenaUnlocked;
+    void SaveArenaUnlock();
+    bool LoadArenaUnlock();
 };

@@ -55,6 +55,9 @@
     - Deep medieval war horns and portcullis iron chain rumbles.
 * **Combat Arena & Wave Defense Mode**:
   * 3 escalating waves of melee vanguards, agile kiting archers, void pyromancers, and **The Grand Inquisitor** boss.
+* **Test Arena Mode (Main Menu)**:
+  * Unlocked on the Title Screen once the player either **defeats Zil** or **faces him in duel and accepts his spare**.
+  * Grants instant access to the original 3-wave combat trials directly from the main menu for continuous weapon and defense testing.
 
 ---
 
