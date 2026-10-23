@@ -60,6 +60,8 @@ public:
     }
     std::string GetName() const;
 
+    friend class EnemyRenderer;
+
 private:
     EnemyType type;
     EnemyState state;

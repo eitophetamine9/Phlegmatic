@@ -15,6 +15,7 @@
 
 #include "../combat/CollisionSystem.hpp"
 #include "../world/WaveManager.hpp"
+#include "RuinedCastleHandler.hpp"
 
 class Game {
 public:
@@ -57,17 +58,7 @@ private:
 
     // Combat & Arena Managers
     WaveManager waveManager;
-
-    // Zil Boss Encounter & Branching Logic
-    bool zilEncounterActive;
-    bool zilDefeated;
-    bool zilSparedPlayer;
-    bool hasUsedZilRetry;
-    bool showZilDefeatModal;
-    float zilDialogueTimer;
-    std::string zilDialogueSpeaker;
-    std::string zilDialogueText;
-    Color zilDialogueColor;
+    RuinedCastleHandler ruinedCastleHandler;
 
     // Test Arena Unlock
     bool testArenaUnlocked;

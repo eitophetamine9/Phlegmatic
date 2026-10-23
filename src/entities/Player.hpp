@@ -58,6 +58,8 @@ public:
     Inventory& GetInventory() { return inventory; }
     const Inventory& GetInventory() const { return inventory; }
 
+    friend class PlayerRenderer;
+
 private:
     Vector2 position;
     Vector2 velocity;

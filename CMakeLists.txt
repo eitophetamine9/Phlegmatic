@@ -12,7 +12,9 @@ set(SOURCES
     src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp
     src/entities/Player.cpp
+    src/entities/PlayerRenderer.cpp
     src/entities/Enemy.cpp
+    src/entities/EnemyRenderer.cpp
     src/combat/Projectile.cpp
     src/combat/Inventory.cpp
     src/combat/CollisionSystem.cpp
@@ -22,6 +24,7 @@ set(SOURCES
     src/states/UI.cpp
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp
+    src/states/RuinedCastleHandler.cpp
     src/states/Game.cpp
 )
 

@@ -168,8 +168,10 @@ Phlegmatic/
     │   └── Interactable.hpp    # Weapon pedestals, training dummy, arena portal
     │
     ├── entities/               # Player character and enemy AI state machines
-    │   ├── Player.hpp / .cpp   # WASD movement, Q Dash (i-frames), F Parry, attacks
-    │   └── Enemy.hpp / .cpp    # 5 enemy archetypes + Zil Boss & The Grand Inquisitor
+    │   ├── Player.hpp / .cpp   # WASD movement, Q Dash (i-frames), F Parry, combat state
+    │   ├── PlayerRenderer.hpp / .cpp# Player visual renderer (weapon sweeps, whirlwind, silhouettes)
+    │   ├── Enemy.hpp / .cpp    # 5 enemy archetypes + Zil Boss & The Grand Inquisitor AI
+    │   └── EnemyRenderer.hpp / .cpp# Enemy telegraph geometric visuals & boss aura rendering
     │
     ├── rendering/              # Procedural silhouettes and asset loader
     │   └── AssetManager.hpp / .cpp# Sprite loader + procedural vector silhouettes
@@ -177,6 +179,7 @@ Phlegmatic/
     └── states/                 # State management and UI rendering
         ├── GameState.hpp       # State enums (TITLE_SCREEN, PROLOGUE_CUTSCENE, RUINED_CASTLE, etc.)
         ├── Game.hpp / .cpp     # Master game loop & state coordinator
+        ├── RuinedCastleHandler.hpp / .cpp# Chapter 1 Ruined Castle loop & Zil Crusader duel branching
         ├── Cutscene.hpp / .cpp # Prologue dark fantasy narrative renderer
         ├── Tutorial.hpp / .cpp # Chapter 1 step tracker & interactive pop-up modals
         ├── TitleUI.hpp / .cpp  # Title screen with Campaign & Test Arena buttons
