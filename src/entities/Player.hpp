@@ -103,6 +103,7 @@ private:
     float stamina;
     float maxStamina;
     float defense;
+    float timeSinceCombat;
 
     // Action Timers & States
     float lightCooldown;

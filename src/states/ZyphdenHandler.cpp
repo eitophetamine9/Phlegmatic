@@ -173,6 +173,7 @@ void ZyphdenHandler::CloseDialogue() {
 
 void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera) {
     inTavern = false;
+    inRoyalKeep = false;
     map.Init(MapEnvironment::ZYPHDEN_REALM);
     map.SetGateOpen(true);
 
@@ -182,9 +183,9 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
     enemies.clear();
     projectiles.clear();
 
-    eldon = { "eldon", "Tavernkeep Eldon", { 720.0f, 636.0f }, 24.0f, Color{ 255, 190, 80, 255 } };
+    eldon = { "eldon", "Tavernkeep Eldon", { 720.0f, 665.0f }, 24.0f, Color{ 255, 190, 80, 255 } };
     noticeboard = { "noticeboard", "Noticeboard", { 780.0f, 720.0f }, 20.0f, Color{ 130, 220, 255, 255 } };
-    kingKreptu = { "king", "King Kreptu", { 1000.0f, 220.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
+    kingKreptu = { "king", "King Kreptu", { 950.0f, 465.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
     knightLenonNPC = { "lenon", "Knight Lenon", { 1490.0f, 700.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
 
     cedric = { "cedric", "Chronicler Cedric", { 720.0f, 1020.0f }, 24.0f, Color{ 100, 200, 255, 255 } };
@@ -369,7 +370,7 @@ void ZyphdenHandler::Update(
 
     // Lenon Walking Into Tavern Sequence
     if (questPhase == ZyphdenQuestPhase::LENON_APPROACHING && inTavern && lenonInTavern) {
-        Vector2 target = { 720.0f, 720.0f };
+        Vector2 target = { 720.0f, 765.0f };
         float dx = target.x - knightLenonNPC.position.x;
         float dy = target.y - knightLenonNPC.position.y;
         float dist = sqrtf(dx * dx + dy * dy);
@@ -378,8 +379,8 @@ void ZyphdenHandler::Update(
             Vector2 walkDir = Vector2Normalize({ dx, dy });
             knightLenonNPC.position.x += walkDir.x * 130.0f * dt;
             knightLenonNPC.position.y += walkDir.y * 130.0f * dt;
-        } else {
-            // Lenon arrived in front of the bar counter! Strike up conversation about Zil!
+        } else if (!isDialogueOpen && currentDialogueNPCId != "lenon_tavern_intro") {
+            // Lenon arrived in front of the bar counter! Strike up conversation about Zil ONCE!
             SoundFX::PlayParrySuccess();
             particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 24, 120.0f);
 
@@ -421,8 +422,9 @@ void ZyphdenHandler::Update(
                 return;
             }
 
-            // 2. Tavernkeep Eldon behind the bar
-            if (interactKey && eldon.CheckInteraction(playerPos)) {
+            // 2. Tavernkeep Eldon behind the bar (Range increased to 110px across the counter)
+            bool eldonInRange = Vector2Distance(playerPos, eldon.position) <= 110.0f;
+            if (interactKey && eldonInRange) {
                 if (questPhase == ZyphdenQuestPhase::SEEK_TAVERN) {
                     std::vector<std::string> pages = {
                         "Welcome to the Hearthside Tavern, traveler! Pull up a stool and warm yourself by the hearth. Few make it past the Crossroads beasts these days.",
@@ -445,6 +447,50 @@ void ZyphdenHandler::Update(
                 };
                 OpenDialogue("lenon_tavern_idle", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
             }
+        } else if (inRoyalKeep) {
+            // Inside Zyphden Royal Keep (Grand Sovereign Throne Hall)
+            // 1. Southern Doorway back to Zyphden exterior (doorway at {950, 995})
+            if (doorCooldown <= 0.0f && (playerPos.y >= 990.0f || (Vector2Distance(playerPos, { 950.0f, 990.0f }) <= 55.0f && interactKey))) {
+                inRoyalKeep = false;
+                doorCooldown = 0.5f;
+                map.Init(MapEnvironment::ZYPHDEN_REALM);
+                player.SetPosition({ 1000.0f, 355.0f });
+                camera.target = player.GetPosition();
+                SoundFX::PlayGateOpen();
+                return;
+            }
+
+            // 2. Audience with King Kreptu on his Golden Throne Dais
+            bool kingInRange = Vector2Distance(playerPos, kingKreptu.position) <= 90.0f;
+            if (interactKey && kingInRange) {
+                if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
+                    questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
+                    hasTalkedToKing = true;
+                    std::vector<std::string> pages = {
+                        "Captain Lenon told me of your arrival, wanderer. You brought word of Lord Zil and braved the corrupted highway.",
+                        "The Lord Liege's madness consumes Tydeshire, and we need warriors of true resolve. I hereby sanction your martial trial!",
+                        "Go to the Eastern Courtyard and spar with Captain Lenon. Defeat him, and the royal Crusader Plate is yours!"
+                    };
+                    OpenDialogue("king_sanction", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
+                    particles.SpawnFloatingText(kingKreptu.position, "Courtyard Trial Sanctioned!", Color{ 255, 220, 90, 255 }, 22.0f);
+                    SoundFX::PlayParrySuccess();
+                } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
+                    std::vector<std::string> pages = {
+                        "You bested Captain Lenon and wear our kingdom's sacred Crusader Plate! Zyphden proudly honors you, Champion of the Gale Winds!"
+                    };
+                    OpenDialogue("king_win", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
+                } else if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
+                    std::vector<std::string> pages = {
+                        "Captain Lenon awaits your blade in the Eastern Courtyard. Prove your strength in the trial!"
+                    };
+                    OpenDialogue("king_ready", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
+                } else {
+                    std::vector<std::string> pages = {
+                        "Welcome, wanderer. If you seek news of our realm, speak with Eldon inside the Hearthside Tavern first."
+                    };
+                    OpenDialogue("king_idle", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
+                }
+            }
         } else {
             // Outside in Zyphden Realm
             // 1. Enter Hearthside Tavern (Both East and South doors supported, with generous range and walk-in threshold)
@@ -463,6 +509,20 @@ void ZyphdenHandler::Update(
                 }
                 map.Init(MapEnvironment::TAVERN_INTERIOR);
                 player.SetPosition({ 800.0f, 840.0f }); // Safely inside tavern room
+                camera.target = player.GetPosition();
+                SoundFX::PlayGateOpen();
+                return;
+            }
+
+            // 2. Enter Royal Keep (King Kreptu's Throne Hall at {1000, 320})
+            bool nearKeepDoor = (Vector2Distance(playerPos, { 1000.0f, 325.0f }) <= 85.0f);
+            bool inKeepDoorThreshold = (playerPos.x >= 940.0f && playerPos.x <= 1060.0f && playerPos.y <= 335.0f && playerPos.y >= 295.0f);
+
+            if (doorCooldown <= 0.0f && ((nearKeepDoor && interactKey) || inKeepDoorThreshold)) {
+                inRoyalKeep = true;
+                doorCooldown = 0.5f;
+                map.Init(MapEnvironment::ROYAL_KEEP);
+                player.SetPosition({ 950.0f, 940.0f });
                 camera.target = player.GetPosition();
                 SoundFX::PlayGateOpen();
                 return;
@@ -532,37 +592,7 @@ void ZyphdenHandler::Update(
                     particles.SpawnFloatingText(royalArchives.position, "DISCOVERED: Fragment VIII (Sovereign's Burden)!", Color{ 255, 215, 80, 255 }, 22.0f);
                     particles.SpawnSparks(royalArchives.position, Color{ 255, 215, 80, 255 }, 24, 140.0f);
                 }
-                // 9. King Kreptu
-                else if (kingKreptu.CheckInteraction(playerPos)) {
-                    if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
-                        questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
-                        hasTalkedToKing = true;
-                        std::vector<std::string> pages = {
-                            "Captain Lenon told me of your arrival, wanderer. You brought word of Lord Zil and braved the corrupted highway.",
-                            "The Lord Liege's madness consumes Tydeshire, and we need warriors of true resolve. I hereby sanction your martial trial!",
-                            "Go to the Eastern Courtyard and spar with Captain Lenon. Defeat him, and the royal Crusader Plate is yours!"
-                        };
-                        OpenDialogue("king_sanction", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
-                        particles.SpawnFloatingText(kingKreptu.position, "Courtyard Trial Sanctioned!", Color{ 255, 220, 90, 255 }, 22.0f);
-                        SoundFX::PlayParrySuccess();
-                    } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
-                        std::vector<std::string> pages = {
-                            "You bested Captain Lenon and wear our kingdom's sacred Crusader Plate! Zyphden proudly honors you, Champion of the Gale Winds!"
-                        };
-                        OpenDialogue("king_win", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
-                    } else if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
-                        std::vector<std::string> pages = {
-                            "Captain Lenon awaits your blade in the Eastern Courtyard. Prove your strength in the trial!"
-                        };
-                        OpenDialogue("king_ready", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
-                    } else {
-                        std::vector<std::string> pages = {
-                            "Welcome, wanderer. If you seek news of our realm, speak with Eldon inside the Hearthside Tavern first."
-                        };
-                        OpenDialogue("king_idle", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
-                    }
-                }
-                // 10. Knight Lenon in Eastern Courtyard
+                // 9. Knight Lenon in Eastern Courtyard
                 else if (lenonSpawned && !sparActive && !lenonInTavern && knightLenonNPC.CheckInteraction(playerPos)) {
                     if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
                         // Begin courtyard spar duel!
@@ -629,6 +659,10 @@ void ZyphdenHandler::Render(
         }
         // Southern doorway prompt
         DrawText("[E] EXIT TAVERN", 745, 900, 11, Color{ 255, 220, 120, 240 });
+    } else if (inRoyalKeep) {
+        // Royal Keep Throne Hall Interior Entities
+        kingKreptu.Draw(time);
+        DrawText("[E] EXIT ROYAL KEEP", 885, 975, 11, Color{ 255, 230, 120, 240 });
     } else {
         // Zyphden Exterior Lore Collectible Items
         windLectern.Draw(time);
@@ -640,7 +674,6 @@ void ZyphdenHandler::Render(
         cedric.Draw(time);
         varek.Draw(time);
         maeve.Draw(time);
-        kingKreptu.Draw(time);
 
         if (lenonSpawned && !sparActive && !lenonInTavern) {
             knightLenonNPC.Draw(time);
@@ -652,6 +685,11 @@ void ZyphdenHandler::Render(
         }
         if (Vector2Distance(player.GetPosition(), { 440.0f, 1010.0f }) <= 120.0f) {
             DrawText("[E] ENTER TAVERN", 400, 1024, 11, Color{ 255, 220, 120, 240 });
+        }
+
+        // Royal Keep entrance prompt outside
+        if (Vector2Distance(player.GetPosition(), { 1000.0f, 325.0f }) <= 130.0f) {
+            DrawText("[E] ENTER ROYAL KEEP (KING KREPTU)", 895, 335, 11, Color{ 255, 225, 110, 240 });
         }
     }
 
@@ -681,6 +719,7 @@ void ZyphdenHandler::Render(
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
+    const char* locationTitle = inRoyalKeep ? "ZYPHDEN ROYAL KEEP" : (inTavern ? "HEARTHSIDE TAVERN" : "ZYPHDEN");
     GameUI::DrawCampaignHUD(
         screenWidth, screenHeight,
         player.GetHealth(), player.GetMaxHealth(),
@@ -688,7 +727,7 @@ void ZyphdenHandler::Render(
         player.GetWeapon(),
         player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(),
         player.IsParrying(), player.HasCounterBuff(),
-        inTavern ? "HEARTHSIDE TAVERN" : "ZYPHDEN",
+        locationTitle,
         hasUnread
     );
 

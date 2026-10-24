@@ -152,19 +152,39 @@ void GameMap::Init(MapEnvironment env) {
         // Hearthside Tavern Interior - Cozy rustic tavern
         bounds = { 600.0f, 600.0f, 400.0f, 320.0f };
 
-        // Bar Counter Obstacle
-        obstacles.push_back({ { 650.0f, 660.0f, 150.0f, 32.0f } });
+        // Bar Counter Obstacle lowered to y = 700 so Eldon behind at y = 665 has clear name tag visibility
+        obstacles.push_back({ { 650.0f, 700.0f, 150.0f, 32.0f } });
         // Stone Hearth Fireplace
-        obstacles.push_back({ { 760.0f, 600.0f, 80.0f, 30.0f } });
+        obstacles.push_back({ { 830.0f, 600.0f, 80.0f, 30.0f } });
         // Dining Table 1
-        obstacles.push_back({ { 860.0f, 720.0f, 70.0f, 42.0f } });
+        obstacles.push_back({ { 860.0f, 740.0f, 70.0f, 42.0f } });
         // Dining Table 2
-        obstacles.push_back({ { 860.0f, 820.0f, 70.0f, 42.0f } });
+        obstacles.push_back({ { 860.0f, 830.0f, 70.0f, 42.0f } });
 
         // Lanterns & Hearth glow
-        torches.push_back({ 800.0f, 620.0f }); // Fireplace flame
+        torches.push_back({ 870.0f, 620.0f }); // Fireplace flame
         torches.push_back({ 680.0f, 760.0f }); // Wall lantern
         torches.push_back({ 920.0f, 760.0f }); // Wall lantern
+    } else if (env == MapEnvironment::ROYAL_KEEP) {
+        // Zyphden Royal Keep - Grand Sovereign Throne Hall
+        bounds = { 700.0f, 380.0f, 500.0f, 620.0f };
+
+        // Throne Dais Obstacle
+        obstacles.push_back({ { 890.0f, 430.0f, 120.0f, 60.0f } });
+
+        // Grand Hall Pillars
+        pillars.push_back({ { 790.0f, 560.0f }, 28.0f });
+        pillars.push_back({ { 1110.0f, 560.0f }, 28.0f });
+        pillars.push_back({ { 790.0f, 780.0f }, 28.0f });
+        pillars.push_back({ { 1110.0f, 780.0f }, 28.0f });
+
+        // Royal Braziers
+        torches.push_back({ 880.0f, 420.0f }); // Left throne brazier
+        torches.push_back({ 1020.0f, 420.0f }); // Right throne brazier
+        torches.push_back({ 790.0f, 560.0f });
+        torches.push_back({ 1110.0f, 560.0f });
+        torches.push_back({ 790.0f, 780.0f });
+        torches.push_back({ 1110.0f, 780.0f });
     }
 }
 
@@ -221,6 +241,8 @@ void GameMap::DrawFloor() const {
         DrawZyphdenFloor();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
         DrawTavernFloor();
+    } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
+        DrawRoyalKeepFloor();
     }
 
     float time = (float)GetTime();
@@ -317,6 +339,8 @@ void GameMap::DrawWallsAndPillars() const {
         DrawZyphdenWalls();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
         DrawTavernWalls();
+    } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
+        DrawRoyalKeepWalls();
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -655,11 +679,14 @@ void GameMap::DrawZyphdenWalls() const {
     DrawRectangleLinesEx(castleKeep, 3.0f, Color{ 85, 105, 145, 255 });
     DrawText("ZYPHDEN ROYAL KEEP", 910, 135, 16, Color{ 255, 225, 110, 255 });
 
-    // King Kreptu's Golden Throne Dais
-    Rectangle throneRec = { 975.0f, 180.0f, 50.0f, 45.0f };
-    DrawRectangleRec(throneRec, Color{ 200, 160, 50, 255 });
-    DrawRectangleLinesEx(throneRec, 2.0f, Color{ 255, 235, 140, 255 });
-    DrawCircle(1000, 195, 10.0f, Color{ 255, 215, 60, 255 });
+    // Grand Entrance Archway into Royal Keep (y: 308-320)
+    Rectangle keepDoor = { 950.0f, 306.0f, 100.0f, 16.0f };
+    DrawRectangleRec(keepDoor, Color{ 18, 22, 34, 255 });
+    DrawRectangleLinesEx(keepDoor, 2.0f, Color{ 235, 195, 65, 255 });
+    DrawCircleGradient(Vector2{ 1000.0f, 314.0f }, 45.0f, Color{ 120, 190, 255, 95 }, Color{ 0, 0, 0, 0 });
+    DrawCircle(942, 314, 5.0f, Color{ 255, 200, 75, 240 });
+    DrawCircle(1058, 314, 5.0f, Color{ 255, 200, 75, 240 });
+    DrawText("[E] ENTER ROYAL KEEP (KING KREPTU)", 895, 326, 10, Color{ 255, 225, 110, 240 });
 
     // Courtyard Enclosure Rails
     for (const auto& obs : obstacles) {
@@ -740,36 +767,36 @@ void GameMap::DrawTavernFloor() const {
 void GameMap::DrawTavernWalls() const {
     float time = (float)GetTime();
 
-    // 1. Bar Counter & Shelves
-    Rectangle bar = { 650.0f, 660.0f, 150.0f, 32.0f };
+    // 1. Bar Counter & Shelves (Lowered to y = 700 so Eldon behind at y = 665 has clear name tag visibility)
+    Rectangle bar = { 650.0f, 700.0f, 150.0f, 32.0f };
     DrawRectangleRec(bar, Color{ 70, 48, 30, 255 });
     DrawRectangleLinesEx(bar, 2.0f, Color{ 120, 85, 55, 255 });
-    DrawText("BAR", 705, 668, 12, Color{ 255, 215, 120, 240 });
+    DrawText("BAR", 705, 708, 12, Color{ 255, 215, 120, 240 });
 
-    // Bar stools
+    // Bar stools in front of counter at y = 746
     for (float sx = 665.0f; sx <= 785.0f; sx += 35.0f) {
-        DrawCircle((int)sx, 706, 10.0f, Color{ 52, 36, 24, 255 });
-        DrawCircleLines((int)sx, 706, 10.0f, Color{ 110, 80, 50, 255 });
+        DrawCircle((int)sx, 746, 10.0f, Color{ 52, 36, 24, 255 });
+        DrawCircleLines((int)sx, 746, 10.0f, Color{ 110, 80, 50, 255 });
     }
 
     // Shelves behind Eldon with bottles/mugs
-    DrawRectangle(650, 608, 150, 16, Color{ 48, 34, 22, 255 });
-    DrawRectangleLines(650, 608, 150, 16, Color{ 90, 65, 42, 255 });
+    DrawRectangle(650, 620, 150, 16, Color{ 48, 34, 22, 255 });
+    DrawRectangleLines(650, 620, 150, 16, Color{ 90, 65, 42, 255 });
     for (int b = 0; b < 6; b++) {
-        DrawRectangle(660 + b * 22, 602, 10, 14, (b % 2 == 0) ? Color{ 80, 160, 120, 220 } : Color{ 180, 110, 60, 220 });
+        DrawRectangle(660 + b * 22, 614, 10, 14, (b % 2 == 0) ? Color{ 80, 160, 120, 220 } : Color{ 180, 110, 60, 220 });
     }
 
     // 2. Fireplace Hearth
-    Rectangle hearth = { 760.0f, 600.0f, 80.0f, 30.0f };
+    Rectangle hearth = { 830.0f, 600.0f, 80.0f, 30.0f };
     DrawRectangleRec(hearth, Color{ 45, 42, 44, 255 });
     DrawRectangleLinesEx(hearth, 2.0f, Color{ 95, 90, 92, 255 });
     // Crackling fire
     float flicker = sinf(time * 12.0f) * 3.0f;
-    DrawCircle(800, 616, 12.0f + flicker, Color{ 255, 120, 30, 240 });
-    DrawCircle(800, 616, 6.0f, Color{ 255, 230, 100, 255 });
+    DrawCircle(870, 616, 12.0f + flicker, Color{ 255, 120, 30, 240 });
+    DrawCircle(870, 616, 6.0f, Color{ 255, 230, 100, 255 });
 
     // 3. Dining Tables & Chairs
-    for (float ty : { 720.0f, 820.0f }) {
+    for (float ty : { 740.0f, 830.0f }) {
         Rectangle table = { 860.0f, ty, 70.0f, 42.0f };
         DrawRectangleRec(table, Color{ 62, 44, 28, 255 });
         DrawRectangleLinesEx(table, 2.0f, Color{ 110, 80, 52, 255 });
@@ -782,4 +809,97 @@ void GameMap::DrawTavernWalls() const {
     DrawRectangle(770, 915, 60, 6, Color{ 20, 15, 12, 255 });
     DrawRectangleLines(770, 915, 60, 6, Color{ 180, 140, 80, 255 });
 }
+
+void GameMap::DrawRoyalKeepFloor() const {
+    // 1. Polished Royal Slate & Marble Flagstones
+    DrawRectangleRec(bounds, Color{ 18, 22, 32, 255 });
+
+    const int tileSize = 50;
+    int startX = (int)bounds.x;
+    int endX = (int)(bounds.x + bounds.width);
+    int startY = (int)bounds.y;
+    int endY = (int)(bounds.y + bounds.height);
+
+    for (int x = startX; x <= endX; x += tileSize) {
+        DrawLine(x, startY, x, endY, Color{ 28, 36, 52, 140 });
+    }
+    for (int y = startY; y <= endY; y += tileSize) {
+        DrawLine(startX, y, endX, y, Color{ 28, 36, 52, 140 });
+    }
+
+    // 2. Grand Royal Crimson Carpet from South Entrance (y = 990) to Throne Dais (y = 490)
+    Rectangle carpet = { 905.0f, 490.0f, 90.0f, 506.0f };
+    DrawRectangleRec(carpet, Color{ 110, 22, 34, 255 });
+    DrawRectangleLinesEx(carpet, 3.0f, Color{ 235, 195, 65, 255 });
+
+    // Carpet gold embroidery patterns
+    for (int y = 520; y <= 960; y += 40) {
+        DrawLine(915, y, 985, y, Color{ 160, 40, 50, 200 });
+        DrawCircleLines(950, y, 6.0f, Color{ 220, 180, 60, 200 });
+    }
+
+    // 3. Sovereign Seal Medallion in front of Dais
+    Vector2 sealCenter = { 950.0f, 600.0f };
+    DrawCircleLines((int)sealCenter.x, (int)sealCenter.y, 42.0f, Color{ 225, 190, 65, 180 });
+    DrawCircleLines((int)sealCenter.x, (int)sealCenter.y, 22.0f, Color{ 225, 190, 65, 200 });
+    DrawCircleLines((int)sealCenter.x, (int)sealCenter.y, 8.0f, Color{ 255, 220, 95, 240 });
+
+    // 4. Stepped Throne Dais Platform
+    Rectangle daisRec = { 880.0f, 420.0f, 140.0f, 70.0f };
+    DrawRectangleRec(daisRec, Color{ 36, 44, 62, 255 });
+    DrawRectangleLinesEx(daisRec, 2.5f, Color{ 225, 185, 65, 255 });
+}
+
+void GameMap::DrawRoyalKeepWalls() const {
+    float time = (float)GetTime();
+
+    // 1. High-backed Gilded Sovereign Throne behind King Kreptu (at {950, 440})
+    Rectangle throneBack = { 926.0f, 408.0f, 48.0f, 42.0f };
+    DrawRectangleRec(throneBack, Color{ 130, 20, 32, 255 });
+    DrawRectangleLinesEx(throneBack, 3.0f, Color{ 255, 215, 65, 255 });
+
+    // Golden Crown Finials on Throne
+    DrawCircle(928, 406, 5.0f, Color{ 255, 220, 80, 255 });
+    DrawCircle(950, 402, 7.0f, Color{ 255, 230, 95, 255 });
+    DrawCircle(972, 406, 5.0f, Color{ 255, 220, 80, 255 });
+
+    // Throne Armrests
+    DrawRectangle(920, 440, 10, 18, Color{ 215, 175, 55, 255 });
+    DrawRectangle(970, 440, 10, 18, Color{ 215, 175, 55, 255 });
+
+    // 2. Pillars & Braziers
+    for (const auto& pillar : pillars) {
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.4f), pillar.radius * 1.15f, Color{ 10, 12, 16, 130 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 42, 50, 70, 255 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 5.0f, Color{ 62, 74, 102, 255 });
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 2.0f, Color{ 225, 185, 65, 200 });
+
+        // Blazing brazier flame
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 8.0f, Color{ 255, 170, 45, 240 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 4.0f, Color{ 255, 240, 140, 255 });
+    }
+
+    // 3. Royal Azure and Gold Banners along walls
+    for (float by : { 520.0f, 740.0f }) {
+        // West Wall Banner
+        Rectangle wBanner = { bounds.x + 8.0f, by, 22.0f, 65.0f };
+        DrawRectangleRec(wBanner, Color{ 28, 48, 92, 255 });
+        DrawRectangleLinesEx(wBanner, 2.0f, Color{ 235, 195, 65, 255 });
+        DrawCircle((int)(wBanner.x + 11), (int)(by + 30), 5.0f, Color{ 255, 220, 80, 255 });
+
+        // East Wall Banner
+        Rectangle eBanner = { bounds.x + bounds.width - 30.0f, by, 22.0f, 65.0f };
+        DrawRectangleRec(eBanner, Color{ 28, 48, 92, 255 });
+        DrawRectangleLinesEx(eBanner, 2.0f, Color{ 235, 195, 65, 255 });
+        DrawCircle((int)(eBanner.x + 11), (int)(by + 30), 5.0f, Color{ 255, 220, 80, 255 });
+    }
+
+    // 4. Southern Exit Threshold Doorway at y = 994
+    Rectangle exitDoor = { 910.0f, 994.0f, 80.0f, 8.0f };
+    DrawRectangleRec(exitDoor, Color{ 25, 30, 45, 255 });
+    DrawRectangleLinesEx(exitDoor, 2.0f, Color{ 255, 215, 75, 255 });
+    DrawCircleGradient(Vector2{ 950.0f, 990.0f }, 50.0f, Color{ 255, 210, 80, 80 }, Color{ 0, 0, 0, 0 });
+    DrawText("[E / WALK OUT] EXIT TO ZYPHDEN", 860, 975, 11, Color{ 255, 230, 120, 240 });
+}
+
 

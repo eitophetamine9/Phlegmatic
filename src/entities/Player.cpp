@@ -50,6 +50,7 @@ Player::Player() {
     shockwaveTimer = 0.0f;
     shockwaveRadius = 0.0f;
     shockwavePos = { 0.0f, 0.0f };
+    timeSinceCombat = 10.0f;
     spawnedProjectiles.clear();
 }
 
@@ -58,6 +59,7 @@ void Player::Init(Vector2 startPos) {
     maxHealth = GetMaxHealth();
     health = maxHealth;
     stamina = maxStamina;
+    timeSinceCombat = 10.0f;
     defense = GetDefense();
     velocity = { 0.0f, 0.0f };
     currentAttack.type = AttackType::NONE;
@@ -154,6 +156,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     if (parryCooldown > 0.0f) parryCooldown -= dt;
     if (dashCooldown > 0.0f) dashCooldown -= dt;
     if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
+
+    // Out of combat health regeneration (recovers health when off combat for 4+ seconds)
+    timeSinceCombat += dt;
+    if (timeSinceCombat >= 4.0f && health < GetMaxHealth()) {
+        float regenRate = 8.0f; // +8 HP/sec out of combat
+        health = fminf(GetMaxHealth(), health + regenRate * dt);
+    }
 
     // Stamina regeneration
     if (!isParrying && !isHeavyWindingUp && !isDashing) {
@@ -467,6 +476,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     if (currentWeapon == WeaponType::NONE) return;
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
+    timeSinceCombat = 0.0f;
     WeaponStats stats = GetWeaponStats(currentWeapon);
     // Daggers light attack costs 0 stamina
     if (currentWeapon != WeaponType::DAGGERS) {
@@ -556,6 +566,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (currentAttack.type != AttackType::NONE && currentWeapon != WeaponType::DAGGERS) return;
     if (heavyCooldown > 0.0f) return;
 
+    timeSinceCombat = 0.0f;
     WeaponStats stats = GetWeaponStats(currentWeapon);
     if (stamina < stats.heavyStamina) return;
 
@@ -626,6 +637,7 @@ void Player::TriggerParry(ParticleSystem& particles) {
     isParrying = true;
     parryTimer = Config::PARRY_WINDOW;
     parryCooldown = Config::PARRY_COOLDOWN;
+    timeSinceCombat = 0.0f;
 
     SoundFX::PlayParryMiss();
 }
@@ -636,6 +648,7 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
     parryCooldown = 0.2f;
     counterBuffTimer = Config::COUNTER_BUFF_DURATION;
     stamina = fminf(maxStamina, stamina + 35.0f);
+    timeSinceCombat = 0.0f;
 
     SoundFX::PlayParrySuccess();
     particles.SpawnParryBurst(position);
@@ -656,6 +669,7 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
     }
 
     // Apply Player Defense with diminishing returns
+    timeSinceCombat = 0.0f;
     float effDef = GetDefense() * fmaxf(0.0f, 1.0f - defensePierce);
     float damageFactor = 100.0f / (100.0f + effDef);
     float finalAmount = amount * damageFactor;
