@@ -162,7 +162,7 @@ void CrossroadsHandler::Update(
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
     if (atNorthernGate || interactGate) {
-        currentState = GameState::BORDERLANDS_GATE;
+        currentState = GameState::ZYPHDEN_REALM;
         SoundFX::PlayGateOpen();
         particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
         return;

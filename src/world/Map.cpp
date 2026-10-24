@@ -101,6 +101,48 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 530.0f, 1150.0f });
         torches.push_back({ 1070.0f, 1150.0f });
         torches.push_back({ 800.0f, 200.0f });
+    } else if (env == MapEnvironment::ZYPHDEN_REALM) {
+        bounds = { 200.0f, 100.0f, 1600.0f, 1400.0f };
+
+        // Town Square & Castle Pillars
+        pillars.push_back({ { 750.0f, 400.0f }, 34.0f });
+        pillars.push_back({ { 1250.0f, 400.0f }, 34.0f });
+        pillars.push_back({ { 850.0f, 220.0f }, 30.0f });
+        pillars.push_back({ { 1150.0f, 220.0f }, 30.0f });
+
+        // Town Square Street Lantern Pillars
+        pillars.push_back({ { 700.0f, 750.0f }, 24.0f });
+        pillars.push_back({ { 1100.0f, 750.0f }, 24.0f });
+        pillars.push_back({ { 700.0f, 1150.0f }, 24.0f });
+        pillars.push_back({ { 1100.0f, 1150.0f }, 24.0f });
+
+        // Courtyard Sparring Arena Pillars
+        pillars.push_back({ { 1350.0f, 550.0f }, 26.0f });
+        pillars.push_back({ { 1650.0f, 550.0f }, 26.0f });
+        pillars.push_back({ { 1350.0f, 850.0f }, 26.0f });
+        pillars.push_back({ { 1650.0f, 850.0f }, 26.0f });
+
+        // Building Wall Obstacles
+        // Eldon's Hearthside Tavern (Southwest)
+        obstacles.push_back({ { 320.0f, 800.0f, 280.0f, 220.0f } });
+        // Carpenter's Masonry Workshop (Central West)
+        obstacles.push_back({ { 320.0f, 480.0f, 220.0f, 180.0f } });
+        // Royal Throne Keep (North Castle)
+        obstacles.push_back({ { 800.0f, 120.0f, 400.0f, 200.0f } });
+        // Courtyard Low Enclosure Fence/Walls
+        obstacles.push_back({ { 1300.0f, 480.0f, 380.0f, 20.0f } }); // North courtyard rail
+        obstacles.push_back({ { 1300.0f, 920.0f, 380.0f, 20.0f } }); // South courtyard rail
+        obstacles.push_back({ { 1680.0f, 500.0f, 20.0f, 420.0f } }); // East courtyard rail
+
+        // Torches & Braziers
+        torches.push_back({ 750.0f, 400.0f });
+        torches.push_back({ 1250.0f, 400.0f });
+        torches.push_back({ 850.0f, 220.0f });
+        torches.push_back({ 1150.0f, 220.0f });
+        torches.push_back({ 1000.0f, 160.0f }); // Royal throne brazier
+        torches.push_back({ 1500.0f, 550.0f }); // Courtyard brazier
+        torches.push_back({ 1500.0f, 850.0f });
+        torches.push_back({ 620.0f, 860.0f });  // Tavern entrance lantern
     }
 }
 
@@ -153,6 +195,8 @@ void GameMap::DrawFloor() const {
         DrawRuinedCastleFloor();
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
         DrawCrossroadsFloor();
+    } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
+        DrawZyphdenFloor();
     }
 
     float time = (float)GetTime();
@@ -245,6 +289,8 @@ void GameMap::DrawWallsAndPillars() const {
         DrawRuinedCastleWalls();
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
         DrawCrossroadsWalls();
+    } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
+        DrawZyphdenWalls();
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -491,3 +537,137 @@ void GameMap::DrawCrossroadsWalls() const {
     DrawCircleGradient(Vector2{ 800.0f, gateY + 16.0f }, 110.0f, Color{ 255, 215, 80, (unsigned char)(140 * pulse) }, Color{ 0, 0, 0, 0 });
     DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
 }
+
+void GameMap::DrawZyphdenFloor() const {
+    float time = (float)GetTime();
+
+    // 1. Base terrain (outer town dirt and gravel)
+    DrawRectangleRec(bounds, Color{ 18, 22, 28, 255 });
+
+    // 2. Central Town Square Cobblestone Paving
+    Rectangle townSquare = { 650.0f, 450.0f, 550.0f, 900.0f };
+    DrawRectangleRec(townSquare, Color{ 26, 32, 44, 255 });
+    DrawRectangleLinesEx(townSquare, 2.0f, Color{ 48, 60, 82, 180 });
+
+    const int tileSize = 44;
+    for (int x = (int)townSquare.x; x <= (int)(townSquare.x + townSquare.width); x += tileSize) {
+        DrawLine(x, (int)townSquare.y, x, (int)(townSquare.y + townSquare.height), Color{ 36, 44, 60, 120 });
+    }
+    for (int y = (int)townSquare.y; y <= (int)(townSquare.y + townSquare.height); y += tileSize) {
+        DrawLine((int)townSquare.x, y, (int)(townSquare.x + townSquare.width), y, Color{ 36, 44, 60, 120 });
+    }
+
+    // Town Square Central Fountain
+    Vector2 fountainPos = { 920.0f, 880.0f };
+    DrawCircle((int)fountainPos.x, (int)fountainPos.y, 42.0f, Color{ 32, 42, 58, 255 });
+    DrawCircleLines((int)fountainPos.x, (int)fountainPos.y, 42.0f, Color{ 70, 95, 130, 255 });
+    DrawCircle((int)fountainPos.x, (int)fountainPos.y, 32.0f, Color{ 22, 54, 82, 240 });
+    float waterPulse = sinf(time * 2.5f) * 3.0f;
+    DrawCircle((int)fountainPos.x, (int)fountainPos.y, 14.0f + waterPulse, Color{ 60, 140, 200, 200 });
+
+    // 3. Castle Keep Royal Hall (North)
+    Rectangle castleHall = { 750.0f, 100.0f, 500.0f, 320.0f };
+    DrawRectangleRec(castleHall, Color{ 28, 36, 52, 255 });
+    DrawRectangleLinesEx(castleHall, 2.0f, Color{ 75, 95, 135, 220 });
+
+    // Royal Crimson and Gold Carpet
+    Rectangle royalCarpet = { 960.0f, 140.0f, 80.0f, 280.0f };
+    DrawRectangleRec(royalCarpet, Color{ 110, 25, 35, 255 });
+    DrawRectangleLinesEx(royalCarpet, 2.0f, Color{ 215, 175, 60, 240 });
+
+    // 4. Eldon's Hearthside Tavern Floor (Southwest)
+    Rectangle tavernFloor = { 320.0f, 800.0f, 280.0f, 220.0f };
+    DrawRectangleRec(tavernFloor, Color{ 36, 26, 20, 255 });
+    DrawRectangleLinesEx(tavernFloor, 2.0f, Color{ 75, 52, 38, 240 });
+    for (int y = (int)tavernFloor.y; y <= (int)(tavernFloor.y + tavernFloor.height); y += 22) {
+        DrawLine((int)tavernFloor.x, y, (int)(tavernFloor.x + tavernFloor.width), y, Color{ 48, 34, 26, 180 });
+    }
+
+    // 5. Carpenter's Workshop Floor (Central West)
+    Rectangle workshopFloor = { 320.0f, 480.0f, 220.0f, 180.0f };
+    DrawRectangleRec(workshopFloor, Color{ 30, 28, 26, 255 });
+    DrawRectangleLinesEx(workshopFloor, 2.0f, Color{ 65, 58, 52, 220 });
+
+    // 6. Courtyard Sparring Ring (East)
+    Rectangle courtyardRec = { 1300.0f, 480.0f, 380.0f, 440.0f };
+    DrawRectangleRec(courtyardRec, Color{ 44, 38, 28, 255 });
+    DrawRectangleLinesEx(courtyardRec, 2.0f, Color{ 90, 78, 55, 220 });
+
+    // Sparring Chalk Ring
+    Vector2 sparRingCenter = { 1490.0f, 700.0f };
+    DrawCircleLines((int)sparRingCenter.x, (int)sparRingCenter.y, 130.0f, Color{ 180, 160, 120, 190 });
+    DrawCircleLines((int)sparRingCenter.x, (int)sparRingCenter.y, 65.0f, Color{ 150, 130, 95, 140 });
+}
+
+void GameMap::DrawZyphdenWalls() const {
+    float time = (float)GetTime();
+
+    // 1. Building Wall Obstacles
+    // Hearthside Tavern (Southwest)
+    Rectangle tavern = { 320.0f, 800.0f, 280.0f, 220.0f };
+    DrawRectangleRec(tavern, Color{ 38, 28, 22, 255 });
+    DrawRectangleLinesEx(tavern, 3.0f, Color{ 85, 60, 42, 255 });
+    DrawRectangle(350, 820, 220, 40, Color{ 52, 38, 28, 255 });
+    DrawText("HEARTHSIDE TAVERN", 380, 832, 14, Color{ 255, 205, 120, 255 });
+
+    // Warm tavern glowing windows
+    DrawRectangle(360, 890, 40, 30, Color{ 255, 170, 50, 200 });
+    DrawRectangle(500, 890, 40, 30, Color{ 255, 170, 50, 200 });
+
+    // Carpenter's Workshop
+    Rectangle workshop = { 320.0f, 480.0f, 220.0f, 180.0f };
+    DrawRectangleRec(workshop, Color{ 36, 32, 28, 255 });
+    DrawRectangleLinesEx(workshop, 3.0f, Color{ 75, 68, 58, 255 });
+    DrawText("CARPENTER'S WORKSHOP", 335, 500, 12, Color{ 210, 195, 160, 240 });
+    // Anvil & Timber stacks
+    DrawRectangle(350, 560, 40, 24, Color{ 55, 60, 68, 255 });
+    DrawRectangle(440, 560, 60, 30, Color{ 70, 50, 35, 255 });
+
+    // Royal Castle Keep (North)
+    Rectangle castleKeep = { 800.0f, 120.0f, 400.0f, 200.0f };
+    DrawRectangleRec(castleKeep, Color{ 35, 42, 58, 255 });
+    DrawRectangleLinesEx(castleKeep, 3.0f, Color{ 85, 105, 145, 255 });
+    DrawText("ZYPHDEN ROYAL KEEP", 910, 135, 16, Color{ 255, 225, 110, 255 });
+
+    // King Kreptu's Golden Throne Dais
+    Rectangle throneRec = { 975.0f, 180.0f, 50.0f, 45.0f };
+    DrawRectangleRec(throneRec, Color{ 200, 160, 50, 255 });
+    DrawRectangleLinesEx(throneRec, 2.0f, Color{ 255, 235, 140, 255 });
+    DrawCircle(1000, 195, 10.0f, Color{ 255, 215, 60, 255 });
+
+    // Courtyard Enclosure Rails
+    for (const auto& obs : obstacles) {
+        if (obs.rect.y >= 480.0f && obs.rect.x >= 1300.0f) {
+            DrawRectangleRec(obs.rect, Color{ 65, 54, 40, 255 });
+            DrawRectangleLinesEx(obs.rect, 2.0f, Color{ 110, 92, 68, 240 });
+        }
+    }
+
+    // Courtyard Weapon Racks
+    DrawRectangle(1330, 510, 60, 18, Color{ 50, 42, 32, 255 });
+    DrawRectangleLines(1330, 510, 60, 18, Color{ 130, 110, 80, 240 });
+    DrawLineEx({ 1340, 504 }, { 1340, 532 }, 2.0f, Color{ 180, 190, 205, 240 });
+    DrawLineEx({ 1360, 504 }, { 1360, 532 }, 2.0f, Color{ 180, 190, 205, 240 });
+    DrawLineEx({ 1380, 504 }, { 1380, 532 }, 2.0f, Color{ 180, 190, 205, 240 });
+
+    // 2. Pillars & Braziers
+    for (const auto& pillar : pillars) {
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.4f), pillar.radius * 1.15f, Color{ 10, 12, 16, 120 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 36, 44, 60, 255 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 5.0f, Color{ 52, 64, 88, 255 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), pillar.radius * 0.45f, Color{ 75, 92, 122, 255 });
+
+        // Flame
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 7.0f, Color{ 255, 160, 40, 240 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 3.5f, Color{ 255, 240, 140, 255 });
+    }
+
+    // 3. Royal Banners of Zyphden (Blue & Gold)
+    for (float bx : { 820.0f, 1180.0f }) {
+        Rectangle bannerRec = { bx - 14.0f, 320.0f, 28.0f, 70.0f };
+        DrawRectangleRec(bannerRec, Color{ 25, 45, 85, 255 });
+        DrawRectangleLinesEx(bannerRec, 2.0f, Color{ 225, 185, 60, 255 });
+        DrawCircle((int)bx, 355, 6.0f, Color{ 255, 215, 80, 255 });
+    }
+}
+

@@ -89,6 +89,14 @@ void Game::EnterCrossroads() {
     particles.Clear();
 }
 
+void Game::EnterZyphden() {
+    zyphdenHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::ZYPHDEN_REALM;
+    showControlsModal = false;
+    showInventoryModal = false;
+    particles.Clear();
+}
+
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
     WeaponType keepWeapon = player.GetWeapon();
@@ -254,6 +262,19 @@ void Game::Update(float dt) {
         }
         crossroadsHandler.Update(
             dt, player, map, particles, enemies, projectiles, camera, currentState,
+            [this]() { EnterLobby(); }
+        );
+        return;
+    }
+
+    // 1.88 ZYPHDEN REALM STATE (Chapter 1)
+    if (currentState == GameState::ZYPHDEN_REALM) {
+        if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM) {
+            EnterZyphden();
+        }
+        zyphdenHandler.Update(
+            dt, player, map, particles, enemies, projectiles, camera, currentState, testArenaUnlocked,
+            [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); }
         );
         return;
@@ -520,6 +541,15 @@ void Game::Render() {
 
     if (currentState == GameState::CROSSROADS) {
         crossroadsHandler.Render(
+            camera, map, enemies, projectiles, player, particles,
+            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::ZYPHDEN_REALM) {
+        zyphdenHandler.Render(
             camera, map, enemies, projectiles, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );

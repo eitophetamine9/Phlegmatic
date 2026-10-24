@@ -101,6 +101,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::CHARGER) baseDamage = 22.0f;
             else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDamage = 45.0f;
             else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDamage = 32.0f;
+            else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 30.0f;
 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {

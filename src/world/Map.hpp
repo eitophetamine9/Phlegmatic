@@ -48,4 +48,6 @@ private:
     void DrawRuinedCastleWalls() const;
     void DrawCrossroadsFloor() const;
     void DrawCrossroadsWalls() const;
+    void DrawZyphdenFloor() const;
+    void DrawZyphdenWalls() const;
 };

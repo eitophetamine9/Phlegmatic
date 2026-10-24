@@ -138,6 +138,8 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 60, 20, 35, 255 }; // Imperial dark crimson & gold
     } else if (enemy.type == EnemyType::ZIL_BOSS) {
         bodyColor = Color{ 48, 54, 68, 255 }; // Corrupted knight steel
+    } else if (enemy.type == EnemyType::KNIGHT_LENON_BOSS) {
+        bodyColor = Color{ 32, 50, 85, 255 }; // Vanguard Crusader royal navy
     }
 
     bool isStunned = (enemy.state == EnemyState::STUNNED);
@@ -173,10 +175,27 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         // Crusader shoulder pauldrons
         DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 5.0f, Color{ 80, 85, 105, 255 });
         DrawCircleV({ enemy.position.x + normal.x * (enemy.radius * 0.8f), enemy.position.y + normal.y * (enemy.radius * 0.8f) }, 5.0f, Color{ 80, 85, 105, 255 });
+    } else if (enemy.type == EnemyType::KNIGHT_LENON_BOSS) {
+        float time = (float)GetTime() * 3.5f;
+        float auraPulse = enemy.radius + 6.0f + 2.0f * sinf(time);
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, auraPulse, Color{ 255, 215, 65, 160 });
+
+        float rad = enemy.facingAngle * DEG2RAD;
+        Vector2 dir = { cosf(rad), sinf(rad) };
+        Vector2 normal = { -dir.y, dir.x };
+        Vector2 swordHand = { enemy.position.x + normal.x * (enemy.radius * 0.75f), enemy.position.y + normal.y * (enemy.radius * 0.75f) };
+
+        // Royal Greatsword
+        AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 46.0f, Color{ 220, 230, 245, 255 }, Color{ 225, 185, 65, 220 });
+
+        // Golden pauldrons & Crusader visor
+        DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
+        DrawCircleV({ enemy.position.x + normal.x * (enemy.radius * 0.8f), enemy.position.y + normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
+        DrawCircleV({ enemy.position.x + dir.x * (enemy.radius * 0.6f), enemy.position.y + dir.y * (enemy.radius * 0.6f) }, 4.0f, Color{ 255, 230, 90, 255 });
     }
 
     // Overhead Health Bar (for normal enemies; boss has master top bar)
-    if (enemy.type != EnemyType::INQUISITOR_BOSS && enemy.type != EnemyType::ZIL_BOSS) {
+    if (enemy.type != EnemyType::INQUISITOR_BOSS && enemy.type != EnemyType::ZIL_BOSS && enemy.type != EnemyType::KNIGHT_LENON_BOSS) {
         const float barWidth = enemy.radius * 2.2f;
         const float barHeight = 5.0f;
         float barX = enemy.position.x - barWidth * 0.5f;
