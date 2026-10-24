@@ -239,6 +239,14 @@ void ZyphdenHandler::Update(
         SoundFX::PlayButtonClick();
     }
 
+    // Sync arena unlock if storyline progress was already completed
+    if (!testArenaUnlocked && player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE)) {
+        testArenaUnlocked = true;
+        if (onSaveArenaUnlock) {
+            onSaveArenaUnlock();
+        }
+    }
+
     // Dialogue dismissal via ESC or UI handled here as well
     if (isDialogueOpen) {
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -332,6 +340,12 @@ void ZyphdenHandler::Update(
             player.SetArmor(ArmorType::CRUSADER_PLATE);
             player.Heal(player.GetMaxHealth());
 
+            // Current progress of storyline completed! Unlock the Combat Arena!
+            testArenaUnlocked = true;
+            if (onSaveArenaUnlock) {
+                onSaveArenaUnlock();
+            }
+
             SoundFX::PlayParrySuccess();
             SoundFX::PlayGateOpen();
             particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED CRUSADER PLATE (+24 DEF, +30 HP)!", Color{ 255, 215, 80, 255 }, 24.0f);
@@ -340,7 +354,8 @@ void ZyphdenHandler::Update(
 
             std::vector<std::string> pages = {
                 "Superb technique, warrior! Wear this Crusader Plate with pride! You have earned Zyphden's highest honor!",
-                "With this armor, the tempest winds beyond our eastern borders will no longer tear you asunder. Go forth, Champion of the Gale Winds!"
+                "With this armor, the tempest winds beyond our eastern borders will no longer tear you asunder. Go forth, Champion of the Gale Winds!",
+                "Martial mastery recognized! The Royal Combat Arena is now unlocked. You can access it from the Title Screen or the Lobby portal!"
             };
             OpenDialogue("lenon_win", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
         }

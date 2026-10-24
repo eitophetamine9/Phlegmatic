@@ -41,16 +41,29 @@ void Game::Init() {
     currentState = GameState::TITLE_SCREEN;
     showControlsModal = false;
     ruinedCastleHandler.Reset();
-    testArenaUnlocked = false; // Strictly locked until explicitly configured
+    testArenaUnlocked = LoadArenaUnlock();
     bandageSpawnTimer = 14.0f;
 }
 
 void Game::SaveArenaUnlock() {
-    // Arena is kept strictly locked; do not save auto-unlock
+    FILE* f = fopen("arena_unlock.dat", "w");
+    if (f) {
+        fprintf(f, "1\n");
+        fclose(f);
+    }
 }
 
 bool Game::LoadArenaUnlock() {
-    return false; // Arena is kept strictly locked
+    FILE* f = fopen("arena_unlock.dat", "r");
+    if (f) {
+        int v = 0;
+        if (fscanf(f, "%d", &v) == 1 && v == 1) {
+            fclose(f);
+            return true;
+        }
+        fclose(f);
+    }
+    return false;
 }
 
 void Game::EnterRuinedCastle() {
@@ -138,6 +151,12 @@ void Game::EnterArena() {
 void Game::Update(float dt) {
     particles.Update(dt);
     Vector2 mouseScreen = GetMousePosition();
+
+    // Unlock arena if current storyline progress was completed (player possesses Crusader Plate)
+    if (!testArenaUnlocked && player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE)) {
+        testArenaUnlocked = true;
+        SaveArenaUnlock();
+    }
 
     // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
     if (IsKeyPressed(KEY_GRAVE)) {
