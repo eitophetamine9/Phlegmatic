@@ -12,12 +12,14 @@ Player::Player() {
     radius = Config::PLAYER_RADIUS;
     facingAngle = 0.0f;
     currentWeapon = WeaponType::SWORD;
+    currentArmor = ArmorType::NONE;
+    currentTotem = TotemType::NONE;
 
-    health = Config::PLAYER_MAX_HEALTH;
-    maxHealth = Config::PLAYER_MAX_HEALTH;
+    maxHealth = GetMaxHealth();
+    health = maxHealth;
     stamina = Config::PLAYER_MAX_STAMINA;
     maxStamina = Config::PLAYER_MAX_STAMINA;
-    defense = 15.0f; // Base player armor (mitigates ~13% raw damage)
+    defense = GetDefense();
 
     lightCooldown = 0.0f;
     heavyCooldown = 0.0f;
@@ -53,8 +55,10 @@ Player::Player() {
 
 void Player::Init(Vector2 startPos) {
     position = startPos;
+    maxHealth = GetMaxHealth();
     health = maxHealth;
     stamina = maxStamina;
+    defense = GetDefense();
     velocity = { 0.0f, 0.0f };
     currentAttack.type = AttackType::NONE;
     isParrying = false;
@@ -73,8 +77,10 @@ void Player::Init(Vector2 startPos) {
 
 void Player::Revive(Vector2 startPos, float hpPercent) {
     position = startPos;
+    maxHealth = GetMaxHealth();
     health = maxHealth * hpPercent;
     stamina = maxStamina;
+    defense = GetDefense();
     velocity = { 0.0f, 0.0f };
     currentAttack.type = AttackType::NONE;
     isParrying = false;
@@ -97,6 +103,41 @@ void Player::SetWeapon(WeaponType newWeapon) {
     }
 }
 
+void Player::SetArmor(ArmorType newArmor) {
+    currentArmor = newArmor;
+    inventory.UnlockArmor(newArmor);
+    inventory.SetEquippedArmor(newArmor);
+    maxHealth = GetMaxHealth();
+    if (health > maxHealth) health = maxHealth;
+    defense = GetDefense();
+    SoundFX::PlayEquipWeapon();
+}
+
+void Player::SetTotem(TotemType newTotem) {
+    currentTotem = newTotem;
+    inventory.UnlockTotem(newTotem);
+    inventory.SetEquippedTotem(newTotem);
+    defense = GetDefense();
+    SoundFX::PlayEquipWeapon();
+}
+
+float Player::GetMaxHealth() const {
+    return Config::PLAYER_MAX_HEALTH + GetArmorStats(currentArmor).maxHpBonus;
+}
+
+float Player::GetDefense() const {
+    float raw = 15.0f + GetArmorStats(currentArmor).defense;
+    return raw * GetTotemStats(currentTotem).defenseMultiplier;
+}
+
+float Player::GetSpeed() const {
+    return Config::PLAYER_SPEED * GetArmorStats(currentArmor).speedModifier * GetTotemStats(currentTotem).speedMultiplier;
+}
+
+float Player::GetStaminaRegenRate() const {
+    return Config::STAMINA_REGEN_RATE * GetArmorStats(currentArmor).staminaRegenModifier * GetTotemStats(currentTotem).staminaRegenMultiplier;
+}
+
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
     if (!IsAlive()) return;
 
@@ -116,7 +157,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
     // Stamina regeneration
     if (!isParrying && !isHeavyWindingUp && !isDashing) {
-        stamina = fminf(maxStamina, stamina + Config::STAMINA_REGEN_RATE * dt);
+        stamina = fminf(maxStamina, stamina + GetStaminaRegenRate() * dt);
     }
 
     // Dash update (Q Key)
@@ -182,7 +223,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.range = 95.0f; // Buffed whirlwind range
             currentAttack.arcAngle = 360.0f;
             currentAttack.isLineBox = false;
-            currentAttack.damage = counterBuffTimer > 0.0f ? (68.0f * 1.5f) : 68.0f; // Buffed spin damage
+            currentAttack.damage = (counterBuffTimer > 0.0f ? (68.0f * 1.5f) : 68.0f) * GetTotemStats(currentTotem).damageMultiplier; // Buffed spin damage
             currentAttack.knockback = 280.0f;
             currentAttack.duration = 0.12f;
             currentAttack.timer = 0.12f;
@@ -231,7 +272,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.circleCenter = { position.x + forwardDir.x * 70.0f, position.y + forwardDir.y * 70.0f };
                 currentAttack.range = 155.0f;
                 currentAttack.arcAngle = 180.0f;
-                currentAttack.damage = counterBuffTimer > 0.0f ? (75.0f * 1.5f) : 75.0f;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (75.0f * 1.5f) : 75.0f) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 380.0f;
                 currentAttack.duration = 0.16f;
                 currentAttack.timer = 0.16f;
@@ -243,7 +284,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Broadsword Heavy Stage 1: Wide Slash
                 currentAttack.range = 125.0f;
                 currentAttack.arcAngle = 160.0f;
-                currentAttack.damage = counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 240.0f;
                 currentAttack.duration = 0.16f;
                 currentAttack.timer = 0.16f;
@@ -256,7 +297,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Truth Seeker Heavy Stage 1: Full 360 circle AoE swing 1
                 currentAttack.range = 135.0f;
                 currentAttack.arcAngle = 360.0f;
-                currentAttack.damage = counterBuffTimer > 0.0f ? (60.0f * 1.5f) : 60.0f;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (60.0f * 1.5f) : 60.0f) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 360.0f;
                 currentAttack.duration = 0.18f;
                 currentAttack.timer = 0.18f;
@@ -273,7 +314,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             } else {
                 currentAttack.range = stats.heavyRange;
                 currentAttack.arcAngle = stats.heavyArc;
-                currentAttack.damage = counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 260.0f;
                 currentAttack.duration = stats.heavyDuration;
                 currentAttack.timer = stats.heavyDuration;
@@ -302,7 +343,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.isFrontalCircle = false;
                     currentAttack.range = 150.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = counterBuffTimer > 0.0f ? (80.0f * 1.5f) : 80.0f;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (80.0f * 1.5f) : 80.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 460.0f;
                     currentAttack.duration = 0.22f;
                     currentAttack.timer = 0.22f;
@@ -328,7 +369,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 50.0f;
                     currentAttack.isLineBox = true;
                     currentAttack.arcAngle = 0.0f;
-                    currentAttack.damage = counterBuffTimer > 0.0f ? (48.0f * 1.5f) : 48.0f;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (48.0f * 1.5f) : 48.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 300.0f;
                     currentAttack.duration = 0.18f;
                     currentAttack.timer = 0.18f;
@@ -344,7 +385,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.type = AttackType::HEAVY;
                     currentAttack.range = 145.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = counterBuffTimer > 0.0f ? (65.0f * 1.5f) : 65.0f;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (65.0f * 1.5f) : 65.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 380.0f;
                     currentAttack.duration = 0.20f;
                     currentAttack.timer = 0.20f;
@@ -373,7 +414,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))  moveDir.x -= 1.0f;
         if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT)) moveDir.x += 1.0f;
 
-        float currentSpeed = Config::PLAYER_SPEED;
+        float currentSpeed = GetSpeed();
         if (isParrying) currentSpeed *= 0.35f;
         if (isHeavyWindingUp) currentSpeed *= 0.25f;
         if (currentAttack.type == AttackType::LIGHT) currentSpeed *= 0.65f;
@@ -432,7 +473,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         if (stamina < stats.lightStamina) return;
         stamina -= stats.lightStamina;
     }
-    lightCooldown = stats.lightCooldown;
+    lightCooldown = stats.lightCooldown * GetTotemStats(currentTotem).cooldownMultiplier;
 
     // Truth Seeker 2-hit combo tracking
     if (currentWeapon == WeaponType::TRUTH_SEEKER) {
@@ -499,6 +540,8 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 220, 255, 255 });
     }
 
+    currentAttack.damage *= GetTotemStats(currentTotem).damageMultiplier;
+
     currentAttack.duration = stats.lightDuration;
     currentAttack.timer = stats.lightDuration;
     currentAttack.hasHit = false;
@@ -517,7 +560,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (stamina < stats.heavyStamina) return;
 
     stamina -= stats.heavyStamina;
-    heavyCooldown = stats.heavyCooldown;
+    heavyCooldown = stats.heavyCooldown * GetTotemStats(currentTotem).cooldownMultiplier;
 
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
 
@@ -540,7 +583,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
         currentAttack.width = 48.0f;
         currentAttack.isLineBox = true;
         currentAttack.arcAngle = 0.0f;
-        currentAttack.damage = counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f;
+        currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
         currentAttack.knockback = 180.0f;
         currentAttack.duration = 0.20f;
         currentAttack.timer = 0.20f;
@@ -613,7 +656,7 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
     }
 
     // Apply Player Defense with diminishing returns
-    float effDef = defense * fmaxf(0.0f, 1.0f - defensePierce);
+    float effDef = GetDefense() * fmaxf(0.0f, 1.0f - defensePierce);
     float damageFactor = 100.0f / (100.0f + effDef);
     float finalAmount = amount * damageFactor;
 
@@ -631,7 +674,7 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 }
 
 void Player::Heal(float amount) {
-    health = fminf(maxHealth, health + amount);
+    health = fminf(GetMaxHealth(), health + amount);
 }
 
 void Player::Draw() const {

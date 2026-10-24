@@ -27,9 +27,15 @@ public:
     void Heal(float amount);
     void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
-    // Weapon equipment
+    // Weapon & Equipment
     void SetWeapon(WeaponType newWeapon);
     WeaponType GetWeapon() const { return currentWeapon; }
+
+    void SetArmor(ArmorType newArmor);
+    ArmorType GetArmor() const { return currentArmor; }
+
+    void SetTotem(TotemType newTotem);
+    TotemType GetTotem() const { return currentTotem; }
 
     // Position
     Vector2 GetPosition() const { return position; }
@@ -37,7 +43,7 @@ public:
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     float GetHealth() const { return health; }
-    float GetMaxHealth() const { return maxHealth; }
+    float GetMaxHealth() const;
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
     bool IsParrying() const { return isParrying; }
@@ -57,7 +63,9 @@ public:
     void SetAttackHit() { currentAttack.hasHit = true; }
     void OnParrySuccessful(ParticleSystem& particles);
 
-    float GetDefense() const { return defense; }
+    float GetDefense() const;
+    float GetSpeed() const;
+    float GetStaminaRegenRate() const;
 
     int GetComboStep() const { return comboStep; }
     int GetHeavyStage() const { return heavyStage; }
@@ -85,6 +93,8 @@ private:
     float facingAngle;
 
     WeaponType currentWeapon;
+    ArmorType currentArmor;
+    TotemType currentTotem;
     Inventory inventory;
 
     // Stats
