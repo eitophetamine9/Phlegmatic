@@ -325,14 +325,14 @@ void RuinedCastleHandler::Render(
     tutorial.DrawHUD(screenWidth, screenHeight);
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(
+    GameUI::DrawCampaignHUD(
         screenWidth, screenHeight,
         player.GetHealth(), player.GetMaxHealth(),
         player.GetStamina(), player.GetMaxStamina(),
         player.GetWeapon(),
         player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(),
         player.IsParrying(), player.HasCounterBuff(),
-        1, 1,
+        "RUINED CASTLE",
         hasUnread
     );
 

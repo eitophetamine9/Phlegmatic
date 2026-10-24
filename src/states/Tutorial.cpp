@@ -428,23 +428,63 @@ void TutorialManager::DrawWorldElements(float time) const {
 void TutorialManager::DrawHUD(int windowWidth, int windowHeight) const {
     if (currentStep == TutorialStep::COMPLETED) return;
 
-    // Left-aligned Cinematic Tutorial Objectives Banner
-    const float bannerW = 590.0f;
-    const float bannerH = 62.0f;
-    float bannerX = 24.0f;
-    float bannerY = 16.0f;
+    // Toggle shortcut: [O] Key
+    if (IsKeyPressed(KEY_O)) {
+        showObjectives = !showObjectives;
+    }
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 14, 18, 28, 235 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 205, 165, 75, 240 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX + 4, bannerY + 4, bannerW - 8, bannerH - 8 }, 0.18f, 6, Color{ 45, 58, 85, 160 });
+    float bannerX = 24.0f;
+    float bannerY = (float)windowHeight * 0.38f; // Middle-left of the screen
+
+    Vector2 mousePos = GetMousePosition();
+    bool isPressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+
+    if (!showObjectives) {
+        // Collapsed Sleek Bookmark Tab
+        const float tabW = 160.0f;
+        const float tabH = 34.0f;
+        Rectangle tabRec = { bannerX, bannerY, tabW, tabH };
+        bool isHovered = CheckCollisionPointRec(mousePos, tabRec);
+
+        if (isHovered && isPressed) {
+            showObjectives = true;
+            SoundFX::PlayButtonClick();
+        }
+
+        DrawRectangleRounded(tabRec, 0.25f, 4, isHovered ? Color{ 28, 38, 56, 235 } : Color{ 16, 22, 34, 215 });
+        DrawRectangleRoundedLines(tabRec, 0.25f, 4, isHovered ? Color{ 255, 215, 80, 240 } : Color{ 65, 85, 120, 200 });
+        DrawCircle((int)bannerX + 16, (int)bannerY + 17, 4.0f, Color{ 255, 215, 80, 255 });
+        DrawText("[O] OBJECTIVES", (int)bannerX + 28, (int)bannerY + 11, 11, isHovered ? Color{ 255, 255, 255, 255 } : Color{ 200, 220, 245, 220 });
+        return;
+    }
+
+    // Expanded Middle-Left Objectives Card
+    const float bannerW = 460.0f;
+    const float bannerH = 76.0f;
+    Rectangle cardRec = { bannerX, bannerY, bannerW, bannerH };
+
+    DrawRectangleRounded(cardRec, 0.15f, 6, Color{ 14, 18, 28, 235 });
+    DrawRectangleRoundedLines(cardRec, 0.15f, 6, Color{ 205, 165, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ bannerX + 3, bannerY + 3, bannerW - 6, bannerH - 6 }, 0.12f, 6, Color{ 45, 58, 85, 160 });
 
     int stepNum = 1 + (int)currentStep;
     if (stepNum > 6) stepNum = 6;
-    std::string chapterHeader = "CHAPTER 1: RUINED CASTLE OF ZYPHDEN  |  OBJECTIVE " + std::to_string(stepNum) + "/6";
+    std::string chapterHeader = "OBJECTIVES  (" + std::to_string(stepNum) + "/6)";
     DrawText(chapterHeader.c_str(), (int)bannerX + 16, (int)bannerY + 10, 11, Color{ 255, 215, 80, 255 });
 
-    DrawText(currentObjectiveText.c_str(), (int)bannerX + 16, (int)bannerY + 27, 12, Color{ 255, 255, 255, 255 });
-    DrawText(currentControlHint.c_str(), (int)bannerX + 16, (int)bannerY + 44, 10, Color{ 120, 220, 255, 220 });
+    // Toggle button on top right of the card
+    Rectangle toggleBtn = { bannerX + bannerW - 92.0f, bannerY + 8.0f, 80.0f, 22.0f };
+    bool isTogHov = CheckCollisionPointRec(mousePos, toggleBtn);
+    if (isTogHov && isPressed) {
+        showObjectives = false;
+        SoundFX::PlayButtonClick();
+    }
+    DrawRectangleRounded(toggleBtn, 0.3f, 3, isTogHov ? Color{ 40, 52, 75, 220 } : Color{ 22, 28, 42, 180 });
+    DrawRectangleRoundedLines(toggleBtn, 0.3f, 3, isTogHov ? Color{ 140, 210, 255, 240 } : Color{ 60, 80, 115, 200 });
+    DrawText("HIDE [O]", (int)toggleBtn.x + 14, (int)toggleBtn.y + 5, 10, isTogHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 205, 235, 220 });
+
+    DrawText(currentObjectiveText.c_str(), (int)bannerX + 16, (int)bannerY + 30, 12, Color{ 255, 255, 255, 255 });
+    DrawText(currentControlHint.c_str(), (int)bannerX + 16, (int)bannerY + 50, 10, Color{ 120, 220, 255, 220 });
 }
 
 bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {

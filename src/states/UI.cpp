@@ -23,6 +23,10 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     HUD::DrawCombat(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, currentWave, totalWaves, hasUnreadLore);
 }
 
+void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
+    HUD::DrawCampaignHUD(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, locationName, hasUnreadLore);
+}
+
 void GameUI::DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp) {
     HUD::DrawBossHealthBar(windowWidth, bossName, hp, maxHp);
 }

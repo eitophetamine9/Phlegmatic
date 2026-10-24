@@ -103,9 +103,15 @@ private:
     std::string currentObjectiveText;
     std::string currentControlHint;
 
+    // Objectives toggle
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() const { showObjectives = !showObjectives; }
+
     // Pop-up modal state
     bool showPopup;
     std::string popupTitle;
     std::string popupBody;
     std::string popupHint;
+
+    mutable bool showObjectives = true;
 };

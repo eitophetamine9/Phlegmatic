@@ -182,6 +182,102 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, float hp, float maxHp, f
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
+void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName) {
+    const float bannerW = 340.0f;
+    const float bannerH = 42.0f;
+    float bannerX = ((float)windowWidth - bannerW) * 0.5f;
+    float bannerY = 16.0f;
+
+    // Dark glass backing card
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 14, 18, 28, 225 });
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 205, 165, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ bannerX + 3, bannerY + 3, bannerW - 6, bannerH - 6 }, 0.20f, 6, Color{ 48, 62, 90, 160 });
+
+    // Golden corner accents
+    Color cornerCol = Color{ 255, 215, 80, 240 };
+    DrawLineEx({ bannerX + 8, bannerY + 8 }, { bannerX + 22, bannerY + 8 }, 1.5f, cornerCol);
+    DrawLineEx({ bannerX + 8, bannerY + 8 }, { bannerX + 8, bannerY + 22 }, 1.5f, cornerCol);
+    DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 22, bannerY + 8 }, 1.5f, cornerCol);
+    DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 8, bannerY + 22 }, 1.5f, cornerCol);
+
+    // Map Name centered in Gold
+    int nameW = MeasureText(locationName.c_str(), 16);
+    DrawText(locationName.c_str(), (int)(bannerX + (bannerW - nameW) * 0.5f), (int)bannerY + 13, 16, Color{ 255, 225, 95, 255 });
+}
+
+void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
+    const float hudX = 24.0f;
+    const float hudY = (float)windowHeight - 110.0f;
+    const float hudWidth = 310.0f;
+    const float hudHeight = 86.0f;
+
+    DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 210 });
+    DrawRectangleRoundedLines(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 48, 62, 85, 220 });
+
+    float hpPercent = fmaxf(0.0f, hp / maxHp);
+    DrawText("HEALTH", (int)hudX + 14, (int)hudY + 12, 11, Color{ 230, 80, 90, 255 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 30, 20, 24, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 12, (int)(215 * hpPercent), 12, Color{ 235, 55, 75, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 12, 215, 12, Color{ 80, 40, 50, 220 });
+
+    float stamPercent = fmaxf(0.0f, stamina / maxStamina);
+    DrawText("STAMINA", (int)hudX + 14, (int)hudY + 32, 11, Color{ 255, 210, 80, 255 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 35, 30, 15, 220 });
+    DrawRectangle((int)hudX + 70, (int)hudY + 32, (int)(215 * stamPercent), 12, Color{ 255, 195, 45, 255 });
+    DrawRectangleLines((int)hudX + 70, (int)hudY + 32, 215, 12, Color{ 90, 75, 30, 220 });
+
+    if (hasCounterBuff) {
+        DrawText("COUNTER BUFF: +50% DAMAGE!", (int)hudX + 14, (int)hudY + 58, 11, Color{ 255, 230, 80, 255 });
+    } else if (isParrying) {
+        DrawText("PARRY WINDOW ACTIVE!", (int)hudX + 14, (int)hudY + 58, 11, Color{ 80, 240, 255, 255 });
+    } else {
+        char dashBuf[32];
+        char parryBuf[32];
+        char heavyBuf[32];
+        char statusBuf[128];
+
+        if (dashCooldown <= 0.0f) snprintf(dashBuf, sizeof(dashBuf), "[Q] Dash");
+        else snprintf(dashBuf, sizeof(dashBuf), "[Q] %.1fs", dashCooldown);
+
+        if (parryCooldown <= 0.0f) snprintf(parryBuf, sizeof(parryBuf), "[F] Parry");
+        else snprintf(parryBuf, sizeof(parryBuf), "[F] %.1fs", parryCooldown);
+
+        if (heavyCooldown <= 0.0f) snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] Heavy");
+        else snprintf(heavyBuf, sizeof(heavyBuf), "[R-Atk] %.1fs", heavyCooldown);
+
+        snprintf(statusBuf, sizeof(statusBuf), "%s  |  %s  |  %s", dashBuf, parryBuf, heavyBuf);
+        DrawText(statusBuf, (int)hudX + 14, (int)hudY + 58, 10, Color{ 170, 205, 235, 240 });
+    }
+
+    // Active Weapon Badge (Bottom Right)
+    WeaponStats stats = GetWeaponStats(weapon);
+    const float wBadgeW = 200.0f;
+    const float wBadgeH = 46.0f;
+    float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
+    float wBadgeY = (float)windowHeight - wBadgeH - 24.0f;
+
+    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 210 });
+    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 220 });
+    DrawText("WEAPON:", (int)wBadgeX + 12, (int)wBadgeY + 8, 10, Color{ 255, 215, 80, 255 });
+    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
+
+    // Top Location Header Banner (NO wave counter in campaign!)
+    DrawLocationHeader(windowWidth, locationName);
+
+    // Journal & Lore button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    if (hasUnreadLore) {
+        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+    }
+
+    // Controls hint top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
+}
+
 void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp) {
     const float barW = 540.0f;
     const float barH = 18.0f;
