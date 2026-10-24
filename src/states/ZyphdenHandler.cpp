@@ -440,8 +440,13 @@ void ZyphdenHandler::Update(
             }
         } else {
             // Outside in Zyphden Realm
-            // 1. Enter Hearthside Tavern East Doorway (door at {600, 880})
-            if (Vector2Distance(playerPos, { 600.0f, 880.0f }) <= 48.0f && (interactKey || playerPos.x <= 595.0f)) {
+            // 1. Enter Hearthside Tavern (Both East and South doors supported, with generous range and walk-in threshold)
+            bool nearEastDoor = (Vector2Distance(playerPos, { 600.0f, 885.0f }) <= 85.0f);
+            bool nearSouthDoor = (Vector2Distance(playerPos, { 440.0f, 1010.0f }) <= 85.0f);
+            bool inEastDoorThreshold = (playerPos.x <= 605.0f && playerPos.x >= 560.0f && playerPos.y >= 845.0f && playerPos.y <= 925.0f);
+            bool inSouthDoorThreshold = (playerPos.y <= 1018.0f && playerPos.y >= 975.0f && playerPos.x >= 390.0f && playerPos.x <= 490.0f);
+
+            if ((nearEastDoor || nearSouthDoor) && (interactKey || inEastDoorThreshold || inSouthDoorThreshold)) {
                 inTavern = true;
                 map.Init(MapEnvironment::TAVERN_INTERIOR);
                 player.SetPosition({ 800.0f, 880.0f });
@@ -628,9 +633,12 @@ void ZyphdenHandler::Render(
             knightLenonNPC.Draw(time);
         }
 
-        // Tavern entrance prompt outside
-        if (Vector2Distance(player.GetPosition(), { 600.0f, 880.0f }) <= 90.0f) {
-            DrawText("[E] ENTER HEARTHSIDE TAVERN", 615, 875, 11, Color{ 255, 220, 120, 240 });
+        // Tavern entrance prompts outside
+        if (Vector2Distance(player.GetPosition(), { 600.0f, 885.0f }) <= 120.0f) {
+            DrawText("[E] ENTER TAVERN", 612, 880, 11, Color{ 255, 220, 120, 240 });
+        }
+        if (Vector2Distance(player.GetPosition(), { 440.0f, 1010.0f }) <= 120.0f) {
+            DrawText("[E] ENTER TAVERN", 400, 1024, 11, Color{ 255, 220, 120, 240 });
         }
     }
 

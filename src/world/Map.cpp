@@ -123,8 +123,13 @@ void GameMap::Init(MapEnvironment env) {
         pillars.push_back({ { 1650.0f, 850.0f }, 26.0f });
 
         // Building Wall Obstacles
-        // Eldon's Hearthside Tavern (Southwest)
-        obstacles.push_back({ { 320.0f, 800.0f, 280.0f, 220.0f } });
+        // Eldon's Hearthside Tavern (Southwest) - Perimeter walls with open East & South doorways
+        obstacles.push_back({ { 320.0f, 800.0f, 280.0f, 24.0f } }); // North wall
+        obstacles.push_back({ { 320.0f, 800.0f, 24.0f, 220.0f } }); // West wall
+        obstacles.push_back({ { 580.0f, 800.0f, 20.0f, 50.0f } });  // East wall top (y: 800-850)
+        obstacles.push_back({ { 580.0f, 920.0f, 20.0f, 100.0f } }); // East wall bottom (y: 920-1020)
+        obstacles.push_back({ { 320.0f, 996.0f, 75.0f, 24.0f } });  // South wall west (x: 320-395)
+        obstacles.push_back({ { 485.0f, 996.0f, 115.0f, 24.0f } }); // South wall east (x: 485-600)
         // Carpenter's Masonry Workshop (Central West)
         obstacles.push_back({ { 320.0f, 480.0f, 220.0f, 180.0f } });
         // Royal Throne Keep (North Castle)
@@ -691,11 +696,20 @@ void GameMap::DrawZyphdenWalls() const {
         DrawCircle((int)bx, 355, 6.0f, Color{ 255, 215, 80, 255 });
     }
 
-    // Tavern East Entrance Doorway (Leading into Tavern Interior)
-    Rectangle tavernDoor = { 595.0f, 860.0f, 14.0f, 50.0f };
-    DrawRectangleRec(tavernDoor, Color{ 20, 15, 12, 255 });
-    DrawRectangleLinesEx(tavernDoor, 2.0f, Color{ 215, 175, 75, 240 });
-    DrawCircle(602, 852, 5.0f, Color{ 255, 190, 70, 240 });
+    // Tavern East Entrance Doorway (Main Street Entrance at {590, 885})
+    Rectangle eastDoor = { 584.0f, 855.0f, 16.0f, 60.0f };
+    DrawRectangleRec(eastDoor, Color{ 22, 16, 12, 255 });
+    DrawRectangleLinesEx(eastDoor, 2.0f, Color{ 225, 180, 75, 240 });
+    DrawCircleGradient(Vector2{ 600.0f, 885.0f }, 45.0f, Color{ 255, 180, 60, 95 }, Color{ 0, 0, 0, 0 });
+    DrawCircle(594, 846, 5.0f, Color{ 255, 195, 75, 240 });
+
+    // Tavern South Entrance Doorway (Town Square Entrance at {440, 1010})
+    Rectangle southDoor = { 398.0f, 996.0f, 84.0f, 16.0f };
+    DrawRectangleRec(southDoor, Color{ 22, 16, 12, 255 });
+    DrawRectangleLinesEx(southDoor, 2.0f, Color{ 225, 180, 75, 240 });
+    DrawCircleGradient(Vector2{ 440.0f, 1010.0f }, 55.0f, Color{ 255, 180, 60, 95 }, Color{ 0, 0, 0, 0 });
+    DrawCircle(396, 992, 5.0f, Color{ 255, 195, 75, 240 });
+    DrawCircle(484, 992, 5.0f, Color{ 255, 195, 75, 240 });
 }
 
 void GameMap::DrawTavernFloor() const {
