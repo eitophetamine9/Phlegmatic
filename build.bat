@@ -34,6 +34,7 @@ g++ -std=c++17 -O2 -static ^
     src\states\Cutscene.cpp ^
     src\states\Tutorial.cpp ^
     src\states\RuinedCastleHandler.cpp ^
+    src\states\CrossroadsHandler.cpp ^
     src\states\Game.cpp ^
     -Isrc ^
     -Isrc\core ^

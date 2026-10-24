@@ -16,6 +16,7 @@
 #include "../combat/CollisionSystem.hpp"
 #include "../world/WaveManager.hpp"
 #include "RuinedCastleHandler.hpp"
+#include "CrossroadsHandler.hpp"
 
 class Game {
 public:
@@ -30,6 +31,7 @@ private:
     void Render();
 
     void EnterRuinedCastle();
+    void EnterCrossroads();
     void EnterLobby();
     void EnterArena();
 
@@ -59,6 +61,7 @@ private:
     // Combat & Arena Managers
     WaveManager waveManager;
     RuinedCastleHandler ruinedCastleHandler;
+    CrossroadsHandler crossroadsHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 

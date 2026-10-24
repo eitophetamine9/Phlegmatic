@@ -177,6 +177,9 @@ void TutorialManager::Init() {
     weaponStandPos = { 800.0f, 980.0f };
     hasClaimedWeapon = false;
 
+    armorStandPos = { 870.0f, 980.0f };
+    hasClaimedArmor = false;
+
     lightAttacksLanded = 0;
     heavyAttacksLanded = 0;
 
@@ -290,16 +293,29 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::WEAPON_STAND: {
-            currentObjectiveText = "WEAPON STAND: Approach the stone plinth ahead to claim the Broadsword [E].";
-            currentControlHint = "Walk to the glowing blade and press [E] to Claim";
+            currentObjectiveText = "WEAPON & ARMOR: Claim the Broadsword and Commoner's Scrap armor from the plinths [E].";
+            currentControlHint = "Walk to glowing plinths and press [E] to Claim Equipment";
 
             float distToStand = Vector2Distance(playerPos, weaponStandPos);
             if (distToStand <= 55.0f && IsKeyPressed(KEY_E)) {
                 hasClaimedWeapon = true;
                 player.SetWeapon(WeaponType::SWORD);
                 player.GetInventory().UnlockWeapon(WeaponType::SWORD);
+                SoundFX::PlayEquipWeapon();
+                particles.SpawnFloatingText(weaponStandPos, "CLAIMED: Crusader's Broadsword!", Color{ 255, 215, 80, 255 }, 20.0f);
+                particles.AddScreenShake(3.0f, 0.15f);
                 currentStep = TutorialStep::COMBAT_BASICS;
                 TriggerStepPopup(TutorialStep::COMBAT_BASICS);
+            }
+
+            float distToArmor = Vector2Distance(playerPos, armorStandPos);
+            if (!hasClaimedArmor && distToArmor <= 55.0f && IsKeyPressed(KEY_E)) {
+                hasClaimedArmor = true;
+                player.GetInventory().UnlockArmor(ArmorType::COMMONERS_SCRAP);
+                player.SetArmor(ArmorType::COMMONERS_SCRAP);
+                SoundFX::PlayEquipWeapon();
+                particles.SpawnFloatingText(armorStandPos, "EQUIPPED: Commoner's Scrap (+6 DEF)!", Color{ 255, 215, 80, 255 }, 20.0f);
+                particles.AddScreenShake(3.0f, 0.15f);
             }
             break;
         }
@@ -400,7 +416,7 @@ void TutorialManager::SkipToBoss(GameMap& map) {
 }
 
 void TutorialManager::DrawWorldElements(float time) const {
-    // 1. Weapon Stand Altar at (800, 980)
+    // 1a. Weapon Stand Altar at (800, 980)
     DrawCircle((int)weaponStandPos.x, (int)(weaponStandPos.y + 12), 34.0f, Color{ 10, 12, 18, 120 });
     DrawCircle((int)weaponStandPos.x, (int)weaponStandPos.y, 30.0f, Color{ 32, 38, 52, 255 });
     DrawCircleLines((int)weaponStandPos.x, (int)weaponStandPos.y, 30.0f, Color{ 68, 85, 115, 240 });
@@ -415,8 +431,32 @@ void TutorialManager::DrawWorldElements(float time) const {
         DrawCircleGradient(Vector2{ weaponStandPos.x, weaponStandPos.y + floatOffset }, 36.0f, Color{ 100, 220, 255, (unsigned char)(70 * pulse) }, Color{ 0, 0, 0, 0 });
 
         const char* label = "[E] Claim Broadsword";
-        int lw = MeasureText(label, 12);
-        DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 12, Color{ 255, 220, 90, 255 });
+        int lw = MeasureText(label, 11);
+        DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+    }
+
+    // 1b. Commoner's Scrap Armor Stand at (870, 980)
+    DrawCircle((int)armorStandPos.x, (int)(armorStandPos.y + 12), 34.0f, Color{ 10, 12, 18, 120 });
+    DrawCircle((int)armorStandPos.x, (int)armorStandPos.y, 30.0f, Color{ 32, 38, 52, 255 });
+    DrawCircleLines((int)armorStandPos.x, (int)armorStandPos.y, 30.0f, Color{ 68, 85, 115, 240 });
+
+    if (!hasClaimedArmor) {
+        float floatOffset = sinf(time * 3.2f + 1.2f) * 5.0f - 16.0f;
+        Vector2 armorCenter = { armorStandPos.x, armorStandPos.y + floatOffset };
+
+        // Armor cuirass icon preview
+        DrawRectangleRounded(Rectangle{ armorCenter.x - 13.0f, armorCenter.y - 12.0f, 26.0f, 24.0f }, 0.25f, 4, Color{ 130, 90, 60, 255 });
+        DrawRectangleRoundedLines(Rectangle{ armorCenter.x - 13.0f, armorCenter.y - 12.0f, 26.0f, 24.0f }, 0.25f, 4, Color{ 180, 195, 215, 255 });
+        DrawCircleV({ armorCenter.x - 11.0f, armorCenter.y - 8.0f }, 4.5f, Color{ 85, 65, 48, 255 });
+        DrawCircleV({ armorCenter.x + 11.0f, armorCenter.y - 8.0f }, 4.5f, Color{ 85, 65, 48, 255 });
+        DrawLineEx({ armorCenter.x, armorCenter.y - 10.0f }, { armorCenter.x, armorCenter.y + 10.0f }, 2.0f, Color{ 220, 200, 140, 255 });
+
+        float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
+        DrawCircleGradient(armorCenter, 34.0f, Color{ 255, 200, 100, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+
+        const char* label = "[E] Commoner's Scrap";
+        int lw = MeasureText(label, 11);
+        DrawText(label, (int)(armorStandPos.x - lw * 0.5f), (int)(armorStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
     }
 
     // 2. All 4 Tutorial Lore Collectibles

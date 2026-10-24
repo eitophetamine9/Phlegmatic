@@ -76,6 +76,31 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 480.0f, 640.0f });
         torches.push_back({ 1020.0f, 640.0f });
         torches.push_back({ 1100.0f, 840.0f });
+    } else if (env == MapEnvironment::CROSSROADS) {
+        bounds = { 400.0f, 150.0f, 800.0f, 1600.0f };
+
+        // Roadside pillars
+        pillars.push_back({ { 530.0f, 400.0f }, 32.0f });
+        pillars.push_back({ { 1070.0f, 400.0f }, 32.0f });
+        pillars.push_back({ { 530.0f, 750.0f }, 32.0f });
+        pillars.push_back({ { 1070.0f, 750.0f }, 32.0f });
+        pillars.push_back({ { 530.0f, 1150.0f }, 32.0f });
+        pillars.push_back({ { 1070.0f, 1150.0f }, 32.0f });
+        pillars.push_back({ { 530.0f, 1500.0f }, 32.0f });
+        pillars.push_back({ { 1070.0f, 1500.0f }, 32.0f });
+
+        // Broken roadside masonry
+        obstacles.push_back({ { 440.0f, 600.0f, 100.0f, 26.0f } });
+        obstacles.push_back({ { 1060.0f, 600.0f, 100.0f, 26.0f } });
+        obstacles.push_back({ { 440.0f, 1250.0f, 100.0f, 26.0f } });
+        obstacles.push_back({ { 1060.0f, 1250.0f, 100.0f, 26.0f } });
+
+        // Torches along roadside
+        torches.push_back({ 530.0f, 400.0f });
+        torches.push_back({ 1070.0f, 400.0f });
+        torches.push_back({ 530.0f, 1150.0f });
+        torches.push_back({ 1070.0f, 1150.0f });
+        torches.push_back({ 800.0f, 200.0f });
     }
 }
 
@@ -126,6 +151,8 @@ void GameMap::DrawFloor() const {
         DrawCircleLines((int)center.x, (int)center.y, 50.0f, Color{ 80, 100, 140, 180 });
     } else if (currentEnv == MapEnvironment::RUINED_CASTLE) {
         DrawRuinedCastleFloor();
+    } else if (currentEnv == MapEnvironment::CROSSROADS) {
+        DrawCrossroadsFloor();
     }
 
     float time = (float)GetTime();
@@ -216,6 +243,8 @@ void GameMap::DrawWallsAndPillars() const {
 
     if (currentEnv == MapEnvironment::RUINED_CASTLE) {
         DrawRuinedCastleWalls();
+    } else if (currentEnv == MapEnvironment::CROSSROADS) {
+        DrawCrossroadsWalls();
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -326,9 +355,9 @@ void GameMap::DrawRuinedCastleWalls() const {
 }
 
 bool GameMap::CheckCircleCollision(Vector2 pos, float radius) const {
-    // Ruined Castle Northern Gateway Corridor check (allows stepping out into Zyphden)
-    bool inGateCorridor = (currentEnv == MapEnvironment::RUINED_CASTLE && gateOpen &&
-                           pos.x >= 700.0f && pos.x <= 900.0f &&
+    // Ruined Castle & Crossroads Northern Gateway Corridor check (allows stepping north through open gateway)
+    bool inGateCorridor = ((currentEnv == MapEnvironment::RUINED_CASTLE || currentEnv == MapEnvironment::CROSSROADS) && gateOpen &&
+                           pos.x >= 680.0f && pos.x <= 920.0f &&
                            pos.y >= bounds.y - 120.0f);
 
     if (!inGateCorridor && (pos.y - radius < bounds.y)) {
@@ -336,8 +365,8 @@ bool GameMap::CheckCircleCollision(Vector2 pos, float radius) const {
     }
 
     // Corridor side walls and northern dead-end barrier when north of bounds.y
-    if (currentEnv == MapEnvironment::RUINED_CASTLE && gateOpen && pos.y < bounds.y) {
-        if (pos.x - radius < 705.0f || pos.x + radius > 895.0f || pos.y - radius < bounds.y - 80.0f) {
+    if ((currentEnv == MapEnvironment::RUINED_CASTLE || currentEnv == MapEnvironment::CROSSROADS) && gateOpen && pos.y < bounds.y) {
+        if (pos.x - radius < 685.0f || pos.x + radius > 915.0f || pos.y - radius < bounds.y - 80.0f) {
             return true;
         }
     }
@@ -388,4 +417,77 @@ Vector2 GameMap::ResolveCollision(Vector2 oldPos, Vector2 newPos, float radius) 
     }
 
     return testY;
+}
+
+void GameMap::DrawCrossroadsFloor() const {
+    float time = (float)GetTime();
+
+    // 1. Weathered earthy terrain
+    DrawRectangleRec(bounds, Color{ 18, 22, 28, 255 });
+
+    // 2. Central Stone Paved Royal Highway (X: 620 to 980)
+    Rectangle road = { 620.0f, bounds.y, 360.0f, bounds.height };
+    DrawRectangleRec(road, Color{ 28, 34, 46, 255 });
+    DrawRectangleLinesEx(road, 2.0f, Color{ 55, 68, 92, 200 });
+
+    // Paving lines
+    for (int y = (int)bounds.y; y <= (int)(bounds.y + bounds.height); y += 48) {
+        DrawLine(620, y, 980, y, Color{ 40, 48, 64, 140 });
+    }
+    DrawLine(800, (int)bounds.y, 800, (int)(bounds.y + bounds.height), Color{ 45, 55, 75, 120 });
+
+    // 3. Roadside moss & wild grass patches
+    for (int i = 0; i < 22; i++) {
+        float gx = bounds.x + fmodf((float)(i * 123), bounds.width - 60.0f) + 30.0f;
+        float gy = bounds.y + fmodf((float)(i * 179), bounds.height - 60.0f) + 30.0f;
+        if (gx > 620.0f && gx < 980.0f) continue;
+        DrawCircle((int)gx, (int)gy, 22.0f, Color{ 24, 42, 32, 90 });
+    }
+
+    // 4. Western Ruined Shrine Alcove for Hidden Totem Chest
+    Vector2 shrinePos = { 510.0f, 950.0f };
+    DrawCircleLines((int)shrinePos.x, (int)shrinePos.y, 45.0f, Color{ 60, 80, 110, 180 });
+    DrawCircleLines((int)shrinePos.x, (int)shrinePos.y, 25.0f, Color{ 80, 120, 160, 200 });
+    DrawRectangle(470, 930, 80, 40, Color{ 36, 44, 60, 255 });
+    DrawRectangleLines(470, 930, 80, 40, Color{ 75, 95, 130, 220 });
+
+    // 5. Northern Gateway Approach to Zyphden
+    DrawRectangle(620, (int)bounds.y, 360, 80, Color{ 36, 48, 68, 255 });
+    DrawRectangleLines(620, (int)bounds.y, 360, 80, Color{ 180, 150, 70, 220 });
+    DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
+}
+
+void GameMap::DrawCrossroadsWalls() const {
+    float time = (float)GetTime();
+
+    // Roadside Pillars & Braziers
+    for (const auto& pillar : pillars) {
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.4f), pillar.radius * 1.15f, Color{ 10, 12, 16, 120 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 34, 42, 58, 255 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 5.0f, Color{ 50, 62, 85, 255 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), pillar.radius * 0.45f, Color{ 72, 88, 118, 255 });
+
+        // Flame
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 7.0f, Color{ 255, 160, 40, 240 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 4.0f), 3.5f, Color{ 255, 240, 140, 255 });
+    }
+
+    // Roadside broken masonry
+    for (const auto& obs : obstacles) {
+        DrawRectangleRec(obs.rect, Color{ 32, 40, 54, 255 });
+        DrawRectangleLinesEx(obs.rect, 2.0f, Color{ 65, 80, 108, 240 });
+    }
+
+    // Northern Archway Gateway
+    float gateX = 660.0f;
+    float gateY = bounds.y - 4.0f;
+    float gateW = 280.0f;
+    float gateH = 32.0f;
+
+    DrawRectangle((int)gateX - 8, (int)gateY - 8, (int)gateW + 16, (int)gateH + 16, Color{ 26, 32, 46, 255 });
+    DrawRectangleLines((int)gateX - 8, (int)gateY - 8, (int)gateW + 16, (int)gateH + 16, Color{ 200, 160, 70, 255 });
+
+    float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
+    DrawCircleGradient(Vector2{ 800.0f, gateY + 16.0f }, 110.0f, Color{ 255, 215, 80, (unsigned char)(140 * pulse) }, Color{ 0, 0, 0, 0 });
+    DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
 }

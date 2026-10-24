@@ -81,6 +81,14 @@ void Game::EnterRuinedCastle() {
     tutorial.Init();
 }
 
+void Game::EnterCrossroads() {
+    crossroadsHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::CROSSROADS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    particles.Clear();
+}
+
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
     WeaponType keepWeapon = player.GetWeapon();
@@ -235,6 +243,18 @@ void Game::Update(float dt) {
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
             [this]() { EnterRuinedCastle(); }
+        );
+        return;
+    }
+
+    // 1.85 CROSSROADS STATE (Path to Zyphden)
+    if (currentState == GameState::CROSSROADS) {
+        if (map.GetEnvironment() != MapEnvironment::CROSSROADS) {
+            EnterCrossroads();
+        }
+        crossroadsHandler.Update(
+            dt, player, map, particles, enemies, projectiles, camera, currentState,
+            [this]() { EnterLobby(); }
         );
         return;
     }
@@ -492,6 +512,15 @@ void Game::Render() {
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
             camera, map, enemies, projectiles, player, particles, tutorial,
+            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::CROSSROADS) {
+        crossroadsHandler.Render(
+            camera, map, enemies, projectiles, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();

@@ -69,6 +69,7 @@ public:
     TutorialStep GetStep() const { return currentStep; }
     bool IsCompleted() const { return currentStep == TutorialStep::COMPLETED; }
     bool HasClaimedWeapon() const { return hasClaimedWeapon; }
+    bool HasClaimedArmor() const { return hasClaimedArmor; }
     bool HasDefeatedTutorialEnemy() const { return tutorialEnemyDefeated; }
     void SkipToBoss(GameMap& map);
 
@@ -76,6 +77,7 @@ public:
     const std::vector<LoreCollectible>& GetLoreItems() const { return loreItems; }
     std::vector<LoreCollectible>& GetLoreItems() { return loreItems; }
     Vector2 GetWeaponStandPos() const { return weaponStandPos; }
+    Vector2 GetArmorStandPos() const { return armorStandPos; }
 
     void TriggerStepPopup(TutorialStep step);
 
@@ -86,6 +88,9 @@ private:
 
     Vector2 weaponStandPos;
     bool hasClaimedWeapon;
+
+    Vector2 armorStandPos;
+    bool hasClaimedArmor;
 
     int lightAttacksLanded;
     int heavyAttacksLanded;
