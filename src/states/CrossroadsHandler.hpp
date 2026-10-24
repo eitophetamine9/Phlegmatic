@@ -23,6 +23,18 @@ struct HiddenTotemChest {
     void Draw(float time) const;
 };
 
+struct RoadsideJournal {
+    Vector2 position = { 1120.0f, 980.0f };
+    float radius = 24.0f;
+    bool collected = false;
+
+    bool CheckInteraction(Vector2 playerPos) const {
+        return !collected && Vector2Distance(playerPos, position) <= (radius + 32.0f);
+    }
+
+    void Draw(float time) const;
+};
+
 class CrossroadsHandler {
 public:
     CrossroadsHandler();
@@ -60,6 +72,7 @@ public:
 
 private:
     HiddenTotemChest chest;
+    RoadsideJournal journal;
     mutable bool showObjectives = true;
     bool enemiesSpawned = false;
     float entryBannerTimer = 4.0f;

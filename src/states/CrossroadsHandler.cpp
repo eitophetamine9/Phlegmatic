@@ -36,9 +36,32 @@ void HiddenTotemChest::Draw(float time) const {
     }
 }
 
+void RoadsideJournal::Draw(float time) const {
+    if (collected) return;
+
+    DrawEllipse((int)position.x, (int)(position.y + 10), radius * 1.1f, radius * 0.5f, Color{ 10, 12, 18, 120 });
+
+    // Weathered Journal / Leather Satchel on Stone Plinth
+    DrawRectangle((int)(position.x - 14), (int)(position.y - 12), 28, 22, Color{ 85, 60, 42, 255 });
+    DrawRectangleLines((int)(position.x - 14), (int)(position.y - 12), 28, 22, Color{ 52, 36, 24, 255 });
+
+    // Golden strap & bookmark
+    DrawRectangle((int)(position.x - 4), (int)(position.y - 14), 8, 26, Color{ 220, 185, 75, 230 });
+    DrawRectangle((int)(position.x - 2), (int)(position.y + 8), 4, 8, Color{ 255, 215, 90, 255 });
+
+    float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
+    DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 220, 100, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+
+    const char* label = "[E] Weathered Journal";
+    int lw = MeasureText(label, 11);
+    DrawText(label, (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 255, 230, 120, 255 });
+}
+
 CrossroadsHandler::CrossroadsHandler() {
     chest.position = { 490.0f, 560.0f };
     chest.opened = false;
+    journal.position = { 1120.0f, 980.0f };
+    journal.collected = false;
     showObjectives = true;
     enemiesSpawned = false;
     entryBannerTimer = 4.0f;
@@ -61,6 +84,8 @@ void CrossroadsHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& e
 
     chest.position = { 490.0f, 560.0f };
     chest.opened = player.GetInventory().HasTotem(TotemType::TOTEM_SANITY);
+    journal.position = { 1120.0f, 980.0f };
+    journal.collected = player.GetInventory().HasFragment("frag_05");
     enemiesSpawned = true;
     entryBannerTimer = 4.0f;
 }
@@ -155,6 +180,15 @@ void CrossroadsHandler::Update(
         particles.AddScreenShake(5.0f, 0.2f);
     }
 
+    // Roadside Weathered Journal Interaction
+    if (!journal.collected && journal.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        journal.collected = true;
+        player.GetInventory().UnlockFragment("frag_05");
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(journal.position, "DISCOVERED: Fragment V (Crossroads Watch)!", Color{ 255, 220, 90, 255 }, 22.0f);
+        particles.SpawnSparks(journal.position, Color{ 255, 220, 90, 255 }, 24, 140.0f);
+    }
+
     // Northern Gateway into Zyphden (Y <= bounds.y + 80.0f)
     bool atNorthernGate = (player.GetPosition().y <= map.GetBounds().y + 80.0f &&
                            player.GetPosition().x >= 680.0f && player.GetPosition().x <= 920.0f);
@@ -192,8 +226,14 @@ void CrossroadsHandler::Render(
     {
         map.DrawFloor();
 
-        // Draw Hidden Totem of Sanity Chest
+        // Draw Hidden Totem of Sanity Chest & Roadside Journal
         chest.Draw((float)GetTime());
+        journal.Draw((float)GetTime());
+
+        // CRITICAL FIX: Draw enemy telegraph indicators in Crossroads!
+        for (const auto& enemy : enemies) {
+            enemy.DrawTelegraph();
+        }
 
         for (const auto& enemy : enemies) {
             enemy.Draw();

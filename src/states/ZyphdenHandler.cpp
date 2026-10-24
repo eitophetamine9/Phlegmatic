@@ -53,6 +53,23 @@ void ZyphdenNPC::Draw(float time) const {
         // Greatsword sheathed at side
         DrawLineEx({ position.x + 18.0f, position.y - 20.0f }, { position.x + 18.0f, position.y + 24.0f }, 3.0f, Color{ 210, 225, 245, 255 });
         DrawRectangle((int)(position.x + 14), (int)(position.y - 12), 9, 3, Color{ 225, 185, 65, 255 });
+    } else if (id == "cedric") {
+        // Scholar Cedric: Royal azure scholar robes, hood, holding an open chronicle scroll
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 35, 65, 120, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.6f, Color{ 225, 200, 175, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 12), radius * 0.5f, Color{ 24, 45, 90, 255 });
+        DrawRectangle((int)(position.x + 12), (int)(position.y - 6), 6, 14, Color{ 240, 230, 205, 255 });
+    } else if (id == "varek") {
+        // Blacksmith Varek: Soot leather apron, forge hammer, anvil
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 70, 50, 40, 255 });
+        DrawRectangle((int)(position.x - 8), (int)(position.y - 6), 16, 16, Color{ 40, 28, 22, 255 });
+        DrawLineEx({ position.x + 12.0f, position.y - 10.0f }, { position.x + 12.0f, position.y + 12.0f }, 3.0f, Color{ 160, 165, 180, 255 });
+        DrawRectangle((int)(position.x - 22), (int)(position.y + 4), 14, 10, Color{ 65, 70, 80, 255 });
+    } else if (id == "maeve") {
+        // Elder Maeve: Moss green wool shawl, wooden walking cane
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 60, 85, 65, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.55f, Color{ 220, 195, 170, 255 });
+        DrawLineEx({ position.x + 12.0f, position.y - 12.0f }, { position.x + 12.0f, position.y + 16.0f }, 2.5f, Color{ 110, 80, 50, 255 });
     }
 
     // Interaction Prompt Icon & Label
@@ -64,15 +81,59 @@ void ZyphdenNPC::Draw(float time) const {
     DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 18.0f), 11, accentColor);
 }
 
+void ZyphdenLoreItem::Draw(float time) const {
+    if (collected) return;
+
+    DrawEllipse((int)position.x, (int)(position.y + 10), radius * 1.1f, radius * 0.5f, Color{ 10, 12, 18, 120 });
+
+    if (fragmentId == "frag_06") {
+        // Wind Lectern: Stone plinth with celestial blue open tome & wind runes
+        DrawRectangle((int)(position.x - 14), (int)(position.y - 10), 28, 20, Color{ 60, 75, 95, 255 });
+        DrawRectangleLines((int)(position.x - 14), (int)(position.y - 10), 28, 20, Color{ 100, 140, 180, 255 });
+        DrawRectangle((int)(position.x - 12), (int)(position.y - 8), 11, 16, Color{ 235, 240, 250, 255 });
+        DrawRectangle((int)(position.x + 1), (int)(position.y - 8), 11, 16, Color{ 235, 240, 250, 255 });
+        float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
+        DrawCircleGradient(position, 24.0f * pulse, Color{ 120, 215, 255, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+    } else if (fragmentId == "frag_07") {
+        // Vanguard Field Log: Leather notebook with gold clasp
+        DrawRectangle((int)(position.x - 12), (int)(position.y - 10), 24, 20, Color{ 90, 55, 35, 255 });
+        DrawRectangleLines((int)(position.x - 12), (int)(position.y - 10), 24, 20, Color{ 60, 35, 22, 255 });
+        DrawRectangle((int)(position.x - 3), (int)(position.y - 12), 6, 24, Color{ 225, 185, 65, 240 });
+        float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
+        DrawCircleGradient(position, 22.0f * pulse, Color{ 225, 185, 65, (unsigned char)(55 * pulse) }, Color{ 0, 0, 0, 0 });
+    } else {
+        // Royal Archives: Gilded archive pedestal with royal decree scroll
+        DrawRectangle((int)(position.x - 14), (int)(position.y - 12), 28, 24, Color{ 48, 56, 85, 255 });
+        DrawRectangleLines((int)(position.x - 14), (int)(position.y - 12), 28, 24, Color{ 235, 195, 65, 255 });
+        DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 65, 255 });
+        float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
+        DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 65, (unsigned char)(65 * pulse) }, Color{ 0, 0, 0, 0 });
+    }
+
+    std::string prompt = "[E] " + name;
+    int lw = MeasureText(prompt.c_str(), 11);
+    DrawText(prompt.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 240, 240, 255, 240 });
+}
+
 ZyphdenHandler::ZyphdenHandler() {
     eldon = { "eldon", "Tavernkeep Eldon", { 480.0f, 890.0f }, 24.0f, Color{ 255, 190, 80, 255 } };
     noticeboard = { "noticeboard", "Noticeboard", { 780.0f, 720.0f }, 20.0f, Color{ 130, 220, 255, 255 } };
     kingKreptu = { "king", "King Kreptu", { 1000.0f, 220.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
-    knightLenonNPC = { "lenon", "Knight Lenon", { 1490.0f, 700.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
+    knightLenonNPC = { "lenon", "Knight Lenon", { 580.0f, 960.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
 
+    cedric = { "cedric", "Chronicler Cedric", { 720.0f, 1020.0f }, 24.0f, Color{ 100, 200, 255, 255 } };
+    varek = { "varek", "Blacksmith Varek", { 320.0f, 700.0f }, 24.0f, Color{ 255, 140, 50, 255 } };
+    maeve = { "maeve", "Elder Maeve", { 920.0f, 880.0f }, 22.0f, Color{ 160, 230, 160, 255 } };
+
+    windLectern = { "frag_06", "Ancient Wind Lectern", { 720.0f, 480.0f }, 24.0f, false };
+    vanguardLog = { "frag_07", "Vanguard Field Log", { 420.0f, 820.0f }, 24.0f, false };
+    royalArchives = { "frag_08", "Royal Archives", { 1140.0f, 220.0f }, 24.0f, false };
+
+    questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
     hasTalkedToKing = false;
     sparActive = false;
     lenonDefeated = false;
+    lenonSpawned = false;
     showObjectives = true;
     entryBannerTimer = 4.0f;
     dialogueTimer = 0.0f;
@@ -99,7 +160,25 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
     eldon = { "eldon", "Tavernkeep Eldon", { 480.0f, 890.0f }, 24.0f, Color{ 255, 190, 80, 255 } };
     noticeboard = { "noticeboard", "Noticeboard", { 780.0f, 720.0f }, 20.0f, Color{ 130, 220, 255, 255 } };
     kingKreptu = { "king", "King Kreptu", { 1000.0f, 220.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
-    knightLenonNPC = { "lenon", "Knight Lenon", { 1490.0f, 700.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
+    knightLenonNPC = { "lenon", "Knight Lenon", { 580.0f, 960.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
+
+    cedric = { "cedric", "Chronicler Cedric", { 720.0f, 1020.0f }, 24.0f, Color{ 100, 200, 255, 255 } };
+    varek = { "varek", "Blacksmith Varek", { 320.0f, 700.0f }, 24.0f, Color{ 255, 140, 50, 255 } };
+    maeve = { "maeve", "Elder Maeve", { 920.0f, 880.0f }, 22.0f, Color{ 160, 230, 160, 255 } };
+
+    windLectern = { "frag_06", "Ancient Wind Lectern", { 720.0f, 480.0f }, 24.0f, player.GetInventory().HasFragment("frag_06") };
+    vanguardLog = { "frag_07", "Vanguard Field Log", { 420.0f, 820.0f }, 24.0f, player.GetInventory().HasFragment("frag_07") };
+    royalArchives = { "frag_08", "Royal Archives", { 1140.0f, 220.0f }, 24.0f, player.GetInventory().HasFragment("frag_08") };
+
+    lenonDefeated = player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE);
+    if (lenonDefeated) {
+        questPhase = ZyphdenQuestPhase::VICTORIOUS;
+        lenonSpawned = true;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else {
+        questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
+        lenonSpawned = false;
+    }
 
     sparActive = false;
     entryBannerTimer = 4.0f;
@@ -211,6 +290,7 @@ void ZyphdenHandler::Update(
             // Player successfully defeated Knight Lenon in spar!
             sparActive = false;
             lenonDefeated = true;
+            questPhase = ZyphdenQuestPhase::VICTORIOUS;
             enemies.clear();
 
             // Reward Crusader Plate
@@ -228,46 +308,150 @@ void ZyphdenHandler::Update(
             particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 45, 220.0f);
             particles.AddScreenShake(6.0f, 0.25f);
 
-            SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN", "Superb technique, warrior! Wear this Crusader Plate with pride! You have earned Zyphden's highest honor!", Color{ 225, 185, 65, 255 }, 7.0f);
+            SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN", "Superb technique, warrior! Wear this Crusader Plate with pride! You have earned Zyphden's highest honor!", Color{ 225, 185, 65, 255 }, 7.5f);
         }
     }
 
-    // NPC Interactivity (Press [E], [SPACE], or [ENTER])
+    // Lenon Walking to Player Sequence
+    if (questPhase == ZyphdenQuestPhase::LENON_APPROACHING) {
+        Vector2 playerPos = player.GetPosition();
+        float dx = playerPos.x - knightLenonNPC.position.x;
+        float dy = playerPos.y - knightLenonNPC.position.y;
+        float dist = sqrtf(dx * dx + dy * dy);
+
+        if (dist > 52.0f) {
+            Vector2 walkDir = Vector2Normalize({ dx, dy });
+            knightLenonNPC.position.x += walkDir.x * 125.0f * dt;
+            knightLenonNPC.position.y += walkDir.y * 125.0f * dt;
+        } else {
+            // Lenon arrived at player! Initiate the conversation about Zil!
+            questPhase = ZyphdenQuestPhase::SEEK_KING;
+            SoundFX::PlayParrySuccess();
+            particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 24, 120.0f);
+
+            if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
+                SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN",
+                    "Hold, traveler! That blade... it is Truth Seeker! My sworn brother Zil carried it when he rode south to purge the madness. You bested him? Then his torment is ended. Before we spar, seek royal audience with King Kreptu in the Northern Keep! I will await your trial in the Courtyard.",
+                    Color{ 225, 185, 65, 255 }, 9.5f);
+            } else if (player.GetInventory().HasQuestItem("zil_token")) {
+                SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN",
+                    "Hold, traveler! That silver token you bear... it belongs to my sworn brother Zil! He spared you and gave you his crest? Then honor still endures in the ruins. Before we spar, seek royal audience with King Kreptu in the Northern Keep! I will await your trial in the Courtyard.",
+                    Color{ 225, 185, 65, 255 }, 9.5f);
+            } else {
+                SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN",
+                    "Hold, traveler! Word reached me that you survived the southern ruins. Before I grant you a trial in our Eastern Courtyard, ancient protocol demands you present yourself to King Kreptu in the Northern Keep. Go speak with His Majesty first!",
+                    Color{ 225, 185, 65, 255 }, 9.0f);
+            }
+
+            // Reposition Lenon to the Eastern Courtyard for the sanctioned trial
+            knightLenonNPC.position = { 1490.0f, 700.0f };
+        }
+    }
+
+    // NPC & Lore Interactivity (Press [E], [SPACE], or [ENTER])
     bool interactKey = IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
     Vector2 playerPos = player.GetPosition();
 
     if (interactKey) {
-        // 1. Tavernkeep Eldon
+        // 1. Tavernkeep Eldon (Main Quest Starter)
         if (eldon.CheckInteraction(playerPos)) {
-            SetDialogue("TAVERNKEEP ELDON", "Welcome to Zyphden! Speak with King Kreptu in the Northern Keep, or test your blade against Knight Lenon!", Color{ 255, 190, 80, 255 }, 5.5f);
-            particles.SpawnFloatingText(eldon.position, "Tavern Rumors Shared", Color{ 255, 200, 100, 255 }, 18.0f);
+            if (questPhase == ZyphdenQuestPhase::SEEK_TAVERN) {
+                questPhase = ZyphdenQuestPhase::LENON_APPROACHING;
+                lenonSpawned = true;
+                knightLenonNPC.position = { 560.0f, 960.0f };
+                SetDialogue("TAVERNKEEP ELDON",
+                    "Welcome to the Hearthside Tavern! You made it through the Crossroads alive? Wait... look behind you! Captain Lenon has been searching for any word of the southern keep!",
+                    Color{ 255, 190, 80, 255 }, 7.0f);
+                particles.SpawnFloatingText(eldon.position, "Main Quest Started!", Color{ 255, 215, 80, 255 }, 22.0f);
+                SoundFX::PlayParrySuccess();
+            } else {
+                SetDialogue("TAVERNKEEP ELDON",
+                    "Warm fire and cold ale for any who brave the wilds! Speak with Captain Lenon or King Kreptu if you seek to aid our realm.",
+                    Color{ 255, 190, 80, 255 }, 5.5f);
+            }
         }
-        // 2. Town Noticeboard
+        // 2. Scholar Cedric (Zyphden Lore)
+        else if (cedric.CheckInteraction(playerPos)) {
+            SetDialogue("CHRONICLER CEDRIC",
+                "Zyphden is the Realm of the Gale Tempests. For centuries our royal wind-spires stood as sentinels against the void. But when King Charlz's crown fell to madness, the ancient seals began to fracture. What you saw in the southern ruins is only the beginning...",
+                Color{ 100, 200, 255, 255 }, 8.5f);
+            particles.SpawnFloatingText(cedric.position, "Ancient Lore Shared", Color{ 100, 200, 255, 255 }, 18.0f);
+        }
+        // 3. Blacksmith Varek (Armorcraft Lore)
+        else if (varek.CheckInteraction(playerPos)) {
+            SetDialogue("BLACKSMITH VAREK",
+                "Looking at that scrap armor of yours, wanderer... it won't stop a charging brute in the outer wildlands. The Crusader Plate worn by Captain Lenon was forged from fallen stars and wind-tempered steel. Best him in the courtyard if you hope to survive what lies beyond Zyphden!",
+                Color{ 255, 140, 50, 255 }, 8.5f);
+            particles.SpawnFloatingText(varek.position, "Master Armorcraft Lore", Color{ 255, 150, 60, 255 }, 18.0f);
+        }
+        // 4. Elder Maeve (Town Lore & Refugees)
+        else if (maeve.CheckInteraction(playerPos)) {
+            SetDialogue("ELDER MAEVE",
+                "Bless you, child. When the beasts overran the highway, my family barely made it inside these gates. King Kreptu gave us bread and sanctuary, but dark clouds gather to the east. Keep your blade sharp and your mind sane.",
+                Color{ 160, 230, 160, 255 }, 8.0f);
+            particles.SpawnFloatingText(maeve.position, "Town Lore Shared", Color{ 160, 230, 160, 255 }, 18.0f);
+        }
+        // 5. Town Noticeboard
         else if (noticeboard.CheckInteraction(playerPos)) {
             player.GetInventory().UnlockFragment("frag_02");
             player.GetInventory().UnlockFragment("frag_04");
             SetDialogue("ROYAL NOTICEBOARD", "The Five Monarchs keep vigil over Tydeshire. Vanguard Captain Lenon oversees all martial trials in the Eastern Courtyard.", Color{ 130, 220, 255, 255 }, 6.0f);
             particles.SpawnFloatingText(noticeboard.position, "Lore Fragment Unlocked!", Color{ 130, 220, 255, 255 }, 18.0f);
         }
-        // 3. King Kreptu
-        else if (kingKreptu.CheckInteraction(playerPos)) {
-            hasTalkedToKing = true;
-            if (lenonDefeated) {
-                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN", "You bested Captain Lenon and wear our kingdom's Crusader Plate! Zyphden proudly salutes your courage, Champion!", Color{ 255, 215, 70, 255 }, 6.0f);
-            } else if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
-                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN", "You carry the Truth Seeker remnant from Zil! Go to the Eastern Courtyard and spar with Captain Lenon to claim our Crusader Plate!", Color{ 255, 215, 70, 255 }, 6.5f);
-            } else {
-                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN", "Welcome, wanderer. Prove your strength against Vanguard Captain Knight Lenon in our Eastern Courtyard to earn our Crusader Plate!", Color{ 255, 215, 70, 255 }, 6.0f);
-            }
-            particles.SpawnFloatingText(kingKreptu.position, "Royal Audience Granted", Color{ 255, 220, 100, 255 }, 18.0f);
+        // 6. Lore Item: Wind Lectern (Fragment VI)
+        else if (!windLectern.collected && windLectern.CheckInteraction(playerPos)) {
+            windLectern.collected = true;
+            player.GetInventory().UnlockFragment("frag_06");
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(windLectern.position, "DISCOVERED: Fragment VI (Gale Winds)!", Color{ 120, 220, 255, 255 }, 22.0f);
+            particles.SpawnSparks(windLectern.position, Color{ 120, 220, 255, 255 }, 24, 140.0f);
         }
-        // 4. Knight Lenon
-        else if (!sparActive && knightLenonNPC.CheckInteraction(playerPos)) {
-            if (lenonDefeated) {
-                SetDialogue("KNIGHT LENON", "A well-earned victory, friend! That Crusader Plate suits you magnificently.", Color{ 225, 185, 65, 255 }, 5.0f);
+        // 7. Lore Item: Vanguard Field Log (Fragment VII)
+        else if (!vanguardLog.collected && vanguardLog.CheckInteraction(playerPos)) {
+            vanguardLog.collected = true;
+            player.GetInventory().UnlockFragment("frag_07");
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(vanguardLog.position, "DISCOVERED: Fragment VII (Lenon's Vigil)!", Color{ 255, 215, 80, 255 }, 22.0f);
+            particles.SpawnSparks(vanguardLog.position, Color{ 255, 215, 80, 255 }, 24, 140.0f);
+        }
+        // 8. Lore Item: Royal Archives (Fragment VIII)
+        else if (!royalArchives.collected && royalArchives.CheckInteraction(playerPos)) {
+            royalArchives.collected = true;
+            player.GetInventory().UnlockFragment("frag_08");
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(royalArchives.position, "DISCOVERED: Fragment VIII (Sovereign's Burden)!", Color{ 255, 215, 80, 255 }, 22.0f);
+            particles.SpawnSparks(royalArchives.position, Color{ 255, 215, 80, 255 }, 24, 140.0f);
+        }
+        // 9. King Kreptu
+        else if (kingKreptu.CheckInteraction(playerPos)) {
+            if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
+                questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
+                hasTalkedToKing = true;
+                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN",
+                    "Captain Lenon told me of your arrival, wanderer. You brought word of Lord Zil and braved the corrupted highway. The Lord Liege's madness consumes Tydeshire, and we need warriors of true resolve. I hereby sanction your martial trial! Go to the Eastern Courtyard and spar with Captain Lenon. Defeat him, and the royal Crusader Plate is yours!",
+                    Color{ 255, 215, 70, 255 }, 9.5f);
+                particles.SpawnFloatingText(kingKreptu.position, "Courtyard Trial Sanctioned!", Color{ 255, 220, 90, 255 }, 22.0f);
+                SoundFX::PlayParrySuccess();
+            } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
+                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN",
+                    "You bested Captain Lenon and wear our kingdom's sacred Crusader Plate! Zyphden proudly honors you, Champion of the Gale Winds!",
+                    Color{ 255, 215, 70, 255 }, 7.0f);
+            } else if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
+                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN",
+                    "Captain Lenon awaits your blade in the Eastern Courtyard. Prove your strength in the trial!",
+                    Color{ 255, 215, 70, 255 }, 5.5f);
             } else {
+                SetDialogue("KING KREPTU - MONARCH OF ZYPHDEN",
+                    "Welcome, wanderer. If you seek news of our realm, speak with Eldon at the Hearthside Tavern first.",
+                    Color{ 255, 215, 70, 255 }, 5.5f);
+            }
+        }
+        // 10. Knight Lenon
+        else if (lenonSpawned && !sparActive && knightLenonNPC.CheckInteraction(playerPos)) {
+            if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
                 // Begin courtyard spar duel!
                 sparActive = true;
+                questPhase = ZyphdenQuestPhase::SPARRING;
                 enemies.clear();
                 projectiles.clear();
                 enemies.emplace_back(EnemyType::KNIGHT_LENON_BOSS, Vector2{ 1490.0f, 660.0f });
@@ -275,7 +459,11 @@ void ZyphdenHandler::Update(
                 SoundFX::PlayCrusaderClash();
                 particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 30, 180.0f);
                 particles.AddScreenShake(5.0f, 0.2f);
-                SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN", "Draw your steel, wanderer! Let us see if your technique matches your reputation!", Color{ 225, 185, 65, 255 }, 5.5f);
+                SetDialogue("KNIGHT LENON - VANGUARD CAPTAIN", "His Majesty has sanctioned our duel! Draw your steel, wanderer! Let us see if your resolve can pierce my defense!", Color{ 225, 185, 65, 255 }, 6.0f);
+            } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
+                SetDialogue("KNIGHT LENON", "A well-earned victory, friend! That Crusader Plate suits you magnificently.", Color{ 225, 185, 65, 255 }, 5.0f);
+            } else if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
+                SetDialogue("KNIGHT LENON", "Speak with King Kreptu in the Northern Keep first! Once His Majesty sanctions our duel, meet me here in the Courtyard.", Color{ 225, 185, 65, 255 }, 6.0f);
             }
         }
     }
@@ -306,12 +494,20 @@ void ZyphdenHandler::Render(
     BeginMode2D(camera);
     map.DrawFloor();
 
+    // Draw Lore Collectible Items
+    windLectern.Draw(time);
+    vanguardLog.Draw(time);
+    royalArchives.Draw(time);
+
     // Draw Peaceful NPCs when not actively sparring as boss
     eldon.Draw(time);
     noticeboard.Draw(time);
+    cedric.Draw(time);
+    varek.Draw(time);
+    maeve.Draw(time);
     kingKreptu.Draw(time);
 
-    if (!sparActive) {
+    if (lenonSpawned && !sparActive) {
         knightLenonNPC.Draw(time);
     }
 
@@ -377,28 +573,36 @@ void ZyphdenHandler::Render(
     DrawText(showObjectives ? "[-] OBJECTIVES [O]" : "[+] OBJECTIVES [O]", (int)objX + 8, (int)objY - 22, 11, hoverTab ? Color{ 255, 230, 120, 255 } : Color{ 200, 215, 240, 230 });
 
     if (showObjectives) {
-        float cardW = 270.0f;
-        float cardH = 120.0f;
+        float cardW = 285.0f;
+        float cardH = 135.0f;
         Rectangle cardRec = { objX, objY, cardW, cardH };
         DrawRectangleRounded(cardRec, 0.15f, 4, Color{ 14, 18, 26, 235 });
         DrawRectangleRoundedLines(cardRec, 0.15f, 4, Color{ 55, 72, 100, 220 });
 
         DrawText("CHAPTER 1: ZYPHDEN", (int)objX + 14, (int)objY + 12, 11, Color{ 255, 215, 80, 255 });
 
-        // Objective 1: Speak with King Kreptu
-        Color col1 = hasTalkedToKing ? Color{ 100, 235, 160, 255 } : Color{ 220, 225, 240, 230 };
-        const char* mark1 = hasTalkedToKing ? "[x] 1. King Kreptu in Northern Keep" : "[ ] 1. King Kreptu in Northern Keep";
-        DrawText(mark1, (int)objX + 14, (int)objY + 36, 11, col1);
+        // Objective 1: Visit Tavernkeep Eldon
+        bool obj1Done = questPhase > ZyphdenQuestPhase::SEEK_TAVERN;
+        Color col1 = obj1Done ? Color{ 100, 235, 160, 255 } : Color{ 255, 230, 120, 255 };
+        const char* mark1 = obj1Done ? "[x] 1. Spoke with Tavernkeep Eldon" : "[>] 1. Visit Hearthside Tavern & speak with Eldon";
+        DrawText(mark1, (int)objX + 14, (int)objY + 34, 10, col1);
 
-        // Objective 2: Challenge Knight Lenon
-        Color col2 = (sparActive || lenonDefeated) ? Color{ 100, 235, 160, 255 } : (hasTalkedToKing ? Color{ 220, 225, 240, 230 } : Color{ 140, 150, 165, 200 });
-        const char* mark2 = lenonDefeated ? "[x] 2. Spar with Knight Lenon" : (sparActive ? "[>] 2. Sparring with Knight Lenon" : "[ ] 2. Spar with Knight Lenon");
-        DrawText(mark2, (int)objX + 14, (int)objY + 58, 11, col2);
+        // Objective 2: Royal Audience with King Kreptu
+        bool obj2Done = questPhase >= ZyphdenQuestPhase::CHALLENGE_READY;
+        Color col2 = obj2Done ? Color{ 100, 235, 160, 255 } : (questPhase == ZyphdenQuestPhase::SEEK_KING ? Color{ 255, 230, 120, 255 } : Color{ 140, 150, 165, 200 });
+        const char* mark2 = obj2Done ? "[x] 2. Royal Audience with King Kreptu" : (questPhase == ZyphdenQuestPhase::SEEK_KING ? "[>] 2. Audience with King Kreptu in Northern Keep" : "[ ] 2. Speak with Captain Lenon & King Kreptu");
+        DrawText(mark2, (int)objX + 14, (int)objY + 56, 10, col2);
 
-        // Objective 3: Claim Crusader Plate
-        Color col3 = lenonDefeated ? Color{ 100, 235, 160, 255 } : Color{ 140, 150, 165, 200 };
-        const char* mark3 = lenonDefeated ? "[x] 3. Claim Crusader Plate (+24 Def)" : "[ ] 3. Claim Crusader Plate (+24 Def)";
-        DrawText(mark3, (int)objX + 14, (int)objY + 80, 11, col3);
+        // Objective 3: Courtyard Spar with Knight Lenon
+        bool obj3Done = questPhase == ZyphdenQuestPhase::VICTORIOUS;
+        Color col3 = obj3Done ? Color{ 100, 235, 160, 255 } : (questPhase == ZyphdenQuestPhase::CHALLENGE_READY || questPhase == ZyphdenQuestPhase::SPARRING ? Color{ 255, 230, 120, 255 } : Color{ 140, 150, 165, 200 });
+        const char* mark3 = obj3Done ? "[x] 3. Bested Knight Lenon in Courtyard" : (questPhase == ZyphdenQuestPhase::SPARRING ? "[!] 3. Sparring with Knight Lenon!" : (questPhase == ZyphdenQuestPhase::CHALLENGE_READY ? "[>] 3. Challenge Knight Lenon in Courtyard" : "[ ] 3. Spar with Knight Lenon in Courtyard"));
+        DrawText(mark3, (int)objX + 14, (int)objY + 78, 10, col3);
+
+        // Objective 4: Claim Crusader Plate
+        Color col4 = obj3Done ? Color{ 100, 235, 160, 255 } : Color{ 140, 150, 165, 200 };
+        const char* mark4 = obj3Done ? "[x] 4. Claimed Crusader Plate (+24 Def)" : "[ ] 4. Claim Crusader Plate (+24 Def)";
+        DrawText(mark4, (int)objX + 14, (int)objY + 100, 10, col4);
     }
 
     // Dialogue Banner

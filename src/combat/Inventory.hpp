@@ -61,6 +61,7 @@ public:
 
     // Lore Fragments
     bool UnlockFragment(const std::string& id);
+    bool HasFragment(const std::string& id) const;
     void MarkFragmentRead(const std::string& id);
     const std::vector<LoreFragment>& GetFragments() const { return fragments; }
     const LoreFragment* GetFragment(const std::string& id) const;
@@ -70,6 +71,7 @@ public:
 
     // Quest / Key Items
     void AddQuestItem(const QuestItem& item);
+    bool HasQuestItem(const std::string& id) const;
     const std::vector<QuestItem>& GetQuestItems() const { return questItems; }
 
 private:

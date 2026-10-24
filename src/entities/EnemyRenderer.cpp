@@ -145,6 +145,118 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
     bool isStunned = (enemy.state == EnemyState::STUNNED);
     AssetManager::DrawEnemySilhouette(enemy.position, enemy.facingAngle, bodyColor, enemy.radius, isStunned);
 
+    float rad = enemy.facingAngle * DEG2RAD;
+    Vector2 dir = { cosf(rad), sinf(rad) };
+    Vector2 normal = { -dir.y, dir.x };
+    Vector2 rightHand = {
+        enemy.position.x + normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f,
+        enemy.position.y + normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f
+    };
+
+    // Enemy Attack Visuals & Weapon Animations
+    if (enemy.type == EnemyType::SLASHER) {
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+            float startArc = enemy.facingAngle - 65.0f;
+            float sweepAngle = progress * 135.0f;
+            float swordAngle = startArc + sweepAngle;
+
+            // Crimson slashing arc & glowing edge
+            DrawCircleSector(enemy.position, enemy.attackRange, startArc, startArc + sweepAngle, 16, Color{ 230, 40, 50, (unsigned char)(75 * (1.0f - progress * 0.35f)) });
+            DrawCircleSectorLines(enemy.position, enemy.attackRange, startArc, startArc + sweepAngle, 16, Color{ 255, 110, 110, 220 });
+
+            // Curved cultist scythe blade
+            AssetManager::DrawSword(rightHand, swordAngle, 36.0f, Color{ 240, 50, 60, 255 }, Color{ 255, 90, 90, 230 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            float windupAngle = enemy.facingAngle - 45.0f - progress * 25.0f;
+            AssetManager::DrawSword(rightHand, windupAngle, 34.0f, Color{ 200, 40, 50, 255 }, Color{ 255, 70, 70, 190 });
+            Vector2 bladeTip = { rightHand.x + cosf(windupAngle * DEG2RAD) * 32.0f, rightHand.y + sinf(windupAngle * DEG2RAD) * 32.0f };
+            DrawCircleV(bladeTip, 3.5f + 2.5f * progress, Color{ 255, 120, 80, 240 });
+        } else {
+            AssetManager::DrawSword(rightHand, enemy.facingAngle + 35.0f, 30.0f, Color{ 170, 45, 55, 255 }, Color{ 110, 25, 35, 200 });
+        }
+    } else if (enemy.type == EnemyType::BRUTE) {
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+            float smashAngle = enemy.facingAngle - 85.0f + progress * 115.0f;
+            AssetManager::DrawMace(rightHand, smashAngle, 42.0f, Color{ 150, 155, 170, 255 }, Color{ 220, 50, 50, 240 });
+
+            // Expanding ground shockwaves & seismic fractures
+            Vector2 impactPos = { enemy.position.x + dir.x * (enemy.radius + 18.0f), enemy.position.y + dir.y * (enemy.radius + 18.0f) };
+            float shockR = enemy.attackRange * progress;
+            DrawCircleLines((int)impactPos.x, (int)impactPos.y, shockR, Color{ 255, 60, 60, (unsigned char)(230 * (1.0f - progress)) });
+            DrawCircleLines((int)impactPos.x, (int)impactPos.y, shockR * 0.7f, Color{ 255, 140, 60, (unsigned char)(190 * (1.0f - progress)) });
+            for (int k = 0; k < 6; k++) {
+                float fa = ((float)k * 60.0f) * DEG2RAD;
+                DrawLineEx(impactPos, { impactPos.x + cosf(fa) * (shockR * 0.9f), impactPos.y + sinf(fa) * (shockR * 0.9f) }, 2.0f, Color{ 255, 100, 60, (unsigned char)(180 * (1.0f - progress)) });
+            }
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            float windupAngle = enemy.facingAngle - 85.0f;
+            AssetManager::DrawMace(rightHand, windupAngle, 40.0f, Color{ 130, 135, 150, 255 }, Color{ 200, 40, 40, 200 });
+            Vector2 maceHead = { rightHand.x + cosf(windupAngle * DEG2RAD) * 36.0f, rightHand.y + sinf(windupAngle * DEG2RAD) * 36.0f };
+            DrawCircleV(maceHead, 4.5f + 3.0f * progress, Color{ 255, 70, 70, 220 });
+        } else {
+            AssetManager::DrawMace(rightHand, enemy.facingAngle + 45.0f, 36.0f, Color{ 110, 115, 130, 255 }, Color{ 60, 25, 30, 200 });
+        }
+    } else if (enemy.type == EnemyType::CHARGER) {
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+            Vector2 thrustHand = { rightHand.x + dir.x * (progress * 26.0f), rightHand.y + dir.y * (progress * 26.0f) };
+            DrawLineEx(thrustHand, { thrustHand.x + dir.x * 46.0f, thrustHand.y + dir.y * 46.0f }, 4.0f, Color{ 255, 210, 120, 255 });
+            DrawCircleV({ thrustHand.x + dir.x * 48.0f, thrustHand.y + dir.y * 48.0f }, 4.5f, Color{ 255, 240, 180, 255 });
+
+            // Trailing speedlines
+            DrawLineEx({ enemy.position.x - normal.x * 12.0f, enemy.position.y - normal.y * 12.0f },
+                       { enemy.position.x - normal.x * 16.0f - dir.x * 32.0f, enemy.position.y - normal.y * 16.0f - dir.y * 32.0f }, 2.0f, Color{ 255, 150, 50, 170 });
+            DrawLineEx({ enemy.position.x + normal.x * 12.0f, enemy.position.y + normal.y * 12.0f },
+                       { enemy.position.x + normal.x * 16.0f - dir.x * 32.0f, enemy.position.y + normal.y * 16.0f - dir.y * 32.0f }, 2.0f, Color{ 255, 150, 50, 170 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            DrawLineEx(rightHand, { rightHand.x + dir.x * 38.0f, rightHand.y + dir.y * 38.0f }, 3.0f, Color{ 230, 150, 60, 255 });
+            DrawCircleV({ rightHand.x + dir.x * 40.0f, rightHand.y + dir.y * 40.0f }, 4.0f, Color{ 255, 190, 80, 255 });
+        } else {
+            DrawLineEx(rightHand, { rightHand.x + dir.x * 32.0f + normal.x * 8.0f, rightHand.y + dir.y * 32.0f + normal.y * 8.0f }, 2.5f, Color{ 180, 110, 40, 255 });
+        }
+    } else if (enemy.type == EnemyType::ARCHER) {
+        Vector2 bowCenter = { enemy.position.x + dir.x * (enemy.radius + 6.0f), enemy.position.y + dir.y * (enemy.radius + 6.0f) };
+        Vector2 bowTip1 = { bowCenter.x - normal.x * 14.0f, bowCenter.y - normal.y * 14.0f };
+        Vector2 bowTip2 = { bowCenter.x + normal.x * 14.0f, bowCenter.y + normal.y * 14.0f };
+
+        if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            Vector2 stringPull = { bowCenter.x - dir.x * (6.0f + 10.0f * progress), bowCenter.y - dir.y * (6.0f + 10.0f * progress) };
+            DrawLineEx(bowTip1, bowCenter, 2.5f, Color{ 145, 105, 65, 255 });
+            DrawLineEx(bowCenter, bowTip2, 2.5f, Color{ 145, 105, 65, 255 });
+            DrawLineEx(bowTip1, stringPull, 1.5f, Color{ 240, 240, 240, 220 });
+            DrawLineEx(bowTip2, stringPull, 1.5f, Color{ 240, 240, 240, 220 });
+            // Nocked glowing arrow
+            DrawLineEx(stringPull, { bowCenter.x + dir.x * 18.0f, bowCenter.y + dir.y * 18.0f }, 2.0f, Color{ 255, 180, 60, 255 });
+            DrawCircleV({ bowCenter.x + dir.x * 18.0f, bowCenter.y + dir.y * 18.0f }, 3.5f, Color{ 255, 230, 120, 255 });
+        } else {
+            DrawLineEx(bowTip1, bowCenter, 2.0f, Color{ 120, 85, 50, 255 });
+            DrawLineEx(bowCenter, bowTip2, 2.0f, Color{ 120, 85, 50, 255 });
+            DrawLineEx(bowTip1, bowTip2, 1.0f, Color{ 200, 200, 200, 160 });
+        }
+    } else if (enemy.type == EnemyType::PYROMANCER) {
+        // Occult void staff
+        Vector2 staffBase = { enemy.position.x - dir.x * 6.0f + normal.x * 10.0f, enemy.position.y - dir.y * 6.0f + normal.y * 10.0f };
+        Vector2 staffHead = { enemy.position.x + dir.x * 24.0f + normal.x * 10.0f, enemy.position.y + dir.y * 24.0f + normal.y * 10.0f };
+        DrawLineEx(staffBase, staffHead, 3.0f, Color{ 65, 45, 75, 255 });
+
+        float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 6.0f);
+        if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            DrawCircleV(staffHead, 6.0f + 4.0f * progress, Color{ 190, 70, 255, 255 });
+            DrawCircleGradient(staffHead, 18.0f * (1.0f + progress), Color{ 170, 50, 240, 140 }, Color{ 0, 0, 0, 0 });
+        } else {
+            DrawCircleV(staffHead, 4.5f + 1.5f * pulse, Color{ 160, 50, 220, 255 });
+        }
+    }
+
     // Boss special crown and aura
     if (enemy.type == EnemyType::INQUISITOR_BOSS) {
         float time = (float)GetTime() * 4.0f;
@@ -152,9 +264,6 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, auraPulse, Color{ 255, 215, 60, 140 });
 
         // Boss runic crown spikes
-        float rad = enemy.facingAngle * DEG2RAD;
-        Vector2 dir = { cosf(rad), sinf(rad) };
-        Vector2 normal = { -dir.y, dir.x };
         Vector2 crownCenter = { enemy.position.x + dir.x * 8.0f, enemy.position.y + dir.y * 8.0f };
         DrawCircleV(crownCenter, 6.0f, Color{ 255, 215, 60, 255 });
         DrawCircleV({ crownCenter.x - normal.x * 9.0f, crownCenter.y - normal.y * 9.0f }, 4.0f, Color{ 255, 180, 40, 240 });
@@ -164,13 +273,29 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         float auraPulse = enemy.radius + 6.0f + 2.5f * sinf(time);
         DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, auraPulse, Color{ 255, 140, 30, 160 });
 
-        float rad = enemy.facingAngle * DEG2RAD;
-        Vector2 dir = { cosf(rad), sinf(rad) };
-        Vector2 normal = { -dir.y, dir.x };
         Vector2 swordHand = { enemy.position.x + normal.x * (enemy.radius * 0.75f), enemy.position.y + normal.y * (enemy.radius * 0.75f) };
 
-        // Zil's Fragment wields Truth Seeker (Partial)!
-        AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 170, 30, 220 });
+        // Animated Zil Boss Attack Visuals (Truth Seeker)
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+
+            // Upward Radiant Slice & Dawnfire Arc
+            float startA = enemy.facingAngle - 70.0f;
+            float arcLen = progress * 140.0f;
+            DrawCircleSector(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 215, 80, (unsigned char)(80 * (1.0f - progress * 0.4f)) });
+            DrawCircleSectorLines(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 240, 150, 230 });
+            float swordA = startA + arcLen;
+            AssetManager::DrawSword(swordHand, swordA, 48.0f, Color{ 255, 240, 160, 255 }, Color{ 255, 180, 40, 230 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            float windupAngle = enemy.facingAngle - 60.0f;
+            AssetManager::DrawSword(swordHand, windupAngle, 46.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 170, 30, 220 });
+            Vector2 tip = { swordHand.x + cosf(windupAngle * DEG2RAD) * 44.0f, swordHand.y + sinf(windupAngle * DEG2RAD) * 44.0f };
+            DrawCircleV(tip, 5.0f + 3.0f * progress, Color{ 255, 220, 100, 240 });
+        } else {
+            AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 170, 30, 220 });
+        }
 
         // Crusader shoulder pauldrons
         DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 5.0f, Color{ 80, 85, 105, 255 });
@@ -180,13 +305,29 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         float auraPulse = enemy.radius + 6.0f + 2.0f * sinf(time);
         DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, auraPulse, Color{ 255, 215, 65, 160 });
 
-        float rad = enemy.facingAngle * DEG2RAD;
-        Vector2 dir = { cosf(rad), sinf(rad) };
-        Vector2 normal = { -dir.y, dir.x };
         Vector2 swordHand = { enemy.position.x + normal.x * (enemy.radius * 0.75f), enemy.position.y + normal.y * (enemy.radius * 0.75f) };
 
-        // Royal Greatsword
-        AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 46.0f, Color{ 220, 230, 245, 255 }, Color{ 225, 185, 65, 220 });
+        // Animated Knight Lenon Attack Visuals (Royal Greatsword)
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+
+            // Royal Greatsword Cleave Arc & Golden Crescent
+            float startA = enemy.facingAngle - 65.0f;
+            float arcLen = progress * 135.0f;
+            DrawCircleSector(enemy.position, 160.0f, startA, startA + arcLen, 20, Color{ 255, 215, 65, (unsigned char)(75 * (1.0f - progress * 0.4f)) });
+            DrawCircleSectorLines(enemy.position, 160.0f, startA, startA + arcLen, 20, Color{ 255, 235, 120, 230 });
+            float swordA = startA + arcLen;
+            AssetManager::DrawSword(swordHand, swordA, 50.0f, Color{ 230, 240, 255, 255 }, Color{ 225, 185, 65, 230 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            float windupAngle = enemy.facingAngle - 55.0f;
+            AssetManager::DrawSword(swordHand, windupAngle, 48.0f, Color{ 220, 230, 245, 255 }, Color{ 225, 185, 65, 220 });
+            Vector2 tip = { swordHand.x + cosf(windupAngle * DEG2RAD) * 46.0f, swordHand.y + sinf(windupAngle * DEG2RAD) * 46.0f };
+            DrawCircleV(tip, 5.0f + 3.0f * progress, Color{ 255, 230, 100, 240 });
+        } else {
+            AssetManager::DrawSword(swordHand, enemy.facingAngle + 35.0f, 46.0f, Color{ 220, 230, 245, 255 }, Color{ 225, 185, 65, 220 });
+        }
 
         // Golden pauldrons & Crusader visor
         DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });

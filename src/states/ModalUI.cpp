@@ -587,8 +587,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText(listTitle.c_str(), (int)col1X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
 
         for (int i = 0; i < totalFrags; i++) {
-            float fragY = contentY + 24.0f + (float)i * 105.0f;
-            Rectangle fragRec = { col1X, fragY, col1W, 96.0f };
+            float cardH = 52.0f;
+            float fragY = contentY + 22.0f + (float)i * 56.0f;
+            Rectangle fragRec = { col1X, fragY, col1W, cardH };
             bool isHov = CheckCollisionPointRec(mousePos, fragRec);
             bool isSel = (selectedFragmentIndex == i);
 
@@ -599,18 +600,17 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             DrawRectangleRoundedLines(fragRec, 0.12f, 4, border);
 
             if (frags[i].discovered) {
-                DrawText(frags[i].realm.c_str(), (int)col1X + 16, (int)fragY + 12, 10, Color{ 140, 210, 255, 220 });
-                DrawText(frags[i].title.c_str(), (int)col1X + 16, (int)fragY + 28, 14, Color{ 255, 255, 255, 255 });
-                DrawText(frags[i].preview.c_str(), (int)col1X + 16, (int)fragY + 50, 11, Color{ 175, 195, 220, 200 });
+                DrawText(frags[i].realm.c_str(), (int)col1X + 12, (int)fragY + 6, 10, Color{ 140, 210, 255, 220 });
+                DrawText(frags[i].title.c_str(), (int)col1X + 12, (int)fragY + 19, 13, Color{ 255, 255, 255, 255 });
+                DrawText(frags[i].preview.c_str(), (int)col1X + 12, (int)fragY + 35, 10, Color{ 175, 195, 220, 200 });
 
                 if (!frags[i].isRead) {
-                    DrawRectangleRounded(Rectangle{ col1X + col1W - 74, fragY + 10, 60, 18 }, 0.3f, 4, Color{ 255, 180, 40, 240 });
-                    DrawText("NEW", (int)(col1X + col1W - 56), (int)fragY + 13, 10, Color{ 10, 12, 18, 255 });
+                    DrawRectangleRounded(Rectangle{ col1X + col1W - 58, fragY + 8, 48, 16 }, 0.3f, 4, Color{ 255, 180, 40, 240 });
+                    DrawText("NEW", (int)(col1X + col1W - 44), (int)fragY + 11, 10, Color{ 10, 12, 18, 255 });
                 }
             } else {
-                DrawText("??? SHROUDED RECORD", (int)col1X + 16, (int)fragY + 14, 10, Color{ 120, 130, 150, 200 });
-                DrawText("Undiscovered Fragment", (int)col1X + 16, (int)fragY + 32, 14, Color{ 150, 160, 180, 180 });
-                DrawText("Explore Tydeshire and defeat guardians to reveal", (int)col1X + 16, (int)fragY + 54, 11, Color{ 110, 120, 140, 180 });
+                DrawText("??? SHROUDED RECORD", (int)col1X + 12, (int)fragY + 10, 10, Color{ 120, 130, 150, 200 });
+                DrawText("Undiscovered Chronicle Fragment", (int)col1X + 12, (int)fragY + 26, 12, Color{ 150, 160, 180, 180 });
             }
 
             if (isHov && isMousePressed) {

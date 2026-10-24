@@ -71,6 +71,46 @@ void Inventory::InitDefault() {
         false,
         false
     });
+
+    fragments.push_back({
+        "frag_05",
+        "Fragment V: The Crossroads Watch",
+        "Crossroads of Tydeshire",
+        "The highway north was once flooded with silk merchants. Now only beasts remain...",
+        "The highway north was once flooded with merchants bearing silk and spice from Fleurshden.\n\nNow, only prowling slashers and iron brutes wander the shattered cobblestone. I watched the royal vanguard ride south three moons ago. None returned. The King in the north has barricaded the gates, waiting for the sky to fall.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_06",
+        "Fragment VI: Rite of the Gale Winds",
+        "Shrine of the Gale Winds",
+        "Long before the Unification, the Gale Monks communed with the northern tempests...",
+        "Long before the Unification, the Gale Monks of Zyphden communed with the howling northern tempests.\n\nThey foresaw that when the sovereign crown fell to corruption, the Totems of old would awaken. The Totem of Sanity was hidden beneath the roadside ruins to guide the one who would dare face the Lord Liege.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_07",
+        "Fragment VII: Lenon's Field Log",
+        "Knight's Garrison of Zyphden",
+        "My sworn brother Zil rode south to investigate the Ruined Castle...",
+        "My sworn brother Zil rode south to investigate the Ruined Castle. He carried the shattered remnant of Truth Seeker, believing he could sever the madness at its root.\n\nI pray he still breathes. If a stranger ever enters Zyphden bearing his blade or token, I will know my brother's fate.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_08",
+        "Fragment VIII: The Sovereign's Burden",
+        "Royal Keep of King Kreptu",
+        "To all subjects of Zyphden: The High Summit is broken. We shall not bend our knee...",
+        "To all subjects of Zyphden: The High Summit is broken. King Charlz answers no raven.\n\nWe have fortified the southern gates and summoned all remaining crusaders to the courtyard. We shall not bend our knee to madness. Zyphden shall stand as long as a single crusader draws breath.",
+        false,
+        false
+    });
 }
 
 bool Inventory::HasWeapon(WeaponType type) const {
@@ -157,6 +197,18 @@ bool Inventory::HasUnreadFragments() const {
     return false;
 }
 
+bool Inventory::HasFragment(const std::string& id) const {
+    const LoreFragment* frag = GetFragment(id);
+    return frag && frag->discovered;
+}
+
 void Inventory::AddQuestItem(const QuestItem& item) {
     questItems.push_back(item);
+}
+
+bool Inventory::HasQuestItem(const std::string& id) const {
+    for (const auto& item : questItems) {
+        if (item.id == id) return true;
+    }
+    return false;
 }
