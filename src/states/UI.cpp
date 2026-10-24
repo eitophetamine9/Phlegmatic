@@ -23,6 +23,10 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     HUD::DrawCombat(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, currentWave, totalWaves, hasUnreadLore);
 }
 
+void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
+    HUD::DrawCampaignHUD(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, locationName, hasUnreadLore);
+}
+
 void GameUI::DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp) {
     HUD::DrawBossHealthBar(windowWidth, bossName, hp, maxHp);
 }
@@ -41,6 +45,10 @@ int GameUI::DrawZilDefeatModal(int windowWidth, int windowHeight, Vector2 mouseP
 
 void GameUI::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {
     HUD::DrawBossDialogueBanner(windowWidth, windowHeight, speaker, text, accentColor);
+}
+
+bool GameUI::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
+    return HUD::DrawNPCDialogueBox(windowWidth, windowHeight, mousePos, isMousePressed, speaker, pages, currentPage, accentColor);
 }
 
 int GameUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player) {

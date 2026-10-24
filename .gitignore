@@ -60,3 +60,6 @@ _deps/
 *.bak
 *.cache
 *.dat
+
+# Project Context & AI Documentation
+PROJECT_CONTEXT.txt

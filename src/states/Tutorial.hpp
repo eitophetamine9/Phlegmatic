@@ -10,11 +10,12 @@
 
 enum class TutorialStep {
     AWAKENING,        // Step 1: Move with [W, A, S, D]
-    WEAPON_STAND,     // Step 2: Claim Broadsword [E]
+    WEAPON_STAND,     // Step 2: Claim Broadsword & Commoner's Scrap [E]
     COMBAT_BASICS,    // Step 3: Test Light [L-Click] & Heavy [R-Click] attacks
-    LORE_DISCOVERY,   // Step 4: Open Ancient Relic Chest [E] & read Journal [I]
-    DEFENSE_SENTINEL, // Step 5: Evade with [Q] Dash & stagger with [F] Parry
-    GATE_OPENED,      // Step 6: Sanctuary gate unlocked, proceed north
+    INVENTORY_CHECK,  // Step 4: Open Journal / Inventory [I] to inspect equipment and attributes
+    LORE_DISCOVERY,   // Step 5: Cross eastern bridge to open Ancient Relic Chest [E]
+    DEFENSE_SENTINEL, // Step 6: Evade with [Q] Dash & stagger with [F] Parry
+    GATE_OPENED,      // Step 7: Sanctuary steps unlocked, proceed north to High Altar
     COMPLETED
 };
 
@@ -38,7 +39,7 @@ struct LoreCollectible {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, bool isInteractable = true) const;
 };
 
 struct AncientChest {
@@ -69,6 +70,7 @@ public:
     TutorialStep GetStep() const { return currentStep; }
     bool IsCompleted() const { return currentStep == TutorialStep::COMPLETED; }
     bool HasClaimedWeapon() const { return hasClaimedWeapon; }
+    bool HasClaimedArmor() const { return hasClaimedArmor; }
     bool HasDefeatedTutorialEnemy() const { return tutorialEnemyDefeated; }
     void SkipToBoss(GameMap& map);
 
@@ -76,8 +78,10 @@ public:
     const std::vector<LoreCollectible>& GetLoreItems() const { return loreItems; }
     std::vector<LoreCollectible>& GetLoreItems() { return loreItems; }
     Vector2 GetWeaponStandPos() const { return weaponStandPos; }
+    Vector2 GetArmorStandPos() const { return armorStandPos; }
 
     void TriggerStepPopup(TutorialStep step);
+    void NotifyInventoryOpened() { hasOpenedInventory = true; }
 
 private:
     TutorialStep currentStep;
@@ -87,8 +91,12 @@ private:
     Vector2 weaponStandPos;
     bool hasClaimedWeapon;
 
+    Vector2 armorStandPos;
+    bool hasClaimedArmor;
+
     int lightAttacksLanded;
     int heavyAttacksLanded;
+    bool hasOpenedInventory;
 
     AncientChest chest;
     bool hasOpenedChest;
@@ -103,9 +111,15 @@ private:
     std::string currentObjectiveText;
     std::string currentControlHint;
 
+    // Objectives toggle
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() const { showObjectives = !showObjectives; }
+
     // Pop-up modal state
     bool showPopup;
     std::string popupTitle;
     std::string popupBody;
     std::string popupHint;
+
+    mutable bool showObjectives = true;
 };

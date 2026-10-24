@@ -70,19 +70,25 @@ void RuinedCastleHandler::Update(
             zilDialogueTimer = 4.0f;
             particles.SpawnFloatingText({ 800.0f, 290.0f }, "DUEL RESTARTED!", Color{ 255, 200, 60, 255 }, 24.0f);
             return;
-        } else if (choice == 2) { // Accept Spare & Regroup
+        } else if (choice == 2) { // Accept Spare & Claim Zil's Token
             showZilDefeatModal = false;
             zilEncounterActive = false;
             zilSparedPlayer = true;
-            player.Revive({ 800.0f, 520.0f }, 0.6f);
+            map.SetGateOpen(true);
+            player.Revive({ 800.0f, 480.0f }, 1.0f);
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
+
+            // Award Zil's Token (quest item)
+            player.GetInventory().AddQuestItem(QuestItem{ "zils_token", "Zil's Token", "A scorched iron crusade badge bestowed by Zil. Proves you survived the trial of the Ruined Castle.", Color{ 255, 180, 60, 255 } });
+
             zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
-            zilDialogueText = "You possess spirit, wanderer... but Truth Seeker yields only to one who can conquer me. Regroup and challenge me again!";
-            zilDialogueColor = Color{ 140, 210, 255, 255 };
+            zilDialogueText = "Take my token, wanderer. Carry word of my eternal vigil to Knight Lenon in Zyphden. The northern gateway to the Crossroads is open.";
+            zilDialogueColor = Color{ 255, 180, 60, 255 };
             zilDialogueTimer = 6.0f;
-            particles.SpawnFloatingText(player.GetPosition(), "SPARED BY ZIL'S FRAGMENT - MUST DEFEAT TO PASS!", Color{ 140, 220, 255, 255 }, 24.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "ACQUIRED: Zil's Token! Gate to Crossroads Unlocked!", Color{ 255, 180, 60, 255 }, 24.0f);
+            particles.AddScreenShake(4.0f, 0.2f);
             return;
         }
         return;
@@ -206,8 +212,6 @@ void RuinedCastleHandler::Update(
 
         if (!zilAlive && !zilDefeated) {
             zilDefeated = true;
-            testArenaUnlocked = true;
-            if (onSaveArenaUnlock) onSaveArenaUnlock();
             zilEncounterActive = false;
             enemies.clear();
             projectiles.clear();
@@ -234,25 +238,26 @@ void RuinedCastleHandler::Update(
         zilDialogueTimer -= dt;
     }
 
-    // Check if player walks through northern open gateway into Zyphden (REQUIRES ZIL DEFEATED)
-    bool atNorthernGate = zilDefeated && map.IsGateOpen() &&
+    // Check if player walks through northern open gateway into Crossroads (Requires Zil defeated OR Zil spared)
+    bool gateUnlocked = (zilDefeated || zilSparedPlayer) && map.IsGateOpen();
+    bool atNorthernGate = gateUnlocked &&
                           (player.GetPosition().y <= map.GetBounds().y + 60.0f &&
                            player.GetPosition().x >= 670.0f && player.GetPosition().x <= 930.0f);
-    bool interactGate = zilDefeated && map.IsGateOpen() &&
+    bool interactGate = gateUnlocked &&
                         (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
     if (atNorthernGate || interactGate) {
-        currentState = GameState::BORDERLANDS_GATE;
+        currentState = GameState::CROSSROADS;
         SoundFX::PlayGateOpen();
-        particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
+        particles.Clear();
         return;
     }
 
-    // If player attempts to interact at the gate before defeating Zil
-    if (!zilDefeated && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
+    // If player attempts to interact at the gate before facing Zil
+    if (!gateUnlocked && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
-        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED - MUST DEFEAT ZIL'S FRAGMENT TO ADVANCE!", Color{ 255, 80, 80, 255 }, 20.0f);
+        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED - FACE ZIL'S FRAGMENT FIRST!", Color{ 255, 80, 80, 255 }, 20.0f);
         SoundFX::PlayHitImpact();
     }
 
@@ -325,14 +330,14 @@ void RuinedCastleHandler::Render(
     tutorial.DrawHUD(screenWidth, screenHeight);
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(
+    GameUI::DrawCampaignHUD(
         screenWidth, screenHeight,
         player.GetHealth(), player.GetMaxHealth(),
         player.GetStamina(), player.GetMaxStamina(),
         player.GetWeapon(),
         player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(),
         player.IsParrying(), player.HasCounterBuff(),
-        1, 1,
+        "RUINED CASTLE",
         hasUnread
     );
 
@@ -352,6 +357,9 @@ void RuinedCastleHandler::Render(
     if (showControlsModal) {
         GameUI::DrawControlsModal(screenWidth, screenHeight, mousePos, false);
     } else if (showInventoryModal) {
+        if (tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+            tutorial.NotifyInventoryOpened();
+        }
         GameUI::DrawInventoryModal(screenWidth, screenHeight, mousePos, false, const_cast<Player&>(player), inventoryActiveTab, inventorySelectedFragment);
     } else if (showZilDefeatModal) {
         GameUI::DrawZilDefeatModal(screenWidth, screenHeight, mousePos, false, !hasUsedZilRetry);

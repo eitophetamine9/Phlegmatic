@@ -25,98 +25,12 @@ Sound SoundFX::sndCrusaderClash = { 0 };
 Sound SoundFX::sndTruthSeekerResonance = { 0 };
 Sound SoundFX::sndGateOpen = { 0 };
 
-Sound SoundFX::GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType) {
-    const int sampleRate = 44100;
-    int totalSamples = (int)(sampleRate * duration);
-    if (totalSamples <= 0) totalSamples = 1;
+static inline float SoftClip(float x) {
+    return x / (1.0f + fabsf(x));
+}
 
-    short* samples = (short*)malloc(totalSamples * sizeof(short));
-    if (!samples) return Sound{ 0 };
-
-    float phase = 0.0f;
-    float phase2 = 0.0f;
-    float phase3 = 0.0f;
-    float filterState = 0.0f;
-
-    for (int i = 0; i < totalSamples; i++) {
-        float t = (float)i / (float)totalSamples;
-        float currentFreq = startFreq + (endFreq - startFreq) * t;
-        float dt = currentFreq / (float)sampleRate;
-        phase += dt;
-        if (phase > 1.0f) phase -= 1.0f;
-
-        float sampleVal = 0.0f;
-        float envelope = 1.0f - t;
-
-        if (waveType == 0) {
-            // Medieval Cathedral Abbey Bell / Ancient Relic Chime:
-            // Authentic bronze bell harmonics (fundamental, minor third tierce, fifth, octave)
-            envelope = (1.0f - t) * (1.0f - t);
-            phase2 += (currentFreq * 1.503f) / (float)sampleRate;
-            if (phase2 > 1.0f) phase2 -= 1.0f;
-            phase3 += (currentFreq * 2.76f) / (float)sampleRate;
-            if (phase3 > 1.0f) phase3 -= 1.0f;
-
-            sampleVal = 0.50f * sinf((float)(phase * 2.0 * M_PI))
-                      + 0.32f * sinf((float)(phase2 * 2.0 * M_PI))
-                      + 0.18f * sinf((float)(phase3 * 2.0 * M_PI));
-        } else if (waveType == 1) {
-            // Steel Blade Air Whoosh / Scabbard Draw:
-            // Filtered aerodynamic air displacement with subtle steel overtone
-            float rawNoise = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
-            filterState += (rawNoise - filterState) * 0.25f;
-            float steelEdge = sinf((float)(phase * 2.0 * M_PI));
-            envelope = sinf(t * (float)M_PI); // smooth rise and fall
-            sampleVal = 0.65f * filterState + 0.35f * steelEdge;
-        } else if (waveType == 2) {
-            // Steel Broadsword & Anvil Blade Clash:
-            // Sharp metallic impact transient with ringing steel overtone resonance
-            float metalNoise = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * expf(-t * 28.0f);
-            phase2 += (currentFreq * 2.42f) / (float)sampleRate;
-            if (phase2 > 1.0f) phase2 -= 1.0f;
-            phase3 += (currentFreq * 4.78f) / (float)sampleRate;
-            if (phase3 > 1.0f) phase3 -= 1.0f;
-
-            envelope = expf(-t * 8.5f);
-            sampleVal = 0.35f * metalNoise
-                      + 0.40f * sinf((float)(phase * 2.0 * M_PI))
-                      + 0.25f * sinf((float)(phase2 * 2.0 * M_PI))
-                      + 0.15f * sinf((float)(phase3 * 2.0 * M_PI));
-        } else if (waveType == 3) {
-            // Heavy Armor Impact / Chainmail & Flesh Thud:
-            // Deep low frequency punch with short metallic rattle
-            envelope = expf(-t * 14.0f);
-            float punch = sinf((float)(phase * 2.0 * M_PI));
-            float rattle = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * expf(-t * 22.0f);
-            sampleVal = 0.75f * punch + 0.25f * rattle;
-        } else if (waveType == 4) {
-            // Wooden Crossbow / Bowstring Snap:
-            // Fast attack wood transient + brief string tension twang
-            envelope = expf(-t * 18.0f);
-            float twang = sinf((float)(phase * 2.0 * M_PI));
-            float snap = (t < 0.08f) ? (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) : 0.0f;
-            sampleVal = 0.60f * snap + 0.40f * twang;
-        } else if (waveType == 5) {
-            // Ominous Medieval War Horn / Battle Drone:
-            // Rich brassy reed harmonics with subtle vibrato (replaces sci-fi beep!)
-            float vibrato = 1.0f + 0.04f * sinf((float)(t * 16.0 * M_PI));
-            float hornPhase = phase * vibrato;
-            envelope = (t < 0.2f) ? (t / 0.2f) : (1.0f - (t - 0.2f) / 0.8f);
-            sampleVal = 0.50f * sinf((float)(hornPhase * 2.0 * M_PI))
-                      + 0.30f * sinf((float)(hornPhase * 4.0 * M_PI))
-                      + 0.20f * sinf((float)(hornPhase * 6.0 * M_PI));
-        } else if (waveType == 6) {
-            // Portcullis Iron Chains & Stone Grinding:
-            float grind = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
-            filterState += (grind - filterState) * 0.15f;
-            float lowRumble = sinf((float)(phase * 2.0 * M_PI));
-            envelope = (1.0f - t);
-            sampleVal = 0.60f * lowRumble + 0.40f * filterState;
-        }
-
-        samples[i] = (short)(sampleVal * envelope * volume * 32767.0f);
-    }
-
+// Procedural sound generators producing authentic, visceral medieval audio
+static Sound CreateSoundFromBuffer(short* samples, int totalSamples, int sampleRate = 44100) {
     Wave wave = { 0 };
     wave.frameCount = totalSamples;
     wave.sampleRate = sampleRate;
@@ -129,44 +43,324 @@ Sound SoundFX::GenerateTone(float startFreq, float endFreq, float duration, floa
     return snd;
 }
 
+// 1. Blade Slash: Aerodynamic cold-steel air cut with swept resonant filtering & edge shimmer
+static Sound GenerateBladeSlash(float duration = 0.16f, float volume = 0.55f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float bp1 = 0.0f, bp2 = 0.0f;
+    float phase = 0.0f;
+    float phaseEdge = 0.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        // Sweeping aerodynamic turbulence: center freq ascends from 450Hz to 2400Hz then falls to 320Hz
+        float centerFreq = 400.0f + 2000.0f * sinf(t * (float)M_PI);
+        float q = 0.22f; // Bandwidth factor
+
+        // White noise excitation
+        float noise = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+
+        // Two-pole bandpass filter
+        bp1 += (noise - bp1) * (centerFreq / (float)sampleRate) * 2.2f;
+        bp2 += (bp1 - bp2) * (centerFreq / (float)sampleRate) * 2.2f;
+        float filteredAir = (bp1 - bp2) * 2.6f;
+
+        // Metallic blade edge overtone (~1100Hz whistle during peak arc)
+        float edgeFreq = 950.0f + 650.0f * sinf(t * (float)M_PI);
+        phaseEdge += edgeFreq / (float)sampleRate;
+        if (phaseEdge > 1.0f) phaseEdge -= 1.0f;
+        float edgeTone = sinf((float)(phaseEdge * 2.0 * M_PI)) * expf(-t * 8.0f);
+
+        // Smooth swing envelope with rapid attack and clean tail
+        float envelope = sinf(t * (float)M_PI);
+        envelope = envelope * envelope; // quadratic smoothing
+
+        float sampleVal = SoftClip(filteredAir * 0.75f + edgeTone * 0.25f);
+        samples[i] = (short)(sampleVal * envelope * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 2. Heavy Blunt Smash: Deep physical shockwave, crushing impact transient, and sub-bass resonance
+static Sound GenerateBluntSmash(float duration = 0.32f, float volume = 0.70f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float phaseBass = 0.0f;
+    float phaseRumble = 0.0f;
+    float filterCrunch = 0.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        // Pitch drops from 160Hz punch down to 42Hz deep earth tremor
+        float bassFreq = 42.0f + 118.0f * expf(-t * 16.0f);
+        phaseBass += bassFreq / (float)sampleRate;
+        if (phaseBass > 1.0f) phaseBass -= 1.0f;
+
+        phaseRumble += 38.0f / (float)sampleRate;
+        if (phaseRumble > 1.0f) phaseRumble -= 1.0f;
+
+        // Sharp crushing stone/metal contact transient (first 18ms)
+        float contactNoise = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+        filterCrunch += (contactNoise - filterCrunch) * 0.35f;
+        float crunch = filterCrunch * expf(-t * 28.0f);
+
+        // Sub-bass body
+        float bass = sinf((float)(phaseBass * 2.0 * M_PI));
+        float rumble = sinf((float)(phaseRumble * 2.0 * M_PI)) * 0.35f;
+
+        // Exponential decay envelope
+        float env = expf(-t * 7.5f);
+
+        float raw = (crunch * 0.55f + bass * 0.75f + rumble * 0.30f);
+        float sampleVal = SoftClip(raw * 1.4f); // Saturated punch
+        samples[i] = (short)(sampleVal * env * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 3. Steel Parry Clash: Authentic tempered high-carbon blade clash with sustained inharmonic ring
+static Sound GenerateParryClash(float duration = 0.40f, float volume = 0.75f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    // Authentic inharmonic blade resonance modes (fundamental & non-integer steel modes)
+    float p1 = 0.0f, p2 = 0.0f, p3 = 0.0f, p4 = 0.0f, p5 = 0.0f;
+    const float f1 = 780.0f;
+    const float f2 = 1240.0f;
+    const float f3 = 1890.0f;
+    const float f4 = 2950.0f;
+    const float f5 = 4400.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        p1 += f1 / (float)sampleRate; if (p1 > 1.0f) p1 -= 1.0f;
+        p2 += f2 / (float)sampleRate; if (p2 > 1.0f) p2 -= 1.0f;
+        p3 += f3 / (float)sampleRate; if (p3 > 1.0f) p3 -= 1.0f;
+        p4 += f4 / (float)sampleRate; if (p4 > 1.0f) p4 -= 1.0f;
+        p5 += f5 / (float)sampleRate; if (p5 > 1.0f) p5 -= 1.0f;
+
+        // Initial violent metal bite (< 6ms)
+        float sparkBurst = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * expf(-t * 80.0f);
+
+        // Ringing bell-like blade harmonics
+        float ring = 0.35f * sinf((float)(p1 * 2.0 * M_PI)) * expf(-t * 6.5f)
+                   + 0.28f * sinf((float)(p2 * 2.0 * M_PI)) * expf(-t * 8.0f)
+                   + 0.22f * sinf((float)(p3 * 2.0 * M_PI)) * expf(-t * 11.0f)
+                   + 0.15f * sinf((float)(p4 * 2.0 * M_PI)) * expf(-t * 15.0f)
+                   + 0.10f * sinf((float)(p5 * 2.0 * M_PI)) * expf(-t * 22.0f);
+
+        float sampleVal = SoftClip(sparkBurst * 0.70f + ring * 1.10f);
+        samples[i] = (short)(sampleVal * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 4. Flesh & Armor Hit Impact: Solid physical thwack with low chest thump and armor rattle
+static Sound GenerateHitImpact(float duration = 0.18f, float volume = 0.65f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float phaseThump = 0.0f;
+    float filterRattle = 0.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        // 95Hz down to 48Hz chest-thump
+        float freq = 48.0f + 47.0f * expf(-t * 24.0f);
+        phaseThump += freq / (float)sampleRate;
+        if (phaseThump > 1.0f) phaseThump -= 1.0f;
+
+        // Snappy initial slap noise
+        float rawNoise = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+        filterRattle += (rawNoise - filterRattle) * 0.28f;
+        float slap = filterRattle * expf(-t * 36.0f);
+
+        float thump = sinf((float)(phaseThump * 2.0 * M_PI)) * expf(-t * 14.0f);
+
+        float sampleVal = SoftClip(slap * 0.60f + thump * 0.85f);
+        samples[i] = (short)(sampleVal * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 5. Dash / Evasion: Soft fluttering fabric swoosh & gravel shuffle
+static Sound GenerateDashSwoosh(float duration = 0.16f, float volume = 0.40f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float filterState = 0.0f;
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        float noise = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+        filterState += (noise - filterState) * 0.16f; // low-pass fabric rustle
+
+        float env = sinf(t * (float)M_PI);
+        env = env * env;
+
+        float sampleVal = SoftClip(filterState * 1.2f);
+        samples[i] = (short)(sampleVal * env * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 6. Medieval Cathedral Abbey Bell / Ancient Relic Chime
+static Sound GenerateAbbeyChime(float rootFreq = 330.0f, float duration = 0.85f, float volume = 0.55f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float p1 = 0.0f, p2 = 0.0f, p3 = 0.0f;
+    float f1 = rootFreq;
+    float f2 = rootFreq * 1.503f; // Tierce (minor third)
+    float f3 = rootFreq * 2.76f;  // Fifth octave
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        p1 += f1 / (float)sampleRate; if (p1 > 1.0f) p1 -= 1.0f;
+        p2 += f2 / (float)sampleRate; if (p2 > 1.0f) p2 -= 1.0f;
+        p3 += f3 / (float)sampleRate; if (p3 > 1.0f) p3 -= 1.0f;
+
+        float bell = 0.50f * sinf((float)(p1 * 2.0 * M_PI)) * expf(-t * 2.5f)
+                   + 0.32f * sinf((float)(p2 * 2.0 * M_PI)) * expf(-t * 3.8f)
+                   + 0.18f * sinf((float)(p3 * 2.0 * M_PI)) * expf(-t * 5.5f);
+
+        samples[i] = (short)(SoftClip(bell) * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 7. War Horn Warning: Resonant brass reed drone with natural swelling attack and vibrato
+static Sound GenerateWarHorn(float rootFreq = 110.0f, float duration = 0.35f, float volume = 0.45f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float phase = 0.0f;
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        float vibrato = 1.0f + 0.035f * sinf((float)(t * 14.0 * M_PI));
+        phase += (rootFreq * vibrato) / (float)sampleRate;
+        if (phase > 1.0f) phase -= 1.0f;
+
+        float env = (t < 0.22f) ? (t / 0.22f) : (1.0f - (t - 0.22f) / 0.78f);
+        float horn = 0.52f * sinf((float)(phase * 2.0 * M_PI))
+                   + 0.30f * sinf((float)(phase * 4.0 * M_PI))
+                   + 0.18f * sinf((float)(phase * 6.0 * M_PI));
+
+        samples[i] = (short)(SoftClip(horn * 1.15f) * env * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 8. Portcullis Gate: Deep stone dragging & iron chains
+static Sound GenerateGateRumble(float duration = 0.90f, float volume = 0.60f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float phase = 0.0f;
+    float filter = 0.0f;
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+
+        phase += 48.0f / (float)sampleRate;
+        if (phase > 1.0f) phase -= 1.0f;
+
+        float n = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+        filter += (n - filter) * 0.14f;
+
+        float stone = sinf((float)(phase * 2.0 * M_PI)) * 0.60f + filter * 0.40f;
+        float env = (1.0f - t);
+
+        samples[i] = (short)(SoftClip(stone) * env * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
 void SoundFX::Init() {
     if (initialized) return;
     InitAudioDevice();
 
-    // 1. Blade slashes (steel blade air displacement)
-    sndLightAttack = GenerateTone(220.0f, 150.0f, 0.15f, 0.38f, 1);
-    sndHeavyAttack = GenerateTone(120.0f, 75.0f, 0.26f, 0.50f, 1);
+    // 1. Blade slashes (crisp cold-steel whoosh)
+    sndLightAttack = GenerateBladeSlash(0.14f, 0.52f);
+    sndHeavyAttack = GenerateBluntSmash(0.28f, 0.72f); // Deep seismic impact and crunch
 
-    // 2. Iron sword & anvil clash (authentic medieval clash!)
-    sndParrySuccess = GenerateTone(520.0f, 440.0f, 0.35f, 0.65f, 2);
-    sndCrusaderClash = GenerateTone(420.0f, 340.0f, 0.40f, 0.70f, 2);
-    sndProjectileReflect = GenerateTone(640.0f, 560.0f, 0.24f, 0.60f, 2);
+    // 2. Tempered sword clashes & deflections
+    sndParrySuccess = GenerateParryClash(0.38f, 0.78f);
+    sndCrusaderClash = GenerateParryClash(0.48f, 0.82f);
+    sndProjectileReflect = GenerateParryClash(0.30f, 0.70f);
 
-    // 3. Armor hits, thuds, collapses
-    sndHitImpact = GenerateTone(110.0f, 55.0f, 0.18f, 0.55f, 3);
-    sndEnemyDeath = GenerateTone(85.0f, 40.0f, 0.45f, 0.60f, 3);
-    sndParryMiss = GenerateTone(150.0f, 110.0f, 0.12f, 0.25f, 1);
+    // 3. Fleshy/armored hit impacts and thuds
+    sndHitImpact = GenerateHitImpact(0.17f, 0.68f);
+    sndEnemyDeath = GenerateBluntSmash(0.40f, 0.70f);
+    sndParryMiss = GenerateBladeSlash(0.12f, 0.35f);
 
-    // 4. Evasion (gravel & cloak)
-    sndDash = GenerateTone(190.0f, 110.0f, 0.14f, 0.35f, 1);
+    // 4. Movement swooshes (cloth/leather)
+    sndDash = GenerateDashSwoosh(0.14f, 0.42f);
 
-    // 5. Bowstring / Crossbow release (authentic wooden snap, NOT laser zap!)
-    sndProjectileShoot = GenerateTone(320.0f, 140.0f, 0.13f, 0.42f, 4);
+    // 5. Arrow / Projectile whoosh
+    sndProjectileShoot = GenerateBladeSlash(0.11f, 0.45f);
 
-    // 6. Medieval war horn warning (replaces retro sci-fi beep!)
-    sndTelegraph = GenerateTone(110.0f, 105.0f, 0.28f, 0.38f, 5);
+    // 6. Medieval war horn warning
+    sndTelegraph = GenerateWarHorn(110.0f, 0.32f, 0.48f);
 
-    // 7. Equipment & scabbard
-    sndEquipWeapon = GenerateTone(280.0f, 210.0f, 0.20f, 0.45f, 1);
-    sndButtonClick = GenerateTone(240.0f, 180.0f, 0.08f, 0.30f, 4);
+    // 7. Scabbard draw & UI
+    sndEquipWeapon = GenerateBladeSlash(0.22f, 0.48f);
+    sndButtonClick = GenerateDashSwoosh(0.06f, 0.32f);
 
-    // 8. Ancient abbey & cathedral chimes (rich medieval church bell harmonics)
-    sndCutsceneChime = GenerateTone(330.0f, 330.0f, 0.75f, 0.50f, 0);
-    sndLoreDiscovery = GenerateTone(440.0f, 440.0f, 0.70f, 0.55f, 0);
-    sndTruthSeekerResonance = GenerateTone(277.0f, 277.0f, 0.90f, 0.65f, 0);
+    // 8. Chimes & holy artifacts
+    sndCutsceneChime = GenerateAbbeyChime(330.0f, 0.75f, 0.55f);
+    sndLoreDiscovery = GenerateAbbeyChime(440.0f, 0.70f, 0.60f);
+    sndTruthSeekerResonance = GenerateAbbeyChime(261.6f, 0.95f, 0.70f);
 
-    // 9. Heavy iron portcullis chains & stone rumble
-    sndGateOpen = GenerateTone(65.0f, 35.0f, 0.85f, 0.60f, 6);
+    // 9. Gate open
+    sndGateOpen = GenerateGateRumble(0.95f, 0.65f);
 
     initialized = true;
 }

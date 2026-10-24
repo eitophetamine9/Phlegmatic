@@ -14,7 +14,8 @@ enum class EnemyType {
     ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
     PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
     INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
-    ZIL_BOSS         // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
+    ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
+    KNIGHT_LENON_BOSS// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
 };
 
 enum class EnemyState {
@@ -51,10 +52,10 @@ public:
     float GetDefense() const { return defense; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
-    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS; }
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS; }
     bool HasMeleeHitbox() const {
         if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
-        if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS) {
+        if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS) {
             return isPerformingMeleeSmite;
         }
         return true; // SLASHER, BRUTE, CHARGER

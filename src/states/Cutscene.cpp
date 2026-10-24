@@ -13,25 +13,25 @@ void Cutscene::InitPrologue() {
 
     segments.push_back({
         "ACT I - THE AGE OF CHAOS",
-        "For over 500 years, the Land of Tydeshire was filled with chaos and never ending war. Order was not an option; there was no unity.\n\nFactions rose and fell, bloodlines fought to carve out kingdoms. Each king desired to rule over the entire Land of Tydeshire, yet most failed miserably in ruin and ash.",
+        "For over 500 years, the Land of Tydeshire was filled with chaos and never ending war. Order was not an option, there was no unity.\n\nFactions came along and so then became kingdoms. Each king wants to rule over the entire Land of Tydeshire, most failed miserably however one stood at the top.",
         Color{ 255, 120, 80, 255 }
     });
 
     segments.push_back({
-        "ACT II - CHARLZ THE LORD LIEGE",
-        "After five centuries of ceaseless slaughter, one ruler stood unchallenged at the apex: King Charlz.\n\nWith overwhelming authority and remarkable strength, he unified the Land of Tydeshire, forcing the warring lords to bend the knee and crowning himself Charlz the Lord Liege.",
+        "ACT II - CHARLZ THE LIEGE OF KINGS",
+        "After 500 years of chaos, one king stood at the top, King Charlz.\n\nHis overwhelming authority and remarkable strength unified the Land of Tydeshire crowning him Charlz the Liege of Kings. He then proceeded to divide the land into 5 kingdoms and appoint a king to each kingdom.",
         Color{ 255, 215, 80, 255 }
     });
 
     segments.push_back({
-        "ACT III - THE FIVE REALMS",
-        "He then proceeded to divide the land into 5 Kingdoms—Azshden, Fleurshden, Zyphden, and Noirden—each ruled by sovereign kings beneath his imperial throne.\n\nFor three golden decades, blades rested in their scabbards, and Tydeshire was celebrated throughout the known world as the Land of Peace.",
+        "ACT III - THE FIVE KINGDOMS",
+        "The 5 Kingdoms are Zyphden, Velnoth, Krynn, Drak'Mar, and Solis. Each Kingdom had a specific role in keeping peace and order throughout the land.\n\nBut this did not last long, peace only lasted for about 50 years until Charlz mysteriously vanished leaving no trace behind.",
         Color{ 100, 220, 255, 255 }
     });
 
     segments.push_back({
-        "ACT IV - THE SHATTERED TRUTH",
-        "However, after three decades of peace, the Lord Liege himself seemed to have gone mad, dictating the entire Land of Tydeshire under iron tyranny.\n\nFormerly known as the Land of Peace, the realm has plunged once more into the Land of Chaos. The true history of this ordeal has been scattered into fragments—waiting in the ruins to be uncovered for meaning.",
+        "ACT IV - THE 2ND GREAT WAR",
+        "The Kings believed he was dead and they began plotting to overthrow each other to take over the land. Thus began the 2nd Great War.\n\nThe truth behind the disappearance of Charlz was never uncovered, but rumors say that he was betrayed by his closest allies. The truth was shattered and scattered across the land, waiting to be pieced together.",
         Color{ 200, 140, 255, 255 }
     });
 }

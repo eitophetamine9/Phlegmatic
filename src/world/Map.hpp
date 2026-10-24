@@ -5,7 +5,11 @@
 enum class MapEnvironment {
     LOBBY,
     ARENA,
-    RUINED_CASTLE
+    RUINED_CASTLE,
+    CROSSROADS,
+    ZYPHDEN_REALM,
+    TAVERN_INTERIOR,
+    ROYAL_KEEP
 };
 
 struct Pillar {
@@ -44,4 +48,12 @@ private:
 
     void DrawRuinedCastleFloor() const;
     void DrawRuinedCastleWalls() const;
+    void DrawCrossroadsFloor() const;
+    void DrawCrossroadsWalls() const;
+    void DrawZyphdenFloor() const;
+    void DrawZyphdenWalls() const;
+    void DrawTavernFloor() const;
+    void DrawTavernWalls() const;
+    void DrawRoyalKeepFloor() const;
+    void DrawRoyalKeepWalls() const;
 };

@@ -135,6 +135,25 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             bossAttackPhase = 0;
             isPerformingMeleeSmite = true;
             break;
+
+        case EnemyType::KNIGHT_LENON_BOSS:
+            radius = 28.0f;
+            maxHealth = 420.0f;
+            defense = 24.0f; // Crusader plate defense
+            moveSpeed = 115.0f;
+            attackRange = 160.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.60f;
+            strikeDuration = 0.20f;
+            recoveryDuration = 0.60f;
+            stunDuration = 1.4f;
+            telegraph.shape = TelegraphShape::LINE;
+            telegraph.radius = 160.0f;
+            telegraph.width = 50.0f;
+            telegraph.warningColor = Color{ 255, 215, 80, 190 };
+            bossAttackPhase = 0;
+            isPerformingMeleeSmite = true;
+            break;
     }
 
     health = maxHealth;
@@ -149,6 +168,7 @@ std::string Enemy::GetName() const {
         case EnemyType::PYROMANCER: return "VOID PYROMANCER";
         case EnemyType::INQUISITOR_BOSS: return "THE GRAND INQUISITOR";
         case EnemyType::ZIL_BOSS: return "ZIL'S FRAGMENT";
+        case EnemyType::KNIGHT_LENON_BOSS: return "KNIGHT LENON - VANGUARD CAPTAIN";
     }
     return "UNKNOWN";
 }
@@ -247,6 +267,35 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.width = 24.0f;
                         telegraph.warningColor = Color{ 120, 230, 255, 210 };
                         isPerformingMeleeSmite = false; // Projectile deals damage!
+                    }
+                } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
+                    // Lenon Vanguard 3-phase combat pattern:
+                    if (bossAttackPhase == 0) {
+                        // Royal Greatsword Lunge (Line / Box AoE)
+                        windupDuration = 0.60f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 160.0f;
+                        telegraph.width = 50.0f;
+                        telegraph.warningColor = Color{ 255, 215, 80, 190 };
+                        isPerformingMeleeSmite = true;
+                    } else if (bossAttackPhase == 1) {
+                        // Golden Whirlwind Slash (Circle AoE)
+                        windupDuration = 0.70f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 140.0f;
+                        telegraph.warningColor = Color{ 255, 185, 45, 190 };
+                        isPerformingMeleeSmite = true;
+                    } else {
+                        // Crusader's Piercing Thrust (Narrow Line AoE with extra range)
+                        windupDuration = 0.55f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 180.0f;
+                        telegraph.width = 42.0f;
+                        telegraph.warningColor = Color{ 255, 235, 100, 210 };
+                        isPerformingMeleeSmite = true;
                     }
                 }
             } else {
@@ -389,6 +438,27 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         particles.AddScreenShake(3.5f, 0.12f);
                     }
                     // Cycle boss attack phase
+                    bossAttackPhase = (bossAttackPhase + 1) % 3;
+                } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+
+                    if (bossAttackPhase == 0) {
+                        // Phase 0: Royal Greatsword Lunge
+                        particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 220, 80, 255 });
+                        particles.AddScreenShake(4.5f, 0.15f);
+                        SoundFX::PlayCrusaderClash();
+                    } else if (bossAttackPhase == 1) {
+                        // Phase 1: Golden Whirlwind
+                        particles.SpawnSparks(position, Color{ 255, 190, 50, 255 }, 22, 145.0f);
+                        particles.AddScreenShake(5.5f, 0.18f);
+                        SoundFX::PlayHeavyAttack();
+                    } else {
+                        // Phase 2: Piercing Thrust
+                        particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 240, 130, 255 });
+                        particles.AddScreenShake(4.0f, 0.12f);
+                        SoundFX::PlayLightAttack();
+                    }
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
                 }
             }

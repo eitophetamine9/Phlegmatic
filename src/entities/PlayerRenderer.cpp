@@ -5,11 +5,12 @@
 #include <cmath>
 
 void PlayerRenderer::Draw(const Player& player) {
-    Color bodyColor = Color{ 40, 110, 210, 255 };
+    ArmorStats armorStats = GetArmorStats(player.currentArmor);
+    Color bodyColor = armorStats.primaryColor;
     if (player.counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
     if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
 
-    AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing);
+    AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
 
     Vector2 dir = { cosf(player.facingAngle * DEG2RAD), sinf(player.facingAngle * DEG2RAD) };
     Vector2 normal = { -dir.y, dir.x };

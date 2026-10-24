@@ -18,6 +18,7 @@ Game::~Game() {
 void Game::Init() {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
     InitWindow(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, Config::WINDOW_TITLE);
+    SetExitKey(KEY_NULL); // Prevent ESC from closing the program
     SetTargetFPS(Config::TARGET_FPS);
 
     SoundFX::Init();
@@ -69,7 +70,11 @@ void Game::EnterRuinedCastle() {
     map.Init(MapEnvironment::RUINED_CASTLE);
     player.Init({ 800.0f, 1180.0f });
     player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
+    player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
+    player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
     player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
+    player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
+    player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
     camera.target = player.GetPosition();
     currentState = GameState::RUINED_CASTLE;
     showControlsModal = false;
@@ -79,6 +84,22 @@ void Game::EnterRuinedCastle() {
     projectiles.clear();
     particles.Clear();
     tutorial.Init();
+}
+
+void Game::EnterCrossroads() {
+    crossroadsHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::CROSSROADS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    particles.Clear();
+}
+
+void Game::EnterZyphden() {
+    zyphdenHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::ZYPHDEN_REALM;
+    showControlsModal = false;
+    showInventoryModal = false;
+    particles.Clear();
 }
 
 void Game::EnterLobby() {
@@ -128,7 +149,14 @@ void Game::EnterArena() {
 }
 
 void Game::Update(float dt) {
+    particles.Update(dt);
     Vector2 mouseScreen = GetMousePosition();
+
+    // Unlock arena if current storyline progress was completed (player possesses Crusader Plate)
+    if (!testArenaUnlocked && player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE)) {
+        testArenaUnlocked = true;
+        SaveArenaUnlock();
+    }
 
     // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
     if (IsKeyPressed(KEY_GRAVE)) {
@@ -155,6 +183,9 @@ void Game::Update(float dt) {
 
     // If Inventory & Lore Journal Modal is active
     if (showInventoryModal) {
+        if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+            tutorial.NotifyInventoryOpened();
+        }
         if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ESCAPE)) {
             showInventoryModal = false;
             SoundFX::PlayButtonClick();
@@ -179,7 +210,10 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
         showInventoryModal = true;
         showControlsModal = false;
-        inventoryActiveTab = 1; // Direct directly to Lore Journal tab
+        inventoryActiveTab = 0; // Direct to Equipment & Character Doll
+        if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+            tutorial.NotifyInventoryOpened();
+        }
         SoundFX::PlayButtonClick();
         return;
     }
@@ -192,7 +226,10 @@ void Game::Update(float dt) {
             if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showInventoryModal = true;
                 showControlsModal = false;
-                inventoryActiveTab = 1;
+                inventoryActiveTab = 0;
+                if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+                    tutorial.NotifyInventoryOpened();
+                }
                 SoundFX::PlayButtonClick();
                 return;
             } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
@@ -235,6 +272,33 @@ void Game::Update(float dt) {
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
             [this]() { EnterRuinedCastle(); }
+        );
+        return;
+    }
+
+    // 1.85 CROSSROADS STATE (Path to Zyphden)
+    if (currentState == GameState::CROSSROADS) {
+        if (map.GetEnvironment() != MapEnvironment::CROSSROADS) {
+            EnterCrossroads();
+        }
+        crossroadsHandler.Update(
+            dt, player, map, particles, enemies, projectiles, camera, currentState,
+            [this]() { EnterLobby(); }
+        );
+        return;
+    }
+
+    // 1.88 ZYPHDEN REALM STATE (Chapter 1)
+    if (currentState == GameState::ZYPHDEN_REALM) {
+        if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
+            map.GetEnvironment() != MapEnvironment::TAVERN_INTERIOR &&
+            map.GetEnvironment() != MapEnvironment::ROYAL_KEEP) {
+            EnterZyphden();
+        }
+        zyphdenHandler.Update(
+            dt, player, map, particles, enemies, projectiles, camera, currentState, testArenaUnlocked,
+            [this]() { SaveArenaUnlock(); },
+            [this]() { EnterLobby(); }
         );
         return;
     }
@@ -492,6 +556,24 @@ void Game::Render() {
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
             camera, map, enemies, projectiles, player, particles, tutorial,
+            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::CROSSROADS) {
+        crossroadsHandler.Render(
+            camera, map, enemies, projectiles, player, particles,
+            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::ZYPHDEN_REALM) {
+        zyphdenHandler.Render(
+            camera, map, enemies, projectiles, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();

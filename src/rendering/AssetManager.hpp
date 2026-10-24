@@ -1,6 +1,8 @@
 #pragma once
 #include "raylib.h"
 #include "../combat/CombatTypes.hpp"
+#include "../combat/Armor.hpp"
+#include "../combat/Totem.hpp"
 #include <string>
 #include <unordered_map>
 
@@ -18,8 +20,9 @@ public:
 
     // Procedural Renderers
     static void DrawEntityShadow(Vector2 position, float radius);
-    static void DrawPlayerSilhouette(Vector2 position, float rotationAngle, Color bodyColor, bool isParrying, bool isDashing);
+    static void DrawPlayerSilhouette(Vector2 position, float rotationAngle, Color bodyColor, bool isParrying, bool isDashing, Color trimColor = Color{ 80, 95, 130, 255 }, Color helmColor = Color{ 48, 58, 80, 255 }, Color visorColor = Color{ 0, 229, 255, 255 });
     static void DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned);
+    static void DrawCharacterDoll(Vector2 center, float scale, WeaponType weapon, ArmorType armor, TotemType totem, float time);
 
     // Weapons
     static void DrawSword(Vector2 origin, float angle, float length, Color bladeColor, Color glowColor);
