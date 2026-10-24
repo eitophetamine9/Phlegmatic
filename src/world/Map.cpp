@@ -491,11 +491,11 @@ void GameMap::DrawCrossroadsFloor() const {
     }
 
     // 4. Western Ruined Shrine Alcove for Hidden Totem Chest
-    Vector2 shrinePos = { 510.0f, 950.0f };
+    Vector2 shrinePos = { 490.0f, 560.0f };
     DrawCircleLines((int)shrinePos.x, (int)shrinePos.y, 45.0f, Color{ 60, 80, 110, 180 });
     DrawCircleLines((int)shrinePos.x, (int)shrinePos.y, 25.0f, Color{ 80, 120, 160, 200 });
-    DrawRectangle(470, 930, 80, 40, Color{ 36, 44, 60, 255 });
-    DrawRectangleLines(470, 930, 80, 40, Color{ 75, 95, 130, 220 });
+    DrawRectangle(450, 540, 80, 40, Color{ 36, 44, 60, 255 });
+    DrawRectangleLines(450, 540, 80, 40, Color{ 75, 95, 130, 220 });
 
     // 5. Northern Gateway Approach to Zyphden
     DrawRectangle(620, (int)bounds.y, 360, 80, Color{ 36, 48, 68, 255 });

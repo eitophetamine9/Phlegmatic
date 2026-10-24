@@ -12,7 +12,7 @@
 #include <functional>
 
 struct HiddenTotemChest {
-    Vector2 position = { 510.0f, 950.0f };
+    Vector2 position = { 490.0f, 560.0f };
     float radius = 32.0f;
     bool opened = false;
 

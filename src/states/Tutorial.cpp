@@ -35,7 +35,7 @@ void AncientChest::Draw(float time) const {
     }
 }
 
-void LoreCollectible::Draw(float time) const {
+void LoreCollectible::Draw(float time, bool isInteractable) const {
     // Drop shadow
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -43,15 +43,21 @@ void LoreCollectible::Draw(float time) const {
         // Ancient Stone Stele
         Rectangle steleRec = { position.x - 16.0f, position.y - 28.0f, 32.0f, 42.0f };
         DrawRectangleRounded(steleRec, 0.35f, 4, Color{ 36, 42, 54, 255 });
-        DrawRectangleRoundedLines(steleRec, 0.35f, 4, collected ? Color{ 65, 78, 100, 200 } : Color{ 120, 145, 185, 255 });
+        DrawRectangleRoundedLines(steleRec, 0.35f, 4, collected ? Color{ 65, 78, 100, 200 } : (isInteractable ? Color{ 120, 145, 185, 255 } : Color{ 60, 68, 85, 200 }));
 
         if (!collected) {
-            float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
-            DrawCircleGradient(position, 34.0f * (0.8f + 0.2f * pulse), Color{ 255, 215, 80, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
-            // Inscribed glowing runes
-            DrawLineEx({ position.x - 8, position.y - 18 }, { position.x + 8, position.y - 18 }, 2.0f, Color{ 255, 220, 90, 255 });
-            DrawLineEx({ position.x, position.y - 18 }, { position.x, position.y + 4 }, 2.0f, Color{ 255, 220, 90, 255 });
-            DrawCircle((int)position.x, (int)position.y - 4, 3.0f, Color{ 255, 240, 140, 255 });
+            if (isInteractable) {
+                float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
+                DrawCircleGradient(position, 34.0f * (0.8f + 0.2f * pulse), Color{ 255, 215, 80, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+                // Inscribed glowing runes
+                DrawLineEx({ position.x - 8, position.y - 18 }, { position.x + 8, position.y - 18 }, 2.0f, Color{ 255, 220, 90, 255 });
+                DrawLineEx({ position.x, position.y - 18 }, { position.x, position.y + 4 }, 2.0f, Color{ 255, 220, 90, 255 });
+                DrawCircle((int)position.x, (int)position.y - 4, 3.0f, Color{ 255, 240, 140, 255 });
+            } else {
+                // Inactive weathered runes
+                DrawLineEx({ position.x - 8, position.y - 18 }, { position.x + 8, position.y - 18 }, 1.5f, Color{ 70, 85, 110, 140 });
+                DrawLineEx({ position.x, position.y - 18 }, { position.x, position.y + 4 }, 1.5f, Color{ 70, 85, 110, 140 });
+            }
         } else {
             // Weathered inactive runes
             DrawLineEx({ position.x - 8, position.y - 18 }, { position.x + 8, position.y - 18 }, 1.5f, Color{ 70, 85, 110, 180 });
@@ -61,12 +67,19 @@ void LoreCollectible::Draw(float time) const {
         // Ancient Wooden Chest
         if (!collected) {
             DrawRectangle((int)(position.x - 22), (int)(position.y - 14), 44, 28, Color{ 68, 48, 30, 255 });
-            DrawRectangleLines((int)(position.x - 22), (int)(position.y - 14), 44, 28, Color{ 40, 28, 18, 255 });
+            DrawRectangleLines((int)(position.x - 22), (int)(position.y - 14), 44, 28, isInteractable ? Color{ 40, 28, 18, 255 } : Color{ 65, 30, 30, 255 });
             DrawRectangle((int)(position.x - 16), (int)(position.y - 14), 6, 28, Color{ 90, 105, 125, 255 });
             DrawRectangle((int)(position.x + 10), (int)(position.y - 14), 6, 28, Color{ 90, 105, 125, 255 });
-            float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
-            DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
-            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+
+            if (isInteractable) {
+                float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
+                DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
+                DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+            } else {
+                // Red sealed padlock
+                DrawRectangle((int)(position.x - 5), (int)(position.y - 5), 10, 10, Color{ 160, 45, 45, 230 });
+                DrawRectangleLines((int)(position.x - 5), (int)(position.y - 5), 10, 10, Color{ 230, 80, 80, 255 });
+            }
         } else {
             DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });
             DrawRectangleLines((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 40, 28, 18, 255 });
@@ -77,14 +90,16 @@ void LoreCollectible::Draw(float time) const {
     } else if (type == LoreType::SHIELD) {
         // Sun-Crusader Inscribed Shield & Sword Relic
         if (!collected) {
-            float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
-            DrawCircleGradient(position, 34.0f * (0.8f + 0.2f * pulse), Color{ 255, 170, 50, (unsigned char)(65 * pulse) }, Color{ 0, 0, 0, 0 });
+            if (isInteractable) {
+                float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
+                DrawCircleGradient(position, 34.0f * (0.8f + 0.2f * pulse), Color{ 255, 170, 50, (unsigned char)(65 * pulse) }, Color{ 0, 0, 0, 0 });
+            }
 
             // Crossed broadsword blade
-            DrawLineEx({ position.x - 14, position.y + 10 }, { position.x + 14, position.y - 18 }, 3.0f, Color{ 180, 195, 215, 255 });
+            DrawLineEx({ position.x - 14, position.y + 10 }, { position.x + 14, position.y - 18 }, 3.0f, isInteractable ? Color{ 180, 195, 215, 255 } : Color{ 110, 120, 135, 220 });
             // Heater shield
-            DrawCircleV({ position.x, position.y - 2 }, 15.0f, Color{ 160, 120, 40, 255 });
-            DrawCircleLines((int)position.x, (int)position.y - 2, 15.0f, Color{ 255, 215, 80, 255 });
+            DrawCircleV({ position.x, position.y - 2 }, 15.0f, isInteractable ? Color{ 160, 120, 40, 255 } : Color{ 85, 70, 45, 255 });
+            DrawCircleLines((int)position.x, (int)position.y - 2, 15.0f, isInteractable ? Color{ 255, 215, 80, 255 } : Color{ 130, 115, 75, 200 });
             DrawCircleV({ position.x, position.y - 2 }, 8.0f, Color{ 220, 160, 30, 255 });
             // Golden cross
             DrawLineEx({ position.x - 6, position.y - 2 }, { position.x + 6, position.y - 2 }, 2.0f, Color{ 255, 240, 160, 255 });
@@ -100,18 +115,20 @@ void LoreCollectible::Draw(float time) const {
         // Royal Obsidian & Gold Reliquary
         Rectangle boxRec = { position.x - 18.0f, position.y - 14.0f, 36.0f, 26.0f };
         if (!collected) {
-            float pulse = 0.5f + 0.5f * sinf(time * 3.8f);
-            DrawCircleGradient(position, 38.0f * (0.8f + 0.2f * pulse), Color{ 180, 100, 255, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+            if (isInteractable) {
+                float pulse = 0.5f + 0.5f * sinf(time * 3.8f);
+                DrawCircleGradient(position, 38.0f * (0.8f + 0.2f * pulse), Color{ 180, 100, 255, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
+            }
 
             DrawRectangleRounded(boxRec, 0.2f, 4, Color{ 26, 20, 38, 255 });
-            DrawRectangleRoundedLines(boxRec, 0.2f, 4, Color{ 200, 140, 255, 255 });
+            DrawRectangleRoundedLines(boxRec, 0.2f, 4, isInteractable ? Color{ 200, 140, 255, 255 } : Color{ 110, 85, 140, 200 });
 
             // Gold filigree corner accents
             DrawCircle((int)boxRec.x + 4, (int)boxRec.y + 4, 3.0f, Color{ 255, 215, 80, 240 });
             DrawCircle((int)(boxRec.x + boxRec.width - 4), (int)boxRec.y + 4, 3.0f, Color{ 255, 215, 80, 240 });
             // Arcane seal
-            DrawCircle((int)position.x, (int)position.y - 1, 6.0f, Color{ 190, 80, 255, 240 });
-            DrawCircleLines((int)position.x, (int)position.y - 1, 8.0f, Color{ 240, 180, 255, 240 });
+            DrawCircle((int)position.x, (int)position.y - 1, 6.0f, isInteractable ? Color{ 190, 80, 255, 240 } : Color{ 110, 55, 140, 200 });
+            DrawCircleLines((int)position.x, (int)position.y - 1, 8.0f, isInteractable ? Color{ 240, 180, 255, 240 } : Color{ 130, 85, 160, 200 });
         } else {
             DrawRectangleRounded(boxRec, 0.2f, 4, Color{ 30, 26, 42, 255 });
             DrawRectangleRoundedLines(boxRec, 0.2f, 4, Color{ 90, 75, 120, 200 });
@@ -120,8 +137,9 @@ void LoreCollectible::Draw(float time) const {
     }
 
     if (!collected) {
-        int lw = MeasureText(label.c_str(), 10);
-        DrawText(label.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, Color{ 255, 230, 120, 240 });
+        std::string displayLabel = isInteractable ? label : ("[SEALED] " + label);
+        int lw = MeasureText(displayLabel.c_str(), 10);
+        DrawText(displayLabel.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, isInteractable ? Color{ 255, 230, 120, 240 } : Color{ 190, 150, 150, 190 });
     }
 }
 
@@ -146,6 +164,11 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
             popupTitle = "SWORDPLAY & MARTIAL ARTS";
             popupBody = "The broadsword is balanced for both rapid slashes and heavy cleaves.\n\nTest both attack styles now to prepare for hostile fortress sentinels.";
             popupHint = "[Left Click] Light Attack  |  [Right Click] Heavy Cleave";
+            break;
+        case TutorialStep::INVENTORY_CHECK:
+            popupTitle = "EQUIPMENT & ATTRIBUTES";
+            popupBody = "Your armaments are equipped and ready.\n\nOpen your Journal & Inventory [I] to inspect your character paper doll, armor defense, and martial stats.";
+            popupHint = "Press [I] or click Journal to Open Inventory";
             break;
         case TutorialStep::LORE_DISCOVERY:
             popupTitle = "THE SCATTERED CHRONICLES";
@@ -182,6 +205,7 @@ void TutorialManager::Init() {
 
     lightAttacksLanded = 0;
     heavyAttacksLanded = 0;
+    hasOpenedInventory = false;
 
     chest.position = { 1100.0f, 840.0f };
     chest.opened = false;
@@ -257,23 +281,32 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
     // 2. Interactive Lore Collectibles (press [E] or Left Click nearby)
     for (auto& item : loreItems) {
-        if (!item.collected && item.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
-            item.collected = true;
-            player.GetInventory().UnlockFragment(item.fragmentId);
-            SoundFX::PlayLoreDiscovery();
+        if (!item.collected && item.CheckInteraction(playerPos)) {
+            if (currentStep < TutorialStep::LORE_DISCOVERY) {
+                if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+                    particles.SpawnFloatingText(item.position, "SEALED - Complete current objective first!", Color{ 255, 90, 90, 255 }, 18.0f);
+                    SoundFX::PlayHitImpact();
+                }
+            } else {
+                if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+                    item.collected = true;
+                    player.GetInventory().UnlockFragment(item.fragmentId);
+                    SoundFX::PlayLoreDiscovery();
 
-            int discovered = player.GetInventory().GetDiscoveredFragmentCount();
-            int total = player.GetInventory().GetTotalFragmentCount();
-            std::string announce = "LORE DISCOVERED (" + std::to_string(discovered) + "/" + std::to_string(total) + "): " + item.title;
-            particles.SpawnFloatingText(item.position, announce, Color{ 255, 220, 80, 255 }, 20.0f);
-            particles.AddScreenShake(3.0f, 0.15f);
+                    int discovered = player.GetInventory().GetDiscoveredFragmentCount();
+                    int total = player.GetInventory().GetTotalFragmentCount();
+                    std::string announce = "LORE DISCOVERED (" + std::to_string(discovered) + "/" + std::to_string(total) + "): " + item.title;
+                    particles.SpawnFloatingText(item.position, announce, Color{ 255, 220, 80, 255 }, 20.0f);
+                    particles.AddScreenShake(3.0f, 0.15f);
 
-            if (item.fragmentId == "frag_02") {
-                chest.opened = true;
-                hasOpenedChest = true;
-                if (currentStep == TutorialStep::LORE_DISCOVERY) {
-                    currentStep = TutorialStep::DEFENSE_SENTINEL;
-                    TriggerStepPopup(TutorialStep::DEFENSE_SENTINEL);
+                    if (item.fragmentId == "frag_02") {
+                        chest.opened = true;
+                        hasOpenedChest = true;
+                        if (currentStep == TutorialStep::LORE_DISCOVERY) {
+                            currentStep = TutorialStep::DEFENSE_SENTINEL;
+                            TriggerStepPopup(TutorialStep::DEFENSE_SENTINEL);
+                        }
+                    }
                 }
             }
         }
@@ -332,6 +365,18 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             }
 
             if (lightAttacksLanded > 0 && heavyAttacksLanded > 0) {
+                currentStep = TutorialStep::INVENTORY_CHECK;
+                TriggerStepPopup(TutorialStep::INVENTORY_CHECK);
+            }
+            break;
+        }
+
+        case TutorialStep::INVENTORY_CHECK: {
+            currentObjectiveText = "EQUIPMENT & STATS: Open Journal / Inventory [I] to inspect equipment and attributes.";
+            currentControlHint = "Press [I] or click Journal to inspect Character Paper Doll & Stats";
+
+            if (hasOpenedInventory || IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
+                hasOpenedInventory = true;
                 currentStep = TutorialStep::LORE_DISCOVERY;
                 TriggerStepPopup(TutorialStep::LORE_DISCOVERY);
             }
@@ -342,11 +387,14 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
             currentObjectiveText = "LOST CHRONICLES: Cross the eastern bridge to inspect the glowing ancient chest [E].";
             currentControlHint = "Press [E] to Open Chest  |  Press [I] to read Lore Journal";
 
-            if (chest.CheckInteraction(playerPos) && IsKeyPressed(KEY_E)) {
+            if (chest.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
                 chest.opened = true;
                 hasOpenedChest = true;
                 player.GetInventory().UnlockFragment("frag_02");
                 SoundFX::PlayLoreDiscovery();
+                for (auto& item : loreItems) {
+                    if (item.fragmentId == "frag_02") item.collected = true;
+                }
                 currentStep = TutorialStep::DEFENSE_SENTINEL;
                 TriggerStepPopup(TutorialStep::DEFENSE_SENTINEL);
             }
@@ -460,8 +508,9 @@ void TutorialManager::DrawWorldElements(float time) const {
     }
 
     // 2. All 4 Tutorial Lore Collectibles
+    bool loreInteractable = (currentStep >= TutorialStep::LORE_DISCOVERY);
     for (const auto& item : loreItems) {
-        item.Draw(time);
+        item.Draw(time, loreInteractable);
     }
 }
 

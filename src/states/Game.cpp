@@ -69,7 +69,11 @@ void Game::EnterRuinedCastle() {
     map.Init(MapEnvironment::RUINED_CASTLE);
     player.Init({ 800.0f, 1180.0f });
     player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
+    player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
+    player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
     player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
+    player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
+    player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
     camera.target = player.GetPosition();
     currentState = GameState::RUINED_CASTLE;
     showControlsModal = false;
@@ -144,6 +148,7 @@ void Game::EnterArena() {
 }
 
 void Game::Update(float dt) {
+    particles.Update(dt);
     Vector2 mouseScreen = GetMousePosition();
 
     // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
@@ -171,6 +176,9 @@ void Game::Update(float dt) {
 
     // If Inventory & Lore Journal Modal is active
     if (showInventoryModal) {
+        if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+            tutorial.NotifyInventoryOpened();
+        }
         if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ESCAPE)) {
             showInventoryModal = false;
             SoundFX::PlayButtonClick();
@@ -195,7 +203,10 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
         showInventoryModal = true;
         showControlsModal = false;
-        inventoryActiveTab = 1; // Direct directly to Lore Journal tab
+        inventoryActiveTab = 0; // Direct to Equipment & Character Doll
+        if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+            tutorial.NotifyInventoryOpened();
+        }
         SoundFX::PlayButtonClick();
         return;
     }
@@ -208,7 +219,10 @@ void Game::Update(float dt) {
             if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showInventoryModal = true;
                 showControlsModal = false;
-                inventoryActiveTab = 1;
+                inventoryActiveTab = 0;
+                if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
+                    tutorial.NotifyInventoryOpened();
+                }
                 SoundFX::PlayButtonClick();
                 return;
             } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {

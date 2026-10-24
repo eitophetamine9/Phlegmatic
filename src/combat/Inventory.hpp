@@ -38,7 +38,11 @@ public:
     // Armor Wardrobe
     bool HasArmor(ArmorType type) const;
     void UnlockArmor(ArmorType type);
-    void ClearArmors() { unlockedArmors.clear(); }
+    void ClearArmors() {
+        unlockedArmors.clear();
+        unlockedArmors.push_back(ArmorType::NONE);
+        equippedArmor = ArmorType::NONE;
+    }
     const std::vector<ArmorType>& GetUnlockedArmors() const { return unlockedArmors; }
     ArmorType GetEquippedArmor() const { return equippedArmor; }
     void SetEquippedArmor(ArmorType type) { equippedArmor = type; }
@@ -46,7 +50,11 @@ public:
     // Totem Relics
     bool HasTotem(TotemType type) const;
     void UnlockTotem(TotemType type);
-    void ClearTotems() { unlockedTotems.clear(); }
+    void ClearTotems() {
+        unlockedTotems.clear();
+        unlockedTotems.push_back(TotemType::NONE);
+        equippedTotem = TotemType::NONE;
+    }
     const std::vector<TotemType>& GetUnlockedTotems() const { return unlockedTotems; }
     TotemType GetEquippedTotem() const { return equippedTotem; }
     void SetEquippedTotem(TotemType type) { equippedTotem = type; }

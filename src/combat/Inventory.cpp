@@ -12,26 +12,16 @@ void Inventory::InitDefault() {
     fragments.clear();
     questItems.clear();
 
-    // Default starting weapons available in sandbox
-    unlockedWeapons.push_back(WeaponType::SWORD);
-    unlockedWeapons.push_back(WeaponType::DAGGERS);
-    unlockedWeapons.push_back(WeaponType::MACE);
+    // Default starting weapons
+    unlockedWeapons.push_back(WeaponType::NONE);
 
-    // Default armors available in sandbox
+    // Default armors: ONLY NONE!
     equippedArmor = ArmorType::NONE;
     unlockedArmors.push_back(ArmorType::NONE);
-    unlockedArmors.push_back(ArmorType::COMMONERS_SCRAP);
-    unlockedArmors.push_back(ArmorType::CRUSADER_PLATE);
-    unlockedArmors.push_back(ArmorType::VANGUARD_MAIL);
-    unlockedArmors.push_back(ArmorType::SHADOW_LEATHER);
 
-    // Default totems available in sandbox
+    // Default totems: ONLY NONE!
     equippedTotem = TotemType::NONE;
     unlockedTotems.push_back(TotemType::NONE);
-    unlockedTotems.push_back(TotemType::TOTEM_SANITY);
-    unlockedTotems.push_back(TotemType::TOTEM_INSANITY);
-    unlockedTotems.push_back(TotemType::TOTEM_MIST);
-    unlockedTotems.push_back(TotemType::CRUSADER_TOTEM);
 
     // Initial quest item: Knight's Signet
     questItems.push_back({

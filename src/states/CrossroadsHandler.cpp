@@ -37,7 +37,7 @@ void HiddenTotemChest::Draw(float time) const {
 }
 
 CrossroadsHandler::CrossroadsHandler() {
-    chest.position = { 510.0f, 950.0f };
+    chest.position = { 490.0f, 560.0f };
     chest.opened = false;
     showObjectives = true;
     enemiesSpawned = false;
@@ -59,7 +59,7 @@ void CrossroadsHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& e
     enemies.emplace_back(EnemyType::SLASHER, Vector2{ 860.0f, 1000.0f });
     enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 650.0f });
 
-    chest.position = { 510.0f, 950.0f };
+    chest.position = { 490.0f, 560.0f };
     chest.opened = player.GetInventory().HasTotem(TotemType::TOTEM_SANITY);
     enemiesSpawned = true;
     entryBannerTimer = 4.0f;
@@ -164,9 +164,11 @@ void CrossroadsHandler::Update(
     if (atNorthernGate || interactGate) {
         currentState = GameState::ZYPHDEN_REALM;
         SoundFX::PlayGateOpen();
-        particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 40, 220.0f);
+        particles.Clear();
         return;
     }
+
+    particles.Update(dt);
 
     camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
     camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
