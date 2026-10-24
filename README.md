@@ -19,7 +19,7 @@
 
 ## The World & Lore: Land of Tydeshire
 
-> *“For over 500 years, the Land of Tydeshire was filled with chaos and never ending war. Order was not an option, there was no unity. Factions came along and so then became kingdoms. Each king wants to rule over the entire Land of Tydeshire, most failed miserably however one stood at the top. After 500 years of chaos, one king stood at the top, King Charlz. His overwhelming authority and remarkable strength unified the Land of Tydeshire crowning him Charlz the Lord Liege.*
+> *“For over 500 years, the Land of Tydeshire was filled with chaos and never ending war. Order was not an option, there was no unity. Factions came along and so then became kingdoms. Each king wants to rule over the entire Land of Tydeshire, most failed miserably however one stood at the top. After 500 years of chaos, one king stood at the top, King Charlz. His overwhelming authority and remarkable strength unified the Land of Tydeshire crowning him Charlz the Liege of Kings.*
 >
 > *He then proceeded to divide the land into 5 Kingdoms (Azshden, Fleurshden, Zyphden, and Noirden) each having kings to rule over each. However after 3 decades of peace, the Lord Liege himself seemed to have gone mad and is now dictating the entire Land of Tydeshire. Formerly known as the Land of Peace became the Land of Chaos. The true history of the entire ordeal has been scattered into fragments, waiting to be uncovered for meaning.”*
 
@@ -29,22 +29,29 @@
 
 * **Prologue Cinematic Cutscene**:
   * An atmospheric dark fantasy opening narrative with slow-drifting embers, cathedral abbey chime acoustics, and cinematic text crawl (`[SPACE]` / `[ENTER]` to advance, `[ESC]` to skip).
-* **Chapter 1: The Ruined Castle of Zyphden**:
-  * Atmospheric overgrown castle sanctuary complete with mossy stone flagstones, carved colonnades, guardian statues, and an elevated high altar.
-  * **Interactive Tutorial Pop-up Modals**: High-priority illuminated parchment pop-ups that temporarily pause real-time combat and gameplay, giving players ample time to read movement, swordplay, and defense instructions. Dismissable instantly via `[SPACE]`, `[ENTER]`, or `RESUME` button.
-* **Lore Journal & Chronicles Modal (`[I]` / `[TAB]`)**:
-  * Built-in interactive codex and royal inventory.
-  * Reads discovered historical fragments recovered from ancient relic chests and fallen champions.
-  * Gold notification badges signal newly uncovered chronicles.
-* **Boss Encounter: Zil the Corrupted Crusader**:
-  * Duel the guardian of the north portcullis atop the high dais.
-  * Features parriable strikes, shield bashes, and flame wave projectiles.
-  * Branching defeat mechanics: 1-time duel retry or sparing by Zil to continue your journey into the open wilderness.
-  * Defeating Zil rewards the legendary broadsword **Truth Seeker** and Fragment III.
+* **Multi-Stage Campaign Progression (Chapter 1)**:
+  * **Act I: The Ruined Castle**: Overgrown sanctuary, tutorial pop-up modals, sanctuary ward barrier, and the high-altar trial against **Zil's Fragment** awarding the legendary **Truth Seeker (Partial)**.
+  * **Act II: The Crossroads of the Damned**: Void-corrupted wilderness connecting the southern ruins to the northern realm. Features telepathic monster ambushes with directional telegraphs and the ancient shrine holding the **Totem of Sanity**.
+  * **Act III: Fortified Realm of Zyphden**: Walled capital of the Gale Tempests featuring cobblestone highways, town noticeboard, lore historians (Chronicler Cedric, Blacksmith Varek, Elder Maeve), and collectible royal archives.
+  * **Hearthside Tavern**: Cozy interior retreat with stone hearth fireplace, timber bar counter, stools, and Tavernkeep Eldon, featuring a scripted entrance sequence for Knight Lenon.
+  * **Zyphden Royal Keep (Throne Hall)**: Grand interior throne room with polished marble flagstones, crimson runner carpet, royal braziers, and **King Kreptu** presiding from his golden throne dais to grant royal sanction.
+  * **Courtyard Boss Spar — Knight Lenon**: Martial duel in the Eastern Courtyard against the Vanguard Captain, awarding the consecrated **Crusader Plate (+24 Def, +30 HP)** and unlocking the Royal Combat Arena.
 * **Precision Combat System**:
   * **`Q` Key — Dash**: 8-directional burst with **invulnerability frames (i-frames)** to phase safely through attacks and projectiles (`EVADED`).
   * **`F` Key — Timed Parry**: Active 0.28s guard window with radiant cyan-gold shield barrier. Deflecting melee blows staggers enemies for 2.0s (`DEFENSE BROKEN!`) and grants a **+50% Counter-Attack Damage Buff**.
   * **Projectile Deflection**: Parrying incoming enemy spells and arrows reflects them back toward your cursor with amplified speed and damage.
+* **Out-of-Combat Health Regeneration**:
+  * Remaining disengaged from combat for 4+ seconds smoothly regenerates health at **+8.0 HP/s** up to maximum capacity.
+* **Equipment & Stat Scaling (Armor & Totems)**:
+  * Collectible armor sets with dynamic damage mitigation:
+    $$\text{Damage} = \text{RawDamage} \times \left(\frac{100}{100 + \text{Defense} \times (1 - \text{Pierce})}\right)$$
+  * Equippable sacred totems that alter stamina recovery rates, attack power, and cooldown timings.
+* **Paginated Multi-Page Dialogue & Lore Codex**:
+  * Clean, interactive dialogue box supporting multi-page conversations with Previous (`[A]`), Next (`[D]`), and Close (`[ESC]`) navigation.
+  * Comprehensive in-game Lore Journal (`[I]` / `[TAB]`) tracking 8 uncoverable historical fragments across the realm with unread notification indicators.
+* **Collapsible Objectives Tracker (`[O]`) & Location Banner**:
+  * Dynamic top HUD displaying active environment (`RUINED CASTLE`, `CROSSROADS`, `ZYPHDEN`, `HEARTHSIDE TAVERN`, `ZYPHDEN ROYAL KEEP`, `ARENA`).
+  * Collapsible quest card pinned cleanly to the middle-left margin.
 * **Procedural Medieval Acoustic Audio**:
   * 100% custom-synthesized medieval soundscape with zero retro/sci-fi synth beeps:
     - Cathedral abbey bells with acoustic overtone partials.
@@ -53,18 +60,10 @@
     - Chainmail & plate armor blunt impact thuds.
     - Crossbow string releases with wooden timber creaks.
     - Deep medieval war horns and portcullis iron chain rumbles.
-* **Combat Arena & Wave Defense Mode - Expanded to 5 Stages**:
+* **Combat Arena & Wave Defense Mode - 5 Stages**:
   * 5 escalating combat waves featuring mixed vanguard formations, high-threat charger vanguards, dual-brute shockwaves, kiting snipers, and culminating in **The Grand Inquisitor** boss trial on Wave 5.
   * **Adhesive Bandages +30 HP**: Glowing medical pickups spawn periodically across the arena floor and drop upon defeating enemies, providing tactical healing sustain during prolonged trials.
-* **Test Arena Mode - Main Menu & Lobby**:
-  * Unlocked on the Title Screen and Lobby once the player completes Chapter 1 and **defeats Zil's Fragment**.
-  * Grants instant access to all 5 arena combat trials directly from the main menu or the Lobby portal for continuous weapon and defense testing.
-* **Streamlined Objectives HUD**:
-  * Tutorial quest objectives are cleanly pinned to the top-left margin to preserve central combat visibility.
-* **Armor Defense & Mitigation System**:
-  * Both player and enemy archetypes possess innate armor defense values that attenuate incoming damage using diminishing returns:
-    $$\text{Damage} = \text{RawDamage} \times \left(\frac{100}{100 + \text{Defense} \times (1 - \text{Pierce})}\right)$$
-  * The player character starts with **15 Defense (~13% mitigation)**, visible in the Lore & Inventory codex (`[I]`). Certain heavy strikes (e.g., War Mace Earthshaker, Truth Seeker Holy Beam) feature defense penetration.
+  * **Combat Arena Unlock**: Unlocked from the Title Screen and Lobby upon completing the current storyline progress (claiming the Crusader Plate).
 
 ---
 
@@ -72,18 +71,21 @@
 
 | Action | Key / Input | Gameplay Role |
 | :--- | :--- | :--- |
-| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid wall and pillar collisions. |
+| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid wall, counter, and pillar collisions. |
 | **Aiming** | `Mouse Cursor` | Reticle targeting for sword thrusts, dashes, and parry reflections. |
 | **Light Attack** | `Left Mouse Button` | Swift slash/thrust. Low/zero stamina cost, rapid recovery cadence. |
 | **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage attacks, lunges, shockwaves). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **i-frames** (`EVADED`) to dodge sweeps & missiles. |
 | **Timed Parry** | `F Key` | 0.28s guard. Staggers melee foes for 2.0s and **reflects incoming projectiles**. |
-| **Interact** | `E Key` / `Left Click` | Claim weapons, open ancient relic chests, and trigger portal transit. |
-| **Lore Journal** | `I Key` or `TAB` | Toggle the in-game chronicles codex, armor stats, and weapon inventory. |
+| **Interact / Advance** | `E Key` / `Space` / `Enter` | Talk to NPCs, claim weapons/armor, inspect lecterns, and transition doors. |
+| **Dialogue Navigation** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
+| **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, pop-ups, and modals without closing the game. |
+| **Toggle Objectives** | `O Key` | Expand or collapse the Chapter 1 objectives tracking card. |
+| **Lore Journal & Inventory** | `I Key` or `TAB` | Toggle the in-game chronicles codex, paper doll, armor stats, and totems. |
 | **Controls Guide** | `C Key` | Toggle the quick-reference controls overlay modal. |
 | **Title Screen** | `~ Key` (Tilde / Grave) | Instantly return to the Title Screen from any map or combat state. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the combat trial. |
-| **Return to Lobby** | `L Key` or `ESC` | Return to the Armory Sanctuary. |
+| **Return to Lobby** | `L Key` | Return to the Armory Sanctuary from lobby-connected states. |
 
 ---
 
