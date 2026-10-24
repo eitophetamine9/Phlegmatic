@@ -3,6 +3,7 @@
 #include "GameState.hpp"
 #include "../combat/CombatTypes.hpp"
 #include <string>
+#include <vector>
 
 class Player;
 
@@ -30,6 +31,9 @@ public:
 
     // Cinematic Boss Dialogue Banner
     static void DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor);
+
+    // Interactive Paginated NPC Dialogue Box with ESC dismiss
+    static bool DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor);
 
     // Open World Borderlands Gateway Epilogue Screen
     // Returns: 0 = None, 1 = Re-enter Castle, 2 = Return to Lobby

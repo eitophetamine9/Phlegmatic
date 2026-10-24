@@ -143,6 +143,23 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 1500.0f, 550.0f }); // Courtyard brazier
         torches.push_back({ 1500.0f, 850.0f });
         torches.push_back({ 620.0f, 860.0f });  // Tavern entrance lantern
+    } else if (env == MapEnvironment::TAVERN_INTERIOR) {
+        // Hearthside Tavern Interior - Cozy rustic tavern
+        bounds = { 600.0f, 600.0f, 400.0f, 320.0f };
+
+        // Bar Counter Obstacle
+        obstacles.push_back({ { 650.0f, 660.0f, 150.0f, 32.0f } });
+        // Stone Hearth Fireplace
+        obstacles.push_back({ { 760.0f, 600.0f, 80.0f, 30.0f } });
+        // Dining Table 1
+        obstacles.push_back({ { 860.0f, 720.0f, 70.0f, 42.0f } });
+        // Dining Table 2
+        obstacles.push_back({ { 860.0f, 820.0f, 70.0f, 42.0f } });
+
+        // Lanterns & Hearth glow
+        torches.push_back({ 800.0f, 620.0f }); // Fireplace flame
+        torches.push_back({ 680.0f, 760.0f }); // Wall lantern
+        torches.push_back({ 920.0f, 760.0f }); // Wall lantern
     }
 }
 
@@ -197,6 +214,8 @@ void GameMap::DrawFloor() const {
         DrawCrossroadsFloor();
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenFloor();
+    } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
+        DrawTavernFloor();
     }
 
     float time = (float)GetTime();
@@ -291,6 +310,8 @@ void GameMap::DrawWallsAndPillars() const {
         DrawCrossroadsWalls();
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenWalls();
+    } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
+        DrawTavernWalls();
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -669,5 +690,82 @@ void GameMap::DrawZyphdenWalls() const {
         DrawRectangleLinesEx(bannerRec, 2.0f, Color{ 225, 185, 60, 255 });
         DrawCircle((int)bx, 355, 6.0f, Color{ 255, 215, 80, 255 });
     }
+
+    // Tavern East Entrance Doorway (Leading into Tavern Interior)
+    Rectangle tavernDoor = { 595.0f, 860.0f, 14.0f, 50.0f };
+    DrawRectangleRec(tavernDoor, Color{ 20, 15, 12, 255 });
+    DrawRectangleLinesEx(tavernDoor, 2.0f, Color{ 215, 175, 75, 240 });
+    DrawCircle(602, 852, 5.0f, Color{ 255, 190, 70, 240 });
+}
+
+void GameMap::DrawTavernFloor() const {
+    // Warm dark amber wood floor planks
+    DrawRectangleRec(bounds, Color{ 38, 26, 18, 255 });
+
+    // Wood plank seams
+    for (int y = (int)bounds.y; y <= (int)(bounds.y + bounds.height); y += 20) {
+        DrawLine((int)bounds.x, y, (int)(bounds.x + bounds.width), y, Color{ 26, 17, 12, 190 });
+    }
+    for (int x = (int)bounds.x; x <= (int)(bounds.x + bounds.width); x += 60) {
+        for (int y = (int)bounds.y; y <= (int)(bounds.y + bounds.height); y += 40) {
+            DrawLine(x, y, x, y + 20, Color{ 26, 17, 12, 140 });
+        }
+    }
+
+    // Cozy rug in front of hearth
+    Rectangle rug = { 750.0f, 640.0f, 100.0f, 50.0f };
+    DrawRectangleRec(rug, Color{ 95, 30, 35, 230 });
+    DrawRectangleLinesEx(rug, 2.0f, Color{ 190, 150, 60, 240 });
+
+    // Doorway mat at southern entrance (doorway at {800, 915})
+    Rectangle mat = { 760.0f, 885.0f, 80.0f, 25.0f };
+    DrawRectangleRec(mat, Color{ 55, 42, 30, 240 });
+    DrawRectangleLines(760, 885, 80, 25, Color{ 110, 85, 55, 200 });
+}
+
+void GameMap::DrawTavernWalls() const {
+    float time = (float)GetTime();
+
+    // 1. Bar Counter & Shelves
+    Rectangle bar = { 650.0f, 660.0f, 150.0f, 32.0f };
+    DrawRectangleRec(bar, Color{ 70, 48, 30, 255 });
+    DrawRectangleLinesEx(bar, 2.0f, Color{ 120, 85, 55, 255 });
+    DrawText("BAR", 705, 668, 12, Color{ 255, 215, 120, 240 });
+
+    // Bar stools
+    for (float sx = 665.0f; sx <= 785.0f; sx += 35.0f) {
+        DrawCircle((int)sx, 706, 10.0f, Color{ 52, 36, 24, 255 });
+        DrawCircleLines((int)sx, 706, 10.0f, Color{ 110, 80, 50, 255 });
+    }
+
+    // Shelves behind Eldon with bottles/mugs
+    DrawRectangle(650, 608, 150, 16, Color{ 48, 34, 22, 255 });
+    DrawRectangleLines(650, 608, 150, 16, Color{ 90, 65, 42, 255 });
+    for (int b = 0; b < 6; b++) {
+        DrawRectangle(660 + b * 22, 602, 10, 14, (b % 2 == 0) ? Color{ 80, 160, 120, 220 } : Color{ 180, 110, 60, 220 });
+    }
+
+    // 2. Fireplace Hearth
+    Rectangle hearth = { 760.0f, 600.0f, 80.0f, 30.0f };
+    DrawRectangleRec(hearth, Color{ 45, 42, 44, 255 });
+    DrawRectangleLinesEx(hearth, 2.0f, Color{ 95, 90, 92, 255 });
+    // Crackling fire
+    float flicker = sinf(time * 12.0f) * 3.0f;
+    DrawCircle(800, 616, 12.0f + flicker, Color{ 255, 120, 30, 240 });
+    DrawCircle(800, 616, 6.0f, Color{ 255, 230, 100, 255 });
+
+    // 3. Dining Tables & Chairs
+    for (float ty : { 720.0f, 820.0f }) {
+        Rectangle table = { 860.0f, ty, 70.0f, 42.0f };
+        DrawRectangleRec(table, Color{ 62, 44, 28, 255 });
+        DrawRectangleLinesEx(table, 2.0f, Color{ 110, 80, 52, 255 });
+        // Stools around table
+        DrawCircle(846, (int)ty + 21, 8.0f, Color{ 48, 34, 22, 255 });
+        DrawCircle(944, (int)ty + 21, 8.0f, Color{ 48, 34, 22, 255 });
+    }
+
+    // 4. Southern Exit Doorway
+    DrawRectangle(770, 915, 60, 6, Color{ 20, 15, 12, 255 });
+    DrawRectangleLines(770, 915, 60, 6, Color{ 180, 140, 80, 255 });
 }
 

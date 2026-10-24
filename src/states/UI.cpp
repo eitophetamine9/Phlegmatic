@@ -47,6 +47,10 @@ void GameUI::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std
     HUD::DrawBossDialogueBanner(windowWidth, windowHeight, speaker, text, accentColor);
 }
 
+bool GameUI::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
+    return HUD::DrawNPCDialogueBox(windowWidth, windowHeight, mousePos, isMousePressed, speaker, pages, currentPage, accentColor);
+}
+
 int GameUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player) {
     return ModalUI::DrawBorderlandsGateway(windowWidth, windowHeight, mousePos, isMousePressed, player);
 }

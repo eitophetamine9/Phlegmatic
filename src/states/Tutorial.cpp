@@ -312,6 +312,17 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
     }
 
+    // Persistent Equipment Stand Checks (Armor and Weapon remain interactable until claimed)
+    float distToArmor = Vector2Distance(playerPos, armorStandPos);
+    if (!hasClaimedArmor && distToArmor <= 55.0f && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        hasClaimedArmor = true;
+        player.GetInventory().UnlockArmor(ArmorType::COMMONERS_SCRAP);
+        player.SetArmor(ArmorType::COMMONERS_SCRAP);
+        SoundFX::PlayEquipWeapon();
+        particles.SpawnFloatingText(armorStandPos, "EQUIPPED: Commoner's Scrap (+6 DEF)!", Color{ 255, 215, 80, 255 }, 20.0f);
+        particles.AddScreenShake(3.0f, 0.15f);
+    }
+
     switch (currentStep) {
         case TutorialStep::AWAKENING: {
             currentObjectiveText = "AWAKENING: Move through the ruined courtyard using [W, A, S, D].";
@@ -326,11 +337,13 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::WEAPON_STAND: {
-            currentObjectiveText = "WEAPON & ARMOR: Claim the Broadsword and Commoner's Scrap armor from the plinths [E].";
+            currentObjectiveText = hasClaimedArmor ?
+                "WEAPON: Claim the Crusader's Broadsword from the central plinth [E]." :
+                "WEAPON & ARMOR: Claim the Broadsword and Commoner's Scrap armor from the plinths [E].";
             currentControlHint = "Walk to glowing plinths and press [E] to Claim Equipment";
 
             float distToStand = Vector2Distance(playerPos, weaponStandPos);
-            if (distToStand <= 55.0f && IsKeyPressed(KEY_E)) {
+            if (distToStand <= 55.0f && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
                 hasClaimedWeapon = true;
                 player.SetWeapon(WeaponType::SWORD);
                 player.GetInventory().UnlockWeapon(WeaponType::SWORD);
@@ -339,16 +352,6 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
                 particles.AddScreenShake(3.0f, 0.15f);
                 currentStep = TutorialStep::COMBAT_BASICS;
                 TriggerStepPopup(TutorialStep::COMBAT_BASICS);
-            }
-
-            float distToArmor = Vector2Distance(playerPos, armorStandPos);
-            if (!hasClaimedArmor && distToArmor <= 55.0f && IsKeyPressed(KEY_E)) {
-                hasClaimedArmor = true;
-                player.GetInventory().UnlockArmor(ArmorType::COMMONERS_SCRAP);
-                player.SetArmor(ArmorType::COMMONERS_SCRAP);
-                SoundFX::PlayEquipWeapon();
-                particles.SpawnFloatingText(armorStandPos, "EQUIPPED: Commoner's Scrap (+6 DEF)!", Color{ 255, 215, 80, 255 }, 20.0f);
-                particles.AddScreenShake(3.0f, 0.15f);
             }
             break;
         }

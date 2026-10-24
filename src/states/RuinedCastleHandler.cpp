@@ -82,8 +82,6 @@ void RuinedCastleHandler::Update(
 
             // Award Zil's Token (quest item)
             player.GetInventory().AddQuestItem(QuestItem{ "zils_token", "Zil's Token", "A scorched iron crusade badge bestowed by Zil. Proves you survived the trial of the Ruined Castle.", Color{ 255, 180, 60, 255 } });
-            testArenaUnlocked = true;
-            if (onSaveArenaUnlock) onSaveArenaUnlock();
 
             zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
             zilDialogueText = "Take my token, wanderer. Carry word of my eternal vigil to Knight Lenon in Zyphden. The northern gateway to the Crossroads is open.";
@@ -214,8 +212,6 @@ void RuinedCastleHandler::Update(
 
         if (!zilAlive && !zilDefeated) {
             zilDefeated = true;
-            testArenaUnlocked = true;
-            if (onSaveArenaUnlock) onSaveArenaUnlock();
             zilEncounterActive = false;
             enemies.clear();
             projectiles.clear();

@@ -18,6 +18,7 @@ Game::~Game() {
 void Game::Init() {
     SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
     InitWindow(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, Config::WINDOW_TITLE);
+    SetExitKey(KEY_NULL); // Prevent ESC from closing the program
     SetTargetFPS(Config::TARGET_FPS);
 
     SoundFX::Init();
@@ -40,29 +41,16 @@ void Game::Init() {
     currentState = GameState::TITLE_SCREEN;
     showControlsModal = false;
     ruinedCastleHandler.Reset();
-    testArenaUnlocked = LoadArenaUnlock();
+    testArenaUnlocked = false; // Strictly locked until explicitly configured
     bandageSpawnTimer = 14.0f;
 }
 
 void Game::SaveArenaUnlock() {
-    FILE* f = fopen("arena_unlock.dat", "w");
-    if (f) {
-        fprintf(f, "1\n");
-        fclose(f);
-    }
+    // Arena is kept strictly locked; do not save auto-unlock
 }
 
 bool Game::LoadArenaUnlock() {
-    FILE* f = fopen("arena_unlock.dat", "r");
-    if (f) {
-        int v = 0;
-        if (fscanf(f, "%d", &v) == 1 && v == 1) {
-            fclose(f);
-            return true;
-        }
-        fclose(f);
-    }
-    return false;
+    return false; // Arena is kept strictly locked
 }
 
 void Game::EnterRuinedCastle() {

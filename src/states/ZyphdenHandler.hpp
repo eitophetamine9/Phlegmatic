@@ -106,22 +106,30 @@ private:
     ZyphdenLoreItem vanguardLog;   // frag_07: Lenon's Field Log
     ZyphdenLoreItem royalArchives; // frag_08: The Sovereign's Burden
 
+    // Map & Interior State
+    bool inTavern = false;
+
     // Quest Progression State Machine
     ZyphdenQuestPhase questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
     bool hasTalkedToKing = false;
     bool sparActive = false;
     bool lenonDefeated = false;
     bool lenonSpawned = false;
+    bool lenonInTavern = false;
+    float lenonSpawnTimer = 0.0f;
 
     // HUD & Banners
     mutable bool showObjectives = true;
     float entryBannerTimer = 0.0f;
 
-    // Dialogue Banner State
-    float dialogueTimer = 0.0f;
+    // Paginated Dialogue Box State
+    bool isDialogueOpen = false;
+    std::string currentDialogueNPCId = "";
     std::string dialogueSpeaker = "";
-    std::string dialogueText = "";
+    std::vector<std::string> dialoguePages;
+    int currentDialoguePage = 0;
     Color dialogueColor = WHITE;
 
-    void SetDialogue(const std::string& speaker, const std::string& text, Color color, float duration = 5.0f);
+    void OpenDialogue(const std::string& npcId, const std::string& speaker, const std::vector<std::string>& pages, Color color);
+    void CloseDialogue();
 };

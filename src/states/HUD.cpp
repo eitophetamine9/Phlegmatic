@@ -324,6 +324,138 @@ void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::s
     DrawText(text.c_str(), (int)bannerX + 22, (int)bannerY + 32, 14, Color{ 240, 244, 255, 250 });
 }
 
+bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
+    if (pages.empty()) return false;
+
+    // Bounds check current page
+    if (currentPage < 0) currentPage = 0;
+    if (currentPage >= (int)pages.size()) currentPage = (int)pages.size() - 1;
+
+    // ESC key closes dialogue immediately
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        return false;
+    }
+
+    // Modal dimensions
+    const float boxW = 840.0f;
+    const float boxH = 190.0f;
+    const float boxX = ((float)windowWidth - boxW) * 0.5f;
+    const float boxY = (float)windowHeight - boxH - 28.0f;
+
+    // Dark backdrop card with accent border
+    DrawRectangleRounded(Rectangle{ boxX, boxY, boxW, boxH }, 0.14f, 6, Color{ 14, 18, 28, 245 });
+    DrawRectangleRoundedLines(Rectangle{ boxX, boxY, boxW, boxH }, 0.14f, 6, accentColor);
+    DrawRectangleRoundedLines(Rectangle{ boxX + 3.0f, boxY + 3.0f, boxW - 6.0f, boxH - 6.0f }, 0.12f, 6, Color{ 45, 60, 85, 180 });
+
+    // Speaker Name Header (Golden/Accent)
+    DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 16, accentColor);
+
+    // Page indicator top-right
+    char pageBuf[32];
+    snprintf(pageBuf, sizeof(pageBuf), "Page %d / %d", currentPage + 1, (int)pages.size());
+    DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
+
+    // Word-wrapped text rendering
+    const std::string& text = pages[currentPage];
+    const float maxLineWidth = boxW - 56.0f;
+    const int fontSize = 14;
+    const int lineSpacing = 22;
+
+    std::vector<std::string> lines;
+    std::string currentLine = "";
+    std::string currentWord = "";
+
+    for (size_t i = 0; i <= text.length(); ++i) {
+        char c = (i < text.length()) ? text[i] : ' ';
+        if (c == ' ' || c == '\n' || i == text.length()) {
+            if (!currentWord.empty()) {
+                std::string testLine = currentLine.empty() ? currentWord : (currentLine + " " + currentWord);
+                if (MeasureText(testLine.c_str(), fontSize) > maxLineWidth) {
+                    if (!currentLine.empty()) lines.push_back(currentLine);
+                    currentLine = currentWord;
+                } else {
+                    currentLine = testLine;
+                }
+                currentWord = "";
+            }
+            if (c == '\n') {
+                lines.push_back(currentLine);
+                currentLine = "";
+            }
+        } else {
+            currentWord += c;
+        }
+    }
+    if (!currentLine.empty()) {
+        lines.push_back(currentLine);
+    }
+
+    // Render dialogue lines
+    int textY = (int)boxY + 48;
+    for (const auto& line : lines) {
+        DrawText(line.c_str(), (int)boxX + 28, textY, fontSize, Color{ 235, 240, 252, 250 });
+        textY += lineSpacing;
+    }
+
+    // Navigation Buttons at Bottom
+    const float btnY = boxY + boxH - 40.0f;
+    const float btnH = 26.0f;
+
+    // 1. [ < PREV (A) ] Button
+    bool hasPrev = (currentPage > 0);
+    Rectangle prevBtn = { boxX + 28.0f, btnY, 110.0f, btnH };
+    bool prevHover = hasPrev && CheckCollisionPointRec(mousePos, prevBtn);
+    Color prevBg = !hasPrev ? Color{ 25, 30, 42, 120 } : (prevHover ? Color{ 55, 75, 115, 240 } : Color{ 32, 44, 65, 220 });
+    Color prevBorder = !hasPrev ? Color{ 50, 60, 80, 100 } : (prevHover ? Color{ 140, 195, 255, 255 } : Color{ 70, 95, 140, 200 });
+    Color prevText = !hasPrev ? Color{ 100, 110, 130, 120 } : (prevHover ? Color{ 255, 255, 255, 255 } : Color{ 190, 215, 245, 230 });
+
+    DrawRectangleRounded(prevBtn, 0.25f, 4, prevBg);
+    DrawRectangleRoundedLines(prevBtn, 0.25f, 4, prevBorder);
+    DrawText("< PREV [A]", (int)prevBtn.x + 16, (int)prevBtn.y + 7, 11, prevText);
+
+    if (hasPrev && ((prevHover && isMousePressed) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))) {
+        currentPage--;
+    }
+
+    // 2. [ NEXT > (D) ] or [ FINISH (SPACE) ] Button
+    bool isLastPage = (currentPage >= (int)pages.size() - 1);
+    Rectangle nextBtn = { boxX + 150.0f, btnY, 130.0f, btnH };
+    bool nextHover = CheckCollisionPointRec(mousePos, nextBtn);
+    Color nextBg = nextHover ? Color{ 70, 90, 135, 240 } : Color{ 38, 52, 80, 220 };
+    Color nextBorder = nextHover ? Color{ 255, 220, 110, 255 } : Color{ 180, 150, 70, 220 };
+    Color nextText = nextHover ? Color{ 255, 240, 150, 255 } : Color{ 240, 225, 160, 240 };
+
+    DrawRectangleRounded(nextBtn, 0.25f, 4, nextBg);
+    DrawRectangleRoundedLines(nextBtn, 0.25f, 4, nextBorder);
+    const char* nextLabel = isLastPage ? "FINISH [SPACE]" : "NEXT > [D]";
+    DrawText(nextLabel, (int)nextBtn.x + 18, (int)nextBtn.y + 7, 11, nextText);
+
+    if ((nextHover && isMousePressed) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_SPACE)) {
+        if (!isLastPage) {
+            currentPage++;
+        } else {
+            return false; // Finished reading dialogue!
+        }
+    }
+
+    // 3. [ CLOSE (ESC) ] Button
+    Rectangle closeBtn = { boxX + boxW - 138.0f, btnY, 110.0f, btnH };
+    bool closeHover = CheckCollisionPointRec(mousePos, closeBtn);
+    Color closeBg = closeHover ? Color{ 130, 40, 50, 240 } : Color{ 58, 28, 35, 220 };
+    Color closeBorder = closeHover ? Color{ 255, 110, 120, 255 } : Color{ 150, 60, 75, 200 };
+    Color closeText = closeHover ? Color{ 255, 230, 235, 255 } : Color{ 230, 175, 185, 230 };
+
+    DrawRectangleRounded(closeBtn, 0.25f, 4, closeBg);
+    DrawRectangleRoundedLines(closeBtn, 0.25f, 4, closeBorder);
+    DrawText("CLOSE [ESC]", (int)closeBtn.x + 16, (int)closeBtn.y + 7, 11, closeText);
+
+    if (closeHover && isMousePressed) {
+        return false;
+    }
+
+    return true; // Keep open
+}
+
 void HUD::DrawGameOver(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 20, 5, 8, 210 });
     int titleW = MeasureText("FALLEN IN BATTLE", 38);
