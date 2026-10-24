@@ -290,7 +290,7 @@ void Game::Update(float dt) {
 
     // 1.88 ZYPHDEN REALM STATE (Chapter 1)
     if (currentState == GameState::ZYPHDEN_REALM) {
-        if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM) {
+        if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM && map.GetEnvironment() != MapEnvironment::TAVERN_INTERIOR) {
             EnterZyphden();
         }
         zyphdenHandler.Update(

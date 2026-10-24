@@ -108,6 +108,8 @@ private:
 
     // Map & Interior State
     bool inTavern = false;
+    float doorCooldown = 0.0f;
+    Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };
 
     // Quest Progression State Machine
     ZyphdenQuestPhase questPhase = ZyphdenQuestPhase::SEEK_TAVERN;

@@ -209,6 +209,8 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
 
     sparActive = false;
     entryBannerTimer = 4.0f;
+    doorCooldown = 0.0f;
+    tavernExitSpawnPos = { 635.0f, 885.0f };
     isDialogueOpen = false;
     dialoguePages.clear();
     currentDialoguePage = 0;
@@ -231,6 +233,10 @@ void ZyphdenHandler::Update(
 
     if (entryBannerTimer > 0.0f) {
         entryBannerTimer -= dt;
+    }
+
+    if (doorCooldown > 0.0f) {
+        doorCooldown -= dt;
     }
 
     // Toggle Middle-Left Objectives
@@ -404,11 +410,12 @@ void ZyphdenHandler::Update(
     if (!isDialogueOpen) {
         if (inTavern) {
             // Inside Hearthside Tavern
-            // 1. South Doorway to Zyphden exterior
-            if (playerPos.y >= 905.0f || (Vector2Distance(playerPos, { 800.0f, 915.0f }) <= 45.0f && interactKey)) {
+            // 1. South Doorway to Zyphden exterior (doorway at {800, 915})
+            if (doorCooldown <= 0.0f && (playerPos.y >= 910.0f || (Vector2Distance(playerPos, { 800.0f, 915.0f }) <= 45.0f && interactKey))) {
                 inTavern = false;
+                doorCooldown = 0.5f;
                 map.Init(MapEnvironment::ZYPHDEN_REALM);
-                player.SetPosition({ 635.0f, 880.0f });
+                player.SetPosition(tavernExitSpawnPos);
                 camera.target = player.GetPosition();
                 SoundFX::PlayGateOpen();
                 return;
@@ -446,10 +453,16 @@ void ZyphdenHandler::Update(
             bool inEastDoorThreshold = (playerPos.x <= 605.0f && playerPos.x >= 560.0f && playerPos.y >= 845.0f && playerPos.y <= 925.0f);
             bool inSouthDoorThreshold = (playerPos.y <= 1018.0f && playerPos.y >= 975.0f && playerPos.x >= 390.0f && playerPos.x <= 490.0f);
 
-            if ((nearEastDoor || nearSouthDoor) && (interactKey || inEastDoorThreshold || inSouthDoorThreshold)) {
+            if (doorCooldown <= 0.0f && ((nearEastDoor || nearSouthDoor) && (interactKey || inEastDoorThreshold || inSouthDoorThreshold))) {
                 inTavern = true;
+                doorCooldown = 0.5f;
+                if (nearEastDoor || inEastDoorThreshold) {
+                    tavernExitSpawnPos = { 635.0f, 885.0f };
+                } else {
+                    tavernExitSpawnPos = { 440.0f, 1040.0f };
+                }
                 map.Init(MapEnvironment::TAVERN_INTERIOR);
-                player.SetPosition({ 800.0f, 880.0f });
+                player.SetPosition({ 800.0f, 840.0f }); // Safely inside tavern room
                 camera.target = player.GetPosition();
                 SoundFX::PlayGateOpen();
                 return;
