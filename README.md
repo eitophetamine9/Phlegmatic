@@ -28,11 +28,12 @@
 ## Key Features
 
 * **Prologue Cinematic Cutscene**:
-  * An atmospheric dark fantasy opening narrative with slow-drifting embers, cathedral abbey chime acoustics, and cinematic text crawl (`[SPACE]` / `[ENTER]` to advance, `[ESC]` to skip).
+  * An atmospheric, brief dark fantasy opening narrative with slow-drifting embers, cathedral abbey chime acoustics, and poetic text crawl (`[SPACE]` / `[ENTER]` to advance, `[ESC]` to skip), letting players jump quickly into gameplay while in-game monoliths and journals tell the deeper lore.
 * **Multi-Stage Campaign Progression (Chapter 1)**:
-  * **Act I: The Ruined Castle**: Overgrown sanctuary, tutorial pop-up modals, sanctuary ward barrier, and the high-altar trial against **Zil's Fragment** awarding the legendary **Truth Seeker (Partial)**.
+  * **Act I: The Ruined Castle**: Overgrown sanctuary, tutorial pop-up modals, sanctuary ward barrier, and the high-altar trial against **Zil's Remnant** awarding the legendary **Truth Seeker (Partial)**.
   * **Act II: The Crossroads of the Damned**: Void-corrupted wilderness connecting the southern ruins to the northern realm. Features telepathic monster ambushes with directional telegraphs and the ancient shrine holding the **Totem of Sanity**.
-  * **Act III: Fortified Realm of Zyphden**: Walled capital of the Gale Tempests featuring cobblestone highways, town noticeboard, lore historians (Chronicler Cedric, Blacksmith Varek, Elder Maeve), and collectible royal archives.
+  * **Zyphden Realm Transition Screen**: An atmospheric realm-entry screen connecting the Crossroads to Zyphden with ornate framing, dust motes, and automatic asset detection for `assets/zyphden_transition.png` (displays an artistic placeholder layout when no custom illustration file is present).
+  * **Act III: Fortified Realm of Zyphden**: Walled capital of the Gale Tempests featuring cobblestone highways, town noticeboard, rich character dialogues (Chronicler Cedric, Blacksmith Varek, Elder Maeve), and collectible royal archives.
   * **Hearthside Tavern**: Cozy interior retreat with stone hearth fireplace, timber bar counter, stools, and Tavernkeep Eldon, featuring a scripted entrance sequence for Knight Lenon.
   * **Zyphden Royal Keep (Throne Hall - Expanded 1200x1100)**: A grand, expansive audience hall featuring an elevated stepped dais, the golden throne of **King Kreptu**, eight massive marble colonnade pillars, Western Royal Archives, Eastern Armory racks, and a 940px crimson runner carpet with the gold Sovereign Seal medallion.
   * **Interactive Throne Room Court (5 NPCs)**:
