@@ -1,10 +1,11 @@
 #pragma once
 #include "raylib.h"
-#include "../combat/CombatTypes.hpp"
+#include "raymath.h"
 #include "../combat/Weapon.hpp"
+#include "../combat/CombatTypes.hpp"
 #include "../core/Particles.hpp"
 #include "../core/SoundFX.hpp"
-#include "raymath.h"
+#include <string>
 #include <cmath>
 
 struct WeaponPedestal {
@@ -194,5 +195,85 @@ struct AdhesiveBandage {
         const char* label = "ADHESIVE BANDAGE +30 HP";
         int w = MeasureText(label, 10);
         DrawText(label, (int)(drawPos.x - w * 0.5f), (int)(drawPos.y - radius - 16.0f), 10, Color{ 120, 255, 170, 220 });
+    }
+};
+
+struct InscribedPillar {
+    std::string fragmentId;
+    std::string name;
+    Vector2 position;
+    float radius = 26.0f;
+    bool read = false;
+
+    bool CheckInteraction(Vector2 playerPos) const {
+        return !read && Vector2Distance(playerPos, position) <= (radius + 38.0f);
+    }
+
+    void Draw(float time) const {
+        // Shadow
+        DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.2f, radius * 0.55f, Color{ 10, 12, 18, 130 });
+
+        // Monolith base
+        Rectangle baseRec = { position.x - 18.0f, position.y - 24.0f, 36.0f, 38.0f };
+        DrawRectangleRounded(baseRec, 0.28f, 4, Color{ 38, 44, 58, 255 });
+        DrawRectangleRoundedLines(baseRec, 0.28f, 4, Color{ 70, 85, 115, 255 });
+
+        // Engraved runic core
+        float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
+        Color runeColor = read ? Color{ 80, 100, 125, 180 } : Color{ 100, 220, 255, (unsigned char)(180 + 75 * pulse) };
+        DrawRectangle((int)(position.x - 4), (int)(position.y - 18), 8, 24, runeColor);
+        DrawCircle((int)position.x, (int)(position.y - 6), 5.0f, runeColor);
+
+        if (!read) {
+            DrawCircleGradient(position, 28.0f * pulse, Color{ 80, 200, 255, (unsigned char)(45 * pulse) }, Color{ 0, 0, 0, 0 });
+            std::string prompt = "[E] " + name;
+            int pw = MeasureText(prompt.c_str(), 11);
+            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 120, 225, 255, 240 });
+        }
+    }
+};
+
+struct RelicChest {
+    std::string fragmentId;
+    int healthPotions = 1;
+    std::string name = "Relic Chest";
+    Vector2 position;
+    float radius = 28.0f;
+    bool opened = false;
+
+    bool CheckInteraction(Vector2 playerPos) const {
+        return !opened && Vector2Distance(playerPos, position) <= (radius + 38.0f);
+    }
+
+    void Draw(float time) const {
+        // Shadow
+        DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
+
+        if (!opened) {
+            // Closed Box
+            DrawRectangle((int)(position.x - 22), (int)(position.y - 14), 44, 28, Color{ 68, 48, 30, 255 });
+            DrawRectangleLines((int)(position.x - 22), (int)(position.y - 14), 44, 28, Color{ 40, 28, 18, 255 });
+
+            // Iron & Gold bands
+            DrawRectangle((int)(position.x - 16), (int)(position.y - 14), 6, 28, Color{ 180, 145, 60, 255 });
+            DrawRectangle((int)(position.x + 10), (int)(position.y - 14), 6, 28, Color{ 180, 145, 60, 255 });
+
+            // Lock glow
+            float pulse = 0.5f + 0.5f * sinf(time * 3.8f);
+            DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
+            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
+
+            std::string prompt = "[E] " + name;
+            int pw = MeasureText(prompt.c_str(), 11);
+            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 255, 230, 110, 240 });
+        } else {
+            // Open Box
+            DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });
+            DrawRectangleLines((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 40, 28, 18, 255 });
+
+            // Open Lid
+            DrawRectangle((int)(position.x - 24), (int)(position.y - 20), 48, 12, Color{ 80, 58, 36, 255 });
+            DrawRectangleLines((int)(position.x - 24), (int)(position.y - 20), 48, 12, Color{ 110, 85, 55, 255 });
+        }
     }
 };

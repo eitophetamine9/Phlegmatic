@@ -62,6 +62,8 @@ CrossroadsHandler::CrossroadsHandler() {
     chest.opened = false;
     journal.position = { 1120.0f, 980.0f };
     journal.collected = false;
+    crossroadsPillar = { "frag_09", "Inscribed Highway Monolith", { 1100.0f, 680.0f }, 26.0f, false };
+    crossroadsChest = { "", 2, "Crossroads Supply Chest", { 680.0f, 420.0f }, 28.0f, false };
     showObjectives = true;
     enemiesSpawned = false;
     entryBannerTimer = 4.0f;
@@ -86,6 +88,8 @@ void CrossroadsHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& e
     chest.opened = player.GetInventory().HasTotem(TotemType::TOTEM_SANITY);
     journal.position = { 1120.0f, 980.0f };
     journal.collected = player.GetInventory().HasFragment("frag_05");
+    crossroadsPillar = { "frag_09", "Inscribed Highway Monolith", { 1100.0f, 680.0f }, 26.0f, player.GetInventory().HasFragment("frag_09") };
+    crossroadsChest = { "", 2, "Crossroads Supply Chest", { 680.0f, 420.0f }, 28.0f, false };
     enemiesSpawned = true;
     entryBannerTimer = 4.0f;
 }
@@ -189,6 +193,24 @@ void CrossroadsHandler::Update(
         particles.SpawnSparks(journal.position, Color{ 255, 220, 90, 255 }, 24, 140.0f);
     }
 
+    // Inscribed Highway Monolith Interaction
+    if (!crossroadsPillar.read && crossroadsPillar.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        crossroadsPillar.read = true;
+        player.GetInventory().UnlockFragment("frag_09");
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(crossroadsPillar.position, "DISCOVERED: Fragment IX (Ancient Pillars)!", Color{ 100, 220, 255, 255 }, 22.0f);
+        particles.SpawnSparks(crossroadsPillar.position, Color{ 100, 220, 255, 255 }, 20, 120.0f);
+    }
+
+    // Supply Chest Interaction
+    if (!crossroadsChest.opened && crossroadsChest.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        crossroadsChest.opened = true;
+        player.GetInventory().AddHealthPotions(2);
+        SoundFX::PlayHeal();
+        particles.SpawnFloatingText(crossroadsChest.position, "FOUND: +2 Health Potions!", Color{ 120, 255, 170, 255 }, 22.0f);
+        particles.SpawnSparks(crossroadsChest.position, Color{ 120, 255, 170, 255 }, 24, 140.0f);
+    }
+
     // Northern Gateway into Zyphden (Y <= bounds.y + 80.0f)
     bool atNorthernGate = (player.GetPosition().y <= map.GetBounds().y + 80.0f &&
                            player.GetPosition().x >= 680.0f && player.GetPosition().x <= 920.0f);
@@ -196,7 +218,7 @@ void CrossroadsHandler::Update(
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
     if (atNorthernGate || interactGate) {
-        currentState = GameState::ZYPHDEN_REALM;
+        currentState = GameState::ZYPHDEN_TRANSITION;
         SoundFX::PlayGateOpen();
         particles.Clear();
         return;
@@ -229,6 +251,8 @@ void CrossroadsHandler::Render(
         // Draw Hidden Totem of Sanity Chest & Roadside Journal
         chest.Draw((float)GetTime());
         journal.Draw((float)GetTime());
+        crossroadsPillar.Draw((float)GetTime());
+        crossroadsChest.Draw((float)GetTime());
 
         // CRITICAL FIX: Draw enemy telegraph indicators in Crossroads!
         for (const auto& enemy : enemies) {
@@ -255,16 +279,7 @@ void CrossroadsHandler::Render(
     GameUI::DrawCampaignHUD(
         screenWidth,
         screenHeight,
-        player.GetHealth(),
-        player.GetMaxHealth(),
-        player.GetStamina(),
-        player.GetMaxStamina(),
-        player.GetWeapon(),
-        player.GetDashCooldown(),
-        player.GetParryCooldown(),
-        player.GetHeavyCooldown(),
-        player.IsParrying(),
-        player.HasCounterBuff(),
+        player,
         "CROSSROADS",
         player.GetInventory().HasUnreadFragments()
     );

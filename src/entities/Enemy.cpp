@@ -17,12 +17,14 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
     burstIntervalTimer = 0.0f;
     kitingRange = 0.0f;
     isPerformingMeleeSmite = false;
+    will = 20.0f;
 
     switch (type) {
         case EnemyType::SLASHER:
             radius = 20.0f;
             maxHealth = 80.0f;
             defense = 8.0f; // Light armor (~7% reduction)
+            will = 10.0f;
             moveSpeed = 165.0f;
             attackRange = 115.0f;
             windupDuration = 0.85f;
@@ -39,6 +41,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 30.0f;
             maxHealth = 190.0f;
             defense = 32.0f; // Heavy plate armor (~24% reduction)
+            will = 50.0f;
             moveSpeed = 100.0f;
             attackRange = 150.0f;
             windupDuration = 1.25f;
@@ -54,6 +57,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 18.0f;
             maxHealth = 65.0f;
             defense = 12.0f; // Reinforced vanguard (~11% reduction)
+            will = 30.0f;
             moveSpeed = 190.0f;
             attackRange = 240.0f;
             windupDuration = 0.70f;
@@ -70,6 +74,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 18.0f;
             maxHealth = 60.0f;
             defense = 6.0f; // Fragile leather (~5% reduction)
+            will = 15.0f;
             moveSpeed = 150.0f;
             attackRange = 360.0f;
             kitingRange = 200.0f;
@@ -87,6 +92,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 20.0f;
             maxHealth = 75.0f;
             defense = 10.0f; // Occult robes (~9% reduction)
+            will = 20.0f;
             moveSpeed = 125.0f;
             attackRange = 320.0f;
             kitingRange = 170.0f;
@@ -105,6 +111,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             radius = 36.0f;
             maxHealth = 500.0f;
             defense = 26.0f; // Imperial regalia (~21% reduction)
+            will = 60.0f;
             moveSpeed = 85.0f;
             attackRange = 420.0f;
             kitingRange = 0.0f;
@@ -119,14 +126,15 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
 
         case EnemyType::ZIL_BOSS:
             radius = 28.0f;
-            maxHealth = 380.0f;
-            defense = 28.0f; // 1% power remnant crusader armor (~22% reduction)
-            moveSpeed = 105.0f;
+            maxHealth = 520.0f; // Formidable Chapter 1 High-Altar Boss
+            defense = 30.0f;    // 1% power remnant crusader armor
+            will = 65.0f;       // High will poise
+            moveSpeed = 115.0f;
             attackRange = 175.0f;
             kitingRange = 0.0f;
-            windupDuration = 0.65f;
+            windupDuration = 0.58f;
             strikeDuration = 0.20f;
-            recoveryDuration = 0.65f;
+            recoveryDuration = 0.55f;
             stunDuration = 1.6f;
             telegraph.shape = TelegraphShape::LINE;
             telegraph.radius = 175.0f;
@@ -138,18 +146,19 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
 
         case EnemyType::KNIGHT_LENON_BOSS:
             radius = 28.0f;
-            maxHealth = 420.0f;
-            defense = 24.0f; // Crusader plate defense
-            moveSpeed = 115.0f;
-            attackRange = 160.0f;
+            maxHealth = 640.0f; // High HP courtyard martial sparring champion
+            defense = 32.0f;    // Tempered Crusader plate
+            will = 70.0f;       // Resolute vanguard captain poise
+            moveSpeed = 125.0f;
+            attackRange = 170.0f;
             kitingRange = 0.0f;
-            windupDuration = 0.60f;
+            windupDuration = 0.48f;
             strikeDuration = 0.20f;
-            recoveryDuration = 0.60f;
+            recoveryDuration = 0.45f;
             stunDuration = 1.4f;
             telegraph.shape = TelegraphShape::LINE;
-            telegraph.radius = 160.0f;
-            telegraph.width = 50.0f;
+            telegraph.radius = 170.0f;
+            telegraph.width = 52.0f;
             telegraph.warningColor = Color{ 255, 215, 80, 190 };
             bossAttackPhase = 0;
             isPerformingMeleeSmite = true;
@@ -240,10 +249,10 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ZIL_BOSS) {
-                    // Truth Seeker signature 3-phase combat pattern:
+                    // Truth Seeker 4-phase combat pattern with telegraphed follow-up cleave:
                     if (bossAttackPhase == 0) {
-                        // Truth Seeker Light Combo: Upward Radiant Slice (Line / Box AoE)
-                        windupDuration = 0.65f;
+                        // Phase 0: Upward Radiant Slice (Line / Box AoE)
+                        windupDuration = 0.58f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
                         telegraph.radius = 175.0f;
@@ -251,49 +260,58 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.warningColor = Color{ 255, 215, 80, 190 };
                         isPerformingMeleeSmite = true;
                     } else if (bossAttackPhase == 1) {
-                        // Truth Seeker Heavy Stage 1: Full 360 Dawnfire Tremor Sweep (Circle AoE)
-                        windupDuration = 0.75f;
+                        // Phase 1: Dawnfire 360 Tremor Sweep (Circle AoE)
+                        windupDuration = 0.65f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::CIRCLE;
-                        telegraph.radius = 150.0f;
+                        telegraph.radius = 155.0f;
                         telegraph.warningColor = Color{ 255, 175, 45, 190 };
                         isPerformingMeleeSmite = true;
-                    } else {
-                        // Truth Seeker Heavy Stage 2: Holy Beam Blast (Radiant Piercing Beam Projectile)
-                        windupDuration = 0.65f;
+                    } else if (bossAttackPhase == 2) {
+                        // Phase 2: Holy Beam Blast (Radiant Piercing Beam Projectile)
+                        windupDuration = 0.52f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
                         telegraph.radius = 350.0f;
                         telegraph.width = 24.0f;
                         telegraph.warningColor = Color{ 120, 230, 255, 210 };
                         isPerformingMeleeSmite = false; // Projectile deals damage!
+                    } else {
+                        // Phase 3: Telegraphed Follow-up Cleave (Damaging Melee Sweep!)
+                        windupDuration = 0.42f; // Dedicated telegraph reaction window
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CONE;
+                        telegraph.radius = 165.0f;
+                        telegraph.arcAngle = 140.0f;
+                        telegraph.warningColor = Color{ 255, 190, 50, 200 };
+                        isPerformingMeleeSmite = true; // Melee hitbox deals damage!
                     }
                 } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
-                    // Lenon Vanguard 3-phase combat pattern:
+                    // Lenon Vanguard 3-phase high-intensity combat pattern:
                     if (bossAttackPhase == 0) {
                         // Royal Greatsword Lunge (Line / Box AoE)
-                        windupDuration = 0.60f;
+                        windupDuration = 0.48f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
-                        telegraph.radius = 160.0f;
-                        telegraph.width = 50.0f;
+                        telegraph.radius = 170.0f;
+                        telegraph.width = 52.0f;
                         telegraph.warningColor = Color{ 255, 215, 80, 190 };
                         isPerformingMeleeSmite = true;
                     } else if (bossAttackPhase == 1) {
                         // Golden Whirlwind Slash (Circle AoE)
-                        windupDuration = 0.70f;
+                        windupDuration = 0.55f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::CIRCLE;
-                        telegraph.radius = 140.0f;
+                        telegraph.radius = 150.0f;
                         telegraph.warningColor = Color{ 255, 185, 45, 190 };
                         isPerformingMeleeSmite = true;
                     } else {
                         // Crusader's Piercing Thrust (Narrow Line AoE with extra range)
-                        windupDuration = 0.55f;
+                        windupDuration = 0.45f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::LINE;
-                        telegraph.radius = 180.0f;
-                        telegraph.width = 42.0f;
+                        telegraph.radius = 185.0f;
+                        telegraph.width = 44.0f;
                         telegraph.warningColor = Color{ 255, 235, 100, 210 };
                         isPerformingMeleeSmite = true;
                     }
@@ -428,17 +446,23 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         particles.SpawnSparks(position, Color{ 255, 185, 50, 255 }, 24, 160.0f);
                         particles.AddScreenShake(6.0f, 0.20f);
                         SoundFX::PlayHeavyAttack();
-                    } else {
+                    } else if (bossAttackPhase == 2) {
                         // Phase 2: Truth Seeker Holy Beam Projectile
                         Vector2 spawnPos = { position.x + forwardDir.x * (radius + 10.0f), position.y + forwardDir.y * (radius + 10.0f) };
-                        Vector2 projVel = { forwardDir.x * 380.0f, forwardDir.y * 380.0f };
-                        outProjectiles.emplace_back(spawnPos, projVel, 9.0f, 26.0f, ProjectileType::HOLY_BEAM, false);
+                        Vector2 projVel = { forwardDir.x * 420.0f, forwardDir.y * 420.0f };
+                        outProjectiles.emplace_back(spawnPos, projVel, 9.0f, 24.0f, ProjectileType::HOLY_BEAM, false);
                         SoundFX::PlayProjectileShoot();
                         particles.SpawnSparks(spawnPos, Color{ 140, 235, 255, 255 }, 16, 140.0f);
                         particles.AddScreenShake(3.5f, 0.12f);
+                    } else {
+                        // Phase 3: Telegraphed Follow-up Melee Cleave
+                        particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 190, 50, 255 });
+                        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 22, 160.0f);
+                        particles.AddScreenShake(6.0f, 0.20f);
+                        SoundFX::PlayCrusaderClash();
                     }
-                    // Cycle boss attack phase
-                    bossAttackPhase = (bossAttackPhase + 1) % 3;
+                    // Cycle boss attack phase across 4 distinct stages
+                    bossAttackPhase = (bossAttackPhase + 1) % 4;
                 } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
                     float rad = facingAngle * DEG2RAD;
                     Vector2 forwardDir = { cosf(rad), sinf(rad) };
@@ -510,11 +534,12 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
 
 void Enemy::OnParried(ParticleSystem& particles) {
     state = EnemyState::STUNNED;
-    stateTimer = stunDuration;
+    float staggerDuration = CalculateStaggerDuration(2.2f, will, false);
+    stateTimer = staggerDuration;
     hasDamagedPlayer = true;
     velocity = { 0.0f, 0.0f };
 
-    particles.SpawnFloatingText({ position.x, position.y - 25.0f }, "STAGGERED!", Color{ 255, 230, 80, 255 }, 24.0f);
+    particles.SpawnFloatingText({ position.x, position.y - 25.0f }, "STAGGERED!", Color{ 255, 200, 60, 255 }, 24.0f);
     particles.SpawnFloatingText({ position.x, position.y - 5.0f }, "DEFENSE BROKEN!", Color{ 255, 120, 60, 255 }, 16.0f);
 }
 

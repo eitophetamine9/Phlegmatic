@@ -23,6 +23,9 @@ void Inventory::InitDefault() {
     equippedTotem = TotemType::NONE;
     unlockedTotems.push_back(TotemType::NONE);
 
+    // Default health potions
+    healthPotions = 1;
+
     // Initial quest item: Knight's Signet
     questItems.push_back({
         "item_signet",
@@ -37,7 +40,7 @@ void Inventory::InitDefault() {
         "Fragment I: The Great Unification",
         "The Land of Tydeshire",
         "In the 500th year of unending strife, King Charlz unified the realms...",
-        "In the 500th year of unending strife, King Charlz crushed the warring factions beneath his warhammer. By solemn decree at the High Summit, four sovereign kings knelt before the throne of Charlz the Lord Liege.\n\nThe realms of Azshden, Fleurshden, Zyphden, and Noirden were chartered in blood and silver. For three golden decades, heralds sang of an eternal peace, and borders stood without blood.",
+        "In the 500th year of unending strife, King Charlz crushed the warring factions beneath his warhammer. By solemn decree at the High Summit, five sovereign kings knelt before the throne of Charlz the Lord Liege.\n\nThe five realms of Azshden, Fleurshden, Zyphden, Noirden, and Solsden were chartered in blood and silver. For three golden decades, heralds sang of an eternal peace, and borders stood without blood.",
         false, // Discovered in tutorial by inspecting the Chronicle Stele
         false
     });
@@ -66,8 +69,8 @@ void Inventory::InitDefault() {
         "frag_04",
         "Fragment IV: The Five Broken Seals",
         "Crown Domain of King Charlz",
-        "Azshden, Fleurshden, Zyphden, and Noirden each bore an ancient seal...",
-        "Azshden of the Iron Cliffs, Fleurshden of the Sunlit Valleys, Zyphden of the Gale Winds, and Noirden of the Obsidian Mists.\n\nEach kingdom was entrusted with an ancient primordial seal bound directly to the Lord Liege's Crown. If the five seals are shattered by the Lord Liege's madness, the veil separating Tydeshire from the outer abyss will collapse forever.",
+        "Azshden, Fleurshden, Zyphden, Noirden, and Solsden each bore an ancient seal...",
+        "Azshden of the Iron Cliffs, Fleurshden of the Sunlit Valleys, Zyphden of the Gale Winds, Noirden of the Obsidian Mists, and Solsden of the Radiant Altars.\n\nEach kingdom was entrusted with an ancient primordial seal bound directly to the Lord Liege's Crown. If the five seals are shattered by the Lord Liege's madness, the veil separating Tydeshire from the outer abyss will collapse forever.",
         false,
         false
     });
@@ -108,6 +111,26 @@ void Inventory::InitDefault() {
         "Royal Keep of King Kreptu",
         "To all subjects of Zyphden: The High Summit is broken. We shall not bend our knee...",
         "To all subjects of Zyphden: The High Summit is broken. King Charlz answers no raven.\n\nWe have fortified the southern gates and summoned all remaining crusaders to the courtyard. We shall not bend our knee to madness. Zyphden shall stand as long as a single crusader draws breath.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_09",
+        "Fragment IX: Inscription of the Ancient Pillars",
+        "High Sanctuaries of Tydeshire",
+        "The monolithic stone pillars bear ancient runic glyphs carved by the First Wardens...",
+        "The monolithic stone pillars standing across the valleys of Tydeshire were not hewn for mere decoration.\n\nCarved by the First Wardens before the Unification Wars, each pillar channels primordial leylines that steady mortal willpower. When the mind falters against madness, gaze upon the runes to rekindle inner poise.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_10",
+        "Fragment X: The Royal Armory Archives",
+        "Keep Armory of Zyphden",
+        "Records of royal weaponsmithing and the tempered armaments of the High Marshals...",
+        "Official records recovered from the keep archives: The high marshals of Zyphden quenched their blades in lunar spring waters to counterbalance the dark abyssal energies creeping from the south.\n\nNo sword alone can vanquish the lord liege; one must hone posture, temper their will against devastating blows, and seize the window of an enemy's stagger.",
         false,
         false
     });

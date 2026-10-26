@@ -9,6 +9,7 @@ void PlayerRenderer::Draw(const Player& player) {
     Color bodyColor = armorStats.primaryColor;
     if (player.counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
     if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
+    if (player.staggerTimer > 0.0f) bodyColor = Color{ 240, 180, 60, 240 };
 
     AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
 

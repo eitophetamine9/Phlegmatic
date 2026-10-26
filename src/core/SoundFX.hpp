@@ -23,6 +23,7 @@ public:
     static void PlayCrusaderClash();
     static void PlayTruthSeekerResonance();
     static void PlayGateOpen();
+    static void PlayHeal();
 
 private:
     static bool initialized;

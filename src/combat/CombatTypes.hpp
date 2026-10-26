@@ -74,3 +74,17 @@ struct TelegraphIndicator {
     int spreadCount = 3;
     float spreadAngle = 0.25f; // in radians
 };
+
+// Centralized Combat Math & Will Scaling Helpers
+inline float CalculateStaggerDuration(float baseStun, float will, bool isPlayer = false) {
+    if (baseStun <= 0.0f) return 0.0f;
+    float effectiveWill = (will < 0.0f) ? 0.0f : will;
+    float duration = baseStun * (100.0f / (100.0f + effectiveWill * 1.25f));
+    if (isPlayer) {
+        if (duration > 0.85f) duration = 0.85f;
+        if (duration < 0.35f) duration = 0.35f;
+    } else {
+        if (duration < 0.20f) duration = 0.20f;
+    }
+    return duration;
+}

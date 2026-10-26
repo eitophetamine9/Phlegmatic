@@ -7,6 +7,7 @@
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 #include "../combat/Projectile.hpp"
+#include "../world/Interactable.hpp"
 #include <vector>
 #include <string>
 #include <functional>
@@ -73,6 +74,8 @@ public:
 private:
     HiddenTotemChest chest;
     RoadsideJournal journal;
+    InscribedPillar crossroadsPillar;
+    RelicChest crossroadsChest;
     mutable bool showObjectives = true;
     bool enemiesSpawned = false;
     float entryBannerTimer = 4.0f;

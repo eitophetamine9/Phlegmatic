@@ -10,6 +10,7 @@ struct ArmorStats {
     float maxHpBonus;
     float speedModifier;
     float staminaRegenModifier;
+    float willBonus;
 
     // Visual Palette for Character Silhouette Rendering
     Color primaryColor;
@@ -24,7 +25,7 @@ inline ArmorStats GetArmorStats(ArmorType type) {
             return {
                 "Commoner's Scrap",
                 "Padded linen tunic reinforced with salvage iron studs found in the castle ruins. Light and unrestrictive.",
-                6.0f, 0.0f, 1.0f, 1.0f,
+                6.0f, 0.0f, 1.0f, 1.0f, 15.0f,
                 Color{ 130, 90, 60, 255 },     // Rustic weathered tunic
                 Color{ 120, 130, 145, 255 },   // Salvaged iron rivets
                 Color{ 85, 65, 48, 255 },      // Cloth leather cowl
@@ -34,7 +35,7 @@ inline ArmorStats GetArmorStats(ArmorType type) {
             return {
                 "Crusader Plate",
                 "Tempered royal steel plate bearing Zyphden's golden heraldry. Awarded after besting Knight Lenon in the royal courtyard.",
-                24.0f, 30.0f, 0.95f, 0.95f,
+                24.0f, 30.0f, 0.95f, 0.95f, 45.0f,
                 Color{ 32, 50, 85, 255 },      // Royal knight navy
                 Color{ 225, 185, 65, 255 },    // Gilded golden pauldrons
                 Color{ 150, 170, 195, 255 },   // Polished steel helm
@@ -44,7 +45,7 @@ inline ArmorStats GetArmorStats(ArmorType type) {
             return {
                 "Vanguard Bastion Mail",
                 "Heavy interlocking iron rings and massive pauldron plates designed to shrug off siege-engine shocks.",
-                32.0f, 50.0f, 0.90f, 0.85f,
+                32.0f, 50.0f, 0.90f, 0.85f, 40.0f,
                 Color{ 38, 42, 54, 255 },      // Heavy dark mail
                 Color{ 75, 85, 105, 255 },     // Fortified iron pauldrons
                 Color{ 30, 35, 46, 255 },      // Full-face brute helm
@@ -54,7 +55,7 @@ inline ArmorStats GetArmorStats(ArmorType type) {
             return {
                 "Shadowstrider Garb",
                 "Boiled midnight-leather tailored for evasive footwork and silent assassination across crumbling ruins.",
-                8.0f, 0.0f, 1.12f, 1.25f,
+                8.0f, 0.0f, 1.12f, 1.25f, 10.0f,
                 Color{ 24, 28, 40, 255 },      // Dark shadow-weave
                 Color{ 95, 70, 135, 255 },     // Violet rune trim
                 Color{ 18, 22, 32, 255 },      // Shadow cowl
@@ -65,7 +66,7 @@ inline ArmorStats GetArmorStats(ArmorType type) {
             return {
                 "Adventurer's Tunic",
                 "Standard traveler garments offering minimal physical defense against blade strikes.",
-                0.0f, 0.0f, 1.0f, 1.0f,
+                0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
                 Color{ 40, 110, 210, 255 },    // Classic blue tunic
                 Color{ 80, 95, 130, 255 },     // Light pauldrons
                 Color{ 48, 58, 80, 255 },      // Iron helm
