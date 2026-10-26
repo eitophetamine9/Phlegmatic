@@ -614,7 +614,7 @@ void Game::Render() {
         }
 
         bool hasUnread = player.GetInventory().HasUnreadFragments();
-        GameUI::DrawLobbyHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), nearAny, nearName, hasUnread);
+        GameUI::DrawLobbyHUD(w, h, player, nearAny, nearName, hasUnread);
 
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mousePos, false);
@@ -660,7 +660,7 @@ void Game::Render() {
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(w, h, player.GetHealth(), player.GetMaxHealth(), player.GetStamina(), player.GetMaxStamina(), player.GetWeapon(), player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(), player.IsParrying(), player.HasCounterBuff(), waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+    GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
 
     // Boss Health Bar during Boss Wave
     for (const auto& enemy : enemies) {

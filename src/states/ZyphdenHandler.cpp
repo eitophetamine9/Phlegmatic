@@ -720,16 +720,7 @@ void ZyphdenHandler::Render(
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
     const char* locationTitle = inRoyalKeep ? "ZYPHDEN ROYAL KEEP" : (inTavern ? "HEARTHSIDE TAVERN" : "ZYPHDEN");
-    GameUI::DrawCampaignHUD(
-        screenWidth, screenHeight,
-        player.GetHealth(), player.GetMaxHealth(),
-        player.GetStamina(), player.GetMaxStamina(),
-        player.GetWeapon(),
-        player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(),
-        player.IsParrying(), player.HasCounterBuff(),
-        locationTitle,
-        hasUnread
-    );
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, locationTitle, hasUnread);
 
     // Boss Health Bar during Courtyard Spar
     if (sparActive) {

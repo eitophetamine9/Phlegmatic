@@ -54,6 +54,7 @@ public:
     float GetDashCooldown() const { return dashCooldown; }
     float GetMaxDashCooldown() const { return GetWeaponStats(currentWeapon).dashCooldown; }
     float GetParryCooldown() const { return parryCooldown; }
+    float GetMaxParryCooldown() const;
     float GetHeavyCooldown() const { return heavyCooldown; }
     float GetMaxHeavyCooldown() const { return GetWeaponStats(currentWeapon).heavyCooldown; }
 

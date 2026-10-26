@@ -330,16 +330,7 @@ void RuinedCastleHandler::Render(
     tutorial.DrawHUD(screenWidth, screenHeight);
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(
-        screenWidth, screenHeight,
-        player.GetHealth(), player.GetMaxHealth(),
-        player.GetStamina(), player.GetMaxStamina(),
-        player.GetWeapon(),
-        player.GetDashCooldown(), player.GetParryCooldown(), player.GetHeavyCooldown(),
-        player.IsParrying(), player.HasCounterBuff(),
-        "RUINED CASTLE",
-        hasUnread
-    );
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RUINED CASTLE", hasUnread);
 
     // Zil Boss Health Bar
     for (const auto& enemy : enemies) {

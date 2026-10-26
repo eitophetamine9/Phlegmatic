@@ -676,6 +676,10 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     }
 }
 
+float Player::GetMaxParryCooldown() const {
+    return Config::PARRY_COOLDOWN;
+}
+
 void Player::TriggerParry(ParticleSystem& particles) {
     if (staggerTimer > 0.0f) return;
     if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging || currentAttack.type != AttackType::NONE) return;

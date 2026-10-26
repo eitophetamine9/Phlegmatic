@@ -255,16 +255,7 @@ void CrossroadsHandler::Render(
     GameUI::DrawCampaignHUD(
         screenWidth,
         screenHeight,
-        player.GetHealth(),
-        player.GetMaxHealth(),
-        player.GetStamina(),
-        player.GetMaxStamina(),
-        player.GetWeapon(),
-        player.GetDashCooldown(),
-        player.GetParryCooldown(),
-        player.GetHeavyCooldown(),
-        player.IsParrying(),
-        player.HasCounterBuff(),
+        player,
         "CROSSROADS",
         player.GetInventory().HasUnreadFragments()
     );
