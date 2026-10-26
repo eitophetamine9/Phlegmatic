@@ -37,18 +37,30 @@
   * **Zyphden Royal Keep (Throne Hall)**: Grand interior throne room with polished marble flagstones, crimson runner carpet, royal braziers, and **King Kreptu** presiding from his golden throne dais to grant royal sanction.
   * **Courtyard Boss Spar — Knight Lenon**: Martial duel in the Eastern Courtyard against the Vanguard Captain, awarding the consecrated **Crusader Plate (+24 Def, +30 HP)** and unlocking the Royal Combat Arena.
 * **Precision Combat System**:
-  * **`Q` Key — Dash**: 8-directional burst with **invulnerability frames (i-frames)** to phase safely through attacks and projectiles (`EVADED`).
-  * **`F` Key — Timed Parry**: Active 0.28s guard window with radiant cyan-gold shield barrier. Deflecting melee blows staggers enemies for 2.0s (`DEFENSE BROKEN!`) and grants a **+50% Counter-Attack Damage Buff**.
+  * **`Q` Key — Dash**: 8-directional burst with **0.25s invulnerability frames (i-frames)** to phase safely through attacks and projectiles (`EVADED`).
+  * **`F` Key — Timed Parry**: Active guard window with radiant cyan-gold shield barrier. Deflecting melee blows inflicts **STAGGERED!** on enemies and grants a **+50% (1.5x) Counter-Attack Damage Buff**.
   * **Projectile Deflection**: Parrying incoming enemy spells and arrows reflects them back toward your cursor with amplified speed and damage.
+* **Will Stat & Stagger Mechanics**:
+  * Both player and enemies possess a **Will** stat mitigating stun and stagger duration from devastating blows:
+    ```text
+    Stun Duration = Base Stun * 100 / (100 + Will * 1.25)
+    ```
+  * Higher Will guarantees faster posture recovery (e.g. Unarmored 20 Will = 0.80s stumble; Crusader Plate 65 Will = 0.55s).
+  * **Anti-Stunlock Grace Buffer**: Recovering from a stagger grants **1.8s of Stagger Immunity**, preventing unfair chain-stuns.
+* **Consumable Health Potions**:
+  * Carry consumable health flasks across your journey (`[1]` or `[H]` to drink).
+  * Restores **+45 HP** upon consumption with a **7.0-second cooldown timer**.
 * **Out-of-Combat Health Regeneration**:
   * Remaining disengaged from combat for 4+ seconds smoothly regenerates health at **+8.0 HP/s** up to maximum capacity.
 * **Equipment & Stat Scaling (Armor & Totems)**:
   * Collectible armor sets with dynamic damage mitigation:
-    $$\text{Damage} = \text{RawDamage} \times \left(\frac{100}{100 + \text{Defense} \times (1 - \text{Pierce})}\right)$$
-  * Equippable sacred totems that alter stamina recovery rates, attack power, and cooldown timings.
+    ```text
+    Damage = Raw Damage * [ 100 / (100 + Defense * (1 - Pierce)) ]
+    ```
+  * Equippable sacred totems that alter stamina recovery rates, attack power, Will resilience, and cooldown timings.
 * **Paginated Multi-Page Dialogue & Lore Codex**:
   * Clean, interactive dialogue box supporting multi-page conversations with Previous (`[A]`), Next (`[D]`), and Close (`[ESC]`) navigation.
-  * Comprehensive in-game Lore Journal (`[I]` / `[TAB]`) tracking 8 uncoverable historical fragments across the realm with unread notification indicators.
+  * Comprehensive in-game Lore Journal (`[I]` / `[TAB]`) tracking 10 uncoverable historical fragments across the realm with unread notification indicators.
 * **Collapsible Objectives Tracker (`[O]`) & Location Banner**:
   * Dynamic top HUD displaying active environment (`RUINED CASTLE`, `CROSSROADS`, `ZYPHDEN`, `HEARTHSIDE TAVERN`, `ZYPHDEN ROYAL KEEP`, `ARENA`).
   * Collapsible quest card pinned cleanly to the middle-left margin.
@@ -76,7 +88,8 @@
 | **Light Attack** | `Left Mouse Button` | Swift slash/thrust. Low/zero stamina cost, rapid recovery cadence. |
 | **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage attacks, lunges, shockwaves). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **i-frames** (`EVADED`) to dodge sweeps & missiles. |
-| **Timed Parry** | `F Key` | 0.28s guard. Staggers melee foes for 2.0s and **reflects incoming projectiles**. |
+| **Timed Parry** | `F Key` | Active guard. Staggers melee foes and **reflects incoming projectiles**. |
+| **Health Potion** | `1 Key` or `H Key` | Consumes 1 potion to restore **+45 HP** (triggers **7.0s cooldown**). |
 | **Interact / Advance** | `E Key` / `Space` / `Enter` | Talk to NPCs, claim weapons/armor, inspect lecterns, and transition doors. |
 | **Dialogue Navigation** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, pop-ups, and modals without closing the game. |
@@ -94,10 +107,10 @@
 | Weapon | Stance Style | Light Atk | Heavy Atk | Dash Cooldown | Passives & Special Properties |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Unarmed** | Bare Fists | None | None | 0.75s (15 stam) | Starting tutorial state. Search the courtyard altar to claim a weapon. |
-| **Crusader's Broadsword** | Balanced Steel | 25 dmg (110° arc, 14 stam) | 85 dmg (2-Stage cleave) | 0.85s (20 stam) | Dependable reach. **Heavy**: Stage 1 wide 150° cleave followed by Stage 2 upward shock slash line/box AoE (2.1s cd). |
-| **Truth Seeker (Partial)** | Holy Blade Fragment | 46 / 60 dmg (2-Hit Combo) | 140 dmg (Dual 360° + Holy Beam) | 0.65s (16 stam) | **Light**: Slash into radiant upward slice (line/box AoE). **Heavy**: Rapid dual 360° dawnfire sweeps + holy beam projectile (10% defense pierce, 3.8s cd). |
-| **Dual Daggers** | Agility Flurry | 22 dmg (twin slice, **0 stam**) | 110 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attacks. **Heavy**: High-velocity piercing lunge (**42 dmg + i-frames**, procs forward regardless of WASD movement) into instant 360° whirlwind (**68 dmg**, 95px range, 1.8s cd). |
-| **War Mace** | Crushing Poise | 52 dmg (Frontal Circle Smack) | 155 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack followed by 360° tremor shockwave (**ignores 25% enemy defense**, 3.6s cd). |
+| **Crusader's Broadsword** | Balanced Steel | 18 dmg (110° arc, 15 stam) | 70 dmg (2-Stage cleave) | 0.85s (20 stam) | Dependable reach. **Heavy**: Stage 1 wide 160° cleave (42 dmg) followed by Stage 2 upward shock slash line/box AoE (28 dmg, 2.1s cd). |
+| **Truth Seeker (Partial)** | Holy Blade Fragment | 26 / 24 dmg (2-Hit Combo) | 78 dmg (Dual 360° + Holy Beam) | 0.65s (16 stam) | **Light**: Slash into radiant upward slice (line/box AoE). **Heavy**: Rapid dual 360° dawnfire sweeps (42 + 36 dmg) + holy beam projectile (22 dmg, 10% pierce, 3.8s cd). |
+| **Dual Daggers** | Agility Flurry | 11 dmg (twin slice, **0 stam**) | 60 dmg (Lunge + Instant Spin) | 0.50s (14 stam) | Zero stamina light attacks. **Heavy**: High-velocity piercing lunge (**22 dmg + i-frames**) into instant 360° whirlwind (**38 dmg**, 95px range, 1.8s cd). |
+| **War Mace** | Crushing Poise | 28 dmg (Frontal Circle Smack) | 96 dmg (Earthshaker 2-Stage) | 1.25s (26 stam) | High damage bludgeon. **Light**: Frontal circular smack. **Heavy**: Amplified frontal smack (52 dmg) followed by 360° tremor shockwave (44 dmg, **ignores 20% enemy defense**, 3.6s cd). |
 
 > [!NOTE]
 > In **Chapter 1: Ruined Castle**, the player begins unarmed with zero weapons in inventory. The Crusader's Broadsword is claimed at the central altar plinth, and all **4 Lore Fragments** are hidden as interactive world artifacts across the castle ruins:
