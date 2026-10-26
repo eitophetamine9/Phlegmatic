@@ -100,12 +100,22 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             if (enemy.GetType() == EnemyType::BRUTE) baseDamage = 38.0f;
             else if (enemy.GetType() == EnemyType::CHARGER) baseDamage = 22.0f;
             else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDamage = 45.0f;
-            else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDamage = 32.0f;
-            else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 30.0f;
+            else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDamage = 34.0f;
+            else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 34.0f;
 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
+            } else if (tookDamage) {
+                // Heavy and crushing boss attacks apply stagger to player if unparried
+                bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
+                                      enemy.GetType() == EnemyType::CHARGER ||
+                                      enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
+                                      enemy.GetType() == EnemyType::ZIL_BOSS ||
+                                      enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS);
+                if (isHeavyAttack && !player.HasStaggerImmunity()) {
+                    player.ApplyStagger(1.0f, particles);
+                }
             }
         }
     }
@@ -121,7 +131,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             float dist = sqrtf(dx * dx + dy * dy);
 
             if (dist <= playerRadius + proj.GetRadius()) {
-                if (player.IsDashing() || player.IsDaggerLunging()) {
+                if (player.IsDashing() || player.IsDaggerLunging() || player.HasInvulnerability()) {
                     // Dash / Dagger Lunge invulnerability frames: Evaded!
                     particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
                     proj.Destroy();

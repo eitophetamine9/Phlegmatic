@@ -50,6 +50,7 @@ public:
     float GetHealth() const { return health; }
     float GetMaxHealth() const { return maxHealth; }
     float GetDefense() const { return defense; }
+    float GetWill() const { return will; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS; }
@@ -77,6 +78,7 @@ private:
     float health;
     float maxHealth;
     float defense;
+    float will;
     float moveSpeed;
 
     float attackRange;

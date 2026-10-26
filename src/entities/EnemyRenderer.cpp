@@ -280,13 +280,19 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
             float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
             progress = fmaxf(0.0f, fminf(1.0f, progress));
 
-            // Upward Radiant Slice & Dawnfire Arc
-            float startA = enemy.facingAngle - 70.0f;
-            float arcLen = progress * 140.0f;
-            DrawCircleSector(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 215, 80, (unsigned char)(80 * (1.0f - progress * 0.4f)) });
-            DrawCircleSectorLines(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 240, 150, 230 });
-            float swordA = startA + arcLen;
-            AssetManager::DrawSword(swordHand, swordA, 48.0f, Color{ 255, 240, 160, 255 }, Color{ 255, 180, 40, 230 });
+            if (!enemy.isPerformingMeleeSmite) {
+                // Holy Beam forward channeling thrust
+                float swordA = enemy.facingAngle;
+                AssetManager::DrawSword(swordHand, swordA, 50.0f, Color{ 140, 235, 255, 255 }, Color{ 255, 255, 255, 240 });
+            } else {
+                // Melee Cleave: Upward Radiant Slice & Followup Cleave Arc
+                float startA = enemy.facingAngle - 70.0f;
+                float arcLen = progress * 140.0f;
+                DrawCircleSector(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 200, 60, (unsigned char)(85 * (1.0f - progress * 0.4f)) });
+                DrawCircleSectorLines(enemy.position, 175.0f, startA, startA + arcLen, 20, Color{ 255, 240, 150, 230 });
+                float swordA = startA + arcLen;
+                AssetManager::DrawSword(swordHand, swordA, 48.0f, Color{ 255, 240, 160, 255 }, Color{ 255, 180, 40, 230 });
+            }
         } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
             float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
             float windupAngle = enemy.facingAngle - 60.0f;
