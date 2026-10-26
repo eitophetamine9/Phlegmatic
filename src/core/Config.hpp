@@ -35,14 +35,14 @@ namespace Config {
     inline constexpr float COUNTER_BUFF_DURATION = 2.5f;// Extra damage window for player after parrying
 
     // Weapon: Sword settings (Balanced)
-    inline constexpr float SWORD_LIGHT_DAMAGE = 25.0f;
+    inline constexpr float SWORD_LIGHT_DAMAGE = 18.0f;
     inline constexpr float SWORD_LIGHT_RANGE = 75.0f;
     inline constexpr float SWORD_LIGHT_ARC = 110.0f;
     inline constexpr float SWORD_LIGHT_DURATION = 0.22f;
     inline constexpr float SWORD_LIGHT_COOLDOWN = 0.35f;
     inline constexpr float SWORD_LIGHT_STAMINA = 15.0f;
 
-    inline constexpr float SWORD_HEAVY_DAMAGE = 65.0f;
+    inline constexpr float SWORD_HEAVY_DAMAGE = 42.0f;
     inline constexpr float SWORD_HEAVY_RANGE = 115.0f;
     inline constexpr float SWORD_HEAVY_ARC = 140.0f;
     inline constexpr float SWORD_HEAVY_WINDUP = 0.18f;
@@ -51,14 +51,14 @@ namespace Config {
     inline constexpr float SWORD_HEAVY_STAMINA = 32.0f;
 
     // Weapon: Daggers settings (Fast, dual hits, whirlwind heavy)
-    inline constexpr float DAGGERS_LIGHT_DAMAGE = 18.0f;
+    inline constexpr float DAGGERS_LIGHT_DAMAGE = 11.0f;
     inline constexpr float DAGGERS_LIGHT_RANGE = 62.0f;
     inline constexpr float DAGGERS_LIGHT_ARC = 95.0f;
     inline constexpr float DAGGERS_LIGHT_DURATION = 0.14f;
     inline constexpr float DAGGERS_LIGHT_COOLDOWN = 0.20f;
     inline constexpr float DAGGERS_LIGHT_STAMINA = 9.0f;
 
-    inline constexpr float DAGGERS_HEAVY_DAMAGE = 52.0f;
+    inline constexpr float DAGGERS_HEAVY_DAMAGE = 38.0f;
     inline constexpr float DAGGERS_HEAVY_RANGE = 75.0f;
     inline constexpr float DAGGERS_HEAVY_ARC = 360.0f; // Whirlwind spin
     inline constexpr float DAGGERS_HEAVY_WINDUP = 0.12f;
@@ -67,14 +67,14 @@ namespace Config {
     inline constexpr float DAGGERS_HEAVY_STAMINA = 22.0f;
 
     // Weapon: Mace settings (Heavy crushing, high stagger, wide impact)
-    inline constexpr float MACE_LIGHT_DAMAGE = 40.0f;
+    inline constexpr float MACE_LIGHT_DAMAGE = 28.0f;
     inline constexpr float MACE_LIGHT_RANGE = 82.0f;
     inline constexpr float MACE_LIGHT_ARC = 85.0f;
     inline constexpr float MACE_LIGHT_DURATION = 0.28f;
     inline constexpr float MACE_LIGHT_COOLDOWN = 0.45f;
     inline constexpr float MACE_LIGHT_STAMINA = 22.0f;
 
-    inline constexpr float MACE_HEAVY_DAMAGE = 95.0f;
+    inline constexpr float MACE_HEAVY_DAMAGE = 52.0f;
     inline constexpr float MACE_HEAVY_RANGE = 135.0f;
     inline constexpr float MACE_HEAVY_ARC = 150.0f;
     inline constexpr float MACE_HEAVY_WINDUP = 0.26f;

@@ -406,3 +406,4 @@ void SoundFX::PlayLoreDiscovery() { if (initialized) PlaySound(sndLoreDiscovery)
 void SoundFX::PlayCrusaderClash() { if (initialized) PlaySound(sndCrusaderClash); }
 void SoundFX::PlayTruthSeekerResonance() { if (initialized) PlaySound(sndTruthSeekerResonance); }
 void SoundFX::PlayGateOpen() { if (initialized) PlaySound(sndGateOpen); }
+void SoundFX::PlayHeal() { if (initialized) PlaySound(sndCutsceneChime); }

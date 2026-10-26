@@ -64,8 +64,28 @@ public:
     void OnParrySuccessful(ParticleSystem& particles);
 
     float GetDefense() const;
+    float GetWill() const;
     float GetSpeed() const;
     float GetStaminaRegenRate() const;
+
+    // Stagger & Posture
+    bool IsStaggered() const { return staggerTimer > 0.0f; }
+    bool HasStaggerImmunity() const { return staggerImmunityTimer > 0.0f; }
+    void ApplyStagger(float baseStunDuration, ParticleSystem& particles);
+    float GetStaggerTimer() const { return staggerTimer; }
+
+    // Invulnerability / I-Frames
+    bool HasInvulnerability() const { return iFrameTimer > 0.0f; }
+    float GetIFrameTimer() const { return iFrameTimer; }
+
+    // Consumables: Potion
+    bool UseHealthPotion(ParticleSystem& particles);
+    float GetPotionCooldown() const { return potionCooldown; }
+    float GetMaxPotionCooldown() const { return 7.0f; }
+
+    // Cooldown accessors for UI
+    float GetLightCooldown() const { return lightCooldown; }
+    float GetMaxLightCooldown() const { return GetWeaponStats(currentWeapon).lightCooldown; }
 
     int GetComboStep() const { return comboStep; }
     int GetHeavyStage() const { return heavyStage; }
@@ -104,6 +124,7 @@ private:
     float maxStamina;
     float defense;
     float timeSinceCombat;
+    float will;
 
     // Action Timers & States
     float lightCooldown;
@@ -112,12 +133,18 @@ private:
     float parryTimer;
     bool isParrying;
     float counterBuffTimer;
+    float potionCooldown;
 
-    // Dash state (Q Key)
+    // Stagger & Poise State
+    float staggerTimer;
+    float staggerImmunityTimer;
+
+    // Dash & I-Frames state (Q Key)
     float dashCooldown;
     float dashTimer;
     bool isDashing;
     Vector2 dashDir;
+    float iFrameTimer;
 
     // Daggers Lunge
     bool isDaggerLunging;

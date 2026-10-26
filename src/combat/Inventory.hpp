@@ -74,6 +74,18 @@ public:
     bool HasQuestItem(const std::string& id) const;
     const std::vector<QuestItem>& GetQuestItems() const { return questItems; }
 
+    // Consumables: Health Potions
+    int GetHealthPotionCount() const { return healthPotions; }
+    void SetHealthPotionCount(int count) { healthPotions = count >= 0 ? count : 0; }
+    void AddHealthPotions(int count) { healthPotions += count; }
+    bool ConsumeHealthPotion() {
+        if (healthPotions > 0) {
+            healthPotions--;
+            return true;
+        }
+        return false;
+    }
+
 private:
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;
@@ -84,4 +96,6 @@ private:
 
     std::vector<LoreFragment> fragments;
     std::vector<QuestItem> questItems;
+
+    int healthPotions = 1; // Default starting health potions
 };

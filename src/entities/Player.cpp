@@ -20,6 +20,7 @@ Player::Player() {
     stamina = Config::PLAYER_MAX_STAMINA;
     maxStamina = Config::PLAYER_MAX_STAMINA;
     defense = GetDefense();
+    will = GetWill();
 
     lightCooldown = 0.0f;
     heavyCooldown = 0.0f;
@@ -27,11 +28,16 @@ Player::Player() {
     parryTimer = 0.0f;
     isParrying = false;
     counterBuffTimer = 0.0f;
+    potionCooldown = 0.0f;
+
+    staggerTimer = 0.0f;
+    staggerImmunityTimer = 0.0f;
 
     dashCooldown = 0.0f;
     dashTimer = 0.0f;
     isDashing = false;
     dashDir = { 0.0f, 0.0f };
+    iFrameTimer = 0.0f;
 
     isDaggerLunging = false;
     daggerLungeTimer = 0.0f;
@@ -61,6 +67,7 @@ void Player::Init(Vector2 startPos) {
     stamina = maxStamina;
     timeSinceCombat = 10.0f;
     defense = GetDefense();
+    will = GetWill();
     velocity = { 0.0f, 0.0f };
     currentAttack.type = AttackType::NONE;
     isParrying = false;
@@ -70,6 +77,10 @@ void Player::Init(Vector2 startPos) {
     heavyStage = 1;
     heavyStageTimer = 0.0f;
     counterBuffTimer = 0.0f;
+    potionCooldown = 0.0f;
+    staggerTimer = 0.0f;
+    staggerImmunityTimer = 0.0f;
+    iFrameTimer = 0.0f;
     comboStep = 1;
     comboTimer = 0.0f;
     shockwaveActive = false;
@@ -83,12 +94,17 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     health = maxHealth * hpPercent;
     stamina = maxStamina;
     defense = GetDefense();
+    will = GetWill();
     velocity = { 0.0f, 0.0f };
     currentAttack.type = AttackType::NONE;
     isParrying = false;
     isDashing = false;
     isHeavyWindingUp = false;
     counterBuffTimer = 0.0f;
+    potionCooldown = 0.0f;
+    staggerTimer = 0.0f;
+    staggerImmunityTimer = 0.0f;
+    iFrameTimer = 0.0f;
     comboStep = 1;
     comboTimer = 0.0f;
     shockwaveActive = false;
@@ -112,6 +128,7 @@ void Player::SetArmor(ArmorType newArmor) {
     maxHealth = GetMaxHealth();
     if (health > maxHealth) health = maxHealth;
     defense = GetDefense();
+    will = GetWill();
     SoundFX::PlayEquipWeapon();
 }
 
@@ -120,6 +137,7 @@ void Player::SetTotem(TotemType newTotem) {
     inventory.UnlockTotem(newTotem);
     inventory.SetEquippedTotem(newTotem);
     defense = GetDefense();
+    will = GetWill();
     SoundFX::PlayEquipWeapon();
 }
 
@@ -130,6 +148,11 @@ float Player::GetMaxHealth() const {
 float Player::GetDefense() const {
     float raw = 15.0f + GetArmorStats(currentArmor).defense;
     return raw * GetTotemStats(currentTotem).defenseMultiplier;
+}
+
+float Player::GetWill() const {
+    float totalWill = 20.0f + GetArmorStats(currentArmor).willBonus + GetTotemStats(currentTotem).willBonus;
+    return totalWill;
 }
 
 float Player::GetSpeed() const {
@@ -150,12 +173,29 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         facingAngle = atan2f(dy, dx) * RAD2DEG;
     }
 
-    // Cooldown updates
+    // Cooldown and buff updates
     if (lightCooldown > 0.0f) lightCooldown -= dt;
     if (heavyCooldown > 0.0f) heavyCooldown -= dt;
     if (parryCooldown > 0.0f) parryCooldown -= dt;
     if (dashCooldown > 0.0f) dashCooldown -= dt;
     if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
+    if (potionCooldown > 0.0f) potionCooldown -= dt;
+    if (iFrameTimer > 0.0f) iFrameTimer -= dt;
+    if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
+
+    // Stagger state update
+    if (staggerTimer > 0.0f) {
+        staggerTimer -= dt;
+        if (staggerTimer <= 0.0f) {
+            staggerTimer = 0.0f;
+            staggerImmunityTimer = 1.8f; // 1.8s anti-stunlock grace window!
+        }
+    }
+
+    // Health Potion consumption via [1] or [H] (7-second cooldown)
+    if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_H)) {
+        UseHealthPotion(particles);
+    }
 
     // Out of combat health regeneration (recovers health when off combat for 4+ seconds)
     timeSinceCombat += dt;
@@ -165,7 +205,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     }
 
     // Stamina regeneration
-    if (!isParrying && !isHeavyWindingUp && !isDashing) {
+    if (!isParrying && !isHeavyWindingUp && !isDashing && staggerTimer <= 0.0f) {
         stamina = fminf(maxStamina, stamina + GetStaminaRegenRate() * dt);
     }
 
@@ -232,7 +272,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.range = 95.0f; // Buffed whirlwind range
             currentAttack.arcAngle = 360.0f;
             currentAttack.isLineBox = false;
-            currentAttack.damage = (counterBuffTimer > 0.0f ? (68.0f * 1.5f) : 68.0f) * GetTotemStats(currentTotem).damageMultiplier; // Buffed spin damage
+            currentAttack.damage = (counterBuffTimer > 0.0f ? (38.0f * 1.5f) : 38.0f) * GetTotemStats(currentTotem).damageMultiplier; // Balanced spin damage
             currentAttack.knockback = 280.0f;
             currentAttack.duration = 0.12f;
             currentAttack.timer = 0.12f;
@@ -281,7 +321,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.circleCenter = { position.x + forwardDir.x * 70.0f, position.y + forwardDir.y * 70.0f };
                 currentAttack.range = 155.0f;
                 currentAttack.arcAngle = 180.0f;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (75.0f * 1.5f) : 75.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (52.0f * 1.5f) : 52.0f) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 380.0f;
                 currentAttack.duration = 0.16f;
                 currentAttack.timer = 0.16f;
@@ -306,7 +346,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Truth Seeker Heavy Stage 1: Full 360 circle AoE swing 1
                 currentAttack.range = 135.0f;
                 currentAttack.arcAngle = 360.0f;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (60.0f * 1.5f) : 60.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 360.0f;
                 currentAttack.duration = 0.18f;
                 currentAttack.timer = 0.18f;
@@ -314,7 +354,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Simultaneously shoot 1 holy projectile with 10% defense pierce
                 Vector2 spawnPos = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
                 Vector2 projVel = { forwardDir.x * 580.0f, forwardDir.y * 580.0f };
-                spawnedProjectiles.emplace_back(spawnPos, projVel, 9.0f, 45.0f, ProjectileType::HOLY_BEAM, true, 0.10f);
+                spawnedProjectiles.emplace_back(spawnPos, projVel, 9.0f, 22.0f, ProjectileType::HOLY_BEAM, true, 0.10f);
 
                 SoundFX::PlayHeavyAttack();
                 SoundFX::PlayCrusaderClash();
@@ -346,18 +386,18 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
 
                 if (currentWeapon == WeaponType::MACE) {
-                    // War Mace Heavy Stage 2: Followup full 360 AoE with 25% defense pierce!
+                    // War Mace Heavy Stage 2: Followup full 360 AoE with 20% defense pierce!
                     heavyStage = 2;
                     currentAttack.type = AttackType::HEAVY;
                     currentAttack.isFrontalCircle = false;
                     currentAttack.range = 150.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (80.0f * 1.5f) : 80.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (44.0f * 1.5f) : 44.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 460.0f;
                     currentAttack.duration = 0.22f;
                     currentAttack.timer = 0.22f;
                     currentAttack.hasHit = false;
-                    currentAttack.defensePierce = 0.25f; // IGNORES 25% DEFENSE!
+                    currentAttack.defensePierce = 0.20f; // IGNORES 20% DEFENSE!
                     currentAttack.hasShockwave = true;
                     currentAttack.shockwavePos = position;
                     currentAttack.shockwaveRadius = 150.0f;
@@ -378,7 +418,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 50.0f;
                     currentAttack.isLineBox = true;
                     currentAttack.arcAngle = 0.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (48.0f * 1.5f) : 48.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (28.0f * 1.5f) : 28.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 300.0f;
                     currentAttack.duration = 0.18f;
                     currentAttack.timer = 0.18f;
@@ -394,7 +434,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.type = AttackType::HEAVY;
                     currentAttack.range = 145.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (65.0f * 1.5f) : 65.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (36.0f * 1.5f) : 36.0f) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 380.0f;
                     currentAttack.duration = 0.20f;
                     currentAttack.timer = 0.20f;
@@ -416,7 +456,11 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     }
 
     // Normal movement when not dashing or dagger lunging
-    if (!isDashing && !isDaggerLunging) {
+    if (staggerTimer > 0.0f) {
+        // Stagger stumble: rapid posture deceleration
+        velocity.x *= 0.70f;
+        velocity.y *= 0.70f;
+    } else if (!isDashing && !isDaggerLunging) {
         Vector2 moveDir = { 0.0f, 0.0f };
         if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))    moveDir.y -= 1.0f;
         if (IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN))  moveDir.y += 1.0f;
@@ -455,6 +499,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
     dashCooldown = stats.dashCooldown;
     dashTimer = Config::DASH_DURATION;
     isDashing = true;
+    iFrameTimer = 0.25f; // Reliable 0.25s I-Frame window!
 
     // Movement direction or facing direction
     Vector2 inputDir = { 0.0f, 0.0f };
@@ -474,6 +519,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
 
 void Player::TriggerLightAttack(ParticleSystem& particles) {
     if (currentWeapon == WeaponType::NONE) return;
+    if (staggerTimer > 0.0f) return;
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
     timeSinceCombat = 0.0f;
@@ -530,7 +576,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
             currentAttack.range = 105.0f;
             currentAttack.width = 40.0f;
             currentAttack.arcAngle = 0.0f;
-            currentAttack.damage = counterBuffTimer > 0.0f ? (36.0f * 1.5f) : 36.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (24.0f * 1.5f) : 24.0f;
             currentAttack.knockback = 260.0f;
 
             SoundFX::PlayLightAttack();
@@ -538,7 +584,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
             particles.SpawnSparks(position, Color{ 140, 220, 255, 255 }, 12, 140.0f);
         } else {
             // Hit 1: Original golden horizontal sweep
-            currentAttack.damage = counterBuffTimer > 0.0f ? (46.0f * 1.5f) : 46.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (26.0f * 1.5f) : 26.0f;
             currentAttack.knockback = 200.0f;
 
             SoundFX::PlayLightAttack();
@@ -562,6 +608,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (currentWeapon == WeaponType::NONE) return;
+    if (staggerTimer > 0.0f) return;
     if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging) return;
     if (currentAttack.type != AttackType::NONE && currentWeapon != WeaponType::DAGGERS) return;
     if (heavyCooldown > 0.0f) return;
@@ -576,7 +623,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
 
     if (currentWeapon == WeaponType::DAGGERS) {
-        // Dual Daggers: Buffed high-speed piercing lunge forward!
+        // Dual Daggers: Balanced high-speed piercing lunge forward!
         isDaggerLunging = true;
         daggerLungeTimer = 0.20f;
         daggerLungeDir = forwardDir;
@@ -594,7 +641,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
         currentAttack.width = 48.0f;
         currentAttack.isLineBox = true;
         currentAttack.arcAngle = 0.0f;
-        currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
+        currentAttack.damage = (counterBuffTimer > 0.0f ? (22.0f * 1.5f) : 22.0f) * GetTotemStats(currentTotem).damageMultiplier;
         currentAttack.knockback = 180.0f;
         currentAttack.duration = 0.20f;
         currentAttack.timer = 0.20f;
@@ -630,6 +677,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 }
 
 void Player::TriggerParry(ParticleSystem& particles) {
+    if (staggerTimer > 0.0f) return;
     if (isDashing || isParrying || isHeavyWindingUp || isDaggerLunging || currentAttack.type != AttackType::NONE) return;
     if (parryCooldown > 0.0f || stamina < Config::PARRY_STAMINA_COST) return;
 
@@ -655,9 +703,46 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
     particles.SpawnFloatingText(position, "PERFECT PARRY!", Color{ 255, 230, 80, 255 }, 26.0f);
 }
 
+void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
+    if (staggerImmunityTimer > 0.0f || HasInvulnerability() || isDashing) return;
+    float duration = CalculateStaggerDuration(baseStunDuration, GetWill(), true);
+    staggerTimer = duration;
+    isHeavyWindingUp = false;
+    isParrying = false;
+    currentAttack.type = AttackType::NONE;
+    particles.SpawnFloatingText(position, "STAGGERED!", Color{ 255, 200, 60, 255 }, 24.0f);
+    particles.SpawnSparks(position, Color{ 255, 200, 60, 255 }, 14, 130.0f);
+    SoundFX::PlayHitImpact();
+}
+
+bool Player::UseHealthPotion(ParticleSystem& particles) {
+    if (potionCooldown > 0.0f) {
+        particles.SpawnFloatingText(position, "POTION ON COOLDOWN", Color{ 200, 200, 200, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.GetHealthPotionCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO POTIONS", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (health >= GetMaxHealth()) {
+        particles.SpawnFloatingText(position, "HP FULL", Color{ 140, 240, 180, 220 }, 16.0f);
+        return false;
+    }
+
+    if (inventory.ConsumeHealthPotion()) {
+        potionCooldown = 7.0f; // 7-second cooldown
+        Heal(45.0f);
+        SoundFX::PlayHeal();
+        particles.SpawnSparks(position, Color{ 80, 255, 140, 255 }, 25, 140.0f);
+        particles.SpawnFloatingText(position, "+45 HP", Color{ 80, 255, 140, 255 }, 24.0f);
+        return true;
+    }
+    return false;
+}
+
 bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
-    // Invulnerable during Dash & Dagger Lunge
-    if (isDashing || isDaggerLunging) {
+    // Invulnerable during Dash, Dagger Lunge, or Active I-Frames
+    if (isDashing || isDaggerLunging || HasInvulnerability()) {
         particles.SpawnFloatingText(position, "EVADED", Color{ 120, 240, 255, 255 }, 18.0f);
         return false;
     }
@@ -694,4 +779,5 @@ void Player::Heal(float amount) {
 void Player::Draw() const {
     PlayerRenderer::Draw(*this);
 }
+
 

@@ -23,6 +23,9 @@ void Inventory::InitDefault() {
     equippedTotem = TotemType::NONE;
     unlockedTotems.push_back(TotemType::NONE);
 
+    // Default health potions
+    healthPotions = 1;
+
     // Initial quest item: Knight's Signet
     questItems.push_back({
         "item_signet",
@@ -108,6 +111,26 @@ void Inventory::InitDefault() {
         "Royal Keep of King Kreptu",
         "To all subjects of Zyphden: The High Summit is broken. We shall not bend our knee...",
         "To all subjects of Zyphden: The High Summit is broken. King Charlz answers no raven.\n\nWe have fortified the southern gates and summoned all remaining crusaders to the courtyard. We shall not bend our knee to madness. Zyphden shall stand as long as a single crusader draws breath.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_09",
+        "Fragment IX: Inscription of the Ancient Pillars",
+        "High Sanctuaries of Tydeshire",
+        "The monolithic stone pillars bear ancient runic glyphs carved by the First Wardens...",
+        "The monolithic stone pillars standing across the valleys of Tydeshire were not hewn for mere decoration.\n\nCarved by the First Wardens before the Unification Wars, each pillar channels primordial leylines that steady mortal willpower. When the mind falters against madness, gaze upon the runes to rekindle inner poise.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_10",
+        "Fragment X: The Royal Armory Archives",
+        "Keep Armory of Zyphden",
+        "Records of royal weaponsmithing and the tempered armaments of the High Marshals...",
+        "Official records recovered from the keep archives: The high marshals of Zyphden quenched their blades in lunar spring waters to counterbalance the dark abyssal energies creeping from the south.\n\nNo sword alone can vanquish the lord liege; one must hone posture, temper their will against devastating blows, and seize the window of an enemy's stagger.",
         false,
         false
     });
