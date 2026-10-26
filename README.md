@@ -15,7 +15,10 @@
 
 ---
 
-> 📖 **Full Technical & Design Reference**: Looking for the full lore chronicles, damage/stagger formulas, equipment stats, bestiary behaviors, and engine architecture? See **[DOCUMENTATION.md](documentation.md)**.
+> [!NOTE]
+> 📖 **Comprehensive Game Documentation & Technical Reference**  
+> Looking for deep combat mathematics, full lore codex, weapon attributes, bestiary AI patterns, and engine architecture?  
+> Please consult **[DOCUMENTATION.md](documentation.md)**.
 
 ---
 
@@ -23,9 +26,9 @@
 
 ## Lore Briefing: Land of Tydeshire
 
-> *“For over 500 years, the Land of Tydeshire was consumed by unending war until King Charlz unified the realm, crowning himself the Liege of Kings. He divided the continent into five sovereign realms to preserve peace.*
+> *“For over 500 years, the Land of Tydeshire was consumed by unending war until King Charlz unified the realm, crowning himself the Liege of Kings. He divided the continent into five sovereign realms to preserve peace: Zyphden, Azshden, Fleurshden, Noirden, and Solsden.*
 >
-> *Yet peace in Tydeshire was only ever borrowed. Three decades later, the Lord Liege vanished into madness, plunging the realm into paranoia and blood. As the warding seals fracture, the true history of his fall lies scattered across forgotten steles and sunlit ruins, waiting for one who can pierce the illusions.”*
+> *Yet peace in Tydeshire was only ever borrowed. Three decades later, the Lord Liege vanished into madness, plunging the realm into paranoia and blood. As the ancient warding seals fracture, the true history of his fall lies scattered across forgotten steles and sunlit ruins, waiting for one who can pierce the illusions.”*
 
 ---
 
@@ -33,16 +36,16 @@
 
 | Action | Key / Input | Role |
 | :--- | :--- | :--- |
-| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional traversal with solid obstacle collision. |
-| **Aiming** | `Mouse Cursor` | Directional reticle for slashes, dashes, and parry reflections. |
-| **Light Attack** | `Left Mouse Button` | Quick slash/thrust with minimal stamina cost. |
-| **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage cleaves, shockwaves). |
+| **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid obstacle collision. |
+| **Aiming** | `Mouse Cursor` | Reticle targeting for sword thrusts, dashes, and parry reflections. |
+| **Light Attack** | `Left Mouse Button` | Swift slash/thrust with low stamina cost and quick recovery cadence. |
+| **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage cleaves, lunges, shockwaves). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
 | **Timed Parry** | `F Key` | Active guard window. Staggers melee foes and **reflects incoming projectiles**. |
-| **Health Potion** | `1 Key` or `H Key` | Restores **+45 HP** immediately (**7.0s cooldown**). |
+| **Health Potion** | `1 Key` or `H Key` | Consumes 1 elixir to heal **+45 HP** immediately (**7.0s cooldown**). |
 | **Interact / Advance** | `E Key` / `Space` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
 | **Dialogue Page** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
-| **Dismiss / Close** | `ESC Key` | Close active dialogue boxes, popups, and inventory modals. |
+| **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
 | **Lore & Equipment** | `I Key` or `TAB` | Open the in-game Journal, Equipment stats, and Totem slots. |
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
@@ -53,7 +56,7 @@
 
 ## Setting Up & Running
 
-Precompiled standalone 64-bit Windows executables are included directly in the repository:
+Standalone precompiled 64-bit Windows executables are included in the repository:
 
 ### 1. Running the Game
 * **Option 1**: Double-click [`phlegmatic.exe`](phlegmatic.exe) in the project root.
@@ -83,11 +86,29 @@ cmake --build build
 
 ---
 
-## Custom Assets Integration
+## Project Structure
 
-Custom sprites and transition illustrations can be dropped directly into [`assets/`](assets/):
-* Drop custom 16:9 artwork (`1920x1080` or `1280x720`) into `assets/zyphden_transition.png` to replace the in-game Zyphden transition placeholder screen.
-* See [`assets/README.md`](assets/README.md) for full sprite dimensions and supported filenames.
+```text
+Phlegmatic/
+├── phlegmatic.exe              # Standalone 64-bit Windows executable in project root
+├── bin/
+│   └── phlegmatic.exe          # Standalone executable in bin output
+├── build.bat                   # Automated MinGW-w64 compilation script
+├── run.bat                     # Quick launcher script
+├── documentation.md            # Comprehensive game design & technical reference
+├── CMakeLists.txt              # Cross-platform CMake configuration
+├── assets/                     # Custom artwork & transition illustration drop
+├── vendor/
+│   └── raylib/                 # Precompiled Raylib 6.2 headers & static libraries
+└── src/
+    ├── main.cpp                # Game entry point & window lifecycle
+    ├── core/                   # Engine config, procedural acoustic sound, particles
+    ├── combat/                 # Weapons, armor, collision, math formulas, projectiles
+    ├── world/                  # Level geometry, map environments, monoliths, chests
+    ├── entities/               # Player, enemy AI, modular vector renderers
+    ├── rendering/              # Procedural vector silhouettes & asset loader
+    └── states/                 # State coordinators, handlers, and modular HUD/UI
+```
 
 ---
 
