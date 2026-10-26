@@ -34,12 +34,28 @@
   * **Act II: The Crossroads of the Damned**: Void-corrupted wilderness connecting the southern ruins to the northern realm. Features telepathic monster ambushes with directional telegraphs and the ancient shrine holding the **Totem of Sanity**.
   * **Act III: Fortified Realm of Zyphden**: Walled capital of the Gale Tempests featuring cobblestone highways, town noticeboard, lore historians (Chronicler Cedric, Blacksmith Varek, Elder Maeve), and collectible royal archives.
   * **Hearthside Tavern**: Cozy interior retreat with stone hearth fireplace, timber bar counter, stools, and Tavernkeep Eldon, featuring a scripted entrance sequence for Knight Lenon.
-  * **Zyphden Royal Keep (Throne Hall)**: Grand interior throne room with polished marble flagstones, crimson runner carpet, royal braziers, and **King Kreptu** presiding from his golden throne dais to grant royal sanction.
+  * **Zyphden Royal Keep (Throne Hall - Expanded 1200x1100)**: A grand, expansive audience hall featuring an elevated stepped dais, the golden throne of **King Kreptu**, eight massive marble colonnade pillars, Western Royal Archives, Eastern Armory racks, and a 940px crimson runner carpet with the gold Sovereign Seal medallion.
+  * **Interactive Throne Room Court (5 NPCs)**:
+    - **Chancellor Malakor**: Head of the Privy Council, discussing court diplomacy, imperial tithes, and the spreading madness of King Charlz.
+    - **Sentinel Donald & Sentinel Garrick**: Twin Royal Halberdiers guarding the sovereign dais with unyielding martial vigilance.
+    - **Archivist Thaddeus**: Keeper of ancient chronicles in the Western Archives, providing deep insight into the forgotten monoliths and fractured seals.
+    - **Lady Genevieve**: High courtier and foreign envoy offering sharp political commentary on the shifting balance of power in Tydeshire.
+  * **Inscribed Monoliths & Relic Supply Chests**:
+    - **Inscribed Pillars**: Ancient stone monoliths holding runic inscriptions (`[E]` to decipher), granting lore fragments like **Fragment IX: Inscription of the Ancient Pillars** (`frag_09`).
+    - **Relic Chests**: Interactive supply caches distributed across the Royal Keep, Crossroads, and Ruined Castle awarding **+1 or +2 Health Potions** and unlocking **Fragment X: The Royal Armory Archives** (`frag_10`).
   * **Courtyard Boss Spar — Knight Lenon**: Martial duel in the Eastern Courtyard against the Vanguard Captain, awarding the consecrated **Crusader Plate (+24 Def, +30 HP)** and unlocking the Royal Combat Arena.
 * **Precision Combat System**:
   * **`Q` Key — Dash**: 8-directional burst with **0.25s invulnerability frames (i-frames)** to phase safely through attacks and projectiles (`EVADED`).
   * **`F` Key — Timed Parry**: Active guard window with radiant cyan-gold shield barrier. Deflecting melee blows inflicts **STAGGERED!** on enemies and grants a **+50% (1.5x) Counter-Attack Damage Buff**.
   * **Projectile Deflection**: Parrying incoming enemy spells and arrows reflects them back toward your cursor with amplified speed and damage.
+* **Modular Visual Cooldown Action Bar & HUD**:
+  * Fixed bottom-center HUD action bar displaying icons, keybindings, and real-time radial sweep cooldown overlays for:
+    - `[Q]` Dash (Active evasion & cooldown sweep)
+    - `[LMB]` Light Attack (Cadence recovery indicator)
+    - `[RMB]` Heavy Attack (Stage cooldown timer)
+    - `[F]` Parry Guard (Active shield window & recovery timer)
+    - `[1]` Health Flask (Stock badge count & 7.0s cooldown countdown)
+  * Dynamic DEF, WILL, and Posture status tags displayed directly alongside player Vitals.
 * **Will Stat & Stagger Mechanics**:
   * Both player and enemies possess a **Will** stat mitigating stun and stagger duration from devastating blows:
     ```text
