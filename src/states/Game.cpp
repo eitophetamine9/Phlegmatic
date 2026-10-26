@@ -288,6 +288,19 @@ void Game::Update(float dt) {
         return;
     }
 
+    // 1.86 ZYPHDEN TRANSITION PLACEHOLDER SCREEN
+    if (currentState == GameState::ZYPHDEN_TRANSITION) {
+        bool proceed = GameUI::DrawZyphdenTransition(
+            Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT,
+            mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), dt
+        );
+        if (proceed) {
+            EnterZyphden();
+            currentState = GameState::ZYPHDEN_REALM;
+        }
+        return;
+    }
+
     // 1.88 ZYPHDEN REALM STATE (Chapter 1)
     if (currentState == GameState::ZYPHDEN_REALM) {
         if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
@@ -566,6 +579,14 @@ void Game::Render() {
         crossroadsHandler.Render(
             camera, map, enemies, projectiles, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        EndDrawing();
+        return;
+    }
+
+    if (currentState == GameState::ZYPHDEN_TRANSITION) {
+        GameUI::DrawZyphdenTransition(
+            w, h, GetMousePosition(), false, GetFrameTime()
         );
         EndDrawing();
         return;

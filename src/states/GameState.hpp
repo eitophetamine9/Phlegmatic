@@ -5,6 +5,7 @@ enum class GameState {
     PROLOGUE_CUTSCENE,
     RUINED_CASTLE,
     CROSSROADS,
+    ZYPHDEN_TRANSITION,
     ZYPHDEN_REALM,
     LOBBY,
     ARENA,

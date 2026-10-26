@@ -12,27 +12,15 @@ void Cutscene::InitPrologue() {
     segments.clear();
 
     segments.push_back({
-        "ACT I - THE AGE OF CHAOS",
-        "For over 500 years, the Land of Tydeshire was filled with chaos and never ending war. Order was not an option, there was no unity.\n\nFactions came along and so then became kingdoms. Each king wants to rule over the entire Land of Tydeshire, most failed miserably however one stood at the top.",
-        Color{ 255, 120, 80, 255 }
+        "THE FRACTURED CROWNS",
+        "For three decades, Charlz the Liege of Kings bound the land of Tydeshire beneath a fragile peace.\n\nYet peace in this world was only ever borrowed. When the High King vanished into madness, five crowns turned against one another in paranoia and blood, fracturing the realm into chaos.",
+        Color{ 255, 145, 75, 255 }
     });
 
     segments.push_back({
-        "ACT II - CHARLZ THE LIEGE OF KINGS",
-        "After 500 years of chaos, one king stood at the top, King Charlz.\n\nHis overwhelming authority and remarkable strength unified the Land of Tydeshire crowning him Charlz the Liege of Kings. He then proceeded to divide the land into 5 kingdoms and appoint a king to each kingdom.",
+        "THE LONG VIGIL",
+        "The truth lies scattered across ancient steles, sunlit ruins, and broken steel.\n\nAwaken, wanderer. The ashes of the southern sanctuary have cooled, and the road to Zyphden lies ahead.",
         Color{ 255, 215, 80, 255 }
-    });
-
-    segments.push_back({
-        "ACT III - THE FIVE KINGDOMS",
-        "The 5 Kingdoms are Zyphden, Velnoth, Krynn, Drak'Mar, and Solis. Each Kingdom had a specific role in keeping peace and order throughout the land.\n\nBut this did not last long, peace only lasted for about 50 years until Charlz mysteriously vanished leaving no trace behind.",
-        Color{ 100, 220, 255, 255 }
-    });
-
-    segments.push_back({
-        "ACT IV - THE 2ND GREAT WAR",
-        "The Kings believed he was dead and they began plotting to overthrow each other to take over the land. Thus began the 2nd Great War.\n\nThe truth behind the disappearance of Charlz was never uncovered, but rumors say that he was betrayed by his closest allies. The truth was shattered and scattered across the land, waiting to be pieced together.",
-        Color{ 200, 140, 255, 255 }
     });
 }
 

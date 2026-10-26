@@ -85,10 +85,10 @@ void RuinedCastleHandler::Update(
             // Award Zil's Token (quest item)
             player.GetInventory().AddQuestItem(QuestItem{ "zils_token", "Zil's Token", "A scorched iron crusade badge bestowed by Zil. Proves you survived the trial of the Ruined Castle.", Color{ 255, 180, 60, 255 } });
 
-            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
-            zilDialogueText = "Take my token, wanderer. Carry word of my eternal vigil to Knight Lenon in Zyphden. The northern gateway to the Crossroads is open.";
+            zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
+            zilDialogueText = "You have heart, though your footing betrayed you. I have seen too much blood spilt for hollow pride. Take my crusade seal to Knight Lenon in Zyphden—tell him Zil's watch endures to the end.";
             zilDialogueColor = Color{ 255, 180, 60, 255 };
-            zilDialogueTimer = 6.0f;
+            zilDialogueTimer = 7.0f;
             particles.SpawnFloatingText(player.GetPosition(), "ACQUIRED: Zil's Token! Gate to Crossroads Unlocked!", Color{ 255, 180, 60, 255 }, 24.0f);
             particles.AddScreenShake(4.0f, 0.2f);
             return;
@@ -193,10 +193,10 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
-            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
-            zilDialogueText = "Halt, intruder! You face a mere fragment possessing 1% of my true power... yet Truth Seeker's blade shall test your resolve!";
+            zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
+            zilDialogueText = "Another soul seeking absolution in these ruined halls... Even shattered to a mere shadow of my former self, Truth Seeker will not yield to an unsteady hand. Draw your steel, wanderer. Let us see if your spirit burns.";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
-            zilDialogueTimer = 5.0f;
+            zilDialogueTimer = 6.0f;
             particles.AddScreenShake(6.0f, 0.25f);
             SoundFX::PlayHeavyAttack();
         }
@@ -226,10 +226,10 @@ void RuinedCastleHandler::Update(
             player.GetInventory().UnlockFragment("frag_03");
 
             map.SetGateOpen(true);
-            zilDialogueSpeaker = "ZIL'S FRAGMENT - 1% TRUE POWER";
-            zilDialogueText = "Even at 1% of my power, you persevered... Claim Truth Seeker (Partial) and uncover the madness of King Charlz.";
+            zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
+            zilDialogueText = "So... the blade recognizes you. Even a fractured remnant can tell true conviction from hollow bravado. Take Truth Seeker. Carry it north, where King Charlz's shadow falls darkest.";
             zilDialogueColor = Color{ 255, 215, 60, 255 };
-            zilDialogueTimer = 6.0f;
+            zilDialogueTimer = 7.0f;
             particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
             particles.AddScreenShake(7.0f, 0.3f);
         }
@@ -278,7 +278,7 @@ void RuinedCastleHandler::Update(
     // If player attempts to interact at the gate before facing Zil
     if (!gateUnlocked && (Vector2Distance(player.GetPosition(), Vector2{ 800.0f, map.GetBounds().y + 10.0f }) < 140.0f) &&
         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
-        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED - FACE ZIL'S FRAGMENT FIRST!", Color{ 255, 80, 80, 255 }, 20.0f);
+        particles.SpawnFloatingText(player.GetPosition(), "GATE SEALED — OVERCOME ZIL'S TRIAL FIRST!", Color{ 255, 80, 80, 255 }, 20.0f);
         SoundFX::PlayHitImpact();
     }
 

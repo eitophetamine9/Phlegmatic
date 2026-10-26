@@ -409,9 +409,9 @@ void ZyphdenHandler::Update(
             particles.AddScreenShake(6.0f, 0.25f);
 
             std::vector<std::string> pages = {
-                "Superb technique, warrior! Wear this Crusader Plate with pride! You have earned Zyphden's highest honor!",
-                "With this armor, the tempest winds beyond our eastern borders will no longer tear you asunder. Go forth, Champion of the Gale Winds!",
-                "Martial mastery recognized! The Royal Combat Arena is now unlocked. You can access it from the Title Screen or the Lobby portal!"
+                "Magnificent bladecraft... A masterclass in balance and poise. You fought like one who has stared into the teeth of death and refused to flinch. The Crusader Plate is yours by every right of arms.",
+                "That plate was tempered in tempest-bellowed coals; with it, the freezing winds of the eastern passes will no longer tear you asunder. Wear it with pride, Champion of the Gale Winds.",
+                "Your martial mastery is recognized throughout our garrison. The Royal Combat Arena has been unsealed in your honor—you may enter its trials from the lobby portal whenever you seek to test your limits."
             };
             OpenDialogue("lenon_win", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
         }
@@ -435,18 +435,17 @@ void ZyphdenHandler::Update(
 
             std::vector<std::string> lenonPages;
             if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
-                lenonPages.push_back("Hold, traveler! That blade at your side... it is Truth Seeker! My sworn brother Zil bore that sacred steel when he rode south to purge the madness.");
-                lenonPages.push_back("You bested him in honorable combat? Then his long torment is finally ended. Zyphden owes you an eternal debt for granting him peace.");
-                lenonPages.push_back("Before I test your mettle, ancient protocol demands you present yourself to King Kreptu in the Northern Keep outside. Seek His Majesty's blessing first!");
-                lenonPages.push_back("Once the King has sanctioned our trial, meet me at the Sparring Ring in the Eastern Courtyard. I shall await you there!");
+                lenonPages.push_back("Hold... Lower your hand. That blade at your side... I would recognize that radiant hue anywhere in this dying realm. It is Truth Seeker—the consecrated steel Zil carried when he rode south.");
+                lenonPages.push_back("Tell me... did he fall with his honor intact? ...Then his long torment is finally ended. For granting my sworn brother peace, Zyphden owes you a debt that words can scarcely repay.");
+                lenonPages.push_back("Before we cross blades in the yard, courtly protocol demands you present yourself to King Kreptu in the keep above. Seek His Majesty's blessing first. If you survive his scrutiny, I shall be waiting for you in the eastern ring.");
             } else if (player.GetInventory().HasQuestItem("zil_token")) {
-                lenonPages.push_back("Hold, traveler! That silver token you bear... it belongs to my sworn brother Zil! He spared you and gave you his crest? Then honor still endures in the ruins.");
-                lenonPages.push_back("Before I grant you a trial in our Eastern Courtyard, ancient protocol demands you present yourself to King Kreptu in the Northern Keep outside. Seek His Majesty's blessing first!");
-                lenonPages.push_back("Once the King has sanctioned our trial, meet me at the Sparring Ring in the Eastern Courtyard. I shall await you there!");
+                lenonPages.push_back("Hold your step, traveler. That scorched silver crest upon your tunic... that was forged for Zil's breastplate with my own hands. If he gave you that token instead of taking your life, then some ember of his old honor still flickers amidst the ruins.");
+                lenonPages.push_back("A warrior who earns Zil's mercy is either extraordinarily fortunate or possessed of rare conviction. Before I test which one you are, courtly protocol demands you present yourself to King Kreptu in the keep above.");
+                lenonPages.push_back("Seek His Majesty's blessing first. Once the crown sanctions our trial, meet me at the Sparring Ring in the Eastern Courtyard. We shall see what mettle you possess.");
             } else {
-                lenonPages.push_back("Hold, traveler! Word reached our sentries that a capable warrior survived the southern ruins and the Crossroads.");
-                lenonPages.push_back("Before I grant you a trial in our Eastern Courtyard, ancient protocol demands you present yourself to King Kreptu in the Northern Keep outside. Go speak with His Majesty first!");
-                lenonPages.push_back("Once the King sanctions our duel, meet me at the Sparring Ring in the Eastern Courtyard!");
+                lenonPages.push_back("Hold your step, wanderer. Whispers travel fast upon the wind—our scouts reported a lone warrior cutting through the corrupted mire of the Crossroads.");
+                lenonPages.push_back("Before I grant you a trial in our courtyard, courtly protocol demands you present yourself to King Kreptu in the keep above. Seek His Majesty's blessing first.");
+                lenonPages.push_back("Once the crown sanctions our bout, meet me at the Sparring Ring in the Eastern Courtyard. We shall see if the rumors do you justice.");
             }
 
             OpenDialogue("lenon_tavern_intro", "KNIGHT LENON - VANGUARD CAPTAIN", lenonPages, Color{ 225, 185, 65, 255 });
@@ -476,15 +475,15 @@ void ZyphdenHandler::Update(
             if (interactKey && eldonInRange) {
                 if (questPhase == ZyphdenQuestPhase::SEEK_TAVERN) {
                     std::vector<std::string> pages = {
-                        "Welcome to the Hearthside Tavern, traveler! Pull up a stool and warm yourself by the hearth. Few make it past the Crossroads beasts these days.",
-                        "The kingdom has been on edge ever since the mad King Charlz fractured the crown. But wait... hear those heavy armored footsteps at the door?"
+                        "Step close to the hearth and let the chill seep out of your bones, traveler. After what you’ve walked through on the Crossroads highway, you look like you haven't slept under a dry roof in weeks. The fire is warm, and the stew is fresh.",
+                        "Zyphden used to be a city of open laughter and high banners, but ever since the northern roads went quiet, every stranger at my door brings fresh dread. Listen... those heavy footsteps outside the archway. That’s Captain Lenon’s stride. He rarely visits the tavern unless the wind carries trouble."
                     };
                     OpenDialogue("eldon_intro", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
-                    particles.SpawnFloatingText(eldon.position, "Main Quest Started!", Color{ 255, 215, 80, 255 }, 22.0f);
+                    particles.SpawnFloatingText(eldon.position, "Audience with Vanguard Captain", Color{ 255, 215, 80, 255 }, 22.0f);
                     SoundFX::PlayParrySuccess();
                 } else {
                     std::vector<std::string> pages = {
-                        "Warm fire and cold ale for any who brave the wilds! Speak with Captain Lenon or King Kreptu if you seek to aid our realm."
+                        "Rest your feet as long as you have need, friend. The hearth fire never goes dark so long as I’m drawing breath. If you’re seeking purpose or a warm bed, the Captain and the King have their hands full of both."
                     };
                     OpenDialogue("eldon_idle", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
                 }
@@ -492,7 +491,7 @@ void ZyphdenHandler::Update(
             // 3. Knight Lenon if inside tavern
             else if (interactKey && lenonInTavern && knightLenonNPC.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "Ancient protocol demands you speak with King Kreptu in the Northern Keep outside first! Once His Majesty sanctions our duel, meet me at the Sparring Ring."
+                    "Protocol is protocol, friend. King Kreptu awaits you in the Northern Keep. Once the monarch sanctions our trial, my blade will be waiting in the courtyard."
                 };
                 OpenDialogue("lenon_tavern_idle", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
             }
@@ -516,26 +515,26 @@ void ZyphdenHandler::Update(
                     questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
                     hasTalkedToKing = true;
                     std::vector<std::string> pages = {
-                        "Captain Lenon told me of your arrival, wanderer. You brought word of Lord Zil and braved the corrupted highway.",
-                        "The Lord Liege's madness consumes Tydeshire, and we need warriors of true resolve. I hereby sanction your martial trial!",
-                        "Go to the Eastern Courtyard and spar with Captain Lenon. Defeat him, and the royal Crusader Plate is yours!"
+                        "Step forward into the light, traveler. Lenon spoke of your arrival, and the wind carried word of your passage through the southern ruins.",
+                        "In an age where King Charlz's madness rots the very foundation of Tydeshire, a kingdom cannot afford to lean on fragile men. Lenon wishes to test your blade in the courtyard, and I grant my royal sanction.",
+                        "Go to the Eastern Courtyard. Face our captain, and prove that your will is as unyielding as the stone beneath our feet. Should you best him, the sacred Crusader Plate shall be yours."
                     };
                     OpenDialogue("king_sanction", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                     particles.SpawnFloatingText(kingKreptu.position, "Courtyard Trial Sanctioned!", Color{ 255, 220, 90, 255 }, 22.0f);
                     SoundFX::PlayParrySuccess();
                 } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
                     std::vector<std::string> pages = {
-                        "You bested Captain Lenon and wear our kingdom's sacred Crusader Plate! Zyphden proudly honors you, Champion of the Gale Winds!"
+                        "You bested Captain Lenon—a feat I have not witnessed in twenty winters of peace or war. The Crusader Plate rests upon shoulders worthy of its weight. You carry Zyphden's blessing, Champion. May the tempests guide your edge against the dark."
                     };
                     OpenDialogue("king_win", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                 } else if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
                     std::vector<std::string> pages = {
-                        "Captain Lenon awaits your blade in the Eastern Courtyard. Prove your strength in the trial!"
+                        "Captain Lenon is not a man to be kept waiting in the yard. Go, traveler. Show our garrison what fire burns in your blood."
                     };
                     OpenDialogue("king_ready", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                 } else {
                     std::vector<std::string> pages = {
-                        "Welcome, wanderer. If you seek news of our realm, speak with Eldon inside the Hearthside Tavern first."
+                        "Heavy hangs the crown when old allies turn their blades toward one another. If you seek news of the town, speak with Eldon at the tavern first."
                     };
                     OpenDialogue("king_idle", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                 }
@@ -543,9 +542,9 @@ void ZyphdenHandler::Update(
             // 3. Chancellor Malakor
             else if (interactKey && malakor.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "Mind your decorum in the Sovereign Presence, wanderer. I am Chancellor Malakor. I manage the kingdom's tribute and maintain our defensive leylines while the King prepares for war.",
-                    "Lord Zil was once the Pride of the Crown, the sworn brother of Captain Lenon. When he rode south into the Ruined Castle, he was tasked with securing the ancient relic 'Truth Seeker'.",
-                    "If his remnant has fallen to madness as you claim, then the Lord Liege's corrupting influence has already penetrated our southern watch. We must bolster our wills, lest we all succumb to the abyss."
+                    "Step lightly upon these flagstones, traveler. The Privy Council has little patience for mud-spattered wanderers, yet His Majesty insists on granting audience to any blade that survives the highway. I manage the kingdom's leylines and our dwindling grain stores while soldiers dream of glorious charges.",
+                    "Lord Zil was our finest vanguard before the Liege of Kings vanished into the northern mist. When Charlz went mad, Zil believed he could anchor the southern reaches with the relic Truth Seeker. If his mind has fractured, then the corruption is no longer a rumor—it is at our throats.",
+                    "Do not mistake our stone ramparts for absolute safety. When empires rot, they rot from the crown downward. Bolster your willpower, wanderer. Steel may turn aside an arrow, but only an iron mind can endure what is coming."
                 };
                 OpenDialogue("malakor", "CHANCELLOR MALAKOR", pages, Color{ 190, 130, 240, 255 });
                 particles.SpawnFloatingText(malakor.position, "Kingdom Politics & Lore Shared", Color{ 190, 130, 240, 255 }, 18.0f);
@@ -553,25 +552,25 @@ void ZyphdenHandler::Update(
             // 4. Sentinel Donald
             else if (interactKey && donald.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "Hold your step! You stand before King Kreptu, sovereign lord of Zyphden. Keep your weapons sheathed while you approach the dais.",
-                    "My halberd was forged by Varek himself. It has severed the heads of fifty corrupted beasts at the Crossroads. Do not think to test our vigil."
+                    "Keep two paces from the dais, wanderer. I care little what tales you brought from the southern highway—my orders are absolute. Let your blade rest easy in its scabbard, and we will have no quarrel.",
+                    "My halberd was forged by Varek himself to crack dragonbone and pierce corrupted hides. It has cleaved fifty horrors along the border moors. Do not think to test our vigil."
                 };
                 OpenDialogue("donald", "SENTINEL DONALD", pages, Color{ 100, 180, 255, 255 });
             }
             // 5. Sentinel Garrick
             else if (interactKey && garrick.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "At ease, Donald. The traveler possesses the crest of the Vanguard. You have the look of someone who has stared into the teeth of death and refused to blink.",
-                    "If the King sanctions your spar against Captain Lenon, be warned: Lenon does not pull his punches. Time your parries perfectly, preserve your stamina, and strike only when his posture breaks!"
+                    "Lower your hackles, Donald. Look at their eyes—they’ve got the quiet stillness of someone who has dodged a fatal blow by a hair's breadth and countered before the blood hit the dirt.",
+                    "A word of advice before you face Captain Lenon in the ring: the man fights like a raging gale. Don’t try to out-muscle his whirlwind. Watch his balance, wait for the split second his blade overextends, and parry with conviction. If you break his posture, you break his fight."
                 };
                 OpenDialogue("garrick", "SENTINEL GARRICK", pages, Color{ 100, 180, 255, 255 });
             }
             // 6. Archivist Thaddeus
             else if (interactKey && thaddeus.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "Ah! Another seeker of forgotten lore. I am Thaddeus, custodian of the Zyphden Keep Archives. These shelves contain the annals of the Great Unification.",
-                    "Have you observed the Inscribed Monoliths scattered throughout our realm? The First Wardens carved them out of leyline stone. Inspecting them will awaken your mind to the true nature of Will and Poise.",
-                    "The monolith standing in our archive wing holds the sacred Nine Inscriptions. Read it with reverence, friend."
+                    "Quiet, please... even the dust here remembers what the world has forgotten. I am Thaddeus. For thirty winters I have tended these folios, chronicling how one man's madness could unravel five centuries of hard-won peace.",
+                    "The stone monoliths you pass in the wilderness are not mere decorative monuments. They were raised by the First Wardens along convergence points of the earth. When a warrior meditates upon their carved runes, the soul remembers its own weight. It tempers your Will—allowing you to shrug off blows that would leave lesser fighters reeling in the dirt.",
+                    "Seek out the monolith in our archive wing. Its inscriptions have survived fire, siege, and betrayal. Perhaps they will offer you the clarity they could not grant our fallen kings."
                 };
                 OpenDialogue("thaddeus", "ARCHIVIST THADDEUS", pages, Color{ 85, 175, 255, 255 });
                 particles.SpawnFloatingText(thaddeus.position, "Ancient Knowledge Shared", Color{ 85, 175, 255, 255 }, 18.0f);
@@ -579,9 +578,9 @@ void ZyphdenHandler::Update(
             // 7. Lady Genevieve
             else if (interactKey && genevieve.CheckInteraction(playerPos)) {
                 std::vector<std::string> pages = {
-                    "Welcome to the Royal Armory, traveler. The weapons gathered here were crafted to pierce the unholy hide of the abyss.",
-                    "Notice how heavy weapons like the War Mace can shatter armor, while twin daggers excel at flurry lacerations. But remember: power is nothing without the will to endure.",
-                    "Our quartermasters have placed supply chests with restorative elixirs in the armory corners. Help yourself—you will need every drop when you leave our gates."
+                    "Ah, so you are the survivor everyone in the bailey is murmuring about. I am Lady Genevieve. My family funds the king's armories—which means I spend half my days lecturing hot-headed knights on the value of defensive craftsmanship.",
+                    "Every weapon tells a philosophy, wanderer. The heavy mace crushes bone straight through plate armor by sheer blunt momentum, while twin daggers rely on breathless speed and slipping beneath a guard. Yet even the sharpest edge is useless if its bearer panics at the first wound.",
+                    "Our quartermasters keep restorative draughts tucked beside the weapon racks. Take what you need from the chests. It does our treasury no good to leave healing draughts gathering dust while the realm bleeds."
                 };
                 OpenDialogue("genevieve", "LADY GENEVIEVE", pages, Color{ 245, 140, 160, 255 });
                 particles.SpawnFloatingText(genevieve.position, "Armory Secrets Shared", Color{ 245, 140, 160, 255 }, 18.0f);
@@ -591,8 +590,8 @@ void ZyphdenHandler::Update(
                 keepPillar.read = true;
                 player.GetInventory().UnlockFragment("frag_09");
                 std::vector<std::string> pages = {
-                    "ANCIENT RUNIC MONOLITH: 'The monolithic stone pillars standing across Tydeshire channel primordial leylines that steady mortal willpower.'",
-                    "'When the mind falters against madness, gaze upon the runes to rekindle inner poise. Willpower reduces the duration of stagger inflicted by heavy strikes.'"
+                    "RUNIC INSCRIPTION OF THE FIRST WARDENS: 'The stone pillar anchors what the storm seeks to tear away. Stand firm as unyielding bedrock.'",
+                    "'For he who tempers his Will shall neither stumble before the hammer nor bend before the tyrant's decree. Poise is the soul's armor against madness.'"
                 };
                 OpenDialogue("keep_pillar", "INSCRIBED KEEP MONOLITH", pages, Color{ 100, 220, 255, 255 });
                 particles.SpawnFloatingText(keepPillar.position, "Lore Fragment IX Unlocked!", Color{ 100, 220, 255, 255 }, 22.0f);
@@ -604,9 +603,9 @@ void ZyphdenHandler::Update(
                 player.GetInventory().UnlockFragment("frag_10");
                 player.GetInventory().AddHealthPotions(2);
                 std::vector<std::string> pages = {
-                    "You opened the Royal Armory Relic Chest!",
-                    "Obtained +2 Health Potions! Press [1] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
-                    "Recovered Fragment X: 'The Royal Armory Archives' - Study weapon armor piercing and stagger punishes in your Journal [I]."
+                    "You have unlatched the Royal Armory Relic Chest.",
+                    "Obtained two flasks of Consecrated Health Elixir! Press [1] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
+                    "Recovered Fragment X: 'The Royal Armory Archives' — recording the ancient arts of armor penetration, posture breaking, and counter ripostes."
                 };
                 OpenDialogue("keep_chest", "ROYAL ARMORY RELIC CHEST", pages, Color{ 255, 215, 80, 255 });
                 particles.SpawnFloatingText(keepChest.position, "+2 Potions & Fragment X!", Color{ 120, 255, 170, 255 }, 22.0f);
@@ -617,8 +616,8 @@ void ZyphdenHandler::Update(
                 keepPantryChest.opened = true;
                 player.GetInventory().AddHealthPotions(1);
                 std::vector<std::string> pages = {
-                    "You opened the Keep Provisions Chest!",
-                    "Obtained +1 Health Potion! Restores 45 Health upon consumption."
+                    "You opened the Keep Provisions Chest.",
+                    "Obtained one flask of Consecrated Health Elixir! Restores 45 Health upon consumption."
                 };
                 OpenDialogue("keep_pantry", "KEEP PROVISIONS CHEST", pages, Color{ 120, 255, 170, 255 });
                 particles.SpawnFloatingText(keepPantryChest.position, "+1 Health Potion!", Color{ 120, 255, 170, 255 }, 20.0f);
@@ -665,9 +664,9 @@ void ZyphdenHandler::Update(
                 // 2. Scholar Cedric (Zyphden Lore)
                 if (cedric.CheckInteraction(playerPos)) {
                     std::vector<std::string> pages = {
-                        "Zyphden is the Realm of the Gale Tempests. For centuries our royal wind-spires stood as sentinels against the void.",
-                        "When King Charlz's crown fell to madness, the ancient seals began to fracture. What you saw in the southern ruins is only the beginning...",
-                        "Beyond our eastern borders lies the untamed wilderness. Only those clad in consecrated armor can withstand the tempest winds."
+                        "Zyphden was named for the gale tempests that sweep through these valley spires. Our founders believed the wind cleansed the land of rot. But now? Even the gales smell of old iron and sulfur.",
+                        "When King Charlz vanished, the covenant between the five crowns dissolved into bitter suspicion. The seals guarding the borderlands are fracturing one by one. The shadows you witnessed in the southern ruins are merely the vanguard of a greater dark.",
+                        "Beyond our eastern ramparts lie the untamed wildlands. Only those clad in consecrated plate can withstand the howling storms that guard the northern frontier."
                     };
                     OpenDialogue("cedric", "CHRONICLER CEDRIC", pages, Color{ 100, 200, 255, 255 });
                     particles.SpawnFloatingText(cedric.position, "Ancient Lore Shared", Color{ 100, 200, 255, 255 }, 18.0f);
@@ -675,8 +674,8 @@ void ZyphdenHandler::Update(
                 // 3. Blacksmith Varek (Armorcraft Lore)
                 else if (varek.CheckInteraction(playerPos)) {
                     std::vector<std::string> pages = {
-                        "Looking at that scrap armor of yours, wanderer... it won't stop a charging brute in the outer wildlands.",
-                        "The Crusader Plate worn by Captain Lenon was forged from fallen stars and wind-tempered steel. Best him in the courtyard if you hope to survive what lies beyond Zyphden!"
+                        "That iron on your back looks like it was scavenged from a ditch, wanderer. Don't take offense—I'm a smith, not a courtier. In the wildlands beyond our gates, beast-hide and rusted mail will get you cleft in two before you can draw breath.",
+                        "The Crusader Plate worn by Captain Lenon was folded a hundred times in wind-bellowed coals. If you want armor that will actually turn a demon's claw aside, you’ll have to earn it from him in the ring. Win or lose, respect the steel."
                     };
                     OpenDialogue("varek", "BLACKSMITH VAREK", pages, Color{ 255, 140, 50, 255 });
                     particles.SpawnFloatingText(varek.position, "Master Armorcraft Lore", Color{ 255, 150, 60, 255 }, 18.0f);
@@ -684,8 +683,8 @@ void ZyphdenHandler::Update(
                 // 4. Elder Maeve (Town Lore & Refugees)
                 else if (maeve.CheckInteraction(playerPos)) {
                     std::vector<std::string> pages = {
-                        "Bless you, child. When the beasts overran the highway, my family barely made it inside these gates.",
-                        "King Kreptu gave us bread and sanctuary, but dark clouds gather to the east. Keep your blade sharp and your mind sane."
+                        "May the winds keep you safe, child. When the abominations crawled from the moors, half my village vanished into the mist. Those of us who made it within these stone walls owe our lives to King Kreptu’s bread and shelter.",
+                        "Yet bread cannot cure terror. The nights grow colder, and the sentries look to the northern horizon with fear in their eyes. Keep your wits about you, traveler. In times like these, a clear head is worth more than a pouch of gold."
                     };
                     OpenDialogue("maeve", "ELDER MAEVE", pages, Color{ 160, 230, 160, 255 });
                     particles.SpawnFloatingText(maeve.position, "Town Lore Shared", Color{ 160, 230, 160, 255 }, 18.0f);
@@ -695,8 +694,8 @@ void ZyphdenHandler::Update(
                     player.GetInventory().UnlockFragment("frag_02");
                     player.GetInventory().UnlockFragment("frag_04");
                     std::vector<std::string> pages = {
-                        "ROYAL DECREE: The Five Monarchs keep vigil over Tydeshire. Vanguard Captain Lenon oversees all martial trials in the Eastern Courtyard.",
-                        "Travelers are warned: The eastern road beyond Zyphden is fraught with tempest anomalies. Proper plate armor required."
+                        "ROYAL PROCLAMATION: By order of King Kreptu, all able-bodied warriors entering Zyphden are subject to martial inspection. Captain Lenon oversees vanguard duels in the Eastern Courtyard.",
+                        "CAUTIONARY WARNING: The eastern pass beyond the city walls is subject to violent atmospheric tempest anomalies. Entry without consecrated plate armor is strictly forbidden."
                     };
                     OpenDialogue("noticeboard", "ROYAL NOTICEBOARD", pages, Color{ 130, 220, 255, 255 });
                     particles.SpawnFloatingText(noticeboard.position, "Lore Fragment Unlocked!", Color{ 130, 220, 255, 255 }, 18.0f);
@@ -739,17 +738,17 @@ void ZyphdenHandler::Update(
                         particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 30, 180.0f);
                         particles.AddScreenShake(5.0f, 0.2f);
                         std::vector<std::string> pages = {
-                            "His Majesty has sanctioned our duel! Draw your steel, wanderer! Let us see if your resolve can pierce my defense!"
+                            "The King has given his blessing, and the courtyard belongs to us. No malice, no hollow pride—only steel testing steel. Draw, wanderer! Let us see if your resolve can withstand the tempests of Zyphden!"
                         };
                         OpenDialogue("lenon_spar_start", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
                     } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
                         std::vector<std::string> pages = {
-                            "A well-earned victory, friend! That Crusader Plate suits you magnificently."
+                            "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead."
                         };
                         OpenDialogue("lenon_spar_win", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
                     } else if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
                         std::vector<std::string> pages = {
-                            "Speak with King Kreptu in the Northern Keep first! Once His Majesty sanctions our duel, meet me here in the Courtyard."
+                            "Protocol is protocol, friend. Speak with King Kreptu in the Northern Keep first! Once His Majesty sanctions our duel, meet me here in the Courtyard."
                         };
                         OpenDialogue("lenon_spar_wait", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
                     }

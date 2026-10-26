@@ -218,7 +218,7 @@ void CrossroadsHandler::Update(
                         (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER));
 
     if (atNorthernGate || interactGate) {
-        currentState = GameState::ZYPHDEN_REALM;
+        currentState = GameState::ZYPHDEN_TRANSITION;
         SoundFX::PlayGateOpen();
         particles.Clear();
         return;

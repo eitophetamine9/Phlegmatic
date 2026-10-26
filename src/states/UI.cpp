@@ -66,3 +66,8 @@ bool GameUI::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mouse
 int GameUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player) {
     return ModalUI::DrawBorderlandsGateway(windowWidth, windowHeight, mousePos, isMousePressed, player);
 }
+
+bool GameUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt) {
+    return ModalUI::DrawZyphdenTransition(windowWidth, windowHeight, mousePos, isMousePressed, dt);
+}
+

@@ -688,22 +688,22 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
 
-    int headerW = MeasureText("DEFEAT // ZIL'S FRAGMENT [1% TRUE POWER]", 20);
-    DrawText("DEFEAT // ZIL'S FRAGMENT [1% TRUE POWER]", (int)(modalX + (modalW - headerW) * 0.5f), (int)modalY + 28, 20, Color{ 255, 90, 70, 255 });
+    int headerW = MeasureText("TRIAL OF THE FALLEN CRUSADER", 20);
+    DrawText("TRIAL OF THE FALLEN CRUSADER", (int)(modalX + (modalW - headerW) * 0.5f), (int)modalY + 28, 20, Color{ 255, 90, 70, 255 });
     DrawLine((int)modalX + 50, (int)modalY + 62, (int)(modalX + modalW - 50), (int)modalY + 62, Color{ 140, 70, 30, 200 });
 
     int choiceResult = 0;
 
     if (canRetry) {
-        int subW = MeasureText("ZIL'S FRAGMENT STANDS VICTORIOUS", 15);
-        DrawText("ZIL'S FRAGMENT STANDS VICTORIOUS", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 255, 205, 80, 255 });
+        int subW = MeasureText("THE SHADOW OF ZIL REMAINS UNBROKEN", 15);
+        DrawText("THE SHADOW OF ZIL REMAINS UNBROKEN", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 255, 205, 80, 255 });
 
         std::string quoteText =
-            "You fought with fierce intent, wanderer, but Truth Seeker remains unyielding in this fragment's grasp.\n\n"
-            "Will you rise once more and test your blade... or yield and regroup?";
+            "Your blade struck with fierce purpose, wanderer, but the sacred cadence of Truth Seeker proved unyielding.\n\n"
+            "The knight's remnant lowers his weapon, observing your labored breath with quiet respect. Will you rise once more to prove your mastery... or accept his mercy and press northward?";
         DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
 
-        const char* noteText = "Honor bound: You are granted a singular retry duel to claim Truth Seeker (Partial).";
+        const char* noteText = "Martial Accord: You may invoke one honorable rematch to master Truth Seeker's cadence.";
         int noteW = MeasureText(noteText, 11);
         DrawText(noteText, (int)(modalX + (modalW - noteW) * 0.5f), (int)modalY + 280, 11, Color{ 255, 170, 60, 220 });
 
@@ -711,15 +711,15 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
         bool hoverRetry = CheckCollisionPointRec(mousePos, btnRetry);
         DrawRectangleRounded(btnRetry, 0.2f, 6, hoverRetry ? Color{ 90, 35, 20, 255 } : Color{ 45, 22, 16, 240 });
         DrawRectangleRoundedLines(btnRetry, 0.2f, 6, hoverRetry ? Color{ 255, 190, 70, 255 } : Color{ 220, 120, 40, 230 });
-        int btn1W = MeasureText("RETRY DUEL [1 REMAINING]", 14);
-        DrawText("RETRY DUEL [1 REMAINING]", (int)(btnRetry.x + (btnRetry.width - btn1W) * 0.5f), (int)btnRetry.y + 19, 14, hoverRetry ? Color{ 255, 255, 255, 255 } : Color{ 255, 215, 100, 240 });
+        int btn1W = MeasureText("INVOKE REMATCH [1 ATTEMPT]", 14);
+        DrawText("INVOKE REMATCH [1 ATTEMPT]", (int)(btnRetry.x + (btnRetry.width - btn1W) * 0.5f), (int)btnRetry.y + 19, 14, hoverRetry ? Color{ 255, 255, 255, 255 } : Color{ 255, 215, 100, 240 });
 
         Rectangle btnProceed = { modalX + 390.0f, modalY + 330.0f, 300.0f, 54.0f };
         bool hoverProceed = CheckCollisionPointRec(mousePos, btnProceed);
         DrawRectangleRounded(btnProceed, 0.2f, 6, hoverProceed ? Color{ 35, 55, 85, 255 } : Color{ 22, 28, 42, 240 });
         DrawRectangleRoundedLines(btnProceed, 0.2f, 6, hoverProceed ? Color{ 140, 210, 255, 255 } : Color{ 90, 130, 180, 230 });
-        int btn2W = MeasureText("ACCEPT SPARE & REGROUP", 14);
-        DrawText("ACCEPT SPARE & REGROUP", (int)(btnProceed.x + (btnProceed.width - btn2W) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 180, 215, 255, 240 });
+        int btn2W = MeasureText("ACCEPT MERCY & PROCEED", 14);
+        DrawText("ACCEPT MERCY & PROCEED", (int)(btnProceed.x + (btnProceed.width - btn2W) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 180, 215, 255, 240 });
 
         if (isMousePressed) {
             if (hoverRetry) {
@@ -731,20 +731,20 @@ int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, 
             }
         }
     } else {
-        int subW = MeasureText("SPARED BY ZIL'S FRAGMENT", 15);
-        DrawText("SPARED BY ZIL'S FRAGMENT", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 140, 210, 255, 255 });
+        int subW = MeasureText("HONOR ACCORD OF THE SUN CRUSADER", 15);
+        DrawText("HONOR ACCORD OF THE SUN CRUSADER", (int)(modalX + (modalW - subW) * 0.5f), (int)modalY + 84, 15, Color{ 140, 210, 255, 255 });
 
         std::string quoteText =
-            "You have exhausted your trials, yet your spirit refuses to be extinguished.\n\n"
-            "Regroup, wanderer. Only by conquering this fragment can you claim Truth Seeker (Partial) and advance to Zyphden.";
+            "The rematch is ended, yet your resolve remains unbroken in the eyes of the crusader.\n\n"
+            "Take Zil's crusade seal northward, wanderer. Cross the northern threshold and present his crest to Captain Lenon in Zyphden.";
         DrawJournalWrappedText(quoteText, (int)modalX + 50, (int)modalY + 120, (int)modalW - 100, 14, 8, Color{ 230, 235, 245, 240 });
 
         Rectangle btnProceed = { modalX + 170.0f, modalY + 330.0f, 400.0f, 54.0f };
         bool hoverProceed = CheckCollisionPointRec(mousePos, btnProceed);
         DrawRectangleRounded(btnProceed, 0.2f, 6, hoverProceed ? Color{ 35, 60, 95, 255 } : Color{ 24, 32, 50, 240 });
         DrawRectangleRoundedLines(btnProceed, 0.2f, 6, hoverProceed ? Color{ 140, 220, 255, 255 } : Color{ 100, 150, 210, 230 });
-        int btnW = MeasureText("PROCEED INTO THE REALM OF ZYPHDEN", 14);
-        DrawText("PROCEED INTO THE REALM OF ZYPHDEN", (int)(btnProceed.x + (btnProceed.width - btnW) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 190, 225, 255, 240 });
+        int btnW = MeasureText("ENTER THE REALM OF ZYPHDEN", 14);
+        DrawText("ENTER THE REALM OF ZYPHDEN", (int)(btnProceed.x + (btnProceed.width - btnW) * 0.5f), (int)btnProceed.y + 19, 14, hoverProceed ? Color{ 255, 255, 255, 255 } : Color{ 190, 225, 255, 240 });
 
         if (isMousePressed && hoverProceed) {
             SoundFX::PlayButtonClick();
@@ -900,3 +900,174 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
     return choiceResult;
 }
+
+bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt) {
+    static float s_animTimer = 0.0f;
+    s_animTimer += dt;
+
+    static Texture2D s_customAsset = { 0 };
+    static bool s_hasCheckedAsset = false;
+    static bool s_customAssetLoaded = false;
+
+    if (!s_hasCheckedAsset) {
+        s_hasCheckedAsset = true;
+        const char* assetCandidates[] = {
+            "assets/zyphden_transition.png",
+            "assets/transition_zyphden.png",
+            "resources/zyphden_transition.png"
+        };
+        for (const char* path : assetCandidates) {
+            if (FileExists(path)) {
+                s_customAsset = LoadTexture(path);
+                if (s_customAsset.id > 0) {
+                    s_customAssetLoaded = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // Deep vignette & dark fantasy stone backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 15, 255 });
+
+    // Subtle atmospheric dust particles
+    for (int i = 0; i < 24; ++i) {
+        float px = fmodf((float)i * 73.0f + s_animTimer * (15.0f + (float)(i % 5) * 8.0f), (float)windowWidth);
+        float py = fmodf((float)i * 47.0f + sinf(s_animTimer * 0.8f + (float)i) * 30.0f, (float)windowHeight);
+        float pAlpha = (sinf(s_animTimer * 1.5f + (float)i) * 0.5f + 0.5f) * 0.4f;
+        DrawCircle((int)px, (int)py, 1.5f, ColorAlpha(Color{ 130, 190, 255, 255 }, pAlpha));
+    }
+
+    // Outer framing card
+    float cardW = fminf((float)windowWidth - 80.0f, 1140.0f);
+    float cardH = fminf((float)windowHeight - 80.0f, 760.0f);
+    float cardX = ((float)windowWidth - cardW) * 0.5f;
+    float cardY = ((float)windowHeight - cardH) * 0.5f;
+
+    // Outer stone frame
+    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.03f, 8, Color{ 15, 18, 27, 252 });
+    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.03f, 8, Color{ 70, 100, 145, 200 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4.0f, cardY + 4.0f, cardW - 8.0f, cardH - 8.0f }, 0.025f, 8, Color{ 30, 42, 62, 160 });
+
+    // Ornate corner brackets
+    Color goldBracket = Color{ 230, 185, 75, 230 };
+    float bLen = 32.0f;
+    // Top-Left
+    DrawLineEx({ cardX + 12.0f, cardY + 12.0f }, { cardX + 12.0f + bLen, cardY + 12.0f }, 2.0f, goldBracket);
+    DrawLineEx({ cardX + 12.0f, cardY + 12.0f }, { cardX + 12.0f, cardY + 12.0f + bLen }, 2.0f, goldBracket);
+    // Top-Right
+    DrawLineEx({ cardX + cardW - 12.0f, cardY + 12.0f }, { cardX + cardW - 12.0f - bLen, cardY + 12.0f }, 2.0f, goldBracket);
+    DrawLineEx({ cardX + cardW - 12.0f, cardY + 12.0f }, { cardX + cardW - 12.0f, cardY + 12.0f + bLen }, 2.0f, goldBracket);
+    // Bottom-Left
+    DrawLineEx({ cardX + 12.0f, cardY + cardH - 12.0f }, { cardX + 12.0f + bLen, cardY + cardH - 12.0f }, 2.0f, goldBracket);
+    DrawLineEx({ cardX + 12.0f, cardY + cardH - 12.0f }, { cardX + 12.0f, cardY + cardH - 12.0f - bLen }, 2.0f, goldBracket);
+    // Bottom-Right
+    DrawLineEx({ cardX + cardW - 12.0f, cardY + cardH - 12.0f }, { cardX + cardW - 12.0f - bLen, cardY + cardH - 12.0f }, 2.0f, goldBracket);
+    DrawLineEx({ cardX + cardW - 12.0f, cardY + cardH - 12.0f }, { cardX + cardW - 12.0f, cardY + cardH - 12.0f - bLen }, 2.0f, goldBracket);
+
+    // Top Header
+    float headerY = cardY + 24.0f;
+    const char* actTag = "CHAPTER 1  //  ACT III";
+    int actW = MeasureText(actTag, 13);
+    DrawText(actTag, (int)(cardX + (cardW - actW) * 0.5f), (int)headerY, 13, Color{ 255, 205, 80, 240 });
+
+    const char* realmTitle = "THE FORTIFIED REALM OF ZYPHDEN";
+    int titleW = MeasureText(realmTitle, 24);
+    DrawText(realmTitle, (int)(cardX + (cardW - titleW) * 0.5f), (int)headerY + 22, 24, Color{ 240, 246, 255, 255 });
+
+    const char* realmSubtitle = "Guardian of the Gale Winds  *  Seat of King Kreptu's Court";
+    int subW = MeasureText(realmSubtitle, 13);
+    DrawText(realmSubtitle, (int)(cardX + (cardW - subW) * 0.5f), (int)headerY + 52, 13, Color{ 130, 175, 225, 210 });
+
+    DrawLine((int)cardX + 40, (int)headerY + 74, (int)(cardX + cardW - 40), (int)headerY + 74, Color{ 48, 68, 98, 180 });
+
+    // Central Artwork Presentation Box (Aspect ~16:9)
+    float artW = cardW - 80.0f;
+    float artH = 390.0f;
+    float artX = cardX + 40.0f;
+    float artY = headerY + 86.0f;
+
+    Rectangle artRec = { artX, artY, artW, artH };
+
+    if (s_customAssetLoaded && s_customAsset.id > 0) {
+        // Draw user's custom transition texture
+        DrawRectangleRec(artRec, Color{ 6, 8, 12, 255 });
+        float scale = fminf(artW / (float)s_customAsset.width, artH / (float)s_customAsset.height);
+        float destW = (float)s_customAsset.width * scale;
+        float destH = (float)s_customAsset.height * scale;
+        float destX = artX + (artW - destW) * 0.5f;
+        float destY = artY + (artH - destH) * 0.5f;
+        DrawTexturePro(s_customAsset,
+                       Rectangle{ 0.0f, 0.0f, (float)s_customAsset.width, (float)s_customAsset.height },
+                       Rectangle{ destX, destY, destW, destH },
+                       Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+        DrawRectangleLinesEx(artRec, 2.0f, Color{ 100, 160, 240, 200 });
+    } else {
+        // High-Quality Atmospheric Transition Screen Placeholder
+        DrawRectangleRounded(artRec, 0.02f, 6, Color{ 10, 14, 22, 250 });
+        DrawRectangleRoundedLines(artRec, 0.02f, 6, Color{ 55, 85, 128, 200 });
+
+        // Inner dashed guide line simulation
+        DrawRectangleLinesEx(Rectangle{ artX + 12.0f, artY + 12.0f, artW - 24.0f, artH - 24.0f }, 1.0f, Color{ 35, 52, 78, 140 });
+
+        // Crosshairs & center indicator
+        float cx = artX + artW * 0.5f;
+        float cy = artY + artH * 0.5f;
+        DrawLine((int)cx - 40, (int)cy, (int)cx + 40, (int)cy, Color{ 60, 95, 145, 160 });
+        DrawLine((int)cx, (int)cy - 40, (int)cx, (int)cy + 40, Color{ 60, 95, 145, 160 });
+        DrawCircleLines((int)cx, (int)cy, 28.0f, Color{ 80, 130, 190, 180 });
+
+        // Placeholder Badge and Instructions
+        const char* phTitle = "[ TRANSITION SCREEN ARTWORK ASSET PLACEHOLDER ]";
+        int phW = MeasureText(phTitle, 16);
+        DrawText(phTitle, (int)(cx - phW * 0.5f), (int)cy - 65, 16, Color{ 120, 200, 255, 240 });
+
+        const char* phDrop = "Drop custom transition illustration into: assets/zyphden_transition.png";
+        int dropW = MeasureText(phDrop, 13);
+        DrawText(phDrop, (int)(cx - dropW * 0.5f), (int)cy + 55, 13, Color{ 220, 230, 245, 230 });
+
+        const char* phSpecs = "Supported format: 1920x1080 (16:9) or 1280x720 PNG / JPG (Auto-scaled)";
+        int specsW = MeasureText(phSpecs, 11);
+        DrawText(phSpecs, (int)(cx - specsW * 0.5f), (int)cy + 75, 11, Color{ 130, 165, 205, 190 });
+
+        const char* phNote = "The engine will automatically detect and render your illustration here upon load.";
+        int noteW = MeasureText(phNote, 11);
+        DrawText(phNote, (int)(cx - noteW * 0.5f), (int)cy + 95, 11, Color{ 255, 215, 80, 200 });
+    }
+
+    // Flavor Narrative Lore Box
+    float loreY = artY + artH + 16.0f;
+    std::string realmLore =
+        "Behind towering wind-carved limestone ramparts and iron portcullises lies the sovereign city of Zyphden. "
+        "Within its cobbled wards and hearthside taverns, the Royal Vanguard maintains an unyielding vigil against the madness festering across Tydeshire.";
+    DrawJournalWrappedText(realmLore, (int)cardX + 45, (int)loreY, (int)cardW - 90, 13, 6, Color{ 210, 222, 238, 230 });
+
+    // Bottom Action / Confirmation Button
+    float btnW = 380.0f;
+    float btnH = 50.0f;
+    float btnX = cardX + (cardW - btnW) * 0.5f;
+    float btnY = cardY + cardH - 68.0f;
+
+    Rectangle btnRec = { btnX, btnY, btnW, btnH };
+    bool isHover = CheckCollisionPointRec(mousePos, btnRec);
+
+    float pulse = (sinf(s_animTimer * 4.0f) * 0.5f + 0.5f);
+    Color btnBg = isHover ? Color{ 40, 75, 120, 255 } : Color{ 24, 40, 68, 230 };
+    Color btnBorder = isHover ? Color{ 160, 225, 255, 255 } : ColorAlpha(Color{ 100, 165, 240, 230 }, 0.7f + 0.3f * pulse);
+
+    DrawRectangleRounded(btnRec, 0.2f, 6, btnBg);
+    DrawRectangleRoundedLines(btnRec, 0.2f, 6, btnBorder);
+
+    const char* btnLabel = "ENTER CITY GATES [SPACE / ENTER]";
+    int btnLabelW = MeasureText(btnLabel, 14);
+    DrawText(btnLabel, (int)(btnX + (btnW - btnLabelW) * 0.5f), (int)btnY + 17, 14, isHover ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
+
+    bool confirmed = (isHover && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
+    if (confirmed) {
+        SoundFX::PlayButtonClick();
+        return true;
+    }
+
+    return false;
+}
+
