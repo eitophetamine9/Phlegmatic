@@ -7,6 +7,7 @@
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 #include "../combat/Projectile.hpp"
+#include "../world/Interactable.hpp"
 #include <vector>
 #include <string>
 #include <functional>
@@ -100,6 +101,18 @@ private:
     ZyphdenNPC cedric; // Scholar Cedric - History of Zyphden & the Gale Winds
     ZyphdenNPC varek;  // Blacksmith Varek - Crusader Plate & Armorcraft Lore
     ZyphdenNPC maeve;  // Elder Maeve - Lore of the Border Refugees & Madness
+
+    // 5 Throne Room NPCs in Expanded Royal Keep
+    ZyphdenNPC malakor;   // Chancellor Malakor - Kingdom governance & lord liege lore
+    ZyphdenNPC donald;    // Sentinel Donald - High Dais Guard (Halberd)
+    ZyphdenNPC garrick;   // Sentinel Garrick - High Dais Guard (Shield & Parry Master)
+    ZyphdenNPC thaddeus;  // Archivist Thaddeus - Western Archives Custodian
+    ZyphdenNPC genevieve; // Lady Genevieve - Eastern Armory Weapons Patron
+
+    // Royal Keep Lore & Supply Interactables
+    InscribedPillar keepPillar;
+    RelicChest keepChest;
+    RelicChest keepPantryChest;
 
     // Journal Lore Collectibles in Zyphden
     ZyphdenLoreItem windLectern;   // frag_06: Rite of the Gale Winds

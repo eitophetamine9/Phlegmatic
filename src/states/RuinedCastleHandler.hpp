@@ -6,6 +6,7 @@
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 #include "../combat/Projectile.hpp"
+#include "../world/Interactable.hpp"
 #include "Tutorial.hpp"
 #include <vector>
 #include <string>
@@ -64,4 +65,6 @@ private:
     std::string zilDialogueSpeaker;
     std::string zilDialogueText;
     Color zilDialogueColor;
+    InscribedPillar castlePillar;
+    RelicChest castleChest;
 };

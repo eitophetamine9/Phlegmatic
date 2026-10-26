@@ -20,6 +20,8 @@ void RuinedCastleHandler::Reset() {
     zilDialogueSpeaker = "";
     zilDialogueText = "";
     zilDialogueColor = WHITE;
+    castlePillar = { "frag_09", "Inscribed Castle Monolith", { 680.0f, 960.0f }, 26.0f, false };
+    castleChest = { "", 2, "Vanguard Relic Chest", { 1350.0f, 620.0f }, 28.0f, false };
 }
 
 void RuinedCastleHandler::Update(
@@ -238,6 +240,25 @@ void RuinedCastleHandler::Update(
         zilDialogueTimer -= dt;
     }
 
+    // Inscribed Castle Monolith Interaction
+    Vector2 playerPos = player.GetPosition();
+    if (!castlePillar.read && castlePillar.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        castlePillar.read = true;
+        player.GetInventory().UnlockFragment("frag_09");
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(castlePillar.position, "DISCOVERED: Fragment IX (Ancient Pillars)!", Color{ 100, 220, 255, 255 }, 22.0f);
+        particles.SpawnSparks(castlePillar.position, Color{ 100, 220, 255, 255 }, 20, 120.0f);
+    }
+
+    // Vanguard Relic Chest Interaction
+    if (!castleChest.opened && castleChest.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
+        castleChest.opened = true;
+        player.GetInventory().AddHealthPotions(2);
+        SoundFX::PlayHeal();
+        particles.SpawnFloatingText(castleChest.position, "FOUND: +2 Health Potions!", Color{ 120, 255, 170, 255 }, 22.0f);
+        particles.SpawnSparks(castleChest.position, Color{ 120, 255, 170, 255 }, 24, 140.0f);
+    }
+
     // Check if player walks through northern open gateway into Crossroads (Requires Zil defeated OR Zil spared)
     bool gateUnlocked = (zilDefeated || zilSparedPlayer) && map.IsGateOpen();
     bool atNorthernGate = gateUnlocked &&
@@ -300,6 +321,8 @@ void RuinedCastleHandler::Render(
     }
 
     tutorial.DrawWorldElements(time);
+    castlePillar.Draw(time);
+    castleChest.Draw(time);
 
     for (const auto& enemy : enemies) {
         enemy.DrawTelegraph();

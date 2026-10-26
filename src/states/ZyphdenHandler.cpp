@@ -70,6 +70,42 @@ void ZyphdenNPC::Draw(float time) const {
         DrawCircle((int)position.x, (int)position.y, radius, Color{ 60, 85, 65, 255 });
         DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.55f, Color{ 220, 195, 170, 255 });
         DrawLineEx({ position.x + 12.0f, position.y - 12.0f }, { position.x + 12.0f, position.y + 16.0f }, 2.5f, Color{ 110, 80, 50, 255 });
+    } else if (id == "malakor") {
+        // Chancellor Malakor: Royal purple robes, golden torque, holding an imperial decree scroll
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 80, 42, 115, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.6f, Color{ 220, 195, 170, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 12), radius * 0.5f, Color{ 60, 30, 90, 255 });
+        DrawCircleLines((int)position.x, (int)position.y, 10.0f, Color{ 245, 205, 75, 255 });
+        DrawRectangle((int)(position.x + 12), (int)(position.y - 8), 5, 18, Color{ 245, 230, 200, 255 });
+    } else if (id == "donald") {
+        // Sentinel Donald: Steel plate, royal blue tabard, long halberd
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 45, 65, 105, 255 });
+        DrawCircle((int)(position.x - 14), (int)position.y, 6.0f, Color{ 140, 160, 185, 255 });
+        DrawCircle((int)(position.x + 14), (int)position.y, 6.0f, Color{ 140, 160, 185, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 6), 11.0f, Color{ 155, 175, 200, 255 });
+        DrawLineEx({ position.x + 16.0f, position.y - 24.0f }, { position.x + 16.0f, position.y + 24.0f }, 3.0f, Color{ 110, 85, 60, 255 });
+        DrawTriangle({ position.x + 16.0f, position.y - 28.0f }, { position.x + 24.0f, position.y - 18.0f }, { position.x + 16.0f, position.y - 14.0f }, Color{ 210, 225, 245, 255 });
+    } else if (id == "garrick") {
+        // Sentinel Garrick: Heavy plate, cobalt cloak, tower shield
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 45, 65, 105, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 6), 11.0f, Color{ 155, 175, 200, 255 });
+        DrawRectangle((int)(position.x - 20), (int)(position.y - 14), 14, 28, Color{ 65, 85, 130, 255 });
+        DrawRectangleLines((int)(position.x - 20), (int)(position.y - 14), 14, 28, Color{ 235, 195, 65, 255 });
+    } else if (id == "thaddeus") {
+        // Archivist Thaddeus: Deep sapphire hooded robes, spectacles, open ancient codex
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 28, 48, 88, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.58f, Color{ 225, 200, 175, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 12), radius * 0.5f, Color{ 18, 34, 68, 255 });
+        DrawCircleLines((int)(position.x - 4), (int)(position.y - 8), 3.0f, Color{ 240, 210, 80, 255 });
+        DrawCircleLines((int)(position.x + 4), (int)(position.y - 8), 3.0f, Color{ 240, 210, 80, 255 });
+    } else if (id == "genevieve") {
+        // Lady Genevieve: Elegant crimson silk dress, gold tiara, jeweled rapier
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 135, 28, 45, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.55f, Color{ 235, 210, 190, 255 });
+        DrawRectangle((int)(position.x - 7), (int)(position.y - 16), 14, 3, Color{ 255, 220, 80, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 18), 2.5f, Color{ 255, 230, 95, 255 });
+        DrawLineEx({ position.x + 12.0f, position.y - 10.0f }, { position.x + 16.0f, position.y + 18.0f }, 2.0f, Color{ 220, 230, 245, 255 });
+        DrawCircle((int)(position.x + 12), (int)(position.y - 8), 3.0f, Color{ 255, 215, 75, 255 });
     }
 
     // Interaction Prompt Icon & Label
@@ -117,10 +153,23 @@ void ZyphdenLoreItem::Draw(float time) const {
 
 ZyphdenHandler::ZyphdenHandler() {
     inTavern = false;
+    inRoyalKeep = false;
     eldon = { "eldon", "Tavernkeep Eldon", { 720.0f, 636.0f }, 24.0f, Color{ 255, 190, 80, 255 } };
     noticeboard = { "noticeboard", "Noticeboard", { 780.0f, 720.0f }, 20.0f, Color{ 130, 220, 255, 255 } };
-    kingKreptu = { "king", "King Kreptu", { 1000.0f, 220.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
+    kingKreptu = { "king", "King Kreptu", { 1000.0f, 275.0f }, 28.0f, Color{ 255, 215, 70, 255 } };
     knightLenonNPC = { "lenon", "Knight Lenon", { 1490.0f, 700.0f }, 26.0f, Color{ 225, 185, 65, 255 } };
+
+    // 5 Throne Room NPCs in Expanded Royal Keep
+    malakor = { "malakor", "Chancellor Malakor", { 920.0f, 360.0f }, 24.0f, Color{ 190, 130, 240, 255 } };
+    donald = { "donald", "Sentinel Donald", { 870.0f, 290.0f }, 26.0f, Color{ 100, 180, 255, 255 } };
+    garrick = { "garrick", "Sentinel Garrick", { 1130.0f, 290.0f }, 26.0f, Color{ 100, 180, 255, 255 } };
+    thaddeus = { "thaddeus", "Archivist Thaddeus", { 540.0f, 480.0f }, 24.0f, Color{ 85, 175, 255, 255 } };
+    genevieve = { "genevieve", "Lady Genevieve", { 1460.0f, 480.0f }, 22.0f, Color{ 245, 140, 160, 255 } };
+
+    // Keep Lore & Supply Interactables
+    keepPillar = { "frag_09", "Inscribed Keep Monolith", { 650.0f, 600.0f }, 26.0f, false };
+    keepChest = { "frag_10", 2, "Royal Armory Relic Chest", { 1480.0f, 380.0f }, 28.0f, false };
+    keepPantryChest = { "", 1, "Keep Provisions Chest", { 650.0f, 380.0f }, 28.0f, false };
 
     cedric = { "cedric", "Chronicler Cedric", { 720.0f, 1020.0f }, 24.0f, Color{ 100, 200, 255, 255 } };
     varek = { "varek", "Blacksmith Varek", { 320.0f, 700.0f }, 24.0f, Color{ 255, 140, 50, 255 } };
@@ -448,9 +497,9 @@ void ZyphdenHandler::Update(
                 OpenDialogue("lenon_tavern_idle", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
             }
         } else if (inRoyalKeep) {
-            // Inside Zyphden Royal Keep (Grand Sovereign Throne Hall)
-            // 1. Southern Doorway back to Zyphden exterior (doorway at {950, 995})
-            if (doorCooldown <= 0.0f && (playerPos.y >= 990.0f || (Vector2Distance(playerPos, { 950.0f, 990.0f }) <= 55.0f && interactKey))) {
+            // Inside Zyphden Royal Keep (Grand Sovereign Throne Hall - Expanded 1200x1100)
+            // 1. Southern Doorway back to Zyphden exterior (doorway at {1000, 1250})
+            if (doorCooldown <= 0.0f && (playerPos.y >= 1235.0f || (Vector2Distance(playerPos, { 1000.0f, 1240.0f }) <= 65.0f && interactKey))) {
                 inRoyalKeep = false;
                 doorCooldown = 0.5f;
                 map.Init(MapEnvironment::ZYPHDEN_REALM);
@@ -461,7 +510,7 @@ void ZyphdenHandler::Update(
             }
 
             // 2. Audience with King Kreptu on his Golden Throne Dais
-            bool kingInRange = Vector2Distance(playerPos, kingKreptu.position) <= 90.0f;
+            bool kingInRange = Vector2Distance(playerPos, kingKreptu.position) <= 95.0f;
             if (interactKey && kingInRange) {
                 if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
                     questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
@@ -490,6 +539,90 @@ void ZyphdenHandler::Update(
                     };
                     OpenDialogue("king_idle", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                 }
+            }
+            // 3. Chancellor Malakor
+            else if (interactKey && malakor.CheckInteraction(playerPos)) {
+                std::vector<std::string> pages = {
+                    "Mind your decorum in the Sovereign Presence, wanderer. I am Chancellor Malakor. I manage the kingdom's tribute and maintain our defensive leylines while the King prepares for war.",
+                    "Lord Zil was once the Pride of the Crown, the sworn brother of Captain Lenon. When he rode south into the Ruined Castle, he was tasked with securing the ancient relic 'Truth Seeker'.",
+                    "If his remnant has fallen to madness as you claim, then the Lord Liege's corrupting influence has already penetrated our southern watch. We must bolster our wills, lest we all succumb to the abyss."
+                };
+                OpenDialogue("malakor", "CHANCELLOR MALAKOR", pages, Color{ 190, 130, 240, 255 });
+                particles.SpawnFloatingText(malakor.position, "Kingdom Politics & Lore Shared", Color{ 190, 130, 240, 255 }, 18.0f);
+            }
+            // 4. Sentinel Donald
+            else if (interactKey && donald.CheckInteraction(playerPos)) {
+                std::vector<std::string> pages = {
+                    "Hold your step! You stand before King Kreptu, sovereign lord of Zyphden. Keep your weapons sheathed while you approach the dais.",
+                    "My halberd was forged by Varek himself. It has severed the heads of fifty corrupted beasts at the Crossroads. Do not think to test our vigil."
+                };
+                OpenDialogue("donald", "SENTINEL DONALD", pages, Color{ 100, 180, 255, 255 });
+            }
+            // 5. Sentinel Garrick
+            else if (interactKey && garrick.CheckInteraction(playerPos)) {
+                std::vector<std::string> pages = {
+                    "At ease, Donald. The traveler possesses the crest of the Vanguard. You have the look of someone who has stared into the teeth of death and refused to blink.",
+                    "If the King sanctions your spar against Captain Lenon, be warned: Lenon does not pull his punches. Time your parries perfectly, preserve your stamina, and strike only when his posture breaks!"
+                };
+                OpenDialogue("garrick", "SENTINEL GARRICK", pages, Color{ 100, 180, 255, 255 });
+            }
+            // 6. Archivist Thaddeus
+            else if (interactKey && thaddeus.CheckInteraction(playerPos)) {
+                std::vector<std::string> pages = {
+                    "Ah! Another seeker of forgotten lore. I am Thaddeus, custodian of the Zyphden Keep Archives. These shelves contain the annals of the Great Unification.",
+                    "Have you observed the Inscribed Monoliths scattered throughout our realm? The First Wardens carved them out of leyline stone. Inspecting them will awaken your mind to the true nature of Will and Poise.",
+                    "The monolith standing in our archive wing holds the sacred Nine Inscriptions. Read it with reverence, friend."
+                };
+                OpenDialogue("thaddeus", "ARCHIVIST THADDEUS", pages, Color{ 85, 175, 255, 255 });
+                particles.SpawnFloatingText(thaddeus.position, "Ancient Knowledge Shared", Color{ 85, 175, 255, 255 }, 18.0f);
+            }
+            // 7. Lady Genevieve
+            else if (interactKey && genevieve.CheckInteraction(playerPos)) {
+                std::vector<std::string> pages = {
+                    "Welcome to the Royal Armory, traveler. The weapons gathered here were crafted to pierce the unholy hide of the abyss.",
+                    "Notice how heavy weapons like the War Mace can shatter armor, while twin daggers excel at flurry lacerations. But remember: power is nothing without the will to endure.",
+                    "Our quartermasters have placed supply chests with restorative elixirs in the armory corners. Help yourself—you will need every drop when you leave our gates."
+                };
+                OpenDialogue("genevieve", "LADY GENEVIEVE", pages, Color{ 245, 140, 160, 255 });
+                particles.SpawnFloatingText(genevieve.position, "Armory Secrets Shared", Color{ 245, 140, 160, 255 }, 18.0f);
+            }
+            // 8. Inscribed Keep Monolith
+            else if (interactKey && keepPillar.CheckInteraction(playerPos)) {
+                keepPillar.read = true;
+                player.GetInventory().UnlockFragment("frag_09");
+                std::vector<std::string> pages = {
+                    "ANCIENT RUNIC MONOLITH: 'The monolithic stone pillars standing across Tydeshire channel primordial leylines that steady mortal willpower.'",
+                    "'When the mind falters against madness, gaze upon the runes to rekindle inner poise. Willpower reduces the duration of stagger inflicted by heavy strikes.'"
+                };
+                OpenDialogue("keep_pillar", "INSCRIBED KEEP MONOLITH", pages, Color{ 100, 220, 255, 255 });
+                particles.SpawnFloatingText(keepPillar.position, "Lore Fragment IX Unlocked!", Color{ 100, 220, 255, 255 }, 22.0f);
+                SoundFX::PlayParrySuccess();
+            }
+            // 9. Royal Armory Relic Chest
+            else if (interactKey && keepChest.CheckInteraction(playerPos)) {
+                keepChest.opened = true;
+                player.GetInventory().UnlockFragment("frag_10");
+                player.GetInventory().AddHealthPotions(2);
+                std::vector<std::string> pages = {
+                    "You opened the Royal Armory Relic Chest!",
+                    "Obtained +2 Health Potions! Press [1] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
+                    "Recovered Fragment X: 'The Royal Armory Archives' - Study weapon armor piercing and stagger punishes in your Journal [I]."
+                };
+                OpenDialogue("keep_chest", "ROYAL ARMORY RELIC CHEST", pages, Color{ 255, 215, 80, 255 });
+                particles.SpawnFloatingText(keepChest.position, "+2 Potions & Fragment X!", Color{ 120, 255, 170, 255 }, 22.0f);
+                SoundFX::PlayHeal();
+            }
+            // 10. Keep Provisions Chest
+            else if (interactKey && keepPantryChest.CheckInteraction(playerPos)) {
+                keepPantryChest.opened = true;
+                player.GetInventory().AddHealthPotions(1);
+                std::vector<std::string> pages = {
+                    "You opened the Keep Provisions Chest!",
+                    "Obtained +1 Health Potion! Restores 45 Health upon consumption."
+                };
+                OpenDialogue("keep_pantry", "KEEP PROVISIONS CHEST", pages, Color{ 120, 255, 170, 255 });
+                particles.SpawnFloatingText(keepPantryChest.position, "+1 Health Potion!", Color{ 120, 255, 170, 255 }, 20.0f);
+                SoundFX::PlayHeal();
             }
         } else {
             // Outside in Zyphden Realm
@@ -522,7 +655,7 @@ void ZyphdenHandler::Update(
                 inRoyalKeep = true;
                 doorCooldown = 0.5f;
                 map.Init(MapEnvironment::ROYAL_KEEP);
-                player.SetPosition({ 950.0f, 940.0f });
+                player.SetPosition({ 1000.0f, 1210.0f });
                 camera.target = player.GetPosition();
                 SoundFX::PlayGateOpen();
                 return;
@@ -660,9 +793,19 @@ void ZyphdenHandler::Render(
         // Southern doorway prompt
         DrawText("[E] EXIT TAVERN", 745, 900, 11, Color{ 255, 220, 120, 240 });
     } else if (inRoyalKeep) {
-        // Royal Keep Throne Hall Interior Entities
+        // Royal Keep Throne Hall Interior Entities (Expanded 1200x1100)
+        keepPillar.Draw(time);
+        keepChest.Draw(time);
+        keepPantryChest.Draw(time);
+
         kingKreptu.Draw(time);
-        DrawText("[E] EXIT ROYAL KEEP", 885, 975, 11, Color{ 255, 230, 120, 240 });
+        malakor.Draw(time);
+        donald.Draw(time);
+        garrick.Draw(time);
+        thaddeus.Draw(time);
+        genevieve.Draw(time);
+
+        DrawText("[E] EXIT ROYAL KEEP", 930, 1226, 11, Color{ 255, 230, 120, 240 });
     } else {
         // Zyphden Exterior Lore Collectible Items
         windLectern.Draw(time);
