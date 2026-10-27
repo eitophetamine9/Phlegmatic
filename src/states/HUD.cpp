@@ -757,6 +757,25 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
     int nameW = MeasureText(bossName.c_str(), 14);
     DrawText(bossName.c_str(), (int)(barX + (barW - nameW) * 0.5f), (int)barY - 20, 14, Color{ 255, 215, 80, 255 });
 
+    // Humoral alignment badge for boss
+    std::string humorBadge = "";
+    Color humorCol = WHITE;
+    if (bossName.find("INQUISITOR") != std::string::npos) {
+        humorBadge = "[CHOLERIC - YELLOW BILE]";
+        humorCol = Color{ 255, 150, 40, 240 };
+    } else if (bossName.find("ZIL") != std::string::npos) {
+        humorBadge = "[MELANCHOLIC - BLACK BILE]";
+        humorCol = Color{ 190, 120, 255, 240 };
+    } else if (bossName.find("LENON") != std::string::npos) {
+        humorBadge = "[SANGUINE - BLOOD]";
+        humorCol = Color{ 255, 60, 80, 240 };
+    }
+
+    if (!humorBadge.empty()) {
+        int hw = MeasureText(humorBadge.c_str(), 10);
+        DrawText(humorBadge.c_str(), (int)(barX + barW - hw), (int)barY - 18, 10, humorCol);
+    }
+
     // Bar background
     DrawRectangleRounded(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 35, 15, 22, 240 });
 

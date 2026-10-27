@@ -35,6 +35,8 @@ Player::Player() {
 
     staggerTimer = 0.0f;
     staggerImmunityTimer = 0.0f;
+    bleedTimer = 0.0f;
+    bleedTickTimer = 0.0f;
 
     dashCooldown = 0.0f;
     dashTimer = 0.0f;
@@ -86,6 +88,8 @@ void Player::Init(Vector2 startPos) {
     potionCooldown = 0.0f;
     staggerTimer = 0.0f;
     staggerImmunityTimer = 0.0f;
+    bleedTimer = 0.0f;
+    bleedTickTimer = 0.0f;
     iFrameTimer = 0.0f;
     comboStep = 1;
     comboTimer = 0.0f;
@@ -113,6 +117,8 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     potionCooldown = 0.0f;
     staggerTimer = 0.0f;
     staggerImmunityTimer = 0.0f;
+    bleedTimer = 0.0f;
+    bleedTickTimer = 0.0f;
     iFrameTimer = 0.0f;
     comboStep = 1;
     comboTimer = 0.0f;
@@ -194,6 +200,17 @@ bool Player::TriggerPhlegmaticTrance(ParticleSystem& particles) {
     return true;
 }
 
+void Player::ApplyBleed(float duration, ParticleSystem& particles) {
+    if (HasStoicPoise()) {
+        particles.SpawnFloatingText(position, "BLEED RESISTED!", Color{ 140, 240, 255, 255 }, 20.0f);
+        return;
+    }
+    bleedTimer = duration;
+    bleedTickTimer = 0.8f;
+    particles.SpawnFloatingText(position, "BLEEDING!", Color{ 255, 60, 80, 255 }, 22.0f);
+    particles.SpawnSparks(position, Color{ 220, 30, 45, 255 }, 14, 100.0f);
+}
+
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
     if (!IsAlive()) return;
 
@@ -213,6 +230,18 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     if (potionCooldown > 0.0f) potionCooldown -= dt;
     if (iFrameTimer > 0.0f) iFrameTimer -= dt;
     if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
+
+    // Sanguine Bleed tick update
+    if (bleedTimer > 0.0f) {
+        bleedTimer -= dt;
+        bleedTickTimer -= dt;
+        particles.SpawnSparks(position, Color{ 200, 25, 40, 180 }, 1, 25.0f);
+        if (bleedTickTimer <= 0.0f) {
+            bleedTickTimer = 0.8f;
+            health = fmaxf(1.0f, health - 3.0f); // Bleed tick damage
+            particles.SpawnFloatingText(position, "-3 Bleed", Color{ 255, 50, 70, 240 }, 16.0f);
+        }
+    }
 
     // Stagger state update
     if (staggerTimer > 0.0f) {

@@ -120,6 +120,12 @@ public:
     bool HasStoicPoise() const { return isInPhlegmaticTrance || (composure >= 80.0f); }
     bool IsTranceReady() const { return !isInPhlegmaticTrance && composure >= 100.0f; }
 
+    // Humoral Alignment & Bleed Status
+    HumorType GetHumor() const { return HumorType::PHLEGMATIC; }
+    bool IsBleeding() const { return bleedTimer > 0.0f; }
+    float GetBleedTimer() const { return bleedTimer; }
+    void ApplyBleed(float duration, ParticleSystem& particles);
+
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
     const Inventory& GetInventory() const { return inventory; }
@@ -163,6 +169,8 @@ private:
     // Stagger & Poise State
     float staggerTimer;
     float staggerImmunityTimer;
+    float bleedTimer;
+    float bleedTickTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;

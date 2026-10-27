@@ -18,9 +18,12 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
     kitingRange = 0.0f;
     isPerformingMeleeSmite = false;
     will = 20.0f;
+    quenchedTimer = 0.0f;
+    shatteredTimer = 0.0f;
 
     switch (type) {
         case EnemyType::SLASHER:
+            humor = HumorType::CHOLERIC;
             radius = 20.0f;
             maxHealth = 80.0f;
             defense = 8.0f; // Light armor (~7% reduction)
@@ -38,6 +41,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::BRUTE:
+            humor = HumorType::MELANCHOLIC;
             radius = 30.0f;
             maxHealth = 190.0f;
             defense = 32.0f; // Heavy plate armor (~24% reduction)
@@ -54,6 +58,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::CHARGER:
+            humor = HumorType::SANGUINE;
             radius = 18.0f;
             maxHealth = 65.0f;
             defense = 12.0f; // Reinforced vanguard (~11% reduction)
@@ -71,6 +76,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::ARCHER:
+            humor = HumorType::SANGUINE;
             radius = 18.0f;
             maxHealth = 60.0f;
             defense = 6.0f; // Fragile leather (~5% reduction)
@@ -89,6 +95,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::PYROMANCER:
+            humor = HumorType::CHOLERIC;
             radius = 20.0f;
             maxHealth = 75.0f;
             defense = 10.0f; // Occult robes (~9% reduction)
@@ -108,6 +115,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::INQUISITOR_BOSS:
+            humor = HumorType::CHOLERIC;
             radius = 36.0f;
             maxHealth = 500.0f;
             defense = 26.0f; // Imperial regalia (~21% reduction)
@@ -125,6 +133,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::ZIL_BOSS:
+            humor = HumorType::MELANCHOLIC;
             radius = 28.0f;
             maxHealth = 520.0f; // Formidable Chapter 1 High-Altar Boss
             defense = 30.0f;    // 1% power remnant crusader armor
@@ -145,6 +154,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             break;
 
         case EnemyType::KNIGHT_LENON_BOSS:
+            humor = HumorType::SANGUINE;
             radius = 28.0f;
             maxHealth = 640.0f; // High HP courtyard martial sparring champion
             defense = 32.0f;    // Tempered Crusader plate
@@ -182,8 +192,53 @@ std::string Enemy::GetName() const {
     return "UNKNOWN";
 }
 
+std::string Enemy::GetHumorName() const {
+    switch (humor) {
+        case HumorType::PHLEGMATIC: return "PHLEGMATIC [WATER]";
+        case HumorType::CHOLERIC: return "CHOLERIC [FIRE]";
+        case HumorType::MELANCHOLIC: return "MELANCHOLIC [EARTH]";
+        case HumorType::SANGUINE: return "SANGUINE [BLOOD]";
+    }
+    return "UNKNOWN";
+}
+
+Color Enemy::GetHumorColor() const {
+    switch (humor) {
+        case HumorType::PHLEGMATIC: return Color{ 140, 230, 255, 255 }; // Ice cyan
+        case HumorType::CHOLERIC: return Color{ 255, 140, 40, 255 };    // Amber flame
+        case HumorType::MELANCHOLIC: return Color{ 190, 110, 255, 255 };// Deep violet earth
+        case HumorType::SANGUINE: return Color{ 255, 60, 75, 255 };     // Crimson blood
+    }
+    return WHITE;
+}
+
+void Enemy::Quench(ParticleSystem& particles) {
+    quenchedTimer = 5.0f;
+    SoundFX::PlayParrySuccess();
+    particles.SpawnFloatingText(Vector2{ position.x, position.y - 30.0f }, "QUENCHED! (-30% SPEED)", Color{ 140, 230, 255, 255 }, 24.0f);
+    particles.SpawnSparks(position, Color{ 140, 230, 255, 255 }, 25, 160.0f);
+}
+
+void Enemy::ShatterShell(ParticleSystem& particles) {
+    shatteredTimer = 4.0f;
+    SoundFX::PlayCrusaderClash();
+    particles.AddScreenShake(5.0f, 0.18f);
+    particles.SpawnFloatingText(Vector2{ position.x, position.y - 30.0f }, "SHELL SHATTERED! (-35% DEF)", Color{ 200, 130, 255, 255 }, 24.0f);
+    particles.SpawnSparks(position, Color{ 180, 100, 240, 255 }, 28, 180.0f);
+}
+
 void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSystem& particles, std::vector<Projectile>& outProjectiles) {
     if (state == EnemyState::DEAD) return;
+
+    // Humoral status effect timers
+    if (quenchedTimer > 0.0f) {
+        quenchedTimer -= dt;
+        particles.SpawnSparks(position, Color{ 140, 230, 255, 140 }, 1, 15.0f);
+    }
+    if (shatteredTimer > 0.0f) {
+        shatteredTimer -= dt;
+        particles.SpawnSparks(position, Color{ 190, 120, 245, 140 }, 1, 15.0f);
+    }
 
     float dx = playerPos.x - position.x;
     float dy = playerPos.y - position.y;
@@ -319,8 +374,9 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
             } else {
                 // Approach player
                 Vector2 moveDir = Vector2Normalize({ dx, dy });
-                velocity.x = moveDir.x * moveSpeed;
-                velocity.y = moveDir.y * moveSpeed;
+                float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
+                velocity.x = moveDir.x * currentSpeed;
+                velocity.y = moveDir.y * currentSpeed;
             }
             break;
         }
@@ -534,7 +590,12 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
 
 void Enemy::OnParried(ParticleSystem& particles) {
     state = EnemyState::STUNNED;
-    float staggerDuration = CalculateStaggerDuration(2.2f, will, false);
+    float baseStun = 2.2f;
+    if (humor == HumorType::CHOLERIC) {
+        Quench(particles);
+        baseStun *= 2.0f; // 2.0x stagger duration on Quenching Choleric frenzy!
+    }
+    float staggerDuration = CalculateStaggerDuration(baseStun, will, false);
     stateTimer = staggerDuration;
     hasDamagedPlayer = true;
     velocity = { 0.0f, 0.0f };
@@ -551,8 +612,12 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
         particles.SpawnFloatingText({ position.x, position.y - 30.0f }, "CRIT!", Color{ 255, 220, 0, 255 }, 20.0f);
     }
 
-    // Apply Enemy Defense formula with defense pierce
-    float effDef = defense * fmaxf(0.0f, 1.0f - defensePierce);
+    // Apply Enemy Defense formula with defense pierce and Melancholic shell shatter
+    float activeDef = defense;
+    if (IsShattered()) {
+        activeDef *= 0.65f; // -35% armor on shattered defense shell!
+    }
+    float effDef = activeDef * fmaxf(0.0f, 1.0f - defensePierce);
     float damageFactor = 100.0f / (100.0f + effDef);
     float finalAmount = amount * damageFactor;
 

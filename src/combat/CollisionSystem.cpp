@@ -31,6 +31,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             if (hit) {
+                // Melancholic shell shatter: War Mace or Heavy attacks shatter brittle black-bile shells
+                if (enemy.GetHumor() == HumorType::MELANCHOLIC && !enemy.IsShattered()) {
+                    if (attack.weapon == WeaponType::MACE || attack.type == AttackType::HEAVY) {
+                        enemy.ShatterShell(particles);
+                    }
+                }
+
                 Vector2 knockOrigin = (attack.hasShockwave && !enemy.CheckHit(attack)) ? attack.shockwavePos : player.GetPosition();
                 Vector2 knockbackDir = Vector2Normalize({
                     enemy.GetPosition().x - knockOrigin.x,
@@ -131,7 +138,15 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
+                if (enemy.GetHumor() == HumorType::CHOLERIC) {
+                    player.ModifyComposure(30.0f); // Quenching Choleric Frenzy composure bonus!
+                }
             } else if (tookDamage) {
+                // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
+                if (enemy.GetHumor() == HumorType::SANGUINE) {
+                    player.ApplyBleed(3.0f, particles);
+                }
+
                 // Heavy and crushing boss attacks apply stagger to player if unparried
                 bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
                                       enemy.GetType() == EnemyType::CHARGER ||
@@ -186,6 +201,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     Vector2 reflectedVel = { aimDir.x * 680.0f, aimDir.y * 680.0f };
                     proj.Reflect(reflectedVel);
                     player.ModifyComposure(25.0f); // Timed parry reflection bonus
+                    if (proj.GetType() == ProjectileType::VOID_ORB || proj.GetType() == ProjectileType::NOVA_STAR || proj.GetType() == ProjectileType::BEAM_SHARD) {
+                        player.ModifyComposure(10.0f); // Extra quenching bonus on fiery/arcane projectiles
+                    }
                     SoundFX::PlayProjectileReflect();
                     particles.SpawnSparks(proj.GetPosition(), Color{ 80, 240, 255, 255 }, 18, 160.0f);
                     particles.SpawnFloatingText(playerPos, "PROJECTILE REFLECTED!", Color{ 80, 240, 255, 255 }, 22.0f);
@@ -194,6 +212,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     // Hit player
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
                     player.TakeDamage(proj.GetDamage(), knockDir, particles);
+                    if (proj.GetType() == ProjectileType::BOLT) {
+                        player.ApplyBleed(3.0f, particles);
+                    }
                     proj.Destroy();
                 }
             }
