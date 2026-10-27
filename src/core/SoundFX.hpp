@@ -25,6 +25,7 @@ public:
     static void PlayGateOpen();
     static void PlayHeal();
     static void PlayCoinPickup();
+    static void PlayTranceActivate();
 
 private:
     static bool initialized;
@@ -46,6 +47,7 @@ private:
     static Sound sndTruthSeekerResonance;
     static Sound sndGateOpen;
     static Sound sndCoinPickup;
+    static Sound sndTranceActivate;
 
     static Sound GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType);
 };

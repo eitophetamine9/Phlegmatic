@@ -178,9 +178,9 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
 
 static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& player) {
     const float hudX = 24.0f;
-    const float hudY = (float)windowHeight - 114.0f;
+    const float hudY = (float)windowHeight - 138.0f;
     const float hudWidth = 320.0f;
-    const float hudHeight = 90.0f;
+    const float hudHeight = 114.0f;
 
     DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 215 });
     DrawRectangleRoundedLines(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 48, 62, 85, 220 });
@@ -205,25 +205,73 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     snprintf(stamBuf, sizeof(stamBuf), "%d/%d", (int)player.GetStamina(), (int)player.GetMaxStamina());
     DrawText(stamBuf, (int)hudX + 246, (int)hudY + 32, 10, Color{ 245, 230, 190, 225 });
 
+    // POISE (COMPOSURE) BAR
+    float compPercent = fmaxf(0.0f, fminf(1.0f, player.GetComposure() / 100.0f));
+    Color poiseLabelCol = Color{ 140, 210, 230, 255 };
+    Color poiseFillCol = Color{ 70, 180, 210, 255 };
+    if (player.IsInPhlegmaticTrance()) {
+        float pulse = (sinf((float)GetTime() * 10.0f) + 1.0f) * 0.5f;
+        poiseLabelCol = Color{ 180, 245, 255, 255 };
+        poiseFillCol = Color{ (unsigned char)(140 + 80 * pulse), (unsigned char)(220 + 35 * pulse), 255, 255 };
+    } else if (player.IsTranceReady()) {
+        poiseLabelCol = Color{ 255, 235, 120, 255 };
+        poiseFillCol = Color{ 120, 240, 255, 255 };
+    } else if (player.HasStoicPoise()) {
+        poiseLabelCol = Color{ 100, 215, 255, 255 };
+        poiseFillCol = Color{ 80, 195, 255, 255 };
+    } else if (player.IsDiscomposed()) {
+        poiseLabelCol = Color{ 255, 160, 70, 255 };
+        poiseFillCol = Color{ 240, 130, 50, 255 };
+    }
+
+    DrawText("POISE", (int)hudX + 14, (int)hudY + 52, 11, poiseLabelCol);
+    DrawRectangle((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 18, 28, 36, 220 });
+    DrawRectangle((int)hudX + 68, (int)hudY + 52, (int)(170 * compPercent), 12, poiseFillCol);
+    DrawRectangleLines((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 50, 80, 100, 220 });
+    char poiseBuf[32];
+    if (player.IsInPhlegmaticTrance()) {
+        snprintf(poiseBuf, sizeof(poiseBuf), "%.1fs", player.GetTranceTimer());
+    } else {
+        snprintf(poiseBuf, sizeof(poiseBuf), "%d%%", (int)player.GetComposure());
+    }
+    DrawText(poiseBuf, (int)hudX + 246, (int)hudY + 52, 10, poiseLabelCol);
+
     // ATTRIBUTES ROW: DEFENSE & WILL
     char defBuf[32];
     snprintf(defBuf, sizeof(defBuf), "DEF: %d", (int)player.GetDefense());
-    DrawText(defBuf, (int)hudX + 14, (int)hudY + 58, 11, Color{ 140, 210, 255, 240 });
+    DrawText(defBuf, (int)hudX + 14, (int)hudY + 78, 11, Color{ 140, 210, 255, 240 });
 
     char willBuf[32];
     snprintf(willBuf, sizeof(willBuf), "WILL: %d", (int)player.GetWill());
-    DrawText(willBuf, (int)hudX + 88, (int)hudY + 58, 11, Color{ 255, 205, 110, 240 });
+    DrawText(willBuf, (int)hudX + 88, (int)hudY + 78, 11, Color{ 255, 205, 110, 240 });
 
     // STATUS BADGE PILL
     const float badgeX = hudX + 172.0f;
-    const float badgeY = hudY + 54.0f;
+    const float badgeY = hudY + 74.0f;
     const float badgeW = 136.0f;
     const float badgeH = 20.0f;
 
-    if (player.IsStaggered()) {
+    if (player.IsInPhlegmaticTrance()) {
+        float pulse = (sinf((float)GetTime() * 8.0f) + 1.0f) * 0.5f;
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 60, 85, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ (unsigned char)(140 + 80 * pulse), 240, 255, 255 });
+        DrawText("TRANCE ACTIVE", (int)badgeX + 16, (int)badgeY + 5, 10, Color{ 160, 245, 255, 255 });
+    } else if (player.IsTranceReady()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 50, 75, 40, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 130, 255, 160, 255 });
+        DrawText("[SPACE] TRANCE", (int)badgeX + 14, (int)badgeY + 5, 10, Color{ 180, 255, 190, 255 });
+    } else if (player.IsStaggered()) {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 70, 35, 15, 230 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 255, 180, 50, 240 });
         DrawText("STAGGERED!", (int)badgeX + 24, (int)badgeY + 5, 10, Color{ 255, 210, 90, 255 });
+    } else if (player.HasStoicPoise()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 50, 75, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 80, 200, 255, 240 });
+        DrawText("STOIC POISE", (int)badgeX + 24, (int)badgeY + 5, 10, Color{ 160, 230, 255, 255 });
+    } else if (player.IsDiscomposed()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 60, 30, 20, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 240, 130, 50, 240 });
+        DrawText("DISCOMPOSED", (int)badgeX + 20, (int)badgeY + 5, 10, Color{ 255, 170, 90, 255 });
     } else if (player.HasStaggerImmunity()) {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 50, 70, 230 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 100, 210, 255, 240 });
@@ -239,7 +287,7 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     } else {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 18, 28, 38, 210 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 60, 85, 115, 190 });
-        DrawText("COMBAT READY", (int)badgeX + 20, (int)badgeY + 5, 10, Color{ 160, 200, 235, 220 });
+        DrawText("COMPOSED", (int)badgeX + 28, (int)badgeY + 5, 10, Color{ 160, 200, 235, 220 });
     }
 }
 

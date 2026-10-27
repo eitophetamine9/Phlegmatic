@@ -178,6 +178,7 @@ void Game::SaveActiveGame() {
     data.playerY = player.GetPosition().y;
     data.playerHealth = player.GetHealth();
     data.playerMaxHealth = player.GetMaxHealth();
+    data.playerComposure = player.GetComposure();
     data.potionCount = player.GetInventory().GetHealthPotionCount();
     data.shingles = player.GetInventory().GetShingles();
     data.equippedWeapon = (int)player.GetWeapon();
@@ -258,6 +259,7 @@ void Game::LoadActiveGame(int slotIndex) {
     player.SetTotem((TotemType)data.equippedTotem);
     player.SetPosition({ data.playerX, data.playerY });
     player.SetHealth(data.playerHealth);
+    player.SetComposure(data.playerComposure);
     camera.target = player.GetPosition();
 
     showControlsModal = false;

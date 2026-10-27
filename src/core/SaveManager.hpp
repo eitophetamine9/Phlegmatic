@@ -29,6 +29,7 @@ struct GameSaveData {
     float playerY = 800.0f;
     float playerHealth = 100.0f;
     float playerMaxHealth = 100.0f;
+    float playerComposure = 50.0f;
     int potionCount = 1;
     int shingles = 0;
     int equippedWeapon = 1;

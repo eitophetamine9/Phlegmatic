@@ -54,6 +54,26 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
 
     Vector2 playerPos = player.GetPosition();
     float playerRadius = player.GetRadius();
+    float dt = GetFrameTime();
+
+    // Patient Stance: standing unhit while nearby enemy telegraphs gives +8.0f/sec composure
+    if (player.IsAlive() && !player.IsAttacking() && !player.IsDashing() && !player.IsDaggerLunging() && !player.IsStaggered() && !player.IsInPhlegmaticTrance()) {
+        bool enemyTelegraphingNear = false;
+        for (const auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            if (enemy.IsTelegraphing()) {
+                float dx = playerPos.x - enemy.GetPosition().x;
+                float dy = playerPos.y - enemy.GetPosition().y;
+                if ((dx * dx + dy * dy) <= (220.0f * 220.0f)) {
+                    enemyTelegraphingNear = true;
+                    break;
+                }
+            }
+        }
+        if (enemyTelegraphingNear) {
+            player.ModifyComposure(8.0f * dt);
+        }
+    }
 
     // 2. Enemy melee strikes vs player (ONLY pure melee strikes, NOT ranged attacks!)
     for (auto& enemy : enemies) {
@@ -118,8 +138,11 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                                       enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
                                       enemy.GetType() == EnemyType::ZIL_BOSS ||
                                       enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS);
-                if (isHeavyAttack && !player.HasStaggerImmunity()) {
-                    player.ApplyStagger(1.0f, particles);
+                if (isHeavyAttack) {
+                    player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
+                    if (!player.HasStaggerImmunity()) {
+                        player.ApplyStagger(1.0f, particles);
+                    }
                 }
             }
         }
@@ -135,9 +158,22 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             float dy = playerPos.y - proj.GetPosition().y;
             float dist = sqrtf(dx * dx + dy * dy);
 
+            // In Phlegmatic Trance, automatic projectile reflection in 120px radius!
+            if (player.IsInPhlegmaticTrance() && dist <= 120.0f) {
+                Vector2 aimDir = Vector2Normalize({ -proj.GetVelocity().x, -proj.GetVelocity().y });
+                if (Vector2Length(aimDir) < 0.1f) aimDir = { 1.0f, 0.0f };
+                Vector2 reflectedVel = { aimDir.x * 720.0f, aimDir.y * 720.0f };
+                proj.Reflect(reflectedVel);
+                SoundFX::PlayProjectileReflect();
+                particles.SpawnSparks(proj.GetPosition(), Color{ 140, 230, 255, 255 }, 20, 180.0f);
+                particles.SpawnFloatingText(playerPos, "TRANCE REFLECT!", Color{ 140, 230, 255, 255 }, 22.0f);
+                continue;
+            }
+
             if (dist <= playerRadius + proj.GetRadius()) {
                 if (player.IsDashing() || player.IsDaggerLunging() || player.HasInvulnerability()) {
                     // Dash / Dagger Lunge invulnerability frames: Evaded!
+                    player.ModifyComposure(15.0f); // Evasive Dash through projectile hitbox
                     particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
                     proj.Destroy();
                 } else if (player.IsParrying()) {
@@ -149,6 +185,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                     Vector2 reflectedVel = { aimDir.x * 680.0f, aimDir.y * 680.0f };
                     proj.Reflect(reflectedVel);
+                    player.ModifyComposure(25.0f); // Timed parry reflection bonus
                     SoundFX::PlayProjectileReflect();
                     particles.SpawnSparks(proj.GetPosition(), Color{ 80, 240, 255, 255 }, 18, 160.0f);
                     particles.SpawnFloatingText(playerPos, "PROJECTILE REFLECTED!", Color{ 80, 240, 255, 255 }, 22.0f);

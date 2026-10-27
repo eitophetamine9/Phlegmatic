@@ -36,6 +36,7 @@ public:
     void DrawTelegraph() const;
 
     bool IsInStrike() const { return state == EnemyState::STRIKE && !hasDamagedPlayer; }
+    bool IsTelegraphing() const { return state == EnemyState::TELEGRAPH_WINDUP; }
     void MarkDamagedPlayer() { hasDamagedPlayer = true; }
     void OnParried(ParticleSystem& particles);
 

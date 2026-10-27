@@ -19,6 +19,9 @@ Player::Player() {
     health = maxHealth;
     stamina = Config::PLAYER_MAX_STAMINA;
     maxStamina = Config::PLAYER_MAX_STAMINA;
+    composure = 50.0f;
+    isInPhlegmaticTrance = false;
+    tranceTimer = 0.0f;
     defense = GetDefense();
     will = GetWill();
 
@@ -65,6 +68,9 @@ void Player::Init(Vector2 startPos) {
     maxHealth = GetMaxHealth();
     health = maxHealth;
     stamina = maxStamina;
+    composure = 50.0f;
+    isInPhlegmaticTrance = false;
+    tranceTimer = 0.0f;
     timeSinceCombat = 10.0f;
     defense = GetDefense();
     will = GetWill();
@@ -93,6 +99,9 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     maxHealth = GetMaxHealth();
     health = maxHealth * hpPercent;
     stamina = maxStamina;
+    composure = 50.0f;
+    isInPhlegmaticTrance = false;
+    tranceTimer = 0.0f;
     defense = GetDefense();
     will = GetWill();
     velocity = { 0.0f, 0.0f };
@@ -160,7 +169,29 @@ float Player::GetSpeed() const {
 }
 
 float Player::GetStaminaRegenRate() const {
-    return Config::STAMINA_REGEN_RATE * GetArmorStats(currentArmor).staminaRegenModifier * GetTotemStats(currentTotem).staminaRegenMultiplier;
+    float rate = Config::STAMINA_REGEN_RATE * GetArmorStats(currentArmor).staminaRegenModifier * GetTotemStats(currentTotem).staminaRegenMultiplier;
+    if (IsDiscomposed()) {
+        rate *= 0.80f; // -20% stamina regen speed
+    } else if (HasStoicPoise()) {
+        rate *= 1.20f; // +20% stamina regen speed
+    }
+    return rate;
+}
+
+void Player::ModifyComposure(float delta) {
+    if (isInPhlegmaticTrance) return; // Locked during Trance
+    composure = fmaxf(0.0f, fminf(100.0f, composure + delta));
+}
+
+bool Player::TriggerPhlegmaticTrance(ParticleSystem& particles) {
+    if (isInPhlegmaticTrance || composure < 100.0f) return false;
+    isInPhlegmaticTrance = true;
+    tranceTimer = 4.0f;
+    SoundFX::PlayTranceActivate();
+    particles.AddScreenShake(7.0f, 0.25f);
+    particles.SpawnFloatingText(position, "PHLEGMATIC TRANCE!", Color{ 140, 230, 255, 255 }, 28.0f);
+    particles.SpawnSparks(position, Color{ 120, 220, 255, 255 }, 35, 220.0f);
+    return true;
 }
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
@@ -197,6 +228,23 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         UseHealthPotion(particles);
     }
 
+    // Phlegmatic Trance activation via [SPACE] when composure is full (100%)
+    if (IsKeyPressed(KEY_SPACE) && IsTranceReady()) {
+        TriggerPhlegmaticTrance(particles);
+    }
+
+    // Phlegmatic Trance countdown & aura
+    if (isInPhlegmaticTrance) {
+        tranceTimer -= dt;
+        particles.SpawnSparks(position, Color{ 160, 230, 255, 180 }, 1, 30.0f);
+        if (tranceTimer <= 0.0f) {
+            isInPhlegmaticTrance = false;
+            tranceTimer = 0.0f;
+            composure = 50.0f; // Resets to baseline upon trance expiry
+            particles.SpawnFloatingText(position, "TRANCE EXPIRED", Color{ 180, 210, 240, 220 }, 20.0f);
+        }
+    }
+
     // Out of combat health regeneration (recovers health when off combat for 4+ seconds)
     timeSinceCombat += dt;
     if (timeSinceCombat >= 4.0f && health < GetMaxHealth()) {
@@ -229,6 +277,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         parryTimer -= dt;
         if (parryTimer <= 0.0f) {
             isParrying = false;
+            ModifyComposure(-12.0f); // Whiffed parry composure penalty
         }
     }
 
@@ -500,9 +549,15 @@ void Player::TriggerDash(ParticleSystem& particles) {
     if (dashCooldown > 0.0f) return;
 
     WeaponStats stats = GetEquippedWeaponStats();
-    if (stamina < stats.dashStaminaCost) return;
+    if (!isInPhlegmaticTrance) {
+        if (stamina < stats.dashStaminaCost) {
+            ModifyComposure(-15.0f); // Out of stamina dash penalty
+            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+            return;
+        }
+        stamina -= stats.dashStaminaCost;
+    }
 
-    stamina -= stats.dashStaminaCost;
     dashCooldown = stats.dashCooldown;
     dashTimer = Config::DASH_DURATION;
     isDashing = true;
@@ -531,9 +586,13 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
     timeSinceCombat = 0.0f;
     WeaponStats stats = GetEquippedWeaponStats();
-    // Daggers light attack costs 0 stamina
-    if (currentWeapon != WeaponType::DAGGERS) {
-        if (stamina < stats.lightStamina) return;
+    // Daggers light attack costs 0 stamina, and Phlegmatic Trance grants zero stamina cost
+    if (!isInPhlegmaticTrance && currentWeapon != WeaponType::DAGGERS) {
+        if (stamina < stats.lightStamina) {
+            ModifyComposure(-15.0f); // Out of stamina attack penalty
+            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+            return;
+        }
         stamina -= stats.lightStamina;
     }
     lightCooldown = stats.lightCooldown * GetTotemStats(currentTotem).cooldownMultiplier;
@@ -623,9 +682,14 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 
     timeSinceCombat = 0.0f;
     WeaponStats stats = GetEquippedWeaponStats();
-    if (stamina < stats.heavyStamina) return;
-
-    stamina -= stats.heavyStamina;
+    if (!isInPhlegmaticTrance) {
+        if (stamina < stats.heavyStamina) {
+            ModifyComposure(-15.0f); // Out of stamina heavy attack penalty
+            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+            return;
+        }
+        stamina -= stats.heavyStamina;
+    }
     heavyCooldown = stats.heavyCooldown * GetTotemStats(currentTotem).cooldownMultiplier;
 
     Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
@@ -709,6 +773,7 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
     parryCooldown = 0.2f;
     counterBuffTimer = Config::COUNTER_BUFF_DURATION;
     stamina = fminf(maxStamina, stamina + 35.0f);
+    ModifyComposure(25.0f); // Timed parry deflection composure bonus
     timeSinceCombat = 0.0f;
 
     SoundFX::PlayParrySuccess();
@@ -718,7 +783,12 @@ void Player::OnParrySuccessful(ParticleSystem& particles) {
 
 void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
     if (staggerImmunityTimer > 0.0f || HasInvulnerability() || isDashing) return;
+    if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp)) return; // Stoic poise hyper-armor & trance invulnerability
+
     float duration = CalculateStaggerDuration(baseStunDuration, GetWill(), true);
+    if (IsDiscomposed()) {
+        duration *= 1.15f; // Discomposed tier: +15% stagger duration
+    }
     staggerTimer = duration;
     isHeavyWindingUp = false;
     isParrying = false;
@@ -756,6 +826,7 @@ bool Player::UseHealthPotion(ParticleSystem& particles) {
 bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
     // Invulnerable during Dash, Dagger Lunge, or Active I-Frames
     if (isDashing || isDaggerLunging || HasInvulnerability()) {
+        ModifyComposure(15.0f); // Evasive Dash through hitbox
         particles.SpawnFloatingText(position, "EVADED", Color{ 120, 240, 255, 255 }, 18.0f);
         return false;
     }
@@ -780,8 +851,9 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 15, 160.0f);
     particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 60, 60, 255 }, 22.0f);
 
-    velocity.x += knockbackDir.x * 240.0f;
-    velocity.y += knockbackDir.y * 240.0f;
+    float knockbackSpeed = HasStoicPoise() ? 60.0f : 240.0f; // Stoic Poise resists 75% knockback
+    velocity.x += knockbackDir.x * knockbackSpeed;
+    velocity.y += knockbackDir.y * knockbackSpeed;
     return true;
 }
 

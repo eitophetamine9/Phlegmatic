@@ -104,6 +104,22 @@ public:
     std::vector<Projectile>& GetSpawnedProjectiles() { return spawnedProjectiles; }
     const std::vector<Projectile>& GetSpawnedProjectiles() const { return spawnedProjectiles; }
 
+    // Phlegmatic Composure System
+    float GetComposure() const { return composure; }
+    void SetComposure(float c) { composure = fmaxf(0.0f, fminf(100.0f, c)); }
+    void ModifyComposure(float delta);
+    float GetMaxComposure() const { return 100.0f; }
+
+    bool IsInPhlegmaticTrance() const { return isInPhlegmaticTrance; }
+    float GetTranceTimer() const { return tranceTimer; }
+    bool TriggerPhlegmaticTrance(ParticleSystem& particles);
+
+    // Passive Tiers
+    bool IsDiscomposed() const { return !isInPhlegmaticTrance && composure < 25.0f; }
+    bool IsComposed() const { return !isInPhlegmaticTrance && composure >= 25.0f && composure < 80.0f; }
+    bool HasStoicPoise() const { return isInPhlegmaticTrance || (composure >= 80.0f); }
+    bool IsTranceReady() const { return !isInPhlegmaticTrance && composure >= 100.0f; }
+
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
     const Inventory& GetInventory() const { return inventory; }
@@ -120,6 +136,11 @@ private:
     ArmorType currentArmor;
     TotemType currentTotem;
     Inventory inventory;
+
+    // Phlegmatic Composure & Trance State
+    float composure;
+    bool isInPhlegmaticTrance;
+    float tranceTimer;
 
     // Stats
     float health;

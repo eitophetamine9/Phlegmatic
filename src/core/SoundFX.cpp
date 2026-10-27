@@ -25,6 +25,7 @@ Sound SoundFX::sndCrusaderClash = { 0 };
 Sound SoundFX::sndTruthSeekerResonance = { 0 };
 Sound SoundFX::sndGateOpen = { 0 };
 Sound SoundFX::sndCoinPickup = { 0 };
+Sound SoundFX::sndTranceActivate = { 0 };
 
 static inline float SoftClip(float x) {
     return x / (1.0f + fabsf(x));
@@ -389,9 +390,10 @@ void SoundFX::Init() {
     sndLoreDiscovery = GenerateAbbeyChime(440.0f, 0.70f, 0.60f);
     sndTruthSeekerResonance = GenerateAbbeyChime(261.6f, 0.95f, 0.70f);
 
-    // 9. Gate open & currency pickup
+    // 9. Gate open & currency pickup & trance
     sndGateOpen = GenerateGateRumble(0.95f, 0.65f);
     sndCoinPickup = GenerateSilverCoinClink(0.18f, 0.55f);
+    sndTranceActivate = GenerateAbbeyChime(523.25f, 1.20f, 0.70f);
 
     initialized = true;
 }
@@ -416,6 +418,7 @@ void SoundFX::Close() {
     UnloadSound(sndTruthSeekerResonance);
     UnloadSound(sndGateOpen);
     UnloadSound(sndCoinPickup);
+    UnloadSound(sndTranceActivate);
 
     CloseAudioDevice();
     initialized = false;
@@ -440,3 +443,4 @@ void SoundFX::PlayTruthSeekerResonance() { if (initialized) PlaySound(sndTruthSe
 void SoundFX::PlayGateOpen() { if (initialized) PlaySound(sndGateOpen); }
 void SoundFX::PlayHeal() { if (initialized) PlaySound(sndCutsceneChime); }
 void SoundFX::PlayCoinPickup() { if (initialized) PlaySound(sndCoinPickup); }
+void SoundFX::PlayTranceActivate() { if (initialized) PlaySound(sndTranceActivate); }

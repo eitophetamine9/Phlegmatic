@@ -152,6 +152,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.playerHealth = ExtractFloatValue(line);
         } else if (line.find("\"playerMaxHealth\"") != std::string::npos) {
             outData.playerMaxHealth = ExtractFloatValue(line);
+        } else if (line.find("\"playerComposure\"") != std::string::npos) {
+            outData.playerComposure = ExtractFloatValue(line);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
             outData.potionCount = ExtractIntValue(line);
         } else if (line.find("\"shingles\"") != std::string::npos) {
@@ -243,6 +245,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"playerY\": " << data.playerY << ",\n";
     file << "  \"playerHealth\": " << data.playerHealth << ",\n";
     file << "  \"playerMaxHealth\": " << data.playerMaxHealth << ",\n";
+    file << "  \"playerComposure\": " << data.playerComposure << ",\n";
     file << "  \"potionCount\": " << data.potionCount << ",\n";
     file << "  \"shingles\": " << data.shingles << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
