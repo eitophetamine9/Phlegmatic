@@ -3,6 +3,7 @@
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/CollisionSystem.hpp"
+#include "../combat/LootDrop.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "raymath.h"
 #include <algorithm>
@@ -101,6 +102,7 @@ void CrossroadsHandler::Update(
     ParticleSystem& particles,
     std::vector<Enemy>& enemies,
     std::vector<Projectile>& projectiles,
+    std::vector<LootDrop>& lootDrops,
     Camera2D& camera,
     GameState& currentState,
     const std::function<void()>& onEnterLobby
@@ -117,6 +119,7 @@ void CrossroadsHandler::Update(
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
+            lootDrops.clear();
             enemies.emplace_back(EnemyType::SLASHER, Vector2{ 740.0f, 1300.0f });
             enemies.emplace_back(EnemyType::SLASHER, Vector2{ 860.0f, 1000.0f });
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 650.0f });
@@ -171,7 +174,15 @@ void CrossroadsHandler::Update(
         return !p.IsActive();
     }), projectiles.end());
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Hidden Chest Interaction
     Vector2 playerPos = player.GetPosition();
@@ -235,6 +246,7 @@ void CrossroadsHandler::Render(
     const GameMap& map,
     const std::vector<Enemy>& enemies,
     const std::vector<Projectile>& projectiles,
+    const std::vector<LootDrop>& lootDrops,
     const Player& player,
     const ParticleSystem& particles,
     int screenWidth,
@@ -261,6 +273,10 @@ void CrossroadsHandler::Render(
 
         for (const auto& enemy : enemies) {
             enemy.Draw();
+        }
+
+        for (const auto& drop : lootDrops) {
+            drop.Draw((float)GetTime());
         }
 
         player.Draw();

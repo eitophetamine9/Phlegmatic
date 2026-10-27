@@ -27,6 +27,7 @@ public:
     static void DrawLobby(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore = false);
     static void DrawCombat(int windowWidth, int windowHeight, const Player& player, int currentWave, int totalWaves, bool hasUnreadLore = false);
     static void DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore = false);
+    static void DrawCurrencyBadge(int windowWidth, int shingles);
 
     // Backward-compatible float-based Draw Methods
     static void DrawLobby(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore = false);

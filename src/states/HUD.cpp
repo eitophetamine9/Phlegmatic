@@ -259,6 +259,9 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
     const char* hint = "Equip weapons at pedestals [E]  |  Step into North Portal to Enter Arena";
     DrawText(hint, (int)bannerX + 16, (int)bannerY + 26, 12, Color{ 200, 220, 245, 220 });
 
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
@@ -339,6 +342,9 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     int waveW = MeasureText(waveStr.c_str(), 14);
     DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
 
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
@@ -353,7 +359,31 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
+void HUD::DrawCurrencyBadge(int windowWidth, int shingles) {
+    const float badgeW = 145.0f;
+    const float badgeH = 32.0f;
+    const float badgeX = (float)windowWidth - 430.0f;
+    const float badgeY = 16.0f;
+
+    Rectangle badgeRec = { badgeX, badgeY, badgeW, badgeH };
+    DrawRectangleRounded(badgeRec, 0.3f, 4, Color{ 18, 24, 36, 225 });
+    DrawRectangleRoundedLines(badgeRec, 0.3f, 4, Color{ 140, 175, 215, 220 });
+
+    // Stylized Silver Shingle Coin Icon
+    float iconCenterX = badgeX + 18.0f;
+    float iconCenterY = badgeY + 16.0f;
+    DrawRectanglePro(Rectangle{ iconCenterX, iconCenterY, 11.0f, 11.0f }, Vector2{ 5.5f, 5.5f }, 45.0f, Color{ 210, 230, 255, 255 });
+    DrawPolyLines(Vector2{ iconCenterX, iconCenterY }, 4, 7.8f, 45.0f, Color{ 90, 125, 170, 255 });
+    DrawLine((int)(iconCenterX - 3), (int)(iconCenterY - 3), (int)(iconCenterX + 3), (int)(iconCenterY - 3), WHITE);
+
+    // Numeric Shingles Count
+    std::string text = std::to_string(shingles) + " Shingles";
+    FontManager::DrawText(text, (int)(badgeX + 34), (int)(badgeY + 8), 12, Color{ 230, 242, 255, 245 }, GameFont::BODY);
+}
+
 void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
     // Player HUD Panel (Bottom Left)
     DrawPlayerCard(windowWidth, windowHeight, player);
 

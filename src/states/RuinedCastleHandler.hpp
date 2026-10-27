@@ -12,6 +12,8 @@
 #include <string>
 #include <functional>
 
+class LootDrop;
+
 class RuinedCastleHandler {
 public:
     RuinedCastleHandler();
@@ -25,6 +27,7 @@ public:
         ParticleSystem& particles,
         std::vector<Enemy>& enemies,
         std::vector<Projectile>& projectiles,
+        std::vector<LootDrop>& lootDrops,
         TutorialManager& tutorial,
         Camera2D& camera,
         GameState& currentState,
@@ -39,6 +42,7 @@ public:
         const GameMap& map,
         const std::vector<Enemy>& enemies,
         const std::vector<Projectile>& projectiles,
+        const std::vector<LootDrop>& lootDrops,
         const Player& player,
         const ParticleSystem& particles,
         TutorialManager& tutorial,
@@ -66,6 +70,7 @@ private:
     std::string zilDialogueSpeaker;
     std::string zilDialogueText;
     Color zilDialogueColor;
+    bool overworldEnemiesSpawned;
     InscribedPillar castlePillar;
     RelicChest castleChest;
 };

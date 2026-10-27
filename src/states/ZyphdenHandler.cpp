@@ -3,6 +3,7 @@
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/CollisionSystem.hpp"
+#include "../combat/LootDrop.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "raymath.h"
 #include <algorithm>
@@ -273,6 +274,7 @@ void ZyphdenHandler::Update(
     ParticleSystem& particles,
     std::vector<Enemy>& enemies,
     std::vector<Projectile>& projectiles,
+    std::vector<LootDrop>& lootDrops,
     Camera2D& camera,
     GameState& currentState,
     bool& testArenaUnlocked,
@@ -372,7 +374,15 @@ void ZyphdenHandler::Update(
         return !p.IsActive();
     }), projectiles.end());
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Check Courtyard Spar Completion
     if (sparActive) {
@@ -769,6 +779,7 @@ void ZyphdenHandler::Render(
     const GameMap& map,
     const std::vector<Enemy>& enemies,
     const std::vector<Projectile>& projectiles,
+    const std::vector<LootDrop>& lootDrops,
     const Player& player,
     const ParticleSystem& particles,
     int screenWidth,
@@ -847,6 +858,10 @@ void ZyphdenHandler::Render(
 
     for (const auto& enemy : enemies) {
         enemy.Draw();
+    }
+
+    for (const auto& drop : lootDrops) {
+        drop.Draw(time);
     }
 
     if (player.IsAlive()) {

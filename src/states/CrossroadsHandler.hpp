@@ -36,6 +36,8 @@ struct RoadsideJournal {
     void Draw(float time) const;
 };
 
+class LootDrop;
+
 class CrossroadsHandler {
 public:
     CrossroadsHandler();
@@ -49,6 +51,7 @@ public:
         ParticleSystem& particles,
         std::vector<Enemy>& enemies,
         std::vector<Projectile>& projectiles,
+        std::vector<LootDrop>& lootDrops,
         Camera2D& camera,
         GameState& currentState,
         const std::function<void()>& onEnterLobby
@@ -59,6 +62,7 @@ public:
         const GameMap& map,
         const std::vector<Enemy>& enemies,
         const std::vector<Projectile>& projectiles,
+        const std::vector<LootDrop>& lootDrops,
         const Player& player,
         const ParticleSystem& particles,
         int screenWidth,

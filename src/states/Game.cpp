@@ -89,6 +89,7 @@ void Game::EnterRuinedCastle() {
     ruinedCastleHandler.Reset();
     enemies.clear();
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     tutorial.Init();
     SaveActiveGame();
@@ -99,6 +100,7 @@ void Game::EnterCrossroads() {
     currentState = GameState::CROSSROADS;
     showControlsModal = false;
     showInventoryModal = false;
+    lootDrops.clear();
     particles.Clear();
     SaveActiveGame();
 }
@@ -108,6 +110,7 @@ void Game::EnterZyphden() {
     currentState = GameState::ZYPHDEN_REALM;
     showControlsModal = false;
     showInventoryModal = false;
+    lootDrops.clear();
     particles.Clear();
     SaveActiveGame();
 }
@@ -127,6 +130,7 @@ void Game::EnterLobby() {
     currentState = GameState::LOBBY;
     showControlsModal = false;
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     particles.SpawnFloatingText(player.GetPosition(), "LOBBY SANCTUARY", Color{ 255, 220, 100, 255 }, 24.0f);
     SaveActiveGame();
@@ -145,6 +149,7 @@ void Game::EnterArena() {
     }
     camera.target = player.GetPosition();
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     arenaBandages.clear();
     bandageSpawnTimer = 14.0f;
@@ -402,7 +407,7 @@ void Game::Update(float dt) {
     // 1.8 RUINED CASTLE CHAPTER 1 STATE
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Update(
-            dt, player, map, particles, enemies, projectiles, tutorial, camera, currentState, testArenaUnlocked,
+            dt, player, map, particles, enemies, projectiles, lootDrops, tutorial, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
             [this]() { EnterRuinedCastle(); }
@@ -416,7 +421,7 @@ void Game::Update(float dt) {
             EnterCrossroads();
         }
         crossroadsHandler.Update(
-            dt, player, map, particles, enemies, projectiles, camera, currentState,
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
             [this]() { EnterLobby(); }
         );
         return;
@@ -443,7 +448,7 @@ void Game::Update(float dt) {
             EnterZyphden();
         }
         zyphdenHandler.Update(
-            dt, player, map, particles, enemies, projectiles, camera, currentState, testArenaUnlocked,
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); }
         );
@@ -613,7 +618,15 @@ void Game::Update(float dt) {
         enemyAliveBefore[i] = enemies[i].IsAlive();
     }
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops in arena
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Chance to drop adhesive bandage on enemy defeat
     for (size_t i = 0; i < enemies.size(); i++) {
@@ -691,7 +704,7 @@ void Game::Render() {
 
     if (currentState == GameState::BORDERLANDS_GATE) {
         ruinedCastleHandler.Render(
-            camera, map, enemies, projectiles, player, particles, tutorial,
+            camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, false, false, 0, 0
         );
         Vector2 mousePos = GetMousePosition();
@@ -702,7 +715,7 @@ void Game::Render() {
 
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
-            camera, map, enemies, projectiles, player, particles, tutorial,
+            camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -711,7 +724,7 @@ void Game::Render() {
 
     if (currentState == GameState::CROSSROADS) {
         crossroadsHandler.Render(
-            camera, map, enemies, projectiles, player, particles,
+            camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -728,7 +741,7 @@ void Game::Render() {
 
     if (currentState == GameState::ZYPHDEN_REALM) {
         zyphdenHandler.Render(
-            camera, map, enemies, projectiles, player, particles,
+            camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -793,6 +806,10 @@ void Game::Render() {
 
     for (const auto& b : arenaBandages) {
         b.Draw();
+    }
+
+    for (const auto& drop : lootDrops) {
+        drop.Draw(time);
     }
 
     for (const auto& proj : projectiles) {

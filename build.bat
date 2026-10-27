@@ -29,6 +29,7 @@ g++ -std=c++17 -O2 -static ^
     src\combat\Projectile.cpp ^
     src\combat\Inventory.cpp ^
     src\combat\CollisionSystem.cpp ^
+    src\combat\LootDrop.cpp ^
     src\states\TitleUI.cpp ^
     src\states\HUD.cpp ^
     src\states\ModalUI.cpp ^

@@ -3,6 +3,7 @@
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/CollisionSystem.hpp"
+#include "../combat/LootDrop.hpp"
 #include "raymath.h"
 #include <algorithm>
 
@@ -20,6 +21,7 @@ void RuinedCastleHandler::Reset() {
     zilDialogueSpeaker = "";
     zilDialogueText = "";
     zilDialogueColor = WHITE;
+    overworldEnemiesSpawned = false;
     castlePillar = { "frag_09", "Inscribed Castle Monolith", { 680.0f, 960.0f }, 26.0f, false };
     castleChest = { "", 2, "Vanguard Relic Chest", { 1350.0f, 620.0f }, 28.0f, false };
 }
@@ -31,6 +33,7 @@ void RuinedCastleHandler::Update(
     ParticleSystem& particles,
     std::vector<Enemy>& enemies,
     std::vector<Projectile>& projectiles,
+    std::vector<LootDrop>& lootDrops,
     TutorialManager& tutorial,
     Camera2D& camera,
     GameState& currentState,
@@ -102,7 +105,16 @@ void RuinedCastleHandler::Update(
             return;
         }
         if (IsKeyPressed(KEY_R)) {
-            if (onEnterRuinedCastle) onEnterRuinedCastle();
+            player.Revive({ 800.0f, 1180.0f }, 1.0f);
+            camera.target = player.GetPosition();
+            enemies.clear();
+            projectiles.clear();
+            lootDrops.clear();
+            if (tutorial.HasDefeatedTutorialEnemy()) {
+                enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
+                enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
+                enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
+            }
             return;
         }
         if (IsKeyPressed(KEY_L)) {
@@ -169,10 +181,26 @@ void RuinedCastleHandler::Update(
         return !p.IsActive();
     }), projectiles.end());
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Tutorial progression
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
+
+    // Overworld enemy respawn in courtyard after tutorial Sentinel defeated
+    if (tutorial.HasDefeatedTutorialEnemy() && !zilEncounterActive && !overworldEnemiesSpawned && enemies.empty()) {
+        overworldEnemiesSpawned = true;
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
+    }
 
     // High Altar Steps Barrier (Cannot enter until first tutorial enemy is officially beaten)
     if (!tutorial.HasDefeatedTutorialEnemy() && player.GetPosition().y <= 430.0f) {
@@ -295,6 +323,7 @@ void RuinedCastleHandler::Render(
     const GameMap& map,
     const std::vector<Enemy>& enemies,
     const std::vector<Projectile>& projectiles,
+    const std::vector<LootDrop>& lootDrops,
     const Player& player,
     const ParticleSystem& particles,
     TutorialManager& tutorial,
@@ -336,6 +365,10 @@ void RuinedCastleHandler::Render(
 
     for (const auto& enemy : enemies) {
         enemy.Draw();
+    }
+
+    for (const auto& drop : lootDrops) {
+        drop.Draw(time);
     }
 
     if (player.IsAlive()) {

@@ -53,6 +53,8 @@ enum class ZyphdenQuestPhase {
     VICTORIOUS        // 6. Lenon defeated; Crusader Plate awarded!
 };
 
+class LootDrop;
+
 class ZyphdenHandler {
 public:
     ZyphdenHandler();
@@ -66,6 +68,7 @@ public:
         ParticleSystem& particles,
         std::vector<Enemy>& enemies,
         std::vector<Projectile>& projectiles,
+        std::vector<LootDrop>& lootDrops,
         Camera2D& camera,
         GameState& currentState,
         bool& testArenaUnlocked,
@@ -78,6 +81,7 @@ public:
         const GameMap& map,
         const std::vector<Enemy>& enemies,
         const std::vector<Projectile>& projectiles,
+        const std::vector<LootDrop>& lootDrops,
         const Player& player,
         const ParticleSystem& particles,
         int screenWidth,
