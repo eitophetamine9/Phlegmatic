@@ -1,5 +1,6 @@
 #include "TitleUI.hpp"
 #include "../core/SoundFX.hpp"
+#include "../rendering/FontManager.hpp"
 #include <cmath>
 
 int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked) {
@@ -14,14 +15,14 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
 
     const char* title = "PHLEGMATIC";
     int titleSize = 64;
-    int titleW = MeasureText(title, titleSize);
-    DrawText(title, (int)(center.x - titleW * 0.5f + 2), (int)(center.y - 120 + 2), titleSize, Color{ 0, 0, 0, 200 });
-    DrawText(title, (int)(center.x - titleW * 0.5f), (int)(center.y - 120), titleSize, Color{ 255, 220, 100, 255 });
+    int titleW = FontManager::MeasureTextTitle(title, titleSize);
+    FontManager::DrawTextTitle(title, (int)(center.x - titleW * 0.5f + 2), (int)(center.y - 120 + 2), titleSize, Color{ 0, 0, 0, 200 });
+    FontManager::DrawTextTitle(title, (int)(center.x - titleW * 0.5f), (int)(center.y - 120), titleSize, Color{ 255, 220, 100, 255 });
 
-    const char* subtitle = "A Top-Down Action RPG of Composure & Precision";
+    const char* subtitle = "A Dark Fantasy Action RPG of Composure & Precision";
     int subSize = 18;
-    int subW = MeasureText(subtitle, subSize);
-    DrawText(subtitle, (int)(center.x - subW * 0.5f), (int)(center.y - 50), subSize, Color{ 180, 200, 230, 230 });
+    int subW = FontManager::MeasureText(subtitle, subSize);
+    FontManager::DrawText(subtitle, (int)(center.x - subW * 0.5f), (int)(center.y - 50), subSize, Color{ 180, 200, 230, 230 });
 
     // Buttons Container
     const float btnWidth = 260.0f;
@@ -40,9 +41,9 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
     DrawRectangleRoundedLines(playRec, 0.25f, 6, playBorder);
 
     const char* playText = "PLAY CAMPAIGN";
-    int playSize = 20;
-    int playW = MeasureText(playText, playSize);
-    DrawText(playText, (int)(center.x - playW * 0.5f), (int)(playY + 14), playSize, playHovered ? Color{ 255, 255, 255, 255 } : Color{ 210, 230, 255, 240 });
+    int playSize = 19;
+    int playW = FontManager::MeasureText(playText, playSize);
+    FontManager::DrawText(playText, (int)(center.x - playW * 0.5f), (int)(playY + 14), playSize, playHovered ? Color{ 255, 255, 255, 255 } : Color{ 210, 230, 255, 240 });
 
     // 2. TEST ARENA BUTTON (Unlocked after winning or hard losing to Zil)
     float arenaBtnY = playY + btnHeight + btnGap;
@@ -56,22 +57,22 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
         DrawRectangleRoundedLines(arenaRec, 0.25f, 6, arenaBorder);
 
         const char* arenaText = "TEST ARENA - 5 STAGES";
-        int arenaSize = 17;
-        int arenaW = MeasureText(arenaText, arenaSize);
-        DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 15), arenaSize, arenaHovered ? Color{ 255, 255, 255, 255 } : Color{ 235, 205, 255, 240 });
+        int arenaSize = 16;
+        int arenaW = FontManager::MeasureText(arenaText, arenaSize);
+        FontManager::DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 15), arenaSize, arenaHovered ? Color{ 255, 255, 255, 255 } : Color{ 235, 205, 255, 240 });
     } else {
         DrawRectangleRounded(arenaRec, 0.25f, 6, Color{ 18, 20, 28, 160 });
         DrawRectangleRoundedLines(arenaRec, 0.25f, 6, Color{ 45, 52, 68, 160 });
 
         const char* arenaText = "TEST ARENA [LOCKED]";
-        int arenaSize = 16;
-        int arenaW = MeasureText(arenaText, arenaSize);
-        DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 16), arenaSize, Color{ 110, 120, 140, 180 });
+        int arenaSize = 15;
+        int arenaW = FontManager::MeasureText(arenaText, arenaSize);
+        FontManager::DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 16), arenaSize, Color{ 110, 120, 140, 180 });
 
         if (arenaHovered) {
             const char* lockMsg = "Duel Zil's Fragment in Chapter 1 to unlock the 5-Stage Combat Arena";
-            int lmW = MeasureText(lockMsg, 11);
-            DrawText(lockMsg, (int)(center.x - lmW * 0.5f), (int)(windowHeight - 72), 11, Color{ 255, 180, 70, 240 });
+            int lmW = FontManager::MeasureText(lockMsg, 12);
+            FontManager::DrawText(lockMsg, (int)(center.x - lmW * 0.5f), (int)(windowHeight - 72), 12, Color{ 255, 180, 70, 240 });
         }
     }
 
@@ -87,15 +88,15 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
 
     const char* ctrlText = "CONTROLS";
     int ctrlSize = 18;
-    int ctrlW = MeasureText(ctrlText, ctrlSize);
-    DrawText(ctrlText, (int)(center.x - ctrlW * 0.5f), (int)(ctrlBtnY + 15), ctrlSize, ctrlHovered ? Color{ 255, 230, 100, 255 } : Color{ 180, 205, 235, 230 });
+    int ctrlW = FontManager::MeasureText(ctrlText, ctrlSize);
+    FontManager::DrawText(ctrlText, (int)(center.x - ctrlW * 0.5f), (int)(ctrlBtnY + 15), ctrlSize, ctrlHovered ? Color{ 255, 230, 100, 255 } : Color{ 180, 205, 235, 230 });
 
     // Quick Hint at bottom
     const char* hint = isArenaUnlocked
         ? "Select [PLAY CAMPAIGN] for Story Chapter 1  |  [TEST ARENA] for the 5-Stage Arena"
         : "Press [PLAY CAMPAIGN] to begin Chapter 1: The Ruined Castle";
-    int hintW = MeasureText(hint, 13);
-    DrawText(hint, (int)(center.x - hintW * 0.5f), (int)(windowHeight - 45), 13, Color{ 140, 165, 195, 200 });
+    int hintW = FontManager::MeasureText(hint, 13);
+    FontManager::DrawText(hint, (int)(center.x - hintW * 0.5f), (int)(windowHeight - 45), 13, Color{ 140, 165, 195, 200 });
 
     if (isMousePressed) {
         if (playHovered) {

@@ -20,6 +20,7 @@ g++ -std=c++17 -O2 -static ^
     src\world\Map.cpp ^
     src\world\WaveManager.cpp ^
     src\rendering\AssetManager.cpp ^
+    src\rendering\FontManager.cpp ^
     src\entities\Player.cpp ^
     src\entities\PlayerRenderer.cpp ^
     src\entities\Enemy.cpp ^

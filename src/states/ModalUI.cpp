@@ -4,43 +4,13 @@
 #include "../combat/Armor.hpp"
 #include "../combat/Totem.hpp"
 #include "../rendering/AssetManager.hpp"
+#include "../rendering/FontManager.hpp"
 #include "../entities/Player.hpp"
 #include <cmath>
 #include <sstream>
 
 static void DrawJournalWrappedText(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color) {
-    std::istringstream stream(text);
-    std::string paragraph;
-    int currentY = posY;
-
-    while (std::getline(stream, paragraph)) {
-        if (paragraph.empty()) {
-            currentY += fontSize + lineSpacing;
-            continue;
-        }
-
-        std::istringstream wordStream(paragraph);
-        std::string word;
-        std::string currentLine = "";
-
-        while (wordStream >> word) {
-            std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
-            int testWidth = MeasureText(testLine.c_str(), fontSize);
-
-            if (testWidth > maxLineWidth && !currentLine.empty()) {
-                DrawText(currentLine.c_str(), posX, currentY, fontSize, color);
-                currentY += fontSize + lineSpacing;
-                currentLine = word;
-            } else {
-                currentLine = testLine;
-            }
-        }
-
-        if (!currentLine.empty()) {
-            DrawText(currentLine.c_str(), posX, currentY, fontSize, color);
-            currentY += fontSize + lineSpacing;
-        }
-    }
+    FontManager::DrawTextWrapped(text, posX, posY, maxLineWidth, fontSize, lineSpacing, color, GameFont::BODY);
 }
 
 bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
@@ -968,16 +938,16 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
     // Top Header
     float headerY = cardY + 24.0f;
     const char* actTag = "CHAPTER 1  //  ACT III";
-    int actW = MeasureText(actTag, 13);
-    DrawText(actTag, (int)(cardX + (cardW - actW) * 0.5f), (int)headerY, 13, Color{ 255, 205, 80, 240 });
+    int actW = FontManager::MeasureText(actTag, 13, GameFont::TITLE);
+    FontManager::DrawText(actTag, (int)(cardX + (cardW - actW) * 0.5f), (int)headerY, 13, Color{ 255, 205, 80, 240 }, GameFont::TITLE);
 
     const char* realmTitle = "THE FORTIFIED REALM OF ZYPHDEN";
-    int titleW = MeasureText(realmTitle, 24);
-    DrawText(realmTitle, (int)(cardX + (cardW - titleW) * 0.5f), (int)headerY + 22, 24, Color{ 240, 246, 255, 255 });
+    int titleW = FontManager::MeasureText(realmTitle, 26, GameFont::TITLE);
+    FontManager::DrawText(realmTitle, (int)(cardX + (cardW - titleW) * 0.5f), (int)headerY + 22, 26, Color{ 240, 246, 255, 255 }, GameFont::TITLE);
 
-    const char* realmSubtitle = "Guardian of the Gale Winds  *  Seat of King Kreptu's Court";
-    int subW = MeasureText(realmSubtitle, 13);
-    DrawText(realmSubtitle, (int)(cardX + (cardW - subW) * 0.5f), (int)headerY + 52, 13, Color{ 130, 175, 225, 210 });
+    const char* realmSubtitle = "Guardian of the Gale Winds  •  Seat of King Kreptu's Court";
+    int subW = FontManager::MeasureText(realmSubtitle, 13);
+    FontManager::DrawText(realmSubtitle, (int)(cardX + (cardW - subW) * 0.5f), (int)headerY + 52, 13, Color{ 130, 175, 225, 210 });
 
     DrawLine((int)cardX + 40, (int)headerY + 74, (int)(cardX + cardW - 40), (int)headerY + 74, Color{ 48, 68, 98, 180 });
 
@@ -1019,20 +989,20 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
 
         // Placeholder Badge and Instructions
         const char* phTitle = "[ TRANSITION SCREEN ARTWORK ASSET PLACEHOLDER ]";
-        int phW = MeasureText(phTitle, 16);
-        DrawText(phTitle, (int)(cx - phW * 0.5f), (int)cy - 65, 16, Color{ 120, 200, 255, 240 });
+        int phW = FontManager::MeasureText(phTitle, 16);
+        FontManager::DrawText(phTitle, (int)(cx - phW * 0.5f), (int)cy - 65, 16, Color{ 120, 200, 255, 240 });
 
         const char* phDrop = "Drop custom transition illustration into: assets/zyphden_transition.png";
-        int dropW = MeasureText(phDrop, 13);
-        DrawText(phDrop, (int)(cx - dropW * 0.5f), (int)cy + 55, 13, Color{ 220, 230, 245, 230 });
+        int dropW = FontManager::MeasureText(phDrop, 13);
+        FontManager::DrawText(phDrop, (int)(cx - dropW * 0.5f), (int)cy + 55, 13, Color{ 220, 230, 245, 230 });
 
         const char* phSpecs = "Supported format: 1920x1080 (16:9) or 1280x720 PNG / JPG (Auto-scaled)";
-        int specsW = MeasureText(phSpecs, 11);
-        DrawText(phSpecs, (int)(cx - specsW * 0.5f), (int)cy + 75, 11, Color{ 130, 165, 205, 190 });
+        int specsW = FontManager::MeasureText(phSpecs, 11);
+        FontManager::DrawText(phSpecs, (int)(cx - specsW * 0.5f), (int)cy + 75, 11, Color{ 130, 165, 205, 190 });
 
         const char* phNote = "The engine will automatically detect and render your illustration here upon load.";
-        int noteW = MeasureText(phNote, 11);
-        DrawText(phNote, (int)(cx - noteW * 0.5f), (int)cy + 95, 11, Color{ 255, 215, 80, 200 });
+        int noteW = FontManager::MeasureText(phNote, 11);
+        FontManager::DrawText(phNote, (int)(cx - noteW * 0.5f), (int)cy + 95, 11, Color{ 255, 215, 80, 200 });
     }
 
     // Flavor Narrative Lore Box
@@ -1059,8 +1029,8 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
     DrawRectangleRoundedLines(btnRec, 0.2f, 6, btnBorder);
 
     const char* btnLabel = "ENTER CITY GATES [SPACE / ENTER]";
-    int btnLabelW = MeasureText(btnLabel, 14);
-    DrawText(btnLabel, (int)(btnX + (btnW - btnLabelW) * 0.5f), (int)btnY + 17, 14, isHover ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
+    int btnLabelW = FontManager::MeasureText(btnLabel, 14, GameFont::TITLE);
+    FontManager::DrawText(btnLabel, (int)(btnX + (btnW - btnLabelW) * 0.5f), (int)btnY + 17, 14, isHover ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 }, GameFont::TITLE);
 
     bool confirmed = (isHover && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
     if (confirmed) {

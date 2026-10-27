@@ -1,6 +1,7 @@
 #include "HUD.hpp"
 #include "../combat/Weapon.hpp"
 #include "../entities/Player.hpp"
+#include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
 
@@ -734,54 +735,17 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRoundedLines(Rectangle{ boxX + 3.0f, boxY + 3.0f, boxW - 6.0f, boxH - 6.0f }, 0.12f, 6, Color{ 45, 60, 85, 180 });
 
     // Speaker Name Header (Golden/Accent)
-    DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 16, accentColor);
+    FontManager::DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 17, accentColor, GameFont::TITLE);
 
     // Page indicator top-right
     char pageBuf[32];
     snprintf(pageBuf, sizeof(pageBuf), "Page %d / %d", currentPage + 1, (int)pages.size());
-    DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
+    FontManager::DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
 
-    // Word-wrapped text rendering
+    // Word-wrapped text rendering with authentic medieval typography
     const std::string& text = pages[currentPage];
     const float maxLineWidth = boxW - 56.0f;
-    const int fontSize = 14;
-    const int lineSpacing = 22;
-
-    std::vector<std::string> lines;
-    std::string currentLine = "";
-    std::string currentWord = "";
-
-    for (size_t i = 0; i <= text.length(); ++i) {
-        char c = (i < text.length()) ? text[i] : ' ';
-        if (c == ' ' || c == '\n' || i == text.length()) {
-            if (!currentWord.empty()) {
-                std::string testLine = currentLine.empty() ? currentWord : (currentLine + " " + currentWord);
-                if (MeasureText(testLine.c_str(), fontSize) > maxLineWidth) {
-                    if (!currentLine.empty()) lines.push_back(currentLine);
-                    currentLine = currentWord;
-                } else {
-                    currentLine = testLine;
-                }
-                currentWord = "";
-            }
-            if (c == '\n') {
-                lines.push_back(currentLine);
-                currentLine = "";
-            }
-        } else {
-            currentWord += c;
-        }
-    }
-    if (!currentLine.empty()) {
-        lines.push_back(currentLine);
-    }
-
-    // Render dialogue lines
-    int textY = (int)boxY + 48;
-    for (const auto& line : lines) {
-        DrawText(line.c_str(), (int)boxX + 28, textY, fontSize, Color{ 235, 240, 252, 250 });
-        textY += lineSpacing;
-    }
+    FontManager::DrawTextWrapped(text, (int)boxX + 28, (int)boxY + 46, (int)maxLineWidth, 15, 6, Color{ 235, 240, 252, 250 }, GameFont::BODY);
 
     // Navigation Buttons at Bottom
     const float btnY = boxY + boxH - 40.0f;
@@ -797,7 +761,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
     DrawRectangleRounded(prevBtn, 0.25f, 4, prevBg);
     DrawRectangleRoundedLines(prevBtn, 0.25f, 4, prevBorder);
-    DrawText("< PREV [A]", (int)prevBtn.x + 16, (int)prevBtn.y + 7, 11, prevText);
+    int prevW = FontManager::MeasureText("< PREV [A]", 11);
+    FontManager::DrawText("< PREV [A]", (int)(prevBtn.x + (prevBtn.width - prevW) * 0.5f), (int)prevBtn.y + 7, 11, prevText);
 
     if (hasPrev && ((prevHover && isMousePressed) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))) {
         currentPage--;
@@ -814,7 +779,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRounded(nextBtn, 0.25f, 4, nextBg);
     DrawRectangleRoundedLines(nextBtn, 0.25f, 4, nextBorder);
     const char* nextLabel = isLastPage ? "FINISH [SPACE]" : "NEXT > [D]";
-    DrawText(nextLabel, (int)nextBtn.x + 18, (int)nextBtn.y + 7, 11, nextText);
+    int nextW = FontManager::MeasureText(nextLabel, 11);
+    FontManager::DrawText(nextLabel, (int)(nextBtn.x + (nextBtn.width - nextW) * 0.5f), (int)nextBtn.y + 7, 11, nextText);
 
     if ((nextHover && isMousePressed) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_SPACE)) {
         if (!isLastPage) {
@@ -833,7 +799,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
     DrawRectangleRounded(closeBtn, 0.25f, 4, closeBg);
     DrawRectangleRoundedLines(closeBtn, 0.25f, 4, closeBorder);
-    DrawText("CLOSE [ESC]", (int)closeBtn.x + 16, (int)closeBtn.y + 7, 11, closeText);
+    int closeW = FontManager::MeasureText("CLOSE [ESC]", 11);
+    FontManager::DrawText("CLOSE [ESC]", (int)(closeBtn.x + (closeBtn.width - closeW) * 0.5f), (int)closeBtn.y + 7, 11, closeText);
 
     if (closeHover && isMousePressed) {
         return false;
@@ -844,16 +811,12 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
 void HUD::DrawGameOver(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 20, 5, 8, 210 });
-    int titleW = MeasureText("FALLEN IN BATTLE", 38);
-    DrawText("FALLEN IN BATTLE", (windowWidth - titleW) / 2, windowHeight / 2 - 40, 38, Color{ 255, 50, 60, 255 });
-    int subW = MeasureText("Press [R] to Respawn  |  [L] Return to Lobby", 18);
-    DrawText("Press [R] to Respawn  |  [L] Return to Lobby", (windowWidth - subW) / 2, windowHeight / 2 + 18, 18, Color{ 220, 225, 240, 230 });
+    FontManager::DrawTextTitleCentered("FALLEN IN BATTLE", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 50, 60, 255 });
+    FontManager::DrawTextCentered("Press [R] to Respawn  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 220, 225, 240, 230 });
 }
 
 void HUD::DrawVictory(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 210 });
-    int titleW = MeasureText("ARENA CLEARED", 38);
-    DrawText("ARENA CLEARED", (windowWidth - titleW) / 2, windowHeight / 2 - 40, 38, Color{ 255, 225, 80, 255 });
-    int subW = MeasureText("Press [R] to Replay  |  [L] Return to Lobby", 18);
-    DrawText("Press [R] to Replay  |  [L] Return to Lobby", (windowWidth - subW) / 2, windowHeight / 2 + 18, 18, Color{ 210, 240, 225, 230 });
+    FontManager::DrawTextTitleCentered("ARENA CLEARED", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 225, 80, 255 });
+    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 210, 240, 225, 230 });
 }

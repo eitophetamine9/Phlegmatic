@@ -1,5 +1,6 @@
 #include "Cutscene.hpp"
 #include "../core/SoundFX.hpp"
+#include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <sstream>
 
@@ -94,54 +95,7 @@ bool Cutscene::Update(float dt) {
 }
 
 void Cutscene::DrawWrappedText(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, int maxChars) const {
-    std::istringstream stream(text);
-    std::string paragraph;
-    int currentY = posY;
-    int charsDrawn = 0;
-
-    while (std::getline(stream, paragraph)) {
-        if (paragraph.empty()) {
-            currentY += fontSize + lineSpacing;
-            continue;
-        }
-
-        std::istringstream wordStream(paragraph);
-        std::string word;
-        std::string currentLine = "";
-
-        while (wordStream >> word) {
-            std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
-            int testWidth = MeasureText(testLine.c_str(), fontSize);
-
-            if (testWidth > maxLineWidth && !currentLine.empty()) {
-                // Print current line
-                if (maxChars < 0 || charsDrawn < maxChars) {
-                    int printLen = (maxChars < 0) ? (int)currentLine.length() : (int)fminf((float)currentLine.length(), (float)(maxChars - charsDrawn));
-                    if (printLen > 0) {
-                        std::string sub = currentLine.substr(0, printLen);
-                        DrawText(sub.c_str(), posX, currentY, fontSize, color);
-                        charsDrawn += printLen;
-                    }
-                }
-                currentY += fontSize + lineSpacing;
-                currentLine = word;
-            } else {
-                currentLine = testLine;
-            }
-        }
-
-        if (!currentLine.empty()) {
-            if (maxChars < 0 || charsDrawn < maxChars) {
-                int printLen = (maxChars < 0) ? (int)currentLine.length() : (int)fminf((float)currentLine.length(), (float)(maxChars - charsDrawn));
-                if (printLen > 0) {
-                    std::string sub = currentLine.substr(0, printLen);
-                    DrawText(sub.c_str(), posX, currentY, fontSize, color);
-                    charsDrawn += printLen;
-                }
-            }
-            currentY += fontSize + lineSpacing;
-        }
-    }
+    FontManager::DrawTextWrapped(text, posX, posY, maxLineWidth, fontSize, lineSpacing, color, GameFont::BODY, maxChars);
 }
 
 void Cutscene::Draw(int windowWidth, int windowHeight) const {
@@ -188,12 +142,12 @@ void Cutscene::Draw(int windowWidth, int windowHeight) const {
 
     // Header: CHRONICLES OF TYDESHIRE
     const char* subHeader = "— CHRONICLES OF TYDESHIRE —";
-    int shW = MeasureText(subHeader, 13);
-    DrawText(subHeader, (int)(cardX + (cardW - shW) * 0.5f), (int)cardY + 36, 13, Color{ 200, 175, 120, 200 });
+    int shW = FontManager::MeasureText(subHeader, 14, GameFont::TITLE);
+    FontManager::DrawText(subHeader, (int)(cardX + (cardW - shW) * 0.5f), (int)cardY + 36, 14, Color{ 200, 175, 120, 200 }, GameFont::TITLE);
 
     // Act Title
-    int titleW = MeasureText(seg.actTitle.c_str(), 24);
-    DrawText(seg.actTitle.c_str(), (int)(cardX + (cardW - titleW) * 0.5f), (int)cardY + 62, 24, seg.accentColor);
+    int titleW = FontManager::MeasureText(seg.actTitle.c_str(), 26, GameFont::TITLE);
+    FontManager::DrawText(seg.actTitle.c_str(), (int)(cardX + (cardW - titleW) * 0.5f), (int)cardY + 62, 26, seg.accentColor, GameFont::TITLE);
 
     // Decorative divider line
     float divHalfW = 180.0f;
@@ -225,8 +179,8 @@ void Cutscene::Draw(int windowWidth, int windowHeight) const {
 
     // Interactive prompt
     const char* advancePrompt = (visibleChars < (int)seg.bodyText.length()) ? "[SPACE / CLICK] Reveal Text" : "[SPACE / CLICK] Continue";
-    int apW = MeasureText(advancePrompt, 13);
-    DrawText(advancePrompt, (int)(cardX + (cardW - apW) * 0.5f), (int)cardY + cardH - 36, 13, Color{ 180, 210, 240, 220 });
+    int apW = FontManager::MeasureText(advancePrompt, 13);
+    FontManager::DrawText(advancePrompt, (int)(cardX + (cardW - apW) * 0.5f), (int)cardY + cardH - 36, 13, Color{ 180, 210, 240, 220 });
 
     // Top Right Skip Button
     Vector2 mousePos = GetMousePosition();
@@ -237,6 +191,6 @@ void Cutscene::Draw(int windowWidth, int windowHeight) const {
     DrawRectangleRoundedLines(skipRec, 0.25f, 4, isSkipHov ? Color{ 120, 220, 255, 255 } : Color{ 60, 80, 115, 200 });
 
     const char* skipText = "SKIP PROLOGUE [ESC]";
-    int stW = MeasureText(skipText, 11);
-    DrawText(skipText, (int)(skipRec.x + (skipRec.width - stW) * 0.5f), (int)(skipRec.y + 12), 11, isSkipHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 215, 240, 220 });
+    int stW = FontManager::MeasureText(skipText, 11);
+    FontManager::DrawText(skipText, (int)(skipRec.x + (skipRec.width - stW) * 0.5f), (int)(skipRec.y + 12), 11, isSkipHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 215, 240, 220 });
 }

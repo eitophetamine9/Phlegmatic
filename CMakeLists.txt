@@ -11,6 +11,7 @@ set(SOURCES
     src/world/Map.cpp
     src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp
+    src/rendering/FontManager.cpp
     src/entities/Player.cpp
     src/entities/PlayerRenderer.cpp
     src/entities/Enemy.cpp
@@ -25,6 +26,8 @@ set(SOURCES
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp
     src/states/RuinedCastleHandler.cpp
+    src/states/CrossroadsHandler.cpp
+    src/states/ZyphdenHandler.cpp
     src/states/Game.cpp
 )
 

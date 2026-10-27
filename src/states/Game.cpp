@@ -1,6 +1,7 @@
 #include "Game.hpp"
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
+#include "../rendering/FontManager.hpp"
 #include "raymath.h"
 #include <cmath>
 #include <string>
@@ -12,6 +13,7 @@ Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), 
 Game::~Game() {
     SoundFX::Close();
     assetManager.Unload();
+    FontManager::Unload();
     CloseWindow();
 }
 
@@ -22,6 +24,7 @@ void Game::Init() {
     SetTargetFPS(Config::TARGET_FPS);
 
     SoundFX::Init();
+    FontManager::Init();
     assetManager.Init();
 
     pedestals.clear();
