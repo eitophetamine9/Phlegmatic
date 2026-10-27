@@ -8,6 +8,7 @@ set(SOURCES
     src/main.cpp
     src/core/SoundFX.cpp
     src/core/Particles.cpp
+    src/core/SaveManager.cpp
     src/world/Map.cpp
     src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp

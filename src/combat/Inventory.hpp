@@ -86,6 +86,33 @@ public:
         return false;
     }
 
+    // Currency: Shingles
+    int GetShingles() const { return shingles; }
+    void SetShingles(int count) { shingles = count >= 0 ? count : 0; }
+    void AddShingles(int count) { shingles += count; }
+    bool SpendShingles(int count) {
+        if (shingles >= count) {
+            shingles -= count;
+            return true;
+        }
+        return false;
+    }
+
+    // Weapon Upgrades (+0, +1, +2)
+    int GetWeaponUpgrade(WeaponType type) const {
+        int idx = (int)type;
+        if (idx >= 0 && idx < 5) return weaponUpgradeLevel[idx];
+        return 0;
+    }
+    void SetWeaponUpgrade(WeaponType type, int level) {
+        int idx = (int)type;
+        if (idx >= 0 && idx < 5) weaponUpgradeLevel[idx] = level;
+    }
+    void UpgradeWeapon(WeaponType type) {
+        int idx = (int)type;
+        if (idx >= 0 && idx < 5) weaponUpgradeLevel[idx]++;
+    }
+
 private:
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;
@@ -98,4 +125,6 @@ private:
     std::vector<QuestItem> questItems;
 
     int healthPotions = 1; // Default starting health potions
+    int shingles = 0;      // Currency: Shingles
+    int weaponUpgradeLevel[5] = { 0 };
 };

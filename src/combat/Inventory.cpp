@@ -23,8 +23,12 @@ void Inventory::InitDefault() {
     equippedTotem = TotemType::NONE;
     unlockedTotems.push_back(TotemType::NONE);
 
-    // Default health potions
+    // Default health potions & currency
     healthPotions = 1;
+    shingles = 0;
+    for (int i = 0; i < 5; ++i) {
+        weaponUpgradeLevel[i] = 0;
+    }
 
     // Initial quest item: Knight's Signet
     questItems.push_back({

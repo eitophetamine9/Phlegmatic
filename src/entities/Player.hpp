@@ -7,6 +7,7 @@
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 #include <vector>
+#include <cmath>
 
 class Player {
 public:
@@ -43,6 +44,7 @@ public:
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     float GetHealth() const { return health; }
+    void SetHealth(float h) { health = fminf(h, GetMaxHealth()); }
     float GetMaxHealth() const;
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }

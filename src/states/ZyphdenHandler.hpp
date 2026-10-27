@@ -89,6 +89,7 @@ public:
     );
 
     bool HasDefeatedLenon() const { return lenonDefeated; }
+    void SetLenonDefeated(bool d) { lenonDefeated = d; }
 
 private:
     // Core NPCs

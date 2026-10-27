@@ -36,10 +36,15 @@ private:
     void EnterZyphden();
     void EnterLobby();
     void EnterArena();
+    void SaveActiveGame();
+    void LoadActiveGame(int slotIndex);
 
     GameState currentState;
     bool showControlsModal;
     bool showInventoryModal;
+    bool showSlotModal;
+    int deletingSlotIndex;
+    bool isRestoringSave;
     int inventoryActiveTab;
     int inventorySelectedFragment;
 

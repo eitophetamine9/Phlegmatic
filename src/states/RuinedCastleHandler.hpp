@@ -52,6 +52,7 @@ public:
 
     bool IsZilEncounterActive() const { return zilEncounterActive; }
     bool IsZilDefeated() const { return zilDefeated; }
+    void SetZilDefeated(bool d) { zilDefeated = d; }
     bool HasUsedZilRetry() const { return hasUsedZilRetry; }
     bool ShowZilDefeatModal() const { return showZilDefeatModal; }
 

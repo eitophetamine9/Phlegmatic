@@ -3,8 +3,8 @@
 #include "HUD.hpp"
 #include "ModalUI.hpp"
 
-int GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked) {
-    return TitleUI::Draw(windowWidth, windowHeight, mousePos, isMousePressed, isArenaUnlocked);
+int GameUI::DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked, bool& showSlotModal, int& deletingSlotIndex) {
+    return TitleUI::Draw(windowWidth, windowHeight, mousePos, isMousePressed, isArenaUnlocked, showSlotModal, deletingSlotIndex);
 }
 
 bool GameUI::DrawControlsModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed) {
