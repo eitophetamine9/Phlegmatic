@@ -42,8 +42,9 @@
 | **Heavy Cleave** | `Right Mouse Button` | High-damage signature moves (multi-stage cleaves, lunges, shockwaves). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
 | **Timed Parry** | `F Key` | Active guard window. Staggers melee foes and **reflects incoming projectiles**. |
+| **Phlegmatic Trance** | `SPACE Key` | Active at 100 Composure. **5.0s invulnerability, zero stamina cost & auto-deflection aura**. |
 | **Health Potion** | `1 Key` or `H Key` | Consumes 1 elixir to heal **+45 HP** immediately (**7.0s cooldown**). |
-| **Interact / Advance** | `E Key` / `Space` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
+| **Interact / Advance** | `E Key` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
 | **Dialogue Page** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
@@ -51,6 +52,55 @@
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
 | **Title Screen** | `~ Key` (Tilde / Grave) | Instantly return to the Title Screen from any state. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the trial. |
+
+---
+
+## What's New in Version 0.0.1b
+
+### 1. Medieval Typography & UTF-8 Character Sanitizer
+* **Custom Typography Engine (`FontManager`)**: Replaced default fonts with an atmospheric medieval typeface tailored for dark fantasy roleplay.
+* **Glyph Fallback & Sanitizer**: Embedded unicode sanitizer ensures special punctuation, dashes, quotes, and symbols render cleanly without question mark (`?`) artifacts.
+
+### 2. Multi-Slot Save Architecture
+* **3-Slot Save Profiles**: Manage three independent campaign saves (`save_slot_1.dat`, `save_slot_2.dat`, `save_slot_3.dat`).
+* **Title Record Modal**: Visual slot selector on the Title Screen displaying active chapter location, equipped armaments, and play metrics with safe deletion confirmation.
+* **Automatic State Persistence**: Real-time autosaving across transitions, boss milestones, and vendor purchases.
+
+### 3. Silver Shingles Economy & Physical Loot Drops
+* **Currency System**: Earn **Silver Shingles** by defeating corrupted foes and exploring the realms of Tydeshire.
+* **Physical Coin Drops**: Slain enemies drop physical shining silver coins with magnetic vacuum attraction toward the player.
+* **Roaming Enemy Respawns**: Overworld hostiles respawn on periodic cycles, allowing deliberate resource farming.
+
+### 4. Blacksmith Varek's Forge & Weapon Upgrades
+* **Interactive Forge Modal**: Visit Blacksmith Varek in Zyphden to temper and sharpen your arsenal.
+* **Weapon Upgrade Tiers**:
+  * **Standard (Base)**: Baseline weapon attributes.
+  * **Tier 1 (+1 Refined)**: +20% base damage, enhanced poise multipliers.
+  * **Tier 2 (+2 Masterwork)**: Critical damage bonuses and extended attack reach.
+  * **Consecrated Relic**: High armor penetration and sacred projectile waves.
+
+### 5. Tavernkeep Eldon's Provisions
+* **Hearthside Restock Counter**: Speak with Tavernkeep Eldon in Zyphden to purchase replenishing **Health Elixirs** using Silver Shingles.
+
+### 6. Phlegmatic Composure & Four Humors Alignment
+* **Composure Gauge (0-100)**:
+  * Master deliberate combat: gains +25 on timed parries, +15 on dash evasions, +30 on quenching Choleric frenzy, and +8/s in Patient Stance.
+  * Depleted by unmitigated heavy hits (-25) and attacking when exhausted (-15).
+* **Poise Tiers**:
+  * **Discomposed (<30)**: Red aura, +15% stagger duration vulnerability.
+  * **Composed (30-80)**: Balanced combat equilibrium.
+  * **Stoic Poise (80-100)**: Golden radiance granting complete **Hyper-Armor** (immunity to stagger and bleed during heavy attack windups).
+* **Active Ability — Phlegmatic Trance (`[SPACE]`)**:
+  * Unleashed at 100 Composure. Grants 5.0 seconds of complete invulnerability, zero stamina consumption, and an automatic 120px projectile reflection sphere.
+* **Medieval Four Humors Alignment**:
+  * **Choleric (Fire)**: High aggression; parrying quenches their fury (-30% speed, 2.0x stagger).
+  * **Melancholic (Earth/Void)**: Heavy defense shells; shattered by War Mace or heavy cleaves (-35% armor).
+  * **Sanguine (Blood)**: Inflicts arterial bleed; resisted by Stoic Poise.
+  * **Phlegmatic (Water)**: Calculated composure and steadfast discipline.
+
+### 7. Combat Juice & Feedback
+* **Hit-Stop Micro-Pause**: 0.04s - 0.06s freeze-frame impacts on parry deflections, heavy cleaves, and armor breaks.
+* **Directional Camera Shake**: Smooth directional impulse and recoil physics reacting to the angle of each heavy strike and deflection.
 
 ---
 
