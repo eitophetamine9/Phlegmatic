@@ -14,6 +14,7 @@
 </div>
 
 ## Table of Contents
+- [Release Highlights: Version 0.0.1b](#release-highlights-version-001b)
 - [1. Overview & Lore of Tydeshire](#1-overview--lore-of-tydeshire)
   - [The Great Unification & The Five Crowns](#the-great-unification--the-five-crowns)
   - [The Fracture & The Long Road](#the-fracture--the-long-road)
@@ -55,6 +56,27 @@
   - [Automated MinGW-w64 Batch Script](#automated-mingw-w64-batch-script)
   - [CMake & Ninja Build](#cmake--ninja-build)
   - [Precompiled Executables](#precompiled-executables)
+- [9. Roadmap & Version 0.0.1c Technical Plans](#9-roadmap--version-001c-technical-plans)
+  - [Font Legibility & Dynamic UI Scaling](#font-legibility--dynamic-ui-scaling)
+  - [Exclusive Fullscreen & Aspect Ratio Preservation](#exclusive-fullscreen--aspect-ratio-preservation)
+  - [Act IV: Northern Marches & Realm Border Crossings](#act-iv-northern-marches--realm-border-crossings)
+  - [Synthesized Acoustic Ambience & Audio Sliders](#synthesized-acoustic-ambience--audio-sliders)
+
+---
+
+## Release Highlights: Version 0.0.1b
+
+A comprehensive breakdown of all systems, gameplay mechanics, visual overhauls, and architectural enhancements introduced in Version 0.0.1b:
+
+* **Medieval Typography Engine**: Unified custom `FontManager` with custom glyph mappings, special character sanitization, and graceful ASCII fallbacks across all UI states, HUD elements, and dialogues.
+* **Multi-Slot Persistence**: Independent 3-slot save system (`save_slot_1.json`, `save_slot_2.json`, `save_slot_3.json`) with automated background state saving and Title Screen slot selection with chapter metadata and timestamps.
+* **Silver Shingles Economy & Physical Loot**: Physical ground coin drops with arc and bounce trajectory physics, vacuum magnet attraction toward the player, roaming overworld enemy respawns, and persistent HUD currency counters.
+* **Blacksmith Forge & Tavern**: Introduced Blacksmith Varek with weapon upgrade tiers (Base, +1 Refined, +2 Masterwork, Consecrated Relic) and Tavernkeep Eldon offering consumable provisions, housed in dedicated interior environments.
+* **Phlegmatic Composure & Four Humors**: Composure gauge (0-100), passive composure tiers (Agitated, Steady, Resolute, Phlegmatic), Phlegmatic Trance active invulnerability aura (`[SPACE]` / `[F]`), and humoral alignments (Sanguine, Choleric, Melancholic, Phlegmatic) with Quenching and Shattering mechanics.
+* **Kinetic Combat Juice**: Hit-stop micro-pauses (0.04s - 0.06s) on heavy impact strikes and parries, paired with directional camera recoil impulses and trauma decay.
+* **Animated Grimoire Lore Journal**: Replaced flat modals with a 3D animated dual-page medieval book featuring realistic page curl and shadow casting, illuminated drop caps, runic seal plaques, and explicit location discovery clues for all 10 fragments across Tydeshire.
+* **Zyphden Gate Transition Fix & Artwork**: Resolved input coordinate mismatches during resolution scaling, enabled multi-key confirmation (`SPACE`, `ENTER`, `E`, and mouse click), and integrated custom 16:9 illustration of limestone ramparts at `assets/zyphden_transition.png`.
+* **World Progression & Dialogue Polish**: Centered King Kreptu upon his royal dais with quest gating, conversational duel restarts with Knight Lenon after defeat, universal proximity-based prompt decluttering, and permanent suppression of tutorial enemy respawns following Zil's defeat.
 
 ---
 
@@ -568,3 +590,31 @@ Standalone executables are bundled directly in the repository:
 
 > [!IMPORTANT]
 > **REMINDER — Clean Rebuilds**: If you modify core struct layouts or headers, run `build.bat` to trigger a clean GCC compilation. The script compiles all translation units with optimization level `-O2` in under 5 seconds.
+
+---
+
+## 9. Roadmap & Version 0.0.1c Technical Plans
+
+### Font Legibility & Dynamic UI Scaling
+To guarantee optimal readability across varying screen sizes, 4K monitors, and handheld/television distances, Version 0.0.1c introduces a multi-tiered typography scaling and enhancement architecture:
+* **Font Scaling Options**: A dedicated display setting allowing players to toggle between `Standard (100%)`, `Enlarged (125%)`, and `High-Visibility (150%)` text sizes across all UI components.
+* **Dialogue Prose Expansion**: Increasing base narrative font point sizes from 13/14pt to 16/18pt, paired with responsive word-wrapping formulas to preserve dialogue card composition.
+* **Text Contrast & Plaque Scrims**: Backing in-world interaction hints and subtitles with semi-translucent parchment/slate scrims and outline drop-shadows (`FontManager::DrawTextShadow`) to eliminate background collision noise.
+* **High-Clarity HUD Glyphs**: Enlarged, bold render passes for Health, Stamina, Composure, Shingles, and item cooldown timers.
+
+### Exclusive Fullscreen & Aspect Ratio Preservation
+Version 0.0.1c will implement robust multi-monitor and fullscreen windowing:
+* **Seamless Fullscreen Toggle**: Instant fullscreen switching via `F11`, `Alt + Enter`, or the in-game Settings/Pause menu.
+* **Virtual Render Target & Letterboxing**:
+  * The game renders to an internal 16:9 virtual framebuffer (e.g. 1280x720 or 1920x1080) and scales to match desktop display resolutions (1080p, 1440p, 4K, 21:9 ultrawide) using clean integer or smooth bilinear scaling.
+  * Preserves aspect ratio with ornamental filigree or matte black letterbox/pillarbox bars, preventing horizontal stretching.
+* **Input Coordinate Transformation**: Automatically maps windowed mouse coordinates through the inverse projection matrix (`GetScreenToWorld2D`), ensuring accurate weapon aiming, telegraph reticles, and UI button hit-detection in all display modes.
+
+### Act IV: Northern Marches & Realm Border Crossings
+* **Realm Border Gates**: Opening the northern mountain passes of Zyphden leading into Azshden and Fleurshden.
+* **Environmental Weather Physics**: Dynamic gale wind physics that deflect lightweight projectile paths, combined with alpine snow particle shaders.
+* **New Hostile Factions**: Royal Vanguard Deserters wielding halberds, Frost Cultists casting ice barriers, and automated Siege Ballistas.
+
+### Synthesized Acoustic Ambience & Audio Sliders
+* **Procedural Environmental Ambience**: Continuous synthesized background soundscapes (whistling wind drafts, cathedral reverberations, and tavern fireplace crackle).
+* **Audio Mixer Configuration**: Dedicated Master, Sound Effects, and Ambience volume control sliders.

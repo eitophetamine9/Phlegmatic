@@ -54,52 +54,17 @@
 
 ---
 
-## What's New in Version 0.0.1b
+## Current Version: 0.0.1b
 
-### 1. Medieval Typography & UTF-8 Character Sanitizer
-* **Custom Typography Engine (`FontManager`)**: Replaced default fonts with an atmospheric medieval typeface tailored for dark fantasy roleplay.
-* **Glyph Fallback & Sanitizer**: Embedded unicode sanitizer ensures special punctuation, dashes, quotes, and symbols render cleanly without question mark (`?`) artifacts.
+Phlegmatic is currently in active development on **Version 0.0.1b**.
 
-### 2. Multi-Slot Save Architecture
-* **3-Slot Save Profiles**: Manage three independent campaign saves (`save_slot_1.dat`, `save_slot_2.dat`, `save_slot_3.dat`).
-* **Title Record Modal**: Visual slot selector on the Title Screen displaying active chapter location, equipped armaments, and play metrics with safe deletion confirmation.
-* **Automatic State Persistence**: Real-time autosaving across transitions, boss milestones, and vendor purchases.
+For detailed release notes, system mechanics breakdowns, math formulas, and lore codices for all features introduced in this build, please consult **[Version 0.0.1b Release Highlights in DOCUMENTATION.md](documentation.md#release-highlights-version-001b)**.
 
-### 3. Silver Shingles Economy & Physical Loot Drops
-* **Currency System**: Earn **Silver Shingles** by defeating corrupted foes and exploring the realms of Tydeshire.
-* **Physical Coin Drops**: Slain enemies drop physical shining silver coins with magnetic vacuum attraction toward the player.
-* **Roaming Enemy Respawns**: Overworld hostiles respawn on periodic cycles, allowing deliberate resource farming.
+---
 
-### 4. Blacksmith Varek's Forge & Weapon Upgrades
-* **Interactive Forge Modal**: Visit Blacksmith Varek in Zyphden to temper and sharpen your arsenal.
-* **Weapon Upgrade Tiers**:
-  * **Standard (Base)**: Baseline weapon attributes.
-  * **Tier 1 (+1 Refined)**: +20% base damage, enhanced poise multipliers.
-  * **Tier 2 (+2 Masterwork)**: Critical damage bonuses and extended attack reach.
-  * **Consecrated Relic**: High armor penetration and sacred projectile waves.
+## Roadmap: Planned for Version 0.0.1c
 
-### 5. Tavernkeep Eldon's Provisions
-* **Hearthside Restock Counter**: Speak with Tavernkeep Eldon in Zyphden to purchase replenishing **Health Elixirs** using Silver Shingles.
-
-### 6. Phlegmatic Composure & Four Humors Alignment
-* **Composure Gauge (0-100)**:
-  * Master deliberate combat: gains +25 on timed parries, +15 on dash evasions, +30 on quenching Choleric frenzy, and +8/s in Patient Stance.
-  * Depleted by unmitigated heavy hits (-25) and attacking when exhausted (-15).
-* **Poise Tiers**:
-  * **Discomposed (<30)**: Red aura, +15% stagger duration vulnerability.
-  * **Composed (30-80)**: Balanced combat equilibrium.
-  * **Stoic Poise (80-100)**: Golden radiance granting complete **Hyper-Armor** (immunity to stagger and bleed during heavy attack windups).
-* **Active Ability — Phlegmatic Trance (`[SPACE]`)**:
-  * Unleashed at 100 Composure. Grants 5.0 seconds of complete invulnerability, zero stamina consumption, and an automatic 120px projectile reflection sphere.
-* **Medieval Four Humors Alignment**:
-  * **Choleric (Fire)**: High aggression; parrying quenches their fury (-30% speed, 2.0x stagger).
-  * **Melancholic (Earth/Void)**: Heavy defense shells; shattered by War Mace or heavy cleaves (-35% armor).
-  * **Sanguine (Blood)**: Inflicts arterial bleed; resisted by Stoic Poise.
-  * **Phlegmatic (Water)**: Calculated composure and steadfast discipline.
-
-### 7. Combat Juice & Feedback
-* **Hit-Stop Micro-Pause**: 0.04s - 0.06s freeze-frame impacts on parry deflections, heavy cleaves, and armor breaks.
-* **Directional Camera Shake**: Smooth directional impulse and recoil physics reacting to the angle of each heavy strike and deflection.
+Upcoming technical enhancements, visual accessibility features (font size scaling and high-visibility options), fullscreen display modes with aspect-ratio preservation, Act IV northern realm expansion, and synthesized ambient soundscapes are documented in the **[Version 0.0.1c Technical Roadmap in DOCUMENTATION.md](documentation.md#9-roadmap--version-001c-technical-plans)**.
 
 ---
 
