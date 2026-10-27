@@ -914,7 +914,7 @@ void ZyphdenHandler::Render(
     float time = (float)GetTime();
 
     BeginMode2D(camera);
-    map.DrawFloor();
+    map.DrawFloor(player.GetPosition());
 
     if (inTavern) {
         // Tavern Interior Entities
@@ -998,7 +998,7 @@ void ZyphdenHandler::Render(
         enemy.DrawTelegraph();
     }
 
-    map.DrawWallsAndPillars();
+    map.DrawWallsAndPillars(player.GetPosition());
 
     for (const auto& proj : projectiles) {
         proj.Draw();

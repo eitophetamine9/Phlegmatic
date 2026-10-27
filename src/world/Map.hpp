@@ -28,8 +28,8 @@ public:
     GameMap();
 
     void Init(MapEnvironment env);
-    void DrawFloor() const;
-    void DrawWallsAndPillars() const;
+    void DrawFloor(Vector2 playerPos = { -9999.0f, -9999.0f }) const;
+    void DrawWallsAndPillars(Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 
     bool CheckCircleCollision(Vector2 pos, float radius) const;
     Vector2 ResolveCollision(Vector2 oldPos, Vector2 newPos, float radius) const;
@@ -49,13 +49,13 @@ private:
     bool gateOpen = false;
 
     void DrawRuinedCastleFloor() const;
-    void DrawRuinedCastleWalls() const;
-    void DrawCrossroadsFloor() const;
-    void DrawCrossroadsWalls() const;
+    void DrawRuinedCastleWalls(Vector2 playerPos) const;
+    void DrawCrossroadsFloor(Vector2 playerPos) const;
+    void DrawCrossroadsWalls(Vector2 playerPos) const;
     void DrawZyphdenFloor() const;
     void DrawZyphdenWalls() const;
     void DrawTavernFloor() const;
-    void DrawTavernWalls() const;
+    void DrawTavernWalls(Vector2 playerPos) const;
     void DrawForgeFloor() const;
     void DrawForgeWalls() const;
     void DrawRoyalKeepFloor() const;

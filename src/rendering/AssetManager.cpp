@@ -413,24 +413,32 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
 
     if (weapon == WeaponType::SWORD) {
         DrawSword({ weaponAnchor.x - 14.0f, weaponAnchor.y + 14.0f }, -45.0f, 38.0f, Color{ 240, 245, 255, 255 }, Color{ 0, 220, 255, 200 });
-        const char* name = "BROADSWORD";
-        int w = MeasureText(name, 11);
-        DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "BROADSWORD";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
     } else if (weapon == WeaponType::DAGGERS) {
         DrawDaggers({ weaponAnchor.x - 8.0f, weaponAnchor.y }, { weaponAnchor.x + 8.0f, weaponAnchor.y }, -60.0f, -120.0f, Color{ 180, 255, 220, 255 }, Color{ 60, 240, 180, 200 });
-        const char* name = "DUAL DAGGERS";
-        int w = MeasureText(name, 11);
-        DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "DUAL DAGGERS";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
     } else if (weapon == WeaponType::MACE) {
         DrawMace({ weaponAnchor.x - 12.0f, weaponAnchor.y + 14.0f }, -45.0f, 36.0f, Color{ 230, 180, 120, 255 }, Color{ 255, 140, 40, 200 });
-        const char* name = "WAR MACE";
-        int w = MeasureText(name, 11);
-        DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "WAR MACE";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
     } else if (weapon == WeaponType::TRUTH_SEEKER) {
         DrawSword({ weaponAnchor.x - 16.0f, weaponAnchor.y + 16.0f }, -45.0f, 44.0f, Color{ 255, 235, 140, 255 }, Color{ 255, 200, 50, 240 });
-        const char* name = "TRUTH SEEKER";
-        int w = MeasureText(name, 11);
-        DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, Color{ 255, 215, 70, 255 });
+        if (isSelected || isHovered) {
+            const char* name = "TRUTH SEEKER";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, Color{ 255, 215, 70, 255 });
+        }
     }
 
     if (isSelected) {

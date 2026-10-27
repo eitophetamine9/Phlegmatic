@@ -765,7 +765,7 @@ void Game::Render() {
         BeginMode2D(camera);
         map.DrawFloor();
 
-        portal.Draw(time, testArenaUnlocked);
+        portal.Draw(time, testArenaUnlocked, player.GetPosition());
 
         Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
         for (const auto& ped : pedestals) {
@@ -774,7 +774,7 @@ void Game::Render() {
             AssetManager::DrawWeaponPedestal(ped.position, ped.weapon, isSel, isHov, time);
         }
 
-        dummy.Draw();
+        dummy.Draw(player.GetPosition());
         map.DrawWallsAndPillars();
         player.Draw();
         particles.Draw();
@@ -818,7 +818,7 @@ void Game::Render() {
     map.DrawWallsAndPillars();
 
     for (const auto& b : arenaBandages) {
-        b.Draw();
+        b.Draw(player.GetPosition());
     }
 
     for (const auto& drop : lootDrops) {

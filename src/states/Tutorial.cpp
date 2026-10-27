@@ -601,15 +601,35 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
     // Dark backdrop overlay
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 8, 14, 215 });
 
-    float cardW = 680.0f;
-    float cardH = 370.0f;
+    // Pre-calculate body text height and split lines
+    std::vector<std::string> lines;
+    std::istringstream stream(popupBody);
+    std::string seg;
+    float bodyH = 0.0f;
+    while (std::getline(stream, seg)) {
+        lines.push_back(seg);
+        if (seg.empty()) {
+            bodyH += 12.0f;
+        } else {
+            bodyH += 22.0f;
+        }
+    }
+
+    const float cardW = 780.0f;
+    const float contentTop = 92.0f;
+    const float hintH = 44.0f;
+    const float btnH = 46.0f;
+    const float spacing = 16.0f;
+    float cardH = contentTop + bodyH + spacing + hintH + spacing + btnH + 24.0f;
+    if (cardH < 380.0f) cardH = 380.0f;
+
     float cardX = ((float)windowWidth - cardW) * 0.5f;
     float cardY = ((float)windowHeight - cardH) * 0.5f;
 
     // Outer backing card
-    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 16, 20, 30, 252 });
-    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 215, 175, 75, 240 });
-    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.045f, 8, Color{ 50, 68, 98, 180 });
+    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 16, 20, 30, 252 });
+    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 215, 175, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.035f, 8, Color{ 50, 68, 98, 180 });
 
     // Gold corner accents
     Color cornerCol = Color{ 255, 215, 80, 240 };
@@ -630,10 +650,8 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
     DrawLine((int)cardX + 36, (int)cardY + 74, (int)(cardX + cardW - 36), (int)cardY + 74, Color{ 140, 110, 50, 200 });
 
     // Body Text
-    std::istringstream stream(popupBody);
-    std::string paragraph;
-    int currentY = (int)cardY + 92;
-    while (std::getline(stream, paragraph)) {
+    int currentY = (int)cardY + (int)contentTop;
+    for (const auto& paragraph : lines) {
         if (paragraph.empty()) {
             currentY += 12;
             continue;
@@ -642,21 +660,22 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
         currentY += 22;
     }
 
-    // Keybindings highlight box
-    Rectangle hintRec = { cardX + 36.0f, cardY + 220.0f, cardW - 72.0f, 44.0f };
+    // Keybindings highlight box positioned below body text
+    Rectangle hintRec = { cardX + 36.0f, (float)currentY + spacing, cardW - 72.0f, hintH };
     DrawRectangleRounded(hintRec, 0.2f, 4, Color{ 24, 32, 48, 240 });
     DrawRectangleRoundedLines(hintRec, 0.2f, 4, Color{ 80, 120, 175, 200 });
-    DrawText(popupHint.c_str(), (int)cardX + 54, (int)cardY + 234, 13, Color{ 140, 230, 255, 255 });
+    int hw = MeasureText(popupHint.c_str(), 13);
+    DrawText(popupHint.c_str(), (int)(hintRec.x + (hintRec.width - hw) * 0.5f), (int)(hintRec.y + (hintRec.height - 13) * 0.5f), 13, Color{ 140, 230, 255, 255 });
 
-    // Button: Resume / Proceed
-    Rectangle btnRec = { cardX + (cardW - 300.0f) * 0.5f, cardY + 290.0f, 300.0f, 48.0f };
+    // Button: Resume / Proceed placed neatly below hint box
+    Rectangle btnRec = { cardX + (cardW - 300.0f) * 0.5f, hintRec.y + hintRec.height + spacing, 300.0f, btnH };
     bool hovered = CheckCollisionPointRec(mousePos, btnRec);
     DrawRectangleRounded(btnRec, 0.2f, 6, hovered ? Color{ 55, 85, 135, 255 } : Color{ 30, 48, 75, 240 });
     DrawRectangleRoundedLines(btnRec, 0.2f, 6, hovered ? Color{ 180, 230, 255, 255 } : Color{ 120, 180, 240, 220 });
 
     const char* btnLabel = "RESUME [SPACE / CLICK]";
     int bw = MeasureText(btnLabel, 14);
-    DrawText(btnLabel, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)btnRec.y + 16, 14, hovered ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
+    DrawText(btnLabel, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)(btnRec.y + (btnRec.height - 14) * 0.5f), 14, hovered ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
 
     bool dismiss = (isMousePressed && hovered) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
     if (dismiss) {

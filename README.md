@@ -11,12 +11,11 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-*Explore the overgrown fortifications of Zyphden, master deliberate martial swordplay, uncover the fragmented history of King Charlz's madness, and pierce through the illusions of corrupted crusaders.*
+*Explore the land of Tydeshire, learn it's deepest secrets and become its next savior from the madness...*
 
 ---
 
-> [!NOTE]
-> 📖 **Comprehensive Game Documentation & Technical Reference**  
+> **Comprehensive Game Documentation & Technical Reference**  
 > Looking for deep combat mathematics, full lore codex, weapon attributes, bestiary AI patterns, and engine architecture?  
 > Please consult **[DOCUMENTATION.md](documentation.md)**.
 

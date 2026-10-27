@@ -21,7 +21,7 @@ struct HiddenTotemChest {
         return !opened && Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 struct RoadsideJournal {
@@ -33,7 +33,7 @@ struct RoadsideJournal {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 32.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 class LootDrop;

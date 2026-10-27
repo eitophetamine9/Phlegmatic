@@ -231,7 +231,7 @@ void GameMap::Init(MapEnvironment env) {
     }
 }
 
-void GameMap::DrawFloor() const {
+void GameMap::DrawFloor(Vector2 playerPos) const {
     ClearBackground(Color{ 8, 10, 15, 255 });
 
     if (currentEnv == MapEnvironment::LOBBY) {
@@ -279,7 +279,7 @@ void GameMap::DrawFloor() const {
     } else if (currentEnv == MapEnvironment::RUINED_CASTLE) {
         DrawRuinedCastleFloor();
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
-        DrawCrossroadsFloor();
+        DrawCrossroadsFloor(playerPos);
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenFloor();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
@@ -366,7 +366,7 @@ void GameMap::DrawRuinedCastleFloor() const {
     DrawCircleLines((int)awakenCenter.x, (int)awakenCenter.y, 45.0f, Color{ 45, 60, 85, 160 });
 }
 
-void GameMap::DrawWallsAndPillars() const {
+void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
     const float wallThickness = 24.0f;
 
     // Outer Perimeter Walls
@@ -377,13 +377,13 @@ void GameMap::DrawWallsAndPillars() const {
     DrawRectangleLinesEx(Rectangle{ bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4 }, 2.0f, Color{ 70, 85, 115, 255 });
 
     if (currentEnv == MapEnvironment::RUINED_CASTLE) {
-        DrawRuinedCastleWalls();
+        DrawRuinedCastleWalls(playerPos);
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
-        DrawCrossroadsWalls();
+        DrawCrossroadsWalls(playerPos);
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenWalls();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
-        DrawTavernWalls();
+        DrawTavernWalls(playerPos);
     } else if (currentEnv == MapEnvironment::FORGE_INTERIOR) {
         DrawForgeWalls();
     } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
@@ -401,7 +401,7 @@ void GameMap::DrawWallsAndPillars() const {
     }
 }
 
-void GameMap::DrawRuinedCastleWalls() const {
+void GameMap::DrawRuinedCastleWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Ruined Interior Wall Segments
@@ -492,8 +492,11 @@ void GameMap::DrawRuinedCastleWalls() const {
         DrawCircle((int)gateX - 8, (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
         DrawCircle((int)(gateX + gateW + 8), (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
 
-        DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
-        DrawText("Step through or Press [E] to advance", (int)gateX + 2, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
+        bool inRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { gateX + gateW * 0.5f, bounds.y }) <= 160.0f);
+        if (inRange) {
+            DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
+            DrawText("Step through or Press [E] to advance", (int)gateX + 2, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
+        }
     }
 }
 
@@ -562,7 +565,7 @@ Vector2 GameMap::ResolveCollision(Vector2 oldPos, Vector2 newPos, float radius) 
     return testY;
 }
 
-void GameMap::DrawCrossroadsFloor() const {
+void GameMap::DrawCrossroadsFloor(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Weathered earthy terrain
@@ -597,10 +600,13 @@ void GameMap::DrawCrossroadsFloor() const {
     // 5. Northern Gateway Approach to Zyphden
     DrawRectangle(620, (int)bounds.y, 360, 80, Color{ 36, 48, 68, 255 });
     DrawRectangleLines(620, (int)bounds.y, 360, 80, Color{ 180, 150, 70, 220 });
-    DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
+    bool inGateRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 800.0f, bounds.y + 40.0f }) <= 160.0f);
+    if (inGateRange) {
+        DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
+    }
 }
 
-void GameMap::DrawCrossroadsWalls() const {
+void GameMap::DrawCrossroadsWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // Roadside Pillars & Braziers
@@ -632,7 +638,10 @@ void GameMap::DrawCrossroadsWalls() const {
 
     float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
     DrawCircleGradient(Vector2{ 800.0f, gateY + 16.0f }, 110.0f, Color{ 255, 215, 80, (unsigned char)(140 * pulse) }, Color{ 0, 0, 0, 0 });
-    DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
+    bool inGateRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 800.0f, bounds.y }) <= 160.0f);
+    if (inGateRange) {
+        DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
+    }
 }
 
 void GameMap::DrawZyphdenFloor() const {
@@ -812,14 +821,17 @@ void GameMap::DrawTavernFloor() const {
     DrawRectangleLines(760, 885, 80, 25, Color{ 110, 85, 55, 200 });
 }
 
-void GameMap::DrawTavernWalls() const {
+void GameMap::DrawTavernWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Bar Counter & Shelves (Lowered to y = 700 so Eldon behind at y = 665 has clear name tag visibility)
     Rectangle bar = { 650.0f, 700.0f, 150.0f, 32.0f };
     DrawRectangleRec(bar, Color{ 70, 48, 30, 255 });
     DrawRectangleLinesEx(bar, 2.0f, Color{ 120, 85, 55, 255 });
-    DrawText("BAR", 705, 708, 12, Color{ 255, 215, 120, 240 });
+    bool inBarRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 725.0f, 716.0f }) <= 150.0f);
+    if (inBarRange) {
+        DrawText("BAR", 705, 708, 12, Color{ 255, 215, 120, 240 });
+    }
 
     // Bar stools in front of counter at y = 746
     for (float sx = 665.0f; sx <= 785.0f; sx += 35.0f) {

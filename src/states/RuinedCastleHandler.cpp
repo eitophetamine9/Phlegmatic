@@ -79,6 +79,7 @@ void RuinedCastleHandler::Update(
             showZilDefeatModal = false;
             zilEncounterActive = false;
             zilSparedPlayer = true;
+            overworldEnemiesSpawned = true;
             map.SetGateOpen(true);
             player.Revive({ 800.0f, 480.0f }, 1.0f);
             camera.target = player.GetPosition();
@@ -110,7 +111,7 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
             lootDrops.clear();
-            if (tutorial.HasDefeatedTutorialEnemy()) {
+            if (tutorial.HasDefeatedTutorialEnemy() && !zilDefeated && !zilSparedPlayer) {
                 enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
                 enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
                 enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
@@ -194,12 +195,17 @@ void RuinedCastleHandler::Update(
     // Tutorial progression
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
 
-    // Overworld enemy respawn in courtyard after tutorial Sentinel defeated
-    if (tutorial.HasDefeatedTutorialEnemy() && !zilEncounterActive && !overworldEnemiesSpawned && enemies.empty()) {
+    // Overworld enemy respawn in courtyard after tutorial Sentinel defeated (Only before encountering or defeating Zil)
+    if (tutorial.HasDefeatedTutorialEnemy() && !zilDefeated && !zilSparedPlayer && !zilEncounterActive && !overworldEnemiesSpawned && enemies.empty()) {
         overworldEnemiesSpawned = true;
         enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
         enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
         enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
+    }
+
+    // Ensure no enemies ever exist or spawn in Ruined Castle after Zil has been defeated or spared
+    if ((zilDefeated || zilSparedPlayer) && !enemies.empty()) {
+        enemies.clear();
     }
 
     // High Altar Steps Barrier (Cannot enter until first tutorial enemy is officially beaten)
@@ -243,6 +249,7 @@ void RuinedCastleHandler::Update(
         if (!zilAlive && !zilDefeated) {
             zilDefeated = true;
             zilEncounterActive = false;
+            overworldEnemiesSpawned = true;
             enemies.clear();
             projectiles.clear();
 
@@ -335,16 +342,18 @@ void RuinedCastleHandler::Render(
     float time = (float)GetTime();
 
     BeginMode2D(camera);
-    map.DrawFloor();
+    map.DrawFloor(player.GetPosition());
 
     // Runic Ward across High Altar steps if sentinel not yet defeated
     if (!tutorial.HasDefeatedTutorialEnemy()) {
         float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
         DrawLineEx({ 580.0f, 430.0f }, { 1020.0f, 430.0f }, 3.5f, Color{ 220, 60, 60, (unsigned char)(160 + 80 * pulse) });
         DrawCircleGradient(Vector2{ 800.0f, 430.0f }, 70.0f, Color{ 200, 40, 40, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
-        const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
-        int wtw = MeasureText(wardText, 10);
-        DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+        if (Vector2Distance(player.GetPosition(), { 800.0f, 430.0f }) <= 110.0f) {
+            const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
+            int wtw = MeasureText(wardText, 10);
+            DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+        }
     }
 
     tutorial.DrawWorldElements(time, player.GetPosition());
@@ -355,7 +364,7 @@ void RuinedCastleHandler::Render(
         enemy.DrawTelegraph();
     }
 
-    map.DrawWallsAndPillars();
+    map.DrawWallsAndPillars(player.GetPosition());
 
     for (const auto& proj : projectiles) {
         proj.Draw();
