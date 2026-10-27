@@ -5,6 +5,7 @@
 #include "../combat/CollisionSystem.hpp"
 #include "../combat/LootDrop.hpp"
 #include "../rendering/AssetManager.hpp"
+#include "../rendering/FontManager.hpp"
 #include "raymath.h"
 #include <algorithm>
 #include <cmath>
@@ -190,6 +191,8 @@ ZyphdenHandler::ZyphdenHandler() {
     showObjectives = true;
     entryBannerTimer = 4.0f;
     isDialogueOpen = false;
+    isForgeOpen = false;
+    isProvisionsOpen = false;
     dialoguePages.clear();
     currentDialoguePage = 0;
 }
@@ -464,9 +467,16 @@ void ZyphdenHandler::Update(
 
     // NPC & Lore & Door Interactivity
     bool interactKey = IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
+    bool talkKey = IsKeyPressed(KEY_T);
     Vector2 playerPos = player.GetPosition();
 
-    if (!isDialogueOpen) {
+    if (isForgeOpen || isProvisionsOpen) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            isForgeOpen = false;
+            isProvisionsOpen = false;
+            SoundFX::PlayButtonClick();
+        }
+    } else if (!isDialogueOpen) {
         if (inTavern) {
             // Inside Hearthside Tavern
             // 1. South Doorway to Zyphden exterior (doorway at {800, 915})
@@ -482,20 +492,29 @@ void ZyphdenHandler::Update(
 
             // 2. Tavernkeep Eldon behind the bar (Range increased to 110px across the counter)
             bool eldonInRange = Vector2Distance(playerPos, eldon.position) <= 110.0f;
-            if (interactKey && eldonInRange) {
+            if (eldonInRange) {
                 if (questPhase == ZyphdenQuestPhase::SEEK_TAVERN) {
-                    std::vector<std::string> pages = {
-                        "Step close to the hearth and let the chill seep out of your bones, traveler. After what you’ve walked through on the Crossroads highway, you look like you haven't slept under a dry roof in weeks. The fire is warm, and the stew is fresh.",
-                        "Zyphden used to be a city of open laughter and high banners, but ever since the northern roads went quiet, every stranger at my door brings fresh dread. Listen... those heavy footsteps outside the archway. That’s Captain Lenon’s stride. He rarely visits the tavern unless the wind carries trouble."
-                    };
-                    OpenDialogue("eldon_intro", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
-                    particles.SpawnFloatingText(eldon.position, "Audience with Vanguard Captain", Color{ 255, 215, 80, 255 }, 22.0f);
-                    SoundFX::PlayParrySuccess();
+                    if (interactKey || talkKey) {
+                        std::vector<std::string> pages = {
+                            "Step close to the hearth and let the chill seep out of your bones, traveler. After what you’ve walked through on the Crossroads highway, you look like you haven't slept under a dry roof in weeks. The fire is warm, and the stew is fresh.",
+                            "Zyphden used to be a city of open laughter and high banners, but ever since the northern roads went quiet, every stranger at my door brings fresh dread. Listen... those heavy footsteps outside the archway. That’s Captain Lenon’s stride. He rarely visits the tavern unless the wind carries trouble."
+                        };
+                        OpenDialogue("eldon_intro", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
+                        particles.SpawnFloatingText(eldon.position, "Audience with Vanguard Captain", Color{ 255, 215, 80, 255 }, 22.0f);
+                        SoundFX::PlayParrySuccess();
+                    }
                 } else {
-                    std::vector<std::string> pages = {
-                        "Rest your feet as long as you have need, friend. The hearth fire never goes dark so long as I’m drawing breath. If you’re seeking purpose or a warm bed, the Captain and the King have their hands full of both."
-                    };
-                    OpenDialogue("eldon_idle", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
+                    if (talkKey) {
+                        std::vector<std::string> pages = {
+                            "Rest your feet as long as you have need, friend. The hearth fire never goes dark so long as I’m drawing breath. If you’re seeking purpose or a warm bed, the Captain and the King have their hands full of both.",
+                            "The mountain brews I sell aren't fancy, but they will knit broken ribs together faster than any apothecary chant. Stock up before you venture into the tempest."
+                        };
+                        OpenDialogue("eldon_idle", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
+                    } else if (interactKey) {
+                        isProvisionsOpen = true;
+                        isForgeOpen = false;
+                        SoundFX::PlayButtonClick();
+                    }
                 }
             }
             // 3. Knight Lenon if inside tavern
@@ -681,14 +700,20 @@ void ZyphdenHandler::Update(
                     OpenDialogue("cedric", "CHRONICLER CEDRIC", pages, Color{ 100, 200, 255, 255 });
                     particles.SpawnFloatingText(cedric.position, "Ancient Lore Shared", Color{ 100, 200, 255, 255 }, 18.0f);
                 }
-                // 3. Blacksmith Varek (Armorcraft Lore)
+                // 3. Blacksmith Varek (Master Forge & Armorcraft Lore)
                 else if (varek.CheckInteraction(playerPos)) {
-                    std::vector<std::string> pages = {
-                        "That iron on your back looks like it was scavenged from a ditch, wanderer. Don't take offense—I'm a smith, not a courtier. In the wildlands beyond our gates, beast-hide and rusted mail will get you cleft in two before you can draw breath.",
-                        "The Crusader Plate worn by Captain Lenon was folded a hundred times in wind-bellowed coals. If you want armor that will actually turn a demon's claw aside, you’ll have to earn it from him in the ring. Win or lose, respect the steel."
-                    };
-                    OpenDialogue("varek", "BLACKSMITH VAREK", pages, Color{ 255, 140, 50, 255 });
-                    particles.SpawnFloatingText(varek.position, "Master Armorcraft Lore", Color{ 255, 150, 60, 255 }, 18.0f);
+                    if (talkKey) {
+                        std::vector<std::string> pages = {
+                            "That iron on your back looks like it was scavenged from a ditch, wanderer. Don't take offense—I'm a smith, not a courtier. In the wildlands beyond our gates, beast-hide and rusted mail will get you cleft in two before you can draw breath.",
+                            "The Crusader Plate worn by Captain Lenon was folded a hundred times in wind-bellowed coals. If you want armor that will actually turn a demon's claw aside, you’ll have to earn it from him in the ring. Win or lose, respect the steel."
+                        };
+                        OpenDialogue("varek", "BLACKSMITH VAREK", pages, Color{ 255, 140, 50, 255 });
+                        particles.SpawnFloatingText(varek.position, "Master Armorcraft Lore", Color{ 255, 150, 60, 255 }, 18.0f);
+                    } else if (interactKey) {
+                        isForgeOpen = true;
+                        isProvisionsOpen = false;
+                        SoundFX::PlayButtonClick();
+                    }
                 }
                 // 4. Elder Maeve (Town Lore & Refugees)
                 else if (maeve.CheckInteraction(playerPos)) {
@@ -797,6 +822,13 @@ void ZyphdenHandler::Render(
     if (inTavern) {
         // Tavern Interior Entities
         eldon.Draw(time);
+        if (Vector2Distance(player.GetPosition(), eldon.position) <= 110.0f) {
+            if (questPhase == ZyphdenQuestPhase::SEEK_TAVERN) {
+                DrawText("[E] Speak with Eldon", (int)eldon.position.x - 55, (int)eldon.position.y - 36, 11, Color{ 255, 215, 80, 245 });
+            } else {
+                DrawText("[E] Provisions  |  [T] Lore", (int)eldon.position.x - 65, (int)eldon.position.y - 36, 11, Color{ 255, 215, 80, 245 });
+            }
+        }
         if (lenonInTavern) {
             knightLenonNPC.Draw(time);
         }
@@ -826,6 +858,9 @@ void ZyphdenHandler::Render(
         noticeboard.Draw(time);
         cedric.Draw(time);
         varek.Draw(time);
+        if (varek.CheckInteraction(player.GetPosition())) {
+            DrawText("[E] Master Forge  |  [T] Lore", (int)varek.position.x - 70, (int)varek.position.y - 38, 11, Color{ 255, 215, 80, 245 });
+        }
         maeve.Draw(time);
 
         if (lenonSpawned && !sparActive && !lenonInTavern) {
@@ -958,6 +993,10 @@ void ZyphdenHandler::Render(
         if (!stillOpen) {
             CloseDialogue();
         }
+    } else if (isForgeOpen) {
+        DrawForgeModal(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles), screenWidth, screenHeight, mousePos, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+    } else if (isProvisionsOpen) {
+        DrawProvisionsModal(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles), screenWidth, screenHeight, mousePos, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
     }
 
     if (showControlsModal) {
@@ -970,5 +1009,384 @@ void ZyphdenHandler::Render(
         DrawText("FALLEN IN BATTLE", (screenWidth - titleW) / 2, screenHeight / 2 - 40, 38, Color{ 255, 50, 60, 255 });
         int subW = MeasureText("Press [R] to Recover at Courtyard Bench  |  [L] Return to Lobby", 16);
         DrawText("Press [R] to Recover at Courtyard Bench  |  [L] Return to Lobby", (screenWidth - subW) / 2, screenHeight / 2 + 18, 16, Color{ 220, 225, 240, 230 });
+    }
+}
+
+void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed) {
+    // Backdrop dimming
+    DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 6, 8, 14, 215 });
+
+    const float modalW = 860.0f;
+    const float modalH = 580.0f;
+    const float modalX = ((float)screenWidth - modalW) * 0.5f;
+    const float modalY = ((float)screenHeight - modalH) * 0.5f;
+
+    Rectangle modalRec = { modalX, modalY, modalW, modalH };
+
+    // Ornate double border panel
+    DrawRectangleRounded(modalRec, 0.04f, 8, Color{ 15, 18, 26, 250 });
+    DrawRectangleRoundedLines(modalRec, 0.04f, 8, Color{ 215, 175, 65, 255 });
+    DrawRectangleLinesEx(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 1.5f, Color{ 65, 85, 120, 180 });
+
+    // Corner Filigree Accents
+    float cfSize = 14.0f;
+    DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+
+    // Header
+    FontManager::DrawText("VAREK'S MASTER FORGE", (int)modalX + 32, (int)modalY + 22, 22, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
+    FontManager::DrawText("Temper steel armaments with hammered silver Shingles to heighten lethal force and martial traits.", (int)modalX + 32, (int)modalY + 48, 12, Color{ 180, 205, 235, 210 }, GameFont::BODY);
+
+    // Silver Shingles live balance badge in top-right of modal
+    int playerShingles = player.GetInventory().GetShingles();
+    float shingleBadgeW = 160.0f;
+    float shingleBadgeH = 34.0f;
+    float shingleBadgeX = modalX + modalW - shingleBadgeW - 32.0f;
+    float shingleBadgeY = modalY + 20.0f;
+    DrawRectangleRounded(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
+    DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
+    // Silver coin icon
+    DrawRectanglePro(Rectangle{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f, 10.0f, 10.0f }, Vector2{ 5.0f, 5.0f }, 45.0f, Color{ 220, 235, 255, 255 });
+    DrawPolyLines(Vector2{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f }, 4, 7.0f, 45.0f, Color{ 100, 135, 180, 255 });
+    std::string shingleStr = std::to_string(playerShingles) + " Shingles";
+    FontManager::DrawText(shingleStr, (int)shingleBadgeX + 34, (int)shingleBadgeY + 9, 13, Color{ 230, 245, 255, 255 }, GameFont::BODY);
+
+    // Divider Line
+    DrawLine((int)modalX + 30, (int)modalY + 76, (int)(modalX + modalW - 30), (int)modalY + 76, Color{ 70, 95, 135, 160 });
+
+    // 4 Weapon Forge Cards in 2x2 Grid
+    struct ForgeEntry {
+        WeaponType type;
+        const char* name;
+        const char* iconTag;
+        int maxTier;
+        int costT1;
+        int costT2;
+        const char* perkT1;
+        const char* perkT2;
+        Color accentColor;
+    };
+
+    ForgeEntry entries[4] = {
+        {
+            WeaponType::SWORD,
+            "Crusader's Broadsword",
+            "BALANCED BLADE",
+            2, 50, 120,
+            "+4 Damage (22 Light / 80 Heavy)",
+            "+8 Damage (26 Light / 90 Heavy), +5% Poise Knockback",
+            Color{ 255, 215, 80, 255 }
+        },
+        {
+            WeaponType::MACE,
+            "War Mace",
+            "CRUSHING HAMMER",
+            2, 60, 140,
+            "+6 Damage (34 Light / 112 Heavy)",
+            "+12 Damage (40 Light / 128 Heavy), +10% Armor Pierce (30% Total)",
+            Color{ 255, 150, 60, 255 }
+        },
+        {
+            WeaponType::DAGGERS,
+            "Dual Daggers",
+            "TWIN FLURRY",
+            2, 45, 110,
+            "+3 Damage (14 Light / 72 Heavy)",
+            "+6 Damage (17 Light / 84 Heavy), +10% Lunge Critical",
+            Color{ 80, 230, 190, 255 }
+        },
+        {
+            WeaponType::TRUTH_SEEKER,
+            "Truth Seeker",
+            "HOLY SUNBLADE",
+            1, 180, 0,
+            "Consecration I (+6 Holy Beam Dmg -> 28, 32 Light / 96 Heavy)",
+            "",
+            Color{ 140, 220, 255, 255 }
+        }
+    };
+
+    for (int i = 0; i < 4; i++) {
+        int col = i % 2;
+        int row = i / 2;
+        float cardX = modalX + 32.0f + (float)col * 406.0f;
+        float cardY = modalY + 92.0f + (float)row * 212.0f;
+        float cardW = 390.0f;
+        float cardH = 200.0f;
+
+        Rectangle cardRec = { cardX, cardY, cardW, cardH };
+        bool isHov = CheckCollisionPointRec(mousePos, cardRec);
+
+        int currentTier = player.GetInventory().GetWeaponUpgrade(entries[i].type);
+        bool isMax = (currentTier >= entries[i].maxTier);
+        int upgradeCost = (currentTier == 0) ? entries[i].costT1 : entries[i].costT2;
+        bool canAfford = (playerShingles >= upgradeCost);
+
+        // Card Background
+        DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
+        DrawRectangleRoundedLines(cardRec, 0.08f, 6, isMax ? Color{ 100, 225, 160, 220 } : (isHov ? entries[i].accentColor : Color{ 55, 75, 105, 180 }));
+
+        // Category Tag
+        DrawText(entries[i].iconTag, (int)cardX + 16, (int)cardY + 12, 10, Color{ 140, 175, 215, 200 });
+
+        // Weapon Title
+        FontManager::DrawText(entries[i].name, (int)cardX + 16, (int)cardY + 26, 15, Color{ 255, 255, 255, 255 }, GameFont::TITLE);
+
+        // Current Tier Badge
+        std::string tierBadge;
+        Color tierCol;
+        if (currentTier == 0) {
+            tierBadge = "[TIER: BASE]";
+            tierCol = Color{ 160, 180, 205, 220 };
+        } else if (currentTier == 1) {
+            tierBadge = (entries[i].type == WeaponType::TRUTH_SEEKER) ? "[CONSECRATED I]" : "[TIER +1]";
+            tierCol = Color{ 120, 215, 255, 255 };
+        } else {
+            tierBadge = "[MASTERWORK +2]";
+            tierCol = Color{ 110, 245, 170, 255 };
+        }
+        int tbw = MeasureText(tierBadge.c_str(), 11);
+        DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
+        DrawText(tierBadge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, tierCol);
+
+        // Weapon Stats display
+        WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
+        std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
+        DrawText(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 52, 11, Color{ 200, 220, 245, 240 });
+
+        // Next Tier Perk description
+        DrawText("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 72, 10, Color{ 255, 215, 80, 240 });
+        if (isMax) {
+            DrawText("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 88, 11, Color{ 110, 245, 170, 240 });
+        } else if (currentTier == 0) {
+            DrawText(entries[i].perkT1, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+            std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
+            DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAfford ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+        } else if (currentTier == 1) {
+            DrawText(entries[i].perkT2, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+            std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
+            DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAfford ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+        }
+
+        // Action Button
+        float btnW = cardW - 32.0f;
+        float btnH = 36.0f;
+        float btnX = cardX + 16.0f;
+        float btnY = cardY + cardH - btnH - 14.0f;
+        Rectangle btnRec = { btnX, btnY, btnW, btnH };
+        bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+
+        if (isMax) {
+            DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
+            DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
+            DrawText("MAX TIER TEMPERED", (int)btnX + (int)(btnW - MeasureText("MAX TIER TEMPERED", 12)) / 2, (int)btnY + 11, 12, Color{ 110, 245, 170, 220 });
+        } else {
+            std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
+            if (entries[i].type == WeaponType::TRUTH_SEEKER) {
+                btnLabel = "CONSECRATE BLADE (" + std::to_string(upgradeCost) + " SHINGLES)";
+            }
+
+            if (canAfford) {
+                Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
+                Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
+                DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+                DrawText(btnLabel.c_str(), (int)btnX + (int)(btnW - MeasureText(btnLabel.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 255, 255, 255 });
+
+                if (isBtnHov && isMousePressed) {
+                    player.GetInventory().SpendShingles(upgradeCost);
+                    player.GetInventory().UpgradeWeapon(entries[i].type);
+                    SoundFX::PlayCrusaderClash();
+                    SoundFX::PlayCoinPickup();
+                    particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 24, 180.0f);
+                    std::string feedback = std::string(entries[i].name) + " Upgraded!";
+                    particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+                }
+            } else {
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                std::string needStr = "INSUFFICIENT SHINGLES (" + std::to_string(upgradeCost) + " NEEDED)";
+                DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 220, 110, 110, 220 });
+            }
+        }
+    }
+
+    // Bottom Footer Buttons
+    // 1. Discuss Armorcraft Lore Button
+    Rectangle loreBtnRec = { modalX + 32.0f, modalY + modalH - 46.0f, 240.0f, 32.0f };
+    bool isLoreHov = CheckCollisionPointRec(mousePos, loreBtnRec);
+    DrawRectangleRounded(loreBtnRec, 0.25f, 4, isLoreHov ? Color{ 40, 55, 85, 240 } : Color{ 24, 32, 50, 220 });
+    DrawRectangleRoundedLines(loreBtnRec, 0.25f, 4, isLoreHov ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 200 });
+    DrawText("[T] Discuss Armorcraft Lore", (int)loreBtnRec.x + 20, (int)loreBtnRec.y + 10, 12, isLoreHov ? Color{ 255, 235, 120, 255 } : Color{ 180, 210, 245, 230 });
+
+    if (isLoreHov && isMousePressed) {
+        isForgeOpen = false;
+        std::vector<std::string> pages = {
+            "That iron on your back looks like it was scavenged from a ditch, wanderer. Don't take offense—I'm a smith, not a courtier. In the wildlands beyond our gates, beast-hide and rusted mail will get you cleft in two before you can draw breath.",
+            "The Crusader Plate worn by Captain Lenon was folded a hundred times in wind-bellowed coals. If you want armor that will actually turn a demon's claw aside, you’ll have to earn it from him in the ring. Win or lose, respect the steel."
+        };
+        OpenDialogue("varek", "BLACKSMITH VAREK", pages, Color{ 255, 140, 50, 255 });
+    }
+
+    // 2. Leave Forge (ESC) Button
+    Rectangle closeBtnRec = { modalX + modalW - 190.0f, modalY + modalH - 46.0f, 158.0f, 32.0f };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtnRec);
+    DrawRectangleRounded(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 55, 30, 35, 240 } : Color{ 32, 20, 24, 220 });
+    DrawRectangleRoundedLines(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 255, 100, 110, 240 } : Color{ 120, 55, 65, 200 });
+    DrawText("LEAVE FORGE [ESC]", (int)closeBtnRec.x + 18, (int)closeBtnRec.y + 10, 12, isCloseHov ? Color{ 255, 180, 180, 255 } : Color{ 220, 140, 145, 220 });
+
+    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
+        isForgeOpen = false;
+        SoundFX::PlayButtonClick();
+    }
+}
+
+void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed) {
+    // Backdrop dimming
+    DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 6, 8, 14, 215 });
+
+    const float modalW = 600.0f;
+    const float modalH = 460.0f;
+    const float modalX = ((float)screenWidth - modalW) * 0.5f;
+    const float modalY = ((float)screenHeight - modalH) * 0.5f;
+
+    Rectangle modalRec = { modalX, modalY, modalW, modalH };
+
+    // Ornate double border panel
+    DrawRectangleRounded(modalRec, 0.05f, 8, Color{ 16, 20, 28, 250 });
+    DrawRectangleRoundedLines(modalRec, 0.05f, 8, Color{ 215, 175, 65, 255 });
+    DrawRectangleLinesEx(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 1.5f, Color{ 65, 85, 120, 180 });
+
+    // Corner Filigree Accents
+    float cfSize = 12.0f;
+    DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+    DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
+
+    // Header
+    FontManager::DrawText("HEARTHSIDE PROVISIONS", (int)modalX + 32, (int)modalY + 22, 22, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
+    FontManager::DrawText("Restorative herbal elixirs brewed by Tavernkeep Eldon to sustain pilgrims in battle.", (int)modalX + 32, (int)modalY + 48, 12, Color{ 180, 205, 235, 210 }, GameFont::BODY);
+
+    // Silver Shingles live balance badge in top-right of modal
+    int playerShingles = player.GetInventory().GetShingles();
+    float shingleBadgeW = 150.0f;
+    float shingleBadgeH = 34.0f;
+    float shingleBadgeX = modalX + modalW - shingleBadgeW - 32.0f;
+    float shingleBadgeY = modalY + 20.0f;
+    DrawRectangleRounded(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
+    DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
+    DrawRectanglePro(Rectangle{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f, 10.0f, 10.0f }, Vector2{ 5.0f, 5.0f }, 45.0f, Color{ 220, 235, 255, 255 });
+    DrawPolyLines(Vector2{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f }, 4, 7.0f, 45.0f, Color{ 100, 135, 180, 255 });
+    std::string shingleStr = std::to_string(playerShingles) + " Shingles";
+    FontManager::DrawText(shingleStr, (int)shingleBadgeX + 34, (int)shingleBadgeY + 9, 13, Color{ 230, 245, 255, 255 }, GameFont::BODY);
+
+    // Divider Line
+    DrawLine((int)modalX + 30, (int)modalY + 76, (int)(modalX + modalW - 30), (int)modalY + 76, Color{ 70, 95, 135, 160 });
+
+    // Main Provisions Card: Health Elixir Flask
+    float cardX = modalX + 32.0f;
+    float cardY = modalY + 96.0f;
+    float cardW = modalW - 64.0f;
+    float cardH = 260.0f;
+
+    Rectangle cardRec = { cardX, cardY, cardW, cardH };
+    DrawRectangleRounded(cardRec, 0.08f, 6, Color{ 18, 24, 34, 230 });
+    DrawRectangleRoundedLines(cardRec, 0.08f, 6, Color{ 80, 120, 170, 200 });
+
+    // Potion Flask Drawing
+    float flaskCenterX = cardX + 70.0f;
+    float flaskCenterY = cardY + 80.0f;
+    // Glowing emerald aura
+    DrawCircleGradient(Vector2{ flaskCenterX, flaskCenterY }, 38.0f, Color{ 40, 220, 120, 60 }, Color{ 20, 140, 80, 0 });
+    // Glass flask bottle
+    DrawCircle((int)flaskCenterX, (int)(flaskCenterY + 10), 22.0f, Color{ 25, 160, 95, 220 });
+    DrawRectangle((int)(flaskCenterX - 8), (int)(flaskCenterY - 18), 16, 18, Color{ 40, 180, 110, 230 });
+    DrawRectangle((int)(flaskCenterX - 11), (int)(flaskCenterY - 24), 22, 6, Color{ 150, 110, 70, 255 }); // Cork
+    DrawCircle((int)(flaskCenterX - 6), (int)(flaskCenterY + 4), 5.0f, Color{ 180, 255, 210, 180 }); // Glass highlight
+
+    // Title and Info
+    FontManager::DrawText("CONSECRATED HEALTH ELIXIR", (int)cardX + 130, (int)cardY + 24, 17, Color{ 120, 255, 170, 255 }, GameFont::TITLE);
+    DrawText("Concentrated restorative draught brewed from dried mountain bellflowers and blossom honey.", (int)cardX + 130, (int)cardY + 48, 11, Color{ 185, 210, 235, 220 });
+    DrawText("Restores 45 Vitality upon consumption. Press [1] in combat to drink (7.0s cooldown).", (int)cardX + 130, (int)cardY + 66, 11, Color{ 130, 225, 255, 230 });
+
+    int currentPotions = player.GetInventory().GetHealthPotionCount();
+    const int maxPotions = 5;
+    bool atMax = (currentPotions >= maxPotions);
+    const int flaskCost = 25;
+    bool canAfford = (playerShingles >= flaskCost);
+
+    // Stock & Price Bar
+    DrawRectangleRounded(Rectangle{ cardX + 24.0f, cardY + 136.0f, cardW - 48.0f, 36.0f }, 0.2f, 4, Color{ 24, 32, 46, 220 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 24.0f, cardY + 136.0f, cardW - 48.0f, 36.0f }, 0.2f, 4, Color{ 60, 85, 120, 180 });
+
+    std::string stockStr = "CARRIED FLASKS: " + std::to_string(currentPotions) + " / " + std::to_string(maxPotions) + (atMax ? " [MAX CAPACITY]" : "");
+    DrawText(stockStr.c_str(), (int)cardX + 38, (int)cardY + 148, 12, atMax ? Color{ 110, 245, 170, 255 } : Color{ 220, 235, 255, 240 });
+
+    std::string priceStr = "PRICE: 25 SHINGLES";
+    DrawText(priceStr.c_str(), (int)(cardX + cardW - 190.0f), (int)cardY + 148, 12, Color{ 255, 215, 80, 255 });
+
+    // Purchase Button
+    float pBtnW = cardW - 48.0f;
+    float pBtnH = 44.0f;
+    float pBtnX = cardX + 24.0f;
+    float pBtnY = cardY + 190.0f;
+    Rectangle pBtnRec = { pBtnX, pBtnY, pBtnW, pBtnH };
+    bool isPBtnHov = CheckCollisionPointRec(mousePos, pBtnRec);
+
+    if (atMax) {
+        DrawRectangleRounded(pBtnRec, 0.2f, 4, Color{ 20, 36, 28, 220 });
+        DrawRectangleRoundedLines(pBtnRec, 0.2f, 4, Color{ 60, 140, 95, 200 });
+        DrawText("MAXIMUM FLASK CAPACITY ATTAINED (5/5)", (int)pBtnX + (int)(pBtnW - MeasureText("MAXIMUM FLASK CAPACITY ATTAINED (5/5)", 12)) / 2, (int)pBtnY + 15, 12, Color{ 110, 245, 170, 220 });
+    } else if (canAfford) {
+        Color pBtnBg = isPBtnHov ? Color{ 35, 85, 55, 255 } : Color{ 24, 60, 40, 240 };
+        Color pBtnBorder = isPBtnHov ? Color{ 100, 255, 160, 255 } : Color{ 50, 170, 100, 220 };
+        DrawRectangleRounded(pBtnRec, 0.2f, 4, pBtnBg);
+        DrawRectangleRoundedLines(pBtnRec, 0.2f, 4, pBtnBorder);
+        DrawText("PURCHASE HEALTH FLASK [25 SHINGLES]", (int)pBtnX + (int)(pBtnW - MeasureText("PURCHASE HEALTH FLASK [25 SHINGLES]", 12)) / 2, (int)pBtnY + 15, 12, Color{ 255, 255, 255, 255 });
+
+        if (isPBtnHov && isMousePressed) {
+            player.GetInventory().SpendShingles(flaskCost);
+            player.GetInventory().AddHealthPotions(1);
+            SoundFX::PlayCoinPickup();
+            SoundFX::PlayHeal();
+            particles.SpawnSparks(player.GetPosition(), Color{ 120, 255, 170, 255 }, 20, 140.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "+1 ELIXIR FLASK!", Color{ 120, 255, 170, 255 }, 22.0f);
+        }
+    } else {
+        DrawRectangleRounded(pBtnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+        DrawRectangleRoundedLines(pBtnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+        DrawText("INSUFFICIENT SHINGLES (25 NEEDED)", (int)pBtnX + (int)(pBtnW - MeasureText("INSUFFICIENT SHINGLES (25 NEEDED)", 12)) / 2, (int)pBtnY + 15, 12, Color{ 220, 110, 110, 220 });
+    }
+
+    // Bottom Footer Buttons
+    // 1. Hearth Tales / Rumors Button
+    Rectangle talesBtnRec = { modalX + 32.0f, modalY + modalH - 52.0f, 210.0f, 32.0f };
+    bool isTalesHov = CheckCollisionPointRec(mousePos, talesBtnRec);
+    DrawRectangleRounded(talesBtnRec, 0.25f, 4, isTalesHov ? Color{ 40, 55, 85, 240 } : Color{ 24, 32, 50, 220 });
+    DrawRectangleRoundedLines(talesBtnRec, 0.25f, 4, isTalesHov ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 200 });
+    DrawText("[T] Hear Tavern Tales", (int)talesBtnRec.x + 24, (int)talesBtnRec.y + 10, 12, isTalesHov ? Color{ 255, 235, 120, 255 } : Color{ 180, 210, 245, 230 });
+
+    if (isTalesHov && isMousePressed) {
+        isProvisionsOpen = false;
+        std::vector<std::string> pages = {
+            "Rest your feet as long as you have need, friend. The hearth fire never goes dark so long as I’m drawing breath. If you’re seeking purpose or a warm bed, the Captain and the King have their hands full of both.",
+            "The mountain brews I sell aren't fancy, but they will knit broken ribs together faster than any apothecary chant. Stock up before you venture into the tempest."
+        };
+        OpenDialogue("eldon_idle", "TAVERNKEEP ELDON", pages, Color{ 255, 190, 80, 255 });
+    }
+
+    // 2. Leave Counter (ESC) Button
+    Rectangle closeBtnRec = { modalX + modalW - 200.0f, modalY + modalH - 52.0f, 168.0f, 32.0f };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtnRec);
+    DrawRectangleRounded(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 55, 30, 35, 240 } : Color{ 32, 20, 24, 220 });
+    DrawRectangleRoundedLines(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 255, 100, 110, 240 } : Color{ 120, 55, 65, 200 });
+    DrawText("LEAVE COUNTER [ESC]", (int)closeBtnRec.x + 14, (int)closeBtnRec.y + 10, 12, isCloseHov ? Color{ 255, 180, 180, 255 } : Color{ 220, 140, 145, 220 });
+
+    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
+        isProvisionsOpen = false;
+        SoundFX::PlayButtonClick();
     }
 }

@@ -287,7 +287,7 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
     }
 
     // Active Weapon Card (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float cardW = 320.0f;
     const float cardH = 92.0f;
     float cardX = (float)windowWidth - cardW - 24.0f;
@@ -318,7 +318,7 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float wBadgeW = 200.0f;
     const float wBadgeH = 46.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
@@ -391,7 +391,7 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float wBadgeW = 200.0f;
     const float wBadgeH = 46.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;

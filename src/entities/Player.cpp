@@ -270,9 +270,9 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             currentAttack.origin = position;
             currentAttack.angle = facingAngle;
             currentAttack.range = 95.0f; // Buffed whirlwind range
-            currentAttack.arcAngle = 360.0f;
-            currentAttack.isLineBox = false;
-            currentAttack.damage = (counterBuffTimer > 0.0f ? (38.0f * 1.5f) : 38.0f) * GetTotemStats(currentTotem).damageMultiplier; // Balanced spin damage
+            WeaponStats dStats = GetEquippedWeaponStats();
+            float spinBase = (dStats.upgradeLevel >= 2) ? 54.0f : ((dStats.upgradeLevel >= 1) ? 46.0f : 38.0f);
+            currentAttack.damage = (counterBuffTimer > 0.0f ? (spinBase * 1.5f) : spinBase) * GetTotemStats(currentTotem).damageMultiplier;
             currentAttack.knockback = 280.0f;
             currentAttack.duration = 0.12f;
             currentAttack.timer = 0.12f;
@@ -300,7 +300,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         if (heavyWindupTimer <= 0.0f) {
             isHeavyWindingUp = false;
-            WeaponStats stats = GetWeaponStats(currentWeapon);
+            WeaponStats stats = GetEquippedWeaponStats();
             heavyStage = 1;
 
             Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
@@ -321,7 +321,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.circleCenter = { position.x + forwardDir.x * 70.0f, position.y + forwardDir.y * 70.0f };
                 currentAttack.range = 155.0f;
                 currentAttack.arcAngle = 180.0f;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (52.0f * 1.5f) : 52.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                float baseDmg = (stats.upgradeLevel >= 2) ? 72.0f : ((stats.upgradeLevel >= 1) ? 62.0f : 52.0f);
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 380.0f;
                 currentAttack.duration = 0.16f;
                 currentAttack.timer = 0.16f;
@@ -333,8 +334,9 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Broadsword Heavy Stage 1: Wide Slash
                 currentAttack.range = 125.0f;
                 currentAttack.arcAngle = 160.0f;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
-                currentAttack.knockback = 240.0f;
+                float baseDmg = (stats.upgradeLevel >= 2) ? 54.0f : ((stats.upgradeLevel >= 1) ? 48.0f : 42.0f);
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.knockback = 240.0f * stats.poiseMultiplier;
                 currentAttack.duration = 0.16f;
                 currentAttack.timer = 0.16f;
 
@@ -346,7 +348,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Truth Seeker Heavy Stage 1: Full 360 circle AoE swing 1
                 currentAttack.range = 135.0f;
                 currentAttack.arcAngle = 360.0f;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (42.0f * 1.5f) : 42.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                float baseDmg = (stats.upgradeLevel >= 1) ? 52.0f : 42.0f;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
                 currentAttack.knockback = 360.0f;
                 currentAttack.duration = 0.18f;
                 currentAttack.timer = 0.18f;
@@ -354,7 +357,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 // Simultaneously shoot 1 holy projectile with 10% defense pierce
                 Vector2 spawnPos = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
                 Vector2 projVel = { forwardDir.x * 580.0f, forwardDir.y * 580.0f };
-                spawnedProjectiles.emplace_back(spawnPos, projVel, 9.0f, 22.0f, ProjectileType::HOLY_BEAM, true, 0.10f);
+                spawnedProjectiles.emplace_back(spawnPos, projVel, 9.0f, stats.holyBeamDamage, ProjectileType::HOLY_BEAM, true, 0.10f);
 
                 SoundFX::PlayHeavyAttack();
                 SoundFX::PlayCrusaderClash();
@@ -384,6 +387,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             // Check for Stage 2 follow-ups
             if (currentAttack.type == AttackType::HEAVY && heavyStage == 1) {
                 Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+                WeaponStats stats = GetEquippedWeaponStats();
 
                 if (currentWeapon == WeaponType::MACE) {
                     // War Mace Heavy Stage 2: Followup full 360 AoE with 20% defense pierce!
@@ -392,12 +396,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.isFrontalCircle = false;
                     currentAttack.range = 150.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (44.0f * 1.5f) : 44.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 56.0f : ((stats.upgradeLevel >= 1) ? 50.0f : 44.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 460.0f;
                     currentAttack.duration = 0.22f;
                     currentAttack.timer = 0.22f;
                     currentAttack.hasHit = false;
-                    currentAttack.defensePierce = 0.20f; // IGNORES 20% DEFENSE!
+                    currentAttack.defensePierce = 0.20f + stats.defensePierceBonus; // IGNORES 20% (+10% on Tier 2) DEFENSE!
                     currentAttack.hasShockwave = true;
                     currentAttack.shockwavePos = position;
                     currentAttack.shockwaveRadius = 150.0f;
@@ -418,8 +423,9 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 50.0f;
                     currentAttack.isLineBox = true;
                     currentAttack.arcAngle = 0.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (28.0f * 1.5f) : 28.0f) * GetTotemStats(currentTotem).damageMultiplier;
-                    currentAttack.knockback = 300.0f;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 36.0f : ((stats.upgradeLevel >= 1) ? 32.0f : 28.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.knockback = 300.0f * stats.poiseMultiplier;
                     currentAttack.duration = 0.18f;
                     currentAttack.timer = 0.18f;
                     currentAttack.hasHit = false;
@@ -434,7 +440,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.type = AttackType::HEAVY;
                     currentAttack.range = 145.0f;
                     currentAttack.arcAngle = 360.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (36.0f * 1.5f) : 36.0f) * GetTotemStats(currentTotem).damageMultiplier;
+                    float baseDmg = (stats.upgradeLevel >= 1) ? 44.0f : 36.0f;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 380.0f;
                     currentAttack.duration = 0.20f;
                     currentAttack.timer = 0.20f;
@@ -492,7 +499,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
     if (isDashing) return;
     if (dashCooldown > 0.0f) return;
 
-    WeaponStats stats = GetWeaponStats(currentWeapon);
+    WeaponStats stats = GetEquippedWeaponStats();
     if (stamina < stats.dashStaminaCost) return;
 
     stamina -= stats.dashStaminaCost;
@@ -523,7 +530,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     if (isDashing || isParrying || isHeavyWindingUp || currentAttack.type != AttackType::NONE) return;
 
     timeSinceCombat = 0.0f;
-    WeaponStats stats = GetWeaponStats(currentWeapon);
+    WeaponStats stats = GetEquippedWeaponStats();
     // Daggers light attack costs 0 stamina
     if (currentWeapon != WeaponType::DAGGERS) {
         if (stamina < stats.lightStamina) return;
@@ -576,7 +583,8 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
             currentAttack.range = 105.0f;
             currentAttack.width = 40.0f;
             currentAttack.arcAngle = 0.0f;
-            currentAttack.damage = counterBuffTimer > 0.0f ? (24.0f * 1.5f) : 24.0f;
+            float baseDmg = (stats.upgradeLevel >= 1) ? 30.0f : 24.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg;
             currentAttack.knockback = 260.0f;
 
             SoundFX::PlayLightAttack();
@@ -584,7 +592,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
             particles.SpawnSparks(position, Color{ 140, 220, 255, 255 }, 12, 140.0f);
         } else {
             // Hit 1: Original golden horizontal sweep
-            currentAttack.damage = counterBuffTimer > 0.0f ? (26.0f * 1.5f) : 26.0f;
+            currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
             currentAttack.knockback = 200.0f;
 
             SoundFX::PlayLightAttack();
@@ -614,7 +622,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
     if (heavyCooldown > 0.0f) return;
 
     timeSinceCombat = 0.0f;
-    WeaponStats stats = GetWeaponStats(currentWeapon);
+    WeaponStats stats = GetEquippedWeaponStats();
     if (stamina < stats.heavyStamina) return;
 
     stamina -= stats.heavyStamina;
@@ -641,7 +649,8 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
         currentAttack.width = 48.0f;
         currentAttack.isLineBox = true;
         currentAttack.arcAngle = 0.0f;
-        currentAttack.damage = (counterBuffTimer > 0.0f ? (22.0f * 1.5f) : 22.0f) * GetTotemStats(currentTotem).damageMultiplier;
+        float baseDmg = (stats.upgradeLevel >= 2) ? (30.0f * stats.critMultiplier) : ((stats.upgradeLevel >= 1) ? 26.0f : 22.0f);
+        currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
         currentAttack.knockback = 180.0f;
         currentAttack.duration = 0.20f;
         currentAttack.timer = 0.20f;

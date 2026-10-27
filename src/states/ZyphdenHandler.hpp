@@ -151,6 +151,12 @@ private:
     int currentDialoguePage = 0;
     Color dialogueColor = WHITE;
 
+    // Forge & Provisions Modal State
+    bool isForgeOpen = false;
+    bool isProvisionsOpen = false;
+
     void OpenDialogue(const std::string& npcId, const std::string& speaker, const std::vector<std::string>& pages, Color color);
     void CloseDialogue();
+    void DrawForgeModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
+    void DrawProvisionsModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
 };

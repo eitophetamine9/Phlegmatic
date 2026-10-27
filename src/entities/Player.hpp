@@ -53,12 +53,13 @@ public:
     bool IsAlive() const { return health > 0.0f; }
     bool HasCounterBuff() const { return counterBuffTimer > 0.0f; }
 
+    WeaponStats GetEquippedWeaponStats() const { return GetWeaponStats(currentWeapon, inventory.GetWeaponUpgrade(currentWeapon)); }
     float GetDashCooldown() const { return dashCooldown; }
-    float GetMaxDashCooldown() const { return GetWeaponStats(currentWeapon).dashCooldown; }
+    float GetMaxDashCooldown() const { return GetEquippedWeaponStats().dashCooldown; }
     float GetParryCooldown() const { return parryCooldown; }
     float GetMaxParryCooldown() const;
     float GetHeavyCooldown() const { return heavyCooldown; }
-    float GetMaxHeavyCooldown() const { return GetWeaponStats(currentWeapon).heavyCooldown; }
+    float GetMaxHeavyCooldown() const { return GetEquippedWeaponStats().heavyCooldown; }
 
     const AttackInfo& GetCurrentAttack() const { return currentAttack; }
     bool IsAttacking() const { return currentAttack.type != AttackType::NONE; }
@@ -88,7 +89,7 @@ public:
 
     // Cooldown accessors for UI
     float GetLightCooldown() const { return lightCooldown; }
-    float GetMaxLightCooldown() const { return GetWeaponStats(currentWeapon).lightCooldown; }
+    float GetMaxLightCooldown() const { return GetEquippedWeaponStats().lightCooldown; }
 
     int GetComboStep() const { return comboStep; }
     int GetHeavyStage() const { return heavyStage; }
