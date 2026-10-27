@@ -1,17 +1,20 @@
 #include "Game.hpp"
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
+#include "../rendering/FontManager.hpp"
+#include "../core/SaveManager.hpp"
 #include "raymath.h"
 #include <cmath>
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), inventoryActiveTab(0), inventorySelectedFragment(0) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0) {
 }
 
 Game::~Game() {
     SoundFX::Close();
     assetManager.Unload();
+    FontManager::Unload();
     CloseWindow();
 }
 
@@ -22,6 +25,7 @@ void Game::Init() {
     SetTargetFPS(Config::TARGET_FPS);
 
     SoundFX::Init();
+    FontManager::Init();
     assetManager.Init();
 
     pedestals.clear();
@@ -40,6 +44,9 @@ void Game::Init() {
 
     currentState = GameState::TITLE_SCREEN;
     showControlsModal = false;
+    showSlotModal = false;
+    deletingSlotIndex = 0;
+    isRestoringSave = false;
     ruinedCastleHandler.Reset();
     testArenaUnlocked = LoadArenaUnlock();
     bandageSpawnTimer = 14.0f;
@@ -82,8 +89,10 @@ void Game::EnterRuinedCastle() {
     ruinedCastleHandler.Reset();
     enemies.clear();
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     tutorial.Init();
+    SaveActiveGame();
 }
 
 void Game::EnterCrossroads() {
@@ -91,7 +100,9 @@ void Game::EnterCrossroads() {
     currentState = GameState::CROSSROADS;
     showControlsModal = false;
     showInventoryModal = false;
+    lootDrops.clear();
     particles.Clear();
+    SaveActiveGame();
 }
 
 void Game::EnterZyphden() {
@@ -99,7 +110,9 @@ void Game::EnterZyphden() {
     currentState = GameState::ZYPHDEN_REALM;
     showControlsModal = false;
     showInventoryModal = false;
+    lootDrops.clear();
     particles.Clear();
+    SaveActiveGame();
 }
 
 void Game::EnterLobby() {
@@ -117,8 +130,10 @@ void Game::EnterLobby() {
     currentState = GameState::LOBBY;
     showControlsModal = false;
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     particles.SpawnFloatingText(player.GetPosition(), "LOBBY SANCTUARY", Color{ 255, 220, 100, 255 }, 24.0f);
+    SaveActiveGame();
 }
 
 void Game::EnterArena() {
@@ -134,6 +149,7 @@ void Game::EnterArena() {
     }
     camera.target = player.GetPosition();
     projectiles.clear();
+    lootDrops.clear();
     particles.Clear();
     arenaBandages.clear();
     bandageSpawnTimer = 14.0f;
@@ -148,6 +164,112 @@ void Game::EnterArena() {
     particles.SpawnSparks(player.GetPosition(), Color{ 100, 220, 255, 255 }, 12, 180.0f);
 }
 
+void Game::SaveActiveGame() {
+    if (isRestoringSave) return;
+    int slot = SaveManager::GetActiveSlot();
+    if (slot < 1 || slot > 3) slot = 1;
+
+    GameSaveData data;
+    data.slotIndex = slot;
+    data.isValid = true;
+    data.gameState = (int)currentState;
+    data.realmName = SaveManager::GetRealmNameFromState((int)currentState);
+    data.playerX = player.GetPosition().x;
+    data.playerY = player.GetPosition().y;
+    data.playerHealth = player.GetHealth();
+    data.playerMaxHealth = player.GetMaxHealth();
+    data.playerComposure = player.GetComposure();
+    data.potionCount = player.GetInventory().GetHealthPotionCount();
+    data.shingles = player.GetInventory().GetShingles();
+    data.equippedWeapon = (int)player.GetWeapon();
+    data.equippedArmor = (int)player.GetArmor();
+    data.equippedTotem = (int)player.GetTotem();
+
+    for (int i = 0; i < 5; ++i) {
+        data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
+        data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
+    }
+
+    const auto& frags = player.GetInventory().GetFragments();
+    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
+        data.unlockedFragments[i] = frags[i].discovered;
+    }
+
+    data.bossZilDefeated = ruinedCastleHandler.IsZilDefeated();
+    data.knightLenonSparCompleted = zyphdenHandler.HasDefeatedLenon();
+    data.arenaHighestWave = waveManager.GetCurrentWave();
+
+    SaveManager::SaveGame(slot, data);
+}
+
+void Game::LoadActiveGame(int slotIndex) {
+    if (slotIndex < 1 || slotIndex > 3) return;
+
+    GameSaveData data;
+    if (!SaveManager::LoadGame(slotIndex, data)) {
+        return;
+    }
+
+    SaveManager::SetActiveSlot(slotIndex);
+
+    isRestoringSave = true;
+
+    // Transition to saved realm/gameState
+    GameState targetState = (GameState)data.gameState;
+    if (targetState == GameState::CROSSROADS) {
+        EnterCrossroads();
+    } else if (targetState == GameState::ZYPHDEN_REALM) {
+        EnterZyphden();
+    } else if (targetState == GameState::LOBBY) {
+        EnterLobby();
+    } else if (targetState == GameState::ARENA) {
+        EnterArena();
+    } else {
+        EnterRuinedCastle();
+        if (data.bossZilDefeated || data.equippedWeapon != 0) {
+            tutorial.SkipToBoss(map);
+        }
+    }
+
+    // Restore inventory state
+    player.GetInventory().SetHealthPotionCount(data.potionCount);
+    player.GetInventory().SetShingles(data.shingles);
+
+    for (int i = 0; i < 5; ++i) {
+        player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
+        if (data.unlockedWeapons[i]) {
+            player.GetInventory().UnlockWeapon((WeaponType)i);
+        }
+    }
+
+    const auto& frags = player.GetInventory().GetFragments();
+    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
+        if (data.unlockedFragments[i]) {
+            player.GetInventory().UnlockFragment(frags[i].id);
+        }
+    }
+
+    // Restore boss flags
+    ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
+    zyphdenHandler.SetLenonDefeated(data.knightLenonSparCompleted);
+
+    // Restore player state
+    player.SetWeapon((WeaponType)data.equippedWeapon);
+    player.SetArmor((ArmorType)data.equippedArmor);
+    player.SetTotem((TotemType)data.equippedTotem);
+    player.SetPosition({ data.playerX, data.playerY });
+    player.SetHealth(data.playerHealth);
+    player.SetComposure(data.playerComposure);
+    camera.target = player.GetPosition();
+
+    showControlsModal = false;
+    showInventoryModal = false;
+    showSlotModal = false;
+    deletingSlotIndex = 0;
+
+    isRestoringSave = false;
+}
+
 void Game::Update(float dt) {
     particles.Update(dt);
     Vector2 mouseScreen = GetMousePosition();
@@ -160,9 +282,14 @@ void Game::Update(float dt) {
 
     // Global Shortcut: '~' (KEY_GRAVE) returns immediately to Title Screen from any map/state
     if (IsKeyPressed(KEY_GRAVE)) {
+        if (currentState != GameState::TITLE_SCREEN && currentState != GameState::PROLOGUE_CUTSCENE) {
+            SaveActiveGame();
+        }
         currentState = GameState::TITLE_SCREEN;
         showControlsModal = false;
         showInventoryModal = false;
+        showSlotModal = false;
+        deletingSlotIndex = 0;
         SoundFX::PlayButtonClick();
         return;
     }
@@ -243,16 +370,30 @@ void Game::Update(float dt) {
 
     // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
-        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked);
+        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked, showSlotModal, deletingSlotIndex);
         if (action == 1) {
-            cutscene.Reset();
-            currentState = GameState::PROLOGUE_CUTSCENE;
-        } else if (action == 2) {
             showControlsModal = true;
-        } else if (action == 3) {
+        } else if (action == 2) {
             if (testArenaUnlocked) {
                 EnterArena();
             }
+        } else if (action >= 11 && action <= 13) {
+            int slot = action - 10;
+            LoadActiveGame(slot);
+        } else if (action >= 21 && action <= 23) {
+            int slot = action - 20;
+            SaveManager::SetActiveSlot(slot);
+            player.GetInventory().InitDefault();
+            player.SetWeapon(WeaponType::NONE);
+            player.SetArmor(ArmorType::NONE);
+            player.SetTotem(TotemType::NONE);
+            player.GetInventory().ClearWeapons();
+            player.GetInventory().ClearArmors();
+            player.GetInventory().ClearTotems();
+            cutscene.Reset();
+            currentState = GameState::PROLOGUE_CUTSCENE;
+            showSlotModal = false;
+            SaveActiveGame();
         }
         return;
     }
@@ -265,10 +406,18 @@ void Game::Update(float dt) {
         return;
     }
 
+    // Hit-stop micro-pause: freeze entity simulations during combat impact pause (parry deflection / heavy cleave)
+    if (particles.IsHitStopped() && currentState != GameState::TITLE_SCREEN && currentState != GameState::PROLOGUE_CUTSCENE) {
+        Vector2 shake = particles.GetScreenShakeOffset();
+        Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
+        camera.target = Vector2Lerp(camera.target, desiredTarget, 10.0f * dt);
+        return;
+    }
+
     // 1.8 RUINED CASTLE CHAPTER 1 STATE
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Update(
-            dt, player, map, particles, enemies, projectiles, tutorial, camera, currentState, testArenaUnlocked,
+            dt, player, map, particles, enemies, projectiles, lootDrops, tutorial, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
             [this]() { EnterRuinedCastle(); }
@@ -282,7 +431,7 @@ void Game::Update(float dt) {
             EnterCrossroads();
         }
         crossroadsHandler.Update(
-            dt, player, map, particles, enemies, projectiles, camera, currentState,
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
             [this]() { EnterLobby(); }
         );
         return;
@@ -290,11 +439,24 @@ void Game::Update(float dt) {
 
     // 1.86 ZYPHDEN TRANSITION PLACEHOLDER SCREEN
     if (currentState == GameState::ZYPHDEN_TRANSITION) {
-        bool proceed = GameUI::DrawZyphdenTransition(
-            Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT,
-            mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), dt
-        );
+        int w = GetScreenWidth();
+        int h = GetScreenHeight();
+        float cardW = fminf((float)w - 80.0f, 1140.0f);
+        float cardH = fminf((float)h - 80.0f, 760.0f);
+        float cardX = ((float)w - cardW) * 0.5f;
+        float cardY = ((float)h - cardH) * 0.5f;
+
+        float btnW = 380.0f;
+        float btnH = 50.0f;
+        float btnX = cardX + (cardW - btnW) * 0.5f;
+        float btnY = cardY + cardH - 68.0f;
+
+        Rectangle btnRec = { btnX, btnY, btnW, btnH };
+        bool isHover = CheckCollisionPointRec(mouseScreen, btnRec);
+        bool proceed = (isHover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ||
+                       IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
         if (proceed) {
+            SoundFX::PlayButtonClick();
             EnterZyphden();
             currentState = GameState::ZYPHDEN_REALM;
         }
@@ -305,11 +467,12 @@ void Game::Update(float dt) {
     if (currentState == GameState::ZYPHDEN_REALM) {
         if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
             map.GetEnvironment() != MapEnvironment::TAVERN_INTERIOR &&
+            map.GetEnvironment() != MapEnvironment::FORGE_INTERIOR &&
             map.GetEnvironment() != MapEnvironment::ROYAL_KEEP) {
             EnterZyphden();
         }
         zyphdenHandler.Update(
-            dt, player, map, particles, enemies, projectiles, camera, currentState, testArenaUnlocked,
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); }
         );
@@ -357,7 +520,13 @@ void Game::Update(float dt) {
         if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
             if (dummy.CheckHit(player.GetCurrentAttack(), particles)) {
                 player.SetAttackHit();
-                particles.AddScreenShake(2.5f, 0.1f);
+                if (player.GetCurrentAttack().type == AttackType::HEAVY) {
+                    particles.TriggerHitStop(0.05f);
+                    float rad = player.GetCurrentAttack().angle * DEG2RAD;
+                    particles.AddDirectionalShake({ cosf(rad), sinf(rad) }, 7.0f, 0.20f);
+                } else {
+                    particles.AddScreenShake(2.5f, 0.1f);
+                }
             }
         }
 
@@ -392,8 +561,6 @@ void Game::Update(float dt) {
             currentState = GameState::TITLE_SCREEN;
             return;
         }
-
-        particles.Update(dt);
 
         Vector2 shake = particles.GetScreenShakeOffset();
         Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
@@ -479,7 +646,15 @@ void Game::Update(float dt) {
         enemyAliveBefore[i] = enemies[i].IsAlive();
     }
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops in arena
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Chance to drop adhesive bandage on enemy defeat
     for (size_t i = 0; i < enemies.size(); i++) {
@@ -524,8 +699,6 @@ void Game::Update(float dt) {
         return !b.active;
     }), arenaBandages.end());
 
-    particles.Update(dt);
-
     Vector2 shake = particles.GetScreenShakeOffset();
     Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
     camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
@@ -540,7 +713,7 @@ void Game::Render() {
 
     if (currentState == GameState::TITLE_SCREEN) {
         Vector2 mouseScreen = GetMousePosition();
-        GameUI::DrawTitleScreen(w, h, mouseScreen, false, testArenaUnlocked);
+        GameUI::DrawTitleScreen(w, h, mouseScreen, false, testArenaUnlocked, showSlotModal, deletingSlotIndex);
 
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mouseScreen, false);
@@ -557,7 +730,7 @@ void Game::Render() {
 
     if (currentState == GameState::BORDERLANDS_GATE) {
         ruinedCastleHandler.Render(
-            camera, map, enemies, projectiles, player, particles, tutorial,
+            camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, false, false, 0, 0
         );
         Vector2 mousePos = GetMousePosition();
@@ -568,7 +741,7 @@ void Game::Render() {
 
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
-            camera, map, enemies, projectiles, player, particles, tutorial,
+            camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -577,7 +750,7 @@ void Game::Render() {
 
     if (currentState == GameState::CROSSROADS) {
         crossroadsHandler.Render(
-            camera, map, enemies, projectiles, player, particles,
+            camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -594,7 +767,7 @@ void Game::Render() {
 
     if (currentState == GameState::ZYPHDEN_REALM) {
         zyphdenHandler.Render(
-            camera, map, enemies, projectiles, player, particles,
+            camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
         EndDrawing();
@@ -605,7 +778,7 @@ void Game::Render() {
         BeginMode2D(camera);
         map.DrawFloor();
 
-        portal.Draw(time, testArenaUnlocked);
+        portal.Draw(time, testArenaUnlocked, player.GetPosition());
 
         Vector2 mouseWorld = GetScreenToWorld2D(GetMousePosition(), camera);
         for (const auto& ped : pedestals) {
@@ -614,7 +787,7 @@ void Game::Render() {
             AssetManager::DrawWeaponPedestal(ped.position, ped.weapon, isSel, isHov, time);
         }
 
-        dummy.Draw();
+        dummy.Draw(player.GetPosition());
         map.DrawWallsAndPillars();
         player.Draw();
         particles.Draw();
@@ -658,7 +831,11 @@ void Game::Render() {
     map.DrawWallsAndPillars();
 
     for (const auto& b : arenaBandages) {
-        b.Draw();
+        b.Draw(player.GetPosition());
+    }
+
+    for (const auto& drop : lootDrops) {
+        drop.Draw(time);
     }
 
     for (const auto& proj : projectiles) {

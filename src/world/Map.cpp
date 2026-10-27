@@ -165,12 +165,30 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 870.0f, 620.0f }); // Fireplace flame
         torches.push_back({ 680.0f, 760.0f }); // Wall lantern
         torches.push_back({ 920.0f, 760.0f }); // Wall lantern
+    } else if (env == MapEnvironment::FORGE_INTERIOR) {
+        // Blacksmith Varek's Forge Workshop - Atmospheric blacksmith shop
+        bounds = { 500.0f, 400.0f, 600.0f, 520.0f };
+
+        // 1. Blacksmith Blast Furnace & Brick Hood at {740, 400, 120, 65}
+        obstacles.push_back({ { 740.0f, 400.0f, 120.0f, 65.0f } });
+        // 2. Heavy Master Anvil at {784, 516, 48, 28}
+        obstacles.push_back({ { 784.0f, 516.0f, 48.0f, 28.0f } });
+        // 3. Quenching Water Trough at {580, 480, 32, 64}
+        obstacles.push_back({ { 580.0f, 480.0f, 32.0f, 64.0f } });
+        // 4. Armory Workbenches & Coal Bin
+        obstacles.push_back({ { 960.0f, 460.0f, 90.0f, 36.0f } });
+        obstacles.push_back({ { 960.0f, 620.0f, 90.0f, 36.0f } });
+
+        // Roaring Furnace embers and lanterns
+        torches.push_back({ 800.0f, 430.0f }); // Furnace fire
+        torches.push_back({ 620.0f, 560.0f }); // Wall lantern
+        torches.push_back({ 980.0f, 560.0f }); // Wall lantern
     } else if (env == MapEnvironment::ROYAL_KEEP) {
         // Zyphden Royal Keep - Grand Sovereign Throne Hall (Expanded 1200x1100)
         bounds = { 400.0f, 160.0f, 1200.0f, 1100.0f };
 
-        // Grand Stepped Dais Obstacle (King Kreptu's elevated platform)
-        obstacles.push_back({ { 910.0f, 225.0f, 180.0f, 65.0f } });
+        // Throne Chair Obstacle (King Kreptu's elevated seat)
+        obstacles.push_back({ { 950.0f, 160.0f, 100.0f, 65.0f } });
 
         // Western Wing (Archives) Library Bookcases & Desks
         obstacles.push_back({ { 480.0f, 320.0f, 200.0f, 28.0f } });
@@ -213,7 +231,7 @@ void GameMap::Init(MapEnvironment env) {
     }
 }
 
-void GameMap::DrawFloor() const {
+void GameMap::DrawFloor(Vector2 playerPos) const {
     ClearBackground(Color{ 8, 10, 15, 255 });
 
     if (currentEnv == MapEnvironment::LOBBY) {
@@ -261,11 +279,13 @@ void GameMap::DrawFloor() const {
     } else if (currentEnv == MapEnvironment::RUINED_CASTLE) {
         DrawRuinedCastleFloor();
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
-        DrawCrossroadsFloor();
+        DrawCrossroadsFloor(playerPos);
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenFloor();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
         DrawTavernFloor();
+    } else if (currentEnv == MapEnvironment::FORGE_INTERIOR) {
+        DrawForgeFloor();
     } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
         DrawRoyalKeepFloor();
     }
@@ -346,7 +366,7 @@ void GameMap::DrawRuinedCastleFloor() const {
     DrawCircleLines((int)awakenCenter.x, (int)awakenCenter.y, 45.0f, Color{ 45, 60, 85, 160 });
 }
 
-void GameMap::DrawWallsAndPillars() const {
+void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
     const float wallThickness = 24.0f;
 
     // Outer Perimeter Walls
@@ -357,13 +377,15 @@ void GameMap::DrawWallsAndPillars() const {
     DrawRectangleLinesEx(Rectangle{ bounds.x - 2, bounds.y - 2, bounds.width + 4, bounds.height + 4 }, 2.0f, Color{ 70, 85, 115, 255 });
 
     if (currentEnv == MapEnvironment::RUINED_CASTLE) {
-        DrawRuinedCastleWalls();
+        DrawRuinedCastleWalls(playerPos);
     } else if (currentEnv == MapEnvironment::CROSSROADS) {
-        DrawCrossroadsWalls();
+        DrawCrossroadsWalls(playerPos);
     } else if (currentEnv == MapEnvironment::ZYPHDEN_REALM) {
         DrawZyphdenWalls();
     } else if (currentEnv == MapEnvironment::TAVERN_INTERIOR) {
-        DrawTavernWalls();
+        DrawTavernWalls(playerPos);
+    } else if (currentEnv == MapEnvironment::FORGE_INTERIOR) {
+        DrawForgeWalls();
     } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
         DrawRoyalKeepWalls();
     } else {
@@ -379,7 +401,7 @@ void GameMap::DrawWallsAndPillars() const {
     }
 }
 
-void GameMap::DrawRuinedCastleWalls() const {
+void GameMap::DrawRuinedCastleWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Ruined Interior Wall Segments
@@ -470,8 +492,11 @@ void GameMap::DrawRuinedCastleWalls() const {
         DrawCircle((int)gateX - 8, (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
         DrawCircle((int)(gateX + gateW + 8), (int)bounds.y - 42, 5.0f, Color{ 255, 180, 40, 240 });
 
-        DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
-        DrawText("Step through or Press [E] to advance", (int)gateX + 2, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
+        bool inRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { gateX + gateW * 0.5f, bounds.y }) <= 160.0f);
+        if (inRange) {
+            DrawText("GATEWAY TO ZYPHDEN", (int)gateX + 18, (int)bounds.y - 52, 13, Color{ 255, 230, 120, 255 });
+            DrawText("Step through or Press [E] to advance", (int)gateX + 2, (int)bounds.y - 32, 11, Color{ 160, 220, 255, 240 });
+        }
     }
 }
 
@@ -540,7 +565,7 @@ Vector2 GameMap::ResolveCollision(Vector2 oldPos, Vector2 newPos, float radius) 
     return testY;
 }
 
-void GameMap::DrawCrossroadsFloor() const {
+void GameMap::DrawCrossroadsFloor(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Weathered earthy terrain
@@ -575,10 +600,13 @@ void GameMap::DrawCrossroadsFloor() const {
     // 5. Northern Gateway Approach to Zyphden
     DrawRectangle(620, (int)bounds.y, 360, 80, Color{ 36, 48, 68, 255 });
     DrawRectangleLines(620, (int)bounds.y, 360, 80, Color{ 180, 150, 70, 220 });
-    DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
+    bool inGateRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 800.0f, bounds.y + 40.0f }) <= 160.0f);
+    if (inGateRange) {
+        DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
+    }
 }
 
-void GameMap::DrawCrossroadsWalls() const {
+void GameMap::DrawCrossroadsWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // Roadside Pillars & Braziers
@@ -610,7 +638,10 @@ void GameMap::DrawCrossroadsWalls() const {
 
     float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
     DrawCircleGradient(Vector2{ 800.0f, gateY + 16.0f }, 110.0f, Color{ 255, 215, 80, (unsigned char)(140 * pulse) }, Color{ 0, 0, 0, 0 });
-    DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
+    bool inGateRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 800.0f, bounds.y }) <= 160.0f);
+    if (inGateRange) {
+        DrawText("ENTER ZYPHDEN KINGDOM", 705, (int)bounds.y - 38, 13, Color{ 255, 225, 100, 255 });
+    }
 }
 
 void GameMap::DrawZyphdenFloor() const {
@@ -683,26 +714,28 @@ void GameMap::DrawZyphdenWalls() const {
     DrawRectangleRec(tavern, Color{ 38, 28, 22, 255 });
     DrawRectangleLinesEx(tavern, 3.0f, Color{ 85, 60, 42, 255 });
     DrawRectangle(350, 820, 220, 40, Color{ 52, 38, 28, 255 });
-    DrawText("HEARTHSIDE TAVERN", 380, 832, 14, Color{ 255, 205, 120, 255 });
 
     // Warm tavern glowing windows
     DrawRectangle(360, 890, 40, 30, Color{ 255, 170, 50, 200 });
     DrawRectangle(500, 890, 40, 30, Color{ 255, 170, 50, 200 });
 
-    // Carpenter's Workshop
+    // Blacksmith Varek's Forge Workshop (Northwest)
     Rectangle workshop = { 320.0f, 480.0f, 220.0f, 180.0f };
     DrawRectangleRec(workshop, Color{ 36, 32, 28, 255 });
     DrawRectangleLinesEx(workshop, 3.0f, Color{ 75, 68, 58, 255 });
-    DrawText("CARPENTER'S WORKSHOP", 335, 500, 12, Color{ 210, 195, 160, 240 });
     // Anvil & Timber stacks
     DrawRectangle(350, 560, 40, 24, Color{ 55, 60, 68, 255 });
     DrawRectangle(440, 560, 60, 30, Color{ 70, 50, 35, 255 });
+    // Forge doorway archway
+    Rectangle forgeDoor = { 400.0f, 650.0f, 60.0f, 14.0f };
+    DrawRectangleRec(forgeDoor, Color{ 20, 16, 14, 255 });
+    DrawRectangleLinesEx(forgeDoor, 2.0f, Color{ 220, 130, 50, 240 });
+    DrawCircleGradient(Vector2{ 430.0f, 656.0f }, 35.0f, Color{ 255, 110, 30, 80 }, Color{ 0, 0, 0, 0 });
 
     // Royal Castle Keep (North)
     Rectangle castleKeep = { 800.0f, 120.0f, 400.0f, 200.0f };
     DrawRectangleRec(castleKeep, Color{ 35, 42, 58, 255 });
     DrawRectangleLinesEx(castleKeep, 3.0f, Color{ 85, 105, 145, 255 });
-    DrawText("ZYPHDEN ROYAL KEEP", 910, 135, 16, Color{ 255, 225, 110, 255 });
 
     // Grand Entrance Archway into Royal Keep (y: 308-320)
     Rectangle keepDoor = { 950.0f, 306.0f, 100.0f, 16.0f };
@@ -711,7 +744,6 @@ void GameMap::DrawZyphdenWalls() const {
     DrawCircleGradient(Vector2{ 1000.0f, 314.0f }, 45.0f, Color{ 120, 190, 255, 95 }, Color{ 0, 0, 0, 0 });
     DrawCircle(942, 314, 5.0f, Color{ 255, 200, 75, 240 });
     DrawCircle(1058, 314, 5.0f, Color{ 255, 200, 75, 240 });
-    DrawText("[E] ENTER ROYAL KEEP (KING KREPTU)", 895, 326, 10, Color{ 255, 225, 110, 240 });
 
     // Courtyard Enclosure Rails
     for (const auto& obs : obstacles) {
@@ -789,14 +821,17 @@ void GameMap::DrawTavernFloor() const {
     DrawRectangleLines(760, 885, 80, 25, Color{ 110, 85, 55, 200 });
 }
 
-void GameMap::DrawTavernWalls() const {
+void GameMap::DrawTavernWalls(Vector2 playerPos) const {
     float time = (float)GetTime();
 
     // 1. Bar Counter & Shelves (Lowered to y = 700 so Eldon behind at y = 665 has clear name tag visibility)
     Rectangle bar = { 650.0f, 700.0f, 150.0f, 32.0f };
     DrawRectangleRec(bar, Color{ 70, 48, 30, 255 });
     DrawRectangleLinesEx(bar, 2.0f, Color{ 120, 85, 55, 255 });
-    DrawText("BAR", 705, 708, 12, Color{ 255, 215, 120, 240 });
+    bool inBarRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, { 725.0f, 716.0f }) <= 150.0f);
+    if (inBarRange) {
+        DrawText("BAR", 705, 708, 12, Color{ 255, 215, 120, 240 });
+    }
 
     // Bar stools in front of counter at y = 746
     for (float sx = 665.0f; sx <= 785.0f; sx += 35.0f) {
@@ -833,6 +868,89 @@ void GameMap::DrawTavernWalls() const {
     // 4. Southern Exit Doorway
     DrawRectangle(770, 915, 60, 6, Color{ 20, 15, 12, 255 });
     DrawRectangleLines(770, 915, 60, 6, Color{ 180, 140, 80, 255 });
+}
+
+void GameMap::DrawForgeFloor() const {
+    // 1. Dark scorched flagstone masonry
+    DrawRectangleRec(bounds, Color{ 22, 20, 24, 255 });
+
+    const int tileSize = 48;
+    int startX = (int)bounds.x;
+    int endX = (int)(bounds.x + bounds.width);
+    int startY = (int)bounds.y;
+    int endY = (int)(bounds.y + bounds.height);
+
+    for (int x = startX; x <= endX; x += tileSize) {
+        DrawLine(x, startY, x, endY, Color{ 36, 32, 38, 160 });
+    }
+    for (int y = startY; y <= endY; y += tileSize) {
+        DrawLine(startX, y, endX, y, Color{ 36, 32, 38, 160 });
+    }
+
+    // Scorched coal ash circle around the central blast furnace and anvil
+    DrawCircleGradient(Vector2{ 800.0f, 500.0f }, 140.0f, Color{ 14, 12, 16, 230 }, Color{ 0, 0, 0, 0 });
+    DrawCircleGradient(Vector2{ 800.0f, 440.0f }, 90.0f, Color{ 255, 90, 20, 45 }, Color{ 0, 0, 0, 0 });
+}
+
+void GameMap::DrawForgeWalls() const {
+    float time = (float)GetTime();
+
+    // 1. Northern Blacksmith Blast Furnace & Brick Hood
+    Rectangle furnace = { 740.0f, 400.0f, 120.0f, 65.0f };
+    DrawRectangleRec(furnace, Color{ 48, 36, 32, 255 });
+    DrawRectangleLinesEx(furnace, 3.0f, Color{ 85, 60, 50, 255 });
+
+    // Glowing Furnace Arch & Coal Bed
+    Rectangle grate = { 765.0f, 420.0f, 70.0f, 40.0f };
+    DrawRectangleRec(grate, Color{ 28, 16, 12, 255 });
+    DrawRectangleLinesEx(grate, 2.0f, Color{ 120, 75, 45, 255 });
+    // Roaring glowing fire
+    float flicker = sinf(time * 14.0f) * 4.0f;
+    DrawCircleGradient(Vector2{ 800.0f, 436.0f }, 32.0f + flicker, Color{ 255, 120, 25, 240 }, Color{ 255, 60, 10, 0 });
+    DrawCircle(800, 436, 14.0f + flicker * 0.5f, Color{ 255, 200, 60, 255 });
+
+    // Smoke Chimney Hood
+    DrawTriangle(Vector2{ 740.0f, 400.0f }, Vector2{ 860.0f, 400.0f }, Vector2{ 800.0f, 380.0f }, Color{ 60, 45, 40, 255 });
+
+    // 2. Heavy Master Blacksmith Anvil at {784, 516, 48, 28}
+    Rectangle anvilBase = { 792.0f, 522.0f, 32.0f, 22.0f };
+    DrawRectangleRec(anvilBase, Color{ 45, 50, 60, 255 });
+    DrawRectangleLinesEx(anvilBase, 2.0f, Color{ 90, 105, 125, 255 });
+    // Anvil Horn and Face
+    DrawRectangle(784, 516, 48, 10, Color{ 75, 85, 100, 255 });
+    DrawRectangleLines(784, 516, 48, 10, Color{ 130, 145, 170, 255 });
+    // Hammer resting on anvil
+    DrawLineEx(Vector2{ 795.0f, 518.0f }, Vector2{ 815.0f, 518.0f }, 2.5f, Color{ 140, 100, 65, 255 });
+    DrawRectangle(812, 514, 8, 8, Color{ 180, 190, 205, 255 });
+
+    // 3. Quenching Water Trough at {580, 480, 32, 64}
+    Rectangle trough = { 580.0f, 480.0f, 32.0f, 64.0f };
+    DrawRectangleRec(trough, Color{ 55, 42, 32, 255 });
+    DrawRectangleLinesEx(trough, 2.0f, Color{ 100, 75, 55, 255 });
+    // Water surface with faint blue ripple
+    Rectangle water = { 584.0f, 484.0f, 24.0f, 56.0f };
+    DrawRectangleRec(water, Color{ 35, 95, 140, 220 });
+    // Rising steam wisps
+    float steamPulse = sinf(time * 3.0f);
+    DrawCircleGradient(Vector2{ 596.0f, 474.0f }, 12.0f, Color{ 200, 225, 255, (unsigned char)(40 + 20 * steamPulse) }, Color{ 0, 0, 0, 0 });
+
+    // 4. Armory Workbenches & Coal Bin
+    Rectangle bench1 = { 960.0f, 460.0f, 90.0f, 36.0f };
+    DrawRectangleRec(bench1, Color{ 58, 44, 34, 255 });
+    DrawRectangleLinesEx(bench1, 2.0f, Color{ 110, 85, 65, 255 });
+    // Steel ingots on bench
+    for (int i = 0; i < 3; i++) {
+        DrawRectangle(975 + i * 22, 468, 16, 12, Color{ 120, 130, 145, 255 });
+        DrawRectangleLines(975 + i * 22, 468, 16, 12, Color{ 180, 195, 215, 255 });
+    }
+
+    Rectangle bench2 = { 960.0f, 620.0f, 90.0f, 36.0f };
+    DrawRectangleRec(bench2, Color{ 58, 44, 34, 255 });
+    DrawRectangleLinesEx(bench2, 2.0f, Color{ 110, 85, 65, 255 });
+
+    // 5. Southern Exit Doorway
+    DrawRectangle(770, 915, 60, 6, Color{ 20, 15, 12, 255 });
+    DrawRectangleLines(770, 915, 60, 6, Color{ 220, 140, 60, 255 });
 }
 
 void GameMap::DrawRoyalKeepFloor() const {
@@ -921,28 +1039,22 @@ void GameMap::DrawRoyalKeepWalls() const {
     // 3. Western Wing (Archives) Fixtures: Bookshelves & Reading desks
     DrawRectangle(480, 320, 200, 28, Color{ 58, 42, 30, 255 });
     DrawRectangleLines(480, 320, 200, 28, Color{ 110, 80, 50, 255 });
-    DrawText("ARCHIVE CODICES", 520, 328, 10, Color{ 200, 215, 235, 220 });
 
     DrawRectangle(480, 440, 200, 28, Color{ 58, 42, 30, 255 });
     DrawRectangleLines(480, 440, 200, 28, Color{ 110, 80, 50, 255 });
-    DrawText("ROYAL CHRONICLES", 516, 448, 10, Color{ 200, 215, 235, 220 });
 
     DrawRectangle(480, 580, 120, 40, Color{ 68, 48, 34, 255 });
     DrawRectangleLines(480, 580, 120, 40, Color{ 125, 95, 60, 255 });
-    DrawText("SCHOLAR DESK", 495, 594, 9, Color{ 240, 220, 180, 220 });
 
     // 4. Eastern Wing (Armory) Fixtures: Weapon Racks & Armor Anvils
     DrawRectangle(1320, 320, 200, 28, Color{ 48, 52, 60, 255 });
     DrawRectangleLines(1320, 320, 200, 28, Color{ 90, 105, 125, 255 });
-    DrawText("HALBERD & LANCE RACKS", 1342, 328, 10, Color{ 220, 230, 245, 220 });
 
     DrawRectangle(1320, 440, 200, 28, Color{ 48, 52, 60, 255 });
     DrawRectangleLines(1320, 440, 200, 28, Color{ 90, 105, 125, 255 });
-    DrawText("CRUSADER SHIELD STANDS", 1336, 448, 10, Color{ 220, 230, 245, 220 });
 
     DrawRectangle(1400, 580, 120, 40, Color{ 52, 56, 66, 255 });
     DrawRectangleLines(1400, 580, 120, 40, Color{ 110, 120, 140, 255 });
-    DrawText("ARMORER BENCH", 1414, 594, 9, Color{ 220, 225, 240, 220 });
 
     // 5. Royal Banners along walls
     for (float by : { 360.0f, 600.0f, 840.0f, 1040.0f }) {
@@ -959,12 +1071,11 @@ void GameMap::DrawRoyalKeepWalls() const {
         DrawCircle((int)(eBanner.x + 12), (int)(by + 36), 6.0f, Color{ 255, 220, 80, 255 });
     }
 
-    // 6. Southern Exit Threshold Doorway at y = 1252
+    // 6. Southern Exit Threshold Doorway at y = 1250
     Rectangle exitDoor = { 950.0f, 1250.0f, 100.0f, 10.0f };
     DrawRectangleRec(exitDoor, Color{ 25, 30, 45, 255 });
     DrawRectangleLinesEx(exitDoor, 2.0f, Color{ 255, 215, 75, 255 });
     DrawCircleGradient(Vector2{ 1000.0f, 1245.0f }, 65.0f, Color{ 255, 210, 80, 85 }, Color{ 0, 0, 0, 0 });
-    DrawText("[E / WALK OUT] EXIT TO ZYPHDEN", 905, 1226, 11, Color{ 255, 230, 120, 240 });
 }
 
 

@@ -3,6 +3,7 @@
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/CollisionSystem.hpp"
+#include "../combat/LootDrop.hpp"
 #include "raymath.h"
 #include <algorithm>
 
@@ -20,6 +21,7 @@ void RuinedCastleHandler::Reset() {
     zilDialogueSpeaker = "";
     zilDialogueText = "";
     zilDialogueColor = WHITE;
+    overworldEnemiesSpawned = false;
     castlePillar = { "frag_09", "Inscribed Castle Monolith", { 680.0f, 960.0f }, 26.0f, false };
     castleChest = { "", 2, "Vanguard Relic Chest", { 1350.0f, 620.0f }, 28.0f, false };
 }
@@ -31,6 +33,7 @@ void RuinedCastleHandler::Update(
     ParticleSystem& particles,
     std::vector<Enemy>& enemies,
     std::vector<Projectile>& projectiles,
+    std::vector<LootDrop>& lootDrops,
     TutorialManager& tutorial,
     Camera2D& camera,
     GameState& currentState,
@@ -76,6 +79,7 @@ void RuinedCastleHandler::Update(
             showZilDefeatModal = false;
             zilEncounterActive = false;
             zilSparedPlayer = true;
+            overworldEnemiesSpawned = true;
             map.SetGateOpen(true);
             player.Revive({ 800.0f, 480.0f }, 1.0f);
             camera.target = player.GetPosition();
@@ -102,7 +106,16 @@ void RuinedCastleHandler::Update(
             return;
         }
         if (IsKeyPressed(KEY_R)) {
-            if (onEnterRuinedCastle) onEnterRuinedCastle();
+            player.Revive({ 800.0f, 1180.0f }, 1.0f);
+            camera.target = player.GetPosition();
+            enemies.clear();
+            projectiles.clear();
+            lootDrops.clear();
+            if (tutorial.HasDefeatedTutorialEnemy() && !zilDefeated && !zilSparedPlayer) {
+                enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
+                enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
+                enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
+            }
             return;
         }
         if (IsKeyPressed(KEY_L)) {
@@ -169,10 +182,31 @@ void RuinedCastleHandler::Update(
         return !p.IsActive();
     }), projectiles.end());
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Tutorial progression
     tutorial.Update(dt, player, map, particles, enemies, projectiles);
+
+    // Overworld enemy respawn in courtyard after tutorial Sentinel defeated (Only before encountering or defeating Zil)
+    if (tutorial.HasDefeatedTutorialEnemy() && !zilDefeated && !zilSparedPlayer && !zilEncounterActive && !overworldEnemiesSpawned && enemies.empty()) {
+        overworldEnemiesSpawned = true;
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ 620.0f, 750.0f });
+        enemies.emplace_back(EnemyType::SLASHER, Vector2{ 980.0f, 750.0f });
+        enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 920.0f });
+    }
+
+    // Ensure no enemies ever exist or spawn in Ruined Castle after Zil has been defeated or spared
+    if ((zilDefeated || zilSparedPlayer) && !enemies.empty()) {
+        enemies.clear();
+    }
 
     // High Altar Steps Barrier (Cannot enter until first tutorial enemy is officially beaten)
     if (!tutorial.HasDefeatedTutorialEnemy() && player.GetPosition().y <= 430.0f) {
@@ -215,6 +249,7 @@ void RuinedCastleHandler::Update(
         if (!zilAlive && !zilDefeated) {
             zilDefeated = true;
             zilEncounterActive = false;
+            overworldEnemiesSpawned = true;
             enemies.clear();
             projectiles.clear();
 
@@ -282,12 +317,10 @@ void RuinedCastleHandler::Update(
         SoundFX::PlayHitImpact();
     }
 
-    // Camera follow
-    camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
-    camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
-
-    // Particle and floating text decay
-    particles.Update(dt);
+    // Camera follow with screen shake
+    Vector2 shake = particles.GetScreenShakeOffset();
+    camera.target.x += (player.GetPosition().x + shake.x - camera.target.x) * 0.12f;
+    camera.target.y += (player.GetPosition().y + shake.y - camera.target.y) * 0.12f;
 }
 
 void RuinedCastleHandler::Render(
@@ -295,6 +328,7 @@ void RuinedCastleHandler::Render(
     const GameMap& map,
     const std::vector<Enemy>& enemies,
     const std::vector<Projectile>& projectiles,
+    const std::vector<LootDrop>& lootDrops,
     const Player& player,
     const ParticleSystem& particles,
     TutorialManager& tutorial,
@@ -308,27 +342,29 @@ void RuinedCastleHandler::Render(
     float time = (float)GetTime();
 
     BeginMode2D(camera);
-    map.DrawFloor();
+    map.DrawFloor(player.GetPosition());
 
     // Runic Ward across High Altar steps if sentinel not yet defeated
     if (!tutorial.HasDefeatedTutorialEnemy()) {
         float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
         DrawLineEx({ 580.0f, 430.0f }, { 1020.0f, 430.0f }, 3.5f, Color{ 220, 60, 60, (unsigned char)(160 + 80 * pulse) });
         DrawCircleGradient(Vector2{ 800.0f, 430.0f }, 70.0f, Color{ 200, 40, 40, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
-        const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
-        int wtw = MeasureText(wardText, 10);
-        DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+        if (Vector2Distance(player.GetPosition(), { 800.0f, 430.0f }) <= 110.0f) {
+            const char* wardText = "[SANCTUARY WARD — DEFEAT SENTINEL TO ADVANCE]";
+            int wtw = MeasureText(wardText, 10);
+            DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
+        }
     }
 
-    tutorial.DrawWorldElements(time);
-    castlePillar.Draw(time);
-    castleChest.Draw(time);
+    tutorial.DrawWorldElements(time, player.GetPosition());
+    castlePillar.Draw(time, player.GetPosition());
+    castleChest.Draw(time, player.GetPosition());
 
     for (const auto& enemy : enemies) {
         enemy.DrawTelegraph();
     }
 
-    map.DrawWallsAndPillars();
+    map.DrawWallsAndPillars(player.GetPosition());
 
     for (const auto& proj : projectiles) {
         proj.Draw();
@@ -336,6 +372,10 @@ void RuinedCastleHandler::Render(
 
     for (const auto& enemy : enemies) {
         enemy.Draw();
+    }
+
+    for (const auto& drop : lootDrops) {
+        drop.Draw(time);
     }
 
     if (player.IsAlive()) {

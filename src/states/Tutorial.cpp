@@ -4,7 +4,7 @@
 #include <cmath>
 #include <sstream>
 
-void AncientChest::Draw(float time) const {
+void AncientChest::Draw(float time, Vector2 playerPos) const {
     // Drop shadow
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -20,7 +20,14 @@ void AncientChest::Draw(float time) const {
         // Golden lock
         float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
         DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
-        DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+
+        bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+        if (inRange) {
+            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+            const char* prompt = "[E] Ancient Relic Chest";
+            int pw = MeasureText(prompt, 10);
+            DrawText(prompt, (int)(position.x - pw * 0.5f), (int)(position.y - radius - 16), 10, Color{ 255, 230, 120, 240 });
+        }
     } else {
         // Open Chest Box
         DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });
@@ -35,7 +42,7 @@ void AncientChest::Draw(float time) const {
     }
 }
 
-void LoreCollectible::Draw(float time, bool isInteractable) const {
+void LoreCollectible::Draw(float time, bool isInteractable, Vector2 playerPos) const {
     // Drop shadow
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -137,9 +144,12 @@ void LoreCollectible::Draw(float time, bool isInteractable) const {
     }
 
     if (!collected) {
-        std::string displayLabel = isInteractable ? label : ("[SEALED] " + label);
-        int lw = MeasureText(displayLabel.c_str(), 10);
-        DrawText(displayLabel.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, isInteractable ? Color{ 255, 230, 120, 240 } : Color{ 190, 150, 150, 190 });
+        bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+        if (inRange) {
+            std::string displayLabel = isInteractable ? label : ("[SEALED] " + label);
+            int lw = MeasureText(displayLabel.c_str(), 10);
+            DrawText(displayLabel.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, isInteractable ? Color{ 255, 230, 120, 240 } : Color{ 190, 150, 150, 190 });
+        }
     }
 }
 
@@ -176,9 +186,9 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
             popupHint = "[E] Open Relic Chest  |  [I] Open Lore Journal";
             break;
         case TutorialStep::DEFENSE_SENTINEL:
-            popupTitle = "DEFENSE TRIAL: DASH & PARRY";
-            popupBody = "A Ruin Sentinel has awakened to test your vigilance!\n\n• Dash [Q]: Swift evasion with invulnerability frames.\n• Parry [F]: Timed deflection right before impact staggers foes and grants +50% Counter Damage!\n• Defeat the Sentinel to break the ward sealing the High Altar.";
-            popupHint = "[Q] Dash (Evade)  |  [F] Parry (Timed Deflection)  |  Defeat Sentinel";
+            popupTitle = "DEFENSE TRIAL: COMPOSURE & PHLEGMATIC MECHANICS";
+            popupBody = "A Ruin Sentinel has awakened! Master your Phlegmatic Composure to dominate combat:\n\n• COMPOSURE GAUGE & POISE TIERS:\n  - Discomposed (<25%): -20% Stamina recovery, vulnerable to Bleed.\n  - Stoic Poise (>=80%): +20% Stamina recovery, immune to Bleed & Stagger.\n  - Phlegmatic Trance (100%): Press [SPACE] to unleash tranquil fury and heightened poise!\n\n• BUILDING COMPOSURE:\n  - Timed Parry [F]: Deflect before impact (+25 Composure, staggers foe, +50% Counter Damage).\n  - Evasive Dash [Q]: Slip through strikes with i-frames (+15 Composure).\n  - Whiffing attacks/parries or taking unmitigated hits lowers composure.\n\n• Defeat the Sentinel to break the ward sealing the High Altar.";
+            popupHint = "[F] Parry (+25 Poise)  |  [Q] Dash (+15 Poise)  |  [SPACE] Trance at 100%";
             break;
         case TutorialStep::GATE_OPENED:
             popupTitle = "THE UPPER SANCTUARY UNSEALED";
@@ -405,8 +415,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::DEFENSE_SENTINEL: {
-            currentObjectiveText = "SANCTUARY SENTINEL: Defeat the corrupt Slasher! Evade with [Q] Dash & deflect with [F] Parry.";
-            currentControlHint = "[Q] Dash (i-frames)  |  [F] Parry to stagger  |  Defeat the Slasher";
+            currentObjectiveText = "COMPOSURE TRIAL: Build Poise (+25 Parry, +15 Dash). At 100%, trigger [SPACE] Phlegmatic Trance!";
+            currentControlHint = "[F] Parry (+25 Poise)  |  [Q] Dash (+15 Poise)  |  [SPACE] Trance at 100%  |  Defeat Sentinel";
 
             if (!sentinelSpawned) {
                 sentinelSpawned = true;
@@ -466,7 +476,7 @@ void TutorialManager::SkipToBoss(GameMap& map) {
     currentStep = TutorialStep::COMPLETED;
 }
 
-void TutorialManager::DrawWorldElements(float time) const {
+void TutorialManager::DrawWorldElements(float time, Vector2 playerPos) const {
     // 1a. Weapon Stand Altar at (800, 980)
     DrawCircle((int)weaponStandPos.x, (int)(weaponStandPos.y + 12), 34.0f, Color{ 10, 12, 18, 120 });
     DrawCircle((int)weaponStandPos.x, (int)weaponStandPos.y, 30.0f, Color{ 32, 38, 52, 255 });
@@ -481,9 +491,12 @@ void TutorialManager::DrawWorldElements(float time) const {
         float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
         DrawCircleGradient(Vector2{ weaponStandPos.x, weaponStandPos.y + floatOffset }, 36.0f, Color{ 100, 220, 255, (unsigned char)(70 * pulse) }, Color{ 0, 0, 0, 0 });
 
-        const char* label = "[E] Claim Broadsword";
-        int lw = MeasureText(label, 11);
-        DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        bool inRange = (playerPos.x > -9000.0f) ? (Vector2Distance(playerPos, weaponStandPos) <= 75.0f) : true;
+        if (inRange) {
+            const char* label = "[E] Claim Broadsword";
+            int lw = MeasureText(label, 11);
+            DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        }
     }
 
     // 1b. Commoner's Scrap Armor Stand at (870, 980)
@@ -505,15 +518,18 @@ void TutorialManager::DrawWorldElements(float time) const {
         float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
         DrawCircleGradient(armorCenter, 34.0f, Color{ 255, 200, 100, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
 
-        const char* label = "[E] Commoner's Scrap";
-        int lw = MeasureText(label, 11);
-        DrawText(label, (int)(armorStandPos.x - lw * 0.5f), (int)(armorStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        bool inRange = (playerPos.x > -9000.0f) ? (Vector2Distance(playerPos, armorStandPos) <= 75.0f) : true;
+        if (inRange) {
+            const char* label = "[E] Commoner's Scrap";
+            int lw = MeasureText(label, 11);
+            DrawText(label, (int)(armorStandPos.x - lw * 0.5f), (int)(armorStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        }
     }
 
     // 2. All 4 Tutorial Lore Collectibles
     bool loreInteractable = (currentStep >= TutorialStep::LORE_DISCOVERY);
     for (const auto& item : loreItems) {
-        item.Draw(time, loreInteractable);
+        item.Draw(time, loreInteractable, playerPos);
     }
 }
 
@@ -585,15 +601,35 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
     // Dark backdrop overlay
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 8, 14, 215 });
 
-    float cardW = 680.0f;
-    float cardH = 370.0f;
+    // Pre-calculate body text height and split lines
+    std::vector<std::string> lines;
+    std::istringstream stream(popupBody);
+    std::string seg;
+    float bodyH = 0.0f;
+    while (std::getline(stream, seg)) {
+        lines.push_back(seg);
+        if (seg.empty()) {
+            bodyH += 12.0f;
+        } else {
+            bodyH += 22.0f;
+        }
+    }
+
+    const float cardW = 780.0f;
+    const float contentTop = 92.0f;
+    const float hintH = 44.0f;
+    const float btnH = 46.0f;
+    const float spacing = 16.0f;
+    float cardH = contentTop + bodyH + spacing + hintH + spacing + btnH + 24.0f;
+    if (cardH < 380.0f) cardH = 380.0f;
+
     float cardX = ((float)windowWidth - cardW) * 0.5f;
     float cardY = ((float)windowHeight - cardH) * 0.5f;
 
     // Outer backing card
-    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 16, 20, 30, 252 });
-    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.05f, 8, Color{ 215, 175, 75, 240 });
-    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.045f, 8, Color{ 50, 68, 98, 180 });
+    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 16, 20, 30, 252 });
+    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.04f, 8, Color{ 215, 175, 75, 240 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.035f, 8, Color{ 50, 68, 98, 180 });
 
     // Gold corner accents
     Color cornerCol = Color{ 255, 215, 80, 240 };
@@ -614,10 +650,8 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
     DrawLine((int)cardX + 36, (int)cardY + 74, (int)(cardX + cardW - 36), (int)cardY + 74, Color{ 140, 110, 50, 200 });
 
     // Body Text
-    std::istringstream stream(popupBody);
-    std::string paragraph;
-    int currentY = (int)cardY + 92;
-    while (std::getline(stream, paragraph)) {
+    int currentY = (int)cardY + (int)contentTop;
+    for (const auto& paragraph : lines) {
         if (paragraph.empty()) {
             currentY += 12;
             continue;
@@ -626,21 +660,22 @@ bool TutorialManager::DrawPopup(int windowWidth, int windowHeight, Vector2 mouse
         currentY += 22;
     }
 
-    // Keybindings highlight box
-    Rectangle hintRec = { cardX + 36.0f, cardY + 220.0f, cardW - 72.0f, 44.0f };
+    // Keybindings highlight box positioned below body text
+    Rectangle hintRec = { cardX + 36.0f, (float)currentY + spacing, cardW - 72.0f, hintH };
     DrawRectangleRounded(hintRec, 0.2f, 4, Color{ 24, 32, 48, 240 });
     DrawRectangleRoundedLines(hintRec, 0.2f, 4, Color{ 80, 120, 175, 200 });
-    DrawText(popupHint.c_str(), (int)cardX + 54, (int)cardY + 234, 13, Color{ 140, 230, 255, 255 });
+    int hw = MeasureText(popupHint.c_str(), 13);
+    DrawText(popupHint.c_str(), (int)(hintRec.x + (hintRec.width - hw) * 0.5f), (int)(hintRec.y + (hintRec.height - 13) * 0.5f), 13, Color{ 140, 230, 255, 255 });
 
-    // Button: Resume / Proceed
-    Rectangle btnRec = { cardX + (cardW - 300.0f) * 0.5f, cardY + 290.0f, 300.0f, 48.0f };
+    // Button: Resume / Proceed placed neatly below hint box
+    Rectangle btnRec = { cardX + (cardW - 300.0f) * 0.5f, hintRec.y + hintRec.height + spacing, 300.0f, btnH };
     bool hovered = CheckCollisionPointRec(mousePos, btnRec);
     DrawRectangleRounded(btnRec, 0.2f, 6, hovered ? Color{ 55, 85, 135, 255 } : Color{ 30, 48, 75, 240 });
     DrawRectangleRoundedLines(btnRec, 0.2f, 6, hovered ? Color{ 180, 230, 255, 255 } : Color{ 120, 180, 240, 220 });
 
     const char* btnLabel = "RESUME [SPACE / CLICK]";
     int bw = MeasureText(btnLabel, 14);
-    DrawText(btnLabel, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)btnRec.y + 16, 14, hovered ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
+    DrawText(btnLabel, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)(btnRec.y + (btnRec.height - 14) * 0.5f), 14, hovered ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
 
     bool dismiss = (isMousePressed && hovered) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
     if (dismiss) {

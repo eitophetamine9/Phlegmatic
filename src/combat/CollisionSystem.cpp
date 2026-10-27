@@ -1,4 +1,5 @@
 #include "CollisionSystem.hpp"
+#include "LootDrop.hpp"
 #include "../entities/Player.hpp"
 #include "../entities/Enemy.hpp"
 #include "Projectile.hpp"
@@ -7,7 +8,7 @@
 #include "raymath.h"
 #include <cmath>
 
-void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera) {
+void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera, std::vector<LootDrop>* outLootDrops) {
     // 1. Player melee attack vs enemies
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
@@ -30,25 +31,62 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             if (hit) {
+                // Melancholic shell shatter: War Mace or Heavy attacks shatter brittle black-bile shells
+                if (enemy.GetHumor() == HumorType::MELANCHOLIC && !enemy.IsShattered()) {
+                    if (attack.weapon == WeaponType::MACE || attack.type == AttackType::HEAVY) {
+                        enemy.ShatterShell(particles);
+                    }
+                }
+
                 Vector2 knockOrigin = (attack.hasShockwave && !enemy.CheckHit(attack)) ? attack.shockwavePos : player.GetPosition();
                 Vector2 knockbackDir = Vector2Normalize({
                     enemy.GetPosition().x - knockOrigin.x,
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                enemy.TakeDamage(attack.damage, knockbackDir, particles, attack.defensePierce);
+                if (enemy.TakeDamage(attack.damage, knockbackDir, particles, attack.defensePierce)) {
+                    if (outLootDrops) {
+                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    }
+                }
                 hitAny = true;
             }
         }
 
         if (hitAny) {
             player.SetAttackHit();
-            particles.AddScreenShake(attack.type == AttackType::HEAVY ? 6.0f : 2.5f, 0.12f);
+            if (attack.type == AttackType::HEAVY) {
+                particles.TriggerHitStop(0.05f);
+                float rad = attack.angle * DEG2RAD;
+                particles.AddDirectionalShake({ cosf(rad), sinf(rad) }, 8.0f, 0.22f);
+            } else {
+                particles.AddScreenShake(2.5f, 0.12f);
+            }
         }
     }
 
     Vector2 playerPos = player.GetPosition();
     float playerRadius = player.GetRadius();
+    float dt = GetFrameTime();
+
+    // Patient Stance: standing unhit while nearby enemy telegraphs gives +8.0f/sec composure
+    if (player.IsAlive() && !player.IsAttacking() && !player.IsDashing() && !player.IsDaggerLunging() && !player.IsStaggered() && !player.IsInPhlegmaticTrance()) {
+        bool enemyTelegraphingNear = false;
+        for (const auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            if (enemy.IsTelegraphing()) {
+                float dx = playerPos.x - enemy.GetPosition().x;
+                float dy = playerPos.y - enemy.GetPosition().y;
+                if ((dx * dx + dy * dy) <= (220.0f * 220.0f)) {
+                    enemyTelegraphingNear = true;
+                    break;
+                }
+            }
+        }
+        if (enemyTelegraphingNear) {
+            player.ModifyComposure(8.0f * dt);
+        }
+    }
 
     // 2. Enemy melee strikes vs player (ONLY pure melee strikes, NOT ranged attacks!)
     for (auto& enemy : enemies) {
@@ -106,15 +144,30 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
+                particles.TriggerHitStop(0.06f);
+                particles.AddDirectionalShake({ -knockbackDir.x, -knockbackDir.y }, 7.5f, 0.20f);
+                if (enemy.GetHumor() == HumorType::CHOLERIC) {
+                    player.ModifyComposure(30.0f); // Quenching Choleric Frenzy composure bonus!
+                }
             } else if (tookDamage) {
+                // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
+                if (enemy.GetHumor() == HumorType::SANGUINE) {
+                    player.ApplyBleed(3.0f, particles);
+                }
+
                 // Heavy and crushing boss attacks apply stagger to player if unparried
                 bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
                                       enemy.GetType() == EnemyType::CHARGER ||
                                       enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
                                       enemy.GetType() == EnemyType::ZIL_BOSS ||
                                       enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS);
-                if (isHeavyAttack && !player.HasStaggerImmunity()) {
-                    player.ApplyStagger(1.0f, particles);
+                if (isHeavyAttack) {
+                    player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
+                    particles.TriggerHitStop(0.04f);
+                    particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
+                    if (!player.HasStaggerImmunity()) {
+                        player.ApplyStagger(1.0f, particles);
+                    }
                 }
             }
         }
@@ -130,9 +183,22 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             float dy = playerPos.y - proj.GetPosition().y;
             float dist = sqrtf(dx * dx + dy * dy);
 
+            // In Phlegmatic Trance, automatic projectile reflection in 120px radius!
+            if (player.IsInPhlegmaticTrance() && dist <= 120.0f) {
+                Vector2 aimDir = Vector2Normalize({ -proj.GetVelocity().x, -proj.GetVelocity().y });
+                if (Vector2Length(aimDir) < 0.1f) aimDir = { 1.0f, 0.0f };
+                Vector2 reflectedVel = { aimDir.x * 720.0f, aimDir.y * 720.0f };
+                proj.Reflect(reflectedVel);
+                SoundFX::PlayProjectileReflect();
+                particles.SpawnSparks(proj.GetPosition(), Color{ 140, 230, 255, 255 }, 20, 180.0f);
+                particles.SpawnFloatingText(playerPos, "TRANCE REFLECT!", Color{ 140, 230, 255, 255 }, 22.0f);
+                continue;
+            }
+
             if (dist <= playerRadius + proj.GetRadius()) {
                 if (player.IsDashing() || player.IsDaggerLunging() || player.HasInvulnerability()) {
                     // Dash / Dagger Lunge invulnerability frames: Evaded!
+                    player.ModifyComposure(15.0f); // Evasive Dash through projectile hitbox
                     particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
                     proj.Destroy();
                 } else if (player.IsParrying()) {
@@ -144,14 +210,22 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                     Vector2 reflectedVel = { aimDir.x * 680.0f, aimDir.y * 680.0f };
                     proj.Reflect(reflectedVel);
+                    player.ModifyComposure(25.0f); // Timed parry reflection bonus
+                    if (proj.GetType() == ProjectileType::VOID_ORB || proj.GetType() == ProjectileType::NOVA_STAR || proj.GetType() == ProjectileType::BEAM_SHARD) {
+                        player.ModifyComposure(10.0f); // Extra quenching bonus on fiery/arcane projectiles
+                    }
                     SoundFX::PlayProjectileReflect();
                     particles.SpawnSparks(proj.GetPosition(), Color{ 80, 240, 255, 255 }, 18, 160.0f);
                     particles.SpawnFloatingText(playerPos, "PROJECTILE REFLECTED!", Color{ 80, 240, 255, 255 }, 22.0f);
-                    particles.AddScreenShake(3.5f, 0.12f);
+                    particles.TriggerHitStop(0.045f);
+                    particles.AddDirectionalShake(aimDir, 5.5f, 0.16f);
                 } else {
                     // Hit player
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
                     player.TakeDamage(proj.GetDamage(), knockDir, particles);
+                    if (proj.GetType() == ProjectileType::BOLT) {
+                        player.ApplyBleed(3.0f, particles);
+                    }
                     proj.Destroy();
                 }
             }
@@ -166,7 +240,11 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
 
                 if (dist <= enemy.GetRadius() + proj.GetRadius()) {
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce());
+                    if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
+                        if (outLootDrops) {
+                            LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                        }
+                    }
                     particles.SpawnSparks(proj.GetPosition(), Color{ 100, 230, 255, 255 }, 14, 130.0f);
                     particles.SpawnFloatingText(enemy.GetPosition(), "COUNTER HIT!", Color{ 255, 220, 40, 255 }, 20.0f);
                     proj.Destroy();

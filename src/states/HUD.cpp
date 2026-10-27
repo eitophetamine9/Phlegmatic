@@ -1,6 +1,7 @@
 #include "HUD.hpp"
 #include "../combat/Weapon.hpp"
 #include "../entities/Player.hpp"
+#include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
 
@@ -177,9 +178,9 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
 
 static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& player) {
     const float hudX = 24.0f;
-    const float hudY = (float)windowHeight - 114.0f;
+    const float hudY = (float)windowHeight - 138.0f;
     const float hudWidth = 320.0f;
-    const float hudHeight = 90.0f;
+    const float hudHeight = 114.0f;
 
     DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 215 });
     DrawRectangleRoundedLines(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 48, 62, 85, 220 });
@@ -204,25 +205,73 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     snprintf(stamBuf, sizeof(stamBuf), "%d/%d", (int)player.GetStamina(), (int)player.GetMaxStamina());
     DrawText(stamBuf, (int)hudX + 246, (int)hudY + 32, 10, Color{ 245, 230, 190, 225 });
 
+    // POISE (COMPOSURE) BAR
+    float compPercent = fmaxf(0.0f, fminf(1.0f, player.GetComposure() / 100.0f));
+    Color poiseLabelCol = Color{ 140, 210, 230, 255 };
+    Color poiseFillCol = Color{ 70, 180, 210, 255 };
+    if (player.IsInPhlegmaticTrance()) {
+        float pulse = (sinf((float)GetTime() * 10.0f) + 1.0f) * 0.5f;
+        poiseLabelCol = Color{ 180, 245, 255, 255 };
+        poiseFillCol = Color{ (unsigned char)(140 + 80 * pulse), (unsigned char)(220 + 35 * pulse), 255, 255 };
+    } else if (player.IsTranceReady()) {
+        poiseLabelCol = Color{ 255, 235, 120, 255 };
+        poiseFillCol = Color{ 120, 240, 255, 255 };
+    } else if (player.HasStoicPoise()) {
+        poiseLabelCol = Color{ 100, 215, 255, 255 };
+        poiseFillCol = Color{ 80, 195, 255, 255 };
+    } else if (player.IsDiscomposed()) {
+        poiseLabelCol = Color{ 255, 160, 70, 255 };
+        poiseFillCol = Color{ 240, 130, 50, 255 };
+    }
+
+    DrawText("POISE", (int)hudX + 14, (int)hudY + 52, 11, poiseLabelCol);
+    DrawRectangle((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 18, 28, 36, 220 });
+    DrawRectangle((int)hudX + 68, (int)hudY + 52, (int)(170 * compPercent), 12, poiseFillCol);
+    DrawRectangleLines((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 50, 80, 100, 220 });
+    char poiseBuf[32];
+    if (player.IsInPhlegmaticTrance()) {
+        snprintf(poiseBuf, sizeof(poiseBuf), "%.1fs", player.GetTranceTimer());
+    } else {
+        snprintf(poiseBuf, sizeof(poiseBuf), "%d%%", (int)player.GetComposure());
+    }
+    DrawText(poiseBuf, (int)hudX + 246, (int)hudY + 52, 10, poiseLabelCol);
+
     // ATTRIBUTES ROW: DEFENSE & WILL
     char defBuf[32];
     snprintf(defBuf, sizeof(defBuf), "DEF: %d", (int)player.GetDefense());
-    DrawText(defBuf, (int)hudX + 14, (int)hudY + 58, 11, Color{ 140, 210, 255, 240 });
+    DrawText(defBuf, (int)hudX + 14, (int)hudY + 78, 11, Color{ 140, 210, 255, 240 });
 
     char willBuf[32];
     snprintf(willBuf, sizeof(willBuf), "WILL: %d", (int)player.GetWill());
-    DrawText(willBuf, (int)hudX + 88, (int)hudY + 58, 11, Color{ 255, 205, 110, 240 });
+    DrawText(willBuf, (int)hudX + 88, (int)hudY + 78, 11, Color{ 255, 205, 110, 240 });
 
     // STATUS BADGE PILL
     const float badgeX = hudX + 172.0f;
-    const float badgeY = hudY + 54.0f;
+    const float badgeY = hudY + 74.0f;
     const float badgeW = 136.0f;
     const float badgeH = 20.0f;
 
-    if (player.IsStaggered()) {
+    if (player.IsInPhlegmaticTrance()) {
+        float pulse = (sinf((float)GetTime() * 8.0f) + 1.0f) * 0.5f;
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 60, 85, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ (unsigned char)(140 + 80 * pulse), 240, 255, 255 });
+        DrawText("TRANCE ACTIVE", (int)badgeX + 16, (int)badgeY + 5, 10, Color{ 160, 245, 255, 255 });
+    } else if (player.IsTranceReady()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 50, 75, 40, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 130, 255, 160, 255 });
+        DrawText("[SPACE] TRANCE", (int)badgeX + 14, (int)badgeY + 5, 10, Color{ 180, 255, 190, 255 });
+    } else if (player.IsStaggered()) {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 70, 35, 15, 230 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 255, 180, 50, 240 });
         DrawText("STAGGERED!", (int)badgeX + 24, (int)badgeY + 5, 10, Color{ 255, 210, 90, 255 });
+    } else if (player.HasStoicPoise()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 50, 75, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 80, 200, 255, 240 });
+        DrawText("STOIC POISE", (int)badgeX + 24, (int)badgeY + 5, 10, Color{ 160, 230, 255, 255 });
+    } else if (player.IsDiscomposed()) {
+        DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 60, 30, 20, 230 });
+        DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 240, 130, 50, 240 });
+        DrawText("DISCOMPOSED", (int)badgeX + 20, (int)badgeY + 5, 10, Color{ 255, 170, 90, 255 });
     } else if (player.HasStaggerImmunity()) {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 20, 50, 70, 230 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 100, 210, 255, 240 });
@@ -238,7 +287,7 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     } else {
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 18, 28, 38, 210 });
         DrawRectangleRoundedLines(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 4, Color{ 60, 85, 115, 190 });
-        DrawText("COMBAT READY", (int)badgeX + 20, (int)badgeY + 5, 10, Color{ 160, 200, 235, 220 });
+        DrawText("COMPOSED", (int)badgeX + 28, (int)badgeY + 5, 10, Color{ 160, 200, 235, 220 });
     }
 }
 
@@ -257,6 +306,9 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
 
     const char* hint = "Equip weapons at pedestals [E]  |  Step into North Portal to Enter Arena";
     DrawText(hint, (int)bannerX + 16, (int)bannerY + 26, 12, Color{ 200, 220, 245, 220 });
+
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -283,7 +335,7 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
     }
 
     // Active Weapon Card (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float cardW = 320.0f;
     const float cardH = 92.0f;
     float cardX = (float)windowWidth - cardW - 24.0f;
@@ -314,7 +366,7 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float wBadgeW = 200.0f;
     const float wBadgeH = 46.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
@@ -338,6 +390,9 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     int waveW = MeasureText(waveStr.c_str(), 14);
     DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
 
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
@@ -352,7 +407,31 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
+void HUD::DrawCurrencyBadge(int windowWidth, int shingles) {
+    const float badgeW = 145.0f;
+    const float badgeH = 32.0f;
+    const float badgeX = (float)windowWidth - 430.0f;
+    const float badgeY = 16.0f;
+
+    Rectangle badgeRec = { badgeX, badgeY, badgeW, badgeH };
+    DrawRectangleRounded(badgeRec, 0.3f, 4, Color{ 18, 24, 36, 225 });
+    DrawRectangleRoundedLines(badgeRec, 0.3f, 4, Color{ 140, 175, 215, 220 });
+
+    // Stylized Silver Shingle Coin Icon
+    float iconCenterX = badgeX + 18.0f;
+    float iconCenterY = badgeY + 16.0f;
+    DrawRectanglePro(Rectangle{ iconCenterX, iconCenterY, 11.0f, 11.0f }, Vector2{ 5.5f, 5.5f }, 45.0f, Color{ 210, 230, 255, 255 });
+    DrawPolyLines(Vector2{ iconCenterX, iconCenterY }, 4, 7.8f, 45.0f, Color{ 90, 125, 170, 255 });
+    DrawLine((int)(iconCenterX - 3), (int)(iconCenterY - 3), (int)(iconCenterX + 3), (int)(iconCenterY - 3), WHITE);
+
+    // Numeric Shingles Count
+    std::string text = std::to_string(shingles) + " Shingles";
+    FontManager::DrawText(text, (int)(badgeX + 34), (int)(badgeY + 8), 12, Color{ 230, 242, 255, 245 }, GameFont::BODY);
+}
+
 void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
+    // Silver Shingles currency badge in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
     // Player HUD Panel (Bottom Left)
     DrawPlayerCard(windowWidth, windowHeight, player);
 
@@ -360,7 +439,7 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
     const float wBadgeW = 200.0f;
     const float wBadgeH = 46.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
@@ -678,6 +757,25 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
     int nameW = MeasureText(bossName.c_str(), 14);
     DrawText(bossName.c_str(), (int)(barX + (barW - nameW) * 0.5f), (int)barY - 20, 14, Color{ 255, 215, 80, 255 });
 
+    // Humoral alignment badge for boss
+    std::string humorBadge = "";
+    Color humorCol = WHITE;
+    if (bossName.find("INQUISITOR") != std::string::npos) {
+        humorBadge = "[CHOLERIC - YELLOW BILE]";
+        humorCol = Color{ 255, 150, 40, 240 };
+    } else if (bossName.find("ZIL") != std::string::npos) {
+        humorBadge = "[MELANCHOLIC - BLACK BILE]";
+        humorCol = Color{ 190, 120, 255, 240 };
+    } else if (bossName.find("LENON") != std::string::npos) {
+        humorBadge = "[SANGUINE - BLOOD]";
+        humorCol = Color{ 255, 60, 80, 240 };
+    }
+
+    if (!humorBadge.empty()) {
+        int hw = MeasureText(humorBadge.c_str(), 10);
+        DrawText(humorBadge.c_str(), (int)(barX + barW - hw), (int)barY - 18, 10, humorCol);
+    }
+
     // Bar background
     DrawRectangleRounded(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 35, 15, 22, 240 });
 
@@ -734,54 +832,17 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRoundedLines(Rectangle{ boxX + 3.0f, boxY + 3.0f, boxW - 6.0f, boxH - 6.0f }, 0.12f, 6, Color{ 45, 60, 85, 180 });
 
     // Speaker Name Header (Golden/Accent)
-    DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 16, accentColor);
+    FontManager::DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 17, accentColor, GameFont::TITLE);
 
     // Page indicator top-right
     char pageBuf[32];
     snprintf(pageBuf, sizeof(pageBuf), "Page %d / %d", currentPage + 1, (int)pages.size());
-    DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
+    FontManager::DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
 
-    // Word-wrapped text rendering
+    // Word-wrapped text rendering with authentic medieval typography
     const std::string& text = pages[currentPage];
     const float maxLineWidth = boxW - 56.0f;
-    const int fontSize = 14;
-    const int lineSpacing = 22;
-
-    std::vector<std::string> lines;
-    std::string currentLine = "";
-    std::string currentWord = "";
-
-    for (size_t i = 0; i <= text.length(); ++i) {
-        char c = (i < text.length()) ? text[i] : ' ';
-        if (c == ' ' || c == '\n' || i == text.length()) {
-            if (!currentWord.empty()) {
-                std::string testLine = currentLine.empty() ? currentWord : (currentLine + " " + currentWord);
-                if (MeasureText(testLine.c_str(), fontSize) > maxLineWidth) {
-                    if (!currentLine.empty()) lines.push_back(currentLine);
-                    currentLine = currentWord;
-                } else {
-                    currentLine = testLine;
-                }
-                currentWord = "";
-            }
-            if (c == '\n') {
-                lines.push_back(currentLine);
-                currentLine = "";
-            }
-        } else {
-            currentWord += c;
-        }
-    }
-    if (!currentLine.empty()) {
-        lines.push_back(currentLine);
-    }
-
-    // Render dialogue lines
-    int textY = (int)boxY + 48;
-    for (const auto& line : lines) {
-        DrawText(line.c_str(), (int)boxX + 28, textY, fontSize, Color{ 235, 240, 252, 250 });
-        textY += lineSpacing;
-    }
+    FontManager::DrawTextWrapped(text, (int)boxX + 28, (int)boxY + 46, (int)maxLineWidth, 15, 6, Color{ 235, 240, 252, 250 }, GameFont::BODY);
 
     // Navigation Buttons at Bottom
     const float btnY = boxY + boxH - 40.0f;
@@ -797,7 +858,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
     DrawRectangleRounded(prevBtn, 0.25f, 4, prevBg);
     DrawRectangleRoundedLines(prevBtn, 0.25f, 4, prevBorder);
-    DrawText("< PREV [A]", (int)prevBtn.x + 16, (int)prevBtn.y + 7, 11, prevText);
+    int prevW = FontManager::MeasureText("< PREV [A]", 11);
+    FontManager::DrawText("< PREV [A]", (int)(prevBtn.x + (prevBtn.width - prevW) * 0.5f), (int)prevBtn.y + 7, 11, prevText);
 
     if (hasPrev && ((prevHover && isMousePressed) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_LEFT))) {
         currentPage--;
@@ -814,7 +876,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRounded(nextBtn, 0.25f, 4, nextBg);
     DrawRectangleRoundedLines(nextBtn, 0.25f, 4, nextBorder);
     const char* nextLabel = isLastPage ? "FINISH [SPACE]" : "NEXT > [D]";
-    DrawText(nextLabel, (int)nextBtn.x + 18, (int)nextBtn.y + 7, 11, nextText);
+    int nextW = FontManager::MeasureText(nextLabel, 11);
+    FontManager::DrawText(nextLabel, (int)(nextBtn.x + (nextBtn.width - nextW) * 0.5f), (int)nextBtn.y + 7, 11, nextText);
 
     if ((nextHover && isMousePressed) || IsKeyPressed(KEY_D) || IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_SPACE)) {
         if (!isLastPage) {
@@ -833,7 +896,8 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
     DrawRectangleRounded(closeBtn, 0.25f, 4, closeBg);
     DrawRectangleRoundedLines(closeBtn, 0.25f, 4, closeBorder);
-    DrawText("CLOSE [ESC]", (int)closeBtn.x + 16, (int)closeBtn.y + 7, 11, closeText);
+    int closeW = FontManager::MeasureText("CLOSE [ESC]", 11);
+    FontManager::DrawText("CLOSE [ESC]", (int)(closeBtn.x + (closeBtn.width - closeW) * 0.5f), (int)closeBtn.y + 7, 11, closeText);
 
     if (closeHover && isMousePressed) {
         return false;
@@ -844,16 +908,12 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
 
 void HUD::DrawGameOver(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 20, 5, 8, 210 });
-    int titleW = MeasureText("FALLEN IN BATTLE", 38);
-    DrawText("FALLEN IN BATTLE", (windowWidth - titleW) / 2, windowHeight / 2 - 40, 38, Color{ 255, 50, 60, 255 });
-    int subW = MeasureText("Press [R] to Respawn  |  [L] Return to Lobby", 18);
-    DrawText("Press [R] to Respawn  |  [L] Return to Lobby", (windowWidth - subW) / 2, windowHeight / 2 + 18, 18, Color{ 220, 225, 240, 230 });
+    FontManager::DrawTextTitleCentered("FALLEN IN BATTLE", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 50, 60, 255 });
+    FontManager::DrawTextCentered("Press [R] to Respawn  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 220, 225, 240, 230 });
 }
 
 void HUD::DrawVictory(int windowWidth, int windowHeight) {
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 210 });
-    int titleW = MeasureText("ARENA CLEARED", 38);
-    DrawText("ARENA CLEARED", (windowWidth - titleW) / 2, windowHeight / 2 - 40, 38, Color{ 255, 225, 80, 255 });
-    int subW = MeasureText("Press [R] to Replay  |  [L] Return to Lobby", 18);
-    DrawText("Press [R] to Replay  |  [L] Return to Lobby", (windowWidth - subW) / 2, windowHeight / 2 + 18, 18, Color{ 210, 240, 225, 230 });
+    FontManager::DrawTextTitleCentered("ARENA CLEARED", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 225, 80, 255 });
+    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 210, 240, 225, 230 });
 }

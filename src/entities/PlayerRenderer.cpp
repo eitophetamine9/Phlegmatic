@@ -7,9 +7,32 @@
 void PlayerRenderer::Draw(const Player& player) {
     ArmorStats armorStats = GetArmorStats(player.currentArmor);
     Color bodyColor = armorStats.primaryColor;
-    if (player.counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
-    if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
-    if (player.staggerTimer > 0.0f) bodyColor = Color{ 240, 180, 60, 240 };
+    if (player.isInPhlegmaticTrance) bodyColor = Color{ 160, 230, 255, 255 };
+    else if (player.counterBuffTimer > 0.0f) bodyColor = Color{ 220, 140, 40, 255 };
+    else if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
+    else if (player.staggerTimer > 0.0f) bodyColor = Color{ 240, 180, 60, 240 };
+
+    // Phlegmatic Composure Visual Effects
+    if (player.IsInPhlegmaticTrance()) {
+        float pulse = (sinf((float)GetTime() * 8.0f) + 1.0f) * 0.5f;
+        // Radiant Ice Aura
+        DrawCircleGradient(player.position, player.radius + 22.0f, Color{ 140, 230, 255, (unsigned char)(60 + 50 * pulse) }, Color{ 80, 180, 255, 0 });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 14.0f + 4.0f * pulse, Color{ 160, 240, 255, 200 });
+        // Orbital frost sparks
+        for (int i = 0; i < 3; ++i) {
+            float orbAngle = (float)GetTime() * 4.0f + i * (2.0f * 3.14159265f / 3.0f);
+            float orbDist = player.radius + 18.0f;
+            Vector2 orbPos = { player.position.x + cosf(orbAngle) * orbDist, player.position.y + sinf(orbAngle) * orbDist };
+            DrawCircle((int)orbPos.x, (int)orbPos.y, 3.5f, Color{ 220, 250, 255, 255 });
+            DrawCircleLines((int)orbPos.x, (int)orbPos.y, 5.0f, Color{ 100, 220, 255, 200 });
+        }
+    } else if (player.HasStoicPoise()) {
+        // Subtle ice-blue poise halo
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 5.0f, Color{ 90, 200, 255, 140 });
+    } else if (player.IsDiscomposed()) {
+        // Subtle amber discomposed jitter ring
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 4.0f, Color{ 240, 140, 60, 140 });
+    }
 
     AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
 

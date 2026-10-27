@@ -36,6 +36,7 @@ public:
     void DrawTelegraph() const;
 
     bool IsInStrike() const { return state == EnemyState::STRIKE && !hasDamagedPlayer; }
+    bool IsTelegraphing() const { return state == EnemyState::TELEGRAPH_WINDUP; }
     void MarkDamagedPlayer() { hasDamagedPlayer = true; }
     void OnParried(ParticleSystem& particles);
 
@@ -63,12 +64,24 @@ public:
     }
     std::string GetName() const;
 
+    // Humoral Alignment
+    HumorType GetHumor() const { return humor; }
+    std::string GetHumorName() const;
+    Color GetHumorColor() const;
+    bool IsQuenched() const { return quenchedTimer > 0.0f; }
+    bool IsShattered() const { return shatteredTimer > 0.0f; }
+    void Quench(ParticleSystem& particles);
+    void ShatterShell(ParticleSystem& particles);
+
     friend class EnemyRenderer;
 
 private:
     EnemyType type;
+    HumorType humor;
     EnemyState state;
     bool isPerformingMeleeSmite;
+    float quenchedTimer;
+    float shatteredTimer;
 
     Vector2 position;
     Vector2 velocity;

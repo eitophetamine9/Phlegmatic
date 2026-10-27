@@ -7,6 +7,7 @@
 #include "../world/Map.hpp"
 #include "../core/Particles.hpp"
 #include <vector>
+#include <cmath>
 
 class Player {
 public:
@@ -43,6 +44,7 @@ public:
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     float GetHealth() const { return health; }
+    void SetHealth(float h) { health = fminf(h, GetMaxHealth()); }
     float GetMaxHealth() const;
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
@@ -51,12 +53,13 @@ public:
     bool IsAlive() const { return health > 0.0f; }
     bool HasCounterBuff() const { return counterBuffTimer > 0.0f; }
 
+    WeaponStats GetEquippedWeaponStats() const { return GetWeaponStats(currentWeapon, inventory.GetWeaponUpgrade(currentWeapon)); }
     float GetDashCooldown() const { return dashCooldown; }
-    float GetMaxDashCooldown() const { return GetWeaponStats(currentWeapon).dashCooldown; }
+    float GetMaxDashCooldown() const { return GetEquippedWeaponStats().dashCooldown; }
     float GetParryCooldown() const { return parryCooldown; }
     float GetMaxParryCooldown() const;
     float GetHeavyCooldown() const { return heavyCooldown; }
-    float GetMaxHeavyCooldown() const { return GetWeaponStats(currentWeapon).heavyCooldown; }
+    float GetMaxHeavyCooldown() const { return GetEquippedWeaponStats().heavyCooldown; }
 
     const AttackInfo& GetCurrentAttack() const { return currentAttack; }
     bool IsAttacking() const { return currentAttack.type != AttackType::NONE; }
@@ -86,7 +89,7 @@ public:
 
     // Cooldown accessors for UI
     float GetLightCooldown() const { return lightCooldown; }
-    float GetMaxLightCooldown() const { return GetWeaponStats(currentWeapon).lightCooldown; }
+    float GetMaxLightCooldown() const { return GetEquippedWeaponStats().lightCooldown; }
 
     int GetComboStep() const { return comboStep; }
     int GetHeavyStage() const { return heavyStage; }
@@ -100,6 +103,28 @@ public:
     // Projectile management
     std::vector<Projectile>& GetSpawnedProjectiles() { return spawnedProjectiles; }
     const std::vector<Projectile>& GetSpawnedProjectiles() const { return spawnedProjectiles; }
+
+    // Phlegmatic Composure System
+    float GetComposure() const { return composure; }
+    void SetComposure(float c) { composure = fmaxf(0.0f, fminf(100.0f, c)); }
+    void ModifyComposure(float delta);
+    float GetMaxComposure() const { return 100.0f; }
+
+    bool IsInPhlegmaticTrance() const { return isInPhlegmaticTrance; }
+    float GetTranceTimer() const { return tranceTimer; }
+    bool TriggerPhlegmaticTrance(ParticleSystem& particles);
+
+    // Passive Tiers
+    bool IsDiscomposed() const { return !isInPhlegmaticTrance && composure < 25.0f; }
+    bool IsComposed() const { return !isInPhlegmaticTrance && composure >= 25.0f && composure < 80.0f; }
+    bool HasStoicPoise() const { return isInPhlegmaticTrance || (composure >= 80.0f); }
+    bool IsTranceReady() const { return !isInPhlegmaticTrance && composure >= 100.0f; }
+
+    // Humoral Alignment & Bleed Status
+    HumorType GetHumor() const { return HumorType::PHLEGMATIC; }
+    bool IsBleeding() const { return bleedTimer > 0.0f; }
+    float GetBleedTimer() const { return bleedTimer; }
+    void ApplyBleed(float duration, ParticleSystem& particles);
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
@@ -117,6 +142,11 @@ private:
     ArmorType currentArmor;
     TotemType currentTotem;
     Inventory inventory;
+
+    // Phlegmatic Composure & Trance State
+    float composure;
+    bool isInPhlegmaticTrance;
+    float tranceTimer;
 
     // Stats
     float health;
@@ -139,6 +169,8 @@ private:
     // Stagger & Poise State
     float staggerTimer;
     float staggerImmunityTimer;
+    float bleedTimer;
+    float bleedTickTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;

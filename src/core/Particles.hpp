@@ -35,8 +35,14 @@ public:
     void SpawnFloatingText(Vector2 pos, const std::string& text, Color color, float size = 20.0f);
     void Clear();
 
+    // Hit-stop micro-pause
+    void TriggerHitStop(float duration = 0.05f);
+    bool IsHitStopped() const;
+    float GetHitStopTimer() const;
+
     // Screen shake
     void AddScreenShake(float intensity, float duration);
+    void AddDirectionalShake(Vector2 dir, float intensity, float duration);
     Vector2 GetScreenShakeOffset() const;
 
 private:
@@ -46,4 +52,7 @@ private:
     float shakeIntensity = 0.0f;
     float shakeDuration = 0.0f;
     float shakeTimer = 0.0f;
+    Vector2 shakeDirection = { 0.0f, 0.0f };
+
+    float hitStopTimer = 0.0f;
 };

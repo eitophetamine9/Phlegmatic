@@ -9,6 +9,7 @@
 #include "../core/Particles.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "../combat/Projectile.hpp"
+#include "../combat/LootDrop.hpp"
 #include "Cutscene.hpp"
 #include "Tutorial.hpp"
 #include <vector>
@@ -36,10 +37,15 @@ private:
     void EnterZyphden();
     void EnterLobby();
     void EnterArena();
+    void SaveActiveGame();
+    void LoadActiveGame(int slotIndex);
 
     GameState currentState;
     bool showControlsModal;
     bool showInventoryModal;
+    bool showSlotModal;
+    int deletingSlotIndex;
+    bool isRestoringSave;
     int inventoryActiveTab;
     int inventorySelectedFragment;
 
@@ -50,6 +56,7 @@ private:
     AssetManager assetManager;
     std::vector<Enemy> enemies;
     std::vector<Projectile> projectiles;
+    std::vector<LootDrop> lootDrops;
 
     // Lobby Elements
     std::vector<WeaponPedestal> pedestals;

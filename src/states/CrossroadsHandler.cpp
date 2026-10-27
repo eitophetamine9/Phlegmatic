@@ -3,12 +3,13 @@
 #include "../core/Config.hpp"
 #include "../core/SoundFX.hpp"
 #include "../combat/CollisionSystem.hpp"
+#include "../combat/LootDrop.hpp"
 #include "../rendering/AssetManager.hpp"
 #include "raymath.h"
 #include <algorithm>
 #include <cmath>
 
-void HiddenTotemChest::Draw(float time) const {
+void HiddenTotemChest::Draw(float time, Vector2 playerPos) const {
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 140 });
 
     if (!opened) {
@@ -24,9 +25,12 @@ void HiddenTotemChest::Draw(float time) const {
         DrawCircle((int)position.x, (int)position.y, 6.0f, Color{ 120, 255, 200, 255 });
         DrawCircleGradient(position, 32.0f * pulse, Color{ 100, 235, 180, (unsigned char)(75 * pulse) }, Color{ 0, 0, 0, 0 });
 
-        const char* label = "[E] Hidden Relic Chest";
-        int lw = MeasureText(label, 11);
-        DrawText(label, (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 120, 255, 200, 255 });
+        bool inRange = (playerPos.x > -9000.0f) && CheckInteraction(playerPos);
+        if (inRange) {
+            const char* label = "[E] Hidden Relic Chest";
+            int lw = MeasureText(label, 11);
+            DrawText(label, (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 120, 255, 200, 255 });
+        }
     } else {
         // Open chest with residual soft aura
         DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 36, 42, 54, 255 });
@@ -36,7 +40,7 @@ void HiddenTotemChest::Draw(float time) const {
     }
 }
 
-void RoadsideJournal::Draw(float time) const {
+void RoadsideJournal::Draw(float time, Vector2 playerPos) const {
     if (collected) return;
 
     DrawEllipse((int)position.x, (int)(position.y + 10), radius * 1.1f, radius * 0.5f, Color{ 10, 12, 18, 120 });
@@ -52,9 +56,12 @@ void RoadsideJournal::Draw(float time) const {
     float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
     DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 220, 100, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
 
-    const char* label = "[E] Weathered Journal";
-    int lw = MeasureText(label, 11);
-    DrawText(label, (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 255, 230, 120, 255 });
+    bool inRange = (playerPos.x > -9000.0f) && CheckInteraction(playerPos);
+    if (inRange) {
+        const char* label = "[E] Weathered Journal";
+        int lw = MeasureText(label, 11);
+        DrawText(label, (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 11, Color{ 255, 230, 120, 255 });
+    }
 }
 
 CrossroadsHandler::CrossroadsHandler() {
@@ -101,6 +108,7 @@ void CrossroadsHandler::Update(
     ParticleSystem& particles,
     std::vector<Enemy>& enemies,
     std::vector<Projectile>& projectiles,
+    std::vector<LootDrop>& lootDrops,
     Camera2D& camera,
     GameState& currentState,
     const std::function<void()>& onEnterLobby
@@ -117,6 +125,7 @@ void CrossroadsHandler::Update(
             camera.target = player.GetPosition();
             enemies.clear();
             projectiles.clear();
+            lootDrops.clear();
             enemies.emplace_back(EnemyType::SLASHER, Vector2{ 740.0f, 1300.0f });
             enemies.emplace_back(EnemyType::SLASHER, Vector2{ 860.0f, 1000.0f });
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ 800.0f, 650.0f });
@@ -171,7 +180,15 @@ void CrossroadsHandler::Update(
         return !p.IsActive();
     }), projectiles.end());
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera);
+    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+
+    // Update active loot drops
+    for (auto& drop : lootDrops) {
+        drop.Update(dt, player.GetPosition(), player, particles);
+    }
+    lootDrops.erase(std::remove_if(lootDrops.begin(), lootDrops.end(), [](const LootDrop& d) {
+        return d.IsCollected();
+    }), lootDrops.end());
 
     // Hidden Chest Interaction
     Vector2 playerPos = player.GetPosition();
@@ -224,10 +241,10 @@ void CrossroadsHandler::Update(
         return;
     }
 
-    particles.Update(dt);
-
-    camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
-    camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
+    // Camera follow with screen shake
+    Vector2 shake = particles.GetScreenShakeOffset();
+    camera.target.x += (player.GetPosition().x + shake.x - camera.target.x) * 0.12f;
+    camera.target.y += (player.GetPosition().y + shake.y - camera.target.y) * 0.12f;
 }
 
 void CrossroadsHandler::Render(
@@ -235,6 +252,7 @@ void CrossroadsHandler::Render(
     const GameMap& map,
     const std::vector<Enemy>& enemies,
     const std::vector<Projectile>& projectiles,
+    const std::vector<LootDrop>& lootDrops,
     const Player& player,
     const ParticleSystem& particles,
     int screenWidth,
@@ -246,13 +264,13 @@ void CrossroadsHandler::Render(
 ) {
     BeginMode2D(camera);
     {
-        map.DrawFloor();
+        map.DrawFloor(player.GetPosition());
 
         // Draw Hidden Totem of Sanity Chest & Roadside Journal
-        chest.Draw((float)GetTime());
-        journal.Draw((float)GetTime());
-        crossroadsPillar.Draw((float)GetTime());
-        crossroadsChest.Draw((float)GetTime());
+        chest.Draw((float)GetTime(), player.GetPosition());
+        journal.Draw((float)GetTime(), player.GetPosition());
+        crossroadsPillar.Draw((float)GetTime(), player.GetPosition());
+        crossroadsChest.Draw((float)GetTime(), player.GetPosition());
 
         // CRITICAL FIX: Draw enemy telegraph indicators in Crossroads!
         for (const auto& enemy : enemies) {
@@ -263,6 +281,10 @@ void CrossroadsHandler::Render(
             enemy.Draw();
         }
 
+        for (const auto& drop : lootDrops) {
+            drop.Draw((float)GetTime());
+        }
+
         player.Draw();
 
         for (const auto& proj : projectiles) {
@@ -271,7 +293,7 @@ void CrossroadsHandler::Render(
 
         particles.Draw();
 
-        map.DrawWallsAndPillars();
+        map.DrawWallsAndPillars(player.GetPosition());
     }
     EndMode2D();
 

@@ -162,13 +162,28 @@ The capital city of the gale winds:
 * Town noticeboard and three lore historians (Cedric, Varek, Maeve).
 * Three environmental lore items (`frag_06`, `frag_07`, `frag_08`).
 
-### Hearthside Tavern
+### Blacksmith Varek's Forge
+Located in the northern artisan sector of Zyphden:
+* **Interactive Forge Anvil**: Press `[E]` near the forge anvil to open the weapon upgrading interface.
+* **Tier Progression**: Spend earned **Silver Shingles** to upgrade discovered weapons:
+  * **Refined (+1)**: Costs 100 Shingles. Grants +20% base damage and +15% poise damage.
+  * **Masterwork (+2)**: Costs 250 Shingles. Unlocks critical hit enhancements and increased attack reach.
+  * **Consecrated Relic**: High defense piercing and radiant projectile arcs.
+
+### Hearthside Tavern & Eldon's Provisions
 Cozy indoor retreat with a roaring fireplace, timber bar, and warm acoustics:
 * Meet **Tavernkeep Eldon** behind the counter to initiate the royal questline.
+* **Provisions Counter**: Purchase restorative **Health Potions** for **35 Silver Shingles** each to restock your flasks before royal trials.
 * Triggers scripted entrance of **Knight Lenon** entering through the tavern doorway to inspect your blade or Zil's token.
 
 > [!IMPORTANT]
 > **REMINDER — Tavern Progress Trigger**: The inner courtyard of the Royal Keep is guarded by sovereign sentinels. Speak with Tavernkeep Eldon in the Hearthside Tavern first to prompt Knight Lenon's arrival and receive your formal audience summons.
+
+### Multi-Slot Save Architecture
+* **3-Slot Save Manager (`SaveManager`)**: Stores complete campaign progression across `save_slot_1.dat`, `save_slot_2.dat`, and `save_slot_3.dat`.
+* **State Persistence**: Records active realm/chapter, player coordinates, remaining HP, Composure, equipped weapon/armor/totem, inventory weapon upgrades, unlocked lore fragments, Silver Shingles purse, health potion stock, and boss defeat milestones.
+* **Title Record Modal**: Allows players to select active save slots, inspect saved playtime metrics, start fresh adventures, or safely delete deprecated files with verification prompts.
+* **Auto-Save Frequency**: Saves automatically upon realm transitions, boss victories, monolith readings, vendor upgrades, and returning to the Title Screen (`~`).
 
 ### Expanded Zyphden Royal Keep
 Grand stone hall expanded to **1200x1100** bounds:
@@ -271,6 +286,57 @@ Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0
 > [!TIP]
 > **Out-of-Combat Health Recovery**: If you run out of potions, disengage from enemies and avoid taking damage for 4.0 seconds. Your vitality will automatically regenerate at +8.0 HP per second until fully healed!
 
+### Phlegmatic Composure System & Stoic Poise
+The **Phlegmatic Composure** system governs the player's mental resilience, deliberate focus, and unflinching poise under intense combat stress.
+
+#### Composure Mechanics
+* **Gauge Bounds**: `0.0f` (Discomposed) to `100.0f` (Max Focus / Trance Ready).
+* **Gaining Composure**:
+  * **Timed Parry (`[F]`)**: **+25.0 Composure** on successful deflection.
+  * **Evasive Dash (`[Q]`)**: **+15.0 Composure** when phasing through enemy hitboxes during i-frames.
+  * **Quenching Choleric Frenzy**: **+30.0 Composure** bonus when deflecting a Choleric hostile.
+  * **Patient Stance**: **+8.0 Composure/s** for standing unhit within 220px of a telegraphing enemy without spamming attacks.
+* **Losing Composure**:
+  * **Unmitigated Heavy Hits**: **-25.0 Composure** on taking damage from heavy enemy attacks.
+  * **Exhausted Swings**: **-15.0 Composure** when attempting heavy attacks without sufficient stamina.
+  * **Natural Decay**: Slowly decays at **-1.5 Composure/s** when disengaged from combat.
+
+#### Composure Poise Tiers
+* **Discomposed (< 30.0)**:
+  * Indicated by a pulsating red alert badge (`POISE: LOW [DISCOMPOSED]`).
+  * **+15% Stagger Duration Penalty**: Vulnerable to extended enemy stagger chains.
+* **Composed (30.0 – 79.9)**:
+  * Baseline state of mental equilibrium (`POISE: XX [COMPOSED]`).
+  * Normal recovery and standard stamina regeneration.
+* **Stoic Poise (80.0 – 100.0)**:
+  * Indicated by a radiant gold badge (`POISE: MAX [STOIC POISE]`).
+  * **Hyper-Armor**: Complete immunity to stagger and knockback during heavy attack windups.
+  * **Hemostasis**: Complete immunity to Sanguine arterial bleed damage.
+
+#### Active Ability — Phlegmatic Trance (`[SPACE]`)
+When Composure reaches maximum capacity (**100.0**), the player can press `[SPACE]` to enter the mystical **Phlegmatic Trance** for **5.0 seconds**:
+* **Complete Invulnerability**: Complete damage immunity (`TRANCE INVULN!`).
+* **Zero Stamina Drain**: All light, heavy, and dash actions consume 0 stamina.
+* **Automatic Reflection Sphere**: Automatically reflects all enemy projectiles within a **120px spherical aura** without requiring manual parry inputs.
+
+---
+
+### Medieval Four Humors Alignment
+Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctrine, exhibiting distinct behavioral temperaments, visual auras, and tactical vulnerabilities:
+
+| Humor Type | Element & Color | Combat Temperament | Tactical Vulnerability & Interaction |
+| :--- | :--- | :--- | :--- |
+| **Choleric** | Yellow Bile (Amber Fire `[255, 140, 40]`) | Relentless aggression, furious charge velocity, and shortened windups. | **Quenching**: Deflecting a Choleric strike with a timed parry extinguishes their fury, applying **QUENCHED!** (-30% movement speed for 5.0s, **2.0x stagger duration**, and grants **+30 Composure** to the player). |
+| **Melancholic** | Black Bile (Earth/Void `[160, 60, 255]`) | Hardened defense carapace granting **+50% base armor** and stoic resilience. | **Shattering**: Striking with a War Mace or 2-stage heavy cleave shatters their carapace, applying **SHELL SHATTERED!** (**-35% defense reduction** for 4.0s). |
+| **Sanguine** | Blood (Arterial Crimson `[255, 60, 75]`) | Rapid flurry strikes and piercing arrows that inflict arterial hemorrhage. | **Hemorrhage**: Unmitigated strikes inflict **Bleed** (10 damage over 3.0s). Reaching **Stoic Poise (80+ Composure)** provides complete immunity against bleed procs. |
+| **Phlegmatic** | Cold Water (Azure Cyan `[80, 220, 255]`) | Deliberate defense, steady positioning, and calculated guard counters. | **Patience & Poise**: Vulnerable to guard breaks, heavy tremors, and timed counter-ripostes. |
+
+---
+
+### Combat Juice: Hit-Stop & Directional Camera Shake
+* **Hit-Stop Micro-Pause**: Delivers a visceral 2-3 frame micro-pause (**0.04s - 0.06s freeze**) upon parry deflections, heavy cleaves, projectile reflections, and armor shell breaks. During hit-stop, entity simulation pauses while camera shake and particle effects continue, creating impactful, crunchy combat feedback.
+* **Directional Camera Shake**: Smooth directional impulse camera shake reacting directly to the trajectory of strikes, tremors, and deflections, blending impulse vectors with decay jitter for realistic recoil physics.
+
 ---
 
 ## 4. Controls & Interface Reference
@@ -285,8 +351,9 @@ Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0
 | `Right Mouse Button` | Heavy Cleave | Signature multi-stage strike, lunge, or shockwave. |
 | `Q Key` | Dash (Evade) | Fast directional burst with **0.25s i-frames** (`EVADED`). |
 | `F Key` | Timed Parry | Active guard window. Staggers melee foes and reflects missiles. |
+| `SPACE Key` | Phlegmatic Trance | Available at 100 Composure. **5.0s invulnerability, zero stamina cost, 120px projectile reflection sphere**. |
 | `1 Key` or `H Key` | Health Potion | Consumes 1 elixir to heal **+45 HP** (**7.0s cooldown**). |
-| `E Key` / `Space` / `Enter` | Interact | Talk to NPCs, open chests, read monoliths, and transition doors. |
+| `E Key` / `Enter` | Interact | Talk to NPCs, open chests, read monoliths, and transition doors. |
 | `A Key` / `D Key` | Dialogue Page | Navigate between previous and next pages of active dialogue. |
 | `ESC Key` | Close / Dismiss | Safely dismiss open dialogues, popups, and journal modals. |
 | `O Key` | Toggle Objectives | Expand or collapse the pinned Chapter 1 quest tracker card. |
@@ -311,17 +378,23 @@ Located at the bottom center of the HUD, the visual action bar provides real-tim
 * **Slot 2 (`[LMB]`)**: Light Attack — Cadence recovery wipe.
 * **Slot 3 (`[RMB]`)**: Heavy Attack — Multi-stage cooldown sweep with numeric timer (`2.1s`, `3.6s`).
 * **Slot 4 (`[F]`)**: Parry — Radiant gold when ready, cyan flash on active guard, dark recovery wipe.
-* **Slot 5 (`[1]`)**: Health Flask — Emerald theme, stock badge (`xN`), and **7.0s countdown timer**.
+* **Slot 5 (`[SPACE]`)**: Phlegmatic Trance — Cyan focus medallion glowing when ready (`TRANCE READY [SPACE]`), countdown sweep when active (`5.0s`).
+* **Slot 6 (`[1]`)**: Health Flask — Emerald theme, stock badge (`xN`), and **7.0s countdown timer**.
 
 ### Attributes & Posture Status Indicators
-Displayed directly alongside the Player Health and Stamina bars:
+Displayed directly alongside the Player Health, Stamina, and Composure bars:
 * **DEF: XX**: Total active defense rating including equipped armor.
 * **WILL: XX**: Current willpower stat mitigating incoming stagger durations.
+* **SHINGLES: XX**: Active purse of Silver Shingles for blacksmith forging and apothecary provisions.
+* **POISE: XX [STATUS]**: Real-time Composure poise tier:
+  * `[DISCOMPOSED]` (Red, < 30 Composure): +15% stagger duration vulnerability.
+  * `[COMPOSED]` (Slate Blue, 30-79 Composure): Equilibrium.
+  * `[STOIC POISE]` (Radiant Gold, 80-100 Composure): Hyper-Armor immunity to stagger and bleed during heavy attack windups.
 * **Dynamic Posture Pill**: Displays real-time state: `STAGGERED!`, `POISE GUARD`, `I-FRAMES`, `+50% COUNTER`, or `COMBAT READY`.
 
 ### In-Game Lore Journal & Equipment Paper Doll
 Opened via `[I]` or `[TAB]`:
-* **Tab 1: Equipment & Arsenal**: Inspect weapons, armor sets, damage mitigation statistics, and equip discovered sacred totems.
+* **Tab 1: Equipment & Arsenal**: Inspect weapons, weapon upgrade tiers (+1, +2, Consecrated), armor sets, damage mitigation statistics, and equip discovered sacred totems.
 * **Tab 2: Lore Journal**: Browse 10 discovered historical fragments with unread badges (`(!)`).
 
 ---

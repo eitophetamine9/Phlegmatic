@@ -20,10 +20,13 @@ struct ZyphdenNPC {
     Color accentColor;
 
     bool CheckInteraction(Vector2 playerPos) const {
+        if (id == "king") {
+            return Vector2Distance(playerPos, position) <= 95.0f;
+        }
         return Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 struct ZyphdenLoreItem {
@@ -41,7 +44,7 @@ struct ZyphdenLoreItem {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 32.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 enum class ZyphdenQuestPhase {
@@ -52,6 +55,8 @@ enum class ZyphdenQuestPhase {
     SPARRING,         // 5. Active courtyard boss duel
     VICTORIOUS        // 6. Lenon defeated; Crusader Plate awarded!
 };
+
+class LootDrop;
 
 class ZyphdenHandler {
 public:
@@ -66,6 +71,7 @@ public:
         ParticleSystem& particles,
         std::vector<Enemy>& enemies,
         std::vector<Projectile>& projectiles,
+        std::vector<LootDrop>& lootDrops,
         Camera2D& camera,
         GameState& currentState,
         bool& testArenaUnlocked,
@@ -78,6 +84,7 @@ public:
         const GameMap& map,
         const std::vector<Enemy>& enemies,
         const std::vector<Projectile>& projectiles,
+        const std::vector<LootDrop>& lootDrops,
         const Player& player,
         const ParticleSystem& particles,
         int screenWidth,
@@ -89,6 +96,7 @@ public:
     );
 
     bool HasDefeatedLenon() const { return lenonDefeated; }
+    void SetLenonDefeated(bool d) { lenonDefeated = d; }
 
 private:
     // Core NPCs
@@ -121,14 +129,18 @@ private:
 
     // Map & Interior State
     bool inTavern = false;
+    bool inForge = false;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };
+    Vector2 forgeExitSpawnPos = { 430.0f, 680.0f };
 
     // Quest Progression State Machine
     ZyphdenQuestPhase questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
     bool hasTalkedToKing = false;
     bool sparActive = false;
+    bool sparPendingStart = false;
+    bool hasSparredOnce = false;
     bool lenonDefeated = false;
     bool lenonSpawned = false;
     bool lenonInTavern = false;
@@ -146,6 +158,12 @@ private:
     int currentDialoguePage = 0;
     Color dialogueColor = WHITE;
 
+    // Forge & Provisions Modal State
+    bool isForgeOpen = false;
+    bool isProvisionsOpen = false;
+
     void OpenDialogue(const std::string& npcId, const std::string& speaker, const std::vector<std::string>& pages, Color color);
     void CloseDialogue();
+    void DrawForgeModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
+    void DrawProvisionsModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
 };

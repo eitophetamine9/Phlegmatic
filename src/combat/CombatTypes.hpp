@@ -25,6 +25,14 @@ enum class TotemType {
     CRUSADER_TOTEM     // Sandbox: +30% defense, -10% movement speed
 };
 
+// The Medieval Four Humors Alignment
+enum class HumorType {
+    PHLEGMATIC, // Player & Solsden Sanctuary (Cold & Moist: Water, Stoic Poise, Quenching)
+    CHOLERIC,   // Cultists & Pyromancers & Inquisitor (Hot & Dry: Fire, Yellow Bile, Frenzy)
+    MELANCHOLIC,// Iron Brutes & Void Casters & Zil Boss (Cold & Dry: Earth, Black Bile, Brittle Shells)
+    SANGUINE    // Deathseeker Archers & Chargers & Knight Lenon (Hot & Moist: Air, Blood, Piercing Bleeds)
+};
+
 enum class AttackType {
     NONE,
     LIGHT,

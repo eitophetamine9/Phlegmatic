@@ -8,9 +8,11 @@ set(SOURCES
     src/main.cpp
     src/core/SoundFX.cpp
     src/core/Particles.cpp
+    src/core/SaveManager.cpp
     src/world/Map.cpp
     src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp
+    src/rendering/FontManager.cpp
     src/entities/Player.cpp
     src/entities/PlayerRenderer.cpp
     src/entities/Enemy.cpp
@@ -18,6 +20,7 @@ set(SOURCES
     src/combat/Projectile.cpp
     src/combat/Inventory.cpp
     src/combat/CollisionSystem.cpp
+    src/combat/LootDrop.cpp
     src/states/TitleUI.cpp
     src/states/HUD.cpp
     src/states/ModalUI.cpp
@@ -25,6 +28,8 @@ set(SOURCES
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp
     src/states/RuinedCastleHandler.cpp
+    src/states/CrossroadsHandler.cpp
+    src/states/ZyphdenHandler.cpp
     src/states/Game.cpp
 )
 

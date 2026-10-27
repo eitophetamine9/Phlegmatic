@@ -9,8 +9,8 @@ class Player;
 
 class GameUI {
 public:
-    // Returns 0 = None, 1 = Play, 2 = Controls, 3 = Test Arena
-    static int DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked = false);
+    // Returns 0 = None, 1 = Controls, 2 = Test Arena, 11..13 = Load Slot 1..3, 21..23 = New Game Slot 1..3
+    static int DrawTitleScreen(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool isArenaUnlocked, bool& showSlotModal, int& deletingSlotIndex);
 
     // Controls Menu Modal (Accessible from Title, Lobby, and Arena)
     static bool DrawControlsModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed);

@@ -24,6 +24,8 @@ Sound SoundFX::sndLoreDiscovery = { 0 };
 Sound SoundFX::sndCrusaderClash = { 0 };
 Sound SoundFX::sndTruthSeekerResonance = { 0 };
 Sound SoundFX::sndGateOpen = { 0 };
+Sound SoundFX::sndCoinPickup = { 0 };
+Sound SoundFX::sndTranceActivate = { 0 };
 
 static inline float SoftClip(float x) {
     return x / (1.0f + fabsf(x));
@@ -323,6 +325,35 @@ static Sound GenerateGateRumble(float duration = 0.90f, float volume = 0.60f) {
     return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
 }
 
+static Sound GenerateSilverCoinClink(float duration = 0.20f, float volume = 0.55f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float phase1 = 0.0f;
+    float phase2 = 0.0f;
+    float f1 = 2093.0f; // C7
+    float f2 = 3136.0f; // G7
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+        phase1 += f1 / (float)sampleRate;
+        if (phase1 > 1.0f) phase1 -= 1.0f;
+        phase2 += f2 / (float)sampleRate;
+        if (phase2 > 1.0f) phase2 -= 1.0f;
+
+        float sig = sinf((float)(phase1 * 2.0 * M_PI)) * 0.65f + sinf((float)(phase2 * 2.0 * M_PI)) * 0.35f;
+        float env = expf(-14.0f * t);
+
+        samples[i] = (short)(SoftClip(sig * env) * volume * 32767.0f);
+    }
+
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
 void SoundFX::Init() {
     if (initialized) return;
     InitAudioDevice();
@@ -359,8 +390,10 @@ void SoundFX::Init() {
     sndLoreDiscovery = GenerateAbbeyChime(440.0f, 0.70f, 0.60f);
     sndTruthSeekerResonance = GenerateAbbeyChime(261.6f, 0.95f, 0.70f);
 
-    // 9. Gate open
+    // 9. Gate open & currency pickup & trance
     sndGateOpen = GenerateGateRumble(0.95f, 0.65f);
+    sndCoinPickup = GenerateSilverCoinClink(0.18f, 0.55f);
+    sndTranceActivate = GenerateAbbeyChime(523.25f, 1.20f, 0.70f);
 
     initialized = true;
 }
@@ -384,6 +417,8 @@ void SoundFX::Close() {
     UnloadSound(sndCrusaderClash);
     UnloadSound(sndTruthSeekerResonance);
     UnloadSound(sndGateOpen);
+    UnloadSound(sndCoinPickup);
+    UnloadSound(sndTranceActivate);
 
     CloseAudioDevice();
     initialized = false;
@@ -407,3 +442,5 @@ void SoundFX::PlayCrusaderClash() { if (initialized) PlaySound(sndCrusaderClash)
 void SoundFX::PlayTruthSeekerResonance() { if (initialized) PlaySound(sndTruthSeekerResonance); }
 void SoundFX::PlayGateOpen() { if (initialized) PlaySound(sndGateOpen); }
 void SoundFX::PlayHeal() { if (initialized) PlaySound(sndCutsceneChime); }
+void SoundFX::PlayCoinPickup() { if (initialized) PlaySound(sndCoinPickup); }
+void SoundFX::PlayTranceActivate() { if (initialized) PlaySound(sndTranceActivate); }

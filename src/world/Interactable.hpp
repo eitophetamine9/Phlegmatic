@@ -72,7 +72,7 @@ struct TrainingDummy {
         return false;
     }
 
-    void Draw() const {
+    void Draw(Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         Vector2 drawPos = position;
         if (shakeTimer > 0.0f) {
             drawPos.x += (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 4.0f;
@@ -98,8 +98,11 @@ struct TrainingDummy {
         DrawCircleV(drawPos, 8.0f, Color{ 220, 50, 50, 230 });
         DrawCircleV(drawPos, 4.0f, Color{ 255, 255, 255, 255 });
 
-        // Label above
-        DrawText("TRAINING DUMMY", (int)(drawPos.x - 46), (int)(drawPos.y - radius - 18), 10, Color{ 200, 215, 235, 200 });
+        // Label above (only when close)
+        bool inRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, drawPos) <= 95.0f);
+        if (inRange) {
+            DrawText("TRAINING DUMMY", (int)(drawPos.x - 46), (int)(drawPos.y - radius - 18), 10, Color{ 200, 215, 235, 200 });
+        }
     }
 };
 
@@ -111,7 +114,7 @@ struct ArenaPortal {
         return Vector2Distance(playerPos, position) <= radius;
     }
 
-    void Draw(float time, bool isUnlocked = true) const {
+    void Draw(float time, bool isUnlocked = true, Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         float pulse = 1.0f + 0.06f * sinf(time * 3.5f);
         if (isUnlocked) {
             // Glowing portal rings
@@ -127,10 +130,13 @@ struct ArenaPortal {
                 DrawCircleV(runePos, 4.5f, Color{ 140, 240, 255, 240 });
             }
 
-            // Text prompt
-            const char* label = "ENTER ARENA";
-            int w = MeasureText(label, 12);
-            DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 12, Color{ 255, 255, 255, 255 });
+            // Text prompt (only when close)
+            bool inRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, position) <= (radius + 45.0f));
+            if (inRange) {
+                const char* label = "ENTER ARENA";
+                int w = MeasureText(label, 12);
+                DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 12, Color{ 255, 255, 255, 255 });
+            }
         } else {
             // Locked red runic barrier
             DrawCircleGradient(position, radius * 1.25f, Color{ 160, 30, 40, 45 }, Color{ 0, 0, 0, 0 });
@@ -138,9 +144,12 @@ struct ArenaPortal {
             DrawCircleLines((int)position.x, (int)position.y, radius * 0.65f, Color{ 120, 35, 35, 160 });
             DrawCircleV(position, radius * 0.35f, Color{ 45, 15, 20, 220 });
 
-            const char* label = "ARENA [LOCKED]";
-            int w = MeasureText(label, 11);
-            DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 11, Color{ 240, 100, 100, 220 });
+            bool inRange = (playerPos.x > -9000.0f) && (Vector2Distance(playerPos, position) <= (radius + 45.0f));
+            if (inRange) {
+                const char* label = "ARENA [LOCKED]";
+                int w = MeasureText(label, 11);
+                DrawText(label, (int)(position.x - w * 0.5f), (int)(position.y - 6), 11, Color{ 240, 100, 100, 220 });
+            }
         }
     }
 };
@@ -161,7 +170,7 @@ struct AdhesiveBandage {
         return Vector2Distance(playerPos, position) <= (radius + 22.0f);
     }
 
-    void Draw() const {
+    void Draw(Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         if (!active) return;
         float bob = sinf(bobTimer * 4.0f) * 3.5f;
         Vector2 drawPos = { position.x, position.y + bob };
@@ -191,10 +200,13 @@ struct AdhesiveBandage {
         float glintY = drawPos.y - 6.0f;
         DrawCircle((int)glintX, (int)glintY, 2.0f, Color{ 255, 255, 255, (unsigned char)(180 + 75 * sinf(bobTimer * 6.0f)) });
 
-        // Name tag
-        const char* label = "ADHESIVE BANDAGE +30 HP";
-        int w = MeasureText(label, 10);
-        DrawText(label, (int)(drawPos.x - w * 0.5f), (int)(drawPos.y - radius - 16.0f), 10, Color{ 120, 255, 170, 220 });
+        // Name tag (only when close)
+        bool inRange = (playerPos.x > -9000.0f) && (CheckPickup(playerPos) || Vector2Distance(playerPos, position) <= (radius + 45.0f));
+        if (inRange) {
+            const char* label = "ADHESIVE BANDAGE +30 HP";
+            int w = MeasureText(label, 10);
+            DrawText(label, (int)(drawPos.x - w * 0.5f), (int)(drawPos.y - radius - 16.0f), 10, Color{ 120, 255, 170, 220 });
+        }
     }
 };
 
@@ -209,7 +221,7 @@ struct InscribedPillar {
         return !read && Vector2Distance(playerPos, position) <= (radius + 38.0f);
     }
 
-    void Draw(float time) const {
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         // Shadow
         DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.2f, radius * 0.55f, Color{ 10, 12, 18, 130 });
 
@@ -225,10 +237,13 @@ struct InscribedPillar {
         DrawCircle((int)position.x, (int)(position.y - 6), 5.0f, runeColor);
 
         if (!read) {
-            DrawCircleGradient(position, 28.0f * pulse, Color{ 80, 200, 255, (unsigned char)(45 * pulse) }, Color{ 0, 0, 0, 0 });
-            std::string prompt = "[E] " + name;
-            int pw = MeasureText(prompt.c_str(), 11);
-            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 120, 225, 255, 240 });
+            bool inRange = (playerPos.x > -9000.0f) && CheckInteraction(playerPos);
+            if (inRange) {
+                DrawCircleGradient(position, 28.0f * pulse, Color{ 80, 200, 255, (unsigned char)(45 * pulse) }, Color{ 0, 0, 0, 0 });
+                std::string prompt = "[E] " + name;
+                int pw = MeasureText(prompt.c_str(), 11);
+                DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 120, 225, 255, 240 });
+            }
         }
     }
 };
@@ -245,7 +260,7 @@ struct RelicChest {
         return !opened && Vector2Distance(playerPos, position) <= (radius + 38.0f);
     }
 
-    void Draw(float time) const {
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         // Shadow
         DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -261,11 +276,14 @@ struct RelicChest {
             // Lock glow
             float pulse = 0.5f + 0.5f * sinf(time * 3.8f);
             DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
-            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
 
-            std::string prompt = "[E] " + name;
-            int pw = MeasureText(prompt.c_str(), 11);
-            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 255, 230, 110, 240 });
+            bool inRange = (playerPos.x > -9000.0f) && CheckInteraction(playerPos);
+            if (inRange) {
+                DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
+                std::string prompt = "[E] " + name;
+                int pw = MeasureText(prompt.c_str(), 11);
+                DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 255, 230, 110, 240 });
+            }
         } else {
             // Open Box
             DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });

@@ -142,6 +142,37 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 32, 50, 85, 255 }; // Vanguard Crusader royal navy
     }
 
+    // Humoral Alignment Visual Auras
+    float timeVal = (float)GetTime() * 4.0f;
+    if (enemy.humor == HumorType::CHOLERIC) {
+        if (enemy.IsQuenched()) {
+            // Pale frost-cyan steam / quenching ring
+            float qPulse = (sinf(timeVal * 2.0f) + 1.0f) * 0.5f;
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 2.0f * qPulse, Color{ 140, 230, 255, 180 });
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 10.0f, Color{ 200, 240, 255, 120 });
+        } else {
+            // Flickering amber flame embers around perimeter
+            float fPulse = (sinf(timeVal * 3.0f) + 1.0f) * 0.5f;
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 5.0f + 2.5f * fPulse, Color{ 255, 130, 30, (unsigned char)(140 + 70 * fPulse) });
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 9.0f, Color{ 255, 80, 20, 100 });
+        }
+    } else if (enemy.humor == HumorType::MELANCHOLIC) {
+        if (enemy.IsShattered()) {
+            // Jagged shattered purple shards and broken stone ring
+            float sPulse = (sinf(timeVal * 2.5f) + 1.0f) * 0.5f;
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f, Color{ 210, 130, 255, 200 });
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 9.0f + 3.0f * sPulse, Color{ 170, 80, 240, 150 });
+        } else {
+            // Deep obsidian-violet heavy mist ring
+            float mPulse = (sinf(timeVal * 1.5f) + 1.0f) * 0.5f;
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 2.0f * mPulse, Color{ 160, 80, 220, 150 });
+        }
+    } else if (enemy.humor == HumorType::SANGUINE) {
+        // Crimson arterial pulse ring
+        float bPulse = (sinf(timeVal * 3.5f) + 1.0f) * 0.5f;
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 5.0f + 2.0f * bPulse, Color{ 255, 45, 65, (unsigned char)(150 + 80 * bPulse) });
+    }
+
     bool isStunned = (enemy.state == EnemyState::STUNNED);
     AssetManager::DrawEnemySilhouette(enemy.position, enemy.facingAngle, bodyColor, enemy.radius, isStunned);
 
@@ -353,5 +384,12 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Color hpColor = (enemy.state == EnemyState::STUNNED) ? Color{ 255, 220, 40, 255 } : Color{ 220, 50, 60, 255 };
         DrawRectangle((int)barX, (int)barY, (int)(barWidth * healthPercent), (int)barHeight, hpColor);
         DrawRectangleLines((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 40, 45, 60, 200 });
+
+        // Overhead Humor / Status tag
+        if (enemy.IsQuenched()) {
+            DrawText("QUENCHED", (int)(enemy.position.x - 22.0f), (int)(barY - 9.0f), 8, Color{ 140, 230, 255, 230 });
+        } else if (enemy.IsShattered()) {
+            DrawText("SHATTERED", (int)(enemy.position.x - 24.0f), (int)(barY - 9.0f), 8, Color{ 210, 140, 255, 230 });
+        }
     }
 }

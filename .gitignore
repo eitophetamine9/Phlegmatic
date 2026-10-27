@@ -60,6 +60,7 @@ _deps/
 *.bak
 *.cache
 *.dat
+save_slot_*.json
 
 # Project Context & AI Documentation
 PROJECT_CONTEXT.txt

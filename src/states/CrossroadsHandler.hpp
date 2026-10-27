@@ -21,7 +21,7 @@ struct HiddenTotemChest {
         return !opened && Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 struct RoadsideJournal {
@@ -33,8 +33,10 @@ struct RoadsideJournal {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 32.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
+
+class LootDrop;
 
 class CrossroadsHandler {
 public:
@@ -49,6 +51,7 @@ public:
         ParticleSystem& particles,
         std::vector<Enemy>& enemies,
         std::vector<Projectile>& projectiles,
+        std::vector<LootDrop>& lootDrops,
         Camera2D& camera,
         GameState& currentState,
         const std::function<void()>& onEnterLobby
@@ -59,6 +62,7 @@ public:
         const GameMap& map,
         const std::vector<Enemy>& enemies,
         const std::vector<Projectile>& projectiles,
+        const std::vector<LootDrop>& lootDrops,
         const Player& player,
         const ParticleSystem& particles,
         int screenWidth,

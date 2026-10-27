@@ -39,7 +39,7 @@ struct LoreCollectible {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time, bool isInteractable = true) const;
+    void Draw(float time, bool isInteractable = true, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 struct AncientChest {
@@ -51,7 +51,7 @@ struct AncientChest {
         return !opened && Vector2Distance(playerPos, position) <= (radius + 32.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 class TutorialManager {
@@ -60,7 +60,7 @@ public:
 
     void Init();
     void Update(float dt, Player& player, GameMap& map, ParticleSystem& particles, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles);
-    void DrawWorldElements(float time) const;
+    void DrawWorldElements(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
     void DrawHUD(int windowWidth, int windowHeight) const;
     bool DrawPopup(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed);
 
