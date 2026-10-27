@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "../rendering/FontManager.hpp"
 #include <vector>
 
 enum class MapEnvironment {
@@ -9,6 +10,7 @@ enum class MapEnvironment {
     CROSSROADS,
     ZYPHDEN_REALM,
     TAVERN_INTERIOR,
+    FORGE_INTERIOR,
     ROYAL_KEEP
 };
 
@@ -54,6 +56,8 @@ private:
     void DrawZyphdenWalls() const;
     void DrawTavernFloor() const;
     void DrawTavernWalls() const;
+    void DrawForgeFloor() const;
+    void DrawForgeWalls() const;
     void DrawRoyalKeepFloor() const;
     void DrawRoyalKeepWalls() const;
 };

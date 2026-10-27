@@ -454,6 +454,7 @@ void Game::Update(float dt) {
     if (currentState == GameState::ZYPHDEN_REALM) {
         if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
             map.GetEnvironment() != MapEnvironment::TAVERN_INTERIOR &&
+            map.GetEnvironment() != MapEnvironment::FORGE_INTERIOR &&
             map.GetEnvironment() != MapEnvironment::ROYAL_KEEP) {
             EnterZyphden();
         }

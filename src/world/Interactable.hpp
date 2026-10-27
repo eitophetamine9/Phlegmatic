@@ -209,7 +209,7 @@ struct InscribedPillar {
         return !read && Vector2Distance(playerPos, position) <= (radius + 38.0f);
     }
 
-    void Draw(float time) const {
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         // Shadow
         DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.2f, radius * 0.55f, Color{ 10, 12, 18, 130 });
 
@@ -225,10 +225,13 @@ struct InscribedPillar {
         DrawCircle((int)position.x, (int)(position.y - 6), 5.0f, runeColor);
 
         if (!read) {
-            DrawCircleGradient(position, 28.0f * pulse, Color{ 80, 200, 255, (unsigned char)(45 * pulse) }, Color{ 0, 0, 0, 0 });
-            std::string prompt = "[E] " + name;
-            int pw = MeasureText(prompt.c_str(), 11);
-            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 120, 225, 255, 240 });
+            bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+            if (inRange) {
+                DrawCircleGradient(position, 28.0f * pulse, Color{ 80, 200, 255, (unsigned char)(45 * pulse) }, Color{ 0, 0, 0, 0 });
+                std::string prompt = "[E] " + name;
+                int pw = MeasureText(prompt.c_str(), 11);
+                DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 120, 225, 255, 240 });
+            }
         }
     }
 };
@@ -245,7 +248,7 @@ struct RelicChest {
         return !opened && Vector2Distance(playerPos, position) <= (radius + 38.0f);
     }
 
-    void Draw(float time) const {
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const {
         // Shadow
         DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -261,11 +264,14 @@ struct RelicChest {
             // Lock glow
             float pulse = 0.5f + 0.5f * sinf(time * 3.8f);
             DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
-            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
 
-            std::string prompt = "[E] " + name;
-            int pw = MeasureText(prompt.c_str(), 11);
-            DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 255, 230, 110, 240 });
+            bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+            if (inRange) {
+                DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, (unsigned char)(50 * pulse) }, Color{ 0, 0, 0, 0 });
+                std::string prompt = "[E] " + name;
+                int pw = MeasureText(prompt.c_str(), 11);
+                DrawText(prompt.c_str(), (int)(position.x - pw * 0.5f), (int)(position.y - radius - 20.0f), 11, Color{ 255, 230, 110, 240 });
+            }
         } else {
             // Open Box
             DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });

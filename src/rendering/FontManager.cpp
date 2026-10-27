@@ -1,4 +1,6 @@
 #include "FontManager.hpp"
+#undef DrawText
+#undef MeasureText
 #include <iostream>
 #include <sstream>
 #include <algorithm>
@@ -147,7 +149,8 @@ std::string FontManager::SanitizeText(const std::string& input) {
     return output;
 }
 
-void FontManager::DrawText(const std::string& text, int posX, int posY, int fontSize, Color color, GameFont fontType) {
+void FontManager::DrawGameText(const std::string& text, int posX, int posY, int fontSize, Color color, GameFont fontType) {
+    if (text.empty()) return;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
     float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
@@ -155,26 +158,33 @@ void FontManager::DrawText(const std::string& text, int posX, int posY, int font
     ::DrawTextEx(font, sanitized.c_str(), pos, (float)fontSize, spacing, color);
 }
 
+void FontManager::DrawGameText(const char* text, int posX, int posY, int fontSize, Color color, GameFont fontType) {
+    if (!text || text[0] == '\0') return;
+    DrawGameText(std::string(text), posX, posY, fontSize, color, fontType);
+}
+
 void FontManager::DrawTextTitle(const std::string& text, int posX, int posY, int fontSize, Color color) {
-    DrawText(text, posX, posY, fontSize, color, GameFont::TITLE);
+    DrawGameText(text, posX, posY, fontSize, color, GameFont::TITLE);
 }
 
 void FontManager::DrawTextEx(GameFont fontType, const std::string& text, Vector2 position, float fontSize, float spacing, Color tint) {
+    if (text.empty()) return;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
     ::DrawTextEx(font, sanitized.c_str(), position, fontSize, spacing, tint);
 }
 
 void FontManager::DrawTextCentered(const std::string& text, int centerX, int posY, int fontSize, Color color, GameFont fontType) {
-    int width = MeasureText(text, fontSize, fontType);
-    DrawText(text, centerX - width / 2, posY, fontSize, color, fontType);
+    int width = MeasureGameText(text, fontSize, fontType);
+    DrawGameText(text, centerX - width / 2, posY, fontSize, color, fontType);
 }
 
 void FontManager::DrawTextTitleCentered(const std::string& text, int centerX, int posY, int fontSize, Color color) {
     DrawTextCentered(text, centerX, posY, fontSize, color, GameFont::TITLE);
 }
 
-int FontManager::MeasureText(const std::string& text, int fontSize, GameFont fontType) {
+int FontManager::MeasureGameText(const std::string& text, int fontSize, GameFont fontType) {
+    if (text.empty()) return 0;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
     float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
@@ -182,8 +192,13 @@ int FontManager::MeasureText(const std::string& text, int fontSize, GameFont fon
     return (int)size.x;
 }
 
+int FontManager::MeasureGameText(const char* text, int fontSize, GameFont fontType) {
+    if (!text || text[0] == '\0') return 0;
+    return MeasureGameText(std::string(text), fontSize, fontType);
+}
+
 int FontManager::MeasureTextTitle(const std::string& text, int fontSize) {
-    return MeasureText(text, fontSize, GameFont::TITLE);
+    return MeasureGameText(text, fontSize, GameFont::TITLE);
 }
 
 Vector2 FontManager::MeasureTextEx(GameFont fontType, const std::string& text, float fontSize, float spacing) {

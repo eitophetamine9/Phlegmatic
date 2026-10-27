@@ -20,10 +20,13 @@ struct ZyphdenNPC {
     Color accentColor;
 
     bool CheckInteraction(Vector2 playerPos) const {
+        if (id == "king") {
+            return Vector2Distance(playerPos, position) <= 95.0f;
+        }
         return Vector2Distance(playerPos, position) <= (radius + 36.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 struct ZyphdenLoreItem {
@@ -41,7 +44,7 @@ struct ZyphdenLoreItem {
         return !collected && Vector2Distance(playerPos, position) <= (radius + 32.0f);
     }
 
-    void Draw(float time) const;
+    void Draw(float time, Vector2 playerPos = { -9999.0f, -9999.0f }) const;
 };
 
 enum class ZyphdenQuestPhase {
@@ -126,14 +129,18 @@ private:
 
     // Map & Interior State
     bool inTavern = false;
+    bool inForge = false;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };
+    Vector2 forgeExitSpawnPos = { 430.0f, 680.0f };
 
     // Quest Progression State Machine
     ZyphdenQuestPhase questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
     bool hasTalkedToKing = false;
     bool sparActive = false;
+    bool sparPendingStart = false;
+    bool hasSparredOnce = false;
     bool lenonDefeated = false;
     bool lenonSpawned = false;
     bool lenonInTavern = false;

@@ -1,5 +1,6 @@
 #pragma once
 #include "raylib.h"
+#include "../rendering/FontManager.hpp"
 #include <string>
 
 namespace Config {

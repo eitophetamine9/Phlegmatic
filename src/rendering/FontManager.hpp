@@ -19,7 +19,8 @@ public:
     static Font GetTitleFont();
 
     // High-level drawing helpers with automatic UTF-8 sanitization
-    static void DrawText(const std::string& text, int posX, int posY, int fontSize, Color color, GameFont fontType = GameFont::BODY);
+    static void DrawGameText(const std::string& text, int posX, int posY, int fontSize, Color color, GameFont fontType = GameFont::BODY);
+    static void DrawGameText(const char* text, int posX, int posY, int fontSize, Color color, GameFont fontType = GameFont::BODY);
     static void DrawTextTitle(const std::string& text, int posX, int posY, int fontSize, Color color);
     static void DrawTextEx(GameFont fontType, const std::string& text, Vector2 position, float fontSize, float spacing, Color tint);
 
@@ -28,9 +29,18 @@ public:
     static void DrawTextTitleCentered(const std::string& text, int centerX, int posY, int fontSize, Color color);
 
     // Text measurement helpers
-    static int MeasureText(const std::string& text, int fontSize, GameFont fontType = GameFont::BODY);
+    static int MeasureGameText(const std::string& text, int fontSize, GameFont fontType = GameFont::BODY);
+    static int MeasureGameText(const char* text, int fontSize, GameFont fontType = GameFont::BODY);
     static int MeasureTextTitle(const std::string& text, int fontSize);
     static Vector2 MeasureTextEx(GameFont fontType, const std::string& text, float fontSize, float spacing = 1.0f);
+
+    // Backward-compatibility aliases
+    static void DrawText(const std::string& text, int posX, int posY, int fontSize, Color color, GameFont fontType = GameFont::BODY) {
+        DrawGameText(text, posX, posY, fontSize, color, fontType);
+    }
+    static int MeasureText(const std::string& text, int fontSize, GameFont fontType = GameFont::BODY) {
+        return MeasureGameText(text, fontSize, fontType);
+    }
 
     // Word-wrapped text drawing
     static void DrawTextWrapped(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, GameFont fontType = GameFont::BODY, int maxChars = -1);
@@ -44,3 +54,10 @@ private:
     static Font titleFont;
     static bool isLoaded;
 };
+
+// Global transparent redirects to ensure consistent MedievalSharp / Cinzel typography across the entire game
+#undef DrawText
+#undef MeasureText
+#define DrawText(...) FontManager::DrawGameText(__VA_ARGS__)
+#define MeasureText(...) FontManager::MeasureGameText(__VA_ARGS__)
+

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <sstream>
 
-void AncientChest::Draw(float time) const {
+void AncientChest::Draw(float time, Vector2 playerPos) const {
     // Drop shadow
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -20,7 +20,14 @@ void AncientChest::Draw(float time) const {
         // Golden lock
         float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
         DrawCircle((int)position.x, (int)position.y, 5.0f, Color{ 255, 215, 80, 255 });
-        DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+
+        bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+        if (inRange) {
+            DrawCircleGradient(position, 24.0f * pulse, Color{ 255, 215, 80, 50 }, Color{ 0, 0, 0, 0 });
+            const char* prompt = "[E] Ancient Relic Chest";
+            int pw = MeasureText(prompt, 10);
+            DrawText(prompt, (int)(position.x - pw * 0.5f), (int)(position.y - radius - 16), 10, Color{ 255, 230, 120, 240 });
+        }
     } else {
         // Open Chest Box
         DrawRectangle((int)(position.x - 22), (int)(position.y - 8), 44, 22, Color{ 55, 38, 24, 255 });
@@ -35,7 +42,7 @@ void AncientChest::Draw(float time) const {
     }
 }
 
-void LoreCollectible::Draw(float time, bool isInteractable) const {
+void LoreCollectible::Draw(float time, bool isInteractable, Vector2 playerPos) const {
     // Drop shadow
     DrawEllipse((int)position.x, (int)(position.y + 12), radius * 1.15f, radius * 0.55f, Color{ 10, 12, 18, 120 });
 
@@ -137,9 +144,12 @@ void LoreCollectible::Draw(float time, bool isInteractable) const {
     }
 
     if (!collected) {
-        std::string displayLabel = isInteractable ? label : ("[SEALED] " + label);
-        int lw = MeasureText(displayLabel.c_str(), 10);
-        DrawText(displayLabel.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, isInteractable ? Color{ 255, 230, 120, 240 } : Color{ 190, 150, 150, 190 });
+        bool inRange = (playerPos.x > -9000.0f) ? CheckInteraction(playerPos) : true;
+        if (inRange) {
+            std::string displayLabel = isInteractable ? label : ("[SEALED] " + label);
+            int lw = MeasureText(displayLabel.c_str(), 10);
+            DrawText(displayLabel.c_str(), (int)(position.x - lw * 0.5f), (int)(position.y - radius - 16), 10, isInteractable ? Color{ 255, 230, 120, 240 } : Color{ 190, 150, 150, 190 });
+        }
     }
 }
 
@@ -176,9 +186,9 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
             popupHint = "[E] Open Relic Chest  |  [I] Open Lore Journal";
             break;
         case TutorialStep::DEFENSE_SENTINEL:
-            popupTitle = "DEFENSE TRIAL: DASH & PARRY";
-            popupBody = "A Ruin Sentinel has awakened to test your vigilance!\n\n• Dash [Q]: Swift evasion with invulnerability frames.\n• Parry [F]: Timed deflection right before impact staggers foes and grants +50% Counter Damage!\n• Defeat the Sentinel to break the ward sealing the High Altar.";
-            popupHint = "[Q] Dash (Evade)  |  [F] Parry (Timed Deflection)  |  Defeat Sentinel";
+            popupTitle = "DEFENSE TRIAL: COMPOSURE & PHLEGMATIC MECHANICS";
+            popupBody = "A Ruin Sentinel has awakened! Master your Phlegmatic Composure to dominate combat:\n\n• COMPOSURE GAUGE & POISE TIERS:\n  - Discomposed (<25%): -20% Stamina recovery, vulnerable to Bleed.\n  - Stoic Poise (>=80%): +20% Stamina recovery, immune to Bleed & Stagger.\n  - Phlegmatic Trance (100%): Press [SPACE] to unleash tranquil fury and heightened poise!\n\n• BUILDING COMPOSURE:\n  - Timed Parry [F]: Deflect before impact (+25 Composure, staggers foe, +50% Counter Damage).\n  - Evasive Dash [Q]: Slip through strikes with i-frames (+15 Composure).\n  - Whiffing attacks/parries or taking unmitigated hits lowers composure.\n\n• Defeat the Sentinel to break the ward sealing the High Altar.";
+            popupHint = "[F] Parry (+25 Poise)  |  [Q] Dash (+15 Poise)  |  [SPACE] Trance at 100%";
             break;
         case TutorialStep::GATE_OPENED:
             popupTitle = "THE UPPER SANCTUARY UNSEALED";
@@ -405,8 +415,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::DEFENSE_SENTINEL: {
-            currentObjectiveText = "SANCTUARY SENTINEL: Defeat the corrupt Slasher! Evade with [Q] Dash & deflect with [F] Parry.";
-            currentControlHint = "[Q] Dash (i-frames)  |  [F] Parry to stagger  |  Defeat the Slasher";
+            currentObjectiveText = "COMPOSURE TRIAL: Build Poise (+25 Parry, +15 Dash). At 100%, trigger [SPACE] Phlegmatic Trance!";
+            currentControlHint = "[F] Parry (+25 Poise)  |  [Q] Dash (+15 Poise)  |  [SPACE] Trance at 100%  |  Defeat Sentinel";
 
             if (!sentinelSpawned) {
                 sentinelSpawned = true;
@@ -466,7 +476,7 @@ void TutorialManager::SkipToBoss(GameMap& map) {
     currentStep = TutorialStep::COMPLETED;
 }
 
-void TutorialManager::DrawWorldElements(float time) const {
+void TutorialManager::DrawWorldElements(float time, Vector2 playerPos) const {
     // 1a. Weapon Stand Altar at (800, 980)
     DrawCircle((int)weaponStandPos.x, (int)(weaponStandPos.y + 12), 34.0f, Color{ 10, 12, 18, 120 });
     DrawCircle((int)weaponStandPos.x, (int)weaponStandPos.y, 30.0f, Color{ 32, 38, 52, 255 });
@@ -481,9 +491,12 @@ void TutorialManager::DrawWorldElements(float time) const {
         float pulse = 0.5f + 0.5f * sinf(time * 3.5f);
         DrawCircleGradient(Vector2{ weaponStandPos.x, weaponStandPos.y + floatOffset }, 36.0f, Color{ 100, 220, 255, (unsigned char)(70 * pulse) }, Color{ 0, 0, 0, 0 });
 
-        const char* label = "[E] Claim Broadsword";
-        int lw = MeasureText(label, 11);
-        DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        bool inRange = (playerPos.x > -9000.0f) ? (Vector2Distance(playerPos, weaponStandPos) <= 75.0f) : true;
+        if (inRange) {
+            const char* label = "[E] Claim Broadsword";
+            int lw = MeasureText(label, 11);
+            DrawText(label, (int)(weaponStandPos.x - lw * 0.5f), (int)(weaponStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        }
     }
 
     // 1b. Commoner's Scrap Armor Stand at (870, 980)
@@ -505,15 +518,18 @@ void TutorialManager::DrawWorldElements(float time) const {
         float pulse = 0.5f + 0.5f * sinf(time * 3.2f);
         DrawCircleGradient(armorCenter, 34.0f, Color{ 255, 200, 100, (unsigned char)(60 * pulse) }, Color{ 0, 0, 0, 0 });
 
-        const char* label = "[E] Commoner's Scrap";
-        int lw = MeasureText(label, 11);
-        DrawText(label, (int)(armorStandPos.x - lw * 0.5f), (int)(armorStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        bool inRange = (playerPos.x > -9000.0f) ? (Vector2Distance(playerPos, armorStandPos) <= 75.0f) : true;
+        if (inRange) {
+            const char* label = "[E] Commoner's Scrap";
+            int lw = MeasureText(label, 11);
+            DrawText(label, (int)(armorStandPos.x - lw * 0.5f), (int)(armorStandPos.y + 36), 11, Color{ 255, 220, 90, 255 });
+        }
     }
 
     // 2. All 4 Tutorial Lore Collectibles
     bool loreInteractable = (currentStep >= TutorialStep::LORE_DISCOVERY);
     for (const auto& item : loreItems) {
-        item.Draw(time, loreInteractable);
+        item.Draw(time, loreInteractable, playerPos);
     }
 }
 

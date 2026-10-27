@@ -347,9 +347,9 @@ void RuinedCastleHandler::Render(
         DrawText(wardText, 800 - wtw / 2, 436, 10, Color{ 255, 120, 120, (unsigned char)(190 + 60 * pulse) });
     }
 
-    tutorial.DrawWorldElements(time);
-    castlePillar.Draw(time);
-    castleChest.Draw(time);
+    tutorial.DrawWorldElements(time, player.GetPosition());
+    castlePillar.Draw(time, player.GetPosition());
+    castleChest.Draw(time, player.GetPosition());
 
     for (const auto& enemy : enemies) {
         enemy.DrawTelegraph();
