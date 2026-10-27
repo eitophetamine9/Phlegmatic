@@ -406,6 +406,14 @@ void Game::Update(float dt) {
         return;
     }
 
+    // Hit-stop micro-pause: freeze entity simulations during combat impact pause (parry deflection / heavy cleave)
+    if (particles.IsHitStopped() && currentState != GameState::TITLE_SCREEN && currentState != GameState::PROLOGUE_CUTSCENE) {
+        Vector2 shake = particles.GetScreenShakeOffset();
+        Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
+        camera.target = Vector2Lerp(camera.target, desiredTarget, 10.0f * dt);
+        return;
+    }
+
     // 1.8 RUINED CASTLE CHAPTER 1 STATE
     if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Update(
@@ -498,7 +506,13 @@ void Game::Update(float dt) {
         if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
             if (dummy.CheckHit(player.GetCurrentAttack(), particles)) {
                 player.SetAttackHit();
-                particles.AddScreenShake(2.5f, 0.1f);
+                if (player.GetCurrentAttack().type == AttackType::HEAVY) {
+                    particles.TriggerHitStop(0.05f);
+                    float rad = player.GetCurrentAttack().angle * DEG2RAD;
+                    particles.AddDirectionalShake({ cosf(rad), sinf(rad) }, 7.0f, 0.20f);
+                } else {
+                    particles.AddScreenShake(2.5f, 0.1f);
+                }
             }
         }
 
@@ -533,8 +547,6 @@ void Game::Update(float dt) {
             currentState = GameState::TITLE_SCREEN;
             return;
         }
-
-        particles.Update(dt);
 
         Vector2 shake = particles.GetScreenShakeOffset();
         Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };
@@ -672,8 +684,6 @@ void Game::Update(float dt) {
     arenaBandages.erase(std::remove_if(arenaBandages.begin(), arenaBandages.end(), [](const AdhesiveBandage& b) {
         return !b.active;
     }), arenaBandages.end());
-
-    particles.Update(dt);
 
     Vector2 shake = particles.GetScreenShakeOffset();
     Vector2 desiredTarget = { player.GetPosition().x + shake.x, player.GetPosition().y + shake.y };

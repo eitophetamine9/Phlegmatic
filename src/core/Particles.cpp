@@ -4,10 +4,18 @@
 #include <cmath>
 
 void ParticleSystem::Update(float dt) {
+    if (hitStopTimer > 0.0f) {
+        hitStopTimer -= dt;
+        if (hitStopTimer <= 0.0f) {
+            hitStopTimer = 0.0f;
+        }
+    }
+
     if (shakeTimer > 0.0f) {
         shakeTimer -= dt;
         if (shakeTimer <= 0.0f) {
             shakeIntensity = 0.0f;
+            shakeDirection = { 0.0f, 0.0f };
         }
     }
 
@@ -62,6 +70,9 @@ void ParticleSystem::Clear() {
     floatingTexts.clear();
     shakeTimer = 0.0f;
     shakeIntensity = 0.0f;
+    shakeDuration = 0.0f;
+    shakeDirection = { 0.0f, 0.0f };
+    hitStopTimer = 0.0f;
 }
 
 void ParticleSystem::SpawnSparks(Vector2 pos, Color color, int count, float speed) {
@@ -85,7 +96,8 @@ void ParticleSystem::SpawnSparks(Vector2 pos, Color color, int count, float spee
 void ParticleSystem::SpawnParryBurst(Vector2 pos) {
     SpawnSparks(pos, Color{ 255, 230, 80, 255 }, 12, 220.0f);
     SpawnSparks(pos, Color{ 80, 240, 255, 255 }, 8, 180.0f);
-    AddScreenShake(6.0f, 0.18f);
+    TriggerHitStop(0.06f);
+    AddScreenShake(6.5f, 0.20f);
 }
 
 void ParticleSystem::SpawnDashTrail(Vector2 pos, Vector2 dir, Color color) {
@@ -137,19 +149,53 @@ void ParticleSystem::SpawnFloatingText(Vector2 pos, const std::string& text, Col
     });
 }
 
+void ParticleSystem::TriggerHitStop(float duration) {
+    if (duration > hitStopTimer) {
+        hitStopTimer = duration;
+    }
+}
+
+bool ParticleSystem::IsHitStopped() const {
+    return hitStopTimer > 0.0f;
+}
+
+float ParticleSystem::GetHitStopTimer() const {
+    return hitStopTimer;
+}
+
 void ParticleSystem::AddScreenShake(float intensity, float duration) {
     if (intensity > shakeIntensity || shakeTimer <= 0.0f) {
         shakeIntensity = intensity;
         shakeDuration = duration;
         shakeTimer = duration;
+        shakeDirection = { 0.0f, 0.0f };
+    }
+}
+
+void ParticleSystem::AddDirectionalShake(Vector2 dir, float intensity, float duration) {
+    if (intensity > shakeIntensity || shakeTimer <= 0.0f) {
+        shakeIntensity = intensity;
+        shakeDuration = duration;
+        shakeTimer = duration;
+        float len = sqrtf(dir.x * dir.x + dir.y * dir.y);
+        if (len > 0.001f) {
+            shakeDirection = { dir.x / len, dir.y / len };
+        } else {
+            shakeDirection = { 0.0f, 0.0f };
+        }
     }
 }
 
 Vector2 ParticleSystem::GetScreenShakeOffset() const {
-    if (shakeTimer <= 0.0f) return { 0.0f, 0.0f };
+    if (shakeTimer <= 0.0f || shakeDuration <= 0.0f) return { 0.0f, 0.0f };
     float factor = shakeTimer / shakeDuration;
     float currentIntensity = shakeIntensity * factor;
-    float offsetX = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * currentIntensity;
-    float offsetY = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * currentIntensity;
-    return { offsetX, offsetY };
+    float jitterX = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * currentIntensity;
+    float jitterY = (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * currentIntensity;
+
+    if (shakeDirection.x != 0.0f || shakeDirection.y != 0.0f) {
+        return { shakeDirection.x * (currentIntensity * 0.7f) + jitterX * 0.3f,
+                 shakeDirection.y * (currentIntensity * 0.7f) + jitterY * 0.3f };
+    }
+    return { jitterX, jitterY };
 }

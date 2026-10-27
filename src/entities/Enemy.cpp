@@ -222,7 +222,8 @@ void Enemy::Quench(ParticleSystem& particles) {
 void Enemy::ShatterShell(ParticleSystem& particles) {
     shatteredTimer = 4.0f;
     SoundFX::PlayCrusaderClash();
-    particles.AddScreenShake(5.0f, 0.18f);
+    particles.TriggerHitStop(0.05f);
+    particles.AddScreenShake(6.5f, 0.22f);
     particles.SpawnFloatingText(Vector2{ position.x, position.y - 30.0f }, "SHELL SHATTERED! (-35% DEF)", Color{ 200, 130, 255, 255 }, 24.0f);
     particles.SpawnSparks(position, Color{ 180, 100, 240, 255 }, 28, 180.0f);
 }

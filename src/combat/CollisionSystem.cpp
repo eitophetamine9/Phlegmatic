@@ -55,7 +55,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
 
         if (hitAny) {
             player.SetAttackHit();
-            particles.AddScreenShake(attack.type == AttackType::HEAVY ? 6.0f : 2.5f, 0.12f);
+            if (attack.type == AttackType::HEAVY) {
+                particles.TriggerHitStop(0.05f);
+                float rad = attack.angle * DEG2RAD;
+                particles.AddDirectionalShake({ cosf(rad), sinf(rad) }, 8.0f, 0.22f);
+            } else {
+                particles.AddScreenShake(2.5f, 0.12f);
+            }
         }
     }
 
@@ -138,6 +144,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
+                particles.TriggerHitStop(0.06f);
+                particles.AddDirectionalShake({ -knockbackDir.x, -knockbackDir.y }, 7.5f, 0.20f);
                 if (enemy.GetHumor() == HumorType::CHOLERIC) {
                     player.ModifyComposure(30.0f); // Quenching Choleric Frenzy composure bonus!
                 }
@@ -155,6 +163,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                                       enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS);
                 if (isHeavyAttack) {
                     player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
+                    particles.TriggerHitStop(0.04f);
+                    particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
                     if (!player.HasStaggerImmunity()) {
                         player.ApplyStagger(1.0f, particles);
                     }
@@ -207,7 +217,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     SoundFX::PlayProjectileReflect();
                     particles.SpawnSparks(proj.GetPosition(), Color{ 80, 240, 255, 255 }, 18, 160.0f);
                     particles.SpawnFloatingText(playerPos, "PROJECTILE REFLECTED!", Color{ 80, 240, 255, 255 }, 22.0f);
-                    particles.AddScreenShake(3.5f, 0.12f);
+                    particles.TriggerHitStop(0.045f);
+                    particles.AddDirectionalShake(aimDir, 5.5f, 0.16f);
                 } else {
                     // Hit player
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());

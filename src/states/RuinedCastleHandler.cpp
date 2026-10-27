@@ -310,12 +310,10 @@ void RuinedCastleHandler::Update(
         SoundFX::PlayHitImpact();
     }
 
-    // Camera follow
-    camera.target.x += (player.GetPosition().x - camera.target.x) * 0.08f;
-    camera.target.y += (player.GetPosition().y - camera.target.y) * 0.08f;
-
-    // Particle and floating text decay
-    particles.Update(dt);
+    // Camera follow with screen shake
+    Vector2 shake = particles.GetScreenShakeOffset();
+    camera.target.x += (player.GetPosition().x + shake.x - camera.target.x) * 0.12f;
+    camera.target.y += (player.GetPosition().y + shake.y - camera.target.y) * 0.12f;
 }
 
 void RuinedCastleHandler::Render(
