@@ -439,11 +439,24 @@ void Game::Update(float dt) {
 
     // 1.86 ZYPHDEN TRANSITION PLACEHOLDER SCREEN
     if (currentState == GameState::ZYPHDEN_TRANSITION) {
-        bool proceed = GameUI::DrawZyphdenTransition(
-            Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT,
-            mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), dt
-        );
+        int w = GetScreenWidth();
+        int h = GetScreenHeight();
+        float cardW = fminf((float)w - 80.0f, 1140.0f);
+        float cardH = fminf((float)h - 80.0f, 760.0f);
+        float cardX = ((float)w - cardW) * 0.5f;
+        float cardY = ((float)h - cardH) * 0.5f;
+
+        float btnW = 380.0f;
+        float btnH = 50.0f;
+        float btnX = cardX + (cardW - btnW) * 0.5f;
+        float btnY = cardY + cardH - 68.0f;
+
+        Rectangle btnRec = { btnX, btnY, btnW, btnH };
+        bool isHover = CheckCollisionPointRec(mouseScreen, btnRec);
+        bool proceed = (isHover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ||
+                       IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
         if (proceed) {
+            SoundFX::PlayButtonClick();
             EnterZyphden();
             currentState = GameState::ZYPHDEN_REALM;
         }

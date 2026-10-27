@@ -12,6 +12,7 @@ struct LoreFragment {
     std::string realm;
     std::string preview;
     std::string fullText;
+    std::string clue;
     bool discovered = false;
     bool isRead = false;
 };

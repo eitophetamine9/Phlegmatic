@@ -45,6 +45,7 @@ void Inventory::InitDefault() {
         "The Land of Tydeshire",
         "In the 500th year of unending strife, King Charlz unified the realms...",
         "In the 500th year of unending strife, King Charlz crushed the warring factions beneath his warhammer. By solemn decree at the High Summit, five sovereign kings knelt before the throne of Charlz the Lord Liege.\n\nThe five realms of Azshden, Fleurshden, Zyphden, Noirden, and Solsden were chartered in blood and silver. For three golden decades, heralds sang of an eternal peace, and borders stood without blood.",
+        "Ruined Castle — Inscribed upon the weathered Chronicle Stele west of the awakening flagstones.",
         false, // Discovered in tutorial by inspecting the Chronicle Stele
         false
     });
@@ -55,6 +56,7 @@ void Inventory::InitDefault() {
         "Kingdom of Zyphden",
         "Whispers spread from the northern watchtowers. The Lord Liege no longer grants audience...",
         "Whispers spread like wildfire from the northern watchtowers of Zyphden. The Lord Liege no longer grants audience to any mortal counsel.\n\nRoyal envoys dispatched to the Crown Domain returned in chains or not at all. The holy paladins who once guarded the realm have turned their blades inward, murmuring incantations in forgotten tongues. The Land of Peace is no more.",
+        "Ruined Castle — Sealed within an ancient iron relic chest across the eastern stone stream bridge.",
         false,
         false
     });
@@ -65,6 +67,7 @@ void Inventory::InitDefault() {
         "Ruined Castle of the Vanguard",
         "Zil, once first champion of the Sun Vanguard, swore to purge the corruption...",
         "Zil, once first champion of the Sun Vanguard, swore an unbroken oath to purge the dark madness that seized King Charlz.\n\nWithin these desecrated castle halls, a remnant fragment possessing 1% of his true power guards the holy blade 'Truth Seeker (Partial)'. Believing he alone guards the realm from absolute ruin, he slays all who draw near.",
+        "Ruined Castle — Bestowed atop the high altar dais upon overcoming or proving resolve to Zil's Remnant.",
         false,
         false
     });
@@ -75,6 +78,7 @@ void Inventory::InitDefault() {
         "Crown Domain of King Charlz",
         "Azshden, Fleurshden, Zyphden, Noirden, and Solsden each bore an ancient seal...",
         "Azshden of the Iron Cliffs, Fleurshden of the Sunlit Valleys, Zyphden of the Gale Winds, Noirden of the Obsidian Mists, and Solsden of the Radiant Altars.\n\nEach kingdom was entrusted with an ancient primordial seal bound directly to the Lord Liege's Crown. If the five seals are shattered by the Lord Liege's madness, the veil separating Tydeshire from the outer abyss will collapse forever.",
+        "Ruined Castle — Carved into a battle-worn Sun-Crusader shield resting in the southeast overgrown ramparts.",
         false,
         false
     });
@@ -85,6 +89,7 @@ void Inventory::InitDefault() {
         "Crossroads of Tydeshire",
         "The highway north was once flooded with silk merchants. Now only beasts remain...",
         "The highway north was once flooded with merchants bearing silk and spice from Fleurshden.\n\nNow, only prowling slashers and iron brutes wander the shattered cobblestone. I watched the royal vanguard ride south three moons ago. None returned. The King in the north has barricaded the gates, waiting for the sky to fall.",
+        "Crossroads — Resting in a leather travel satchel upon a stone roadside plinth southeast of the main highway junction.",
         false,
         false
     });
@@ -95,6 +100,7 @@ void Inventory::InitDefault() {
         "Shrine of the Gale Winds",
         "Long before the Unification, the Gale Monks communed with the northern tempests...",
         "Long before the Unification, the Gale Monks of Zyphden communed with the howling northern tempests.\n\nThey foresaw that when the sovereign crown fell to corruption, the Totems of old would awaken. The Totem of Sanity was hidden beneath the roadside ruins to guide the one who would dare face the Lord Liege.",
+        "The Realm of Zyphden — Inscribed upon an ancient celestial Wind Lectern in the northern town courtyard.",
         false,
         false
     });
@@ -105,6 +111,7 @@ void Inventory::InitDefault() {
         "Knight's Garrison of Zyphden",
         "My sworn brother Zil rode south to investigate the Ruined Castle...",
         "My sworn brother Zil rode south to investigate the Ruined Castle. He carried the shattered remnant of Truth Seeker, believing he could sever the madness at its root.\n\nI pray he still breathes. If a stranger ever enters Zyphden bearing his blade or token, I will know my brother's fate.",
+        "The Realm of Zyphden — Discovered in a Vanguard Field Log resting outside the western garrison armory.",
         false,
         false
     });
@@ -115,6 +122,7 @@ void Inventory::InitDefault() {
         "Royal Keep of King Kreptu",
         "To all subjects of Zyphden: The High Summit is broken. We shall not bend our knee...",
         "To all subjects of Zyphden: The High Summit is broken. King Charlz answers no raven.\n\nWe have fortified the southern gates and summoned all remaining crusaders to the courtyard. We shall not bend our knee to madness. Zyphden shall stand as long as a single crusader draws breath.",
+        "The Realm of Zyphden — Preserved within a gilded archive pedestal near the northeastern rampart approach.",
         false,
         false
     });
@@ -125,6 +133,7 @@ void Inventory::InitDefault() {
         "High Sanctuaries of Tydeshire",
         "The monolithic stone pillars bear ancient runic glyphs carved by the First Wardens...",
         "The monolithic stone pillars standing across the valleys of Tydeshire were not hewn for mere decoration.\n\nCarved by the First Wardens before the Unification Wars, each pillar channels primordial leylines that steady mortal willpower. When the mind falters against madness, gaze upon the runes to rekindle inner poise.",
+        "Royal Keep — Carved into the monolithic runic pillar inside King Kreptu's Great Throne Hall.",
         false,
         false
     });
@@ -135,6 +144,7 @@ void Inventory::InitDefault() {
         "Keep Armory of Zyphden",
         "Records of royal weaponsmithing and the tempered armaments of the High Marshals...",
         "Official records recovered from the keep archives: The high marshals of Zyphden quenched their blades in lunar spring waters to counterbalance the dark abyssal energies creeping from the south.\n\nNo sword alone can vanquish the lord liege; one must hone posture, temper their will against devastating blows, and seize the window of an enemy's stagger.",
+        "Royal Keep — Locked inside the gilded Royal Armory relic chest in the eastern vault of the Throne Hall.",
         false,
         false
     });

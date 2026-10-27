@@ -547,85 +547,363 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
         }
     } else {
-        // TAB 1: LORE JOURNAL
-        float col1X = modalX + 36.0f;
-        float col1W = 360.0f;
+        // =========================================================================
+        // TAB 1: THE ILLUMINATED GRIMOIRE & CHRONICLES OF TYDESHIRE
+        // =========================================================================
         const auto& frags = player.GetInventory().GetFragments();
         int totalFrags = (int)frags.size();
         int discoveredFrags = player.GetInventory().GetDiscoveredFragmentCount();
 
-        std::string listTitle = "LORE FRAGMENTS: " + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " FOUND";
-        DrawText(listTitle.c_str(), (int)col1X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
+        // Animated Page-Flip State
+        static float s_flipProgress = 1.0f;
+        static int s_flipDir = 0; // +1 forward (left to right), -1 backward
+        static int s_targetFragIndex = 0;
 
-        for (int i = 0; i < totalFrags; i++) {
-            float cardH = 52.0f;
-            float fragY = contentY + 22.0f + (float)i * 56.0f;
-            Rectangle fragRec = { col1X, fragY, col1W, cardH };
-            bool isHov = CheckCollisionPointRec(mousePos, fragRec);
-            bool isSel = (selectedFragmentIndex == i);
+        float frameDt = GetFrameTime();
+        if (frameDt > 0.05f) frameDt = 0.016f;
 
-            Color bg = isSel ? Color{ 36, 46, 68, 255 } : (isHov ? Color{ 26, 34, 52, 220 } : Color{ 18, 22, 32, 200 });
-            Color border = isSel ? Color{ 255, 215, 80, 240 } : (frags[i].discovered ? (isHov ? Color{ 100, 160, 230, 220 } : Color{ 50, 68, 96, 200 }) : Color{ 35, 42, 58, 160 });
-
-            DrawRectangleRounded(fragRec, 0.12f, 4, bg);
-            DrawRectangleRoundedLines(fragRec, 0.12f, 4, border);
-
-            if (frags[i].discovered) {
-                DrawText(frags[i].realm.c_str(), (int)col1X + 12, (int)fragY + 6, 10, Color{ 140, 210, 255, 220 });
-                DrawText(frags[i].title.c_str(), (int)col1X + 12, (int)fragY + 19, 13, Color{ 255, 255, 255, 255 });
-                DrawText(frags[i].preview.c_str(), (int)col1X + 12, (int)fragY + 35, 10, Color{ 175, 195, 220, 200 });
-
-                if (!frags[i].isRead) {
-                    DrawRectangleRounded(Rectangle{ col1X + col1W - 58, fragY + 8, 48, 16 }, 0.3f, 4, Color{ 255, 180, 40, 240 });
-                    DrawText("NEW", (int)(col1X + col1W - 44), (int)fragY + 11, 10, Color{ 10, 12, 18, 255 });
+        if (s_flipProgress < 1.0f) {
+            s_flipProgress += frameDt * 4.8f;
+            if (s_flipProgress >= 0.5f && selectedFragmentIndex != s_targetFragIndex) {
+                selectedFragmentIndex = s_targetFragIndex;
+                if (selectedFragmentIndex >= 0 && selectedFragmentIndex < totalFrags) {
+                    player.GetInventory().MarkFragmentRead(frags[selectedFragmentIndex].id);
                 }
-            } else {
-                DrawText("??? SHROUDED RECORD", (int)col1X + 12, (int)fragY + 10, 10, Color{ 120, 130, 150, 200 });
-                DrawText("Undiscovered Chronicle Fragment", (int)col1X + 12, (int)fragY + 26, 12, Color{ 150, 160, 180, 180 });
+            }
+            if (s_flipProgress >= 1.0f) {
+                s_flipProgress = 1.0f;
+            }
+        }
+
+        // Hotkeys for page flipping: [A] / [LEFT] = Prev, [D] / [RIGHT] = Next
+        if (s_flipProgress >= 1.0f) {
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) {
+                if (selectedFragmentIndex > 0) {
+                    s_targetFragIndex = selectedFragmentIndex - 1;
+                    s_flipDir = -1;
+                    s_flipProgress = 0.0f;
+                    SoundFX::PlayButtonClick();
+                }
+            } else if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) {
+                if (selectedFragmentIndex < totalFrags - 1) {
+                    s_targetFragIndex = selectedFragmentIndex + 1;
+                    s_flipDir = 1;
+                    s_flipProgress = 0.0f;
+                    SoundFX::PlayButtonClick();
+                }
+            }
+        }
+
+        // Clamp selected index
+        if (selectedFragmentIndex < 0) selectedFragmentIndex = 0;
+        if (selectedFragmentIndex >= totalFrags) selectedFragmentIndex = totalFrags - 1;
+
+        // Book Geometry
+        float bookX = modalX + 26.0f;
+        float bookY = contentY + 2.0f;
+        float bookW = modalW - 52.0f; // 1028 px
+        float bookH = 485.0f;
+
+        // 1. Dark Antique Mahogany Leather Cover Backing
+        Rectangle coverRec = { bookX, bookY, bookW, bookH };
+        DrawRectangleRounded(coverRec, 0.04f, 8, Color{ 34, 20, 14, 255 });
+        DrawRectangleRoundedLines(coverRec, 0.04f, 8, Color{ 175, 130, 55, 230 });
+        DrawRectangleRoundedLines(Rectangle{ bookX + 4.0f, bookY + 4.0f, bookW - 8.0f, bookH - 8.0f }, 0.035f, 8, Color{ 75, 48, 25, 180 });
+
+        // Antique Brass Corner Brackets on Leather Cover
+        Color brassCol = Color{ 215, 175, 75, 230 };
+        float cLen = 26.0f;
+        DrawLineEx({ bookX + 8.0f, bookY + 8.0f }, { bookX + 8.0f + cLen, bookY + 8.0f }, 2.0f, brassCol);
+        DrawLineEx({ bookX + 8.0f, bookY + 8.0f }, { bookX + 8.0f, bookY + 8.0f + cLen }, 2.0f, brassCol);
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + 8.0f }, { bookX + bookW - 8.0f - cLen, bookY + 8.0f }, 2.0f, brassCol);
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + 8.0f }, { bookX + bookW - 8.0f, bookY + 8.0f + cLen }, 2.0f, brassCol);
+        DrawLineEx({ bookX + 8.0f, bookY + bookH - 8.0f }, { bookX + 8.0f + cLen, bookY + bookH - 8.0f }, 2.0f, brassCol);
+        DrawLineEx({ bookX + 8.0f, bookY + bookH - 8.0f }, { bookX + 8.0f, bookY + bookH - 8.0f - cLen }, 2.0f, brassCol);
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + bookH - 8.0f }, { bookX + bookW - 8.0f - cLen, bookY + bookH - 8.0f }, 2.0f, brassCol);
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + bookH - 8.0f }, { bookX + bookW - 8.0f, bookY + bookH - 8.0f - cLen }, 2.0f, brassCol);
+
+        // 2. Open Parchment Pages Dimensions
+        float spineWidth = 24.0f;
+        float spineX = bookX + bookW * 0.5f;
+        float pageMargin = 12.0f;
+        float pageW = (bookW - spineWidth - pageMargin * 2.0f) * 0.5f; // ~485px
+        float pageH = bookH - 24.0f; // 461px
+        float leftPageX = bookX + pageMargin;
+        float rightPageX = spineX + spineWidth * 0.5f;
+        float pageY = bookY + 12.0f;
+
+        // Deckle paper edge layers beneath pages
+        for (int layer = 3; layer >= 1; --layer) {
+            float off = (float)layer * 1.5f;
+            Color deckleCol = Color{ 210, 198, 172, (unsigned char)(210 - layer * 35) };
+            DrawRectangleRounded(Rectangle{ leftPageX - off, pageY + off, pageW, pageH }, 0.02f, 4, deckleCol);
+            DrawRectangleRounded(Rectangle{ rightPageX + off, pageY + off, pageW, pageH }, 0.02f, 4, deckleCol);
+        }
+
+        // Left & Right Parchment Sheets
+        Color parchmentBase = Color{ 246, 238, 218, 255 };
+        Color parchmentBorder = Color{ 190, 170, 135, 220 };
+        Rectangle leftPageRec = { leftPageX, pageY, pageW, pageH };
+        Rectangle rightPageRec = { rightPageX, pageY, pageW, pageH };
+
+        DrawRectangleRounded(leftPageRec, 0.02f, 4, parchmentBase);
+        DrawRectangleRoundedLines(leftPageRec, 0.02f, 4, parchmentBorder);
+
+        DrawRectangleRounded(rightPageRec, 0.02f, 4, parchmentBase);
+        DrawRectangleRoundedLines(rightPageRec, 0.02f, 4, parchmentBorder);
+
+        // Spine Crease & Shadow
+        DrawRectangleGradientH((int)(spineX - 34.0f), (int)pageY, 34, (int)pageH, Color{ 0, 0, 0, 0 }, Color{ 70, 45, 25, 95 });
+        DrawRectangleGradientH((int)(spineX), (int)pageY, 34, (int)pageH, Color{ 70, 45, 25, 95 }, Color{ 0, 0, 0, 0 });
+        DrawRectangle((int)(spineX - 5.0f), (int)pageY - 2, 10, (int)pageH + 4, Color{ 20, 12, 8, 255 });
+        DrawRectangleLines((int)(spineX - 5.0f), (int)pageY - 2, 10, (int)pageH + 4, Color{ 115, 80, 40, 200 });
+
+        // Crimson Silk Bookmark hanging from upper spine
+        DrawRectangle((int)spineX - 4, (int)bookY - 2, 8, 44, Color{ 185, 35, 35, 255 });
+        DrawTriangle({ spineX - 4.0f, bookY + 42.0f }, { spineX + 4.0f, bookY + 42.0f }, { spineX, bookY + 50.0f }, Color{ 230, 185, 60, 255 });
+
+        const auto& curFrag = frags[selectedFragmentIndex];
+
+        // =========================================================================
+        // LEFT PAGE CONTENT: CHAPTER INDEX & LOCATION CLUES
+        // =========================================================================
+        float lPad = leftPageX + 22.0f;
+        float lW = pageW - 44.0f;
+
+        // Left Header
+        FontManager::DrawText("CHRONICLES OF TYDESHIRE", (int)lPad, (int)pageY + 16, 14, Color{ 55, 35, 20, 255 }, GameFont::TITLE);
+        std::string progressStr = "Restored: " + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " Fragments";
+        FontManager::DrawText(progressStr.c_str(), (int)lPad, (int)pageY + 34, 11, Color{ 135, 90, 35, 255 }, GameFont::BODY);
+        DrawLine((int)lPad, (int)pageY + 50, (int)(lPad + lW), (int)pageY + 50, Color{ 180, 150, 105, 200 });
+
+        // Bookmark Page Selector (10 clickable tabs across 2 rows)
+        FontManager::DrawText("PAGE BOOKMARKS (CLICK TO TURN PAGE):", (int)lPad, (int)pageY + 58, 10, Color{ 110, 80, 45, 240 }, GameFont::TITLE);
+        const char* romanNumerals[10] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+        float tabW = (lW - 16.0f) / 5.0f;
+        float tabH = 26.0f;
+
+        for (int i = 0; i < 10 && i < totalFrags; i++) {
+            int row = i / 5;
+            int col = i % 5;
+            float tx = lPad + (float)col * (tabW + 4.0f);
+            float ty = pageY + 76.0f + (float)row * (tabH + 4.0f);
+            Rectangle tabRec = { tx, ty, tabW, tabH };
+            bool isTabHov = CheckCollisionPointRec(mousePos, tabRec);
+            bool isTabSel = (selectedFragmentIndex == i);
+
+            Color tBg = isTabSel ? Color{ 215, 175, 90, 255 } : (isTabHov ? Color{ 232, 218, 186, 255 } : Color{ 238, 228, 205, 230 });
+            Color tBorder = isTabSel ? Color{ 120, 75, 25, 255 } : (frags[i].discovered ? Color{ 160, 130, 85, 220 } : Color{ 190, 175, 150, 180 });
+
+            DrawRectangleRounded(tabRec, 0.2f, 4, tBg);
+            DrawRectangleRoundedLines(tabRec, 0.2f, 4, tBorder);
+
+            std::string label = std::string(romanNumerals[i]);
+            int lbw = FontManager::MeasureText(label, 11, GameFont::TITLE);
+            Color textCol = isTabSel ? Color{ 35, 20, 10, 255 } : (frags[i].discovered ? Color{ 70, 45, 25, 240 } : Color{ 145, 130, 110, 200 });
+            FontManager::DrawText(label, (int)(tx + (tabW - lbw) * 0.5f), (int)ty + 6, 11, textCol, GameFont::TITLE);
+
+            // Red unread notification dot
+            if (frags[i].discovered && !frags[i].isRead) {
+                DrawCircle((int)tx + (int)tabW - 5, (int)ty + 5, 3.5f, Color{ 210, 45, 45, 255 });
             }
 
-            if (isHov && isMousePressed) {
-                selectedFragmentIndex = i;
-                player.GetInventory().MarkFragmentRead(frags[i].id);
+            if (isTabHov && isMousePressed && s_flipProgress >= 1.0f && selectedFragmentIndex != i) {
+                s_targetFragIndex = i;
+                s_flipDir = (i > selectedFragmentIndex) ? 1 : -1;
+                s_flipProgress = 0.0f;
                 SoundFX::PlayButtonClick();
             }
         }
 
-        // Right Column: Chronicle Text Reader
-        float col2X = modalX + 415.0f;
-        float col2W = modalW - 450.0f;
-        float col2H = 465.0f;
+        // Active Chapter Summary
+        float sumY = pageY + 144.0f;
+        DrawLine((int)lPad, (int)sumY, (int)(lPad + lW), (int)sumY, Color{ 180, 150, 105, 180 });
 
-        DrawRectangleRounded(Rectangle{ col2X, contentY + 24.0f, col2W, col2H }, 0.04f, 6, Color{ 16, 20, 30, 240 });
-        DrawRectangleRoundedLines(Rectangle{ col2X, contentY + 24.0f, col2W, col2H }, 0.04f, 6, Color{ 205, 165, 75, 220 });
-        DrawRectangleRoundedLines(Rectangle{ col2X + 4, contentY + 28.0f, col2W - 8, col2H - 8 }, 0.04f, 6, Color{ 50, 65, 90, 180 });
+        std::string chapHeader = "SELECTED: " + curFrag.title;
+        FontManager::DrawText(chapHeader.c_str(), (int)lPad, (int)sumY + 8, 11, Color{ 45, 30, 18, 255 }, GameFont::TITLE);
+        std::string realmStr = "Origin Realm: " + curFrag.realm;
+        FontManager::DrawText(realmStr.c_str(), (int)lPad, (int)sumY + 24, 10, Color{ 85, 60, 35, 220 }, GameFont::BODY);
 
-        if (selectedFragmentIndex >= 0 && selectedFragmentIndex < totalFrags) {
-            const auto& curFrag = frags[selectedFragmentIndex];
-            if (curFrag.discovered) {
-                std::string originStr = "HISTORICAL RECORD // " + curFrag.realm;
-                DrawText(originStr.c_str(), (int)col2X + 28, (int)contentY + 48, 11, Color{ 120, 220, 255, 240 });
+        // DEDICATED LOCATION CLUE & COMPASS PARCHMENT PLAQUE
+        float clueBoxY = sumY + 44.0f;
+        float clueBoxH = 200.0f;
+        Rectangle clueRec = { lPad, clueBoxY, lW, clueBoxH };
 
-                DrawText(curFrag.title.c_str(), (int)col2X + 28, (int)contentY + 68, 20, Color{ 255, 215, 80, 255 });
-                DrawLine((int)col2X + 28, (int)contentY + 100, (int)(col2X + col2W - 28), (int)contentY + 100, Color{ 160, 125, 55, 220 });
+        DrawRectangleRounded(clueRec, 0.08f, 6, Color{ 238, 228, 204, 255 });
+        DrawRectangleRoundedLines(clueRec, 0.08f, 6, Color{ 165, 130, 80, 220 });
+        DrawRectangleRoundedLines(Rectangle{ lPad + 3.0f, clueBoxY + 3.0f, lW - 6.0f, clueBoxH - 6.0f }, 0.07f, 6, Color{ 215, 195, 160, 180 });
 
-                DrawJournalWrappedText(curFrag.fullText, (int)col2X + 28, (int)contentY + 122, (int)col2W - 56, 14, 8, Color{ 230, 238, 250, 245 });
+        // Compass Rose Header
+        FontManager::DrawText("LOCATION CLUE & RECOVERY COMPASS", (int)lPad + 14, (int)clueBoxY + 12, 11, Color{ 160, 38, 28, 255 }, GameFont::TITLE);
+        DrawLine((int)lPad + 14, (int)clueBoxY + 28, (int)(lPad + lW - 14), (int)clueBoxY + 28, Color{ 180, 140, 95, 180 });
 
-                DrawLine((int)col2X + 28, (int)(contentY + 24.0f + col2H - 46), (int)(col2X + col2W - 28), (int)(contentY + 24.0f + col2H - 46), Color{ 50, 65, 90, 180 });
-                const char* footQuote = "“The true history of Tydeshire has been scattered. Seek the ruins for meaning.”";
-                DrawText(footQuote, (int)col2X + 28, (int)(contentY + 24.0f + col2H - 32), 11, Color{ 200, 170, 90, 220 });
-            } else {
-                int uhW = MeasureText("THIS CHRONICLE FRAGMENT REMAINS SHROUDED", 16);
-                DrawText("THIS CHRONICLE FRAGMENT REMAINS SHROUDED", (int)(col2X + (col2W - uhW) * 0.5f), (int)contentY + 184, 16, Color{ 215, 90, 80, 255 });
+        // Recovery Clue Body
+        std::string clueBody = curFrag.clue.empty() ? "Seek forgotten altars and guarded chests throughout Tydeshire." : curFrag.clue;
+        FontManager::DrawTextWrapped(clueBody, (int)lPad + 14, (int)clueBoxY + 38, (int)lW - 28, 12, 5, Color{ 48, 34, 22, 255 }, GameFont::BODY);
 
-                const char* unDesc1 = "The parchment detailing this epoch was torn asunder during the Lord Liege's madness.";
-                int ud1W = MeasureText(unDesc1, 12);
-                DrawText(unDesc1, (int)(col2X + (col2W - ud1W) * 0.5f), (int)contentY + 224, 12, Color{ 170, 190, 215, 220 });
+        // Discovery Status Badge inside plaque
+        float badgeY = clueBoxY + clueBoxH - 36.0f;
+        if (curFrag.discovered) {
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 215, 240, 215, 255 });
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 40, 140, 60, 220 });
+            FontManager::DrawText("RECOVERED & CHRONICLED", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 20, 110, 45, 255 }, GameFont::TITLE);
+        } else {
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 245, 220, 215, 255 });
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 180, 50, 40, 220 });
+            FontManager::DrawText("SHROUDED - SEARCH THIS LOCATION", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 160, 35, 25, 255 }, GameFont::TITLE);
+        }
 
-                const char* unDesc2 = "Defeat corrupted crusaders and search forgotten shrines across the Land of Tydeshire to recover it.";
-                int ud2W = MeasureText(unDesc2, 12);
-                DrawText(unDesc2, (int)(col2X + (col2W - ud2W) * 0.5f), (int)contentY + 248, 12, Color{ 150, 170, 195, 200 });
+        // Bottom Left Page Navigation: Previous Page Button
+        float navBtnY = pageY + pageH - 42.0f;
+        float navBtnW = 160.0f;
+        float navBtnH = 30.0f;
+        Rectangle prevBtnRec = { lPad, navBtnY, navBtnW, navBtnH };
+        bool canPrev = (selectedFragmentIndex > 0);
+        bool isPrevHov = canPrev && CheckCollisionPointRec(mousePos, prevBtnRec);
+
+        if (canPrev) {
+            DrawRectangleRounded(prevBtnRec, 0.25f, 4, isPrevHov ? Color{ 210, 185, 140, 255 } : Color{ 228, 214, 185, 255 });
+            DrawRectangleRoundedLines(prevBtnRec, 0.25f, 4, isPrevHov ? Color{ 110, 70, 25, 255 } : Color{ 155, 120, 75, 220 });
+            FontManager::DrawText("< PREV PAGE [A]", (int)lPad + 18, (int)navBtnY + 8, 11, isPrevHov ? Color{ 20, 12, 6, 255 } : Color{ 65, 42, 22, 240 }, GameFont::TITLE);
+
+            if (isPrevHov && isMousePressed && s_flipProgress >= 1.0f) {
+                s_targetFragIndex = selectedFragmentIndex - 1;
+                s_flipDir = -1;
+                s_flipProgress = 0.0f;
+                SoundFX::PlayButtonClick();
             }
+        }
+
+        // =========================================================================
+        // RIGHT PAGE CONTENT: ILLUMINATED CHRONICLE SPREAD
+        // =========================================================================
+        float rPad = rightPageX + 22.0f;
+        float rW = pageW - 44.0f;
+
+        // Right Header & Page Number
+        std::string pageNumStr = "Page " + std::to_string(selectedFragmentIndex + 1) + " of " + std::to_string(totalFrags);
+        int pnw = FontManager::MeasureText(pageNumStr, 11, GameFont::BODY);
+        FontManager::DrawText(pageNumStr.c_str(), (int)(rPad + rW - pnw), (int)pageY + 16, 11, Color{ 120, 90, 50, 220 }, GameFont::BODY);
+
+        std::string rOrigin = "HISTORICAL RECORD // " + curFrag.realm;
+        FontManager::DrawText(rOrigin.c_str(), (int)rPad, (int)pageY + 16, 10, Color{ 40, 70, 95, 240 }, GameFont::TITLE);
+        DrawLine((int)rPad, (int)pageY + 32, (int)(rPad + rW), (int)pageY + 32, Color{ 180, 150, 105, 180 });
+
+        // Chronicle Title in Burnished Title Font
+        FontManager::DrawText(curFrag.title.c_str(), (int)rPad, (int)pageY + 42, 16, Color{ 68, 36, 18, 255 }, GameFont::TITLE);
+        DrawLine((int)rPad, (int)pageY + 68, (int)(rPad + rW), (int)pageY + 68, Color{ 160, 125, 65, 200 });
+
+        // Illuminated Body Content
+        if (curFrag.discovered) {
+            // Illuminated Initial Capital Letter Box
+            char firstChar = curFrag.fullText.empty() ? 'T' : curFrag.fullText[0];
+            std::string dropLetter(1, firstChar);
+            float dropBoxX = rPad;
+            float dropBoxY = pageY + 78.0f;
+            float dropBoxSize = 38.0f;
+
+            DrawRectangleRounded(Rectangle{ dropBoxX, dropBoxY, dropBoxSize, dropBoxSize }, 0.2f, 4, Color{ 225, 195, 130, 255 });
+            DrawRectangleRoundedLines(Rectangle{ dropBoxX, dropBoxY, dropBoxSize, dropBoxSize }, 0.2f, 4, Color{ 120, 75, 25, 255 });
+            int dlw = FontManager::MeasureText(dropLetter, 22, GameFont::TITLE);
+            FontManager::DrawText(dropLetter, (int)(dropBoxX + (dropBoxSize - dlw) * 0.5f), (int)dropBoxY + 8, 22, Color{ 65, 25, 12, 255 }, GameFont::TITLE);
+
+            // Narrative Text Body
+            std::string remainingText = (curFrag.fullText.size() > 1) ? curFrag.fullText.substr(1) : "";
+            FontManager::DrawTextWrapped(remainingText, (int)rPad + (int)dropBoxSize + 10, (int)dropBoxY + 4, (int)rW - (int)dropBoxSize - 10, 13, 6, Color{ 42, 30, 20, 255 }, GameFont::BODY);
+
+            // Bottom Historical Epilogue Quote
+            float quoteY = pageY + pageH - 74.0f;
+            DrawLine((int)rPad, (int)quoteY, (int)(rPad + rW), (int)quoteY, Color{ 180, 150, 105, 160 });
+            const char* bookQuote = "\"The truth of Tydeshire endures though crowns turn to rust and kings fall to madness.\"";
+            FontManager::DrawText(bookQuote, (int)rPad, (int)quoteY + 10, 10, Color{ 130, 95, 45, 220 }, GameFont::BODY);
+        } else {
+            // Shrouded Page Graphic
+            float shroudBoxY = pageY + 95.0f;
+            float shroudBoxH = 260.0f;
+            Rectangle shroudRec = { rPad, shroudBoxY, rW, shroudBoxH };
+
+            DrawRectangleRounded(shroudRec, 0.05f, 6, Color{ 232, 220, 195, 255 });
+            DrawRectangleRoundedLines(shroudRec, 0.05f, 6, Color{ 170, 140, 105, 200 });
+
+            // Arcane Runes Row
+            const char* runes = "* * *  R U N I C   S E A L  * * *";
+            int rnw = FontManager::MeasureText(runes, 11, GameFont::TITLE);
+            FontManager::DrawText(runes, (int)(rPad + (rW - rnw) * 0.5f), (int)shroudBoxY + 28, 11, Color{ 150, 110, 60, 220 }, GameFont::TITLE);
+
+            const char* shTitle = "THIS CHRONICLE FRAGMENT REMAINS SHROUDED";
+            int stw = FontManager::MeasureText(shTitle, 13, GameFont::TITLE);
+            FontManager::DrawText(shTitle, (int)(rPad + (rW - stw) * 0.5f), (int)shroudBoxY + 68, 13, Color{ 165, 40, 30, 255 }, GameFont::TITLE);
+
+            std::string shDesc =
+                "The parchment detailing this epoch was torn asunder when King Charlz succumbed to the outer corruption.\n\n"
+                "Examine the Recovery Compass on the left page to track down its hidden resting place across the realm.";
+            FontManager::DrawTextWrapped(shDesc, (int)rPad + 20, (int)shroudBoxY + 108, (int)rW - 40, 12, 6, Color{ 60, 45, 30, 240 }, GameFont::BODY);
+        }
+
+        // Bottom Right Page Navigation: Next Page Button
+        Rectangle nextBtnRec = { rPad + rW - navBtnW, navBtnY, navBtnW, navBtnH };
+        bool canNext = (selectedFragmentIndex < totalFrags - 1);
+        bool isNextHov = canNext && CheckCollisionPointRec(mousePos, nextBtnRec);
+
+        if (canNext) {
+            DrawRectangleRounded(nextBtnRec, 0.25f, 4, isNextHov ? Color{ 210, 185, 140, 255 } : Color{ 228, 214, 185, 255 });
+            DrawRectangleRoundedLines(nextBtnRec, 0.25f, 4, isNextHov ? Color{ 110, 70, 25, 255 } : Color{ 155, 120, 75, 220 });
+            FontManager::DrawText("NEXT PAGE [D] >", (int)(rPad + rW - navBtnW + 18), (int)navBtnY + 8, 11, isNextHov ? Color{ 20, 12, 6, 255 } : Color{ 65, 42, 22, 240 }, GameFont::TITLE);
+
+            if (isNextHov && isMousePressed && s_flipProgress >= 1.0f) {
+                s_targetFragIndex = selectedFragmentIndex + 1;
+                s_flipDir = 1;
+                s_flipProgress = 0.0f;
+                SoundFX::PlayButtonClick();
+            }
+        }
+
+        // =========================================================================
+        // ANIMATED 3D PAGE-FLIP OVERLAY EFFECT
+        // =========================================================================
+        if (s_flipProgress < 1.0f) {
+            float flipAngle = s_flipProgress * PI;
+            float cosVal = cosf(flipAngle);
+            float flipW = pageW * fabsf(cosVal);
+            float flipAlpha = sinf(flipAngle);
+
+            // Sweeping shadow cast across the stationary page
+            if (s_flipDir > 0) {
+                // Turning forward (right page flips over to left)
+                float shadowX = spineX + (1.0f - s_flipProgress) * (pageW * 0.7f);
+                DrawRectangleGradientH((int)spineX, (int)pageY, (int)(shadowX - spineX), (int)pageH, ColorAlpha(BLACK, 0.28f * flipAlpha), Color{ 0, 0, 0, 0 });
+            } else {
+                // Turning backward (left page flips over to right)
+                float shadowX = spineX - (1.0f - s_flipProgress) * (pageW * 0.7f);
+                DrawRectangleGradientH((int)shadowX, (int)pageY, (int)(spineX - shadowX), (int)pageH, Color{ 0, 0, 0, 0 }, ColorAlpha(BLACK, 0.28f * flipAlpha));
+            }
+
+            // The curling flipping page rectangle
+            Rectangle curlingPage;
+            if (cosVal >= 0.0f) {
+                // Page is still on the source side of the spine
+                if (s_flipDir > 0) {
+                    curlingPage = { spineX, pageY, flipW, pageH };
+                } else {
+                    curlingPage = { spineX - flipW, pageY, flipW, pageH };
+                }
+            } else {
+                // Page has crossed over the spine to the destination side
+                if (s_flipDir > 0) {
+                    curlingPage = { spineX - flipW, pageY, flipW, pageH };
+                } else {
+                    curlingPage = { spineX, pageY, flipW, pageH };
+                }
+            }
+
+            // Render curling parchment sheet with gradient curl shading
+            Color curlPaper = Color{ 242, 232, 208, 255 };
+            DrawRectangleRounded(curlingPage, 0.02f, 4, curlPaper);
+            DrawRectangleRoundedLines(curlingPage, 0.02f, 4, Color{ 170, 145, 110, 230 });
+
+            // Crease highlight on page turn
+            float curlEdgeX = (s_flipDir > 0) ? (curlingPage.x + curlingPage.width) : curlingPage.x;
+            DrawLineEx({ curlEdgeX, pageY }, { curlEdgeX, pageY + pageH }, 2.0f, ColorAlpha(Color{ 255, 245, 220, 255 }, 0.6f * flipAlpha));
         }
     }
 
@@ -1029,11 +1307,11 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
     DrawRectangleRounded(btnRec, 0.2f, 6, btnBg);
     DrawRectangleRoundedLines(btnRec, 0.2f, 6, btnBorder);
 
-    const char* btnLabel = "ENTER CITY GATES [SPACE / ENTER]";
+    const char* btnLabel = "ENTER CITY GATES [SPACE / ENTER / CLICK]";
     int btnLabelW = FontManager::MeasureText(btnLabel, 14, GameFont::TITLE);
     FontManager::DrawText(btnLabel, (int)(btnX + (btnW - btnLabelW) * 0.5f), (int)btnY + 17, 14, isHover ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 }, GameFont::TITLE);
 
-    bool confirmed = (isHover && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
+    bool confirmed = (isHover && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
     if (confirmed) {
         SoundFX::PlayButtonClick();
         return true;
