@@ -31,6 +31,8 @@ private:
     void Init();
     void Update(float dt);
     void Render();
+    void RenderScene();
+    void ToggleGameFullscreen();
 
     void EnterRuinedCastle();
     void EnterCrossroads();
@@ -79,4 +81,8 @@ private:
     bool testArenaUnlocked;
     void SaveArenaUnlock();
     bool LoadArenaUnlock();
+
+    // Virtual Viewport & Window State
+    RenderTexture2D virtualTarget;
+    bool isFullscreen;
 };

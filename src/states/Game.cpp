@@ -8,21 +8,41 @@
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
 }
 
 Game::~Game() {
+    UnloadRenderTexture(virtualTarget);
     SoundFX::Close();
     assetManager.Unload();
     FontManager::Unload();
     CloseWindow();
 }
 
+void Game::ToggleGameFullscreen() {
+    if (!isFullscreen) {
+        int monitor = GetCurrentMonitor();
+        int mWidth = GetMonitorWidth(monitor);
+        int mHeight = GetMonitorHeight(monitor);
+        SetWindowSize(mWidth, mHeight);
+        ToggleFullscreen();
+        isFullscreen = true;
+    } else {
+        ToggleFullscreen();
+        SetWindowSize(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
+        isFullscreen = false;
+    }
+}
+
 void Game::Init() {
-    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
     InitWindow(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, Config::WINDOW_TITLE);
     SetExitKey(KEY_NULL); // Prevent ESC from closing the program
     SetTargetFPS(Config::TARGET_FPS);
+
+    virtualTarget = LoadRenderTexture(Config::VIRTUAL_WIDTH, Config::VIRTUAL_HEIGHT);
+    SetTextureFilter(virtualTarget.texture, TEXTURE_FILTER_BILINEAR);
+    isFullscreen = false;
 
     SoundFX::Init();
     FontManager::Init();
@@ -273,6 +293,11 @@ void Game::LoadActiveGame(int slotIndex) {
 void Game::Update(float dt) {
     particles.Update(dt);
     Vector2 mouseScreen = GetMousePosition();
+
+    // Fullscreen Shortcuts: F11 or Alt+Enter
+    if (IsKeyPressed(KEY_F11) || ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) && IsKeyPressed(KEY_ENTER))) {
+        ToggleGameFullscreen();
+    }
 
     // Unlock arena if current storyline progress was completed (player possesses Crusader Plate)
     if (!testArenaUnlocked && player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE)) {
@@ -704,11 +729,9 @@ void Game::Update(float dt) {
     camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
 }
 
-void Game::Render() {
-    BeginDrawing();
-
-    int w = Config::WINDOW_WIDTH;
-    int h = Config::WINDOW_HEIGHT;
+void Game::RenderScene() {
+    int w = Config::VIRTUAL_WIDTH;
+    int h = Config::VIRTUAL_HEIGHT;
     float time = (float)GetTime();
 
     if (currentState == GameState::TITLE_SCREEN) {
@@ -718,13 +741,11 @@ void Game::Render() {
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mouseScreen, false);
         }
-        EndDrawing();
         return;
     }
 
     if (currentState == GameState::PROLOGUE_CUTSCENE) {
         cutscene.Draw(w, h);
-        EndDrawing();
         return;
     }
 
@@ -735,7 +756,6 @@ void Game::Render() {
         );
         Vector2 mousePos = GetMousePosition();
         GameUI::DrawBorderlandsGateway(w, h, mousePos, false, player);
-        EndDrawing();
         return;
     }
 
@@ -744,7 +764,6 @@ void Game::Render() {
             camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
-        EndDrawing();
         return;
     }
 
@@ -753,7 +772,6 @@ void Game::Render() {
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
-        EndDrawing();
         return;
     }
 
@@ -761,7 +779,6 @@ void Game::Render() {
         GameUI::DrawZyphdenTransition(
             w, h, GetMousePosition(), false, GetFrameTime()
         );
-        EndDrawing();
         return;
     }
 
@@ -770,7 +787,6 @@ void Game::Render() {
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
-        EndDrawing();
         return;
     }
 
@@ -815,8 +831,6 @@ void Game::Render() {
         } else if (showInventoryModal) {
             GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
         }
-
-        EndDrawing();
         return;
     }
 
@@ -878,6 +892,44 @@ void Game::Render() {
         GameUI::DrawControlsModal(w, h, mousePos, false);
     } else if (showInventoryModal) {
         GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+    }
+}
+
+void Game::Render() {
+    // 1. Render virtual scene to 1280x720 internal framebuffer
+    BeginTextureMode(virtualTarget);
+    ClearBackground(BLACK);
+    RenderScene();
+    EndTextureMode();
+
+    // 2. Uniform letterbox presentation to physical window / fullscreen display
+    BeginDrawing();
+    ClearBackground(BLACK);
+
+    float screenW = (float)GetScreenWidth();
+    float screenH = (float)GetScreenHeight();
+    float scale = fminf(screenW / (float)Config::VIRTUAL_WIDTH, screenH / (float)Config::VIRTUAL_HEIGHT);
+    if (scale <= 0.0001f) scale = 1.0f;
+
+    float destW = (float)Config::VIRTUAL_WIDTH * scale;
+    float destH = (float)Config::VIRTUAL_HEIGHT * scale;
+    float destX = (screenW - destW) * 0.5f;
+    float destY = (screenH - destH) * 0.5f;
+
+    Rectangle sourceRec = { 0.0f, 0.0f, (float)virtualTarget.texture.width, -(float)virtualTarget.texture.height };
+    Rectangle destRec = { destX, destY, destW, destH };
+    Vector2 origin = { 0.0f, 0.0f };
+
+    DrawTexturePro(virtualTarget.texture, sourceRec, destRec, origin, 0.0f, WHITE);
+
+    // Subtle dark fantasy border filigree over unused letterbox/pillarbox space
+    if (destX > 2.0f) {
+        DrawLineEx({ destX, 0.0f }, { destX, screenH }, 1.5f, Color{ 45, 58, 80, 200 });
+        DrawLineEx({ destX + destW, 0.0f }, { destX + destW, screenH }, 1.5f, Color{ 45, 58, 80, 200 });
+    }
+    if (destY > 2.0f) {
+        DrawLineEx({ 0.0f, destY }, { screenW, destY }, 1.5f, Color{ 45, 58, 80, 200 });
+        DrawLineEx({ 0.0f, destY + destH }, { screenW, destY + destH }, 1.5f, Color{ 45, 58, 80, 200 });
     }
 
     EndDrawing();
