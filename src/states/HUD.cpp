@@ -310,18 +310,23 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
 
+    // Map button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[M] Realm Map", windowWidth - 368, 25, 12, Color{ 255, 220, 100, 240 });
+
     // Journal & Lore button in top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
-    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 240, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
     if (hasUnreadLore) {
-        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+        DrawCircle(windowWidth - 155, 23, 4.0f, Color{ 255, 200, 50, 255 });
     }
 
     // Controls button in top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
-    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 120, 25, 12, Color{ 120, 220, 255, 240 });
 
     // Interaction prompt popup if standing near pedestal
     if (isNearPedestal) {
@@ -393,24 +398,29 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
 
+    // Map button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[M] Realm Map", windowWidth - 368, 25, 12, Color{ 255, 220, 100, 240 });
+
     // Journal & Lore button in top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
-    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 240, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
     if (hasUnreadLore) {
-        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+        DrawCircle(windowWidth - 155, 23, 4.0f, Color{ 255, 200, 50, 255 });
     }
 
     // Controls hint top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
-    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 120, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
 void HUD::DrawCurrencyBadge(int windowWidth, int shingles, int oreScraps) {
     const float badgeW = 140.0f;
     const float badgeH = 32.0f;
-    const float badgeX = (float)windowWidth - 430.0f;
+    const float badgeX = (float)windowWidth - 530.0f;
     const float badgeY = 16.0f;
 
     // 1. Silver Shingles Badge
@@ -467,18 +477,23 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     // Top Location Header Banner (NO wave counter in campaign!)
     DrawLocationHeader(windowWidth, locationName);
 
+    // Map button in top right
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[M] Realm Map", windowWidth - 368, 25, 12, Color{ 255, 220, 100, 240 });
+
     // Journal & Lore button in top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
-    DrawText("[I] Journal", windowWidth - 263, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 250), 16.0f, 110.0f, 32.0f }, 0.3f, 4, hasUnreadLore ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 220 });
+    DrawText("[I] Journal", windowWidth - 240, 25, 12, hasUnreadLore ? Color{ 255, 225, 100, 255 } : Color{ 140, 210, 255, 240 });
     if (hasUnreadLore) {
-        DrawCircle(windowWidth - 170, 23, 4.0f, Color{ 255, 200, 50, 255 });
+        DrawCircle(windowWidth - 155, 23, 4.0f, Color{ 255, 200, 50, 255 });
     }
 
     // Controls hint top right
-    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
-    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 140), 16.0f, 116.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
-    DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
+    DrawRectangleRounded(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
+    DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
+    DrawText("[C] Controls", windowWidth - 120, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
 // Legacy float-based overloads

@@ -8,7 +8,7 @@
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
 }
 
 Game::~Game() {
@@ -349,6 +349,26 @@ void Game::Update(float dt) {
         if (close) {
             showInventoryModal = false;
         }
+        if (inventoryActiveTab == 2) {
+            showInventoryModal = false;
+            showMapModal = true;
+            inventoryActiveTab = 0;
+            return;
+        }
+        return;
+    }
+
+    // If Interactive Realm Map Modal is active
+    if (showMapModal) {
+        if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_ESCAPE)) {
+            showMapModal = false;
+            SoundFX::PlayButtonClick();
+            return;
+        }
+        bool close = GameUI::DrawMapModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, currentState);
+        if (close) {
+            showMapModal = false;
+        }
         return;
     }
 
@@ -356,6 +376,7 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_C)) {
         showControlsModal = true;
         showInventoryModal = false;
+        showMapModal = false;
         SoundFX::PlayButtonClick();
         return;
     }
@@ -364,6 +385,7 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
         showInventoryModal = true;
         showControlsModal = false;
+        showMapModal = false;
         inventoryActiveTab = 0; // Direct to Equipment & Character Doll
         if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
             tutorial.NotifyInventoryOpened();
@@ -372,14 +394,31 @@ void Game::Update(float dt) {
         return;
     }
 
-    // Check HUD top right button clicks in Ruined Castle, Lobby & Arena
-    if (!showControlsModal && !showInventoryModal) {
-        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA) {
-            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 275), 16.0f, 120.0f, 32.0f };
-            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 140), 16.0f, 116.0f, 32.0f };
-            if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    // Toggle Interactive Realm Map modal when closed
+    if (IsKeyPressed(KEY_M)) {
+        showMapModal = true;
+        showInventoryModal = false;
+        showControlsModal = false;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
+    // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
+    if (!showControlsModal && !showInventoryModal && !showMapModal) {
+        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM) {
+            Rectangle mapBtnRec = { (float)(Config::WINDOW_WIDTH - 380), 16.0f, 120.0f, 32.0f };
+            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 250), 16.0f, 110.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 130), 16.0f, 110.0f, 32.0f };
+            if (CheckCollisionPointRec(mouseScreen, mapBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showMapModal = true;
+                showInventoryModal = false;
+                showControlsModal = false;
+                SoundFX::PlayButtonClick();
+                return;
+            } else if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showInventoryModal = true;
                 showControlsModal = false;
+                showMapModal = false;
                 inventoryActiveTab = 0;
                 if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
                     tutorial.NotifyInventoryOpened();
@@ -389,6 +428,7 @@ void Game::Update(float dt) {
             } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showControlsModal = true;
                 showInventoryModal = false;
+                showMapModal = false;
                 SoundFX::PlayButtonClick();
                 return;
             }
@@ -766,6 +806,10 @@ void Game::RenderScene() {
             camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
+        if (showMapModal) {
+            Vector2 mousePos = GetMousePosition();
+            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        }
         return;
     }
 
@@ -774,6 +818,10 @@ void Game::RenderScene() {
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
+        if (showMapModal) {
+            Vector2 mousePos = GetMousePosition();
+            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        }
         return;
     }
 
@@ -789,6 +837,10 @@ void Game::RenderScene() {
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );
+        if (showMapModal) {
+            Vector2 mousePos = GetMousePosition();
+            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        }
         return;
     }
 
@@ -832,6 +884,8 @@ void Game::RenderScene() {
             GameUI::DrawControlsModal(w, h, mousePos, false);
         } else if (showInventoryModal) {
             GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+        } else if (showMapModal) {
+            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
         }
         return;
     }
@@ -894,6 +948,8 @@ void Game::RenderScene() {
         GameUI::DrawControlsModal(w, h, mousePos, false);
     } else if (showInventoryModal) {
         GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+    } else if (showMapModal) {
+        GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
     }
 }
 

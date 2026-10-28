@@ -15,6 +15,10 @@ bool GameUI::DrawInventoryModal(int windowWidth, int windowHeight, Vector2 mouse
     return ModalUI::DrawInventory(windowWidth, windowHeight, mousePos, isMousePressed, player, activeTab, selectedFragmentIndex);
 }
 
+bool GameUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState) {
+    return ModalUI::DrawMapModal(windowWidth, windowHeight, mousePos, isMousePressed, player, currentState);
+}
+
 void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
     HUD::DrawLobby(windowWidth, windowHeight, player, isNearPedestal, nearWeaponName, hasUnreadLore);
 }

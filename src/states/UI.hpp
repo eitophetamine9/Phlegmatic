@@ -18,6 +18,9 @@ public:
     // Inventory & Lore Journal Modal ([I] Key)
     static bool DrawInventoryModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player, int& activeTab, int& selectedFragmentIndex);
 
+    // Interactive Realm Map Modal ([M] Key)
+    static bool DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState);
+
     static void DrawLobbyHUD(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore = false);
     static void DrawCombatHUD(int windowWidth, int windowHeight, const Player& player, int currentWave, int totalWaves, bool hasUnreadLore = false);
     static void DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore = false);

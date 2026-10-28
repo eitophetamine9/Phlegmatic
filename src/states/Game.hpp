@@ -45,6 +45,7 @@ private:
     GameState currentState;
     bool showControlsModal;
     bool showInventoryModal;
+    bool showMapModal;
     bool showSlotModal;
     int deletingSlotIndex;
     bool isRestoringSave;
