@@ -135,6 +135,17 @@ void Game::EnterZyphden() {
     SaveActiveGame();
 }
 
+void Game::EnterQuarryDepths() {
+    quarryHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::QUARRY_DEPTHS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
     WeaponType keepWeapon = player.GetWeapon();
@@ -241,6 +252,8 @@ void Game::LoadActiveGame(int slotIndex) {
         EnterCrossroads();
     } else if (targetState == GameState::ZYPHDEN_REALM) {
         EnterZyphden();
+    } else if (targetState == GameState::QUARRY_DEPTHS) {
+        EnterQuarryDepths();
     } else if (targetState == GameState::LOBBY) {
         EnterLobby();
     } else if (targetState == GameState::ARENA) {
@@ -405,7 +418,7 @@ void Game::Update(float dt) {
 
     // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
     if (!showControlsModal && !showInventoryModal && !showMapModal) {
-        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM) {
+        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM || currentState == GameState::QUARRY_DEPTHS) {
             Rectangle mapBtnRec = { (float)(Config::WINDOW_WIDTH - 380), 16.0f, 120.0f, 32.0f };
             Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 250), 16.0f, 110.0f, 32.0f };
             Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 130), 16.0f, 110.0f, 32.0f };
@@ -530,6 +543,31 @@ void Game::Update(float dt) {
         return;
     }
 
+    // 1.87 QUARRY TRANSITION SCREEN
+    if (currentState == GameState::QUARRY_TRANSITION) {
+        int w = GetScreenWidth();
+        int h = GetScreenHeight();
+        float cardW = fminf((float)w - 80.0f, 1140.0f);
+        float cardH = fminf((float)h - 80.0f, 760.0f);
+        float cardX = ((float)w - cardW) * 0.5f;
+        float cardY = ((float)h - cardH) * 0.5f;
+
+        float btnW = 380.0f;
+        float btnH = 50.0f;
+        float btnX = cardX + (cardW - btnW) * 0.5f;
+        float btnY = cardY + cardH - 68.0f;
+
+        Rectangle btnRec = { btnX, btnY, btnW, btnH };
+        bool isHover = CheckCollisionPointRec(mouseScreen, btnRec);
+        bool proceed = (isHover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ||
+                       IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
+        if (proceed) {
+            SoundFX::PlayButtonClick();
+            EnterQuarryDepths();
+        }
+        return;
+    }
+
     // 1.88 ZYPHDEN REALM STATE (Chapter 1)
     if (currentState == GameState::ZYPHDEN_REALM) {
         if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
@@ -541,6 +579,27 @@ void Game::Update(float dt) {
         zyphdenHandler.Update(
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
+            [this]() { EnterLobby(); }
+        );
+        return;
+    }
+
+    // 1.89 QUARRY DEPTHS & GOLEM MINES STATE
+    if (currentState == GameState::QUARRY_DEPTHS) {
+        if (map.GetEnvironment() != MapEnvironment::QUARRY_DEPTHS) {
+            map.Init(MapEnvironment::QUARRY_DEPTHS);
+        }
+        quarryHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                map.Init(MapEnvironment::ZYPHDEN_REALM);
+                player.SetPosition({ 1620.0f, 700.0f });
+                camera.target = player.GetPosition();
+                currentState = GameState::ZYPHDEN_REALM;
+                enemies.clear();
+                projectiles.clear();
+                particles.Clear();
+            },
             [this]() { EnterLobby(); }
         );
         return;
@@ -832,8 +891,27 @@ void Game::RenderScene() {
         return;
     }
 
+    if (currentState == GameState::QUARRY_TRANSITION) {
+        GameUI::DrawQuarryTransition(
+            w, h, GetMousePosition(), false, GetFrameTime()
+        );
+        return;
+    }
+
     if (currentState == GameState::ZYPHDEN_REALM) {
         zyphdenHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+        );
+        if (showMapModal) {
+            Vector2 mousePos = GetMousePosition();
+            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        }
+        return;
+    }
+
+    if (currentState == GameState::QUARRY_DEPTHS) {
+        quarryHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
         );

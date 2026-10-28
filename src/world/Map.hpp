@@ -11,7 +11,8 @@ enum class MapEnvironment {
     ZYPHDEN_REALM,
     TAVERN_INTERIOR,
     FORGE_INTERIOR,
-    ROYAL_KEEP
+    ROYAL_KEEP,
+    QUARRY_DEPTHS
 };
 
 struct Pillar {
@@ -60,4 +61,6 @@ private:
     void DrawForgeWalls() const;
     void DrawRoyalKeepFloor() const;
     void DrawRoyalKeepWalls() const;
+    void DrawQuarryDepthsFloor() const;
+    void DrawQuarryDepthsWalls(Vector2 playerPos) const;
 };

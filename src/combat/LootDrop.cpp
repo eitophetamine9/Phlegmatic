@@ -153,7 +153,16 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
     Vector2 pos = enemy.GetPosition();
     EnemyType type = enemy.GetType();
 
-    if (type == EnemyType::ORE_GOLEM) {
+    if (type == EnemyType::ELEMENTAL_GOLEM) {
+        // Secret Boss Elemental Golem: 12-18 Ore Scraps + 150-250 Shingles + 3 Elixirs
+        int scrapCount = 12 + (rand() % 7);
+        outDrops.emplace_back(LootType::ORE_SCRAP, pos, scrapCount);
+        int shingleCount = 150 + (rand() % 101);
+        outDrops.emplace_back(LootType::SHINGLES, Vector2{ pos.x + 16.0f, pos.y }, shingleCount);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 18.0f, pos.y }, 1);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 18.0f, pos.y }, 1);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x, pos.y - 18.0f }, 1);
+    } else if (type == EnemyType::ORE_GOLEM) {
         // Ore Golem: 2-4 Ore Scraps + 15-30 Shingles + 40% Elixir
         int scrapCount = 2 + (rand() % 3);
         outDrops.emplace_back(LootType::ORE_SCRAP, pos, scrapCount);

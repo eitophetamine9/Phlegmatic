@@ -30,6 +30,7 @@ set(SOURCES
     src/states/RuinedCastleHandler.cpp
     src/states/CrossroadsHandler.cpp
     src/states/ZyphdenHandler.cpp
+    src/states/QuarryHandler.cpp
     src/states/Game.cpp
 )
 

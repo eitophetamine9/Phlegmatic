@@ -822,21 +822,21 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
 }
 
 void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {
-    float bannerW = 820.0f;
-    float bannerH = 74.0f;
+    float bannerW = 860.0f;
+    float bannerH = 84.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
-    float bannerY = (float)windowHeight - 165.0f;
+    float bannerY = (float)windowHeight - 175.0f;
 
     DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 12, 15, 22, 235 });
     DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, accentColor);
 
     // Speaker Name
     int speakerSize = FontManager::GetScaledSize(13);
-    FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 22, (int)bannerY + 12, speakerSize, accentColor);
+    FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 24, (int)bannerY + 12, speakerSize, accentColor);
 
     // Text Quote
-    int quoteSize = FontManager::GetScaledSize(16);
-    FontManager::DrawGameTextShadow(text, (int)bannerX + 22, (int)bannerY + 32, quoteSize, Color{ 240, 244, 255, 250 });
+    int quoteSize = FontManager::GetScaledSize(15);
+    FontManager::DrawGameTextShadow(text, (int)bannerX + 24, (int)bannerY + 34, quoteSize, Color{ 240, 244, 255, 250 });
 }
 
 bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
@@ -852,10 +852,10 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     }
 
     // Modal dimensions
-    const float boxW = 840.0f;
-    const float boxH = 190.0f;
+    const float boxW = 920.0f;
+    const float boxH = 205.0f;
     const float boxX = ((float)windowWidth - boxW) * 0.5f;
-    const float boxY = (float)windowHeight - boxH - 28.0f;
+    const float boxY = (float)windowHeight - boxH - 24.0f;
 
     // Dark backdrop card with accent border
     DrawRectangleRounded(Rectangle{ boxX, boxY, boxW, boxH }, 0.14f, 6, Color{ 14, 18, 28, 245 });

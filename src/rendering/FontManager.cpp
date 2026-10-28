@@ -88,10 +88,18 @@ void FontManager::Init() {
     int cpCount = (int)codepoints.size();
     const int* cpData = codepoints.data();
 
-    // 1. Load Body Font (MedievalSharp)
-    const char* bodyPath = "assets/fonts/MedievalSharp.ttf";
-    if (FileExists(bodyPath)) {
-        bodyFont = LoadFontEx(bodyPath, 36, cpData, cpCount);
+    // 1. Load Body Font (Georgia for pristine on-screen clarity and dark fantasy elegance)
+    const char* georgiaPath = "assets/fonts/Georgia.ttf";
+    const char* fallbackBodyPath = "assets/fonts/MedievalSharp.ttf";
+    if (FileExists(georgiaPath)) {
+        bodyFont = LoadFontEx(georgiaPath, 38, cpData, cpCount);
+        if (bodyFont.texture.id != 0) {
+            SetTextureFilter(bodyFont.texture, TEXTURE_FILTER_BILINEAR);
+        } else {
+            bodyFont = GetFontDefault();
+        }
+    } else if (FileExists(fallbackBodyPath)) {
+        bodyFont = LoadFontEx(fallbackBodyPath, 36, cpData, cpCount);
         if (bodyFont.texture.id != 0) {
             SetTextureFilter(bodyFont.texture, TEXTURE_FILTER_BILINEAR);
         } else {
@@ -178,7 +186,7 @@ void FontManager::DrawGameText(const std::string& text, int posX, int posY, int 
     if (text.empty()) return;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
     Vector2 pos = { (float)posX, (float)posY };
     ::DrawTextEx(font, sanitized.c_str(), pos, (float)fontSize, spacing, color);
 }
@@ -243,7 +251,7 @@ int FontManager::MeasureGameText(const std::string& text, int fontSize, GameFont
     if (text.empty()) return 0;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
     Vector2 size = ::MeasureTextEx(font, sanitized.c_str(), (float)fontSize, spacing);
     return (int)size.x;
 }
@@ -266,7 +274,7 @@ Vector2 FontManager::MeasureTextEx(GameFont fontType, const std::string& text, f
 void FontManager::DrawTextWrapped(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, GameFont fontType, int maxChars) {
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
 
     std::istringstream stream(sanitized);
     std::string paragraph;

@@ -32,6 +32,7 @@ Player::Player() {
     isParrying = false;
     counterBuffTimer = 0.0f;
     potionCooldown = 0.0f;
+    elementalProjectileCooldown = 0.0f;
 
     staggerTimer = 0.0f;
     staggerImmunityTimer = 0.0f;
@@ -162,6 +163,9 @@ float Player::GetMaxHealth() const {
 
 float Player::GetDefense() const {
     float raw = 15.0f + GetArmorStats(currentArmor).defense;
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        raw += 25.0f; // High defense fortification
+    }
     return raw * GetTotemStats(currentTotem).defenseMultiplier;
 }
 
@@ -250,6 +254,11 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             staggerTimer = 0.0f;
             staggerImmunityTimer = 1.8f; // 1.8s anti-stunlock grace window!
         }
+    }
+
+    // Elemental Core Totem projectile cooldown
+    if (elementalProjectileCooldown > 0.0f) {
+        elementalProjectileCooldown -= dt;
     }
 
     // Health Potion consumption via [1] or [H] (7-second cooldown)
@@ -651,6 +660,16 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.hasShockwave = false;
     currentAttack.isFrontalCircle = false;
     currentAttack.defensePierce = 0.0f;
+
+    // Elemental Core Totem: Projectile on Light Attack (5s cooldown)
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM && elementalProjectileCooldown <= 0.0f) {
+        Vector2 spawnPos = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
+        Vector2 projVel = { forwardDir.x * 560.0f, forwardDir.y * 560.0f };
+        spawnedProjectiles.emplace_back(spawnPos, projVel, 10.0f, 32.0f, ProjectileType::ELEMENTAL_BOLT, true, 0.20f);
+        elementalProjectileCooldown = 5.0f;
+        particles.SpawnSparks(spawnPos, Color{ 255, 140, 50, 255 }, 18, 140.0f);
+        SoundFX::PlayCrusaderClash();
+    }
 
     if (currentWeapon == WeaponType::MACE) {
         // War Mace Light: Frontal circular smack

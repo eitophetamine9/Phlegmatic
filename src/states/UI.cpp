@@ -75,3 +75,7 @@ bool GameUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 mo
     return ModalUI::DrawZyphdenTransition(windowWidth, windowHeight, mousePos, isMousePressed, dt);
 }
 
+bool GameUI::DrawQuarryTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt) {
+    return ModalUI::DrawQuarryTransition(windowWidth, windowHeight, mousePos, isMousePressed, dt);
+}
+

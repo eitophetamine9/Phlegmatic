@@ -244,6 +244,37 @@ void GameMap::Init(MapEnvironment env) {
         // Wing lanterns
         torches.push_back({ 460.0f, 200.0f });
         torches.push_back({ 1540.0f, 200.0f });
+    } else if (env == MapEnvironment::QUARRY_DEPTHS) {
+        // Eastern Quarry Mines & Basalt Depths (1600x1200)
+        bounds = { 200.0f, 150.0f, 1600.0f, 1200.0f };
+
+        // Elevated Primordial Altar Dais in Northern Clearing (x: 920-1080, y: 230-340)
+        obstacles.push_back({ { 920.0f, 230.0f, 160.0f, 110.0f } });
+
+        // Natural Basalt Boulders & Quarry Crags
+        obstacles.push_back({ { 480.0f, 400.0f, 130.0f, 85.0f } });
+        obstacles.push_back({ { 1360.0f, 420.0f, 140.0f, 90.0f } });
+        obstacles.push_back({ { 440.0f, 880.0f, 120.0f, 80.0f } });
+        obstacles.push_back({ { 1420.0f, 900.0f, 135.0f, 85.0f } });
+        obstacles.push_back({ { 900.0f, 720.0f, 160.0f, 80.0f } }); // Central quarry pit boulder
+
+        // Monolith Altar Pillars flanking the dais
+        pillars.push_back({ { 860.0f, 250.0f }, 24.0f });
+        pillars.push_back({ { 1140.0f, 250.0f }, 24.0f });
+        pillars.push_back({ { 860.0f, 370.0f }, 24.0f });
+        pillars.push_back({ { 1140.0f, 370.0f }, 24.0f });
+
+        // Quarry Mining Lanterns & Elemental Torches
+        torches.push_back({ 1000.0f, 280.0f }); // Altar heart glow
+        torches.push_back({ 860.0f, 250.0f });  // Fire pillar
+        torches.push_back({ 1140.0f, 250.0f }); // Frost pillar
+        torches.push_back({ 860.0f, 370.0f });  // Earth pillar
+        torches.push_back({ 1140.0f, 370.0f }); // Storm pillar
+        torches.push_back({ 260.0f, 750.0f });  // West archway entrance lantern
+        torches.push_back({ 620.0f, 600.0f });
+        torches.push_back({ 1280.0f, 600.0f });
+        torches.push_back({ 700.0f, 1050.0f });
+        torches.push_back({ 1200.0f, 1050.0f });
     }
 }
 
@@ -304,6 +335,8 @@ void GameMap::DrawFloor(Vector2 playerPos) const {
         DrawForgeFloor();
     } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
         DrawRoyalKeepFloor();
+    } else if (currentEnv == MapEnvironment::QUARRY_DEPTHS) {
+        DrawQuarryDepthsFloor();
     }
 
     float time = (float)GetTime();
@@ -404,6 +437,8 @@ void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
         DrawForgeWalls();
     } else if (currentEnv == MapEnvironment::ROYAL_KEEP) {
         DrawRoyalKeepWalls();
+    } else if (currentEnv == MapEnvironment::QUARRY_DEPTHS) {
+        DrawQuarryDepthsWalls(playerPos);
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -1122,5 +1157,143 @@ void GameMap::DrawRoyalKeepWalls() const {
     DrawRectangleLinesEx(exitDoor, 2.0f, Color{ 255, 215, 75, 255 });
     DrawCircleGradient(Vector2{ 1000.0f, 1245.0f }, 65.0f, Color{ 255, 210, 80, 85 }, Color{ 0, 0, 0, 0 });
 }
+
+void GameMap::DrawQuarryDepthsFloor() const {
+    float time = (float)GetTime();
+
+    // 1. Deep Slate and Dark Basalt Rock Floor
+    DrawRectangleRec(bounds, Color{ 20, 22, 30, 255 });
+
+    const int tileSize = 50;
+    int startX = (int)bounds.x;
+    int endX = (int)(bounds.x + bounds.width);
+    int startY = (int)bounds.y;
+    int endY = (int)(bounds.y + bounds.height);
+
+    for (int x = startX; x <= endX; x += tileSize) {
+        DrawLine(x, startY, x, endY, Color{ 30, 34, 46, 110 });
+    }
+    for (int y = startY; y <= endY; y += tileSize) {
+        DrawLine(startX, y, endX, y, Color{ 30, 34, 46, 110 });
+    }
+
+    // 2. Minecart Tracks from West Archway through Central Quarry Pit
+    float trackY = 750.0f;
+    float trackStartX = bounds.x + 20.0f;
+    float trackEndX = bounds.x + 850.0f;
+
+    // Wooden Ties
+    for (float tx = trackStartX; tx <= trackEndX; tx += 28.0f) {
+        DrawRectangle((int)tx - 3, (int)trackY - 14, 6, 28, Color{ 54, 40, 28, 255 });
+        DrawRectangleLines((int)tx - 3, (int)trackY - 14, 6, 28, Color{ 36, 26, 18, 255 });
+    }
+    // Steel Rails
+    DrawLineEx({ trackStartX, trackY - 10.0f }, { trackEndX, trackY - 10.0f }, 2.5f, Color{ 110, 125, 145, 240 });
+    DrawLineEx({ trackStartX, trackY + 10.0f }, { trackEndX, trackY + 10.0f }, 2.5f, Color{ 110, 125, 145, 240 });
+
+    // Track spur curving south towards lower mining pit
+    for (int i = 0; i < 16; i++) {
+        float cx = trackEndX + (float)i * 18.0f;
+        float cy = trackY + (float)(i * i) * 1.5f;
+        DrawRectangle((int)cx - 3, (int)cy - 12, 6, 24, Color{ 54, 40, 28, 220 });
+    }
+
+    // 3. Ancient Primordial Altar Sacred Circle in Northern Clearing
+    Vector2 altarCenter = { 1000.0f, 285.0f };
+    float ringPulse = (sinf(time * 2.5f) * 0.5f + 0.5f);
+
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 140.0f, Color{ 60, 50, 75, 180 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 138.0f, Color{ 140, 100, 190, (unsigned char)(120 + 80 * ringPulse) });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 90.0f, Color{ 85, 70, 105, 160 });
+
+    // 4 Quad-Elemental Inscribed Floor Runes at Cardinal Offsets
+    // 1. Fire Rune (North-West)
+    DrawCircleGradient(Vector2{ altarCenter.x - 70.0f, altarCenter.y - 70.0f }, 32.0f, Color{ 255, 90, 40, 60 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(Vector2{ altarCenter.x - 70.0f, altarCenter.y - 70.0f }, 3, 10.0f, 30.0f, Color{ 255, 110, 50, 220 });
+
+    // 2. Frost Rune (North-East)
+    DrawCircleGradient(Vector2{ altarCenter.x + 70.0f, altarCenter.y - 70.0f }, 32.0f, Color{ 90, 215, 255, 60 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(Vector2{ altarCenter.x + 70.0f, altarCenter.y - 70.0f }, 4, 9.0f, 45.0f, Color{ 120, 230, 255, 220 });
+
+    // 3. Earth Rune (South-West)
+    DrawCircleGradient(Vector2{ altarCenter.x - 70.0f, altarCenter.y + 70.0f }, 32.0f, Color{ 245, 185, 50, 60 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(Vector2{ altarCenter.x - 70.0f, altarCenter.y + 70.0f }, 5, 9.0f, 0.0f, Color{ 255, 205, 70, 220 });
+
+    // 4. Storm Rune (South-East)
+    DrawCircleGradient(Vector2{ altarCenter.x + 70.0f, altarCenter.y + 70.0f }, 32.0f, Color{ 190, 110, 255, 60 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(Vector2{ altarCenter.x + 70.0f, altarCenter.y + 70.0f }, 4, 9.0f, time * 30.0f, Color{ 210, 130, 255, 220 });
+}
+
+void GameMap::DrawQuarryDepthsWalls(Vector2 playerPos) const {
+    float time = (float)GetTime();
+
+    // 1. Natural Basalt Rock Obstacles & Crags
+    for (const auto& obs : obstacles) {
+        if (obs.rect.x > 900.0f && obs.rect.x < 1100.0f && obs.rect.y < 350.0f) {
+            // This is the Primordial Altar Dais - drawn with sacred carved stone below!
+            continue;
+        }
+
+        // Rocky Basalt Boulder with faceted depth
+        DrawRectangleRec(obs.rect, Color{ 34, 38, 48, 255 });
+        DrawRectangleLinesEx(obs.rect, 2.0f, Color{ 58, 65, 80, 255 });
+
+        // Geological strata lines & golden ore mineral specks
+        DrawLine((int)obs.rect.x + 10, (int)obs.rect.y + (int)(obs.rect.height * 0.45f),
+                 (int)(obs.rect.x + obs.rect.width - 10), (int)obs.rect.y + (int)(obs.rect.height * 0.45f),
+                 Color{ 48, 54, 68, 220 });
+        DrawCircle((int)(obs.rect.x + obs.rect.width * 0.35f), (int)(obs.rect.y + obs.rect.height * 0.35f), 2.5f, Color{ 255, 205, 75, 220 });
+        DrawCircle((int)(obs.rect.x + obs.rect.width * 0.65f), (int)(obs.rect.y + obs.rect.height * 0.65f), 2.0f, Color{ 255, 205, 75, 220 });
+    }
+
+    // 2. The Sacred Primordial Altar Dais (x: 920-1080, y: 230-340)
+    Rectangle daisRec = { 920.0f, 230.0f, 160.0f, 110.0f };
+    DrawRectangleRounded(daisRec, 0.12f, 6, Color{ 28, 24, 36, 255 });
+    DrawRectangleRoundedLines(daisRec, 0.12f, 6, Color{ 215, 165, 60, 255 });
+    DrawRectangleLinesEx(Rectangle{ daisRec.x + 4.0f, daisRec.y + 4.0f, daisRec.width - 8.0f, daisRec.height - 8.0f }, 1.5f, Color{ 140, 105, 190, 200 });
+
+    // Inner Offering Stone Table
+    Rectangle tableRec = { daisRec.x + 25.0f, daisRec.y + 20.0f, daisRec.width - 50.0f, daisRec.height - 40.0f };
+    DrawRectangleRec(tableRec, Color{ 18, 16, 24, 255 });
+    DrawRectangleLinesEx(tableRec, 1.5f, Color{ 180, 140, 70, 220 });
+
+    // Floating Primordial Elemental Core Orb above Altar Table
+    Vector2 coreCenter = { 1000.0f, 275.0f };
+    float hover = sinf(time * 3.0f) * 6.0f;
+    Vector2 orbPos = { coreCenter.x, coreCenter.y + hover };
+
+    float orbPulse = (sinf(time * 4.0f) * 0.5f + 0.5f);
+    DrawCircleGradient(Vector2{ orbPos.x, orbPos.y }, 28.0f, Color{ 220, 140, 255, 120 }, Color{ 0, 0, 0, 0 });
+    DrawCircleV(orbPos, 10.0f, Color{ 240, 220, 255, 255 });
+    DrawCircleLines((int)orbPos.x, (int)orbPos.y, 14.0f + 3.0f * orbPulse, Color{ 255, 205, 75, 240 });
+
+    // 4 Monolith Altar Pillars Flanking the Dais
+    for (size_t i = 0; i < pillars.size(); i++) {
+        const auto& p = pillars[i];
+        DrawCircle((int)p.position.x, (int)(p.position.y + p.radius * 0.4f), p.radius * 1.15f, Color{ 8, 8, 12, 140 });
+        DrawCircle((int)p.position.x, (int)p.position.y, p.radius, Color{ 36, 32, 46, 255 });
+        DrawCircle((int)p.position.x, (int)p.position.y, p.radius - 5.0f, Color{ 52, 46, 68, 255 });
+
+        // Floating elemental crystal beacon above each pillar
+        Color crysCol = (i == 0) ? Color{ 255, 80, 30, 255 } :
+                        (i == 1) ? Color{ 90, 220, 255, 255 } :
+                        (i == 2) ? Color{ 245, 190, 50, 255 } : Color{ 190, 110, 255, 255 };
+        DrawPoly(Vector2{ p.position.x, p.position.y - 6.0f }, 4, 8.0f, time * 45.0f * ((i % 2 == 0) ? 1.0f : -1.0f), crysCol);
+        DrawCircleGradient(Vector2{ p.position.x, p.position.y - 6.0f }, 24.0f, ColorAlpha(crysCol, 0.4f), Color{ 0, 0, 0, 0 });
+    }
+
+    // 3. West Exit Archway back to Zyphden at bounds.x
+    Rectangle exitArch = { bounds.x - 2.0f, 700.0f, 16.0f, 100.0f };
+    DrawRectangleRec(exitArch, Color{ 18, 22, 32, 255 });
+    DrawRectangleLinesEx(exitArch, 2.0f, Color{ 140, 200, 255, 240 });
+    DrawCircleGradient(Vector2{ bounds.x + 10.0f, 750.0f }, 75.0f, Color{ 120, 190, 255, 90 }, Color{ 0, 0, 0, 0 });
+
+    // Archway wooden timber framing
+    DrawRectangle((int)bounds.x, 685, 28, 14, Color{ 68, 50, 35, 255 });
+    DrawRectangle((int)bounds.x, 800, 28, 14, Color{ 68, 50, 35, 255 });
+    DrawRectangleLines((int)bounds.x, 685, 28, 14, Color{ 110, 85, 55, 255 });
+    DrawRectangleLines((int)bounds.x, 800, 28, 14, Color{ 110, 85, 55, 255 });
+}
+
 
 

@@ -49,4 +49,8 @@ public:
     // Realm Transition Screen (Zyphden Entry Placeholder Screen)
     // Returns true when player confirms entry into Zyphden
     static bool DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt);
+
+    // Quarry Depths Transition Screen (Eastern Mines Entry Screen)
+    // Returns true when player confirms descent into Quarry Mines
+    static bool DrawQuarryTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt);
 };

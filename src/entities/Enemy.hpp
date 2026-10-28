@@ -16,7 +16,8 @@ enum class EnemyType {
     INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
     ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
     KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
-    ORE_GOLEM        // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
+    ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
+    ELEMENTAL_GOLEM  // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
 };
 
 enum class EnemyState {
@@ -55,13 +56,13 @@ public:
     float GetWill() const { return will; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
 
-    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS; }
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM; }
     bool HasMeleeHitbox() const {
         if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
-        if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS) {
+        if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM) {
             return isPerformingMeleeSmite;
         }
-        return true; // SLASHER, BRUTE, CHARGER
+        return true; // SLASHER, BRUTE, CHARGER, ORE_GOLEM
     }
     std::string GetName() const;
 

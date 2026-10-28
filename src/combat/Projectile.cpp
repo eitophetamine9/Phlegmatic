@@ -27,6 +27,10 @@ Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, Pro
             maxLifetime = 1.5f;
             color = Color{ 255, 225, 90, 255 }; // Radiant holy dawnfire
             break;
+        case ProjectileType::ELEMENTAL_BOLT:
+            maxLifetime = 2.4f;
+            color = isFromPlayer ? Color{ 255, 140, 45, 255 } : Color{ 255, 90, 50, 255 };
+            break;
     }
 }
 
@@ -47,6 +51,8 @@ void Projectile::Update(float dt, const GameMap& map, ParticleSystem& particles)
         particles.SpawnSparks(position, color, 1, 25.0f);
     } else if (type == ProjectileType::NOVA_STAR && GetRandomValue(0, 3) == 0) {
         particles.SpawnSparks(position, color, 1, 30.0f);
+    } else if (type == ProjectileType::ELEMENTAL_BOLT && GetRandomValue(0, 2) == 0) {
+        particles.SpawnSparks(position, Color{ 255, 170, 50, 220 }, 1, 35.0f);
     }
 
     // Check collision against map walls and pillars
@@ -144,6 +150,21 @@ void Projectile::Draw() const {
             DrawTriangle(tip, wingL, wingR, Color{ 255, 215, 80, 240 });
             DrawLineEx(tail, tip, 3.5f, Color{ 255, 245, 180, 255 });
             DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+            break;
+        }
+
+        case ProjectileType::ELEMENTAL_BOLT: {
+            // Molten rock core with rotating elemental aura
+            float time = (float)GetTime() * 10.0f;
+            DrawCircleGradient(position, radius * 2.2f, Color{ 255, 120, 30, 120 }, Color{ 0, 0, 0, 0 });
+            DrawCircleV(position, radius, Color{ 40, 25, 20, 255 }); // Dark obsidian core
+            DrawCircleV(position, radius * 0.65f, Color{ 255, 160, 50, 255 }); // Molten fire
+            DrawCircleV(position, radius * 0.35f, Color{ 255, 235, 160, 255 }); // White-hot center
+            // Orbiting elemental sparks
+            float ox = cosf(time) * (radius * 1.5f);
+            float oy = sinf(time) * (radius * 1.5f);
+            DrawCircle((int)(position.x + ox), (int)(position.y + oy), 2.5f, Color{ 80, 220, 255, 240 }); // Frost spark
+            DrawCircle((int)(position.x - ox), (int)(position.y - oy), 2.5f, Color{ 255, 215, 60, 240 }); // Earth spark
             break;
         }
     }

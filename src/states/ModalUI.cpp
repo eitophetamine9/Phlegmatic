@@ -273,7 +273,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         // Category Tabs: WEAPONS, ARMORS, TOTEMS
         float catW = (col2W - 16.0f) / 3.0f;
-        const char* catNames[3] = { "WEAPONS (4)", "ARMORS (4)", "TOTEMS (4)" };
+        const char* catNames[3] = { "WEAPONS (4)", "ARMORS (4)", "TOTEMS (5)" };
         for (int c = 0; c < 3; c++) {
             Rectangle catRec = { col2X + (float)c * (catW + 8.0f), contentY, catW, 28.0f };
             bool isCatHov = CheckCollisionPointRec(mousePos, catRec);
@@ -413,16 +413,17 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 TotemType type;
                 const char* lockMsg;
             };
-            TotemItem totems[4] = {
+            TotemItem totems[5] = {
                 { TotemType::TOTEM_SANITY, "Crossroads - Hidden ruined altar chest" },
                 { TotemType::TOTEM_INSANITY, "Sanctum - Testing chamber offering" },
                 { TotemType::TOTEM_MIST, "Mist Realm - Shrouded archive" },
-                { TotemType::CRUSADER_TOTEM, "Zyphden - Crusader chapel shrine" }
+                { TotemType::CRUSADER_TOTEM, "Zyphden - Crusader chapel shrine" },
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Defeat Elemental Golem" }
             };
 
-            for (int i = 0; i < 4; i++) {
-                float itemY = listY + (float)i * 110.0f;
-                Rectangle itemRec = { col2X, itemY, col2W, 102.0f };
+            for (int i = 0; i < 5; i++) {
+                float itemY = listY + (float)i * 92.0f;
+                Rectangle itemRec = { col2X, itemY, col2W, 86.0f };
                 bool isUnlocked = player.GetInventory().HasTotem(totems[i].type);
                 bool isEquipped = (player.GetTotem() == totems[i].type);
                 bool isHov = CheckCollisionPointRec(mousePos, itemRec);
@@ -434,26 +435,26 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawRectangleRoundedLines(itemRec, 0.1f, 4, borderCol);
 
                 TotemStats st = GetTotemStats(totems[i].type);
-                DrawText(st.name.c_str(), (int)col2X + 14, (int)itemY + 10, 13, isUnlocked ? st.glowColor : Color{ 120, 130, 145, 200 });
+                DrawText(st.name.c_str(), (int)col2X + 14, (int)itemY + 8, 13, isUnlocked ? st.glowColor : Color{ 120, 130, 145, 200 });
 
                 if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ col2X + col2W - 88.0f, itemY + 8.0f, 76.0f, 20.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
-                    DrawText("ATTUNED", (int)(col2X + col2W - 78.0f), (int)itemY + 12, 10, Color{ 14, 18, 26, 255 });
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 88.0f, itemY + 6.0f, 76.0f, 20.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
+                    DrawText("ATTUNED", (int)(col2X + col2W - 78.0f), (int)itemY + 10, 10, Color{ 14, 18, 26, 255 });
                 } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ col2X + col2W - 74.0f, itemY + 8.0f, 62.0f, 20.0f }, 0.25f, 4, isHov ? Color{ 60, 90, 130, 255 } : Color{ 30, 42, 62, 230 });
-                    DrawText("ATTUNE", (int)(col2X + col2W - 62.0f), (int)itemY + 12, 10, isHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 195, 225, 220 });
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 74.0f, itemY + 6.0f, 62.0f, 20.0f }, 0.25f, 4, isHov ? Color{ 60, 90, 130, 255 } : Color{ 30, 42, 62, 230 });
+                    DrawText("ATTUNE", (int)(col2X + col2W - 62.0f), (int)itemY + 10, 10, isHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 195, 225, 220 });
                 }
 
-                DrawText(st.description.c_str(), (int)col2X + 14, (int)itemY + 28, 10, Color{ 175, 195, 220, 210 });
+                DrawText(st.description.c_str(), (int)col2X + 14, (int)itemY + 26, 10, Color{ 175, 195, 220, 210 });
 
                 if (isUnlocked) {
                     std::string buffStr = "[+] " + st.buffText;
-                    DrawText(buffStr.c_str(), (int)col2X + 14, (int)itemY + 66, 10, Color{ 100, 245, 180, 240 });
+                    DrawText(buffStr.c_str(), (int)col2X + 14, (int)itemY + 46, 10, Color{ 100, 245, 180, 240 });
                     std::string nerfStr = "[-] " + st.nerfText;
-                    DrawText(nerfStr.c_str(), (int)col2X + 14, (int)itemY + 82, 10, (st.nerfText.find("None") != std::string::npos) ? Color{ 160, 180, 200, 200 } : Color{ 255, 95, 95, 240 });
+                    DrawText(nerfStr.c_str(), (int)col2X + 14, (int)itemY + 64, 10, (st.nerfText.find("None") != std::string::npos) ? Color{ 160, 180, 200, 200 } : Color{ 255, 95, 95, 240 });
                 } else {
                     std::string lockStr = "Locked // " + std::string(totems[i].lockMsg);
-                    DrawText(lockStr.c_str(), (int)col2X + 14, (int)itemY + 76, 10, Color{ 220, 90, 90, 220 });
+                    DrawText(lockStr.c_str(), (int)col2X + 14, (int)itemY + 54, 10, Color{ 220, 90, 90, 220 });
                 }
 
                 if (isUnlocked && isHov && isMousePressed) {
@@ -1332,6 +1333,156 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
     return false;
 }
 
+bool ModalUI::DrawQuarryTransition(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, float dt) {
+    static float s_quarryAnimTimer = 0.0f;
+    s_quarryAnimTimer += dt;
+
+    static bool s_quarryCustomLoaded = false;
+    static Texture2D s_quarryCustomAsset = { 0 };
+    static bool s_quarryAssetChecked = false;
+
+    if (!s_quarryAssetChecked) {
+        s_quarryAssetChecked = true;
+        const char* potentialPaths[] = {
+            "assets/quarry_transition.png",
+            "assets/quarry_transition.jpg",
+            "resources/quarry_transition.png"
+        };
+        for (const char* p : potentialPaths) {
+            if (FileExists(p)) {
+                s_quarryCustomAsset = LoadTexture(p);
+                if (s_quarryCustomAsset.id > 0) {
+                    SetTextureFilter(s_quarryCustomAsset, TEXTURE_FILTER_BILINEAR);
+                    s_quarryCustomLoaded = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // 1. Dark Vignette Atmospheric Backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 8, 14, 245 });
+
+    // 2. Large Central Ornate Card
+    float cardW = fminf((float)windowWidth - 80.0f, 1140.0f);
+    float cardH = fminf((float)windowHeight - 80.0f, 760.0f);
+    float cardX = ((float)windowWidth - cardW) * 0.5f;
+    float cardY = ((float)windowHeight - cardH) * 0.5f;
+
+    Rectangle cardRec = { cardX, cardY, cardW, cardH };
+
+    // Outer backing card & filigree borders
+    DrawRectangleRounded(cardRec, 0.03f, 8, Color{ 16, 14, 22, 252 });
+    DrawRectangleRoundedLines(cardRec, 0.03f, 8, Color{ 225, 175, 55, 240 });
+    DrawRectangleRoundedLines(Rectangle{ cardX + 4, cardY + 4, cardW - 8, cardH - 8 }, 0.025f, 8, Color{ 65, 50, 85, 180 });
+
+    // Amber & bronze corner filigree accents
+    Color cornerCol = Color{ 255, 195, 60, 240 };
+    DrawLineEx({ cardX + 16, cardY + 16 }, { cardX + 46, cardY + 16 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 16, cardY + 16 }, { cardX + 16, cardY + 46 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 16, cardY + 16 }, { cardX + cardW - 46, cardY + 16 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 16, cardY + 16 }, { cardX + cardW - 16, cardY + 46 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 16, cardY + cardH - 16 }, { cardX + 46, cardY + cardH - 16 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + 16, cardY + cardH - 16 }, { cardX + 16, cardY + cardH - 46 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 16, cardY + cardH - 16 }, { cardX + cardW - 46, cardY + cardH - 16 }, 2.0f, cornerCol);
+    DrawLineEx({ cardX + cardW - 16, cardY + cardH - 16 }, { cardX + cardW - 16, cardY + cardH - 46 }, 2.0f, cornerCol);
+
+    // Header Title
+    float headerY = cardY + 28.0f;
+    const char* realmTitle = "THE EASTERN QUARRY & BASALT DEPTHS";
+    int titleW = FontManager::MeasureText(realmTitle, 26, GameFont::TITLE);
+    FontManager::DrawText(realmTitle, (int)(cardX + (cardW - titleW) * 0.5f), (int)headerY, 26, Color{ 255, 215, 80, 255 }, GameFont::TITLE);
+
+    const char* realmSubtitle = "Subterranean Mines of Ancient Titans and Fabled Ore Veins";
+    int subW = FontManager::MeasureText(realmSubtitle, 13);
+    FontManager::DrawText(realmSubtitle, (int)(cardX + (cardW - subW) * 0.5f), (int)headerY + 48, 13, Color{ 210, 185, 130, 210 });
+
+    DrawLine((int)cardX + 40, (int)headerY + 70, (int)(cardX + cardW - 40), (int)headerY + 70, Color{ 85, 68, 48, 180 });
+
+    // Central Artwork Presentation Box (Aspect ~16:9)
+    float artW = cardW - 80.0f;
+    float artH = 390.0f;
+    float artX = cardX + 40.0f;
+    float artY = headerY + 82.0f;
+
+    Rectangle artRec = { artX, artY, artW, artH };
+
+    if (s_quarryCustomLoaded && s_quarryCustomAsset.id > 0) {
+        DrawRectangleRec(artRec, Color{ 8, 6, 12, 255 });
+        float scale = fminf(artW / (float)s_quarryCustomAsset.width, artH / (float)s_quarryCustomAsset.height);
+        float destW = (float)s_quarryCustomAsset.width * scale;
+        float destH = (float)s_quarryCustomAsset.height * scale;
+        float destX = artX + (artW - destW) * 0.5f;
+        float destY = artY + (artH - destH) * 0.5f;
+        DrawTexturePro(s_quarryCustomAsset,
+                       Rectangle{ 0.0f, 0.0f, (float)s_quarryCustomAsset.width, (float)s_quarryCustomAsset.height },
+                       Rectangle{ destX, destY, destW, destH },
+                       Vector2{ 0.0f, 0.0f }, 0.0f, WHITE);
+        DrawRectangleLinesEx(artRec, 2.0f, Color{ 225, 175, 55, 200 });
+    } else {
+        // High-Quality Atmospheric Quarry Transition Screen Placeholder
+        DrawRectangleRounded(artRec, 0.02f, 6, Color{ 14, 12, 20, 250 });
+        DrawRectangleRoundedLines(artRec, 0.02f, 6, Color{ 95, 75, 50, 200 });
+        DrawRectangleLinesEx(Rectangle{ artX + 12.0f, artY + 12.0f, artW - 24.0f, artH - 24.0f }, 1.0f, Color{ 65, 50, 35, 140 });
+
+        float cx = artX + artW * 0.5f;
+        float cy = artY + artH * 0.5f;
+        DrawLine((int)cx - 40, (int)cy, (int)cx + 40, (int)cy, Color{ 160, 120, 50, 160 });
+        DrawLine((int)cx, (int)cy - 40, (int)cx, (int)cy + 40, Color{ 160, 120, 50, 160 });
+        DrawCircleLines((int)cx, (int)cy, 28.0f, Color{ 200, 150, 60, 180 });
+
+        const char* phTitle = "[ QUARRY DEPTHS TRANSITION ARTWORK PLACEHOLDER ]";
+        int phW = FontManager::MeasureText(phTitle, 16);
+        FontManager::DrawText(phTitle, (int)(cx - phW * 0.5f), (int)cy - 65, 16, Color{ 255, 215, 80, 240 });
+
+        const char* phDrop = "Drop custom transition illustration into: assets/quarry_transition.png";
+        int dropW = FontManager::MeasureText(phDrop, 13);
+        FontManager::DrawText(phDrop, (int)(cx - dropW * 0.5f), (int)cy + 55, 13, Color{ 240, 225, 205, 230 });
+
+        const char* phSpecs = "Supported format: 1920x1080 (16:9) or 1280x720 PNG / JPG (Auto-scaled)";
+        int specsW = FontManager::MeasureText(phSpecs, 11);
+        FontManager::DrawText(phSpecs, (int)(cx - specsW * 0.5f), (int)cy + 75, 11, Color{ 185, 160, 120, 190 });
+
+        const char* phNote = "The engine will automatically detect and render your illustration here upon load.";
+        int noteW = FontManager::MeasureText(phNote, 11);
+        FontManager::DrawText(phNote, (int)(cx - noteW * 0.5f), (int)cy + 95, 11, Color{ 255, 190, 60, 200 });
+    }
+
+    // Flavor Narrative Lore Box
+    float loreY = artY + artH + 16.0f;
+    std::string realmLore =
+        "Beneath the jagged limestone ridges east of Zyphden lie the ancestral Quarry Depths. Ancient miners unearthered primordial ore crystals here before dark tremors woke the stone itself. Deep within the deepest mine shaft, an ancient elemental altar stands dormant, vibrating in resonance with forgotten lore fragments.";
+    DrawJournalWrappedText(realmLore, (int)cardX + 45, (int)loreY, (int)cardW - 90, 13, 6, Color{ 235, 222, 210, 230 });
+
+    // Bottom Action / Confirmation Button
+    float btnW = 420.0f;
+    float btnH = 50.0f;
+    float btnX = cardX + (cardW - btnW) * 0.5f;
+    float btnY = cardY + cardH - 68.0f;
+
+    Rectangle btnRec = { btnX, btnY, btnW, btnH };
+    bool isHover = CheckCollisionPointRec(mousePos, btnRec);
+
+    float pulse = (sinf(s_quarryAnimTimer * 4.0f) * 0.5f + 0.5f);
+    Color btnBg = isHover ? Color{ 85, 55, 20, 255 } : Color{ 50, 32, 12, 230 };
+    Color btnBorder = isHover ? Color{ 255, 225, 95, 255 } : ColorAlpha(Color{ 225, 175, 55, 230 }, 0.7f + 0.3f * pulse);
+
+    DrawRectangleRounded(btnRec, 0.2f, 6, btnBg);
+    DrawRectangleRoundedLines(btnRec, 0.2f, 6, btnBorder);
+
+    const char* btnLabel = "DESCEND INTO QUARRY MINES [SPACE / ENTER / CLICK]";
+    int btnLabelW = FontManager::MeasureText(btnLabel, 13, GameFont::TITLE);
+    FontManager::DrawText(btnLabel, (int)(btnX + (btnW - btnLabelW) * 0.5f), (int)btnY + 17, 13, isHover ? Color{ 255, 255, 255, 255 } : Color{ 255, 235, 160, 240 }, GameFont::TITLE);
+
+    bool confirmed = (isHover && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
+    if (confirmed) {
+        SoundFX::PlayButtonClick();
+        return true;
+    }
+
+    return false;
+}
+
 bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState) {
     // 1. Dark Vignette Backdrop
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 14, 230 });
@@ -1761,6 +1912,9 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
             playerOffset = { nx, -70.0f + ny };
             locName = "Kingdom of Zyphden - Grand Plaza";
         }
+    } else if (currentState == GameState::QUARRY_DEPTHS) {
+        playerOffset = { 240.0f, -40.0f };
+        locName = "Quarry Mines & Primordial Altar";
     } else if (currentState == GameState::CROSSROADS) {
         playerOffset = { -10.0f, 65.0f };
         locName = "Crossroads Highway & Sanctum";

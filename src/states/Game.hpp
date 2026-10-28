@@ -19,6 +19,7 @@
 #include "RuinedCastleHandler.hpp"
 #include "CrossroadsHandler.hpp"
 #include "ZyphdenHandler.hpp"
+#include "QuarryHandler.hpp"
 
 class Game {
 public:
@@ -37,6 +38,7 @@ private:
     void EnterRuinedCastle();
     void EnterCrossroads();
     void EnterZyphden();
+    void EnterQuarryDepths();
     void EnterLobby();
     void EnterArena();
     void SaveActiveGame();
@@ -75,6 +77,7 @@ private:
     RuinedCastleHandler ruinedCastleHandler;
     CrossroadsHandler crossroadsHandler;
     ZyphdenHandler zyphdenHandler;
+    QuarryHandler quarryHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 

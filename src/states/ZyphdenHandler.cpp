@@ -285,16 +285,8 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
     dialoguePages.clear();
     currentDialoguePage = 0;
 
-    // Eastern Quarry Ore Golem Spawners (7.0s Respawn Loop)
+    // Eastern Quarry Ore Golems moved to dedicated Quarry Depths map
     golemSpawners.clear();
-    golemSpawners.push_back({ { 1940.0f, 650.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 2180.0f, 750.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 1920.0f, 1050.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 2160.0f, 1180.0f }, 0.0f, true });
-
-    for (const auto& spawner : golemSpawners) {
-        enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
-    }
 }
 
 void ZyphdenHandler::Update(
@@ -440,48 +432,13 @@ void ZyphdenHandler::Update(
         return d.IsCollected();
     }), lootDrops.end());
 
-    // Check dead enemies & update Ore Golem respawn timers
+    // Clean up dead enemies in Zyphden
     if (!inTavern && !inForge && !inRoyalKeep) {
         for (auto it = enemies.begin(); it != enemies.end(); ) {
             if (!it->IsAlive()) {
-                if (it->GetType() == EnemyType::ORE_GOLEM) {
-                    // Start 7-second respawn timer on closest spawner
-                    float bestDist = 999999.0f;
-                    int bestIdx = -1;
-                    for (size_t i = 0; i < golemSpawners.size(); ++i) {
-                        if (golemSpawners[i].isAlive) {
-                            float d = Vector2Distance(it->GetPosition(), golemSpawners[i].spawnPos);
-                            if (d < bestDist) {
-                                bestDist = d;
-                                bestIdx = (int)i;
-                            }
-                        }
-                    }
-                    if (bestIdx != -1) {
-                        golemSpawners[bestIdx].isAlive = false;
-                        golemSpawners[bestIdx].respawnTimer = 7.0f;
-                    }
-                }
                 it = enemies.erase(it);
             } else {
                 ++it;
-            }
-        }
-
-        // Countdown respawn timers and resurrect Golems after exactly 7.0 seconds
-        for (auto& spawner : golemSpawners) {
-            if (!spawner.isAlive) {
-                spawner.respawnTimer -= dt;
-                if (spawner.respawnTimer <= 0.0f) {
-                    spawner.respawnTimer = 0.0f;
-                    spawner.isAlive = true;
-                    enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
-
-                    SoundFX::PlayHitImpact();
-                    particles.SpawnSparks(spawner.spawnPos, Color{ 255, 190, 50, 255 }, 25, 160.0f);
-                    particles.AddScreenShake(3.5f, 0.15f);
-                    particles.SpawnFloatingText(Vector2{ spawner.spawnPos.x, spawner.spawnPos.y - 25.0f }, "ORE GOLEM RISES", Color{ 255, 200, 70, 240 }, 18.0f);
-                }
             }
         }
     }
@@ -878,6 +835,20 @@ void ZyphdenHandler::Update(
                 return;
             }
 
+            // 3. Eastern Quarry Archway Gate (Courtyard Gateway at { 1680.0f, 700.0f })
+            bool nearQuarryArchway = (Vector2Distance(playerPos, { 1680.0f, 700.0f }) <= 95.0f);
+            if (nearQuarryArchway && interactKey && doorCooldown <= 0.0f) {
+                if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                    SoundFX::PlayHitImpact();
+                    particles.SpawnFloatingText(player.GetPosition(), "Royal Decree: Spar with Captain Lenon in the courtyard before venturing east.", Color{ 255, 120, 120, 255 }, 20.0f);
+                    particles.AddScreenShake(3.0f, 0.12f);
+                } else {
+                    SoundFX::PlayGateOpen();
+                    currentState = GameState::QUARRY_TRANSITION;
+                    return;
+                }
+            }
+
             if (interactKey) {
                 // 2. Scholar Cedric (Zyphden Lore)
                 if (cedric.CheckInteraction(playerPos)) {
@@ -1066,6 +1037,15 @@ void ZyphdenHandler::Render(
         if (Vector2Distance(player.GetPosition(), { 1000.0f, 325.0f }) <= 130.0f) {
             DrawText("[E] ENTER ROYAL KEEP (KING KREPTU)", 895, 335, 11, Color{ 255, 225, 110, 240 });
         }
+
+        // Eastern Quarry Archway Gate prompt outside
+        if (Vector2Distance(player.GetPosition(), { 1680.0f, 700.0f }) <= 140.0f) {
+            if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                FontManager::DrawGameTextShadow("[E] QUARRY ARCHWAY (LOCKED - SPAR WITH LENON FIRST)", 1470, 640, 11, Color{ 255, 110, 110, 240 });
+            } else {
+                FontManager::DrawGameTextShadow("[E] ENTER EASTERN QUARRY MINES", 1510, 640, 12, Color{ 255, 215, 80, 255 });
+            }
+        }
     }
 
     if (!inTavern && !inForge && !inRoyalKeep) {
@@ -1141,8 +1121,8 @@ void ZyphdenHandler::Render(
         FontManager::DrawGameTextShadow("[O] OBJECTIVES", (int)bannerX + 28, (int)bannerY + 11, 11, isHovered ? Color{ 255, 255, 255, 255 } : Color{ 200, 220, 245, 220 });
     } else {
         // Expanded Middle-Left Single-Objective Card (Matching Tutorial Display)
-        const float bannerW = 480.0f;
-        const float bannerH = 78.0f;
+        const float bannerW = 620.0f;
+        const float bannerH = 92.0f;
         Rectangle cardRec = { bannerX, bannerY, bannerW, bannerH };
 
         DrawRectangleRounded(cardRec, 0.15f, 6, Color{ 14, 18, 28, 235 });
@@ -1188,7 +1168,7 @@ void ZyphdenHandler::Render(
             default:
                 stepNum = 7;
                 objTitle = "THE OPEN REALM: Journey to the next kingdom across northern gate (open exploration).";
-                objHint = "Explore Zyphden, craft blades at Varek's Forge, or proceed north at your leisure";
+                objHint = "Explore Zyphden, craft blades at Varek's Forge, or enter the Eastern Quarry at your leisure";
                 break;
         }
 
@@ -1196,7 +1176,7 @@ void ZyphdenHandler::Render(
         FontManager::DrawGameTextShadow(chapterHeader.c_str(), (int)bannerX + 16, (int)bannerY + 10, 11, Color{ 255, 215, 80, 255 });
 
         // Toggle button on top right of the card
-        Rectangle toggleBtn = { bannerX + bannerW - 92.0f, bannerY + 8.0f, 80.0f, 22.0f };
+        Rectangle toggleBtn = { bannerX + bannerW - 96.0f, bannerY + 8.0f, 84.0f, 22.0f };
         bool isTogHov = CheckCollisionPointRec(mousePos, toggleBtn);
         if (isTogHov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             showObjectives = false;
@@ -1204,10 +1184,10 @@ void ZyphdenHandler::Render(
         }
         DrawRectangleRounded(toggleBtn, 0.3f, 3, isTogHov ? Color{ 40, 52, 75, 220 } : Color{ 22, 28, 42, 180 });
         DrawRectangleRoundedLines(toggleBtn, 0.3f, 3, isTogHov ? Color{ 140, 210, 255, 240 } : Color{ 60, 80, 115, 200 });
-        FontManager::DrawGameTextShadow("HIDE [O]", (int)toggleBtn.x + 14, (int)toggleBtn.y + 5, 10, isTogHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 205, 235, 220 });
+        FontManager::DrawGameTextShadow("HIDE [O]", (int)toggleBtn.x + 16, (int)toggleBtn.y + 5, 10, isTogHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 205, 235, 220 });
 
-        FontManager::DrawGameTextShadow(objTitle.c_str(), (int)bannerX + 16, (int)bannerY + 31, 12, Color{ 255, 255, 255, 255 });
-        FontManager::DrawGameTextShadow(objHint.c_str(), (int)bannerX + 16, (int)bannerY + 52, 10, Color{ 120, 220, 255, 220 });
+        FontManager::DrawGameTextShadow(objTitle.c_str(), (int)bannerX + 16, (int)bannerY + 34, 12, Color{ 255, 255, 255, 255 });
+        FontManager::DrawGameTextShadow(objHint.c_str(), (int)bannerX + 16, (int)bannerY + 58, 11, Color{ 120, 220, 255, 220 });
     }
 
     // Top Location Entry Banner
@@ -1255,8 +1235,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     // Backdrop dimming
     DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 6, 8, 14, 215 });
 
-    const float modalW = 860.0f;
-    const float modalH = 580.0f;
+    const float modalW = 880.0f;
+    const float modalH = 615.0f;
     const float modalX = ((float)screenWidth - modalW) * 0.5f;
     const float modalY = ((float)screenHeight - modalH) * 0.5f;
 
@@ -1377,10 +1357,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     for (int i = 0; i < 4; i++) {
         int col = i % 2;
         int row = i / 2;
-        float cardX = modalX + 32.0f + (float)col * 406.0f;
-        float cardY = modalY + 92.0f + (float)row * 212.0f;
-        float cardW = 390.0f;
-        float cardH = 200.0f;
+        float cardX = modalX + 28.0f + (float)col * 416.0f;
+        float cardY = modalY + 86.0f + (float)row * 228.0f;
+        float cardW = 404.0f;
+        float cardH = 216.0f;
 
         Rectangle cardRec = { cardX, cardY, cardW, cardH };
         bool isHov = CheckCollisionPointRec(mousePos, cardRec);
@@ -1399,7 +1379,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         DrawRectangleRoundedLines(cardRec, 0.08f, 6, isMax ? Color{ 100, 225, 160, 220 } : (isHov ? entries[i].accentColor : Color{ 55, 75, 105, 180 }));
 
         // Category Tag
-        DrawText(entries[i].iconTag, (int)cardX + 16, (int)cardY + 12, 10, Color{ 140, 175, 215, 200 });
+        FontManager::DrawGameTextShadow(entries[i].iconTag, (int)cardX + 16, (int)cardY + 12, 10, Color{ 140, 175, 215, 200 });
 
         // Weapon Title
         FontManager::DrawText(entries[i].name, (int)cardX + 16, (int)cardY + 26, 15, Color{ 255, 255, 255, 255 }, GameFont::TITLE);
@@ -1408,7 +1388,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         float btnW = cardW - 32.0f;
         float btnH = 36.0f;
         float btnX = cardX + 16.0f;
-        float btnY = cardY + cardH - btnH - 14.0f;
+        float btnY = cardY + cardH - btnH - 12.0f;
         Rectangle btnRec = { btnX, btnY, btnW, btnH };
         bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
 
@@ -1417,18 +1397,18 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             if (canCraft) {
                 // Status Badge: CRAFTABLE
                 std::string badge = "[CRAFTABLE]";
-                int tbw = MeasureText(badge.c_str(), 11);
-                DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 45, 30, 16, 230 });
-                DrawText(badge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, Color{ 255, 185, 60, 255 });
+                int tbw = FontManager::MeasureText(badge, 11);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 45, 30, 16, 230 });
+                FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 16, 11, Color{ 255, 185, 60, 255 });
 
                 // Weapon description
-                DrawText(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 50, 10, Color{ 200, 215, 235, 220 });
+                FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 50, 10, Color{ 200, 215, 235, 220 });
 
                 // Crafting Cost Line
-                DrawText("FORGE CRAFTING COST:", (int)cardX + 16, (int)cardY + 76, 10, Color{ 255, 215, 80, 240 });
+                FontManager::DrawGameTextShadow("FORGE CRAFTING COST:", (int)cardX + 16, (int)cardY + 76, 10, Color{ 255, 215, 80, 240 });
                 std::string costText = std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
                 Color costCol = canAffordCraft ? Color{ 120, 255, 170, 255 } : Color{ 245, 110, 110, 255 };
-                DrawText(costText.c_str(), (int)cardX + 16, (int)cardY + 92, 11, costCol);
+                FontManager::DrawGameTextShadow(costText.c_str(), (int)cardX + 16, (int)cardY + 92, 11, costCol);
 
                 // Crafting Button
                 if (canAffordCraft) {
@@ -1438,7 +1418,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
 
                     std::string btnStr = "CRAFT " + std::string(entries[i].name);
-                    DrawText(btnStr.c_str(), (int)btnX + (int)(btnW - MeasureText(btnStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 235, 140, 255 });
+                    int bw = FontManager::MeasureText(btnStr, 11);
+                    FontManager::DrawGameTextShadow(btnStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 10, 11, Color{ 255, 235, 140, 255 });
 
                     if (isBtnHov && isMousePressed) {
                         player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
@@ -1458,22 +1439,24 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 20, 200 });
                     DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
                     std::string needStr = "INSUFFICIENT MATERIALS";
-                    DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 220, 110, 110, 220 });
+                    int bw = FontManager::MeasureText(needStr, 11);
+                    FontManager::DrawGameTextShadow(needStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 10, 11, Color{ 220, 110, 110, 220 });
                 }
             } else {
                 // Quest-locked weapon (e.g. Truth Seeker before defeating Zil)
                 std::string badge = "[NOT ACQUIRED]";
-                int tbw = MeasureText(badge.c_str(), 11);
-                DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
-                DrawText(badge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, Color{ 140, 155, 180, 200 });
+                int tbw = FontManager::MeasureText(badge, 11);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
+                FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 16, 11, Color{ 140, 155, 180, 200 });
 
-                DrawText(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 52, 10, Color{ 160, 175, 195, 200 });
-                DrawText("REQUIRES: Defeat Corrupted Zil in Castle Ruins", (int)cardX + 16, (int)cardY + 84, 10, Color{ 230, 150, 70, 220 });
+                FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 52, 10, Color{ 160, 175, 195, 200 });
+                FontManager::DrawGameTextShadow("REQUIRES: Defeat Corrupted Zil in Castle Ruins", (int)cardX + 16, (int)cardY + 84, 10, Color{ 230, 150, 70, 220 });
 
                 DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 20, 22, 28, 180 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 48, 54, 68, 180 });
                 const char* lockLabel = "LOCKED (SEEK ZIL IN RUINS)";
-                DrawText(lockLabel, (int)btnX + (int)(btnW - MeasureText(lockLabel, 11)) / 2, (int)btnY + 12, 11, Color{ 130, 140, 155, 190 });
+                int bw = FontManager::MeasureText(lockLabel, 11);
+                FontManager::DrawGameTextShadow(lockLabel, (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 10, 11, Color{ 130, 140, 155, 190 });
             }
         } else {
             // Weapon is OWNED — Display standard upgrade path!
@@ -1489,33 +1472,34 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 tierBadge = "[MASTERWORK +2]";
                 tierCol = Color{ 110, 245, 170, 255 };
             }
-            int tbw = MeasureText(tierBadge.c_str(), 11);
-            DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
-            DrawText(tierBadge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, tierCol);
+            int tbw = FontManager::MeasureText(tierBadge, 11);
+            DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
+            FontManager::DrawGameTextShadow(tierBadge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 16, 11, tierCol);
 
             // Weapon Stats display
             WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
             std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
-            DrawText(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 52, 11, Color{ 200, 220, 245, 240 });
+            FontManager::DrawGameTextShadow(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 52, 11, Color{ 200, 220, 245, 240 });
 
             // Next Tier Perk description
-            DrawText("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 72, 10, Color{ 255, 215, 80, 240 });
+            FontManager::DrawGameTextShadow("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 72, 10, Color{ 255, 215, 80, 240 });
             if (isMax) {
-                DrawText("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 88, 11, Color{ 110, 245, 170, 240 });
+                FontManager::DrawGameTextShadow("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 88, 11, Color{ 110, 245, 170, 240 });
             } else if (currentTier == 0) {
-                DrawText(entries[i].perkT1, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+                FontManager::DrawGameTextShadow(entries[i].perkT1, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
                 std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
-                DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+                FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
             } else if (currentTier == 1) {
-                DrawText(entries[i].perkT2, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+                FontManager::DrawGameTextShadow(entries[i].perkT2, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
                 std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
-                DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+                FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
             }
 
             if (isMax) {
                 DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
-                DrawText("MAX TIER TEMPERED", (int)btnX + (int)(btnW - MeasureText("MAX TIER TEMPERED", 12)) / 2, (int)btnY + 11, 12, Color{ 110, 245, 170, 220 });
+                int bw = FontManager::MeasureText("MAX TIER TEMPERED", 12);
+                FontManager::DrawGameTextShadow("MAX TIER TEMPERED", (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 10, 12, Color{ 110, 245, 170, 220 });
             } else {
                 std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
                 if (entries[i].type == WeaponType::TRUTH_SEEKER) {
@@ -1527,7 +1511,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
                     DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
                     DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
-                    DrawText(btnLabel.c_str(), (int)btnX + (int)(btnW - MeasureText(btnLabel.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 255, 255, 255 });
+                    int bw = FontManager::MeasureText(btnLabel, 11);
+                    FontManager::DrawGameTextShadow(btnLabel.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 10, 11, Color{ 255, 255, 255, 255 });
 
                     if (isBtnHov && isMousePressed) {
                         player.GetInventory().SpendShingles(upgradeCost);

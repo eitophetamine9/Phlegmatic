@@ -191,6 +191,26 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.radius = 135.0f;
             telegraph.warningColor = Color{ 230, 160, 40, 170 };
             break;
+
+        case EnemyType::ELEMENTAL_GOLEM:
+            humor = HumorType::MELANCHOLIC;
+            radius = 38.0f;
+            maxHealth = 850.0f; // Ancient Primordial Titan
+            defense = 55.0f;    // High stone defense (~35% reduction, encourages Shatter/Mace)
+            will = 90.0f;       // Massive poise resistance
+            moveSpeed = 100.0f;
+            attackRange = 180.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.72f;
+            strikeDuration = 0.28f;
+            recoveryDuration = 0.65f;
+            stunDuration = 1.6f;
+            telegraph.shape = TelegraphShape::CIRCLE;
+            telegraph.radius = 190.0f;
+            telegraph.warningColor = Color{ 240, 160, 40, 200 };
+            bossAttackPhase = 0;
+            isPerformingMeleeSmite = true;
+            break;
     }
 
     health = maxHealth;
@@ -207,6 +227,7 @@ std::string Enemy::GetName() const {
         case EnemyType::ZIL_BOSS: return "ZIL'S FRAGMENT";
         case EnemyType::KNIGHT_LENON_BOSS: return "KNIGHT LENON - VANGUARD CAPTAIN";
         case EnemyType::ORE_GOLEM: return "ORE GOLEM";
+        case EnemyType::ELEMENTAL_GOLEM: return "ELEMENTAL GOLEM (PRIMORDIAL TITAN)";
     }
     return "UNKNOWN";
 }
@@ -390,6 +411,44 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.warningColor = Color{ 255, 235, 100, 210 };
                         isPerformingMeleeSmite = true;
                     }
+                } else if (type == EnemyType::ELEMENTAL_GOLEM) {
+                    // 4-Phase Elemental Titan Cycle
+                    if (bossAttackPhase == 0) {
+                        // Quad-Seismic Shockwave (Massive Circle AoE)
+                        windupDuration = 0.75f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 190.0f;
+                        telegraph.warningColor = Color{ 255, 170, 45, 210 };
+                        isPerformingMeleeSmite = true;
+                    } else if (bossAttackPhase == 1) {
+                        // Magma Boulder Projectile Fling (Long Line AoE)
+                        windupDuration = 0.65f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 380.0f;
+                        telegraph.width = 34.0f;
+                        telegraph.warningColor = Color{ 255, 80, 40, 220 };
+                        isPerformingMeleeSmite = false; // Projectile deals damage
+                    } else if (bossAttackPhase == 2) {
+                        // Cryo Frost Tremor (Wide Cone Frost Sweep)
+                        windupDuration = 0.60f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CONE;
+                        telegraph.radius = 180.0f;
+                        telegraph.arcAngle = 160.0f;
+                        telegraph.warningColor = Color{ 100, 215, 255, 210 };
+                        isPerformingMeleeSmite = true;
+                    } else {
+                        // Storm Fissure Cleave (Heavy Charged Line AoE)
+                        windupDuration = 0.55f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 220.0f;
+                        telegraph.width = 56.0f;
+                        telegraph.warningColor = Color{ 190, 110, 255, 220 };
+                        isPerformingMeleeSmite = true;
+                    }
                 }
             } else {
                 if (type == EnemyType::ORE_GOLEM && distToPlayer > 450.0f) {
@@ -569,6 +628,38 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         SoundFX::PlayLightAttack();
                     }
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
+                } else if (type == EnemyType::ELEMENTAL_GOLEM) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+
+                    if (bossAttackPhase == 0) {
+                        // Phase 0: Quad-Seismic Quake (4 bursts of shockwave & sparks)
+                        particles.AddScreenShake(8.5f, 0.28f);
+                        particles.SpawnSparks(position, Color{ 255, 180, 50, 255 }, 35, 240.0f);
+                        SoundFX::PlayHeavyAttack();
+                    } else if (bossAttackPhase == 1) {
+                        // Phase 1: Magma Boulder Fling (Fires ELEMENTAL_BOLT projectile)
+                        Vector2 spawnPos = { position.x + forwardDir.x * (radius + 12.0f), position.y + forwardDir.y * (radius + 12.0f) };
+                        Vector2 projVel = { forwardDir.x * 400.0f, forwardDir.y * 400.0f };
+                        outProjectiles.emplace_back(spawnPos, projVel, 10.0f, 26.0f, ProjectileType::ELEMENTAL_BOLT, false);
+                        SoundFX::PlayProjectileShoot();
+                        particles.SpawnSparks(spawnPos, Color{ 255, 100, 40, 255 }, 20, 160.0f);
+                        particles.AddScreenShake(4.5f, 0.15f);
+                    } else if (bossAttackPhase == 2) {
+                        // Phase 2: Cryo Frost Tremor (Frost sweep)
+                        particles.AddScreenShake(6.0f, 0.20f);
+                        particles.SpawnSparks(position, Color{ 120, 225, 255, 255 }, 28, 180.0f);
+                        SoundFX::PlayCrusaderClash();
+                    } else {
+                        // Phase 3: Storm Fissure Cleave (Violet lightning fissure)
+                        particles.SpawnSlashTrail(position, forwardDir, Color{ 200, 120, 255, 255 });
+                        particles.SpawnSparks(position, Color{ 220, 140, 255, 255 }, 26, 200.0f);
+                        particles.AddScreenShake(7.0f, 0.22f);
+                        SoundFX::PlayHeavyAttack();
+                    }
+
+                    // Cycle boss attack phase across 4 elemental phases
+                    bossAttackPhase = (bossAttackPhase + 1) % 4;
                 }
             }
             break;
@@ -655,7 +746,7 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 12, 120.0f);
     particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 240, 240, 255 }, 20.0f);
 
-    float knockMult = (type == EnemyType::INQUISITOR_BOSS) ? 40.0f : ((type == EnemyType::BRUTE || type == EnemyType::ORE_GOLEM) ? 60.0f : 180.0f);
+    float knockMult = (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM) ? 35.0f : ((type == EnemyType::BRUTE || type == EnemyType::ORE_GOLEM) ? 60.0f : 180.0f);
     velocity.x += knockbackDir.x * knockMult;
     velocity.y += knockbackDir.y * knockMult;
 
@@ -664,7 +755,7 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
         state = EnemyState::DEAD;
         SoundFX::PlayEnemyDeath();
         particles.SpawnSparks(position, Color{ 200, 40, 40, 255 }, 25, 220.0f);
-        particles.SpawnFloatingText({ position.x, position.y - 10.0f }, type == EnemyType::INQUISITOR_BOSS ? "BOSS SLAIN" : "DEFEATED", Color{ 255, 100, 100, 255 }, 24.0f);
+        particles.SpawnFloatingText({ position.x, position.y - 10.0f }, (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM) ? "BOSS SLAIN" : "DEFEATED", Color{ 255, 100, 100, 255 }, 24.0f);
         return true;
     }
 
