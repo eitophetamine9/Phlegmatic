@@ -287,8 +287,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             WeaponItem weapons[4] = {
                 { WeaponType::SWORD, "Crusader's Broadsword", "" },
-                { WeaponType::DAGGERS, "Dual Daggers", "" },
-                { WeaponType::MACE, "War Mace", "" },
+                { WeaponType::DAGGERS, "Dual Daggers", "Craft at Blacksmith Varek's Forge using Ore Scraps" },
+                { WeaponType::MACE, "War Mace", "Craft at Blacksmith Varek's Forge using Ore Scraps" },
                 { WeaponType::TRUTH_SEEKER, "Truth Seeker (Partial)", "Beat Corrupted Zil in Ruined Castle" }
             };
 

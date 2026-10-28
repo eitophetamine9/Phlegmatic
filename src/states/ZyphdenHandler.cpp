@@ -1275,22 +1275,38 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
 
     // Header
-    FontManager::DrawText("VAREK'S MASTER FORGE", (int)modalX + 32, (int)modalY + 22, 22, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
-    FontManager::DrawText("Temper steel armaments with hammered silver Shingles to heighten lethal force and martial traits.", (int)modalX + 32, (int)modalY + 48, 12, Color{ 180, 205, 235, 210 }, GameFont::BODY);
+    FontManager::DrawText("VAREK'S MASTER FORGE", (int)modalX + 32, (int)modalY + 20, 22, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
+    FontManager::DrawText("Craft armaments with Quarry Ore Scraps and temper steel with silver Shingles.", (int)modalX + 32, (int)modalY + 46, 12, Color{ 180, 205, 235, 210 }, GameFont::BODY);
 
-    // Silver Shingles live balance badge in top-right of modal
+    // Live Currency & Material Badges in Top-Right of Modal Header
     int playerShingles = player.GetInventory().GetShingles();
-    float shingleBadgeW = 160.0f;
-    float shingleBadgeH = 34.0f;
+    int playerScraps = player.GetInventory().GetOreScraps();
+
+    // 1. Silver Shingles Badge
+    float shingleBadgeW = 140.0f;
+    float shingleBadgeH = 32.0f;
     float shingleBadgeX = modalX + modalW - shingleBadgeW - 32.0f;
     float shingleBadgeY = modalY + 20.0f;
     DrawRectangleRounded(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
     DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, shingleBadgeY, shingleBadgeW, shingleBadgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
     // Silver coin icon
-    DrawRectanglePro(Rectangle{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f, 10.0f, 10.0f }, Vector2{ 5.0f, 5.0f }, 45.0f, Color{ 220, 235, 255, 255 });
-    DrawPolyLines(Vector2{ shingleBadgeX + 18.0f, shingleBadgeY + 17.0f }, 4, 7.0f, 45.0f, Color{ 100, 135, 180, 255 });
+    DrawRectanglePro(Rectangle{ shingleBadgeX + 18.0f, shingleBadgeY + 16.0f, 10.0f, 10.0f }, Vector2{ 5.0f, 5.0f }, 45.0f, Color{ 220, 235, 255, 255 });
+    DrawPolyLines(Vector2{ shingleBadgeX + 18.0f, shingleBadgeY + 16.0f }, 4, 7.0f, 45.0f, Color{ 100, 135, 180, 255 });
     std::string shingleStr = std::to_string(playerShingles) + " Shingles";
-    FontManager::DrawText(shingleStr, (int)shingleBadgeX + 34, (int)shingleBadgeY + 9, 13, Color{ 230, 245, 255, 255 }, GameFont::BODY);
+    FontManager::DrawText(shingleStr, (int)shingleBadgeX + 34, (int)shingleBadgeY + 8, 12, Color{ 230, 245, 255, 255 }, GameFont::BODY);
+
+    // 2. Ore Scraps Badge (Amber / Bronze)
+    float scrapBadgeW = 140.0f;
+    float scrapBadgeH = 32.0f;
+    float scrapBadgeX = shingleBadgeX - scrapBadgeW - 12.0f;
+    float scrapBadgeY = modalY + 20.0f;
+    DrawRectangleRounded(Rectangle{ scrapBadgeX, scrapBadgeY, scrapBadgeW, scrapBadgeH }, 0.25f, 4, Color{ 26, 22, 16, 240 });
+    DrawRectangleRoundedLines(Rectangle{ scrapBadgeX, scrapBadgeY, scrapBadgeW, scrapBadgeH }, 0.25f, 4, Color{ 225, 175, 55, 220 });
+    // Amber scrap polygon icon
+    DrawPoly(Vector2{ scrapBadgeX + 18.0f, scrapBadgeY + 16.0f }, 4, 7.2f, 45.0f, Color{ 255, 195, 55, 255 });
+    DrawPolyLinesEx(Vector2{ scrapBadgeX + 18.0f, scrapBadgeY + 16.0f }, 4, 7.2f, 45.0f, 1.5f, Color{ 255, 235, 140, 255 });
+    std::string scrapStr = std::to_string(playerScraps) + " Ore Scraps";
+    FontManager::DrawText(scrapStr, (int)scrapBadgeX + 34, (int)scrapBadgeY + 8, 12, Color{ 255, 225, 120, 255 }, GameFont::BODY);
 
     // Divider Line
     DrawLine((int)modalX + 30, (int)modalY + 76, (int)(modalX + modalW - 30), (int)modalY + 76, Color{ 70, 95, 135, 160 });
@@ -1306,6 +1322,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         const char* perkT1;
         const char* perkT2;
         Color accentColor;
+        int craftScrapCost;
+        int craftShingleCost;
+        const char* craftDesc;
     };
 
     ForgeEntry entries[4] = {
@@ -1316,7 +1335,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             2, 50, 120,
             "+4 Damage (22 Light / 80 Heavy)",
             "+8 Damage (26 Light / 90 Heavy), +5% Poise Knockback",
-            Color{ 255, 215, 80, 255 }
+            Color{ 255, 215, 80, 255 },
+            0, 0,
+            "Tempered steel longsword of the Royal Vanguard."
         },
         {
             WeaponType::MACE,
@@ -1325,7 +1346,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             2, 60, 140,
             "+6 Damage (34 Light / 112 Heavy)",
             "+12 Damage (40 Light / 128 Heavy), +10% Armor Pierce (30% Total)",
-            Color{ 255, 150, 60, 255 }
+            Color{ 255, 150, 60, 255 },
+            12, 40,
+            "Heavy iron-shod mace. Shatters brittle Melancholic defense shells."
         },
         {
             WeaponType::DAGGERS,
@@ -1334,7 +1357,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             2, 45, 110,
             "+3 Damage (14 Light / 72 Heavy)",
             "+6 Damage (17 Light / 84 Heavy), +10% Lunge Critical",
-            Color{ 80, 230, 190, 255 }
+            Color{ 80, 230, 190, 255 },
+            8, 30,
+            "Twin razor daggers. Enables lightning rapid strikes and evasive lunges."
         },
         {
             WeaponType::TRUTH_SEEKER,
@@ -1343,7 +1368,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             1, 180, 0,
             "Consecration I (+6 Holy Beam Dmg -> 28, 32 Light / 96 Heavy)",
             "",
-            Color{ 140, 220, 255, 255 }
+            Color{ 140, 220, 255, 255 },
+            0, 0,
+            "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
         }
     };
 
@@ -1358,10 +1385,14 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         Rectangle cardRec = { cardX, cardY, cardW, cardH };
         bool isHov = CheckCollisionPointRec(mousePos, cardRec);
 
+        bool isOwned = player.GetInventory().HasWeapon(entries[i].type);
         int currentTier = player.GetInventory().GetWeaponUpgrade(entries[i].type);
-        bool isMax = (currentTier >= entries[i].maxTier);
+        bool isMax = isOwned && (currentTier >= entries[i].maxTier);
         int upgradeCost = (currentTier == 0) ? entries[i].costT1 : entries[i].costT2;
-        bool canAfford = (playerShingles >= upgradeCost);
+        bool canAffordUpgrade = isOwned && (playerShingles >= upgradeCost);
+
+        bool canCraft = (!isOwned && entries[i].craftScrapCost > 0);
+        bool canAffordCraft = canCraft && (playerScraps >= entries[i].craftScrapCost && playerShingles >= entries[i].craftShingleCost);
 
         // Card Background
         DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
@@ -1373,43 +1404,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         // Weapon Title
         FontManager::DrawText(entries[i].name, (int)cardX + 16, (int)cardY + 26, 15, Color{ 255, 255, 255, 255 }, GameFont::TITLE);
 
-        // Current Tier Badge
-        std::string tierBadge;
-        Color tierCol;
-        if (currentTier == 0) {
-            tierBadge = "[TIER: BASE]";
-            tierCol = Color{ 160, 180, 205, 220 };
-        } else if (currentTier == 1) {
-            tierBadge = (entries[i].type == WeaponType::TRUTH_SEEKER) ? "[CONSECRATED I]" : "[TIER +1]";
-            tierCol = Color{ 120, 215, 255, 255 };
-        } else {
-            tierBadge = "[MASTERWORK +2]";
-            tierCol = Color{ 110, 245, 170, 255 };
-        }
-        int tbw = MeasureText(tierBadge.c_str(), 11);
-        DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
-        DrawText(tierBadge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, tierCol);
-
-        // Weapon Stats display
-        WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
-        std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
-        DrawText(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 52, 11, Color{ 200, 220, 245, 240 });
-
-        // Next Tier Perk description
-        DrawText("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 72, 10, Color{ 255, 215, 80, 240 });
-        if (isMax) {
-            DrawText("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 88, 11, Color{ 110, 245, 170, 240 });
-        } else if (currentTier == 0) {
-            DrawText(entries[i].perkT1, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
-            std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
-            DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAfford ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
-        } else if (currentTier == 1) {
-            DrawText(entries[i].perkT2, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
-            std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
-            DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAfford ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
-        }
-
-        // Action Button
+        // Action Button coordinates
         float btnW = cardW - 32.0f;
         float btnH = 36.0f;
         float btnX = cardX + 16.0f;
@@ -1417,37 +1412,138 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         Rectangle btnRec = { btnX, btnY, btnW, btnH };
         bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
 
-        if (isMax) {
-            DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
-            DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
-            DrawText("MAX TIER TEMPERED", (int)btnX + (int)(btnW - MeasureText("MAX TIER TEMPERED", 12)) / 2, (int)btnY + 11, 12, Color{ 110, 245, 170, 220 });
-        } else {
-            std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
-            if (entries[i].type == WeaponType::TRUTH_SEEKER) {
-                btnLabel = "CONSECRATE BLADE (" + std::to_string(upgradeCost) + " SHINGLES)";
-            }
+        if (!isOwned) {
+            // Weapon is NOT yet owned (Craftable via Scraps or Unlocked via Quest)
+            if (canCraft) {
+                // Status Badge: CRAFTABLE
+                std::string badge = "[CRAFTABLE]";
+                int tbw = MeasureText(badge.c_str(), 11);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 45, 30, 16, 230 });
+                DrawText(badge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, Color{ 255, 185, 60, 255 });
 
-            if (canAfford) {
-                Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
-                Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
-                DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
-                DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
-                DrawText(btnLabel.c_str(), (int)btnX + (int)(btnW - MeasureText(btnLabel.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 255, 255, 255 });
+                // Weapon description
+                DrawText(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 50, 10, Color{ 200, 215, 235, 220 });
 
-                if (isBtnHov && isMousePressed) {
-                    player.GetInventory().SpendShingles(upgradeCost);
-                    player.GetInventory().UpgradeWeapon(entries[i].type);
-                    SoundFX::PlayCrusaderClash();
-                    SoundFX::PlayCoinPickup();
-                    particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 24, 180.0f);
-                    std::string feedback = std::string(entries[i].name) + " Upgraded!";
-                    particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+                // Crafting Cost Line
+                DrawText("FORGE CRAFTING COST:", (int)cardX + 16, (int)cardY + 76, 10, Color{ 255, 215, 80, 240 });
+                std::string costText = std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
+                Color costCol = canAffordCraft ? Color{ 120, 255, 170, 255 } : Color{ 245, 110, 110, 255 };
+                DrawText(costText.c_str(), (int)cardX + 16, (int)cardY + 92, 11, costCol);
+
+                // Crafting Button
+                if (canAffordCraft) {
+                    Color btnBg = isBtnHov ? Color{ 75, 55, 20, 255 } : Color{ 50, 36, 15, 240 };
+                    Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 225, 175, 55, 220 };
+                    DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+
+                    std::string btnStr = "CRAFT " + std::string(entries[i].name);
+                    DrawText(btnStr.c_str(), (int)btnX + (int)(btnW - MeasureText(btnStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 235, 140, 255 });
+
+                    if (isBtnHov && isMousePressed) {
+                        player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
+                        player.GetInventory().SpendShingles(entries[i].craftShingleCost);
+                        player.GetInventory().UnlockWeapon(entries[i].type);
+                        player.SetWeapon(entries[i].type);
+
+                        SoundFX::PlayCrusaderClash();
+                        SoundFX::PlayCoinPickup();
+                        particles.SpawnSparks(player.GetPosition(), entries[i].accentColor, 35, 220.0f);
+                        particles.AddScreenShake(4.5f, 0.18f);
+
+                        std::string feedback = std::string(entries[i].name) + " Crafted & Equipped!";
+                        particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 24.0f);
+                    }
+                } else {
+                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 20, 200 });
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                    std::string needStr = "INSUFFICIENT MATERIALS";
+                    DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 220, 110, 110, 220 });
                 }
             } else {
-                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
-                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
-                std::string needStr = "INSUFFICIENT SHINGLES (" + std::to_string(upgradeCost) + " NEEDED)";
-                DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 220, 110, 110, 220 });
+                // Quest-locked weapon (e.g. Truth Seeker before defeating Zil)
+                std::string badge = "[NOT ACQUIRED]";
+                int tbw = MeasureText(badge.c_str(), 11);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
+                DrawText(badge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, Color{ 140, 155, 180, 200 });
+
+                DrawText(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 52, 10, Color{ 160, 175, 195, 200 });
+                DrawText("REQUIRES: Defeat Corrupted Zil in Castle Ruins", (int)cardX + 16, (int)cardY + 84, 10, Color{ 230, 150, 70, 220 });
+
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 20, 22, 28, 180 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 48, 54, 68, 180 });
+                const char* lockLabel = "LOCKED (SEEK ZIL IN RUINS)";
+                DrawText(lockLabel, (int)btnX + (int)(btnW - MeasureText(lockLabel, 11)) / 2, (int)btnY + 12, 11, Color{ 130, 140, 155, 190 });
+            }
+        } else {
+            // Weapon is OWNED — Display standard upgrade path!
+            std::string tierBadge;
+            Color tierCol;
+            if (currentTier == 0) {
+                tierBadge = "[TIER: BASE]";
+                tierCol = Color{ 160, 180, 205, 220 };
+            } else if (currentTier == 1) {
+                tierBadge = (entries[i].type == WeaponType::TRUTH_SEEKER) ? "[CONSECRATED I]" : "[TIER +1]";
+                tierCol = Color{ 120, 215, 255, 255 };
+            } else {
+                tierBadge = "[MASTERWORK +2]";
+                tierCol = Color{ 110, 245, 170, 255 };
+            }
+            int tbw = MeasureText(tierBadge.c_str(), 11);
+            DrawRectangleRounded(Rectangle{ cardX + cardW - tbw - 24.0f, cardY + 12.0f, (float)tbw + 12.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
+            DrawText(tierBadge.c_str(), (int)(cardX + cardW - tbw - 18.0f), (int)cardY + 16, 11, tierCol);
+
+            // Weapon Stats display
+            WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
+            std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
+            DrawText(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 52, 11, Color{ 200, 220, 245, 240 });
+
+            // Next Tier Perk description
+            DrawText("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 72, 10, Color{ 255, 215, 80, 240 });
+            if (isMax) {
+                DrawText("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 88, 11, Color{ 110, 245, 170, 240 });
+            } else if (currentTier == 0) {
+                DrawText(entries[i].perkT1, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+                std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
+                DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+            } else if (currentTier == 1) {
+                DrawText(entries[i].perkT2, (int)cardX + 16, (int)cardY + 88, 11, Color{ 160, 235, 255, 240 });
+                std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
+                DrawText(costStr.c_str(), (int)cardX + 16, (int)cardY + 108, 11, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+            }
+
+            if (isMax) {
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
+                DrawText("MAX TIER TEMPERED", (int)btnX + (int)(btnW - MeasureText("MAX TIER TEMPERED", 12)) / 2, (int)btnY + 11, 12, Color{ 110, 245, 170, 220 });
+            } else {
+                std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
+                if (entries[i].type == WeaponType::TRUTH_SEEKER) {
+                    btnLabel = "CONSECRATE BLADE (" + std::to_string(upgradeCost) + " SHINGLES)";
+                }
+
+                if (canAffordUpgrade) {
+                    Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
+                    Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
+                    DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+                    DrawText(btnLabel.c_str(), (int)btnX + (int)(btnW - MeasureText(btnLabel.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 255, 255, 255, 255 });
+
+                    if (isBtnHov && isMousePressed) {
+                        player.GetInventory().SpendShingles(upgradeCost);
+                        player.GetInventory().UpgradeWeapon(entries[i].type);
+                        SoundFX::PlayCrusaderClash();
+                        SoundFX::PlayCoinPickup();
+                        particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 24, 180.0f);
+                        std::string feedback = std::string(entries[i].name) + " Upgraded!";
+                        particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+                    }
+                } else {
+                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                    std::string needStr = "INSUFFICIENT SHINGLES (" + std::to_string(upgradeCost) + " NEEDED)";
+                    DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 12, 11, Color{ 220, 110, 110, 220 });
+                }
             }
         }
     }

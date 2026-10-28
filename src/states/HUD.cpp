@@ -307,8 +307,8 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
     const char* hint = "Equip weapons at pedestals [E]  |  Step into North Portal to Enter Arena";
     DrawText(hint, (int)bannerX + 16, (int)bannerY + 26, 12, Color{ 200, 220, 245, 220 });
 
-    // Silver Shingles currency badge in top right
-    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+    // Silver Shingles and Ore Scraps currency badges in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -390,8 +390,8 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     int waveW = MeasureText(waveStr.c_str(), 14);
     DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
 
-    // Silver Shingles currency badge in top right
-    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+    // Silver Shingles and Ore Scraps currency badges in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -407,31 +407,45 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
-void HUD::DrawCurrencyBadge(int windowWidth, int shingles) {
-    const float badgeW = 145.0f;
+void HUD::DrawCurrencyBadge(int windowWidth, int shingles, int oreScraps) {
+    const float badgeW = 140.0f;
     const float badgeH = 32.0f;
     const float badgeX = (float)windowWidth - 430.0f;
     const float badgeY = 16.0f;
 
+    // 1. Silver Shingles Badge
     Rectangle badgeRec = { badgeX, badgeY, badgeW, badgeH };
     DrawRectangleRounded(badgeRec, 0.3f, 4, Color{ 18, 24, 36, 225 });
     DrawRectangleRoundedLines(badgeRec, 0.3f, 4, Color{ 140, 175, 215, 220 });
 
-    // Stylized Silver Shingle Coin Icon
     float iconCenterX = badgeX + 18.0f;
     float iconCenterY = badgeY + 16.0f;
     DrawRectanglePro(Rectangle{ iconCenterX, iconCenterY, 11.0f, 11.0f }, Vector2{ 5.5f, 5.5f }, 45.0f, Color{ 210, 230, 255, 255 });
     DrawPolyLines(Vector2{ iconCenterX, iconCenterY }, 4, 7.8f, 45.0f, Color{ 90, 125, 170, 255 });
     DrawLine((int)(iconCenterX - 3), (int)(iconCenterY - 3), (int)(iconCenterX + 3), (int)(iconCenterY - 3), WHITE);
 
-    // Numeric Shingles Count
     std::string text = std::to_string(shingles) + " Shingles";
     FontManager::DrawText(text, (int)(badgeX + 34), (int)(badgeY + 8), 12, Color{ 230, 242, 255, 245 }, GameFont::BODY);
+
+    // 2. Ore Scraps Badge (Amber / Bronze)
+    const float scrapBadgeW = 136.0f;
+    const float scrapBadgeX = badgeX - scrapBadgeW - 10.0f;
+    Rectangle scrapBadgeRec = { scrapBadgeX, badgeY, scrapBadgeW, badgeH };
+    DrawRectangleRounded(scrapBadgeRec, 0.3f, 4, Color{ 26, 22, 16, 225 });
+    DrawRectangleRoundedLines(scrapBadgeRec, 0.3f, 4, Color{ 225, 170, 55, 220 });
+
+    float scrapIconX = scrapBadgeX + 18.0f;
+    float scrapIconY = badgeY + 16.0f;
+    DrawPoly(Vector2{ scrapIconX, scrapIconY }, 4, 7.2f, 45.0f, Color{ 255, 195, 55, 255 });
+    DrawPolyLinesEx(Vector2{ scrapIconX, scrapIconY }, 4, 7.2f, 45.0f, 1.5f, Color{ 255, 235, 140, 255 });
+
+    std::string scrapText = std::to_string(oreScraps) + " Scraps";
+    FontManager::DrawText(scrapText, (int)(scrapBadgeX + 34), (int)(badgeY + 8), 12, Color{ 255, 225, 130, 245 }, GameFont::BODY);
 }
 
 void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
-    // Silver Shingles currency badge in top right
-    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles());
+    // Silver Shingles and Ore Scraps currency badges in top right
+    DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
     // Player HUD Panel (Bottom Left)
     DrawPlayerCard(windowWidth, windowHeight, player);
 
