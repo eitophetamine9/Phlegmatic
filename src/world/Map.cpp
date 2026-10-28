@@ -102,7 +102,7 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 1070.0f, 1150.0f });
         torches.push_back({ 800.0f, 200.0f });
     } else if (env == MapEnvironment::ZYPHDEN_REALM) {
-        bounds = { 200.0f, 100.0f, 1600.0f, 1400.0f };
+        bounds = { 200.0f, 100.0f, 2200.0f, 1400.0f };
 
         // Town Square & Castle Pillars
         pillars.push_back({ { 750.0f, 400.0f }, 34.0f });
@@ -134,10 +134,19 @@ void GameMap::Init(MapEnvironment env) {
         obstacles.push_back({ { 320.0f, 480.0f, 220.0f, 180.0f } });
         // Royal Throne Keep (North Castle)
         obstacles.push_back({ { 800.0f, 120.0f, 400.0f, 200.0f } });
-        // Courtyard Low Enclosure Fence/Walls
+        // Courtyard Low Enclosure Fence/Walls with Eastern Quarry Passageway
         obstacles.push_back({ { 1300.0f, 480.0f, 380.0f, 20.0f } }); // North courtyard rail
         obstacles.push_back({ { 1300.0f, 920.0f, 380.0f, 20.0f } }); // South courtyard rail
-        obstacles.push_back({ { 1680.0f, 500.0f, 20.0f, 420.0f } }); // East courtyard rail
+        obstacles.push_back({ { 1680.0f, 480.0f, 20.0f, 170.0f } }); // East courtyard rail North (y: 480-650)
+        obstacles.push_back({ { 1680.0f, 750.0f, 20.0f, 190.0f } }); // East courtyard rail South (y: 750-940)
+        // Open 100px gateway at Y: 650 to 750 allows seamless access into Eastern Quarry!
+
+        // Eastern Quarry Natural Boulders & Crags (X: 1720 to 2380)
+        obstacles.push_back({ { 1900.0f, 440.0f, 90.0f, 65.0f } });
+        obstacles.push_back({ { 2200.0f, 500.0f, 110.0f, 75.0f } });
+        obstacles.push_back({ { 1820.0f, 850.0f, 80.0f, 60.0f } });
+        obstacles.push_back({ { 2240.0f, 900.0f, 95.0f, 70.0f } });
+        obstacles.push_back({ { 2040.0f, 1260.0f, 120.0f, 60.0f } });
 
         // Torches & Braziers
         torches.push_back({ 750.0f, 400.0f });
@@ -148,6 +157,13 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 1500.0f, 550.0f }); // Courtyard brazier
         torches.push_back({ 1500.0f, 850.0f });
         torches.push_back({ 620.0f, 860.0f });  // Tavern entrance lantern
+
+        // Eastern Quarry Torches & Mining Braziers
+        torches.push_back({ 1720.0f, 700.0f }); // Quarry entrance lantern
+        torches.push_back({ 2000.0f, 600.0f });
+        torches.push_back({ 2250.0f, 750.0f });
+        torches.push_back({ 1950.0f, 1050.0f });
+        torches.push_back({ 2180.0f, 1200.0f });
     } else if (env == MapEnvironment::TAVERN_INTERIOR) {
         // Hearthside Tavern Interior - Cozy rustic tavern
         bounds = { 600.0f, 600.0f, 400.0f, 320.0f };
@@ -703,6 +719,22 @@ void GameMap::DrawZyphdenFloor() const {
     Vector2 sparRingCenter = { 1490.0f, 700.0f };
     DrawCircleLines((int)sparRingCenter.x, (int)sparRingCenter.y, 130.0f, Color{ 180, 160, 120, 190 });
     DrawCircleLines((int)sparRingCenter.x, (int)sparRingCenter.y, 65.0f, Color{ 150, 130, 95, 140 });
+
+    // 7. Eastern Quarry Plateau (X: 1720 to 2380, Y: 350 to 1400)
+    Rectangle quarryFloor = { 1720.0f, 350.0f, 660.0f, 1050.0f };
+    DrawRectangleRec(quarryFloor, Color{ 22, 25, 32, 255 });
+    DrawRectangleLinesEx(quarryFloor, 2.0f, Color{ 55, 62, 78, 180 });
+
+    // Weathered quarry gravel & amber ore dust tracks
+    for (int y = 400; y < 1350; y += 45) {
+        DrawLine(1720, y, 2380, y, Color{ 32, 38, 48, 90 });
+    }
+    // Minecart rails through central quarry
+    DrawLineEx({ 1720.0f, 736.0f }, { 2350.0f, 736.0f }, 3.0f, Color{ 68, 76, 92, 240 });
+    DrawLineEx({ 1720.0f, 752.0f }, { 2350.0f, 752.0f }, 3.0f, Color{ 68, 76, 92, 240 });
+    for (int rx = 1730; rx < 2350; rx += 24) {
+        DrawLineEx({ (float)rx, 731.0f }, { (float)rx, 757.0f }, 2.5f, Color{ 48, 38, 30, 240 });
+    }
 }
 
 void GameMap::DrawZyphdenWalls() const {
@@ -745,13 +777,26 @@ void GameMap::DrawZyphdenWalls() const {
     DrawCircle(942, 314, 5.0f, Color{ 255, 200, 75, 240 });
     DrawCircle(1058, 314, 5.0f, Color{ 255, 200, 75, 240 });
 
-    // Courtyard Enclosure Rails
+    // Courtyard Enclosure Rails and Eastern Quarry Crags
     for (const auto& obs : obstacles) {
-        if (obs.rect.y >= 480.0f && obs.rect.x >= 1300.0f) {
+        if (obs.rect.x >= 1720.0f) {
+            // Rough-hewn Quarry Boulders & Crags
+            DrawRectangleRec(obs.rect, Color{ 44, 48, 58, 255 });
+            DrawRectangleLinesEx(obs.rect, 2.5f, Color{ 75, 82, 98, 240 });
+            // Embedded glowing amber ore crystals
+            DrawPoly({ obs.rect.x + obs.rect.width * 0.4f, obs.rect.y + obs.rect.height * 0.45f }, 4, 8.0f, 20.0f, Color{ 255, 195, 55, 240 });
+            DrawPolyLinesEx({ obs.rect.x + obs.rect.width * 0.4f, obs.rect.y + obs.rect.height * 0.45f }, 4, 8.0f, 20.0f, 1.5f, Color{ 255, 235, 130, 255 });
+        } else if (obs.rect.y >= 480.0f && obs.rect.x >= 1300.0f) {
             DrawRectangleRec(obs.rect, Color{ 65, 54, 40, 255 });
             DrawRectangleLinesEx(obs.rect, 2.0f, Color{ 110, 92, 68, 240 });
         }
     }
+
+    // Eastern Quarry Gate Archway (Courtyard Exit to Quarry)
+    DrawRectangle(1676, 646, 12, 12, Color{ 75, 60, 42, 255 });
+    DrawRectangle(1676, 742, 12, 12, Color{ 75, 60, 42, 255 });
+    DrawLineEx({ 1682.0f, 650.0f }, { 1682.0f, 750.0f }, 1.5f, Color{ 220, 160, 50, 140 });
+    DrawText("EASTERN QUARRY", 1700, 690, 12, Color{ 245, 195, 65, 220 });
 
     // Courtyard Weapon Racks
     DrawRectangle(1330, 510, 60, 18, Color{ 50, 42, 32, 255 });

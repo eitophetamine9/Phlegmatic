@@ -98,6 +98,8 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.playerMaxHealth = ExtractFloatValue(line);
         } else if (line.find("\"shingles\"") != std::string::npos) {
             outSummary.shingles = ExtractIntValue(line);
+        } else if (line.find("\"oreScraps\"") != std::string::npos) {
+            outSummary.oreScraps = ExtractIntValue(line);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
             outSummary.potionCount = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
@@ -158,6 +160,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.potionCount = ExtractIntValue(line);
         } else if (line.find("\"shingles\"") != std::string::npos) {
             outData.shingles = ExtractIntValue(line);
+        } else if (line.find("\"oreScraps\"") != std::string::npos) {
+            outData.oreScraps = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
             outData.equippedWeapon = ExtractIntValue(line);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
@@ -248,6 +252,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"playerComposure\": " << data.playerComposure << ",\n";
     file << "  \"potionCount\": " << data.potionCount << ",\n";
     file << "  \"shingles\": " << data.shingles << ",\n";
+    file << "  \"oreScraps\": " << data.oreScraps << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";
     file << "  \"equippedTotem\": " << data.equippedTotem << ",\n";

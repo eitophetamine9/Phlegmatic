@@ -173,6 +173,24 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             bossAttackPhase = 0;
             isPerformingMeleeSmite = true;
             break;
+
+        case EnemyType::ORE_GOLEM:
+            humor = HumorType::MELANCHOLIC;
+            radius = 28.0f;
+            maxHealth = 220.0f; // Heavy stone chassis
+            defense = 45.0f;    // Tough rocky plating (~31% damage reduction)
+            will = 55.0f;       // Resolute stone poise
+            moveSpeed = 85.0f;  // Heavy deliberate gait
+            attackRange = 135.0f;
+            kitingRange = 0.0f;
+            windupDuration = 1.05f;
+            strikeDuration = 0.22f;
+            recoveryDuration = 0.85f;
+            stunDuration = 2.2f;
+            telegraph.shape = TelegraphShape::CIRCLE;
+            telegraph.radius = 135.0f;
+            telegraph.warningColor = Color{ 230, 160, 40, 170 };
+            break;
     }
 
     health = maxHealth;
@@ -188,6 +206,7 @@ std::string Enemy::GetName() const {
         case EnemyType::INQUISITOR_BOSS: return "THE GRAND INQUISITOR";
         case EnemyType::ZIL_BOSS: return "ZIL'S FRAGMENT";
         case EnemyType::KNIGHT_LENON_BOSS: return "KNIGHT LENON - VANGUARD CAPTAIN";
+        case EnemyType::ORE_GOLEM: return "ORE GOLEM";
     }
     return "UNKNOWN";
 }
@@ -373,11 +392,16 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     }
                 }
             } else {
-                // Approach player
-                Vector2 moveDir = Vector2Normalize({ dx, dy });
-                float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
-                velocity.x = moveDir.x * currentSpeed;
-                velocity.y = moveDir.y * currentSpeed;
+                if (type == EnemyType::ORE_GOLEM && distToPlayer > 450.0f) {
+                    // Ore Golems remain sentinel in their quarry plateau until player enters ~450px
+                    velocity = { 0.0f, 0.0f };
+                } else {
+                    // Approach player
+                    Vector2 moveDir = Vector2Normalize({ dx, dy });
+                    float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
+                    velocity.x = moveDir.x * currentSpeed;
+                    velocity.y = moveDir.y * currentSpeed;
+                }
             }
             break;
         }
@@ -421,6 +445,10 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 } else if (type == EnemyType::BRUTE) {
                     particles.AddScreenShake(5.0f, 0.18f);
                     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 20, 180.0f);
+                } else if (type == EnemyType::ORE_GOLEM) {
+                    particles.AddScreenShake(6.5f, 0.22f);
+                    particles.SpawnSparks(position, Color{ 230, 160, 40, 255 }, 25, 200.0f);
+                    SoundFX::PlayHeavyAttack();
                 } else if (type == EnemyType::SLASHER) {
                     float rad = facingAngle * DEG2RAD;
                     particles.SpawnSlashTrail(position, { cosf(rad), sinf(rad) }, Color{ 255, 70, 70, 255 });
@@ -627,7 +655,7 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
     particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 12, 120.0f);
     particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 240, 240, 255 }, 20.0f);
 
-    float knockMult = (type == EnemyType::INQUISITOR_BOSS) ? 40.0f : ((type == EnemyType::BRUTE) ? 80.0f : 180.0f);
+    float knockMult = (type == EnemyType::INQUISITOR_BOSS) ? 40.0f : ((type == EnemyType::BRUTE || type == EnemyType::ORE_GOLEM) ? 60.0f : 180.0f);
     velocity.x += knockbackDir.x * knockMult;
     velocity.y += knockbackDir.y * knockMult;
 

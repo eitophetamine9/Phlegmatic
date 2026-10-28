@@ -201,6 +201,7 @@ void Game::SaveActiveGame() {
     data.playerComposure = player.GetComposure();
     data.potionCount = player.GetInventory().GetHealthPotionCount();
     data.shingles = player.GetInventory().GetShingles();
+    data.oreScraps = player.GetInventory().GetOreScraps();
     data.equippedWeapon = (int)player.GetWeapon();
     data.equippedArmor = (int)player.GetArmor();
     data.equippedTotem = (int)player.GetTotem();
@@ -254,6 +255,7 @@ void Game::LoadActiveGame(int slotIndex) {
     // Restore inventory state
     player.GetInventory().SetHealthPotionCount(data.potionCount);
     player.GetInventory().SetShingles(data.shingles);
+    player.GetInventory().SetOreScraps(data.oreScraps);
 
     for (int i = 0; i < 5; ++i) {
         player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);

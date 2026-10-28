@@ -140,6 +140,8 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 48, 54, 68, 255 }; // Corrupted knight steel
     } else if (enemy.type == EnemyType::KNIGHT_LENON_BOSS) {
         bodyColor = Color{ 32, 50, 85, 255 }; // Vanguard Crusader royal navy
+    } else if (enemy.type == EnemyType::ORE_GOLEM) {
+        bodyColor = Color{ 72, 78, 88, 255 }; // Slate quarry stone
     }
 
     // Humoral Alignment Visual Auras
@@ -370,6 +372,62 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
         DrawCircleV({ enemy.position.x + normal.x * (enemy.radius * 0.8f), enemy.position.y + normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
         DrawCircleV({ enemy.position.x + dir.x * (enemy.radius * 0.6f), enemy.position.y + dir.y * (enemy.radius * 0.6f) }, 4.0f, Color{ 255, 230, 90, 255 });
+    } else if (enemy.type == EnemyType::ORE_GOLEM) {
+        // Heavy Quarry Stone Chassis with Embedded Glowing Amber Ore Crystals
+        Vector2 leftHand = {
+            enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f,
+            enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f
+        };
+
+        // Amber crystal nodes on shoulders
+        Vector2 leftShoulder = { enemy.position.x - normal.x * (enemy.radius * 0.85f), enemy.position.y - normal.y * (enemy.radius * 0.85f) };
+        Vector2 rightShoulder = { enemy.position.x + normal.x * (enemy.radius * 0.85f), enemy.position.y + normal.y * (enemy.radius * 0.85f) };
+        DrawPoly(leftShoulder, 3, 7.0f, 25.0f, Color{ 255, 195, 60, 255 });
+        DrawPolyLinesEx(leftShoulder, 3, 7.0f, 25.0f, 1.5f, Color{ 255, 235, 140, 255 });
+        DrawPoly(rightShoulder, 3, 7.0f, -25.0f, Color{ 255, 195, 60, 255 });
+        DrawPolyLinesEx(rightShoulder, 3, 7.0f, -25.0f, 1.5f, Color{ 255, 235, 140, 255 });
+
+        // Glowing runic amber eye slit in center chassis
+        Vector2 eyePos = { enemy.position.x + dir.x * (enemy.radius * 0.5f), enemy.position.y + dir.y * (enemy.radius * 0.5f) };
+        DrawCircleV(eyePos, 4.0f, Color{ 255, 220, 70, 255 });
+        DrawCircleGradient(eyePos, 10.0f, Color{ 255, 200, 50, 160 }, Color{ 0, 0, 0, 0 });
+
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+
+            // Expanding amber seismic shockwave & ground fracture fissures
+            Vector2 slamCenter = { enemy.position.x + dir.x * (enemy.radius + 16.0f), enemy.position.y + dir.y * (enemy.radius + 16.0f) };
+            float shockRadius = enemy.attackRange * progress;
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius, Color{ 255, 185, 45, (unsigned char)(235 * (1.0f - progress)) });
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius * 0.65f, Color{ 255, 220, 80, (unsigned char)(190 * (1.0f - progress)) });
+
+            for (int k = 0; k < 6; ++k) {
+                float fa = ((float)k * 60.0f) * DEG2RAD;
+                DrawLineEx(slamCenter, { slamCenter.x + cosf(fa) * (shockRadius * 0.9f), slamCenter.y + sinf(fa) * (shockRadius * 0.9f) }, 2.0f, Color{ 245, 165, 40, (unsigned char)(180 * (1.0f - progress)) });
+            }
+
+            // Both stone fists slamming down forward
+            Vector2 slamFistL = { leftHand.x + dir.x * (progress * 24.0f), leftHand.y + dir.y * (progress * 24.0f) };
+            Vector2 slamFistR = { rightHand.x + dir.x * (progress * 24.0f), rightHand.y + dir.y * (progress * 24.0f) };
+            DrawCircleV(slamFistL, 8.0f, Color{ 90, 95, 105, 255 });
+            DrawCircleLines((int)slamFistL.x, (int)slamFistL.y, 8.0f, Color{ 255, 190, 50, 220 });
+            DrawCircleV(slamFistR, 8.0f, Color{ 90, 95, 105, 255 });
+            DrawCircleLines((int)slamFistR.x, (int)slamFistR.y, 8.0f, Color{ 255, 190, 50, 220 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            // Raised stone fists gathering amber seismic charge
+            DrawCircleV({ leftHand.x - dir.x * 6.0f, leftHand.y - dir.y * 6.0f }, 7.5f, Color{ 85, 90, 100, 255 });
+            DrawCircleV({ rightHand.x - dir.x * 6.0f, rightHand.y - dir.y * 6.0f }, 7.5f, Color{ 85, 90, 100, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 9.0f + 3.0f * progress, Color{ 255, 190, 50, 220 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 9.0f + 3.0f * progress, Color{ 255, 190, 50, 220 });
+        } else {
+            // Resting boulder fists
+            DrawCircleV(leftHand, 7.0f, Color{ 75, 80, 90, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 7.0f, Color{ 110, 115, 125, 200 });
+            DrawCircleV(rightHand, 7.0f, Color{ 75, 80, 90, 255 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 7.0f, Color{ 110, 115, 125, 200 });
+        }
     }
 
     // Overhead Health Bar (for normal enemies; boss has master top bar)

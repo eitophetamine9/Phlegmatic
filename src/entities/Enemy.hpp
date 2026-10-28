@@ -15,7 +15,8 @@ enum class EnemyType {
     PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
     INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
     ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
-    KNIGHT_LENON_BOSS// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
+    KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
+    ORE_GOLEM        // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
 };
 
 enum class EnemyState {

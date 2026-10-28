@@ -284,6 +284,17 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
     isDialogueOpen = false;
     dialoguePages.clear();
     currentDialoguePage = 0;
+
+    // Eastern Quarry Ore Golem Spawners (7.0s Respawn Loop)
+    golemSpawners.clear();
+    golemSpawners.push_back({ { 1940.0f, 650.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 2180.0f, 750.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 1920.0f, 1050.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 2160.0f, 1180.0f }, 0.0f, true });
+
+    for (const auto& spawner : golemSpawners) {
+        enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
+    }
 }
 
 void ZyphdenHandler::Update(
@@ -361,7 +372,9 @@ void ZyphdenHandler::Update(
         sparActive = true;
         hasSparredOnce = true;
         questPhase = ZyphdenQuestPhase::SPARRING;
-        enemies.clear();
+        enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
+            return e.GetType() == EnemyType::KNIGHT_LENON_BOSS;
+        }), enemies.end());
         projectiles.clear();
         enemies.emplace_back(EnemyType::KNIGHT_LENON_BOSS, Vector2{ 1490.0f, 660.0f });
 
@@ -402,8 +415,10 @@ void ZyphdenHandler::Update(
     }
     player.GetSpawnedProjectiles().clear();
 
-    for (auto& enemy : enemies) {
-        enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+    if (!inTavern && !inForge && !inRoyalKeep) {
+        for (auto& enemy : enemies) {
+            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+        }
     }
 
     for (auto& proj : projectiles) {
@@ -425,6 +440,52 @@ void ZyphdenHandler::Update(
         return d.IsCollected();
     }), lootDrops.end());
 
+    // Check dead enemies & update Ore Golem respawn timers
+    if (!inTavern && !inForge && !inRoyalKeep) {
+        for (auto it = enemies.begin(); it != enemies.end(); ) {
+            if (!it->IsAlive()) {
+                if (it->GetType() == EnemyType::ORE_GOLEM) {
+                    // Start 7-second respawn timer on closest spawner
+                    float bestDist = 999999.0f;
+                    int bestIdx = -1;
+                    for (size_t i = 0; i < golemSpawners.size(); ++i) {
+                        if (golemSpawners[i].isAlive) {
+                            float d = Vector2Distance(it->GetPosition(), golemSpawners[i].spawnPos);
+                            if (d < bestDist) {
+                                bestDist = d;
+                                bestIdx = (int)i;
+                            }
+                        }
+                    }
+                    if (bestIdx != -1) {
+                        golemSpawners[bestIdx].isAlive = false;
+                        golemSpawners[bestIdx].respawnTimer = 7.0f;
+                    }
+                }
+                it = enemies.erase(it);
+            } else {
+                ++it;
+            }
+        }
+
+        // Countdown respawn timers and resurrect Golems after exactly 7.0 seconds
+        for (auto& spawner : golemSpawners) {
+            if (!spawner.isAlive) {
+                spawner.respawnTimer -= dt;
+                if (spawner.respawnTimer <= 0.0f) {
+                    spawner.respawnTimer = 0.0f;
+                    spawner.isAlive = true;
+                    enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
+
+                    SoundFX::PlayHitImpact();
+                    particles.SpawnSparks(spawner.spawnPos, Color{ 255, 190, 50, 255 }, 25, 160.0f);
+                    particles.AddScreenShake(3.5f, 0.15f);
+                    particles.SpawnFloatingText(Vector2{ spawner.spawnPos.x, spawner.spawnPos.y - 25.0f }, "ORE GOLEM RISES", Color{ 255, 200, 70, 240 }, 18.0f);
+                }
+            }
+        }
+    }
+
     // Check Courtyard Spar Completion
     if (sparActive) {
         bool lenonStillAlive = false;
@@ -440,7 +501,9 @@ void ZyphdenHandler::Update(
             sparActive = false;
             lenonDefeated = true;
             questPhase = ZyphdenQuestPhase::VICTORIOUS;
-            enemies.clear();
+            enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
+                return e.GetType() == EnemyType::KNIGHT_LENON_BOSS;
+            }), enemies.end());
 
             // Reward Crusader Plate
             player.GetInventory().UnlockArmor(ArmorType::CRUSADER_PLATE);
@@ -1005,8 +1068,10 @@ void ZyphdenHandler::Render(
         }
     }
 
-    for (const auto& enemy : enemies) {
-        enemy.DrawTelegraph();
+    if (!inTavern && !inForge && !inRoyalKeep) {
+        for (const auto& enemy : enemies) {
+            enemy.DrawTelegraph();
+        }
     }
 
     map.DrawWallsAndPillars(player.GetPosition());
@@ -1015,8 +1080,10 @@ void ZyphdenHandler::Render(
         proj.Draw();
     }
 
-    for (const auto& enemy : enemies) {
-        enemy.Draw();
+    if (!inTavern && !inForge && !inRoyalKeep) {
+        for (const auto& enemy : enemies) {
+            enemy.Draw();
+        }
     }
 
     for (const auto& drop : lootDrops) {

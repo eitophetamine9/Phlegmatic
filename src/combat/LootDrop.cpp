@@ -69,6 +69,12 @@ void LootDrop::Update(float dt, Vector2 playerPos, Player& player, ParticleSyste
             particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 120, 255, 180, 255 }, 20.0f);
             SoundFX::PlayHeal();
             particles.SpawnSparks(position, Color{ 100, 255, 160, 255 }, 12, 120.0f);
+        } else if (type == LootType::ORE_SCRAP) {
+            player.GetInventory().AddOreScraps(amount);
+            std::string label = "+" + std::to_string(amount) + " Ore Scrap" + (amount > 1 ? "s" : "");
+            particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 255, 195, 60, 255 }, 20.0f);
+            SoundFX::PlayParrySuccess();
+            particles.SpawnSparks(position, Color{ 255, 185, 40, 255 }, 14, 110.0f);
         }
     }
 }
@@ -120,6 +126,26 @@ void LootDrop::Draw(float time) const {
 
         // Glass gleam highlight
         DrawLine((int)position.x - 3, (int)drawY - 4, (int)position.x - 3, (int)drawY + 4, Color{ 210, 255, 230, 220 });
+    } else if (type == LootType::ORE_SCRAP) {
+        // Glowing Amber Ore Scrap Cluster
+        float pulse = 0.7f + 0.3f * sinf(age * 5.0f);
+        DrawCircleGradient(Vector2{ position.x, drawY }, 20.0f * pulse, Color{ 245, 175, 45, (unsigned char)(70 * pulse) }, Color{ 0, 0, 0, 0 });
+
+        // Jagged metallic ore chunk polygon
+        Vector2 v1 = { position.x - 7.0f, drawY + 3.0f };
+        Vector2 v2 = { position.x, drawY - 7.0f };
+        Vector2 v3 = { position.x + 8.0f, drawY - 1.0f };
+        Vector2 v4 = { position.x + 4.0f, drawY + 6.0f };
+        DrawTriangle(v1, v2, v3, Color{ 190, 125, 35, 255 });
+        DrawTriangle(v1, v3, v4, Color{ 145, 90, 25, 255 });
+
+        // Golden mineral veins
+        DrawLineEx(v2, { position.x + 2.0f, drawY }, 2.0f, Color{ 255, 225, 110, 255 });
+        DrawLineEx({ position.x - 3.0f, drawY }, v4, 1.5f, Color{ 255, 200, 70, 240 });
+
+        // Metallic glint
+        DrawPixel((int)position.x, (int)drawY - 4, WHITE);
+        DrawPixel((int)position.x + 1, (int)drawY - 4, WHITE);
     }
 }
 
@@ -127,7 +153,16 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
     Vector2 pos = enemy.GetPosition();
     EnemyType type = enemy.GetType();
 
-    if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS) {
+    if (type == EnemyType::ORE_GOLEM) {
+        // Ore Golem: 2-4 Ore Scraps + 15-30 Shingles + 40% Elixir
+        int scrapCount = 2 + (rand() % 3);
+        outDrops.emplace_back(LootType::ORE_SCRAP, pos, scrapCount);
+        int shingleCount = 15 + (rand() % 16);
+        outDrops.emplace_back(LootType::SHINGLES, Vector2{ pos.x + 12.0f, pos.y }, shingleCount);
+        if ((rand() % 100) < 40) {
+            outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 12.0f, pos.y }, 1);
+        }
+    } else if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS) {
         // Boss Drops: 100-150 Shingles + 2 Guaranteed Elixirs
         int shingleCount = 100 + (rand() % 51);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);

@@ -57,6 +57,12 @@ enum class ZyphdenQuestPhase {
     EXPLORE_REALM     // 7. King granted border commission; explore realm openly
 };
 
+struct GolemSpawner {
+    Vector2 spawnPos;
+    float respawnTimer = 0.0f;
+    bool isAlive = true;
+};
+
 class LootDrop;
 
 class ZyphdenHandler {
@@ -162,6 +168,9 @@ private:
     // Forge & Provisions Modal State
     bool isForgeOpen = false;
     bool isProvisionsOpen = false;
+
+    // Eastern Quarry Ore Golem Spawners (7.0s Respawn Loop)
+    std::vector<GolemSpawner> golemSpawners;
 
     void OpenDialogue(const std::string& npcId, const std::string& speaker, const std::vector<std::string>& pages, Color color);
     void CloseDialogue();
