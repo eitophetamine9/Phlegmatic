@@ -438,14 +438,7 @@ void RuinedCastleHandler::Render(
         }
     }
 
-    if (showControlsModal) {
-        GameUI::DrawControlsModal(screenWidth, screenHeight, mousePos, false);
-    } else if (showInventoryModal) {
-        if (tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
-            tutorial.NotifyInventoryOpened();
-        }
-        GameUI::DrawInventoryModal(screenWidth, screenHeight, mousePos, false, const_cast<Player&>(player), inventoryActiveTab, inventorySelectedFragment);
-    } else if (showZilDefeatModal) {
+    if (showZilDefeatModal) {
         GameUI::DrawZilDefeatModal(screenWidth, screenHeight, mousePos, false, !hasUsedZilRetry);
     } else if (tutorial.HasActivePopup()) {
         tutorial.DrawPopup(screenWidth, screenHeight, mousePos, false);

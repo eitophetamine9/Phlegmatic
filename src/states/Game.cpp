@@ -348,11 +348,6 @@ void Game::Update(float dt) {
         if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_TAB)) {
             showControlsModal = false;
             SoundFX::PlayButtonClick();
-            return;
-        }
-        bool close = GameUI::DrawControlsModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
-        if (close) {
-            showControlsModal = false;
         }
         return;
     }
@@ -365,17 +360,6 @@ void Game::Update(float dt) {
         if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ESCAPE)) {
             showInventoryModal = false;
             SoundFX::PlayButtonClick();
-            return;
-        }
-        bool close = GameUI::DrawInventoryModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
-        if (close) {
-            showInventoryModal = false;
-        }
-        if (inventoryActiveTab == 2) {
-            showInventoryModal = false;
-            showMapModal = true;
-            inventoryActiveTab = 0;
-            return;
         }
         return;
     }
@@ -385,11 +369,6 @@ void Game::Update(float dt) {
         if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_ESCAPE)) {
             showMapModal = false;
             SoundFX::PlayButtonClick();
-            return;
-        }
-        bool close = GameUI::DrawMapModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, currentState);
-        if (close) {
-            showMapModal = false;
         }
         return;
     }
@@ -866,72 +845,37 @@ void Game::RenderScene() {
         );
         Vector2 mousePos = GetMousePosition();
         GameUI::DrawBorderlandsGateway(w, h, mousePos, false, player);
-        return;
-    }
-
-    if (currentState == GameState::RUINED_CASTLE) {
+    } else if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        if (showMapModal) {
-            Vector2 mousePos = GetMousePosition();
-            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
-        }
-        return;
-    }
-
-    if (currentState == GameState::CROSSROADS) {
+    } else if (currentState == GameState::CROSSROADS) {
         crossroadsHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        if (showMapModal) {
-            Vector2 mousePos = GetMousePosition();
-            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
-        }
-        return;
-    }
-
-    if (currentState == GameState::ZYPHDEN_TRANSITION) {
+    } else if (currentState == GameState::ZYPHDEN_TRANSITION) {
         GameUI::DrawZyphdenTransition(
             w, h, GetMousePosition(), false, GetFrameTime()
         );
         return;
-    }
-
-    if (currentState == GameState::QUARRY_TRANSITION) {
+    } else if (currentState == GameState::QUARRY_TRANSITION) {
         GameUI::DrawQuarryTransition(
             w, h, GetMousePosition(), false, GetFrameTime()
         );
         return;
-    }
-
-    if (currentState == GameState::ZYPHDEN_REALM) {
+    } else if (currentState == GameState::ZYPHDEN_REALM) {
         zyphdenHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        if (showMapModal) {
-            Vector2 mousePos = GetMousePosition();
-            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
-        }
-        return;
-    }
-
-    if (currentState == GameState::QUARRY_DEPTHS) {
+    } else if (currentState == GameState::QUARRY_DEPTHS) {
         quarryHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        if (showMapModal) {
-            Vector2 mousePos = GetMousePosition();
-            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
-        }
-        return;
-    }
-
-    if (currentState == GameState::LOBBY) {
+    } else if (currentState == GameState::LOBBY) {
         BeginMode2D(camera);
         map.DrawFloor();
 
@@ -966,77 +910,85 @@ void Game::RenderScene() {
 
         bool hasUnread = player.GetInventory().HasUnreadFragments();
         GameUI::DrawLobbyHUD(w, h, player, nearAny, nearName, hasUnread);
+    } else if (currentState == GameState::ARENA || currentState == GameState::GAME_OVER || currentState == GameState::VICTORY) {
+        BeginMode2D(camera);
+        map.DrawFloor();
 
-        if (showControlsModal) {
-            GameUI::DrawControlsModal(w, h, mousePos, false);
-        } else if (showInventoryModal) {
-            GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
-        } else if (showMapModal) {
-            GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        for (const auto& enemy : enemies) {
+            enemy.DrawTelegraph();
         }
-        return;
+
+        map.DrawWallsAndPillars();
+
+        for (const auto& b : arenaBandages) {
+            b.Draw(player.GetPosition());
+        }
+
+        for (const auto& drop : lootDrops) {
+            drop.Draw(time);
+        }
+
+        for (const auto& proj : projectiles) {
+            proj.Draw();
+        }
+
+        for (const auto& enemy : enemies) {
+            enemy.Draw();
+        }
+
+        if (player.IsAlive()) {
+            player.Draw();
+        }
+
+        particles.Draw();
+        EndMode2D();
+
+        Vector2 mousePos = GetMousePosition();
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
+
+        bool hasUnread = player.GetInventory().HasUnreadFragments();
+        GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+
+        // Boss Health Bar during Boss Wave
+        for (const auto& enemy : enemies) {
+            if (enemy.IsBoss() && enemy.IsAlive()) {
+                GameUI::DrawBossHealthBar(w, enemy.GetName(), enemy.GetHealth(), enemy.GetMaxHealth());
+                break;
+            }
+        }
+
+        if (currentState == GameState::GAME_OVER) {
+            GameUI::DrawGameOver(w, h);
+        } else if (currentState == GameState::VICTORY) {
+            GameUI::DrawVictory(w, h);
+        }
     }
 
-    // ARENA RENDERING
-    BeginMode2D(camera);
-    map.DrawFloor();
-
-    for (const auto& enemy : enemies) {
-        enemy.DrawTelegraph();
-    }
-
-    map.DrawWallsAndPillars();
-
-    for (const auto& b : arenaBandages) {
-        b.Draw(player.GetPosition());
-    }
-
-    for (const auto& drop : lootDrops) {
-        drop.Draw(time);
-    }
-
-    for (const auto& proj : projectiles) {
-        proj.Draw();
-    }
-
-    for (const auto& enemy : enemies) {
-        enemy.Draw();
-    }
-
-    if (player.IsAlive()) {
-        player.Draw();
-    }
-
-    particles.Draw();
-    EndMode2D();
-
+    // --- TOP-LEVEL SCREEN-SPACE MODAL OVERLAYS (Rendered on top of ALL realms) ---
     Vector2 mousePos = GetMousePosition();
-    DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
-    DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
-
-    bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
-
-    // Boss Health Bar during Boss Wave
-    for (const auto& enemy : enemies) {
-        if (enemy.IsBoss() && enemy.IsAlive()) {
-            GameUI::DrawBossHealthBar(w, enemy.GetName(), enemy.GetHealth(), enemy.GetMaxHealth());
-            break;
-        }
-    }
-
-    if (currentState == GameState::GAME_OVER) {
-        GameUI::DrawGameOver(w, h);
-    } else if (currentState == GameState::VICTORY) {
-        GameUI::DrawVictory(w, h);
-    }
+    bool isMousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     if (showControlsModal) {
-        GameUI::DrawControlsModal(w, h, mousePos, false);
+        bool close = GameUI::DrawControlsModal(w, h, mousePos, isMousePressed);
+        if (close) {
+            showControlsModal = false;
+        }
     } else if (showInventoryModal) {
-        GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+        bool close = GameUI::DrawInventoryModal(w, h, mousePos, isMousePressed, player, inventoryActiveTab, inventorySelectedFragment);
+        if (close) {
+            showInventoryModal = false;
+        }
+        if (inventoryActiveTab == 2) {
+            showInventoryModal = false;
+            showMapModal = true;
+            inventoryActiveTab = 0;
+        }
     } else if (showMapModal) {
-        GameUI::DrawMapModal(w, h, mousePos, false, player, currentState);
+        bool close = GameUI::DrawMapModal(w, h, mousePos, isMousePressed, player, currentState);
+        if (close) {
+            showMapModal = false;
+        }
     }
 }
 

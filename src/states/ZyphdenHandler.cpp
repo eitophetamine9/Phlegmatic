@@ -1231,11 +1231,7 @@ void ZyphdenHandler::Render(
         DrawProvisionsModal(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles), screenWidth, screenHeight, mousePos, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
     }
 
-    if (showControlsModal) {
-        GameUI::DrawControlsModal(screenWidth, screenHeight, mousePos, false);
-    } else if (showInventoryModal) {
-        GameUI::DrawInventoryModal(screenWidth, screenHeight, mousePos, false, const_cast<Player&>(player), inventoryActiveTab, inventorySelectedFragment);
-    } else if (!player.IsAlive()) {
+    if (!player.IsAlive()) {
         DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 20, 5, 8, 210 });
         int titleW = MeasureText("FALLEN IN BATTLE", 38);
         DrawText("FALLEN IN BATTLE", (screenWidth - titleW) / 2, screenHeight / 2 - 40, 38, Color{ 255, 50, 60, 255 });

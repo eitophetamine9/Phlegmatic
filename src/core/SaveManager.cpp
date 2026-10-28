@@ -1,4 +1,5 @@
 #include "SaveManager.hpp"
+#include "../states/GameState.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -309,13 +310,16 @@ int SaveManager::GetActiveSlot() {
 }
 
 std::string SaveManager::GetRealmNameFromState(int state) {
-    switch (state) {
-        case 1: return "The Ruined Castle";
-        case 3: return "The Crossroads of the Damned";
-        case 4: return "Fortified Realm of Zyphden";
-        case 6: return "The Armory Sanctuary";
-        case 7: return "The Royal Combat Arena";
-        case 9: return "Zyphden Threshold";
+    switch ((GameState)state) {
+        case GameState::RUINED_CASTLE: return "The Ruined Castle";
+        case GameState::CROSSROADS: return "The Crossroads of the Damned";
+        case GameState::ZYPHDEN_TRANSITION: return "Zyphden Threshold";
+        case GameState::ZYPHDEN_REALM: return "Fortified Realm of Zyphden";
+        case GameState::QUARRY_TRANSITION: return "Basalt Passageway";
+        case GameState::QUARRY_DEPTHS: return "Eastern Quarry Depths";
+        case GameState::LOBBY: return "The Armory Sanctuary";
+        case GameState::ARENA: return "The Royal Combat Arena";
+        case GameState::BORDERLANDS_GATE: return "Borderlands Gateway";
         default: return "Land of Tydeshire";
     }
 }
