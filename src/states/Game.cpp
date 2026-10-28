@@ -307,6 +307,7 @@ void Game::LoadActiveGame(int slotIndex) {
 
 void Game::Update(float dt) {
     particles.Update(dt);
+    camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
     Vector2 mouseScreen = GetMousePosition();
 
     // Fullscreen Shortcuts: F11 or Alt+Enter
@@ -831,8 +832,8 @@ void Game::Update(float dt) {
 }
 
 void Game::RenderScene() {
-    int w = Config::VIRTUAL_WIDTH;
-    int h = Config::VIRTUAL_HEIGHT;
+    int w = GetScreenWidth();
+    int h = GetScreenHeight();
     float time = (float)GetTime();
 
     if (currentState == GameState::TITLE_SCREEN) {
@@ -1032,42 +1033,9 @@ void Game::RenderScene() {
 }
 
 void Game::Render() {
-    // 1. Render virtual scene to 1280x720 internal framebuffer
-    BeginTextureMode(virtualTarget);
-    ClearBackground(BLACK);
-    RenderScene();
-    EndTextureMode();
-
-    // 2. Uniform letterbox presentation to physical window / fullscreen display
     BeginDrawing();
     ClearBackground(BLACK);
-
-    float screenW = (float)GetScreenWidth();
-    float screenH = (float)GetScreenHeight();
-    float scale = fminf(screenW / (float)Config::VIRTUAL_WIDTH, screenH / (float)Config::VIRTUAL_HEIGHT);
-    if (scale <= 0.0001f) scale = 1.0f;
-
-    float destW = (float)Config::VIRTUAL_WIDTH * scale;
-    float destH = (float)Config::VIRTUAL_HEIGHT * scale;
-    float destX = (screenW - destW) * 0.5f;
-    float destY = (screenH - destH) * 0.5f;
-
-    Rectangle sourceRec = { 0.0f, 0.0f, (float)virtualTarget.texture.width, -(float)virtualTarget.texture.height };
-    Rectangle destRec = { destX, destY, destW, destH };
-    Vector2 origin = { 0.0f, 0.0f };
-
-    DrawTexturePro(virtualTarget.texture, sourceRec, destRec, origin, 0.0f, WHITE);
-
-    // Subtle dark fantasy border filigree over unused letterbox/pillarbox space
-    if (destX > 2.0f) {
-        DrawLineEx({ destX, 0.0f }, { destX, screenH }, 1.5f, Color{ 45, 58, 80, 200 });
-        DrawLineEx({ destX + destW, 0.0f }, { destX + destW, screenH }, 1.5f, Color{ 45, 58, 80, 200 });
-    }
-    if (destY > 2.0f) {
-        DrawLineEx({ 0.0f, destY }, { screenW, destY }, 1.5f, Color{ 45, 58, 80, 200 });
-        DrawLineEx({ 0.0f, destY + destH }, { screenW, destY + destH }, 1.5f, Color{ 45, 58, 80, 200 });
-    }
-
+    RenderScene();
     EndDrawing();
 }
 

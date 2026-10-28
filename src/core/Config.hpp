@@ -86,30 +86,12 @@ namespace Config {
     inline constexpr float MACE_HEAVY_COOLDOWN = 0.85f;
     inline constexpr float MACE_HEAVY_STAMINA = 40.0f;
 
-    // Virtual Mouse Coordinate Remapping
+    // Mouse Coordinate Mapping (Native display resolution)
     inline Vector2 GetVirtualMousePosition() {
-        float screenW = (float)GetScreenWidth();
-        float screenH = (float)GetScreenHeight();
-        float scale = fminf(screenW / (float)VIRTUAL_WIDTH, screenH / (float)VIRTUAL_HEIGHT);
-        if (scale <= 0.0001f) scale = 1.0f;
-        float destW = (float)VIRTUAL_WIDTH * scale;
-        float destH = (float)VIRTUAL_HEIGHT * scale;
-        float destX = (screenW - destW) * 0.5f;
-        float destY = (screenH - destH) * 0.5f;
-
-        Vector2 raw = (::GetMousePosition)();
-        Vector2 virtualPos = {
-            (raw.x - destX) / scale,
-            (raw.y - destY) / scale
-        };
-        if (virtualPos.x < 0.0f) virtualPos.x = 0.0f;
-        if (virtualPos.x > (float)VIRTUAL_WIDTH) virtualPos.x = (float)VIRTUAL_WIDTH;
-        if (virtualPos.y < 0.0f) virtualPos.y = 0.0f;
-        if (virtualPos.y > (float)VIRTUAL_HEIGHT) virtualPos.y = (float)VIRTUAL_HEIGHT;
-        return virtualPos;
+        return (::GetMousePosition)();
     }
 }
 
-// Global transparent redirect to ensure all modules map to virtual 16:9 coordinates
+// Global transparent redirect
 #undef GetMousePosition
 #define GetMousePosition() Config::GetVirtualMousePosition()

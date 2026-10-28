@@ -1,4 +1,5 @@
 #include "QuarryHandler.hpp"
+#include "../core/Config.hpp"
 #include "../combat/CollisionSystem.hpp"
 #include "../core/SoundFX.hpp"
 #include "../rendering/FontManager.hpp"
@@ -19,6 +20,7 @@ QuarryHandler::QuarryHandler()
 void QuarryHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera) {
     map.Init(MapEnvironment::QUARRY_DEPTHS);
     player.SetPosition({ 280.0f, 750.0f });
+    camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
     camera.target = player.GetPosition();
 
     enemies.clear();
@@ -53,6 +55,7 @@ void QuarryHandler::Update(
     const std::function<void()>& onReturnToZyphden,
     const std::function<void()>& onEnterLobby
 ) {
+    camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
     Vector2 mouseScreen = GetMousePosition();
     Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 

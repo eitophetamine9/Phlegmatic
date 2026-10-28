@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "GameState.hpp"
+#include "../core/Config.hpp"
 #include "../entities/Player.hpp"
 #include "../entities/Enemy.hpp"
 #include "../world/Map.hpp"

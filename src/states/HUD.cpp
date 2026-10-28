@@ -822,21 +822,23 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
 }
 
 void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {
-    float bannerW = 860.0f;
-    float bannerH = 84.0f;
+    float bannerW = 920.0f;
+    float bannerH = 104.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
-    float bannerY = (float)windowHeight - 175.0f;
+    float bannerY = (float)windowHeight - bannerH - 40.0f;
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, Color{ 12, 15, 22, 235 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, accentColor);
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.16f, 6, Color{ 12, 15, 22, 240 });
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.16f, 6, accentColor);
+    DrawRectangleRoundedLines(Rectangle{ bannerX + 3.0f, bannerY + 3.0f, bannerW - 6.0f, bannerH - 6.0f }, 0.14f, 6, Color{ 45, 60, 85, 180 });
 
     // Speaker Name
-    int speakerSize = FontManager::GetScaledSize(13);
+    int speakerSize = FontManager::GetScaledSize(14);
     FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 24, (int)bannerY + 12, speakerSize, accentColor);
 
-    // Text Quote
+    // Text Quote (Word wrapped so it never overflows)
     int quoteSize = FontManager::GetScaledSize(15);
-    FontManager::DrawGameTextShadow(text, (int)bannerX + 24, (int)bannerY + 34, quoteSize, Color{ 240, 244, 255, 250 });
+    int lineSpacing = FontManager::GetScaledSize(5);
+    FontManager::DrawTextWrappedShadow(text, (int)bannerX + 24, (int)bannerY + 36, (int)bannerW - 48, quoteSize, lineSpacing, Color{ 240, 244, 255, 250 });
 }
 
 bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
@@ -851,9 +853,9 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
         return false;
     }
 
-    // Modal dimensions
-    const float boxW = 920.0f;
-    const float boxH = 205.0f;
+    // Modal dimensions (Spacious container to prevent any text clipping)
+    const float boxW = 960.0f;
+    const float boxH = 225.0f;
     const float boxX = ((float)windowWidth - boxW) * 0.5f;
     const float boxY = (float)windowHeight - boxH - 24.0f;
 

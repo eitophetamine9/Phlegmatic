@@ -21,6 +21,9 @@ void RuinedCastleHandler::Reset() {
     zilDialogueSpeaker = "";
     zilDialogueText = "";
     zilDialogueColor = WHITE;
+    isZilDialogueOpen = false;
+    zilDialoguePages.clear();
+    zilDialoguePage = 0;
     overworldEnemiesSpawned = false;
     castlePillar = { "frag_09", "Inscribed Castle Monolith", { 680.0f, 960.0f }, 26.0f, false };
     castleChest = { "", 2, "Vanguard Relic Chest", { 1350.0f, 620.0f }, 28.0f, false };
@@ -126,7 +129,14 @@ void RuinedCastleHandler::Update(
 
     Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 
-    if (player.IsAlive()) {
+    if (isZilDialogueOpen) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            isZilDialogueOpen = false;
+            SoundFX::PlayButtonClick();
+        }
+    }
+
+    if (player.IsAlive() && !isZilDialogueOpen) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             if (tutorial.HasClaimedWeapon()) {
                 player.TriggerLightAttack(particles);
@@ -227,10 +237,15 @@ void RuinedCastleHandler::Update(
             enemies.clear();
             projectiles.clear();
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ 800.0f, 290.0f });
+
+            isZilDialogueOpen = true;
             zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
-            zilDialogueText = "Another soul seeking absolution in these ruined halls... Even shattered to a mere shadow of my former self, Truth Seeker will not yield to an unsteady hand. Draw your steel, wanderer. Let us see if your spirit burns.";
             zilDialogueColor = Color{ 255, 170, 40, 255 };
-            zilDialogueTimer = 6.0f;
+            zilDialoguePages = {
+                "Another soul seeking absolution in these ruined halls... Even shattered to a mere shadow of my former self, Truth Seeker will not yield to an unsteady hand.",
+                "Draw your steel, wanderer. Let us see if your spirit burns with genuine conviction or merely hollow pride!"
+            };
+            zilDialoguePage = 0;
             particles.AddScreenShake(6.0f, 0.25f);
             SoundFX::PlayHeavyAttack();
         }
@@ -261,12 +276,19 @@ void RuinedCastleHandler::Update(
             player.GetInventory().UnlockFragment("frag_03");
 
             map.SetGateOpen(true);
+
+            isZilDialogueOpen = true;
             zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
-            zilDialogueText = "So... the blade recognizes you. Even a fractured remnant can tell true conviction from hollow bravado. Take Truth Seeker. Carry it north, where King Charlz's shadow falls darkest.";
             zilDialogueColor = Color{ 255, 215, 60, 255 };
-            zilDialogueTimer = 7.0f;
+            zilDialoguePages = {
+                "So... the blade recognizes you. Even a fractured remnant can tell true conviction from hollow bravado.",
+                "Take Truth Seeker. Carry it north across the high pass into Zyphden, where King Charlz's corruption falls darkest.",
+                "Seek King Kreptu and Captain Lenon in the mountain city. Tell them Zil fulfilled his holy oath until the very end."
+            };
+            zilDialoguePage = 0;
             particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
             particles.AddScreenShake(7.0f, 0.3f);
+            SoundFX::PlayParrySuccess();
         }
     }
 
@@ -403,9 +425,17 @@ void RuinedCastleHandler::Render(
         }
     }
 
-    // Boss Dialogue Banner
-    if (zilDialogueTimer > 0.0f) {
-        GameUI::DrawBossDialogueBanner(screenWidth, screenHeight, zilDialogueSpeaker, zilDialogueText, zilDialogueColor);
+    // Zil Boss Paginated Dialogue Box (matching NPC dialogue system)
+    if (isZilDialogueOpen) {
+        bool stillOpen = GameUI::DrawNPCDialogueBox(
+            screenWidth, screenHeight, mousePos,
+            IsMouseButtonPressed(MOUSE_BUTTON_LEFT),
+            zilDialogueSpeaker, zilDialoguePages, zilDialoguePage, zilDialogueColor
+        );
+        if (!stillOpen) {
+            isZilDialogueOpen = false;
+            SoundFX::PlayButtonClick();
+        }
     }
 
     if (showControlsModal) {
