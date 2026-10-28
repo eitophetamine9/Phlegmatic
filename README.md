@@ -48,23 +48,27 @@
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
 | **Lore & Equipment** | `I Key` or `TAB` | Open the in-game Journal, Equipment stats, and Totem slots. |
+| **Interactive Realm Map** | `M Key` | Open the full parchment map with live player tracking and POI tooltips. |
+| **Fullscreen Toggle** | `F11` or `Alt + Enter` | Switch between windowed and native crisp fullscreen display modes. |
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
 | **Title Screen** | `~ Key` (Tilde / Grave) | Instantly return to the Title Screen from any state. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the trial. |
 
 ---
 
-## Current Version: 0.0.1b
+## Current Version: 0.0.1c
 
-Phlegmatic is currently in active development on **Version 0.0.1b**.
-
-For detailed release notes, system mechanics breakdowns, math formulas, and lore codices for all features introduced in this build, please consult **[Version 0.0.1b Release Highlights in DOCUMENTATION.md](documentation.md#release-highlights-version-001b)**.
+> [!NOTE]
+> Phlegmatic is currently in active development on **Version 0.0.1c**.
+> 
+> For detailed release notes, system mechanics breakdowns, math formulas, and lore codices, please consult **[DOCUMENTATION.md](documentation.md)**.
 
 ---
 
-## Roadmap: Planned for Version 0.0.1c
+## Roadmap: Planned for Version 0.0.1d
 
-Upcoming technical enhancements, visual accessibility features (font size scaling and high-visibility options), fullscreen display modes with aspect-ratio preservation, Act IV northern realm expansion, and synthesized ambient soundscapes are documented in the **[Version 0.0.1c Technical Roadmap in DOCUMENTATION.md](documentation.md#9-roadmap--version-001c-technical-plans)**.
+> [!NOTE]
+> Upcoming technical enhancements, Act IV northern realm expansion (Azshden and Fleurshden), dynamic environmental weather physics, and synthesized ambient soundscapes are documented in **[Version 0.0.1d Technical Roadmap in DOCUMENTATION.md](documentation.md#9-roadmap--version-001d-technical-plans)**.
 
 ---
 
