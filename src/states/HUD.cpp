@@ -802,10 +802,12 @@ void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::s
     DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.2f, 6, accentColor);
 
     // Speaker Name
-    DrawText(speaker.c_str(), (int)bannerX + 22, (int)bannerY + 12, 11, accentColor);
+    int speakerSize = FontManager::GetScaledSize(13);
+    FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 22, (int)bannerY + 12, speakerSize, accentColor);
 
     // Text Quote
-    DrawText(text.c_str(), (int)bannerX + 22, (int)bannerY + 32, 14, Color{ 240, 244, 255, 250 });
+    int quoteSize = FontManager::GetScaledSize(16);
+    FontManager::DrawGameTextShadow(text, (int)bannerX + 22, (int)bannerY + 32, quoteSize, Color{ 240, 244, 255, 250 });
 }
 
 bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
@@ -831,18 +833,22 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRoundedLines(Rectangle{ boxX, boxY, boxW, boxH }, 0.14f, 6, accentColor);
     DrawRectangleRoundedLines(Rectangle{ boxX + 3.0f, boxY + 3.0f, boxW - 6.0f, boxH - 6.0f }, 0.12f, 6, Color{ 45, 60, 85, 180 });
 
-    // Speaker Name Header (Golden/Accent)
-    FontManager::DrawText(speaker.c_str(), (int)boxX + 28, (int)boxY + 16, 17, accentColor, GameFont::TITLE);
+    // Speaker Name Header (Golden/Accent) with drop shadow
+    int titleSize = FontManager::GetScaledSize(18);
+    FontManager::DrawTextTitleShadow(speaker, (int)boxX + 28, (int)boxY + 16, titleSize, accentColor);
 
     // Page indicator top-right
     char pageBuf[32];
     snprintf(pageBuf, sizeof(pageBuf), "Page %d / %d", currentPage + 1, (int)pages.size());
-    FontManager::DrawText(pageBuf, (int)(boxX + boxW - 120.0f), (int)boxY + 18, 12, Color{ 170, 190, 220, 230 });
+    int pageIndSize = FontManager::GetScaledSize(12);
+    FontManager::DrawGameTextShadow(pageBuf, (int)(boxX + boxW - 130.0f), (int)boxY + 18, pageIndSize, Color{ 170, 190, 220, 230 });
 
-    // Word-wrapped text rendering with authentic medieval typography
+    // Word-wrapped text rendering with authentic medieval typography & drop shadow
     const std::string& text = pages[currentPage];
     const float maxLineWidth = boxW - 56.0f;
-    FontManager::DrawTextWrapped(text, (int)boxX + 28, (int)boxY + 46, (int)maxLineWidth, 15, 6, Color{ 235, 240, 252, 250 }, GameFont::BODY);
+    int proseSize = FontManager::GetScaledSize(16);
+    int lineSpacing = FontManager::GetScaledSize(6);
+    FontManager::DrawTextWrappedShadow(text, (int)boxX + 28, (int)boxY + 46, (int)maxLineWidth, proseSize, lineSpacing, Color{ 235, 240, 252, 250 });
 
     // Navigation Buttons at Bottom
     const float btnY = boxY + boxH - 40.0f;

@@ -4,10 +4,35 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 Font FontManager::bodyFont = { 0 };
 Font FontManager::titleFont = { 0 };
 bool FontManager::isLoaded = false;
+FontScaleMode FontManager::currentScaleMode = FontScaleMode::STANDARD;
+
+void FontManager::SetScaleMode(FontScaleMode mode) {
+    currentScaleMode = mode;
+}
+
+FontScaleMode FontManager::GetScaleMode() {
+    return currentScaleMode;
+}
+
+float FontManager::GetScaleFactor() {
+    switch (currentScaleMode) {
+        case FontScaleMode::LARGE: return 1.25f;
+        case FontScaleMode::EXTRA_LARGE: return 1.50f;
+        case FontScaleMode::STANDARD:
+        default:
+            return 1.00f;
+    }
+}
+
+int FontManager::GetScaledSize(int baseSize) {
+    int scaled = (int)std::round((float)baseSize * GetScaleFactor());
+    return std::max(8, scaled);
+}
 
 std::vector<int> FontManager::GenerateExtendedCodepoints() {
     std::vector<int> codepoints;
@@ -181,6 +206,37 @@ void FontManager::DrawTextCentered(const std::string& text, int centerX, int pos
 
 void FontManager::DrawTextTitleCentered(const std::string& text, int centerX, int posY, int fontSize, Color color) {
     DrawTextCentered(text, centerX, posY, fontSize, color, GameFont::TITLE);
+}
+
+void FontManager::DrawGameTextShadow(const std::string& text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    if (text.empty()) return;
+    DrawGameText(text, posX + offset, posY + offset, fontSize, shadowColor, fontType);
+    DrawGameText(text, posX, posY, fontSize, color, fontType);
+}
+
+void FontManager::DrawGameTextShadow(const char* text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    if (!text || text[0] == '\0') return;
+    DrawGameTextShadow(std::string(text), posX, posY, fontSize, color, shadowColor, offset, fontType);
+}
+
+void FontManager::DrawTextTitleShadow(const std::string& text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset) {
+    DrawGameTextShadow(text, posX, posY, fontSize, color, shadowColor, offset, GameFont::TITLE);
+}
+
+void FontManager::DrawTextCenteredShadow(const std::string& text, int centerX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    int width = MeasureGameText(text, fontSize, fontType);
+    int posX = centerX - width / 2;
+    DrawGameTextShadow(text, posX, posY, fontSize, color, shadowColor, offset, fontType);
+}
+
+void FontManager::DrawTextTitleCenteredShadow(const std::string& text, int centerX, int posY, int fontSize, Color color, Color shadowColor, int offset) {
+    DrawTextCenteredShadow(text, centerX, posY, fontSize, color, shadowColor, offset, GameFont::TITLE);
+}
+
+void FontManager::DrawTextWrappedShadow(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, Color shadowColor, int offset, GameFont fontType, int maxChars) {
+    if (text.empty()) return;
+    DrawTextWrapped(text, posX + offset, posY + offset, maxLineWidth, fontSize, lineSpacing, shadowColor, fontType, maxChars);
+    DrawTextWrapped(text, posX, posY, maxLineWidth, fontSize, lineSpacing, color, fontType, maxChars);
 }
 
 int FontManager::MeasureGameText(const std::string& text, int fontSize, GameFont fontType) {
