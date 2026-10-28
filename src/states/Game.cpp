@@ -229,6 +229,7 @@ void Game::SaveActiveGame() {
 
     data.bossZilDefeated = ruinedCastleHandler.IsZilDefeated();
     data.knightLenonSparCompleted = zyphdenHandler.HasDefeatedLenon();
+    data.zyphdenQuestPhase = zyphdenHandler.GetQuestPhase();
     data.arenaHighestWave = waveManager.GetCurrentWave();
 
     SaveManager::SaveGame(slot, data);
@@ -245,6 +246,29 @@ void Game::LoadActiveGame(int slotIndex) {
     SaveManager::SetActiveSlot(slotIndex);
 
     isRestoringSave = true;
+
+    // Restore inventory state BEFORE realm transition so Handler::Init can inspect player inventory correctly
+    player.GetInventory().SetHealthPotionCount(data.potionCount);
+    player.GetInventory().SetShingles(data.shingles);
+    player.GetInventory().SetOreScraps(data.oreScraps);
+
+    for (int i = 0; i < 5; ++i) {
+        player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
+        if (data.unlockedWeapons[i]) {
+            player.GetInventory().UnlockWeapon((WeaponType)i);
+        }
+    }
+
+    const auto& frags = player.GetInventory().GetFragments();
+    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
+        if (data.unlockedFragments[i]) {
+            player.GetInventory().UnlockFragment(frags[i].id);
+        }
+    }
+
+    player.SetWeapon((WeaponType)data.equippedWeapon);
+    player.SetArmor((ArmorType)data.equippedArmor);
+    player.SetTotem((TotemType)data.equippedTotem);
 
     // Transition to saved realm/gameState
     GameState targetState = (GameState)data.gameState;
@@ -265,30 +289,14 @@ void Game::LoadActiveGame(int slotIndex) {
         }
     }
 
-    // Restore inventory state
-    player.GetInventory().SetHealthPotionCount(data.potionCount);
-    player.GetInventory().SetShingles(data.shingles);
-    player.GetInventory().SetOreScraps(data.oreScraps);
-
-    for (int i = 0; i < 5; ++i) {
-        player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
-        if (data.unlockedWeapons[i]) {
-            player.GetInventory().UnlockWeapon((WeaponType)i);
-        }
-    }
-
-    const auto& frags = player.GetInventory().GetFragments();
-    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
-        if (data.unlockedFragments[i]) {
-            player.GetInventory().UnlockFragment(frags[i].id);
-        }
-    }
-
-    // Restore boss flags
+    // Restore boss and quest flags
     ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
-    zyphdenHandler.SetLenonDefeated(data.knightLenonSparCompleted);
+    zyphdenHandler.SetQuestPhase(data.zyphdenQuestPhase);
+    if (data.knightLenonSparCompleted) {
+        zyphdenHandler.SetLenonDefeated(true);
+    }
 
-    // Restore player state
+    // Restore player position and stats
     player.SetWeapon((WeaponType)data.equippedWeapon);
     player.SetArmor((ArmorType)data.equippedArmor);
     player.SetTotem((TotemType)data.equippedTotem);
@@ -342,7 +350,7 @@ void Game::Update(float dt) {
             SoundFX::PlayButtonClick();
             return;
         }
-        bool close = GameUI::DrawControlsModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        bool close = GameUI::DrawControlsModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         if (close) {
             showControlsModal = false;
         }
@@ -359,7 +367,7 @@ void Game::Update(float dt) {
             SoundFX::PlayButtonClick();
             return;
         }
-        bool close = GameUI::DrawInventoryModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
+        bool close = GameUI::DrawInventoryModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
         if (close) {
             showInventoryModal = false;
         }
@@ -379,7 +387,7 @@ void Game::Update(float dt) {
             SoundFX::PlayButtonClick();
             return;
         }
-        bool close = GameUI::DrawMapModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, currentState);
+        bool close = GameUI::DrawMapModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, currentState);
         if (close) {
             showMapModal = false;
         }
@@ -420,9 +428,9 @@ void Game::Update(float dt) {
     // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
     if (!showControlsModal && !showInventoryModal && !showMapModal) {
         if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM || currentState == GameState::QUARRY_DEPTHS) {
-            Rectangle mapBtnRec = { (float)(Config::WINDOW_WIDTH - 380), 16.0f, 120.0f, 32.0f };
-            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 250), 16.0f, 110.0f, 32.0f };
-            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 130), 16.0f, 110.0f, 32.0f };
+            Rectangle mapBtnRec = { (float)(GetScreenWidth() - 380), 16.0f, 120.0f, 32.0f };
+            Rectangle journalBtnRec = { (float)(GetScreenWidth() - 250), 16.0f, 110.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(GetScreenWidth() - 130), 16.0f, 110.0f, 32.0f };
             if (CheckCollisionPointRec(mouseScreen, mapBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showMapModal = true;
                 showInventoryModal = false;
@@ -451,7 +459,7 @@ void Game::Update(float dt) {
 
     // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
-        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked, showSlotModal, deletingSlotIndex);
+        int action = GameUI::DrawTitleScreen(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked, showSlotModal, deletingSlotIndex);
         if (action == 1) {
             showControlsModal = true;
         } else if (action == 2) {
@@ -608,7 +616,7 @@ void Game::Update(float dt) {
 
     // 1.9 BORDERLANDS GATEWAY EPILOGUE STATE
     if (currentState == GameState::BORDERLANDS_GATE) {
-        int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
+        int choice = GameUI::DrawBorderlandsGateway(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
         if (choice == 1 || IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { // Arena Test
             if (testArenaUnlocked) {
                 EnterArena();

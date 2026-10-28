@@ -56,13 +56,13 @@ void RuinedCastleHandler::Update(
 
     // Interactive Tutorial Pop-up Modal (pauses combat and gameplay while visible)
     if (tutorial.HasActivePopup()) {
-        tutorial.DrawPopup(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+        tutorial.DrawPopup(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
         return;
     }
 
     // Handle Zil Defeat Modal Interaction
     if (showZilDefeatModal) {
-        int choice = GameUI::DrawZilDefeatModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), !hasUsedZilRetry);
+        int choice = GameUI::DrawZilDefeatModal(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), !hasUsedZilRetry);
         if (choice == 1) { // Retry Duel (1 attempt only)
             hasUsedZilRetry = true;
             showZilDefeatModal = false;

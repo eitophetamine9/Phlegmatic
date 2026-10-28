@@ -172,6 +172,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.bossZilDefeated = ExtractBoolValue(line);
         } else if (line.find("\"knightLenonSparCompleted\"") != std::string::npos) {
             outData.knightLenonSparCompleted = ExtractBoolValue(line);
+        } else if (line.find("\"zyphdenQuestPhase\"") != std::string::npos) {
+            outData.zyphdenQuestPhase = ExtractIntValue(line);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
             outData.arenaHighestWave = ExtractIntValue(line);
         } else if (line.find("\"playtimeSeconds\"") != std::string::npos) {
@@ -280,6 +282,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
 
     file << "  \"bossZilDefeated\": " << (data.bossZilDefeated ? "true" : "false") << ",\n";
     file << "  \"knightLenonSparCompleted\": " << (data.knightLenonSparCompleted ? "true" : "false") << ",\n";
+    file << "  \"zyphdenQuestPhase\": " << data.zyphdenQuestPhase << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";
     file << "  \"playtimeSeconds\": " << data.playtimeSeconds << ",\n";
     file << "  \"timestamp\": " << (data.timestamp > 0 ? data.timestamp : (uint64_t)std::time(nullptr)) << ",\n";

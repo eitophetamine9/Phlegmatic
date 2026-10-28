@@ -42,6 +42,7 @@ struct GameSaveData {
     bool unlockedFragments[10] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;
+    int zyphdenQuestPhase = 0;
     int arenaHighestWave = 0;
     uint32_t playtimeSeconds = 0;
     uint64_t timestamp = 0;

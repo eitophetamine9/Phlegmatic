@@ -123,7 +123,7 @@ void Inventory::InitDefault() {
         "Royal Keep of King Kreptu",
         "To all subjects of Zyphden: The High Summit is broken. We shall not bend our knee...",
         "To all subjects of Zyphden: The High Summit is broken. King Charlz answers no raven.\n\nWe have fortified the southern gates and summoned all remaining crusaders to the courtyard. We shall not bend our knee to madness. Zyphden shall stand as long as a single crusader draws breath.",
-        "The Realm of Zyphden — Preserved within a gilded archive pedestal near the northeastern rampart approach.",
+        "The Realm of Zyphden — Preserved within a gilded archive pedestal beside the courtyard sparring training grounds.",
         false,
         false
     });

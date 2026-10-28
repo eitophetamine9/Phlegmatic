@@ -103,7 +103,9 @@ public:
     );
 
     bool HasDefeatedLenon() const { return lenonDefeated; }
-    void SetLenonDefeated(bool d) { lenonDefeated = d; }
+    void SetLenonDefeated(bool d);
+    int GetQuestPhase() const { return (int)questPhase; }
+    void SetQuestPhase(int phase);
 
 private:
     // Core NPCs

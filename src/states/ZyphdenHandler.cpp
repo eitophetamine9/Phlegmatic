@@ -189,7 +189,7 @@ ZyphdenHandler::ZyphdenHandler() {
 
     windLectern = { "frag_06", "Ancient Wind Lectern", { 720.0f, 480.0f }, 24.0f, false };
     vanguardLog = { "frag_07", "Vanguard Field Log", { 420.0f, 820.0f }, 24.0f, false };
-    royalArchives = { "frag_08", "Royal Archives", { 1140.0f, 220.0f }, 24.0f, false };
+    royalArchives = { "frag_08", "Royal Archives", { 1390.0f, 540.0f }, 24.0f, false };
 
     questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
     hasTalkedToKing = false;
@@ -263,14 +263,27 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
 
     windLectern = { "frag_06", "Ancient Wind Lectern", { 720.0f, 480.0f }, 24.0f, player.GetInventory().HasFragment("frag_06") };
     vanguardLog = { "frag_07", "Vanguard Field Log", { 420.0f, 820.0f }, 24.0f, player.GetInventory().HasFragment("frag_07") };
-    royalArchives = { "frag_08", "Royal Archives", { 1140.0f, 220.0f }, 24.0f, player.GetInventory().HasFragment("frag_08") };
+    royalArchives = { "frag_08", "Royal Archives", { 1390.0f, 540.0f }, 24.0f, player.GetInventory().HasFragment("frag_08") };
 
-    lenonDefeated = player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE);
-    if (lenonDefeated) {
-        questPhase = ZyphdenQuestPhase::VICTORIOUS;
+    bool hasPlate = player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE);
+    if (lenonDefeated || hasPlate || questPhase >= ZyphdenQuestPhase::VICTORIOUS) {
+        lenonDefeated = true;
+        if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+            questPhase = ZyphdenQuestPhase::VICTORIOUS;
+        }
         lenonSpawned = true;
         lenonInTavern = false;
         knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else if (questPhase >= ZyphdenQuestPhase::SEEK_KING) {
+        lenonDefeated = false;
+        lenonSpawned = true;
+        lenonInTavern = false;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else if (questPhase == ZyphdenQuestPhase::LENON_APPROACHING) {
+        lenonDefeated = false;
+        lenonSpawned = true;
+        lenonInTavern = true;
+        knightLenonNPC.position = { 720.0f, 765.0f };
     } else {
         questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
         lenonSpawned = false;
@@ -1708,5 +1721,46 @@ void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particl
     if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
         isProvisionsOpen = false;
         SoundFX::PlayButtonClick();
+    }
+}
+
+void ZyphdenHandler::SetLenonDefeated(bool d) {
+    lenonDefeated = d;
+    if (d && questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+        questPhase = ZyphdenQuestPhase::VICTORIOUS;
+        lenonSpawned = true;
+        lenonInTavern = false;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    }
+}
+
+void ZyphdenHandler::SetQuestPhase(int phase) {
+    if (phase < 0) phase = 0;
+    questPhase = (ZyphdenQuestPhase)phase;
+    if (questPhase == ZyphdenQuestPhase::EXPLORE_REALM) {
+        lenonDefeated = true;
+        lenonSpawned = true;
+        lenonInTavern = false;
+        hasTalkedToKing = true;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else if (questPhase >= ZyphdenQuestPhase::VICTORIOUS) {
+        lenonDefeated = true;
+        lenonSpawned = true;
+        lenonInTavern = false;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else if (questPhase >= ZyphdenQuestPhase::SEEK_KING) {
+        lenonDefeated = false;
+        lenonSpawned = true;
+        lenonInTavern = false;
+        knightLenonNPC.position = { 1490.0f, 700.0f };
+    } else if (questPhase == ZyphdenQuestPhase::LENON_APPROACHING) {
+        lenonDefeated = false;
+        lenonSpawned = true;
+        lenonInTavern = true;
+        knightLenonNPC.position = { 720.0f, 765.0f };
+    } else {
+        lenonDefeated = false;
+        lenonSpawned = false;
+        lenonInTavern = false;
     }
 }
