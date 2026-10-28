@@ -8,21 +8,41 @@
 #include <string>
 #include <algorithm>
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
 }
 
 Game::~Game() {
+    UnloadRenderTexture(virtualTarget);
     SoundFX::Close();
     assetManager.Unload();
     FontManager::Unload();
     CloseWindow();
 }
 
+void Game::ToggleGameFullscreen() {
+    if (!isFullscreen) {
+        int monitor = GetCurrentMonitor();
+        int mWidth = GetMonitorWidth(monitor);
+        int mHeight = GetMonitorHeight(monitor);
+        SetWindowSize(mWidth, mHeight);
+        ToggleFullscreen();
+        isFullscreen = true;
+    } else {
+        ToggleFullscreen();
+        SetWindowSize(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT);
+        isFullscreen = false;
+    }
+}
+
 void Game::Init() {
-    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_VSYNC_HINT | FLAG_MSAA_4X_HINT | FLAG_WINDOW_RESIZABLE);
     InitWindow(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, Config::WINDOW_TITLE);
     SetExitKey(KEY_NULL); // Prevent ESC from closing the program
     SetTargetFPS(Config::TARGET_FPS);
+
+    virtualTarget = LoadRenderTexture(Config::VIRTUAL_WIDTH, Config::VIRTUAL_HEIGHT);
+    SetTextureFilter(virtualTarget.texture, TEXTURE_FILTER_BILINEAR);
+    isFullscreen = false;
 
     SoundFX::Init();
     FontManager::Init();
@@ -115,6 +135,17 @@ void Game::EnterZyphden() {
     SaveActiveGame();
 }
 
+void Game::EnterQuarryDepths() {
+    quarryHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::QUARRY_DEPTHS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
 void Game::EnterLobby() {
     map.Init(MapEnvironment::LOBBY);
     WeaponType keepWeapon = player.GetWeapon();
@@ -181,6 +212,7 @@ void Game::SaveActiveGame() {
     data.playerComposure = player.GetComposure();
     data.potionCount = player.GetInventory().GetHealthPotionCount();
     data.shingles = player.GetInventory().GetShingles();
+    data.oreScraps = player.GetInventory().GetOreScraps();
     data.equippedWeapon = (int)player.GetWeapon();
     data.equippedArmor = (int)player.GetArmor();
     data.equippedTotem = (int)player.GetTotem();
@@ -197,6 +229,7 @@ void Game::SaveActiveGame() {
 
     data.bossZilDefeated = ruinedCastleHandler.IsZilDefeated();
     data.knightLenonSparCompleted = zyphdenHandler.HasDefeatedLenon();
+    data.zyphdenQuestPhase = zyphdenHandler.GetQuestPhase();
     data.arenaHighestWave = waveManager.GetCurrentWave();
 
     SaveManager::SaveGame(slot, data);
@@ -214,26 +247,10 @@ void Game::LoadActiveGame(int slotIndex) {
 
     isRestoringSave = true;
 
-    // Transition to saved realm/gameState
-    GameState targetState = (GameState)data.gameState;
-    if (targetState == GameState::CROSSROADS) {
-        EnterCrossroads();
-    } else if (targetState == GameState::ZYPHDEN_REALM) {
-        EnterZyphden();
-    } else if (targetState == GameState::LOBBY) {
-        EnterLobby();
-    } else if (targetState == GameState::ARENA) {
-        EnterArena();
-    } else {
-        EnterRuinedCastle();
-        if (data.bossZilDefeated || data.equippedWeapon != 0) {
-            tutorial.SkipToBoss(map);
-        }
-    }
-
-    // Restore inventory state
+    // Restore inventory state BEFORE realm transition so Handler::Init can inspect player inventory correctly
     player.GetInventory().SetHealthPotionCount(data.potionCount);
     player.GetInventory().SetShingles(data.shingles);
+    player.GetInventory().SetOreScraps(data.oreScraps);
 
     for (int i = 0; i < 5; ++i) {
         player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
@@ -249,11 +266,37 @@ void Game::LoadActiveGame(int slotIndex) {
         }
     }
 
-    // Restore boss flags
-    ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
-    zyphdenHandler.SetLenonDefeated(data.knightLenonSparCompleted);
+    player.SetWeapon((WeaponType)data.equippedWeapon);
+    player.SetArmor((ArmorType)data.equippedArmor);
+    player.SetTotem((TotemType)data.equippedTotem);
 
-    // Restore player state
+    // Transition to saved realm/gameState
+    GameState targetState = (GameState)data.gameState;
+    if (targetState == GameState::CROSSROADS) {
+        EnterCrossroads();
+    } else if (targetState == GameState::ZYPHDEN_REALM) {
+        EnterZyphden();
+    } else if (targetState == GameState::QUARRY_DEPTHS) {
+        EnterQuarryDepths();
+    } else if (targetState == GameState::LOBBY) {
+        EnterLobby();
+    } else if (targetState == GameState::ARENA) {
+        EnterArena();
+    } else {
+        EnterRuinedCastle();
+        if (data.bossZilDefeated || data.equippedWeapon != 0) {
+            tutorial.SkipToBoss(map);
+        }
+    }
+
+    // Restore boss and quest flags
+    ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
+    zyphdenHandler.SetQuestPhase(data.zyphdenQuestPhase);
+    if (data.knightLenonSparCompleted) {
+        zyphdenHandler.SetLenonDefeated(true);
+    }
+
+    // Restore player position and stats
     player.SetWeapon((WeaponType)data.equippedWeapon);
     player.SetArmor((ArmorType)data.equippedArmor);
     player.SetTotem((TotemType)data.equippedTotem);
@@ -272,7 +315,13 @@ void Game::LoadActiveGame(int slotIndex) {
 
 void Game::Update(float dt) {
     particles.Update(dt);
+    camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
     Vector2 mouseScreen = GetMousePosition();
+
+    // Fullscreen Shortcuts: F11 or Alt+Enter
+    if (IsKeyPressed(KEY_F11) || ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) && IsKeyPressed(KEY_ENTER))) {
+        ToggleGameFullscreen();
+    }
 
     // Unlock arena if current storyline progress was completed (player possesses Crusader Plate)
     if (!testArenaUnlocked && player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE)) {
@@ -299,11 +348,6 @@ void Game::Update(float dt) {
         if (IsKeyPressed(KEY_C) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_TAB)) {
             showControlsModal = false;
             SoundFX::PlayButtonClick();
-            return;
-        }
-        bool close = GameUI::DrawControlsModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
-        if (close) {
-            showControlsModal = false;
         }
         return;
     }
@@ -316,11 +360,15 @@ void Game::Update(float dt) {
         if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB) || IsKeyPressed(KEY_ESCAPE)) {
             showInventoryModal = false;
             SoundFX::PlayButtonClick();
-            return;
         }
-        bool close = GameUI::DrawInventoryModal(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player, inventoryActiveTab, inventorySelectedFragment);
-        if (close) {
-            showInventoryModal = false;
+        return;
+    }
+
+    // If Interactive Realm Map Modal is active
+    if (showMapModal) {
+        if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_ESCAPE)) {
+            showMapModal = false;
+            SoundFX::PlayButtonClick();
         }
         return;
     }
@@ -329,6 +377,7 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_C)) {
         showControlsModal = true;
         showInventoryModal = false;
+        showMapModal = false;
         SoundFX::PlayButtonClick();
         return;
     }
@@ -337,6 +386,7 @@ void Game::Update(float dt) {
     if (IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
         showInventoryModal = true;
         showControlsModal = false;
+        showMapModal = false;
         inventoryActiveTab = 0; // Direct to Equipment & Character Doll
         if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
             tutorial.NotifyInventoryOpened();
@@ -345,14 +395,31 @@ void Game::Update(float dt) {
         return;
     }
 
-    // Check HUD top right button clicks in Ruined Castle, Lobby & Arena
-    if (!showControlsModal && !showInventoryModal) {
-        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA) {
-            Rectangle journalBtnRec = { (float)(Config::WINDOW_WIDTH - 275), 16.0f, 120.0f, 32.0f };
-            Rectangle controlsBtnRec = { (float)(Config::WINDOW_WIDTH - 140), 16.0f, 116.0f, 32.0f };
-            if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    // Toggle Interactive Realm Map modal when closed
+    if (IsKeyPressed(KEY_M)) {
+        showMapModal = true;
+        showInventoryModal = false;
+        showControlsModal = false;
+        SoundFX::PlayButtonClick();
+        return;
+    }
+
+    // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
+    if (!showControlsModal && !showInventoryModal && !showMapModal) {
+        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM || currentState == GameState::QUARRY_DEPTHS) {
+            Rectangle mapBtnRec = { (float)(GetScreenWidth() - 380), 16.0f, 120.0f, 32.0f };
+            Rectangle journalBtnRec = { (float)(GetScreenWidth() - 250), 16.0f, 110.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(GetScreenWidth() - 130), 16.0f, 110.0f, 32.0f };
+            if (CheckCollisionPointRec(mouseScreen, mapBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                showMapModal = true;
+                showInventoryModal = false;
+                showControlsModal = false;
+                SoundFX::PlayButtonClick();
+                return;
+            } else if (CheckCollisionPointRec(mouseScreen, journalBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showInventoryModal = true;
                 showControlsModal = false;
+                showMapModal = false;
                 inventoryActiveTab = 0;
                 if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
                     tutorial.NotifyInventoryOpened();
@@ -362,6 +429,7 @@ void Game::Update(float dt) {
             } else if (CheckCollisionPointRec(mouseScreen, controlsBtnRec) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 showControlsModal = true;
                 showInventoryModal = false;
+                showMapModal = false;
                 SoundFX::PlayButtonClick();
                 return;
             }
@@ -370,7 +438,7 @@ void Game::Update(float dt) {
 
     // 1. TITLE SCREEN STATE
     if (currentState == GameState::TITLE_SCREEN) {
-        int action = GameUI::DrawTitleScreen(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked, showSlotModal, deletingSlotIndex);
+        int action = GameUI::DrawTitleScreen(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), testArenaUnlocked, showSlotModal, deletingSlotIndex);
         if (action == 1) {
             showControlsModal = true;
         } else if (action == 2) {
@@ -463,6 +531,31 @@ void Game::Update(float dt) {
         return;
     }
 
+    // 1.87 QUARRY TRANSITION SCREEN
+    if (currentState == GameState::QUARRY_TRANSITION) {
+        int w = GetScreenWidth();
+        int h = GetScreenHeight();
+        float cardW = fminf((float)w - 80.0f, 1140.0f);
+        float cardH = fminf((float)h - 80.0f, 760.0f);
+        float cardX = ((float)w - cardW) * 0.5f;
+        float cardY = ((float)h - cardH) * 0.5f;
+
+        float btnW = 380.0f;
+        float btnH = 50.0f;
+        float btnX = cardX + (cardW - btnW) * 0.5f;
+        float btnY = cardY + cardH - 68.0f;
+
+        Rectangle btnRec = { btnX, btnY, btnW, btnH };
+        bool isHover = CheckCollisionPointRec(mouseScreen, btnRec);
+        bool proceed = (isHover && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) ||
+                       IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_E);
+        if (proceed) {
+            SoundFX::PlayButtonClick();
+            EnterQuarryDepths();
+        }
+        return;
+    }
+
     // 1.88 ZYPHDEN REALM STATE (Chapter 1)
     if (currentState == GameState::ZYPHDEN_REALM) {
         if (map.GetEnvironment() != MapEnvironment::ZYPHDEN_REALM &&
@@ -479,9 +572,30 @@ void Game::Update(float dt) {
         return;
     }
 
+    // 1.89 QUARRY DEPTHS & GOLEM MINES STATE
+    if (currentState == GameState::QUARRY_DEPTHS) {
+        if (map.GetEnvironment() != MapEnvironment::QUARRY_DEPTHS) {
+            map.Init(MapEnvironment::QUARRY_DEPTHS);
+        }
+        quarryHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                map.Init(MapEnvironment::ZYPHDEN_REALM);
+                player.SetPosition({ 1620.0f, 700.0f });
+                camera.target = player.GetPosition();
+                currentState = GameState::ZYPHDEN_REALM;
+                enemies.clear();
+                projectiles.clear();
+                particles.Clear();
+            },
+            [this]() { EnterLobby(); }
+        );
+        return;
+    }
+
     // 1.9 BORDERLANDS GATEWAY EPILOGUE STATE
     if (currentState == GameState::BORDERLANDS_GATE) {
-        int choice = GameUI::DrawBorderlandsGateway(Config::WINDOW_WIDTH, Config::WINDOW_HEIGHT, mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
+        int choice = GameUI::DrawBorderlandsGateway(GetScreenWidth(), GetScreenHeight(), mouseScreen, IsMouseButtonPressed(MOUSE_BUTTON_LEFT), player);
         if (choice == 1 || IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_A) || IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_SPACE)) { // Arena Test
             if (testArenaUnlocked) {
                 EnterArena();
@@ -704,11 +818,9 @@ void Game::Update(float dt) {
     camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
 }
 
-void Game::Render() {
-    BeginDrawing();
-
-    int w = Config::WINDOW_WIDTH;
-    int h = Config::WINDOW_HEIGHT;
+void Game::RenderScene() {
+    int w = GetScreenWidth();
+    int h = GetScreenHeight();
     float time = (float)GetTime();
 
     if (currentState == GameState::TITLE_SCREEN) {
@@ -718,13 +830,11 @@ void Game::Render() {
         if (showControlsModal) {
             GameUI::DrawControlsModal(w, h, mouseScreen, false);
         }
-        EndDrawing();
         return;
     }
 
     if (currentState == GameState::PROLOGUE_CUTSCENE) {
         cutscene.Draw(w, h);
-        EndDrawing();
         return;
     }
 
@@ -735,46 +845,37 @@ void Game::Render() {
         );
         Vector2 mousePos = GetMousePosition();
         GameUI::DrawBorderlandsGateway(w, h, mousePos, false, player);
-        EndDrawing();
-        return;
-    }
-
-    if (currentState == GameState::RUINED_CASTLE) {
+    } else if (currentState == GameState::RUINED_CASTLE) {
         ruinedCastleHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles, tutorial,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        EndDrawing();
-        return;
-    }
-
-    if (currentState == GameState::CROSSROADS) {
+    } else if (currentState == GameState::CROSSROADS) {
         crossroadsHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        EndDrawing();
-        return;
-    }
-
-    if (currentState == GameState::ZYPHDEN_TRANSITION) {
+    } else if (currentState == GameState::ZYPHDEN_TRANSITION) {
         GameUI::DrawZyphdenTransition(
             w, h, GetMousePosition(), false, GetFrameTime()
         );
-        EndDrawing();
         return;
-    }
-
-    if (currentState == GameState::ZYPHDEN_REALM) {
+    } else if (currentState == GameState::QUARRY_TRANSITION) {
+        GameUI::DrawQuarryTransition(
+            w, h, GetMousePosition(), false, GetFrameTime()
+        );
+        return;
+    } else if (currentState == GameState::ZYPHDEN_REALM) {
         zyphdenHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
-            w, h, showControlsModal, showInventoryModal, inventoryActiveTab, inventorySelectedFragment
+            w, h, false, false, 0, 0
         );
-        EndDrawing();
-        return;
-    }
-
-    if (currentState == GameState::LOBBY) {
+    } else if (currentState == GameState::QUARRY_DEPTHS) {
+        quarryHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
+    } else if (currentState == GameState::LOBBY) {
         BeginMode2D(camera);
         map.DrawFloor();
 
@@ -809,77 +910,92 @@ void Game::Render() {
 
         bool hasUnread = player.GetInventory().HasUnreadFragments();
         GameUI::DrawLobbyHUD(w, h, player, nearAny, nearName, hasUnread);
+    } else if (currentState == GameState::ARENA || currentState == GameState::GAME_OVER || currentState == GameState::VICTORY) {
+        BeginMode2D(camera);
+        map.DrawFloor();
 
-        if (showControlsModal) {
-            GameUI::DrawControlsModal(w, h, mousePos, false);
-        } else if (showInventoryModal) {
-            GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+        for (const auto& enemy : enemies) {
+            enemy.DrawTelegraph();
         }
 
-        EndDrawing();
-        return;
+        map.DrawWallsAndPillars();
+
+        for (const auto& b : arenaBandages) {
+            b.Draw(player.GetPosition());
+        }
+
+        for (const auto& drop : lootDrops) {
+            drop.Draw(time);
+        }
+
+        for (const auto& proj : projectiles) {
+            proj.Draw();
+        }
+
+        for (const auto& enemy : enemies) {
+            enemy.Draw();
+        }
+
+        if (player.IsAlive()) {
+            player.Draw();
+        }
+
+        particles.Draw();
+        EndMode2D();
+
+        Vector2 mousePos = GetMousePosition();
+        DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
+        DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
+
+        bool hasUnread = player.GetInventory().HasUnreadFragments();
+        GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+
+        // Boss Health Bar during Boss Wave
+        for (const auto& enemy : enemies) {
+            if (enemy.IsBoss() && enemy.IsAlive()) {
+                GameUI::DrawBossHealthBar(w, enemy.GetName(), enemy.GetHealth(), enemy.GetMaxHealth());
+                break;
+            }
+        }
+
+        if (currentState == GameState::GAME_OVER) {
+            GameUI::DrawGameOver(w, h);
+        } else if (currentState == GameState::VICTORY) {
+            GameUI::DrawVictory(w, h);
+        }
     }
 
-    // ARENA RENDERING
-    BeginMode2D(camera);
-    map.DrawFloor();
-
-    for (const auto& enemy : enemies) {
-        enemy.DrawTelegraph();
-    }
-
-    map.DrawWallsAndPillars();
-
-    for (const auto& b : arenaBandages) {
-        b.Draw(player.GetPosition());
-    }
-
-    for (const auto& drop : lootDrops) {
-        drop.Draw(time);
-    }
-
-    for (const auto& proj : projectiles) {
-        proj.Draw();
-    }
-
-    for (const auto& enemy : enemies) {
-        enemy.Draw();
-    }
-
-    if (player.IsAlive()) {
-        player.Draw();
-    }
-
-    particles.Draw();
-    EndMode2D();
-
+    // --- TOP-LEVEL SCREEN-SPACE MODAL OVERLAYS (Rendered on top of ALL realms) ---
     Vector2 mousePos = GetMousePosition();
-    DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });
-    DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
-
-    bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
-
-    // Boss Health Bar during Boss Wave
-    for (const auto& enemy : enemies) {
-        if (enemy.IsBoss() && enemy.IsAlive()) {
-            GameUI::DrawBossHealthBar(w, enemy.GetName(), enemy.GetHealth(), enemy.GetMaxHealth());
-            break;
-        }
-    }
-
-    if (currentState == GameState::GAME_OVER) {
-        GameUI::DrawGameOver(w, h);
-    } else if (currentState == GameState::VICTORY) {
-        GameUI::DrawVictory(w, h);
-    }
+    bool isMousePressed = IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
 
     if (showControlsModal) {
-        GameUI::DrawControlsModal(w, h, mousePos, false);
+        bool close = GameUI::DrawControlsModal(w, h, mousePos, isMousePressed);
+        if (close) {
+            showControlsModal = false;
+        }
     } else if (showInventoryModal) {
-        GameUI::DrawInventoryModal(w, h, mousePos, false, player, inventoryActiveTab, inventorySelectedFragment);
+        bool close = GameUI::DrawInventoryModal(w, h, mousePos, isMousePressed, player, inventoryActiveTab, inventorySelectedFragment);
+        if (close) {
+            showInventoryModal = false;
+        }
+        if (inventoryActiveTab == 2) {
+            showInventoryModal = false;
+            showMapModal = true;
+            inventoryActiveTab = 0;
+        }
+    } else if (showMapModal) {
+        bool close = GameUI::DrawMapModal(w, h, mousePos, isMousePressed, player, currentState);
+        if (close) {
+            showMapModal = false;
+        }
     }
+}
 
+void Game::Render() {
+    BeginDrawing();
+    ClearBackground(BLACK);
+    RenderScene();
     EndDrawing();
 }
 

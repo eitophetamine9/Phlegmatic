@@ -4,10 +4,35 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
 Font FontManager::bodyFont = { 0 };
 Font FontManager::titleFont = { 0 };
 bool FontManager::isLoaded = false;
+FontScaleMode FontManager::currentScaleMode = FontScaleMode::STANDARD;
+
+void FontManager::SetScaleMode(FontScaleMode mode) {
+    currentScaleMode = mode;
+}
+
+FontScaleMode FontManager::GetScaleMode() {
+    return currentScaleMode;
+}
+
+float FontManager::GetScaleFactor() {
+    switch (currentScaleMode) {
+        case FontScaleMode::LARGE: return 1.25f;
+        case FontScaleMode::EXTRA_LARGE: return 1.50f;
+        case FontScaleMode::STANDARD:
+        default:
+            return 1.00f;
+    }
+}
+
+int FontManager::GetScaledSize(int baseSize) {
+    int scaled = (int)std::round((float)baseSize * GetScaleFactor());
+    return std::max(8, scaled);
+}
 
 std::vector<int> FontManager::GenerateExtendedCodepoints() {
     std::vector<int> codepoints;
@@ -63,10 +88,18 @@ void FontManager::Init() {
     int cpCount = (int)codepoints.size();
     const int* cpData = codepoints.data();
 
-    // 1. Load Body Font (MedievalSharp)
-    const char* bodyPath = "assets/fonts/MedievalSharp.ttf";
-    if (FileExists(bodyPath)) {
-        bodyFont = LoadFontEx(bodyPath, 36, cpData, cpCount);
+    // 1. Load Body Font (Georgia for pristine on-screen clarity and dark fantasy elegance)
+    const char* georgiaPath = "assets/fonts/Georgia.ttf";
+    const char* fallbackBodyPath = "assets/fonts/MedievalSharp.ttf";
+    if (FileExists(georgiaPath)) {
+        bodyFont = LoadFontEx(georgiaPath, 38, cpData, cpCount);
+        if (bodyFont.texture.id != 0) {
+            SetTextureFilter(bodyFont.texture, TEXTURE_FILTER_BILINEAR);
+        } else {
+            bodyFont = GetFontDefault();
+        }
+    } else if (FileExists(fallbackBodyPath)) {
+        bodyFont = LoadFontEx(fallbackBodyPath, 36, cpData, cpCount);
         if (bodyFont.texture.id != 0) {
             SetTextureFilter(bodyFont.texture, TEXTURE_FILTER_BILINEAR);
         } else {
@@ -153,7 +186,7 @@ void FontManager::DrawGameText(const std::string& text, int posX, int posY, int 
     if (text.empty()) return;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
     Vector2 pos = { (float)posX, (float)posY };
     ::DrawTextEx(font, sanitized.c_str(), pos, (float)fontSize, spacing, color);
 }
@@ -183,11 +216,42 @@ void FontManager::DrawTextTitleCentered(const std::string& text, int centerX, in
     DrawTextCentered(text, centerX, posY, fontSize, color, GameFont::TITLE);
 }
 
+void FontManager::DrawGameTextShadow(const std::string& text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    if (text.empty()) return;
+    DrawGameText(text, posX + offset, posY + offset, fontSize, shadowColor, fontType);
+    DrawGameText(text, posX, posY, fontSize, color, fontType);
+}
+
+void FontManager::DrawGameTextShadow(const char* text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    if (!text || text[0] == '\0') return;
+    DrawGameTextShadow(std::string(text), posX, posY, fontSize, color, shadowColor, offset, fontType);
+}
+
+void FontManager::DrawTextTitleShadow(const std::string& text, int posX, int posY, int fontSize, Color color, Color shadowColor, int offset) {
+    DrawGameTextShadow(text, posX, posY, fontSize, color, shadowColor, offset, GameFont::TITLE);
+}
+
+void FontManager::DrawTextCenteredShadow(const std::string& text, int centerX, int posY, int fontSize, Color color, Color shadowColor, int offset, GameFont fontType) {
+    int width = MeasureGameText(text, fontSize, fontType);
+    int posX = centerX - width / 2;
+    DrawGameTextShadow(text, posX, posY, fontSize, color, shadowColor, offset, fontType);
+}
+
+void FontManager::DrawTextTitleCenteredShadow(const std::string& text, int centerX, int posY, int fontSize, Color color, Color shadowColor, int offset) {
+    DrawTextCenteredShadow(text, centerX, posY, fontSize, color, shadowColor, offset, GameFont::TITLE);
+}
+
+void FontManager::DrawTextWrappedShadow(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, Color shadowColor, int offset, GameFont fontType, int maxChars) {
+    if (text.empty()) return;
+    DrawTextWrapped(text, posX + offset, posY + offset, maxLineWidth, fontSize, lineSpacing, shadowColor, fontType, maxChars);
+    DrawTextWrapped(text, posX, posY, maxLineWidth, fontSize, lineSpacing, color, fontType, maxChars);
+}
+
 int FontManager::MeasureGameText(const std::string& text, int fontSize, GameFont fontType) {
     if (text.empty()) return 0;
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
     Vector2 size = ::MeasureTextEx(font, sanitized.c_str(), (float)fontSize, spacing);
     return (int)size.x;
 }
@@ -210,7 +274,7 @@ Vector2 FontManager::MeasureTextEx(GameFont fontType, const std::string& text, f
 void FontManager::DrawTextWrapped(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, GameFont fontType, int maxChars) {
     Font font = GetFont(fontType);
     std::string sanitized = SanitizeText(text);
-    float spacing = (fontSize >= 20) ? 1.5f : 1.0f;
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
 
     std::istringstream stream(sanitized);
     std::string paragraph;

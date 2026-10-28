@@ -19,6 +19,7 @@
 #include "RuinedCastleHandler.hpp"
 #include "CrossroadsHandler.hpp"
 #include "ZyphdenHandler.hpp"
+#include "QuarryHandler.hpp"
 
 class Game {
 public:
@@ -31,10 +32,13 @@ private:
     void Init();
     void Update(float dt);
     void Render();
+    void RenderScene();
+    void ToggleGameFullscreen();
 
     void EnterRuinedCastle();
     void EnterCrossroads();
     void EnterZyphden();
+    void EnterQuarryDepths();
     void EnterLobby();
     void EnterArena();
     void SaveActiveGame();
@@ -43,6 +47,7 @@ private:
     GameState currentState;
     bool showControlsModal;
     bool showInventoryModal;
+    bool showMapModal;
     bool showSlotModal;
     int deletingSlotIndex;
     bool isRestoringSave;
@@ -72,6 +77,7 @@ private:
     RuinedCastleHandler ruinedCastleHandler;
     CrossroadsHandler crossroadsHandler;
     ZyphdenHandler zyphdenHandler;
+    QuarryHandler quarryHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 
@@ -79,4 +85,8 @@ private:
     bool testArenaUnlocked;
     void SaveArenaUnlock();
     bool LoadArenaUnlock();
+
+    // Virtual Viewport & Window State
+    RenderTexture2D virtualTarget;
+    bool isFullscreen;
 };

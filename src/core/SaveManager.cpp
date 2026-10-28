@@ -1,4 +1,5 @@
 #include "SaveManager.hpp"
+#include "../states/GameState.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -98,6 +99,8 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.playerMaxHealth = ExtractFloatValue(line);
         } else if (line.find("\"shingles\"") != std::string::npos) {
             outSummary.shingles = ExtractIntValue(line);
+        } else if (line.find("\"oreScraps\"") != std::string::npos) {
+            outSummary.oreScraps = ExtractIntValue(line);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
             outSummary.potionCount = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
@@ -158,6 +161,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.potionCount = ExtractIntValue(line);
         } else if (line.find("\"shingles\"") != std::string::npos) {
             outData.shingles = ExtractIntValue(line);
+        } else if (line.find("\"oreScraps\"") != std::string::npos) {
+            outData.oreScraps = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
             outData.equippedWeapon = ExtractIntValue(line);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
@@ -168,6 +173,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.bossZilDefeated = ExtractBoolValue(line);
         } else if (line.find("\"knightLenonSparCompleted\"") != std::string::npos) {
             outData.knightLenonSparCompleted = ExtractBoolValue(line);
+        } else if (line.find("\"zyphdenQuestPhase\"") != std::string::npos) {
+            outData.zyphdenQuestPhase = ExtractIntValue(line);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
             outData.arenaHighestWave = ExtractIntValue(line);
         } else if (line.find("\"playtimeSeconds\"") != std::string::npos) {
@@ -248,6 +255,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"playerComposure\": " << data.playerComposure << ",\n";
     file << "  \"potionCount\": " << data.potionCount << ",\n";
     file << "  \"shingles\": " << data.shingles << ",\n";
+    file << "  \"oreScraps\": " << data.oreScraps << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";
     file << "  \"equippedTotem\": " << data.equippedTotem << ",\n";
@@ -275,6 +283,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
 
     file << "  \"bossZilDefeated\": " << (data.bossZilDefeated ? "true" : "false") << ",\n";
     file << "  \"knightLenonSparCompleted\": " << (data.knightLenonSparCompleted ? "true" : "false") << ",\n";
+    file << "  \"zyphdenQuestPhase\": " << data.zyphdenQuestPhase << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";
     file << "  \"playtimeSeconds\": " << data.playtimeSeconds << ",\n";
     file << "  \"timestamp\": " << (data.timestamp > 0 ? data.timestamp : (uint64_t)std::time(nullptr)) << ",\n";
@@ -301,13 +310,16 @@ int SaveManager::GetActiveSlot() {
 }
 
 std::string SaveManager::GetRealmNameFromState(int state) {
-    switch (state) {
-        case 1: return "The Ruined Castle";
-        case 3: return "The Crossroads of the Damned";
-        case 4: return "Fortified Realm of Zyphden";
-        case 6: return "The Armory Sanctuary";
-        case 7: return "The Royal Combat Arena";
-        case 9: return "Zyphden Threshold";
+    switch ((GameState)state) {
+        case GameState::RUINED_CASTLE: return "The Ruined Castle";
+        case GameState::CROSSROADS: return "The Crossroads of the Damned";
+        case GameState::ZYPHDEN_TRANSITION: return "Zyphden Threshold";
+        case GameState::ZYPHDEN_REALM: return "Fortified Realm of Zyphden";
+        case GameState::QUARRY_TRANSITION: return "Basalt Passageway";
+        case GameState::QUARRY_DEPTHS: return "Eastern Quarry Depths";
+        case GameState::LOBBY: return "The Armory Sanctuary";
+        case GameState::ARENA: return "The Royal Combat Arena";
+        case GameState::BORDERLANDS_GATE: return "Borderlands Gateway";
         default: return "Land of Tydeshire";
     }
 }

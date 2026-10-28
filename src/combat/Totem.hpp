@@ -57,6 +57,15 @@ inline TotemStats GetTotemStats(TotemType type) {
                 1.0f, 1.30f, 0.90f, 1.0f, 1.0f, 20.0f,
                 Color{ 255, 215, 80, 255 }
             };
+        case TotemType::ELEMENTAL_CORE_TOTEM:
+            return {
+                "Elemental Core Totem",
+                "A core of primordial magma, frost, and basalt dropped by the Elemental Golem. Channels elemental projectile bolts through blade strikes.",
+                "+25 Defense, Elemental Projectile on Light Attack (5s CD)",
+                "-15% Movement Speed",
+                1.0f, 1.35f, 0.85f, 1.0f, 1.0f, 25.0f,
+                Color{ 255, 130, 45, 255 }
+            };
         case TotemType::NONE:
         default:
             return {

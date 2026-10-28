@@ -140,6 +140,10 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 48, 54, 68, 255 }; // Corrupted knight steel
     } else if (enemy.type == EnemyType::KNIGHT_LENON_BOSS) {
         bodyColor = Color{ 32, 50, 85, 255 }; // Vanguard Crusader royal navy
+    } else if (enemy.type == EnemyType::ORE_GOLEM) {
+        bodyColor = Color{ 72, 78, 88, 255 }; // Slate quarry stone
+    } else if (enemy.type == EnemyType::ELEMENTAL_GOLEM) {
+        bodyColor = Color{ 36, 40, 50, 255 }; // Primordial dark basalt titan
     }
 
     // Humoral Alignment Visual Auras
@@ -370,10 +374,134 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawCircleV({ enemy.position.x - normal.x * (enemy.radius * 0.8f), enemy.position.y - normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
         DrawCircleV({ enemy.position.x + normal.x * (enemy.radius * 0.8f), enemy.position.y + normal.y * (enemy.radius * 0.8f) }, 6.0f, Color{ 225, 185, 65, 255 });
         DrawCircleV({ enemy.position.x + dir.x * (enemy.radius * 0.6f), enemy.position.y + dir.y * (enemy.radius * 0.6f) }, 4.0f, Color{ 255, 230, 90, 255 });
+    } else if (enemy.type == EnemyType::ORE_GOLEM) {
+        // Heavy Quarry Stone Chassis with Embedded Glowing Amber Ore Crystals
+        Vector2 leftHand = {
+            enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f,
+            enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f
+        };
+
+        // Amber crystal nodes on shoulders
+        Vector2 leftShoulder = { enemy.position.x - normal.x * (enemy.radius * 0.85f), enemy.position.y - normal.y * (enemy.radius * 0.85f) };
+        Vector2 rightShoulder = { enemy.position.x + normal.x * (enemy.radius * 0.85f), enemy.position.y + normal.y * (enemy.radius * 0.85f) };
+        DrawPoly(leftShoulder, 3, 7.0f, 25.0f, Color{ 255, 195, 60, 255 });
+        DrawPolyLinesEx(leftShoulder, 3, 7.0f, 25.0f, 1.5f, Color{ 255, 235, 140, 255 });
+        DrawPoly(rightShoulder, 3, 7.0f, -25.0f, Color{ 255, 195, 60, 255 });
+        DrawPolyLinesEx(rightShoulder, 3, 7.0f, -25.0f, 1.5f, Color{ 255, 235, 140, 255 });
+
+        // Glowing runic amber eye slit in center chassis
+        Vector2 eyePos = { enemy.position.x + dir.x * (enemy.radius * 0.5f), enemy.position.y + dir.y * (enemy.radius * 0.5f) };
+        DrawCircleV(eyePos, 4.0f, Color{ 255, 220, 70, 255 });
+        DrawCircleGradient(eyePos, 10.0f, Color{ 255, 200, 50, 160 }, Color{ 0, 0, 0, 0 });
+
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+
+            // Expanding amber seismic shockwave & ground fracture fissures
+            Vector2 slamCenter = { enemy.position.x + dir.x * (enemy.radius + 16.0f), enemy.position.y + dir.y * (enemy.radius + 16.0f) };
+            float shockRadius = enemy.attackRange * progress;
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius, Color{ 255, 185, 45, (unsigned char)(235 * (1.0f - progress)) });
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius * 0.65f, Color{ 255, 220, 80, (unsigned char)(190 * (1.0f - progress)) });
+
+            for (int k = 0; k < 6; ++k) {
+                float fa = ((float)k * 60.0f) * DEG2RAD;
+                DrawLineEx(slamCenter, { slamCenter.x + cosf(fa) * (shockRadius * 0.9f), slamCenter.y + sinf(fa) * (shockRadius * 0.9f) }, 2.0f, Color{ 245, 165, 40, (unsigned char)(180 * (1.0f - progress)) });
+            }
+
+            // Both stone fists slamming down forward
+            Vector2 slamFistL = { leftHand.x + dir.x * (progress * 24.0f), leftHand.y + dir.y * (progress * 24.0f) };
+            Vector2 slamFistR = { rightHand.x + dir.x * (progress * 24.0f), rightHand.y + dir.y * (progress * 24.0f) };
+            DrawCircleV(slamFistL, 8.0f, Color{ 90, 95, 105, 255 });
+            DrawCircleLines((int)slamFistL.x, (int)slamFistL.y, 8.0f, Color{ 255, 190, 50, 220 });
+            DrawCircleV(slamFistR, 8.0f, Color{ 90, 95, 105, 255 });
+            DrawCircleLines((int)slamFistR.x, (int)slamFistR.y, 8.0f, Color{ 255, 190, 50, 220 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            // Raised stone fists gathering amber seismic charge
+            DrawCircleV({ leftHand.x - dir.x * 6.0f, leftHand.y - dir.y * 6.0f }, 7.5f, Color{ 85, 90, 100, 255 });
+            DrawCircleV({ rightHand.x - dir.x * 6.0f, rightHand.y - dir.y * 6.0f }, 7.5f, Color{ 85, 90, 100, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 9.0f + 3.0f * progress, Color{ 255, 190, 50, 220 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 9.0f + 3.0f * progress, Color{ 255, 190, 50, 220 });
+        } else {
+            // Resting boulder fists
+            DrawCircleV(leftHand, 7.0f, Color{ 75, 80, 90, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 7.0f, Color{ 110, 115, 125, 200 });
+            DrawCircleV(rightHand, 7.0f, Color{ 75, 80, 90, 255 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 7.0f, Color{ 110, 115, 125, 200 });
+        }
+    } else if (enemy.type == EnemyType::ELEMENTAL_GOLEM) {
+        // Primordial Basalt Titan with 4 elemental crystal nodes (Fire, Frost, Earth, Storm)
+        Vector2 leftHand = {
+            enemy.position.x - normal.x * (enemy.radius * 0.80f) + dir.x * 6.0f,
+            enemy.position.y - normal.y * (enemy.radius * 0.80f) + dir.y * 6.0f
+        };
+        Vector2 rightHand = {
+            enemy.position.x + normal.x * (enemy.radius * 0.80f) + dir.x * 6.0f,
+            enemy.position.y + normal.y * (enemy.radius * 0.80f) + dir.y * 6.0f
+        };
+
+        // 4 Elemental Nodes on Titan Chassis
+        Vector2 fireNode = { enemy.position.x - normal.x * (enemy.radius * 0.85f) - dir.x * 8.0f, enemy.position.y - normal.y * (enemy.radius * 0.85f) - dir.y * 8.0f };
+        Vector2 frostNode = { enemy.position.x + normal.x * (enemy.radius * 0.85f) - dir.x * 8.0f, enemy.position.y + normal.y * (enemy.radius * 0.85f) - dir.y * 8.0f };
+        Vector2 earthNode = { enemy.position.x - normal.x * (enemy.radius * 0.85f) + dir.x * 12.0f, enemy.position.y - normal.y * (enemy.radius * 0.85f) + dir.y * 12.0f };
+        Vector2 stormNode = { enemy.position.x + normal.x * (enemy.radius * 0.85f) + dir.x * 12.0f, enemy.position.y + normal.y * (enemy.radius * 0.85f) + dir.y * 12.0f };
+
+        // 1. Fire (Magma Amber/Red)
+        DrawPoly(fireNode, 3, 9.0f, (float)GetTime() * 45.0f, Color{ 255, 75, 30, 255 });
+        DrawCircleGradient(fireNode, 14.0f, Color{ 255, 100, 30, 150 }, Color{ 0, 0, 0, 0 });
+
+        // 2. Frost (Glacial Cyan)
+        DrawPoly(frostNode, 4, 8.5f, (float)GetTime() * -45.0f, Color{ 90, 220, 255, 255 });
+        DrawCircleGradient(frostNode, 14.0f, Color{ 80, 200, 255, 150 }, Color{ 0, 0, 0, 0 });
+
+        // 3. Earth (Jade Amber)
+        DrawPoly(earthNode, 5, 8.5f, 30.0f, Color{ 245, 195, 50, 255 });
+        DrawCircleGradient(earthNode, 14.0f, Color{ 245, 185, 40, 150 }, Color{ 0, 0, 0, 0 });
+
+        // 4. Storm (Violet Amethyst)
+        DrawPoly(stormNode, 4, 8.5f, (float)GetTime() * 60.0f, Color{ 200, 110, 255, 255 });
+        DrawCircleGradient(stormNode, 14.0f, Color{ 180, 90, 255, 150 }, Color{ 0, 0, 0, 0 });
+
+        // Central Multi-Spectral Primordial Heart Core
+        Vector2 heartPos = { enemy.position.x + dir.x * (enemy.radius * 0.25f), enemy.position.y + dir.y * (enemy.radius * 0.25f) };
+        float corePulse = (sinf((float)GetTime() * 4.0f) * 0.5f + 0.5f);
+        Color coreCol = Color{ (unsigned char)(210 + 45 * corePulse), (unsigned char)(160 + 80 * corePulse), (unsigned char)(255 * (1.0f - corePulse)), 255 };
+        DrawCircleV(heartPos, 8.0f, coreCol);
+        DrawCircleGradient(heartPos, 18.0f, ColorAlpha(coreCol, 0.7f), Color{ 0, 0, 0, 0 });
+
+        if (enemy.state == EnemyState::STRIKE) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.strikeDuration);
+            progress = fmaxf(0.0f, fminf(1.0f, progress));
+
+            Vector2 slamCenter = { enemy.position.x + dir.x * (enemy.radius + 20.0f), enemy.position.y + dir.y * (enemy.radius + 20.0f) };
+            float shockRadius = enemy.attackRange * progress;
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius, Color{ 255, 160, 40, (unsigned char)(240 * (1.0f - progress)) });
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius * 0.7f, Color{ 130, 220, 255, (unsigned char)(210 * (1.0f - progress)) });
+            DrawCircleLines((int)slamCenter.x, (int)slamCenter.y, shockRadius * 0.4f, Color{ 210, 120, 255, (unsigned char)(180 * (1.0f - progress)) });
+
+            Vector2 slamFistL = { leftHand.x + dir.x * (progress * 30.0f), leftHand.y + dir.y * (progress * 30.0f) };
+            Vector2 slamFistR = { rightHand.x + dir.x * (progress * 30.0f), rightHand.y + dir.y * (progress * 30.0f) };
+            DrawCircleV(slamFistL, 11.0f, Color{ 50, 55, 68, 255 });
+            DrawCircleLines((int)slamFistL.x, (int)slamFistL.y, 11.0f, Color{ 255, 170, 50, 240 });
+            DrawCircleV(slamFistR, 11.0f, Color{ 50, 55, 68, 255 });
+            DrawCircleLines((int)slamFistR.x, (int)slamFistR.y, 11.0f, Color{ 120, 220, 255, 240 });
+        } else if (enemy.state == EnemyState::TELEGRAPH_WINDUP) {
+            float progress = 1.0f - (enemy.stateTimer / enemy.windupDuration);
+            DrawCircleV({ leftHand.x - dir.x * 8.0f, leftHand.y - dir.y * 8.0f }, 10.0f, Color{ 55, 60, 72, 255 });
+            DrawCircleV({ rightHand.x - dir.x * 8.0f, rightHand.y - dir.y * 8.0f }, 10.0f, Color{ 55, 60, 72, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 12.0f + 4.0f * progress, Color{ 255, 140, 40, 230 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 12.0f + 4.0f * progress, Color{ 160, 100, 255, 230 });
+        } else {
+            DrawCircleV(leftHand, 9.5f, Color{ 48, 52, 64, 255 });
+            DrawCircleLines((int)leftHand.x, (int)leftHand.y, 9.5f, Color{ 130, 135, 150, 200 });
+            DrawCircleV(rightHand, 9.5f, Color{ 48, 52, 64, 255 });
+            DrawCircleLines((int)rightHand.x, (int)rightHand.y, 9.5f, Color{ 130, 135, 150, 200 });
+        }
     }
 
     // Overhead Health Bar (for normal enemies; boss has master top bar)
-    if (enemy.type != EnemyType::INQUISITOR_BOSS && enemy.type != EnemyType::ZIL_BOSS && enemy.type != EnemyType::KNIGHT_LENON_BOSS) {
+    if (enemy.type != EnemyType::INQUISITOR_BOSS && enemy.type != EnemyType::ZIL_BOSS && enemy.type != EnemyType::KNIGHT_LENON_BOSS && enemy.type != EnemyType::ELEMENTAL_GOLEM) {
         const float barWidth = enemy.radius * 2.2f;
         const float barHeight = 5.0f;
         float barX = enemy.position.x - barWidth * 0.5f;

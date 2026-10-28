@@ -53,7 +53,14 @@ enum class ZyphdenQuestPhase {
     SEEK_KING,        // 3. Lenon spoke of Zil, directed player to King Kreptu
     CHALLENGE_READY,  // 4. King Kreptu granted audience; Lenon awaits in courtyard
     SPARRING,         // 5. Active courtyard boss duel
-    VICTORIOUS        // 6. Lenon defeated; Crusader Plate awarded!
+    VICTORIOUS,       // 6. Lenon defeated; Crusader Plate awarded! Report to King
+    EXPLORE_REALM     // 7. King granted border commission; explore realm openly
+};
+
+struct GolemSpawner {
+    Vector2 spawnPos;
+    float respawnTimer = 0.0f;
+    bool isAlive = true;
 };
 
 class LootDrop;
@@ -96,7 +103,9 @@ public:
     );
 
     bool HasDefeatedLenon() const { return lenonDefeated; }
-    void SetLenonDefeated(bool d) { lenonDefeated = d; }
+    void SetLenonDefeated(bool d);
+    int GetQuestPhase() const { return (int)questPhase; }
+    void SetQuestPhase(int phase);
 
 private:
     // Core NPCs
@@ -161,6 +170,9 @@ private:
     // Forge & Provisions Modal State
     bool isForgeOpen = false;
     bool isProvisionsOpen = false;
+
+    // Eastern Quarry Ore Golem Spawners (7.0s Respawn Loop)
+    std::vector<GolemSpawner> golemSpawners;
 
     void OpenDialogue(const std::string& npcId, const std::string& speaker, const std::vector<std::string>& pages, Color color);
     void CloseDialogue();

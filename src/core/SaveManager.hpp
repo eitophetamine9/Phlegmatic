@@ -10,6 +10,7 @@ struct SaveSlotSummary {
     float playerHealth = 100.0f;
     float playerMaxHealth = 100.0f;
     int shingles = 0;
+    int oreScraps = 0;
     int potionCount = 1;
     int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker
     int equippedArmor = 0;
@@ -32,6 +33,7 @@ struct GameSaveData {
     float playerComposure = 50.0f;
     int potionCount = 1;
     int shingles = 0;
+    int oreScraps = 0;
     int equippedWeapon = 1;
     int equippedArmor = 0;
     int equippedTotem = 0;
@@ -40,6 +42,7 @@ struct GameSaveData {
     bool unlockedFragments[10] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;
+    int zyphdenQuestPhase = 0;
     int arenaHighestWave = 0;
     uint32_t playtimeSeconds = 0;
     uint64_t timestamp = 0;

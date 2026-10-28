@@ -2,9 +2,12 @@
 #include "raylib.h"
 #include "../rendering/FontManager.hpp"
 #include <string>
+#include <cmath>
 
 namespace Config {
-    // Window settings
+    // Window & Virtual Viewport settings
+    inline constexpr int VIRTUAL_WIDTH = 1280;
+    inline constexpr int VIRTUAL_HEIGHT = 720;
     inline constexpr int WINDOW_WIDTH = 1280;
     inline constexpr int WINDOW_HEIGHT = 720;
     inline const char* WINDOW_TITLE = "Phlegmatic - Top-Down Action RPG";
@@ -82,4 +85,13 @@ namespace Config {
     inline constexpr float MACE_HEAVY_DURATION = 0.38f;
     inline constexpr float MACE_HEAVY_COOLDOWN = 0.85f;
     inline constexpr float MACE_HEAVY_STAMINA = 40.0f;
+
+    // Mouse Coordinate Mapping (Native display resolution)
+    inline Vector2 GetVirtualMousePosition() {
+        return (::GetMousePosition)();
+    }
 }
+
+// Global transparent redirect
+#undef GetMousePosition
+#define GetMousePosition() Config::GetVirtualMousePosition()

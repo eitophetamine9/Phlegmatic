@@ -7,6 +7,8 @@ enum class GameState {
     CROSSROADS,
     ZYPHDEN_TRANSITION,
     ZYPHDEN_REALM,
+    QUARRY_TRANSITION,
+    QUARRY_DEPTHS,
     LOBBY,
     ARENA,
     GAME_OVER,

@@ -60,6 +60,7 @@ public:
     float GetMaxParryCooldown() const;
     float GetHeavyCooldown() const { return heavyCooldown; }
     float GetMaxHeavyCooldown() const { return GetEquippedWeaponStats().heavyCooldown; }
+    float GetElementalProjectileCooldown() const { return elementalProjectileCooldown; }
 
     const AttackInfo& GetCurrentAttack() const { return currentAttack; }
     bool IsAttacking() const { return currentAttack.type != AttackType::NONE; }
@@ -165,6 +166,7 @@ private:
     bool isParrying;
     float counterBuffTimer;
     float potionCooldown;
+    float elementalProjectileCooldown;
 
     // Stagger & Poise State
     float staggerTimer;

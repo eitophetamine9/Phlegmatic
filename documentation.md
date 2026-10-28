@@ -14,6 +14,7 @@
 </div>
 
 ## Table of Contents
+- [Release Highlights: Version 0.0.1c](#release-highlights-version-001c)
 - [Release Highlights: Version 0.0.1b](#release-highlights-version-001b)
 - [1. Overview & Lore of Tydeshire](#1-overview--lore-of-tydeshire)
   - [The Great Unification & The Five Crowns](#the-great-unification--the-five-crowns)
@@ -27,6 +28,7 @@
   - [Act III: Fortified Realm of Zyphden](#act-iii-fortified-realm-of-zyphden)
   - [Hearthside Tavern](#hearthside-tavern)
   - [Expanded Zyphden Royal Keep](#expanded-zyphden-royal-keep)
+  - [Act IV: Subterranean Quarry Depths & Primordial Altar](#act-iv-subterranean-quarry-depths--primordial-altar)
   - [Combat Arena & Endless Wave Defense](#combat-arena--endless-wave-defense)
 - [3. Combat Systems & Mathematical Formulas](#3-combat-systems--mathematical-formulas)
   - [Defense & Armor Penetration Formula](#defense--armor-penetration-formula)
@@ -39,10 +41,11 @@
   - [Keybindings Guide](#keybindings-guide)
   - [Modular Visual Action Bar](#modular-visual-action-bar)
   - [Attributes & Posture Status Indicators](#attributes--posture-status-indicators)
-  - [In-Game Lore Journal & Equipment Paper Doll](#in-game-lore-journal--equipment-paper-doll)
-- [5. Weapon Arsenal & Combat Stances](#5-weapon-arsenal--combat-stances)
+  - [In-Game Lore Journal, Equipment Paper Doll & Realm Map](#in-game-lore-journal-equipment-paper-doll--realm-map)
+- [5. Weapon Arsenal, Armor & Totems](#5-weapon-arsenal-armor--totems)
   - [Arsenal Summary Table](#arsenal-summary-table)
   - [Detailed Weapon Stances](#detailed-weapon-stances)
+  - [Sacred Totems Compendium](#sacred-totems-compendium)
 - [6. Bestiary & Boss Encounters](#6-bestiary--boss-encounters)
   - [Hostiles Compendium](#hostiles-compendium)
   - [Boss Encounters & AI Cadence](#boss-encounters--ai-cadence)
@@ -56,11 +59,27 @@
   - [Automated MinGW-w64 Batch Script](#automated-mingw-w64-batch-script)
   - [CMake & Ninja Build](#cmake--ninja-build)
   - [Precompiled Executables](#precompiled-executables)
-- [9. Roadmap & Version 0.0.1c Technical Plans](#9-roadmap--version-001c-technical-plans)
-  - [Font Legibility & Dynamic UI Scaling](#font-legibility--dynamic-ui-scaling)
-  - [Exclusive Fullscreen & Aspect Ratio Preservation](#exclusive-fullscreen--aspect-ratio-preservation)
-  - [Act IV: Northern Marches & Realm Border Crossings](#act-iv-northern-marches--realm-border-crossings)
-  - [Synthesized Acoustic Ambience & Audio Sliders](#synthesized-acoustic-ambience--audio-sliders)
+- [9. Roadmap & Version 0.0.1d Technical Plans](#9-roadmap--version-001d-technical-plans)
+  - [Act V: Northern Frontier Borders](#act-v-northern-frontier-borders)
+  - [Environmental Weather Physics](#environmental-weather-physics)
+  - [Synthesized Environmental Ambience & Audio Sliders](#synthesized-environmental-ambience--audio-sliders)
+
+---
+
+## Release Highlights: Version 0.0.1c
+
+A comprehensive breakdown of all systems, gameplay mechanics, visual overhauls, and architectural enhancements introduced in Version 0.0.1c:
+
+* **Interactive Realm Map (`[M]`)**: Comprehensive medieval cartographic guild survey map featuring smooth pan and zoom navigation, recenter shortcuts (`[SPACE]`/`[R]`), live player coordinate tracking beacon with radar pulses, and 8 interactive Points of Interest categorized by Quests, Services, and Danger with filter toggles (`[0]`-`[3]`).
+* **Gated Quarry Depths & `QUARRY_TRANSITION`**: Gated eastern archway in Zyphden Courtyard that unlocks upon defeating Knight Lenon in the martial spar. Interacting transitions via a dedicated lore screen into the subterranean `MapEnvironment::QUARRY_DEPTHS` zone with slate flagstone paths and minecart tracks.
+* **Ore Golem Patrols & Crafting Scraps**: Added 4 basalt Ore Golem spawners across the Quarry Mines with 7.0-second respawn timers. Defeated golems drop Ore Scraps used alongside Silver Shingles at Blacksmith Varek's Forge to craft the Dual Daggers and War Mace.
+* **Primordial Altar & Secret Boss "Elemental Golem"**: Located deep within the Quarry Mines, the Primordial Altar requires collecting all 10 Lore Fragments (`frag_01` through `frag_10`). Assembling all fragments summons the titan secret boss (**Elemental Golem**, 850 HP, 55 Def, 90 Will) wielding 4-phase elemental quake, magma boulder, frost tremor, and storm fissure attacks.
+* **Elemental Core Totem**: Defeating the Elemental Golem pacifies the altar, yields abundant Ore Scraps and Shingles, and permanently unlocks the `Elemental Core Totem` (+25 flat Defense, -15% movement speed, and auto-fires an `ELEMENTAL_BOLT` projectile on light attacks with a 5.0s cooldown).
+* **Decoupled Screen-Space Modal Architecture**: Eliminated all `Draw*` calls from `Game::Update(float dt)`, resolving the freeze when opening the journal, map, or tab menu. Restructured `Game::RenderScene()` so all gameplay realms fall through to a single, centralized screen-space modal overlay executed safely between `BeginDrawing()` and `EndDrawing()`.
+* **Dynamic Fullscreen Button Hit-Tests**: Replaced hardcoded dimensions with dynamic `GetScreenWidth()` and `GetScreenHeight()` calculations across title screen buttons, HUD top-right actions, and modals, ensuring pixel-perfect clicks across windowed, borderless, and 4K fullscreen modes.
+* **Save File Quest Track Persistence**: Serialized `zyphdenQuestPhase` into save slots and reorganized `Game::LoadActiveGame` to restore inventory, equipment, and fragments before state transitions, preventing storyline regressions.
+* **Lore Fragment VIII Relocation**: Moved Fragment VIII (*The Sovereign's Burden*) from inside the solid castle keep wall to `{ 1390.0f, 540.0f }` in the open Courtyard Sparring Training Grounds beside weapon racks, and updated its journal recovery clue.
+* **Typography & Dialogue Polish**: Switched to crisp Windows `Georgia.ttf` rendering with bilinear filtering and proportional character spacing, and paginated Corrupted Zil's post-defeat monologue across 3 interactive pages with navigation hints.
 
 ---
 
@@ -112,7 +131,7 @@ The game world contains ten discoverable historical fragments documented inside 
 | **`frag_05`** | **The Crossroads Watch** | Crossroads Ancient Shrine | The tragic massacre of the southern border patrol when the highway went dark. |
 | **`frag_06`** | **Rite of the Gale Winds** | Zyphden Wind Lectern | Architectural folios describing the resonance leylines powering Zyphden's ramparts. |
 | **`frag_07`** | **Lenon's Field Log** | Courtyard Gates Lectern | Vanguard Captain Lenon's personal reflections on his missing sworn brother Zil. |
-| **`frag_08`** | **The Sovereign's Burden** | Royal Archives Reliquary | King Kreptu's secret correspondence regarding dwindling grain stores and war. |
+| **`frag_08`** | **The Sovereign's Burden** | Courtyard Sparring Training Grounds | King Kreptu's secret correspondence regarding dwindling grain stores and war. |
 | **`frag_09`** | **Inscription of Ancient Pillars** | Inscribed Runic Monoliths | Ancient First Warden runes teaching how inner Will hardens posture against stagger. |
 | **`frag_10`** | **The Royal Armory Archives** | Royal Keep Armory Chest | Tactical treaties detailing weapon armor penetration, poise breaks, and ripostes. |
 
@@ -214,6 +233,13 @@ Grand stone hall expanded to **1200x1100** bounds:
 * Eight solid marble colonnade pillars, Western Royal Archives with bookshelves, and Eastern Armory with weapon displays.
 * Five interactive court NPCs (Malakor, Donald, Garrick, Thaddeus, Genevieve).
 * Inscribed Monolith (`frag_09`), Armory Chest (+2 Potions, `frag_10`), and Provisions Chest (+1 Potion).
+
+### Act IV: Subterranean Quarry Depths & Primordial Altar
+Gated behind defeating Knight Lenon in the courtyard martial spar:
+* **The Eastern Archway & Transition Screen**: Interacting with the eastern rampart portal (`[E]`) triggers `GameState::QUARRY_TRANSITION`, presenting illustrated lore exposition of Zyphden's ancient mineral shafts.
+* **Quarry Mines Environment**: Underground cavern with carved basalt walls, glinting crystalline mineral seams, slate flagstone walkways, and ancient minecart rail circuits.
+* **Ore Golem Patrols & 7-Second Spawners**: Four basalt Ore Golems patrol the shafts. Upon defeat, they drop valuable Ore Scraps and automatically reconstitute every 7.0 seconds.
+* **The Primordial Altar Dais**: Located at `{ 1000, 320 }`, surrounded by 4 monolithic elemental pillars. Gathering all 10 Lore Fragments awakens the secret titan boss: **Elemental Golem (Primordial Titan)**. Conquering the titan bestows the **Elemental Core Totem**.
 
 ### Combat Arena & Endless Wave Defense
 Unlocked permanently upon completing the Chapter 1 storyline:
@@ -380,6 +406,8 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 | `ESC Key` | Close / Dismiss | Safely dismiss open dialogues, popups, and journal modals. |
 | `O Key` | Toggle Objectives | Expand or collapse the pinned Chapter 1 quest tracker card. |
 | `I Key` or `TAB` | Lore & Equipment | Open the in-game Journal, Equipment stats, and Totem slots. |
+| `M Key` | Interactive Realm Map | Open the full parchment map with live player tracking and POI tooltips. |
+| `F11` / `Alt + Enter` | Fullscreen Toggle | Switch between windowed and native crisp fullscreen display modes. |
 | `C Key` | Controls Guide | Toggle the quick-reference keybindings overlay. |
 | `~ Key` (Tilde / Grave) | Title Screen | Instantly return to the Title Screen from any state. |
 | `R Key` | Respawn / Retry | Instantly restart an active trial or respawn after defeat. |
@@ -414,14 +442,15 @@ Displayed directly alongside the Player Health, Stamina, and Composure bars:
   * `[STOIC POISE]` (Radiant Gold, 80-100 Composure): Hyper-Armor immunity to stagger and bleed during heavy attack windups.
 * **Dynamic Posture Pill**: Displays real-time state: `STAGGERED!`, `POISE GUARD`, `I-FRAMES`, `+50% COUNTER`, or `COMBAT READY`.
 
-### In-Game Lore Journal & Equipment Paper Doll
-Opened via `[I]` or `[TAB]`:
+### In-Game Lore Journal, Equipment Paper Doll & Realm Map
+Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 * **Tab 1: Equipment & Arsenal**: Inspect weapons, weapon upgrade tiers (+1, +2, Consecrated), armor sets, damage mitigation statistics, and equip discovered sacred totems.
 * **Tab 2: Lore Journal**: Browse 10 discovered historical fragments with unread badges (`(!)`).
+* **Tab 3: Interactive Realm Map (`[M]`)**: Inspect the cartographic survey of Tydeshire, pan/zoom across terrain, filter POIs, and locate the player beacon.
 
 ---
 
-## 5. Weapon Arsenal & Combat Stances
+## 5. Weapon Arsenal, Armor & Totems
 
 ### Arsenal Summary Table
 
@@ -451,6 +480,21 @@ Opened via `[I]` or `[TAB]`:
 * **Stance Philosophy**: Heavy blunt trauma designed to crush fortified armor plates.
 * **Tactical Advice**: Heaviest weapon in the game. Stage 2 Earthshaker tremor ignores 20% of enemy defense. Ideal against Iron Brutes and Knight Lenon.
 
+### Sacred Totems Compendium
+
+Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, altars, and boss encounters. Players can equip one active totem in the Journal / Equipment interface (`[I]` or `[TAB]` -> Equipment Tab) to augment their combat style:
+
+| Totem Relic | Acquisition Source | Stat Multipliers & Buffs | Drawbacks & Nerfs | Visual Glow |
+| :--- | :--- | :--- | :--- | :--- |
+| **Totem of Sanity** | Hidden ruins along Crossroads path | **+15% Overall Damage, +15 Will** | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
+| **Totem of Insanity** | Cathedral crypt reliquary | **+30% Overall Damage** | **-10% Armor Defense** | Arterial Crimson (`[255, 65, 80]`) |
+| **Totem of Mist** | East Crossroads shroud shrine | **+20% Stamina Regen, +5% Cooldown Speed, +5 Will** | **-5% Overall Damage** | Vapor Azure (`[140, 210, 255]`) |
+| **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
+| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths) | **+25 Defense, Projectile on Light Attack (5.0s Cooldown)** | **-15% Movement Speed** | Molten Amber (`[255, 130, 45]`) |
+
+> [!TIP]
+> **Elemental Core Synergy**: The Elemental Core Totem fires a high-velocity elemental projectile bolt whenever you perform a light attack (with an internal 5.0-second cooldown). This allows melee fighters to weave ranged pressure between close-quarters blade swings!
+
 > [!TIP]
 > **Weapon Swapping in Lobby**: You can swap weapons freely between missions at the pedestals in the Lobby sanctuary. Try different armaments in the Arena to discover your preferred combat style!
 
@@ -473,6 +517,7 @@ Opened via `[I]` or `[TAB]`:
 | **Void Pyromancer** | Occult Caster | 10 | 20 | 3-Way Laser & Glowing Landing Tinges | Casts tri-directional void orbs. Orbs can be reflected back with `[F]`. |
 | **Shadow Charger** | Dash Melee | 12 | 30 | Linear Path (50px width, 240px) | High-speed linear thrust. Evade laterally with `[Q]` or parry head-on. |
 | **Iron Brute** | Heavy Crusher | 32 | 50 | Expanding Red Circle (150px AoE) | High armor tank. Ground slam inflicts heavy stagger if unevaded. |
+| **Ore Golem** | Melancholic Tank | 45 | 55 | Expanding Red Circle (135px AoE) | High-durability mineral chassis (220 HP, 45 Def). Smashes ground with heavy stone tremors. Best countered with War Mace or heavy 2-stage cleaves to shatter stone armor. Respawns after 7.0s and drops Ore Scraps for smithing. |
 
 > [!TIP]
 > **Countering Cultist Slashers**: Cultist Slashers always telegraph with an amber/red cone before swinging. A single well-timed parry (`[F]`) leaves them staggered for nearly 2 full seconds (1.95s), ample time for a full heavy combo.
@@ -499,8 +544,20 @@ Opened via `[I]` or `[TAB]`:
 * **Moveset**: Rotates between 12-way Radial Star Trajectories, Linear Beam Shard, and Cataclysmic Smite AoE.
 * **Strategy**: Stay mobile. Use dash i-frames to phase through radial stars, and parry his linear beam shards to reflect massive holy damage back into him.
 
+#### Elemental Golem (Primordial Titan)
+* **Stats**: 850 HP, 55 Defense (~35% damage reduction), 90 Will, 100 MoveSpeed.
+* **Humor Alignment**: Melancholic [Earth / Primordial Magma].
+* **Summoning Requirement**: Accessible in the Subterranean Quarry Depths after defeating Knight Lenon. Requires depositing all 10 recovered Lore Fragments upon the Primordial Altar.
+* **Moveset & 4-Phase Combat Rotation**:
+  * **Phase 1 (Ground Tremor Cleave)**: Charges a massive 190px circular shockwave (0.72s windup) dealing heavy blunt trauma.
+  * **Phase 2 (Molten Shard Salvo)**: Conjures and unleashes high-velocity elemental projectiles aimed directly at the player.
+  * **Phase 3 (Tri-Directional Volley)**: Hurls a tri-directional fan of elemental missiles across the quarry cavern.
+  * **Phase 4 (Radial Nova Shockwave)**: Radiates an 8-directional elemental star burst, demanding precise timing on dash i-frames (`[Q]`) or parry reflections (`[F]`).
+* **Reward**: Drops the **Elemental Core Totem**, 12–18 Ore Scraps, 150–250 Silver Shingles, and 3 Health Elixirs.
+* **Tactical Strategy**: With 55 Defense and 90 Will, the Elemental Golem is nearly impervious to light spam. Utilize the **War Mace** or the Crusader Broadsword's 2-stage heavy cleave to trigger **SHELL SHATTERED!** (-35% defense). Keep mobile during projectile salvos, parry incoming shards to deflect damage back into the titan, and trigger **Phlegmatic Trance (`[SPACE]`)** at 100 Composure for 5.0 seconds of invulnerability and automatic projectile reflection.
+
 > [!IMPORTANT]
-> **REMINDER — Boss Stagger Windows**: Bosses possess high Will (60–70) and recover from staggers in approximately 1.2 seconds. Never commit to more than a 2-hit sequence while a boss is reeling.
+> **REMINDER — Boss Stagger Windows**: Bosses possess high Will (60–90) and recover from staggers quickly. Never commit to more than a 2-hit sequence while a boss is reeling.
 
 ---
 
@@ -593,28 +650,21 @@ Standalone executables are bundled directly in the repository:
 
 ---
 
-## 9. Roadmap & Version 0.0.1c Technical Plans
+## 9. Roadmap & Version 0.0.1d Technical Plans
 
-### Font Legibility & Dynamic UI Scaling
-To guarantee optimal readability across varying screen sizes, 4K monitors, and handheld/television distances, Version 0.0.1c introduces a multi-tiered typography scaling and enhancement architecture:
-* **Font Scaling Options**: A dedicated display setting allowing players to toggle between `Standard (100%)`, `Enlarged (125%)`, and `High-Visibility (150%)` text sizes across all UI components.
-* **Dialogue Prose Expansion**: Increasing base narrative font point sizes from 13/14pt to 16/18pt, paired with responsive word-wrapping formulas to preserve dialogue card composition.
-* **Text Contrast & Plaque Scrims**: Backing in-world interaction hints and subtitles with semi-translucent parchment/slate scrims and outline drop-shadows (`FontManager::DrawTextShadow`) to eliminate background collision noise.
-* **High-Clarity HUD Glyphs**: Enlarged, bold render passes for Health, Stamina, Composure, Shingles, and item cooldown timers.
+### Act V: Northern Marches & Realm Border Crossings
+* **Realm Border Gates**: Opening the northern mountain passes of Zyphden leading into the neighbouring nations of Azshden and Fleurshden.
+* **Environmental Weather Physics**: Dynamic gale wind physics that deflect lightweight projectile paths, combined with alpine snow particle shaders and slippery frozen terrain.
+* **New Hostile Factions**: Royal Vanguard Deserters wielding long-reach halberds, Frost Cultists casting ice barriers, and automated Siege Ballistas.
 
-### Exclusive Fullscreen & Aspect Ratio Preservation
-Version 0.0.1c will implement robust multi-monitor and fullscreen windowing:
-* **Seamless Fullscreen Toggle**: Instant fullscreen switching via `F11`, `Alt + Enter`, or the in-game Settings/Pause menu.
-* **Virtual Render Target & Letterboxing**:
-  * The game renders to an internal 16:9 virtual framebuffer (e.g. 1280x720 or 1920x1080) and scales to match desktop display resolutions (1080p, 1440p, 4K, 21:9 ultrawide) using clean integer or smooth bilinear scaling.
-  * Preserves aspect ratio with ornamental filigree or matte black letterbox/pillarbox bars, preventing horizontal stretching.
-* **Input Coordinate Transformation**: Automatically maps windowed mouse coordinates through the inverse projection matrix (`GetScreenToWorld2D`), ensuring accurate weapon aiming, telegraph reticles, and UI button hit-detection in all display modes.
+### Advanced Weapon Archetypes
+* **Polearm / Halberd**: Extended piercing reach, sweeping pole-vault strikes, and anti-cavalry thrusts.
+* **Flail & Greatshield**: Deflection-focused vanguard armament capable of absorbing heavy crushing blows without poise depletion.
 
-### Act IV: Northern Marches & Realm Border Crossings
-* **Realm Border Gates**: Opening the northern mountain passes of Zyphden leading into Azshden and Fleurshden.
-* **Environmental Weather Physics**: Dynamic gale wind physics that deflect lightweight projectile paths, combined with alpine snow particle shaders.
-* **New Hostile Factions**: Royal Vanguard Deserters wielding halberds, Frost Cultists casting ice barriers, and automated Siege Ballistas.
+### Synthesized Acoustic Ambience & Audio Mixer
+* **Procedural Environmental Ambience**: Continuous synthesized background soundscapes (whistling wind drafts, subterranean cavern echoes, cathedral reverberations, and tavern fireplace crackle).
+* **Audio Mixer Configuration**: Dedicated Master, Sound Effects, and Ambience volume control sliders accessible from the in-game settings modal.
 
-### Synthesized Acoustic Ambience & Audio Sliders
-* **Procedural Environmental Ambience**: Continuous synthesized background soundscapes (whistling wind drafts, cathedral reverberations, and tavern fireplace crackle).
-* **Audio Mixer Configuration**: Dedicated Master, Sound Effects, and Ambience volume control sliders.
+### Bestiary Codex & Rematch Arena Trials
+* **Bestiary Kill Counters & Lore Unlocks**: Track enemy encounters and unlock detailed lore excerpts and drop rate tables in the in-game Journal.
+* **Sanctuary Rematch Crucible**: Challenge empowered variants of Zil's Remnant, Knight Lenon, and the Elemental Golem with custom trial modifiers and speedrun timers.

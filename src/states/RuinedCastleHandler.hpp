@@ -70,6 +70,9 @@ private:
     std::string zilDialogueSpeaker;
     std::string zilDialogueText;
     Color zilDialogueColor;
+    bool isZilDialogueOpen;
+    std::vector<std::string> zilDialoguePages;
+    int zilDialoguePage;
     bool overworldEnemiesSpawned;
     InscribedPillar castlePillar;
     RelicChest castleChest;

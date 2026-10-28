@@ -4,7 +4,8 @@
 
 enum class LootType {
     SHINGLES,      // Ancient hammered silver shingles
-    ELIXIR_FLASK   // Restorative health potion flask
+    ELIXIR_FLASK,  // Restorative health potion flask
+    ORE_SCRAP      // Raw metallic quarry ore scrap used for blacksmith forging
 };
 
 class Player;

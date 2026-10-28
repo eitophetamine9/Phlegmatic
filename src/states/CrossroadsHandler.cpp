@@ -358,10 +358,5 @@ void CrossroadsHandler::Render(
         GameUI::DrawGameOver(screenWidth, screenHeight);
     }
 
-    if (showControlsModal) {
-        GameUI::DrawControlsModal(screenWidth, screenHeight, mousePos, isPressed);
-    }
-    if (showInventoryModal) {
-        GameUI::DrawInventoryModal(screenWidth, screenHeight, mousePos, isPressed, const_cast<Player&>(player), inventoryActiveTab, inventorySelectedFragment);
-    }
+
 }

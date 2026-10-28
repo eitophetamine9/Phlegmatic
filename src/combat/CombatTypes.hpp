@@ -19,10 +19,11 @@ enum class ArmorType {
 
 enum class TotemType {
     NONE,
-    TOTEM_SANITY,      // Campaign: +15% overall damage, no nerfs
-    TOTEM_INSANITY,    // Sandbox: +30% overall damage, -10% armor
-    TOTEM_MIST,        // Sandbox: +20% stamina recovery, +5% cd reduction, -5% damage
-    CRUSADER_TOTEM     // Sandbox: +30% defense, -10% movement speed
+    TOTEM_SANITY,          // Campaign: +15% overall damage, no nerfs
+    TOTEM_INSANITY,        // Sandbox: +30% overall damage, -10% armor
+    TOTEM_MIST,            // Sandbox: +20% stamina recovery, +5% cd reduction, -5% damage
+    CRUSADER_TOTEM,        // Sandbox: +30% defense, -10% movement speed
+    ELEMENTAL_CORE_TOTEM   // Secret Boss: +Defense, projectile on light attack (5s CD), -speed
 };
 
 // The Medieval Four Humors Alignment

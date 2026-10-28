@@ -4,11 +4,12 @@
 #include "../core/Particles.hpp"
 
 enum class ProjectileType {
-    BOLT,         // Archer's piercing bolt
-    VOID_ORB,     // Pyromancer's occult orb
-    NOVA_STAR,    // Boss radial star
-    BEAM_SHARD,   // Boss focused beam / shard
-    HOLY_BEAM     // Truth Seeker piercing holy beam
+    BOLT,           // Archer's piercing bolt
+    VOID_ORB,       // Pyromancer's occult orb
+    NOVA_STAR,      // Boss radial star
+    BEAM_SHARD,     // Boss focused beam / shard
+    HOLY_BEAM,      // Truth Seeker piercing holy beam
+    ELEMENTAL_BOLT  // Elemental Golem & Elemental Core Totem projectile
 };
 
 class Projectile {

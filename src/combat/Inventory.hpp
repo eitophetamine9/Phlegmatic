@@ -99,6 +99,18 @@ public:
         return false;
     }
 
+    // Material: Ore Scraps
+    int GetOreScraps() const { return oreScraps; }
+    void SetOreScraps(int count) { oreScraps = count >= 0 ? count : 0; }
+    void AddOreScraps(int count) { oreScraps += count; }
+    bool SpendOreScraps(int count) {
+        if (oreScraps >= count) {
+            oreScraps -= count;
+            return true;
+        }
+        return false;
+    }
+
     // Weapon Upgrades (+0, +1, +2)
     int GetWeaponUpgrade(WeaponType type) const {
         int idx = (int)type;
@@ -127,5 +139,6 @@ private:
 
     int healthPotions = 1; // Default starting health potions
     int shingles = 0;      // Currency: Shingles
+    int oreScraps = 0;     // Material: Ore Scraps (from Quarry Ore Golems)
     int weaponUpgradeLevel[5] = { 0 };
 };
