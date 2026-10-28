@@ -590,10 +590,21 @@ void ZyphdenHandler::Update(
                     particles.SpawnFloatingText(kingKreptu.position, "Courtyard Trial Sanctioned!", Color{ 255, 220, 90, 255 }, 22.0f);
                     SoundFX::PlayParrySuccess();
                 } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
+                    questPhase = ZyphdenQuestPhase::EXPLORE_REALM;
                     std::vector<std::string> pages = {
-                        "You bested Captain Lenon—a feat I have not witnessed in twenty winters of peace or war. The Crusader Plate rests upon shoulders worthy of its weight. You carry Zyphden's blessing, Champion. May the tempests guide your edge against the dark."
+                        "You bested Captain Lenon—a martial feat I have not witnessed in twenty winters of peace or war. The sacred Crusader Plate rests upon shoulders worthy of its weight.",
+                        "Your true journey lies beyond our mountain ramparts. I hereby grant you the Crown's sanction to travel to the next kingdom through the northern frontier passes.",
+                        "Hear me well, Champion: there is no haste. Take your time to explore Zyphden freely, sharpen your armaments at Varek's master forge, or test your mettle against the quarry beasts to the east. You may roam without worry."
                     };
                     OpenDialogue("king_win", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
+                    particles.SpawnFloatingText(kingKreptu.position, "The Frontier Unlocked!", Color{ 255, 220, 90, 255 }, 22.0f);
+                    SoundFX::PlayParrySuccess();
+                } else if (questPhase == ZyphdenQuestPhase::EXPLORE_REALM) {
+                    std::vector<std::string> pages = {
+                        "The northern border road is open whenever you are prepared to cross into the next realm.",
+                        "Until then, you remain an honored champion of Zyphden. Roam our courtyards, workshops, and borders freely."
+                    };
+                    OpenDialogue("king_explore", "KING KREPTU - MONARCH OF ZYPHDEN", pages, Color{ 255, 215, 70, 255 });
                 } else if (questPhase == ZyphdenQuestPhase::CHALLENGE_READY) {
                     std::vector<std::string> pages = {
                         "Captain Lenon is not a man to be kept waiting in the yard. Go, traveler. Show our garrison what fire burns in your blood."
@@ -874,7 +885,7 @@ void ZyphdenHandler::Update(
                             };
                         }
                         OpenDialogue("lenon_spar_start", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
-                    } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS) {
+                    } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS || questPhase == ZyphdenQuestPhase::EXPLORE_REALM) {
                         std::vector<std::string> pages = {
                             "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead."
                         };
@@ -1037,51 +1048,99 @@ void ZyphdenHandler::Render(
         }
     }
 
-    // Middle-Left Collapsible Objectives Tracker
-    float objY = (float)screenHeight * 0.38f;
-    float objX = 18.0f;
-    Rectangle toggleTabRec = { objX, objY - 26.0f, 130.0f, 22.0f };
-    bool hoverTab = CheckCollisionPointRec(mousePos, toggleTabRec);
-    if (hoverTab && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+    // Middle-Left Collapsible Objectives Tracker (Tutorial-Style Single-Objective Display)
+    if (IsKeyPressed(KEY_O)) {
         showObjectives = !showObjectives;
-        SoundFX::PlayButtonClick();
     }
 
-    DrawRectangleRounded(toggleTabRec, 0.3f, 4, hoverTab ? Color{ 42, 54, 75, 240 } : Color{ 22, 28, 40, 210 });
-    DrawRectangleRoundedLines(toggleTabRec, 0.3f, 4, Color{ 85, 105, 140, 220 });
-    DrawText(showObjectives ? "[-] OBJECTIVES [O]" : "[+] OBJECTIVES [O]", (int)objX + 8, (int)objY - 22, 11, hoverTab ? Color{ 255, 230, 120, 255 } : Color{ 200, 215, 240, 230 });
+    float bannerX = 24.0f;
+    float bannerY = (float)screenHeight * 0.38f;
 
-    if (showObjectives) {
-        float cardW = 285.0f;
-        float cardH = 135.0f;
-        Rectangle cardRec = { objX, objY, cardW, cardH };
-        DrawRectangleRounded(cardRec, 0.15f, 4, Color{ 14, 18, 26, 235 });
-        DrawRectangleRoundedLines(cardRec, 0.15f, 4, Color{ 55, 72, 100, 220 });
+    if (!showObjectives) {
+        // Collapsed Sleek Bookmark Tab
+        const float tabW = 160.0f;
+        const float tabH = 34.0f;
+        Rectangle tabRec = { bannerX, bannerY, tabW, tabH };
+        bool isHovered = CheckCollisionPointRec(mousePos, tabRec);
 
-        DrawText("CHAPTER 1: ZYPHDEN", (int)objX + 14, (int)objY + 12, 11, Color{ 255, 215, 80, 255 });
+        if (isHovered && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            showObjectives = true;
+            SoundFX::PlayButtonClick();
+        }
 
-        // Objective 1: Visit Tavernkeep Eldon
-        bool obj1Done = questPhase > ZyphdenQuestPhase::SEEK_TAVERN;
-        Color col1 = obj1Done ? Color{ 100, 235, 160, 255 } : Color{ 255, 230, 120, 255 };
-        const char* mark1 = obj1Done ? "[x] 1. Spoke with Tavernkeep Eldon" : "[>] 1. Visit Hearthside Tavern & speak with Eldon";
-        DrawText(mark1, (int)objX + 14, (int)objY + 34, 10, col1);
+        DrawRectangleRounded(tabRec, 0.25f, 4, isHovered ? Color{ 28, 38, 56, 235 } : Color{ 16, 22, 34, 215 });
+        DrawRectangleRoundedLines(tabRec, 0.25f, 4, isHovered ? Color{ 255, 215, 80, 240 } : Color{ 65, 85, 120, 200 });
+        DrawCircle((int)bannerX + 16, (int)bannerY + 17, 4.0f, Color{ 255, 215, 80, 255 });
+        FontManager::DrawGameTextShadow("[O] OBJECTIVES", (int)bannerX + 28, (int)bannerY + 11, 11, isHovered ? Color{ 255, 255, 255, 255 } : Color{ 200, 220, 245, 220 });
+    } else {
+        // Expanded Middle-Left Single-Objective Card (Matching Tutorial Display)
+        const float bannerW = 480.0f;
+        const float bannerH = 78.0f;
+        Rectangle cardRec = { bannerX, bannerY, bannerW, bannerH };
 
-        // Objective 2: Royal Audience with King Kreptu
-        bool obj2Done = questPhase >= ZyphdenQuestPhase::CHALLENGE_READY;
-        Color col2 = obj2Done ? Color{ 100, 235, 160, 255 } : (questPhase == ZyphdenQuestPhase::SEEK_KING ? Color{ 255, 230, 120, 255 } : Color{ 140, 150, 165, 200 });
-        const char* mark2 = obj2Done ? "[x] 2. Royal Audience with King Kreptu" : (questPhase == ZyphdenQuestPhase::SEEK_KING ? "[>] 2. Audience with King Kreptu in Northern Keep" : "[ ] 2. Speak with Captain Lenon & King Kreptu");
-        DrawText(mark2, (int)objX + 14, (int)objY + 56, 10, col2);
+        DrawRectangleRounded(cardRec, 0.15f, 6, Color{ 14, 18, 28, 235 });
+        DrawRectangleRoundedLines(cardRec, 0.15f, 6, Color{ 205, 165, 75, 240 });
+        DrawRectangleRoundedLines(Rectangle{ bannerX + 3.0f, bannerY + 3.0f, bannerW - 6.0f, bannerH - 6.0f }, 0.12f, 6, Color{ 45, 58, 85, 160 });
 
-        // Objective 3: Courtyard Spar with Knight Lenon
-        bool obj3Done = questPhase == ZyphdenQuestPhase::VICTORIOUS;
-        Color col3 = obj3Done ? Color{ 100, 235, 160, 255 } : (questPhase == ZyphdenQuestPhase::CHALLENGE_READY || questPhase == ZyphdenQuestPhase::SPARRING ? Color{ 255, 230, 120, 255 } : Color{ 140, 150, 165, 200 });
-        const char* mark3 = obj3Done ? "[x] 3. Bested Knight Lenon in Courtyard" : (questPhase == ZyphdenQuestPhase::SPARRING ? "[!] 3. Sparring with Knight Lenon!" : (questPhase == ZyphdenQuestPhase::CHALLENGE_READY ? "[>] 3. Challenge Knight Lenon in Courtyard" : "[ ] 3. Spar with Knight Lenon in Courtyard"));
-        DrawText(mark3, (int)objX + 14, (int)objY + 78, 10, col3);
+        int stepNum = 1;
+        std::string objTitle = "";
+        std::string objHint = "";
 
-        // Objective 4: Claim Crusader Plate
-        Color col4 = obj3Done ? Color{ 100, 235, 160, 255 } : Color{ 140, 150, 165, 200 };
-        const char* mark4 = obj3Done ? "[x] 4. Claimed Crusader Plate (+24 Def)" : "[ ] 4. Claim Crusader Plate (+24 Def)";
-        DrawText(mark4, (int)objX + 14, (int)objY + 100, 10, col4);
+        switch (questPhase) {
+            case ZyphdenQuestPhase::SEEK_TAVERN:
+                stepNum = 1;
+                objTitle = "TAVERN INQUIRY: Visit the Hearthside Tavern and speak with Tavernkeep Eldon [E].";
+                objHint = "Enter the Tavern in southwest Zyphden to gather rumors of the realm";
+                break;
+            case ZyphdenQuestPhase::LENON_APPROACHING:
+                stepNum = 2;
+                objTitle = "VANGUARD CAPTAIN: Captain Lenon approaches outside! Speak with him regarding Zil.";
+                objHint = "Speak with Knight Lenon outside the Tavern to hear King Kreptu's summons";
+                break;
+            case ZyphdenQuestPhase::SEEK_KING:
+                stepNum = 3;
+                objTitle = "ROYAL AUDIENCE: Seek King Kreptu on his throne dais in the Northern Royal Keep [E].";
+                objHint = "Follow the central stone road north and enter the royal throne room";
+                break;
+            case ZyphdenQuestPhase::CHALLENGE_READY:
+                stepNum = 4;
+                objTitle = "COURTYARD CHALLENGE: Meet Knight Lenon in the courtyard to initiate the martial spar [E].";
+                objHint = "Approach Knight Lenon near the central banners and speak with him to begin";
+                break;
+            case ZyphdenQuestPhase::SPARRING:
+                stepNum = 5;
+                objTitle = "MARTIAL DUEL: Spar with Knight Lenon! Master parries and break his poise.";
+                objHint = "Timed Parry [F] deflects heavy strikes; Dash [Q] evades whirlwind slashes";
+                break;
+            case ZyphdenQuestPhase::VICTORIOUS:
+                stepNum = 6;
+                objTitle = "ROYAL DEBRIEF: Return to the Royal Keep and speak with King Kreptu [E].";
+                objHint = "Enter the Royal Keep and report your victory over Lenon to the King";
+                break;
+            case ZyphdenQuestPhase::EXPLORE_REALM:
+            default:
+                stepNum = 7;
+                objTitle = "THE OPEN REALM: Journey to the next kingdom across northern gate (open exploration).";
+                objHint = "Explore Zyphden, craft blades at Varek's Forge, or proceed north at your leisure";
+                break;
+        }
+
+        std::string chapterHeader = "MAIN QUEST: ZYPHDEN  (" + std::to_string(stepNum) + "/7)";
+        FontManager::DrawGameTextShadow(chapterHeader.c_str(), (int)bannerX + 16, (int)bannerY + 10, 11, Color{ 255, 215, 80, 255 });
+
+        // Toggle button on top right of the card
+        Rectangle toggleBtn = { bannerX + bannerW - 92.0f, bannerY + 8.0f, 80.0f, 22.0f };
+        bool isTogHov = CheckCollisionPointRec(mousePos, toggleBtn);
+        if (isTogHov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            showObjectives = false;
+            SoundFX::PlayButtonClick();
+        }
+        DrawRectangleRounded(toggleBtn, 0.3f, 3, isTogHov ? Color{ 40, 52, 75, 220 } : Color{ 22, 28, 42, 180 });
+        DrawRectangleRoundedLines(toggleBtn, 0.3f, 3, isTogHov ? Color{ 140, 210, 255, 240 } : Color{ 60, 80, 115, 200 });
+        FontManager::DrawGameTextShadow("HIDE [O]", (int)toggleBtn.x + 14, (int)toggleBtn.y + 5, 10, isTogHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 205, 235, 220 });
+
+        FontManager::DrawGameTextShadow(objTitle.c_str(), (int)bannerX + 16, (int)bannerY + 31, 12, Color{ 255, 255, 255, 255 });
+        FontManager::DrawGameTextShadow(objHint.c_str(), (int)bannerX + 16, (int)bannerY + 52, 10, Color{ 120, 220, 255, 220 });
     }
 
     // Top Location Entry Banner
