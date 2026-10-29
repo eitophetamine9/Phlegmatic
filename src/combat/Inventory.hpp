@@ -114,16 +114,16 @@ public:
     // Weapon Upgrades (+0, +1, +2)
     int GetWeaponUpgrade(WeaponType type) const {
         int idx = (int)type;
-        if (idx >= 0 && idx < 5) return weaponUpgradeLevel[idx];
+        if (idx >= 0 && idx < 6) return weaponUpgradeLevel[idx];
         return 0;
     }
     void SetWeaponUpgrade(WeaponType type, int level) {
         int idx = (int)type;
-        if (idx >= 0 && idx < 5) weaponUpgradeLevel[idx] = level;
+        if (idx >= 0 && idx < 6) weaponUpgradeLevel[idx] = level;
     }
     void UpgradeWeapon(WeaponType type) {
         int idx = (int)type;
-        if (idx >= 0 && idx < 5) weaponUpgradeLevel[idx]++;
+        if (idx >= 0 && idx < 6) weaponUpgradeLevel[idx]++;
     }
 
 private:
@@ -140,5 +140,5 @@ private:
     int healthPotions = 1; // Default starting health potions
     int shingles = 0;      // Currency: Shingles
     int oreScraps = 0;     // Material: Ore Scraps (from Quarry Ore Golems)
-    int weaponUpgradeLevel[5] = { 0 };
+    int weaponUpgradeLevel[6] = { 0 };
 };

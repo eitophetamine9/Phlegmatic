@@ -12,7 +12,7 @@ struct SaveSlotSummary {
     int shingles = 0;
     int oreScraps = 0;
     int potionCount = 1;
-    int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker
+    int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker, 5: Halberd
     int equippedArmor = 0;
     int equippedTotem = 0;
     int discoveredFragments = 0;
@@ -37,8 +37,8 @@ struct GameSaveData {
     int equippedWeapon = 1;
     int equippedArmor = 0;
     int equippedTotem = 0;
-    int weaponUpgrades[5] = { 0 };
-    bool unlockedWeapons[5] = { true, true, false, false, false };
+    int weaponUpgrades[6] = { 0 };
+    bool unlockedWeapons[6] = { true, true, false, false, false, false };
     bool unlockedFragments[10] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;

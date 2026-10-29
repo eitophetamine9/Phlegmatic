@@ -217,7 +217,7 @@ void Game::SaveActiveGame() {
     data.equippedArmor = (int)player.GetArmor();
     data.equippedTotem = (int)player.GetTotem();
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
         data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
     }
@@ -252,7 +252,7 @@ void Game::LoadActiveGame(int slotIndex) {
     player.GetInventory().SetShingles(data.shingles);
     player.GetInventory().SetOreScraps(data.oreScraps);
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
         if (data.unlockedWeapons[i]) {
             player.GetInventory().UnlockWeapon((WeaponType)i);
@@ -317,6 +317,8 @@ void Game::Update(float dt) {
     particles.Update(dt);
     camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
     Vector2 mouseScreen = GetMousePosition();
+
+    SoundFX::UpdateAmbience(dt, (int)currentState);
 
     // Fullscreen Shortcuts: F11 or Alt+Enter
     if (IsKeyPressed(KEY_F11) || ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)) && IsKeyPressed(KEY_ENTER))) {

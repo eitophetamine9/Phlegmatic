@@ -139,6 +139,7 @@ private:
     // Map & Interior State
     bool inTavern = false;
     bool inForge = false;
+    int forgeTab = 0;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };

@@ -27,7 +27,7 @@ void Inventory::InitDefault() {
     healthPotions = 1;
     shingles = 0;
     oreScraps = 0;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < 6; ++i) {
         weaponUpgradeLevel[i] = 0;
     }
 
