@@ -65,7 +65,8 @@ private:
     bool zilDefeated;
     bool zilSparedPlayer;
     bool hasUsedZilRetry;
-    bool showZilDefeatModal;
+    bool showZilDefeatModal;
+    int pendingZilChoice = 0;
     float zilDialogueTimer;
     std::string zilDialogueSpeaker;
     std::string zilDialogueText;
