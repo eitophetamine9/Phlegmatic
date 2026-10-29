@@ -28,6 +28,7 @@ public:
     static void DrawSword(Vector2 origin, float angle, float length, Color bladeColor, Color glowColor);
     static void DrawDaggers(Vector2 originL, Vector2 originR, float angleL, float angleR, Color bladeColor, Color glowColor);
     static void DrawMace(Vector2 origin, float angle, float length, Color headColor, Color glowColor);
+    static void DrawHalberd(Vector2 origin, float angle, float length, Color headColor, Color glowColor);
 
     // Pedestals & Environment
     static void DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool isSelected, bool isHovered, float time);

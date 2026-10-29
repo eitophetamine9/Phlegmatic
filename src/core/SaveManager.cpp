@@ -192,7 +192,7 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
                 std::stringstream ss(inner);
                 std::string item;
                 int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 5) {
+                while (std::getline(ss, item, ',') && idx < 6) {
                     outData.weaponUpgrades[idx++] = std::stoi(item);
                 }
             }
@@ -204,7 +204,7 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
                 std::stringstream ss(inner);
                 std::string item;
                 int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 5) {
+                while (std::getline(ss, item, ',') && idx < 6) {
                     outData.unlockedWeapons[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
                 }
             }
@@ -262,15 +262,15 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
 
     // Weapon upgrades
     file << "  \"weaponUpgrades\": [";
-    for (int i = 0; i < 5; ++i) {
-        file << data.weaponUpgrades[i] << (i < 4 ? ", " : "");
+    for (int i = 0; i < 6; ++i) {
+        file << data.weaponUpgrades[i] << (i < 5 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked weapons
     file << "  \"unlockedWeapons\": [";
-    for (int i = 0; i < 5; ++i) {
-        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 4 ? ", " : "");
+    for (int i = 0; i < 6; ++i) {
+        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 5 ? ", " : "");
     }
     file << "],\n";
 
