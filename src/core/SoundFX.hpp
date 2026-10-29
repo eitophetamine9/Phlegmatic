@@ -1,53 +1,71 @@
-#pragma once
-#include "raylib.h"
-
-class SoundFX {
-public:
-    static void Init();
-    static void Close();
-
-    static void PlayLightAttack();
-    static void PlayHeavyAttack();
-    static void PlayParrySuccess();
-    static void PlayParryMiss();
-    static void PlayHitImpact();
-    static void PlayTelegraphWarning();
-    static void PlayEnemyDeath();
-    static void PlayDash();
-    static void PlayProjectileShoot();
-    static void PlayProjectileReflect();
-    static void PlayEquipWeapon();
-    static void PlayButtonClick();
-    static void PlayCutsceneChime();
-    static void PlayLoreDiscovery();
-    static void PlayCrusaderClash();
-    static void PlayTruthSeekerResonance();
-    static void PlayGateOpen();
-    static void PlayHeal();
-    static void PlayCoinPickup();
-    static void PlayTranceActivate();
-
-private:
-    static bool initialized;
-    static Sound sndLightAttack;
-    static Sound sndHeavyAttack;
-    static Sound sndParrySuccess;
-    static Sound sndParryMiss;
-    static Sound sndHitImpact;
-    static Sound sndTelegraph;
-    static Sound sndEnemyDeath;
-    static Sound sndDash;
-    static Sound sndProjectileShoot;
-    static Sound sndProjectileReflect;
-    static Sound sndEquipWeapon;
-    static Sound sndButtonClick;
-    static Sound sndCutsceneChime;
-    static Sound sndLoreDiscovery;
-    static Sound sndCrusaderClash;
-    static Sound sndTruthSeekerResonance;
-    static Sound sndGateOpen;
-    static Sound sndCoinPickup;
-    static Sound sndTranceActivate;
-
-    static Sound GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType);
-};
+#pragma once
+#include "raylib.h"
+
+class SoundFX {
+public:
+    static void Init();
+    static void Close();
+
+    static void PlayLightAttack();
+    static void PlayHeavyAttack();
+    static void PlayParrySuccess();
+    static void PlayParryMiss();
+    static void PlayHitImpact();
+    static void PlayTelegraphWarning();
+    static void PlayEnemyDeath();
+    static void PlayDash();
+    static void PlayProjectileShoot();
+    static void PlayProjectileReflect();
+    static void PlayEquipWeapon();
+    static void PlayButtonClick();
+    static void PlayCutsceneChime();
+    static void PlayLoreDiscovery();
+    static void PlayCrusaderClash();
+    static void PlayTruthSeekerResonance();
+    static void PlayGateOpen();
+    static void PlayHeal();
+    static void PlayCoinPickup();
+    static void PlayTranceActivate();
+
+    // Volume & Environmental Ambience API
+    static void SetMasterVolume(float vol);
+    static void SetSFXVolume(float vol);
+    static void SetAmbienceVolume(float vol);
+    static float GetMasterVolume() { return masterVolume; }
+    static float GetSFXVolume() { return sfxVolume; }
+    static float GetAmbienceVolume() { return ambienceVolume; }
+    static void UpdateAmbience(float dt, int stateOrEnv);
+
+private:
+    static bool initialized;
+    static Sound sndLightAttack;
+    static Sound sndHeavyAttack;
+    static Sound sndParrySuccess;
+    static Sound sndParryMiss;
+    static Sound sndHitImpact;
+    static Sound sndTelegraph;
+    static Sound sndEnemyDeath;
+    static Sound sndDash;
+    static Sound sndProjectileShoot;
+    static Sound sndProjectileReflect;
+    static Sound sndEquipWeapon;
+    static Sound sndButtonClick;
+    static Sound sndCutsceneChime;
+    static Sound sndLoreDiscovery;
+    static Sound sndCrusaderClash;
+    static Sound sndTruthSeekerResonance;
+    static Sound sndGateOpen;
+    static Sound sndCoinPickup;
+    static Sound sndTranceActivate;
+    static Sound sndAmbienceWind;
+    static Sound sndAmbienceCavern;
+    static Sound sndAmbienceFire;
+
+    static float masterVolume;
+    static float sfxVolume;
+    static float ambienceVolume;
+    static int currentAmbienceTrack;
+    static float ambienceLoopTimer;
+
+    static Sound GenerateTone(float startFreq, float endFreq, float duration, float volume, int waveType);
+};
