@@ -106,6 +106,8 @@ public:
     void SetLenonDefeated(bool d);
     int GetQuestPhase() const { return (int)questPhase; }
     void SetQuestPhase(int phase);
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
     // Core NPCs

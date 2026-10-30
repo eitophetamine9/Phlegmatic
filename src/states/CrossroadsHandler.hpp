@@ -74,6 +74,8 @@ public:
     );
 
     bool HasClaimedTotemOfSanity() const { return chest.opened; }
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
     HiddenTotemChest chest;
