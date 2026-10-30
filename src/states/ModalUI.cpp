@@ -238,624 +238,1668 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
 
 
 // ==========================================
-// TACTICAL UI WIREFRAME VECTOR ICON HELPERS (Image 1 & Image 2)
-// ==========================================
-
-static void DrawWireframeWeapon(Vector2 center, WeaponType type, Color col) {
-    switch (type) {
-        case WeaponType::HALBERD: {
-            // Extended polearm shaft
-            DrawLineEx({ center.x - 45.0f, center.y + 20.0f }, { center.x + 45.0f, center.y - 20.0f }, 2.5f, col);
-            // Spear tip
-            Vector2 tip = { center.x + 45.0f, center.y - 20.0f };
-            DrawTriangle({ tip.x + 12.0f, tip.y - 5.0f }, { tip.x - 3.0f, tip.y - 8.0f }, { tip.x - 1.0f, tip.y + 4.0f }, col);
-            // Crescent axe blade
-            DrawCircleSectorLines({ tip.x - 10.0f, tip.y - 2.0f }, 16.0f, 210.0f, 330.0f, 12, col);
-            DrawLineEx({ tip.x - 10.0f, tip.y - 2.0f }, { tip.x - 22.0f, tip.y - 12.0f }, 2.0f, col);
-            // Rear beak hook
-            DrawLineEx({ tip.x - 14.0f, tip.y + 2.0f }, { tip.x - 24.0f, tip.y + 10.0f }, 2.0f, col);
-            break;
-        }
-        case WeaponType::MACE: {
-            // Shaft
-            DrawLineEx({ center.x - 35.0f, center.y + 20.0f }, { center.x + 25.0f, center.y - 15.0f }, 3.0f, col);
-            // Flanged head
-            Vector2 head = { center.x + 25.0f, center.y - 15.0f };
-            DrawCircleLines((int)head.x, (int)head.y, 14.0f, col);
-            DrawLineEx({ head.x - 10.0f, head.y }, { head.x + 10.0f, head.y }, 2.5f, col);
-            DrawLineEx({ head.x, head.y - 10.0f }, { head.x, head.y + 10.0f }, 2.5f, col);
-            DrawCircle((int)head.x, (int)head.y, 4.0f, col);
-            break;
-        }
-        case WeaponType::TRUTH_SEEKER: {
-            // Double crescent sacred blade
-            DrawLineEx({ center.x - 35.0f, center.y + 18.0f }, { center.x + 35.0f, center.y - 18.0f }, 2.5f, col);
-            Vector2 head = { center.x + 22.0f, center.y - 11.0f };
-            DrawCircleSectorLines(head, 18.0f, 180.0f, 360.0f, 16, col);
-            DrawCircleLines((int)head.x, (int)head.y, 7.0f, Color{ 255, 235, 120, 255 });
-            break;
-        }
-        case WeaponType::SWORD:
-        default: {
-            // Martial Broadsword
-            DrawLineEx({ center.x - 40.0f, center.y + 18.0f }, { center.x + 35.0f, center.y - 16.0f }, 3.0f, col);
-            Vector2 guard = { center.x - 15.0f, center.y + 6.0f };
-            DrawLineEx({ guard.x - 7.0f, guard.y - 14.0f }, { guard.x + 7.0f, guard.y + 14.0f }, 3.0f, col);
-            Vector2 tip = { center.x + 35.0f, center.y - 16.0f };
-            DrawLineEx(tip, { tip.x + 8.0f, tip.y - 4.0f }, 2.0f, col);
-            break;
-        }
-    }
-}
-
-static void DrawWireframeSidearm(Vector2 center, Color col) {
-    // Twin Daggers wireframe
-    DrawLineEx({ center.x - 18.0f, center.y - 14.0f }, { center.x + 14.0f, center.y + 14.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 18.0f, center.y - 14.0f }, { center.x - 14.0f, center.y + 14.0f }, 2.0f, col);
-    DrawCircleLines((int)center.x, (int)center.y, 5.0f, col);
-}
-
-static void DrawWireframeMelee(Vector2 center, Color col) {
-    // Curved combat blade
-    DrawLineEx({ center.x - 20.0f, center.y + 12.0f }, { center.x + 5.0f, center.y - 2.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 5.0f, center.y - 2.0f }, { center.x + 22.0f, center.y - 16.0f }, 2.5f, col);
-    DrawLineEx({ center.x - 20.0f, center.y + 12.0f }, { center.x - 26.0f, center.y + 16.0f }, 3.5f, col);
-}
-
-static void DrawWireframeSpecial(Vector2 center, Color col) {
-    // Relic diamond prism
-    DrawPolyLines(center, 4, 18.0f, 45.0f, col);
-    DrawCircleLines((int)center.x, (int)center.y, 6.0f, Color{ 255, 235, 120, 255 });
-    DrawLineEx({ center.x - 22.0f, center.y }, { center.x + 22.0f, center.y }, 1.5f, col);
-    DrawLineEx({ center.x, center.y - 22.0f }, { center.x, center.y + 22.0f }, 1.5f, col);
-}
-
-static void DrawWireframeGrenade(Vector2 center, Color col) {
-    // Tactical grenade flask canister
-    Rectangle body = { center.x - 9.0f, center.y - 10.0f, 18.0f, 22.0f };
-    DrawRectangleRoundedLines(body, 0.35f, 4, col);
-    DrawLineEx({ center.x - 9.0f, center.y - 3.0f }, { center.x + 9.0f, center.y - 3.0f }, 1.5f, col);
-    DrawLineEx({ center.x - 9.0f, center.y + 4.0f }, { center.x + 9.0f, center.y + 4.0f }, 1.5f, col);
-    DrawLineEx({ center.x, center.y - 10.0f }, { center.x, center.y - 15.0f }, 2.0f, col);
-    DrawCircleLines((int)center.x - 4, (int)center.y - 15, 3.0f, col);
-}
-
-static void DrawWireframeHelmet(Vector2 center, Color col) {
-    // Tactical diamond crest helmet (Image 1)
-    DrawPolyLines(center, 4, 20.0f, 45.0f, col);
-    DrawPolyLines(center, 4, 12.0f, 45.0f, Color{ col.r, col.g, col.b, 160 });
-    DrawLineEx({ center.x - 24.0f, center.y }, { center.x + 24.0f, center.y }, 1.5f, col);
-    DrawLineEx({ center.x, center.y - 24.0f }, { center.x, center.y + 24.0f }, 1.5f, col);
-}
-
-static void DrawWireframeCuirass(Vector2 center, Color col) {
-    // Segmented armored tactical vest (Image 1)
-    // High collar & shoulder cutouts
-    DrawLineEx({ center.x - 18.0f, center.y - 24.0f }, { center.x + 18.0f, center.y - 24.0f }, 2.0f, col);
-    DrawLineEx({ center.x - 18.0f, center.y - 24.0f }, { center.x - 26.0f, center.y - 8.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 18.0f, center.y - 24.0f }, { center.x + 26.0f, center.y - 8.0f }, 2.0f, col);
-    // Armored torso ribs
-    DrawLineEx({ center.x - 26.0f, center.y - 8.0f }, { center.x - 18.0f, center.y + 22.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 26.0f, center.y - 8.0f }, { center.x + 18.0f, center.y + 22.0f }, 2.0f, col);
-    DrawLineEx({ center.x - 18.0f, center.y + 22.0f }, { center.x + 18.0f, center.y + 22.0f }, 2.0f, col);
-    // Ballistic chest chevron lines
-    DrawLineEx({ center.x - 16.0f, center.y - 10.0f }, { center.x, center.y - 2.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 16.0f, center.y - 10.0f }, { center.x, center.y - 2.0f }, 1.8f, col);
-    DrawLineEx({ center.x - 14.0f, center.y + 4.0f }, { center.x, center.y + 12.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 14.0f, center.y + 4.0f }, { center.x, center.y + 12.0f }, 1.8f, col);
-}
-
-static void DrawWireframeBoots(Vector2 center, Color col) {
-    // Tactical laced high boots (Image 1)
-    // Left boot
-    DrawLineEx({ center.x - 18.0f, center.y - 22.0f }, { center.x - 8.0f, center.y - 22.0f }, 1.8f, col);
-    DrawLineEx({ center.x - 18.0f, center.y - 22.0f }, { center.x - 16.0f, center.y + 14.0f }, 1.8f, col);
-    DrawLineEx({ center.x - 8.0f, center.y - 22.0f }, { center.x - 6.0f, center.y + 8.0f }, 1.8f, col);
-    DrawLineEx({ center.x - 16.0f, center.y + 14.0f }, { center.x - 22.0f, center.y + 22.0f }, 2.0f, col);
-    DrawLineEx({ center.x - 22.0f, center.y + 22.0f }, { center.x - 6.0f, center.y + 22.0f }, 2.0f, col);
-    DrawLineEx({ center.x - 6.0f, center.y + 8.0f }, { center.x - 6.0f, center.y + 22.0f }, 1.8f, col);
-
-    // Right boot
-    DrawLineEx({ center.x + 8.0f, center.y - 22.0f }, { center.x + 18.0f, center.y - 22.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 8.0f, center.y - 22.0f }, { center.x + 6.0f, center.y + 8.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 18.0f, center.y - 22.0f }, { center.x + 16.0f, center.y + 14.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 6.0f, center.y + 8.0f }, { center.x + 6.0f, center.y + 22.0f }, 1.8f, col);
-    DrawLineEx({ center.x + 6.0f, center.y + 22.0f }, { center.x + 22.0f, center.y + 22.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 16.0f, center.y + 14.0f }, { center.x + 22.0f, center.y + 22.0f }, 2.0f, col);
-}
-
-static void DrawWireframeLegs(Vector2 center, Color col) {
-    // Tactical combat pants / trousers (Image 1)
-    // Waistband & belt
-    DrawLineEx({ center.x - 20.0f, center.y - 24.0f }, { center.x + 20.0f, center.y - 24.0f }, 2.2f, col);
-    DrawLineEx({ center.x - 20.0f, center.y - 18.0f }, { center.x + 20.0f, center.y - 18.0f }, 1.5f, col);
-    // Outer legs
-    DrawLineEx({ center.x - 20.0f, center.y - 18.0f }, { center.x - 18.0f, center.y + 24.0f }, 2.0f, col);
-    DrawLineEx({ center.x + 20.0f, center.y - 18.0f }, { center.x + 18.0f, center.y + 24.0f }, 2.0f, col);
-    // Crotch & inner legs
-    DrawLineEx({ center.x, center.y - 8.0f }, { center.x - 6.0f, center.y + 24.0f }, 1.8f, col);
-    DrawLineEx({ center.x, center.y - 8.0f }, { center.x + 6.0f, center.y + 24.0f }, 1.8f, col);
-    // Knee seams & cargo accents
-    DrawLineEx({ center.x - 18.0f, center.y + 4.0f }, { center.x - 7.0f, center.y + 4.0f }, 1.5f, col);
-    DrawLineEx({ center.x + 7.0f, center.y + 4.0f }, { center.x + 18.0f, center.y + 4.0f }, 1.5f, col);
-}
-
-static void DrawWireframePotion(Vector2 center, Color col) {
-    // Alchemy potion flask bottle (Image 1)
-    // Cork & neck
-    DrawRectangleLines((int)center.x - 5, (int)center.y - 22, 10, 6, col);
-    DrawLineEx({ center.x - 4.0f, center.y - 16.0f }, { center.x + 4.0f, center.y - 16.0f }, 2.0f, col);
-    // Spherical body
-    DrawCircleLines((int)center.x, (int)center.y + 2, 18.0f, col);
-    // Bubbling liquid inside
-    DrawCircleSector({ center.x, center.y + 2 }, 15.0f, 20.0f, 160.0f, 12, Color{ col.r, col.g, col.b, 90 });
-    DrawCircle((int)center.x - 4, (int)center.y + 5, 2.5f, col);
-    DrawCircle((int)center.x + 4, (int)center.y - 1, 2.0f, col);
-}
-
-
 bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player, int& activeTab, int& selectedFragmentIndex) {
-    // Dimmed cinematic tactical backdrop
-    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 5, 8, 12, 225 });
 
-    float modalW = 1120.0f;
-    float modalH = 650.0f;
+    // Dimmed cinematic backdrop
+
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 9, 14, 215 });
+
+
+
+    float modalW = 1080.0f;
+
+    float modalH = 640.0f;
+
     float modalX = ((float)windowWidth - modalW) * 0.5f;
+
     float modalY = ((float)windowHeight - modalH) * 0.5f;
 
-    // Outer backing card & tactical borders
-    DrawRectangleRounded(Rectangle{ modalX, modalY, modalW, modalH }, 0.03f, 8, Color{ 11, 15, 22, 252 });
-    DrawRectangleRoundedLines(Rectangle{ modalX, modalY, modalW, modalH }, 0.03f, 8, Color{ 40, 52, 72, 220 });
-    DrawRectangleRoundedLines(Rectangle{ modalX + 4, modalY + 4, modalW - 8, modalH - 8 }, 0.025f, 8, Color{ 24, 32, 46, 180 });
 
-    // Subtle corner brackets (Image 1 style)
-    Color cornerCol = Color{ 140, 165, 195, 180 };
-    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 32, modalY + 12 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 12, modalY + 32 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 32, modalY + 12 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 12, modalY + 32 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 32, modalY + modalH - 12 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 12, modalY + modalH - 32 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 32, modalY + modalH - 12 }, 2.0f, cornerCol);
-    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 32 }, 2.0f, cornerCol);
 
-    // ==========================================
-    // TOP NAVIGATION BAR (Image 1: QUESTS | GEAR | INVENTORY | ABILITIES)
-    // ==========================================
-    float topNavY = modalY + 16.0f;
-    const char* tabs[4] = { "QUESTS", "GEAR", "INVENTORY", "ABILITIES" };
-    float tabWidths[4] = { 100.0f, 90.0f, 120.0f, 110.0f };
-    float tabStartX = modalX + (modalW - 460.0f) * 0.5f;
+    // Outer backing card & filigree borders
 
-    for (int t = 0; t < 4; t++) {
-        Rectangle tRec = { tabStartX, topNavY, tabWidths[t], 28.0f };
-        bool isHov = CheckCollisionPointRec(mousePos, tRec);
-        if ((isHov && isMousePressed) || (IsKeyPressed(KEY_ONE + t))) {
-            activeTab = t;
-            SoundFX::PlayButtonClick();
-        }
+    DrawRectangleRounded(Rectangle{ modalX, modalY, modalW, modalH }, 0.04f, 8, Color{ 14, 17, 26, 250 });
 
-        bool isActive = (activeTab == t);
-        int textW = MeasureText(tabs[t], 13);
-        int textX = (int)(tRec.x + (tRec.width - textW) * 0.5f);
+    DrawRectangleRoundedLines(Rectangle{ modalX, modalY, modalW, modalH }, 0.04f, 8, Color{ 205, 165, 75, 230 });
 
-        if (isActive) {
-            DrawText(tabs[t], textX, (int)topNavY + 4, 13, Color{ 255, 255, 255, 255 });
-            // Active glowing underline (Orange/Coral bar under GEAR like in Image 1)
-            DrawRectangle((int)tRec.x + 8, (int)topNavY + 24, (int)tRec.width - 16, 3, Color{ 255, 95, 75, 255 });
-            DrawRectangleGradientH((int)tRec.x + 4, (int)topNavY + 24, (int)tRec.width - 8, 3, Color{ 255, 130, 90, 255 }, Color{ 255, 70, 50, 255 });
-        } else {
-            DrawText(tabs[t], textX, (int)topNavY + 4, 13, isHov ? Color{ 220, 230, 245, 255 } : Color{ 130, 145, 170, 200 });
-        }
+    DrawRectangleRoundedLines(Rectangle{ modalX + 4, modalY + 4, modalW - 8, modalH - 8 }, 0.035f, 8, Color{ 45, 58, 82, 180 });
 
-        tabStartX += tabWidths[t] + 16.0f;
-    }
 
-    // Close Button [ESC / I] on Top Right
-    float closeW = 90.0f;
-    float closeH = 26.0f;
-    Rectangle closeRec = { modalX + modalW - closeW - 24.0f, topNavY, closeW, closeH };
+
+    // Golden corner filigree
+
+    Color cornerCol = Color{ 255, 215, 80, 240 };
+
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 38, modalY + 12 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 12, modalY + 38 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 38, modalY + 12 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 12, modalY + 38 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
+
+    DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
+
+
+
+    // Modal Header
+
+    DrawText("CHRONICLES & ARMORY OF TYDESHIRE", (int)modalX + 36, (int)modalY + 20, 22, Color{ 255, 220, 90, 255 });
+
+    DrawText("Manage royal armaments, inspect combat stats, and read uncovered lore fragments.", (int)modalX + 36, (int)modalY + 48, 12, Color{ 175, 195, 220, 220 });
+
+
+
+    // Close Button [ESC / I]
+
+    const float closeW = 120.0f;
+
+    const float closeH = 32.0f;
+
+    float closeX = modalX + modalW - closeW - 32.0f;
+
+    float closeY = modalY + 22.0f;
+
+    Rectangle closeRec = { closeX, closeY, closeW, closeH };
+
     bool isCloseHov = CheckCollisionPointRec(mousePos, closeRec);
-    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 48, 60, 85, 255 } : Color{ 20, 26, 38, 220 });
-    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 255, 95, 75, 255 } : Color{ 50, 65, 90, 200 });
-    DrawText("CLOSE [ESC]", (int)closeRec.x + 12, (int)closeRec.y + 7, 10, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 185, 210, 220 });
-    bool closeClicked = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_I);
 
-    // ==========================================
-    // TOP ATTRIBUTES STRIP (Directly under tabs, Image 1)
-    // ==========================================
-    float stripY = modalY + 54.0f;
-    float stripH = 34.0f;
-    DrawRectangle((int)modalX + 16, (int)stripY, (int)modalW - 32, (int)stripH, Color{ 14, 18, 26, 240 });
-    DrawLine((int)modalX + 16, (int)stripY, (int)modalX + (int)modalW - 16, (int)stripY, Color{ 36, 46, 64, 255 });
-    DrawLine((int)modalX + 16, (int)stripY + (int)stripH, (int)modalX + (int)modalW - 16, (int)stripY + (int)stripH, Color{ 36, 46, 64, 255 });
 
-    // Currency on Left: Shingles & Ore Scraps
-    DrawRectangle((int)modalX + 44, (int)stripY + 10, 12, 14, Color{ 255, 210, 60, 255 });
-    DrawRectangleLines((int)modalX + 44, (int)stripY + 10, 12, 14, Color{ 255, 240, 140, 255 });
-    std::string shinglesStr = std::to_string(player.GetInventory().GetShingles()) + " Shingles";
-    DrawText(shinglesStr.c_str(), (int)modalX + 64, (int)stripY + 10, 13, Color{ 255, 225, 100, 255 });
 
-    std::string oreStr = std::to_string(player.GetInventory().GetOreScraps()) + " Basalt Ore";
-    DrawText(oreStr.c_str(), (int)modalX + 180, (int)stripY + 10, 12, Color{ 160, 200, 230, 220 });
+    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
 
-    // Center Attributes: Heart (HP) | Blade (ATK) | Shield (DEF) | Lightning (SPD)
-    float attrCenterX = modalX + modalW * 0.5f - 140.0f;
+    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
 
-    // Heart Icon (HP)
-    DrawCircle((int)attrCenterX, (int)stripY + 16, 5.0f, Color{ 255, 75, 75, 255 });
-    DrawCircle((int)attrCenterX + 7, (int)stripY + 16, 5.0f, Color{ 255, 75, 75, 255 });
-    DrawTriangle({ attrCenterX - 4.0f, stripY + 18.0f }, { attrCenterX + 11.0f, stripY + 18.0f }, { attrCenterX + 3.5f, stripY + 26.0f }, Color{ 255, 75, 75, 255 });
-    std::string hpStr = std::to_string((int)player.GetHealth()) + "/" + std::to_string((int)player.GetMaxHealth());
-    DrawText(hpStr.c_str(), (int)attrCenterX + 18, (int)stripY + 11, 12, Color{ 240, 245, 255, 255 });
+    DrawText("CLOSE [ESC/I]", (int)closeX + 16, (int)closeY + 9, 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
 
-    // Blade Icon (ATK)
-    float atkX = attrCenterX + 95.0f;
-    DrawLineEx({ atkX, stripY + 23.0f }, { atkX + 10.0f, stripY + 10.0f }, 2.0f, Color{ 255, 160, 60, 255 });
-    DrawLineEx({ atkX + 1.0f, stripY + 19.0f }, { atkX + 7.0f, stripY + 23.0f }, 2.0f, Color{ 255, 160, 60, 255 });
-    std::string atkStr = std::to_string((int)player.GetEquippedWeaponStats().lightDamage);
-    DrawText(atkStr.c_str(), (int)atkX + 16, (int)stripY + 11, 12, Color{ 240, 245, 255, 255 });
 
-    // Shield Icon (DEF)
-    float defX = atkX + 65.0f;
-    DrawPoly({ defX + 5.0f, stripY + 17.0f }, 3, 7.0f, 180.0f, Color{ 90, 200, 255, 255 });
-    std::string defStr = std::to_string((int)player.GetDefense());
-    DrawText(defStr.c_str(), (int)defX + 16, (int)stripY + 11, 12, Color{ 240, 245, 255, 255 });
 
-    // Lightning Icon (SPD)
-    float spdX = defX + 65.0f;
-    DrawLineEx({ spdX + 4.0f, stripY + 10.0f }, { spdX, stripY + 17.0f }, 2.0f, Color{ 255, 230, 80, 255 });
-    DrawLineEx({ spdX, stripY + 17.0f }, { spdX + 5.0f, stripY + 17.0f }, 2.0f, Color{ 255, 230, 80, 255 });
-    DrawLineEx({ spdX + 5.0f, stripY + 17.0f }, { spdX + 1.0f, stripY + 24.0f }, 2.0f, Color{ 255, 230, 80, 255 });
-    std::string spdStr = std::to_string((int)player.GetSpeed());
-    DrawText(spdStr.c_str(), (int)spdX + 14, (int)stripY + 11, 12, Color{ 240, 245, 255, 255 });
+    bool closeClicked = (isCloseHov && isMousePressed);
 
-    // Capacity on Right: Bag / Weight
-    float capX = modalX + modalW - 145.0f;
-    DrawCircleLines((int)capX, (int)stripY + 14, 4.0f, Color{ 170, 190, 220, 240 });
-    DrawRectangleLines((int)capX - 6, (int)stripY + 18, 12, 8, Color{ 170, 190, 220, 240 });
-    std::string capStr = std::to_string(((int)player.GetInventory().GetUnlockedWeapons().size() + (int)player.GetInventory().GetQuestItems().size() + player.GetInventory().GetHealthPotionCount())) + "/175";
-    DrawText(capStr.c_str(), (int)capX + 14, (int)stripY + 11, 12, Color{ 200, 220, 245, 240 });
 
-    float contentY = stripY + stripH + 16.0f;
-    float contentH = modalH - (contentY - modalY) - 16.0f;
 
-    // ==========================================
-    // TAB 1: GEAR SCREEN (3-Column Tactical Layout from Image 1)
-    // ==========================================
+    // Tab Navigation Bar
+
+    float tabY = modalY + 76.0f;
+
+    DrawLine((int)modalX + 32, (int)tabY + 34, (int)(modalX + modalW - 32), (int)tabY + 34, Color{ 45, 58, 82, 255 });
+
+
+
+    // Tab 1: Equipment & Arsenal
+
+    Rectangle tab1Rec = { modalX + 36, tabY, 230.0f, 34.0f };
+
+    bool isTab1Hov = CheckCollisionPointRec(mousePos, tab1Rec);
+
+    if ((isTab1Hov && isMousePressed) || IsKeyPressed(KEY_ONE)) {
+
+        activeTab = 0;
+
+        SoundFX::PlayButtonClick();
+
+    }
+
+
+
+    if (activeTab == 0) {
+
+        DrawRectangleRounded(tab1Rec, 0.2f, 4, Color{ 32, 42, 64, 255 });
+
+        DrawRectangleRoundedLines(tab1Rec, 0.2f, 4, Color{ 255, 215, 80, 240 });
+
+        DrawText("1. EQUIPMENT & ARSENAL", (int)tab1Rec.x + 16, (int)tab1Rec.y + 10, 13, Color{ 255, 225, 100, 255 });
+
+    } else {
+
+        DrawRectangleRounded(tab1Rec, 0.2f, 4, isTab1Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
+
+        DrawText("1. EQUIPMENT & ARSENAL", (int)tab1Rec.x + 16, (int)tab1Rec.y + 10, 13, isTab1Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
+
+    }
+
+
+
+    // Tab 2: Lore Journal
+
+    Rectangle tab2Rec = { modalX + 276, tabY, 210.0f, 34.0f };
+
+    bool isTab2Hov = CheckCollisionPointRec(mousePos, tab2Rec);
+
+    if ((isTab2Hov && isMousePressed) || IsKeyPressed(KEY_TWO)) {
+
+        activeTab = 1;
+
+        SoundFX::PlayButtonClick();
+
+    }
+
+
+
+    bool hasUnread = player.GetInventory().HasUnreadFragments();
+
+    std::string tab2Label = hasUnread ? "2. LORE JOURNAL (!)" : "2. LORE JOURNAL";
+
+
+
     if (activeTab == 1) {
-        WeaponStats curWStats = player.GetEquippedWeaponStats();
-        ArmorStats curAStats = GetArmorStats(player.GetArmor());
-        TotemStats curTStats = GetTotemStats(player.GetTotem());
-        std::string hoveredTooltip = "";
 
-        // ------------------------------------------
-        // COLUMN 1 (LEFT): ARMAMENTS & AUXILIARIES
-        // ------------------------------------------
-        float col1X = modalX + 40.0f;
-        float col1W = 240.0f;
+        DrawRectangleRounded(tab2Rec, 0.2f, 4, Color{ 32, 42, 64, 255 });
 
-        // 1. MAIN WEAPON CARD (Equipped, highlighted red/coral border from Image 1)
-        float mainCardH = 110.0f;
-        Rectangle mainRec = { col1X, contentY + 14.0f, col1W, mainCardH };
-        bool isMainHov = CheckCollisionPointRec(mousePos, mainRec);
+        DrawRectangleRoundedLines(tab2Rec, 0.2f, 4, Color{ 255, 215, 80, 240 });
 
-        DrawText("MAIN", (int)col1X, (int)contentY, 11, Color{ 255, 95, 75, 255 });
-        DrawRectangleRounded(mainRec, 0.08f, 6, isMainHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 240 });
-        DrawRectangleRoundedLines(mainRec, 0.08f, 6, Color{ 255, 95, 75, 255 }); // Red/coral accent border!
+        DrawText(tab2Label.c_str(), (int)tab2Rec.x + 16, (int)tab2Rec.y + 10, 13, Color{ 255, 225, 100, 255 });
 
-        // Wireframe drawing of equipped weapon
-        Vector2 mainWepCenter = { col1X + col1W * 0.5f, mainRec.y + 44.0f };
-        DrawWireframeWeapon(mainWepCenter, player.GetWeapon(), Color{ 255, 225, 90, 255 });
+    } else {
 
-        // Weapon label & stats inside card
-        DrawText(curWStats.name.c_str(), (int)col1X + 12, (int)mainRec.y + mainCardH - 26.0f, 12, Color{ 255, 255, 255, 255 });
-        std::string wSub = "DMG " + std::to_string((int)curWStats.lightDamage) + " | RCH " + std::to_string((int)curWStats.lightRange);
-        DrawText(wSub.c_str(), (int)col1X + 12, (int)mainRec.y + mainCardH - 14.0f, 9, Color{ 170, 190, 215, 200 });
-        DrawText("[1-4]", (int)col1X + col1W - 32, (int)mainRec.y + mainCardH - 18.0f, 9, Color{ 255, 95, 75, 200 });
+        DrawRectangleRounded(tab2Rec, 0.2f, 4, isTab2Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
 
-        if (isMainHov) {
-            hoveredTooltip = curWStats.name + "\n" + curWStats.description + "\nLight DMG: " + std::to_string((int)curWStats.lightDamage) + " | Heavy DMG: " + std::to_string((int)curWStats.heavyDamage) + "\nPress [1] Sword | [2] Mace | [3] Halberd | [4] Truth Seeker to swap.";
-        }
+        DrawText(tab2Label.c_str(), (int)tab2Rec.x + 16, (int)tab2Rec.y + 10, 13, hasUnread ? Color{ 255, 215, 80, 255 } : (isTab2Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 }));
 
-        // Quick weapon swap on number keys or click
-        if (IsKeyPressed(KEY_ONE)) player.SetWeapon(WeaponType::SWORD);
-        if (IsKeyPressed(KEY_TWO)) player.SetWeapon(WeaponType::MACE);
-        if (IsKeyPressed(KEY_THREE)) player.SetWeapon(WeaponType::HALBERD);
-        if (IsKeyPressed(KEY_FOUR)) player.SetWeapon(WeaponType::TRUTH_SEEKER);
+    }
 
-        // 2. ROW 2: SIDEARM & MELEE SLOTS
-        float row2Y = mainRec.y + mainCardH + 18.0f;
-        float slotSubW = (col1W - 12.0f) * 0.5f;
-        float slotSubH = 80.0f;
 
-        // SIDEARM
-        Rectangle sideRec = { col1X, row2Y + 12.0f, slotSubW, slotSubH };
-        bool isSideHov = CheckCollisionPointRec(mousePos, sideRec);
-        DrawText("SIDEARM", (int)col1X, (int)row2Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(sideRec, 0.08f, 4, isSideHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(sideRec, 0.08f, 4, isSideHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeSidearm({ sideRec.x + slotSubW * 0.5f, sideRec.y + slotSubH * 0.5f - 2.0f }, Color{ 255, 220, 90, 240 });
-        DrawText("Dual Daggers", (int)sideRec.x + 8, (int)sideRec.y + slotSubH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isSideHov) hoveredTooltip = "SIDEARM: Dual Daggers\nRapid dual-blade secondary. Execute forward puncture bursts with [SPACE] evasion cadence.";
 
-        // MELEE
-        Rectangle melRec = { col1X + slotSubW + 12.0f, row2Y + 12.0f, slotSubW, slotSubH };
-        bool isMelHov = CheckCollisionPointRec(mousePos, melRec);
-        DrawText("MELEE", (int)melRec.x, (int)row2Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(melRec, 0.08f, 4, isMelHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(melRec, 0.08f, 4, isMelHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeMelee({ melRec.x + slotSubW * 0.5f, melRec.y + slotSubH * 0.5f - 2.0f }, Color{ 255, 220, 90, 240 });
-        DrawText("Combat Stiletto", (int)melRec.x + 8, (int)melRec.y + slotSubH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isMelHov) hoveredTooltip = "MELEE: Solsden Trench Stiletto\nTactical parrying blade used to deflect heavy attacks with timed precision [F].";
+    // Tab 3: Realm Map [M]
 
-        // 3. ROW 3: SPECIAL (RELIC / TOTEM)
-        float row3Y = sideRec.y + slotSubH + 18.0f;
-        float specH = 84.0f;
-        Rectangle specRec = { col1X, row3Y + 12.0f, col1W, specH };
-        bool isSpecHov = CheckCollisionPointRec(mousePos, specRec);
-        DrawText("SPECIAL", (int)col1X, (int)row3Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(specRec, 0.08f, 6, isSpecHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(specRec, 0.08f, 6, isSpecHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeSpecial({ col1X + 38.0f, specRec.y + specH * 0.5f }, Color{ 255, 220, 90, 240 });
-        DrawText(curTStats.name.c_str(), (int)col1X + 70, (int)specRec.y + 14, 11, Color{ 255, 255, 255, 255 });
-        DrawText(curTStats.description.c_str(), (int)col1X + 70, (int)specRec.y + 32, 8, Color{ 160, 185, 215, 200 });
-        if (isSpecHov) hoveredTooltip = "SPECIAL RELIC: " + curTStats.name + "\n" + curTStats.description;
+    Rectangle tab3Rec = { modalX + 496, tabY, 190.0f, 34.0f };
 
-        // 4. ROW 4: GRENADES / AUXILIARY FLASKS
-        float row4Y = specRec.y + specH + 16.0f;
-        DrawText("GRENADES", (int)col1X, (int)row4Y, 10, Color{ 140, 160, 190, 220 });
-        float grenW = 54.0f;
-        float grenH = 54.0f;
-        Rectangle gren1Rec = { col1X + 30.0f, row4Y + 12.0f, grenW, grenH };
-        Rectangle gren2Rec = { col1X + 96.0f, row4Y + 12.0f, grenW, grenH };
-        DrawRectangleRounded(gren1Rec, 0.12f, 4, Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(gren1Rec, 0.12f, 4, Color{ 36, 48, 68, 200 });
-        DrawWireframeGrenade({ gren1Rec.x + grenW * 0.5f, gren1Rec.y + grenH * 0.5f }, Color{ 255, 220, 90, 220 });
-        DrawRectangleRounded(gren2Rec, 0.12f, 4, Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(gren2Rec, 0.12f, 4, Color{ 36, 48, 68, 200 });
-        DrawWireframeGrenade({ gren2Rec.x + grenW * 0.5f, gren2Rec.y + grenH * 0.5f }, Color{ 255, 220, 90, 220 });
+    bool isTab3Hov = CheckCollisionPointRec(mousePos, tab3Rec);
 
-        // ------------------------------------------
-        // COLUMN 2 (CENTER): HERO PAPER DOLL & PROGRESSION BADGE
-        // ------------------------------------------
-        float centerColX = modalX + 310.0f;
-        float centerColW = 440.0f;
-        Vector2 dollCenter = { centerColX + centerColW * 0.5f, contentY + 225.0f };
+    if ((isTab3Hov && isMousePressed) || IsKeyPressed(KEY_THREE) || IsKeyPressed(KEY_M)) {
 
-        // Tactical Pedestal Circle beneath character (Image 1)
-        DrawEllipse((int)dollCenter.x, (int)(dollCenter.y + 168.0f), 125.0f, 32.0f, Color{ 10, 14, 22, 200 });
-        DrawEllipseLines((int)dollCenter.x, (int)(dollCenter.y + 168.0f), 125.0f, 32.0f, Color{ 45, 65, 95, 180 });
-        DrawEllipseLines((int)dollCenter.x, (int)(dollCenter.y + 168.0f), 95.0f, 24.0f, Color{ 60, 95, 135, 120 });
+        activeTab = 2;
 
-        // Draw animated Hero Paper Doll
-        AssetManager::DrawCharacterDoll(dollCenter, 1.95f, player.GetWeapon(), player.GetArmor(), player.GetTotem(), (float)GetTime());
+        SoundFX::PlayButtonClick();
 
-        // Ambient sparks around character
-        float animT = (float)GetTime();
-        for (int i = 0; i < 4; i++) {
-            float spkX = dollCenter.x + cosf(animT * 1.5f + (float)i * 1.57f) * 110.0f;
-            float spkY = dollCenter.y + sinf(animT * 1.2f + (float)i * 1.2f) * 130.0f;
-            DrawCircle((int)spkX, (int)spkY, 1.8f, Color{ 140, 210, 255, 160 });
-        }
+        return true; // Signals closing inventory and opening map
 
-        // Bottom-Left Level & Title Badge (Image 1: 23 JUST_BUCK_IT)
-        float titleX = centerColX + 24.0f;
-        float titleY = contentY + 418.0f;
-        DrawText("23", (int)titleX, (int)titleY, 34, Color{ 255, 255, 255, 255 });
-        DrawRectangle((int)titleX + 48, (int)titleY + 6, 3, 24, Color{ 255, 95, 75, 255 });
-        DrawText("JUST_BUCK_IT", (int)titleX + 58, (int)titleY + 4, 16, Color{ 255, 95, 75, 255 });
-        DrawText("SOLSDEN VANGUARD | ROYAL CHAMPION", (int)titleX + 58, (int)titleY + 23, 10, Color{ 130, 150, 180, 220 });
+    }
 
-        // ------------------------------------------
-        // COLUMN 3 (RIGHT): APPAREL & POTIONS
-        // ------------------------------------------
-        float col3X = modalX + modalW - 300.0f;
-        float col3W = 260.0f;
-        float appW = (col3W - 14.0f) * 0.5f;
-        float appH = 92.0f;
 
-        // ROW 1: HEAD & CHEST
-        float appRow1Y = contentY + 14.0f;
 
-        // HEAD
-        Rectangle headRec = { col3X, appRow1Y + 12.0f, appW, appH };
-        bool isHeadHov = CheckCollisionPointRec(mousePos, headRec);
-        DrawText("HEAD", (int)col3X, (int)appRow1Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(headRec, 0.08f, 4, isHeadHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(headRec, 0.08f, 4, isHeadHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeHelmet({ headRec.x + appW * 0.5f, headRec.y + appH * 0.5f - 4.0f }, Color{ 255, 220, 90, 240 });
-        DrawText("Vanguard Helm", (int)headRec.x + 8, (int)headRec.y + appH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isHeadHov) hoveredTooltip = "HEAD: Vanguard Steel Sallet\nTempered visor granting +10 Willpower posture resistance.";
+    DrawRectangleRounded(tab3Rec, 0.2f, 4, isTab3Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
 
-        // CHEST
-        Rectangle chestRec = { col3X + appW + 14.0f, appRow1Y + 12.0f, appW, appH };
-        bool isChestHov = CheckCollisionPointRec(mousePos, chestRec);
-        DrawText("CHEST", (int)chestRec.x, (int)appRow1Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(chestRec, 0.08f, 4, isChestHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(chestRec, 0.08f, 4, isChestHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeCuirass({ chestRec.x + appW * 0.5f, chestRec.y + appH * 0.5f - 4.0f }, Color{ 255, 220, 90, 240 });
-        DrawText(curAStats.name.c_str(), (int)chestRec.x + 8, (int)chestRec.y + appH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isChestHov) hoveredTooltip = "CHEST: " + curAStats.name + "\n" + curAStats.description + "\nDEF: " + std::to_string((int)curAStats.defense);
+    DrawText("3. REALM MAP [M]", (int)tab3Rec.x + 16, (int)tab3Rec.y + 10, 13, isTab3Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
 
-        // ROW 2: BOOTS & LEGS
-        float appRow2Y = headRec.y + appH + 18.0f;
 
-        // BOOTS
-        Rectangle bootRec = { col3X, appRow2Y + 12.0f, appW, appH };
-        bool isBootHov = CheckCollisionPointRec(mousePos, bootRec);
-        DrawText("BOOTS", (int)col3X, (int)appRow2Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(bootRec, 0.08f, 4, isBootHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(bootRec, 0.08f, 4, isBootHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeBoots({ bootRec.x + appW * 0.5f, bootRec.y + appH * 0.5f - 4.0f }, Color{ 255, 220, 90, 240 });
-        DrawText("Plated Treads", (int)bootRec.x + 8, (int)bootRec.y + appH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isBootHov) hoveredTooltip = "BOOTS: Plated Sabatons\nReinforced treads providing steady footing and 100% dash recovery.";
 
-        // LEGS
-        Rectangle legRec = { col3X + appW + 14.0f, appRow2Y + 12.0f, appW, appH };
-        bool isLegHov = CheckCollisionPointRec(mousePos, legRec);
-        DrawText("LEGS", (int)legRec.x, (int)appRow2Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(legRec, 0.08f, 4, isLegHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(legRec, 0.08f, 4, isLegHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframeLegs({ legRec.x + appW * 0.5f, legRec.y + appH * 0.5f - 4.0f }, Color{ 255, 220, 90, 240 });
-        DrawText("Greaves", (int)legRec.x + 8, (int)legRec.y + appH - 14.0f, 8, Color{ 170, 185, 210, 200 });
-        if (isLegHov) hoveredTooltip = "LEGS: Reinforced Combat Greaves\nChainmail leggings reducing bleed trauma by 20%.";
+    // TAB CONTENT AREA
 
-        // ROW 3: POTION QUICK-SLOT (Image 1)
-        float appRow3Y = bootRec.y + appH + 18.0f;
-        float potH = 88.0f;
-        Rectangle potRec = { col3X, appRow3Y + 12.0f, col3W, potH };
-        bool isPotHov = CheckCollisionPointRec(mousePos, potRec);
-        DrawText("POTION", (int)col3X, (int)appRow3Y, 10, Color{ 140, 160, 190, 220 });
-        DrawRectangleRounded(potRec, 0.08f, 6, isPotHov ? Color{ 22, 28, 42, 255 } : Color{ 14, 18, 28, 230 });
-        DrawRectangleRoundedLines(potRec, 0.08f, 6, isPotHov ? Color{ 120, 210, 255, 240 } : Color{ 36, 48, 68, 200 });
-        DrawWireframePotion({ col3X + 38.0f, potRec.y + potH * 0.5f }, Color{ 255, 220, 90, 240 });
+    float contentY = modalY + 125.0f;
 
-        int potCount = player.GetInventory().GetHealthPotionCount();
-        std::string potCountStr = "Health Elixir x" + std::to_string(potCount);
-        DrawText(potCountStr.c_str(), (int)col3X + 70, (int)potRec.y + 16, 12, Color{ 255, 255, 255, 255 });
-        DrawText("Restores 45 HP | Cooldown: 7s", (int)col3X + 70, (int)potRec.y + 34, 9, Color{ 160, 190, 220, 200 });
-        DrawText("[CLICK OR PRESS E TO DRINK]", (int)col3X + 70, (int)potRec.y + 52, 9, isPotHov ? Color{ 255, 215, 80, 255 } : Color{ 120, 145, 175, 180 });
 
-        if (isPotHov) hoveredTooltip = "POTION: Health Elixir\nConsumes 1 flask to restore 45 Health Points. Click or press [E] in combat.";
-        if ((isPotHov && isMousePressed) || IsKeyPressed(KEY_E)) {
-            // ParticleSystem particles; // Potion use
-            // player.UseHealthPotion(particles);
+
+    if (activeTab == 0) {
+
+        // TAB 0: EQUIPMENT, CHARACTER PREVIEW & MARTIAL STATS
+
+        static int s_equipCategory = 0; // 0 = WEAPONS, 1 = ARMORS, 2 = TOTEMS
+
+
+
+        // COLUMN 1: CHARACTER DOLL & QUICK-SLOT BADGES
+
+        float col1X = modalX + 34.0f;
+
+        float col1W = 260.0f;
+
+
+
+        DrawText("ROYAL CHAMPION", (int)col1X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
+
+
+
+        // Doll Stage Box
+
+        Rectangle dollBox = { col1X, contentY + 22.0f, col1W, 260.0f };
+
+        DrawRectangleRounded(dollBox, 0.08f, 6, Color{ 18, 23, 34, 230 });
+
+        DrawRectangleRoundedLines(dollBox, 0.08f, 6, Color{ 60, 80, 115, 240 });
+
+
+
+        // Draw animated paper doll
+
+        Vector2 dollCenter = { col1X + col1W * 0.5f, contentY + 140.0f };
+
+        AssetManager::DrawCharacterDoll(dollCenter, 1.35f, player.GetWeapon(), player.GetArmor(), player.GetTotem(), (float)GetTime());
+
+
+
+        // Subtitle below doll: Current Armor & Totem
+
+        ArmorStats curArmStats = GetArmorStats(player.GetArmor());
+
+        TotemStats curTotStats = GetTotemStats(player.GetTotem());
+
+        int anw = MeasureText(curArmStats.name.c_str(), 11);
+
+        DrawText(curArmStats.name.c_str(), (int)(col1X + (col1W - anw) * 0.5f), (int)(dollBox.y + dollBox.height - 24.0f), 11, Color{ 200, 220, 245, 230 });
+
+
+
+        // Quick Slot Badges below doll box
+
+        float slotStartY = contentY + 292.0f;
+
+        float slotH = 58.0f;
+
+
+
+        // Weapon Quick Slot
+
+        Rectangle slotWRec = { col1X, slotStartY, col1W, slotH };
+
+        bool isWSlotHov = CheckCollisionPointRec(mousePos, slotWRec);
+
+        if (isWSlotHov && isMousePressed) {
+
+            s_equipCategory = 0;
+
             SoundFX::PlayButtonClick();
+
         }
 
-        // Floating Inspection Tooltip Box (if hovering over any slot)
-        if (!hoveredTooltip.empty()) {
-            float tipW = 340.0f;
-            float tipH = 75.0f;
-            float tipX = mousePos.x + 18.0f;
-            float tipY = mousePos.y + 12.0f;
-            if (tipX + tipW > modalX + modalW - 10.0f) tipX = modalX + modalW - tipW - 10.0f;
-            if (tipY + tipH > modalY + modalH - 10.0f) tipY = modalY + modalH - tipH - 10.0f;
+        DrawRectangleRounded(slotWRec, 0.12f, 4, (s_equipCategory == 0) ? Color{ 32, 44, 66, 255 } : (isWSlotHov ? Color{ 24, 32, 48, 220 } : Color{ 18, 24, 36, 200 }));
 
-            DrawRectangleRounded(Rectangle{ tipX, tipY, tipW, tipH }, 0.15f, 4, Color{ 8, 12, 18, 245 });
-            DrawRectangleRoundedLines(Rectangle{ tipX, tipY, tipW, tipH }, 0.15f, 4, Color{ 120, 200, 255, 220 });
-            DrawText(hoveredTooltip.c_str(), (int)tipX + 12, (int)tipY + 10, 10, Color{ 225, 240, 255, 240 });
+        DrawRectangleRoundedLines(slotWRec, 0.12f, 4, (s_equipCategory == 0) ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
+
+        DrawText("[WEAPON SLOT]", (int)col1X + 12, (int)slotStartY + 8, 10, Color{ 140, 210, 255, 220 });
+
+        WeaponStats wStats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
+
+        DrawText(wStats.name.c_str(), (int)col1X + 12, (int)slotStartY + 24, 13, Color{ 255, 255, 255, 255 });
+
+        DrawText("Click to view arsenal", (int)col1X + 12, (int)slotStartY + 41, 9, Color{ 160, 180, 200, 180 });
+
+
+
+        // Armor Quick Slot
+
+        Rectangle slotARec = { col1X, slotStartY + 64.0f, col1W, slotH };
+
+        bool isASlotHov = CheckCollisionPointRec(mousePos, slotARec);
+
+        if (isASlotHov && isMousePressed) {
+
+            s_equipCategory = 1;
+
+            SoundFX::PlayButtonClick();
+
         }
-    }
-    // ==========================================
-    // TAB 0: QUESTS SCREEN (Active Objectives Tracker)
-    // ==========================================
-    else if (activeTab == 0) {
-        float qX = modalX + 50.0f;
-        float qY = contentY + 20.0f;
-        DrawText("CAMPAIGN CHRONICLES & ACTIVE OBJECTIVES", (int)qX, (int)qY, 16, Color{ 255, 220, 90, 255 });
-        DrawText("Track your oaths, kingdom investigations, and uncovered secrets across Tydeshire.", (int)qX, (int)qY + 24, 11, Color{ 160, 180, 210, 200 });
 
-        struct QuestEntry { const char* title; const char* stage; const char* desc; bool done; };
-        QuestEntry quests[3] = {
-            { "Act I: Solsden Awakening", "Ruined Castle", "Acquire vanguard armament from weapon rack and overcome the lingering remnant.", true },
-            { "Act II: Highway of the Damned", "Crossroads", "Cross the southern timberline, purge the bandit ambush, and find the border shrine.", true },
-            { "Act III: The Vanished Liege", "Zyphden Keep", "Seek royal audience with King Kreptu upon the throne dais in the High Keep.", false }
-        };
+        DrawRectangleRounded(slotARec, 0.12f, 4, (s_equipCategory == 1) ? Color{ 32, 44, 66, 255 } : (isASlotHov ? Color{ 24, 32, 48, 220 } : Color{ 18, 24, 36, 200 }));
 
-        for (int i = 0; i < 3; i++) {
-            float boxY = qY + 65.0f + (float)i * 105.0f;
-            Rectangle qRec = { qX, boxY, modalW - 100.0f, 90.0f };
-            DrawRectangleRounded(qRec, 0.08f, 6, Color{ 16, 22, 32, 230 });
-            DrawRectangleRoundedLines(qRec, 0.08f, 6, quests[i].done ? Color{ 90, 220, 140, 200 } : Color{ 255, 210, 70, 220 });
+        DrawRectangleRoundedLines(slotARec, 0.12f, 4, (s_equipCategory == 1) ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
 
-            DrawCircle((int)qX + 30, (int)boxY + 45, 12.0f, quests[i].done ? Color{ 40, 140, 70, 255 } : Color{ 180, 130, 30, 255 });
-            DrawText(quests[i].done ? "v" : "!", (int)qX + 26, (int)boxY + 38, 14, Color{ 255, 255, 255, 255 });
+        DrawText("[ARMOR SLOT]", (int)col1X + 12, (int)slotStartY + 72, 10, Color{ 140, 210, 255, 220 });
 
-            DrawText(quests[i].title, (int)qX + 60, (int)boxY + 16, 14, Color{ 255, 255, 255, 255 });
-            DrawText(quests[i].stage, (int)qX + modalW - 240, (int)boxY + 16, 11, Color{ 140, 200, 255, 240 });
-            DrawText(quests[i].desc, (int)qX + 60, (int)boxY + 42, 11, Color{ 170, 190, 215, 200 });
-            DrawText(quests[i].done ? "[COMPLETED]" : "[ACTIVE IN PROGRESS]", (int)qX + 60, (int)boxY + 64, 9, quests[i].done ? Color{ 120, 230, 150, 220 } : Color{ 255, 210, 80, 220 });
+        DrawText(curArmStats.name.c_str(), (int)col1X + 12, (int)slotStartY + 88, 13, Color{ 255, 255, 255, 255 });
+
+        DrawText("Click to view armors", (int)col1X + 12, (int)slotStartY + 105, 9, Color{ 160, 180, 200, 180 });
+
+
+
+        // Totem Quick Slot
+
+        Rectangle slotTRec = { col1X, slotStartY + 128.0f, col1W, slotH };
+
+        bool isTSlotHov = CheckCollisionPointRec(mousePos, slotTRec);
+
+        if (isTSlotHov && isMousePressed) {
+
+            s_equipCategory = 2;
+
+            SoundFX::PlayButtonClick();
+
         }
-    }
-    // ==========================================
-    // TAB 2: INVENTORY & LORE JOURNAL SCREEN
-    // ==========================================
-    else if (activeTab == 2) {
-        float jX = modalX + 50.0f;
-        float jY = contentY + 20.0f;
-        DrawText("LORE JOURNAL & DISCOVERED FRAGMENTS", (int)jX, (int)jY, 16, Color{ 255, 220, 90, 255 });
 
-        // Left List: Fragment indices
-        float listW = 280.0f;
-        float listH = contentH - 60.0f;
-        Rectangle listRec = { jX, jY + 35.0f, listW, listH };
-        DrawRectangleRounded(listRec, 0.05f, 4, Color{ 16, 22, 32, 230 });
-        DrawRectangleRoundedLines(listRec, 0.05f, 4, Color{ 40, 55, 80, 200 });
+        DrawRectangleRounded(slotTRec, 0.12f, 4, (s_equipCategory == 2) ? Color{ 32, 44, 66, 255 } : (isTSlotHov ? Color{ 24, 32, 48, 220 } : Color{ 18, 24, 36, 200 }));
 
-        const auto& fragments = player.GetInventory().GetFragments();
-        int totalFrag = player.GetInventory().GetTotalFragmentCount();
+        DrawRectangleRoundedLines(slotTRec, 0.12f, 4, (s_equipCategory == 2) ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
 
-        for (int i = 0; i < totalFrag && i < 8; i++) {
-            float itemY = listRec.y + 10.0f + (float)i * 44.0f;
-            Rectangle itemRec = { listRec.x + 8.0f, itemY, listW - 16.0f, 38.0f };
-            bool isItmHov = CheckCollisionPointRec(mousePos, itemRec);
-            bool isSel = (selectedFragmentIndex == i);
+        DrawText("[TOTEM RELIC]", (int)col1X + 12, (int)slotStartY + 136, 10, Color{ 140, 210, 255, 220 });
 
-            if (isItmHov && isMousePressed) {
-                selectedFragmentIndex = i;
+        std::string tName = (player.GetTotem() == TotemType::NONE) ? "None Attuned" : curTotStats.name;
+
+        DrawText(tName.c_str(), (int)col1X + 12, (int)slotStartY + 152, 13, (player.GetTotem() == TotemType::NONE) ? Color{ 160, 175, 195, 200 } : curTotStats.glowColor);
+
+        DrawText("Click to view totems", (int)col1X + 12, (int)slotStartY + 169, 9, Color{ 160, 180, 200, 180 });
+
+
+
+        // COLUMN 2: EQUIPMENT SELECTION & ARSENAL
+
+        float col2X = modalX + 310.0f;
+
+        float col2W = 410.0f;
+
+
+
+        // Category Tabs: WEAPONS, ARMORS, TOTEMS
+
+        float catW = (col2W - 16.0f) / 3.0f;
+
+        const char* catNames[3] = { "WEAPONS (5)", "ARMORS (4)", "TOTEMS (5)" };
+
+        for (int c = 0; c < 3; c++) {
+
+            Rectangle catRec = { col2X + (float)c * (catW + 8.0f), contentY, catW, 28.0f };
+
+            bool isCatHov = CheckCollisionPointRec(mousePos, catRec);
+
+            bool isCatActive = (s_equipCategory == c);
+
+            if (isCatHov && isMousePressed) {
+
+                s_equipCategory = c;
+
                 SoundFX::PlayButtonClick();
+
             }
 
-            DrawRectangleRounded(itemRec, 0.15f, 4, isSel ? Color{ 36, 52, 78, 255 } : (isItmHov ? Color{ 24, 32, 48, 220 } : Color{ 18, 24, 36, 180 }));
-            DrawRectangleRoundedLines(itemRec, 0.15f, 4, isSel ? Color{ 255, 215, 80, 240 } : Color{ 38, 50, 72, 180 });
-            std::string label = "Fragment #" + std::to_string(i + 1);
-            DrawText(label.c_str(), (int)itemRec.x + 14, (int)itemY + 12, 12, isSel ? Color{ 255, 230, 110, 255 } : Color{ 180, 200, 225, 200 });
+            DrawRectangleRounded(catRec, 0.2f, 4, isCatActive ? Color{ 36, 48, 72, 255 } : (isCatHov ? Color{ 26, 34, 50, 220 } : Color{ 18, 22, 34, 180 }));
+
+            DrawRectangleRoundedLines(catRec, 0.2f, 4, isCatActive ? Color{ 255, 215, 80, 240 } : Color{ 55, 75, 105, 200 });
+
+            int tw = MeasureText(catNames[c], 11);
+
+            DrawText(catNames[c], (int)(catRec.x + (catW - tw) * 0.5f), (int)catRec.y + 8, 11, isCatActive ? Color{ 255, 225, 100, 255 } : (isCatHov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 }));
+
         }
 
-        // Right View: Reading Parchment
-        float viewX = jX + listW + 24.0f;
-        float viewW = modalW - (jX - modalX) * 2.0f - listW - 24.0f;
-        Rectangle viewRec = { viewX, jY + 35.0f, viewW, listH };
-        DrawRectangleRounded(viewRec, 0.05f, 6, Color{ 20, 26, 38, 240 });
-        DrawRectangleRoundedLines(viewRec, 0.05f, 6, Color{ 60, 80, 115, 200 });
 
-        DrawText("HISTORICAL EXCERPT", (int)viewX + 24, (int)viewRec.y + 20, 14, Color{ 255, 220, 90, 255 });
-        DrawLine((int)viewX + 24, (int)viewRec.y + 44, (int)(viewX + viewW - 24), (int)viewRec.y + 44, Color{ 45, 60, 85, 200 });
 
-        std::string excerpt = "When the Liege of Kings vanished beyond the mist, Lord Zil stood as the vanguard of Tydeshire.\nYet an encroaching bile seeped from the northern fractures, fracturing mind and oath alike.\nSeek out the Four Humors, wanderer, for only temperance of soul may quench the rising frenzy.";
-        DrawText(excerpt.c_str(), (int)viewX + 24, (int)viewRec.y + 60, 11, Color{ 185, 205, 235, 220 });
-    }
-    // ==========================================
-    // TAB 3: ABILITIES SCREEN (Four Humors & Composure Perks)
-    // ==========================================
-    else if (activeTab == 3) {
-        float aX = modalX + 50.0f;
-        float aY = contentY + 20.0f;
-        DrawText("THE FOUR MEDIEVAL HUMORS & MARTIAL DISCIPLINES", (int)aX, (int)aY, 16, Color{ 255, 220, 90, 255 });
-        DrawText("Align your physical constitution with medieval elemental philosophies.", (int)aX, (int)aY + 24, 11, Color{ 160, 180, 210, 200 });
+        float listY = contentY + 36.0f;
 
-        struct HumorDesc { const char* name; const char* elem; const char* perk; Color col; };
-        HumorDesc humors[4] = {
-            { "PHLEGMATIC (Player)", "Water & Cold", "Stoic Poise: Heavy attack hyper-armor & immune to stagger in trance.", Color{ 90, 215, 255, 255 } },
-            { "CHOLERIC", "Fire & Yellow Bile", "Frenzy: Aggressive thrusts increase critical strike multiplier.", Color{ 255, 120, 50, 255 } },
-            { "MELANCHOLIC", "Earth & Black Bile", "Brittle Shells: Hardened carapace shattered by heavy strikes.", Color{ 190, 140, 240, 255 } },
-            { "SANGUINE", "Air & Blood", "Piercing Bleeds: Rapid thrusts inflict bleeding damage over time.", Color{ 255, 80, 95, 255 } }
-        };
 
-        for (int i = 0; i < 4; i++) {
-            float hBoxY = aY + 65.0f + (float)i * 90.0f;
-            Rectangle hRec = { aX, hBoxY, modalW - 100.0f, 76.0f };
-            DrawRectangleRounded(hRec, 0.08f, 6, Color{ 16, 22, 32, 230 });
-            DrawRectangleRoundedLines(hRec, 0.08f, 6, humors[i].col);
 
-            DrawCircle((int)aX + 30, (int)hBoxY + 38, 12.0f, Color{ humors[i].col.r, humors[i].col.g, humors[i].col.b, 60 });
-            DrawCircleLines((int)aX + 30, (int)hBoxY + 38, 12.0f, humors[i].col);
+        // Subcategory 0: WEAPONS
 
-            DrawText(humors[i].name, (int)aX + 60, (int)hBoxY + 16, 14, humors[i].col);
-            DrawText(humors[i].elem, (int)aX + 270, (int)hBoxY + 18, 11, Color{ 170, 190, 215, 200 });
-            DrawText(humors[i].perk, (int)aX + 60, (int)hBoxY + 44, 11, Color{ 220, 235, 250, 220 });
+        if (s_equipCategory == 0) {
+
+            struct WeaponItem {
+
+                WeaponType type;
+
+                const char* label;
+
+                const char* lockMsg;
+
+            };
+
+            WeaponItem weapons[5] = {
+
+                { WeaponType::SWORD, "Crusader's Broadsword", "" },
+
+                { WeaponType::DAGGERS, "Dual Daggers", "Craft at Blacksmith Varek's Forge using Ore Scraps" },
+
+                { WeaponType::MACE, "War Mace", "Craft at Blacksmith Varek's Forge using Ore Scraps" },
+
+                { WeaponType::HALBERD, "Royal Halberd", "Craft at Blacksmith Varek's Forge using Ore Scraps" },
+
+                { WeaponType::TRUTH_SEEKER, "Truth Seeker (Partial)", "Beat Corrupted Zil in Ruined Castle" }
+
+            };
+
+
+
+            for (int i = 0; i < 5; i++) {
+
+                float itemY = listY + (float)i * 88.0f;
+
+                Rectangle itemRec = { col2X, itemY, col2W, 82.0f };
+
+                bool isUnlocked = player.GetInventory().HasWeapon(weapons[i].type);
+
+                bool isEquipped = (player.GetWeapon() == weapons[i].type);
+
+                bool isHov = CheckCollisionPointRec(mousePos, itemRec);
+
+
+
+                Color bgCol = isEquipped ? Color{ 32, 46, 70, 255 } : (isHov && isUnlocked ? Color{ 24, 34, 52, 240 } : Color{ 16, 20, 32, 200 });
+
+                Color borderCol = isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 230, 220 } : Color{ 50, 70, 100, 200 }) : Color{ 35, 42, 56, 160 });
+
+
+
+                DrawRectangleRounded(itemRec, 0.1f, 4, bgCol);
+
+                DrawRectangleRoundedLines(itemRec, 0.1f, 4, borderCol);
+
+
+
+                int upgLvl = player.GetInventory().GetWeaponUpgrade(weapons[i].type);
+
+                WeaponStats st = GetWeaponStats(weapons[i].type, upgLvl);
+
+                DrawText(st.name.c_str(), (int)col2X + 14, (int)itemY + 8, 12, isUnlocked ? Color{ 255, 255, 255, 255 } : Color{ 120, 130, 145, 200 });
+
+
+
+                if (isEquipped) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 88.0f, itemY + 6.0f, 76.0f, 18.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
+
+                    DrawText("EQUIPPED", (int)(col2X + col2W - 78.0f), (int)itemY + 9, 9, Color{ 14, 18, 26, 255 });
+
+                } else if (isUnlocked) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 74.0f, itemY + 6.0f, 62.0f, 18.0f }, 0.25f, 4, isHov ? Color{ 60, 90, 130, 255 } : Color{ 30, 42, 62, 230 });
+
+                    DrawText("EQUIP", (int)(col2X + col2W - 60.0f), (int)itemY + 9, 9, isHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 195, 225, 220 });
+
+                }
+
+
+
+                DrawText(st.description.c_str(), (int)col2X + 14, (int)itemY + 26, 9, Color{ 175, 195, 220, 210 });
+
+
+
+                if (isUnlocked) {
+
+                    std::string dmgLine = "L-Atk: " + std::to_string((int)st.lightDamage) + " dmg  |  H-Atk: " + std::to_string((int)st.heavyDamage) + " dmg  |  Arc: " + std::to_string((int)st.lightArc) + " deg";
+
+                    DrawText(dmgLine.c_str(), (int)col2X + 14, (int)itemY + 62, 9, Color{ 120, 225, 255, 230 });
+
+                } else {
+
+                    std::string lockStr = "Locked // " + std::string(weapons[i].lockMsg);
+
+                    DrawText(lockStr.c_str(), (int)col2X + 14, (int)itemY + 62, 9, Color{ 220, 90, 90, 220 });
+
+                }
+
+
+
+                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
+
+                    player.SetWeapon(weapons[i].type);
+
+                    SoundFX::PlayEquipWeapon();
+
+                }
+
+            }
+
         }
+
+        // Subcategory 1: ARMORS
+
+        else if (s_equipCategory == 1) {
+
+            struct ArmorItem {
+
+                ArmorType type;
+
+                const char* lockMsg;
+
+            };
+
+            ArmorItem armors[4] = {
+
+                { ArmorType::COMMONERS_SCRAP, "Ruined Castle - Beside broadsword pedestal" },
+
+                { ArmorType::CRUSADER_PLATE, "Zyphden - Defeat Knight Lenon in spar" },
+
+                { ArmorType::VANGUARD_MAIL, "Lobby / Arsenal testing supplies" },
+
+                { ArmorType::SHADOW_LEATHER, "Lobby / Arsenal testing supplies" }
+
+            };
+
+
+
+            for (int i = 0; i < 4; i++) {
+
+                float itemY = listY + (float)i * 110.0f;
+
+                Rectangle itemRec = { col2X, itemY, col2W, 102.0f };
+
+                bool isUnlocked = player.GetInventory().HasArmor(armors[i].type);
+
+                bool isEquipped = (player.GetArmor() == armors[i].type);
+
+                bool isHov = CheckCollisionPointRec(mousePos, itemRec);
+
+
+
+                Color bgCol = isEquipped ? Color{ 32, 46, 70, 255 } : (isHov && isUnlocked ? Color{ 24, 34, 52, 240 } : Color{ 16, 20, 32, 200 });
+
+                Color borderCol = isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 230, 220 } : Color{ 50, 70, 100, 200 }) : Color{ 35, 42, 56, 160 });
+
+
+
+                DrawRectangleRounded(itemRec, 0.1f, 4, bgCol);
+
+                DrawRectangleRoundedLines(itemRec, 0.1f, 4, borderCol);
+
+
+
+                ArmorStats st = GetArmorStats(armors[i].type);
+
+                DrawText(st.name.c_str(), (int)col2X + 14, (int)itemY + 10, 13, isUnlocked ? Color{ 255, 255, 255, 255 } : Color{ 120, 130, 145, 200 });
+
+
+
+                if (isEquipped) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 88.0f, itemY + 8.0f, 76.0f, 20.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
+
+                    DrawText("EQUIPPED", (int)(col2X + col2W - 78.0f), (int)itemY + 12, 10, Color{ 14, 18, 26, 255 });
+
+                } else if (isUnlocked) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 74.0f, itemY + 8.0f, 62.0f, 20.0f }, 0.25f, 4, isHov ? Color{ 60, 90, 130, 255 } : Color{ 30, 42, 62, 230 });
+
+                    DrawText("EQUIP", (int)(col2X + col2W - 60.0f), (int)itemY + 12, 10, isHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 195, 225, 220 });
+
+                }
+
+
+
+                DrawText(st.description.c_str(), (int)col2X + 14, (int)itemY + 28, 10, Color{ 175, 195, 220, 210 });
+
+
+
+                if (isUnlocked) {
+
+                    std::string statLine = "Defense: +" + std::to_string((int)st.defense);
+
+                    if (st.maxHpBonus > 0.0f) statLine += " | HP: +" + std::to_string((int)st.maxHpBonus);
+
+                    if (st.speedModifier != 1.0f) {
+
+                        int pct = (int)((st.speedModifier - 1.0f) * 100.0f);
+
+                        statLine += " | Spd: " + (pct > 0 ? ("+" + std::to_string(pct)) : std::to_string(pct)) + "%";
+
+                    }
+
+                    if (st.staminaRegenModifier != 1.0f) {
+
+                        int pct = (int)((st.staminaRegenModifier - 1.0f) * 100.0f);
+
+                        statLine += " | Stam: " + (pct > 0 ? ("+" + std::to_string(pct)) : std::to_string(pct)) + "%";
+
+                    }
+
+                    DrawText(statLine.c_str(), (int)col2X + 14, (int)itemY + 76, 10, Color{ 100, 240, 200, 230 });
+
+                } else {
+
+                    std::string lockStr = "Locked // " + std::string(armors[i].lockMsg);
+
+                    DrawText(lockStr.c_str(), (int)col2X + 14, (int)itemY + 76, 10, Color{ 220, 90, 90, 220 });
+
+                }
+
+
+
+                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
+
+                    player.SetArmor(armors[i].type);
+
+                    SoundFX::PlayEquipWeapon();
+
+                }
+
+            }
+
+        }
+
+        // Subcategory 2: TOTEMS
+
+        else if (s_equipCategory == 2) {
+
+            struct TotemItem {
+
+                TotemType type;
+
+                const char* lockMsg;
+
+            };
+
+            TotemItem totems[5] = {
+
+                { TotemType::TOTEM_SANITY, "Crossroads - Hidden ruined altar chest" },
+
+                { TotemType::TOTEM_INSANITY, "Sanctum - Testing chamber offering" },
+
+                { TotemType::TOTEM_MIST, "Mist Realm - Shrouded archive" },
+
+                { TotemType::CRUSADER_TOTEM, "Zyphden - Crusader chapel shrine" },
+
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Defeat Elemental Golem" }
+
+            };
+
+
+
+            for (int i = 0; i < 5; i++) {
+
+                float itemY = listY + (float)i * 92.0f;
+
+                Rectangle itemRec = { col2X, itemY, col2W, 86.0f };
+
+                bool isUnlocked = player.GetInventory().HasTotem(totems[i].type);
+
+                bool isEquipped = (player.GetTotem() == totems[i].type);
+
+                bool isHov = CheckCollisionPointRec(mousePos, itemRec);
+
+
+
+                Color bgCol = isEquipped ? Color{ 32, 46, 70, 255 } : (isHov && isUnlocked ? Color{ 24, 34, 52, 240 } : Color{ 16, 20, 32, 200 });
+
+                Color borderCol = isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 230, 220 } : Color{ 50, 70, 100, 200 }) : Color{ 35, 42, 56, 160 });
+
+
+
+                DrawRectangleRounded(itemRec, 0.1f, 4, bgCol);
+
+                DrawRectangleRoundedLines(itemRec, 0.1f, 4, borderCol);
+
+
+
+                TotemStats st = GetTotemStats(totems[i].type);
+
+                DrawText(st.name.c_str(), (int)col2X + 14, (int)itemY + 8, 13, isUnlocked ? st.glowColor : Color{ 120, 130, 145, 200 });
+
+
+
+                if (isEquipped) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 88.0f, itemY + 6.0f, 76.0f, 20.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
+
+                    DrawText("ATTUNED", (int)(col2X + col2W - 78.0f), (int)itemY + 10, 10, Color{ 14, 18, 26, 255 });
+
+                } else if (isUnlocked) {
+
+                    DrawRectangleRounded(Rectangle{ col2X + col2W - 74.0f, itemY + 6.0f, 62.0f, 20.0f }, 0.25f, 4, isHov ? Color{ 60, 90, 130, 255 } : Color{ 30, 42, 62, 230 });
+
+                    DrawText("ATTUNE", (int)(col2X + col2W - 62.0f), (int)itemY + 10, 10, isHov ? Color{ 255, 255, 255, 255 } : Color{ 170, 195, 225, 220 });
+
+                }
+
+
+
+                DrawText(st.description.c_str(), (int)col2X + 14, (int)itemY + 26, 10, Color{ 175, 195, 220, 210 });
+
+
+
+                if (isUnlocked) {
+
+                    std::string buffStr = "[+] " + st.buffText;
+
+                    DrawText(buffStr.c_str(), (int)col2X + 14, (int)itemY + 46, 10, Color{ 100, 245, 180, 240 });
+
+                    std::string nerfStr = "[-] " + st.nerfText;
+
+                    DrawText(nerfStr.c_str(), (int)col2X + 14, (int)itemY + 64, 10, (st.nerfText.find("None") != std::string::npos) ? Color{ 160, 180, 200, 200 } : Color{ 255, 95, 95, 240 });
+
+                } else {
+
+                    std::string lockStr = "Locked // " + std::string(totems[i].lockMsg);
+
+                    DrawText(lockStr.c_str(), (int)col2X + 14, (int)itemY + 54, 10, Color{ 220, 90, 90, 220 });
+
+                }
+
+
+
+                if (isUnlocked && isHov && isMousePressed) {
+
+                    if (isEquipped) {
+
+                        player.SetTotem(TotemType::NONE);
+
+                    } else {
+
+                        player.SetTotem(totems[i].type);
+
+                    }
+
+                    SoundFX::PlayEquipWeapon();
+
+                }
+
+            }
+
+        }
+
+
+
+        // COLUMN 3: MARTIAL ATTRIBUTES, ACTIVE TOTEM, QUEST ITEMS
+
+        float col3X = modalX + 736.0f;
+
+        float col3W = modalW - 770.0f;
+
+
+
+        DrawText("MARTIAL ATTRIBUTES", (int)col3X, (int)contentY, 13, Color{ 255, 220, 90, 255 });
+
+
+
+        Rectangle statsBox = { col3X, contentY + 22.0f, col3W, 182.0f };
+
+        DrawRectangleRounded(statsBox, 0.08f, 6, Color{ 18, 23, 34, 220 });
+
+        DrawRectangleRoundedLines(statsBox, 0.08f, 6, Color{ 55, 75, 105, 230 });
+
+
+
+        // Health
+
+        DrawText("Maximum Vitality:", (int)col3X + 16, (int)contentY + 34, 11, Color{ 140, 210, 255, 240 });
+
+        std::string hpStr = std::to_string((int)player.GetMaxHealth()) + " HP";
+
+        if (curArmStats.maxHpBonus > 0.0f) {
+
+            hpStr += " (+" + std::to_string((int)curArmStats.maxHpBonus) + " Armor)";
+
+        }
+
+        DrawText(hpStr.c_str(), (int)col3X + 140, (int)contentY + 34, 11, Color{ 255, 255, 255, 255 });
+
+
+
+        // Defense
+
+        float def = player.GetDefense();
+
+        float mitPct = (def / (def + 100.0f)) * 100.0f;
+
+        DrawText("Armor Defense:", (int)col3X + 16, (int)contentY + 54, 11, Color{ 140, 210, 255, 240 });
+
+        std::string defStr = std::to_string((int)def) + " (" + std::to_string((int)mitPct) + "% Reduction)";
+
+        DrawText(defStr.c_str(), (int)col3X + 140, (int)contentY + 54, 11, Color{ 100, 240, 200, 255 });
+
+
+
+        // Stamina & Regen
+
+        DrawText("Stamina & Regen:", (int)col3X + 16, (int)contentY + 74, 11, Color{ 140, 210, 255, 240 });
+
+        std::string stamStr = std::to_string((int)player.GetMaxStamina()) + " SP / " + std::to_string((int)player.GetStaminaRegenRate()) + "s";
+
+        DrawText(stamStr.c_str(), (int)col3X + 140, (int)contentY + 74, 11, Color{ 255, 255, 255, 255 });
+
+
+
+        // Movement Speed
+
+        DrawText("Movement Speed:", (int)col3X + 16, (int)contentY + 94, 11, Color{ 140, 210, 255, 240 });
+
+        std::string spdStr = std::to_string((int)player.GetSpeed()) + " units/s";
+
+        DrawText(spdStr.c_str(), (int)col3X + 140, (int)contentY + 94, 11, Color{ 240, 245, 255, 255 });
+
+
+
+        // Attack Multiplier
+
+        DrawText("Damage Output:", (int)col3X + 16, (int)contentY + 114, 11, Color{ 140, 210, 255, 240 });
+
+        int dmgPct = (int)(curTotStats.damageMultiplier * 100.0f);
+
+        std::string dmgStr = std::to_string(dmgPct) + "% Attack Power";
+
+        DrawText(dmgStr.c_str(), (int)col3X + 140, (int)contentY + 114, 11, (dmgPct > 100) ? Color{ 100, 245, 180, 255 } : ((dmgPct < 100) ? Color{ 255, 100, 100, 255 } : Color{ 255, 255, 255, 255 }));
+
+
+
+        // Parry & Dash windows
+
+        DrawText("Parry / Dodge:", (int)col3X + 16, (int)contentY + 134, 11, Color{ 140, 210, 255, 240 });
+
+        DrawText("0.28s Parry  |  0.18s Dash", (int)col3X + 140, (int)contentY + 134, 11, Color{ 240, 245, 255, 255 });
+
+
+
+        // Counter buff
+
+        DrawText("Parry Riposte:", (int)col3X + 16, (int)contentY + 154, 11, Color{ 140, 210, 255, 240 });
+
+        DrawText("+50% Damage Riposte Buff", (int)col3X + 140, (int)contentY + 154, 11, Color{ 255, 220, 80, 255 });
+
+
+
+        // Active Totem Resonance Box
+
+        float totemBoxY = contentY + 214.0f;
+
+        Rectangle totemBox = { col3X, totemBoxY, col3W, 110.0f };
+
+        bool hasTotem = (player.GetTotem() != TotemType::NONE);
+
+        DrawRectangleRounded(totemBox, 0.08f, 6, Color{ 18, 23, 34, 220 });
+
+        DrawRectangleRoundedLines(totemBox, 0.08f, 6, hasTotem ? curTotStats.glowColor : Color{ 55, 75, 105, 230 });
+
+
+
+        DrawText("ACTIVE TOTEM RESONANCE", (int)col3X + 16, (int)totemBoxY + 12, 12, Color{ 255, 220, 90, 255 });
+
+        if (hasTotem) {
+
+            DrawText(curTotStats.name.c_str(), (int)col3X + 16, (int)totemBoxY + 32, 13, curTotStats.glowColor);
+
+            std::string tb = "[+] " + curTotStats.buffText;
+
+            DrawText(tb.c_str(), (int)col3X + 16, (int)totemBoxY + 54, 10, Color{ 100, 245, 180, 240 });
+
+            std::string tn = "[-] " + curTotStats.nerfText;
+
+            DrawText(tn.c_str(), (int)col3X + 16, (int)totemBoxY + 72, 10, (curTotStats.nerfText.find("None") != std::string::npos) ? Color{ 160, 180, 200, 200 } : Color{ 255, 95, 95, 240 });
+
+        } else {
+
+            DrawText("No totem attuned.", (int)col3X + 16, (int)totemBoxY + 36, 12, Color{ 160, 175, 195, 200 });
+
+            DrawText("Attune a sacred relic to empower your", (int)col3X + 16, (int)totemBoxY + 58, 10, Color{ 140, 155, 175, 180 });
+
+            DrawText("strikes with primordial gifts & vows.", (int)col3X + 16, (int)totemBoxY + 74, 10, Color{ 140, 155, 175, 180 });
+
+        }
+
+
+
+        // Relics & Quest Items Box
+
+        float relicsY = contentY + 334.0f;
+
+        Rectangle relicsBox = { col3X, relicsY, col3W, 140.0f };
+
+        DrawRectangleRounded(relicsBox, 0.08f, 6, Color{ 18, 23, 34, 220 });
+
+        DrawRectangleRoundedLines(relicsBox, 0.08f, 6, Color{ 55, 75, 105, 230 });
+
+
+
+        DrawText("RELICS & QUEST ITEMS", (int)col3X + 16, (int)relicsY + 12, 12, Color{ 255, 220, 90, 255 });
+
+        DrawLine((int)col3X + 16, (int)relicsY + 28, (int)(col3X + col3W - 16), (int)relicsY + 28, Color{ 40, 52, 75, 255 });
+
+
+
+        const auto& qItems = player.GetInventory().GetQuestItems();
+
+        if (qItems.empty()) {
+
+            DrawText("No quest artifacts collected yet.", (int)col3X + 16, (int)relicsY + 44, 11, Color{ 150, 165, 185, 200 });
+
+            DrawText("Explore Tydeshire, defeat corrupted lieges,", (int)col3X + 16, (int)relicsY + 66, 10, Color{ 130, 145, 165, 180 });
+
+            DrawText("and speak with royal allies to gather relics.", (int)col3X + 16, (int)relicsY + 82, 10, Color{ 130, 145, 165, 180 });
+
+        } else {
+
+            for (size_t i = 0; i < qItems.size() && i < 2; i++) {
+
+                float qy = relicsY + 38.0f + (float)i * 48.0f;
+
+                DrawRectangleRounded(Rectangle{ col3X + 12, qy, col3W - 24, 42.0f }, 0.15f, 4, Color{ 24, 30, 44, 180 });
+
+                DrawText(qItems[i].name.c_str(), (int)col3X + 20, (int)qy + 6, 11, qItems[i].rarityColor);
+
+                DrawText(qItems[i].description.c_str(), (int)col3X + 20, (int)qy + 22, 9, Color{ 180, 200, 220, 220 });
+
+            }
+
+        }
+
+    } else {
+
+        // =========================================================================
+
+        // TAB 1: THE ILLUMINATED GRIMOIRE & CHRONICLES OF TYDESHIRE
+
+        // =========================================================================
+
+        const auto& frags = player.GetInventory().GetFragments();
+
+        int totalFrags = (int)frags.size();
+
+        int discoveredFrags = player.GetInventory().GetDiscoveredFragmentCount();
+
+
+
+        // Animated Page-Flip State
+
+        static float s_flipProgress = 1.0f;
+
+        static int s_flipDir = 0; // +1 forward (left to right), -1 backward
+
+        static int s_targetFragIndex = 0;
+
+
+
+        float frameDt = GetFrameTime();
+
+        if (frameDt > 0.05f) frameDt = 0.016f;
+
+
+
+        if (s_flipProgress < 1.0f) {
+
+            s_flipProgress += frameDt * 4.8f;
+
+            if (s_flipProgress >= 0.5f && selectedFragmentIndex != s_targetFragIndex) {
+
+                selectedFragmentIndex = s_targetFragIndex;
+
+                if (selectedFragmentIndex >= 0 && selectedFragmentIndex < totalFrags) {
+
+                    player.GetInventory().MarkFragmentRead(frags[selectedFragmentIndex].id);
+
+                }
+
+            }
+
+            if (s_flipProgress >= 1.0f) {
+
+                s_flipProgress = 1.0f;
+
+            }
+
+        }
+
+
+
+        // Hotkeys for page flipping: [A] / [LEFT] = Prev, [D] / [RIGHT] = Next
+
+        if (s_flipProgress >= 1.0f) {
+
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) {
+
+                if (selectedFragmentIndex > 0) {
+
+                    s_targetFragIndex = selectedFragmentIndex - 1;
+
+                    s_flipDir = -1;
+
+                    s_flipProgress = 0.0f;
+
+                    SoundFX::PlayButtonClick();
+
+                }
+
+            } else if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) {
+
+                if (selectedFragmentIndex < totalFrags - 1) {
+
+                    s_targetFragIndex = selectedFragmentIndex + 1;
+
+                    s_flipDir = 1;
+
+                    s_flipProgress = 0.0f;
+
+                    SoundFX::PlayButtonClick();
+
+                }
+
+            }
+
+        }
+
+
+
+        // Clamp selected index
+
+        if (selectedFragmentIndex < 0) selectedFragmentIndex = 0;
+
+        if (selectedFragmentIndex >= totalFrags) selectedFragmentIndex = totalFrags - 1;
+
+
+
+        // Book Geometry
+
+        float bookX = modalX + 26.0f;
+
+        float bookY = contentY + 2.0f;
+
+        float bookW = modalW - 52.0f; // 1028 px
+
+        float bookH = 485.0f;
+
+
+
+        // 1. Dark Antique Mahogany Leather Cover Backing
+
+        Rectangle coverRec = { bookX, bookY, bookW, bookH };
+
+        DrawRectangleRounded(coverRec, 0.04f, 8, Color{ 34, 20, 14, 255 });
+
+        DrawRectangleRoundedLines(coverRec, 0.04f, 8, Color{ 175, 130, 55, 230 });
+
+        DrawRectangleRoundedLines(Rectangle{ bookX + 4.0f, bookY + 4.0f, bookW - 8.0f, bookH - 8.0f }, 0.035f, 8, Color{ 75, 48, 25, 180 });
+
+
+
+        // Antique Brass Corner Brackets on Leather Cover
+
+        Color brassCol = Color{ 215, 175, 75, 230 };
+
+        float cLen = 26.0f;
+
+        DrawLineEx({ bookX + 8.0f, bookY + 8.0f }, { bookX + 8.0f + cLen, bookY + 8.0f }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + 8.0f, bookY + 8.0f }, { bookX + 8.0f, bookY + 8.0f + cLen }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + 8.0f }, { bookX + bookW - 8.0f - cLen, bookY + 8.0f }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + 8.0f }, { bookX + bookW - 8.0f, bookY + 8.0f + cLen }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + 8.0f, bookY + bookH - 8.0f }, { bookX + 8.0f + cLen, bookY + bookH - 8.0f }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + 8.0f, bookY + bookH - 8.0f }, { bookX + 8.0f, bookY + bookH - 8.0f - cLen }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + bookH - 8.0f }, { bookX + bookW - 8.0f - cLen, bookY + bookH - 8.0f }, 2.0f, brassCol);
+
+        DrawLineEx({ bookX + bookW - 8.0f, bookY + bookH - 8.0f }, { bookX + bookW - 8.0f, bookY + bookH - 8.0f - cLen }, 2.0f, brassCol);
+
+
+
+        // 2. Open Parchment Pages Dimensions
+
+        float spineWidth = 24.0f;
+
+        float spineX = bookX + bookW * 0.5f;
+
+        float pageMargin = 12.0f;
+
+        float pageW = (bookW - spineWidth - pageMargin * 2.0f) * 0.5f; // ~485px
+
+        float pageH = bookH - 24.0f; // 461px
+
+        float leftPageX = bookX + pageMargin;
+
+        float rightPageX = spineX + spineWidth * 0.5f;
+
+        float pageY = bookY + 12.0f;
+
+
+
+        // Deckle paper edge layers beneath pages
+
+        for (int layer = 3; layer >= 1; --layer) {
+
+            float off = (float)layer * 1.5f;
+
+            Color deckleCol = Color{ 210, 198, 172, (unsigned char)(210 - layer * 35) };
+
+            DrawRectangleRounded(Rectangle{ leftPageX - off, pageY + off, pageW, pageH }, 0.02f, 4, deckleCol);
+
+            DrawRectangleRounded(Rectangle{ rightPageX + off, pageY + off, pageW, pageH }, 0.02f, 4, deckleCol);
+
+        }
+
+
+
+        // Left & Right Parchment Sheets
+
+        Color parchmentBase = Color{ 246, 238, 218, 255 };
+
+        Color parchmentBorder = Color{ 190, 170, 135, 220 };
+
+        Rectangle leftPageRec = { leftPageX, pageY, pageW, pageH };
+
+        Rectangle rightPageRec = { rightPageX, pageY, pageW, pageH };
+
+
+
+        DrawRectangleRounded(leftPageRec, 0.02f, 4, parchmentBase);
+
+        DrawRectangleRoundedLines(leftPageRec, 0.02f, 4, parchmentBorder);
+
+
+
+        DrawRectangleRounded(rightPageRec, 0.02f, 4, parchmentBase);
+
+        DrawRectangleRoundedLines(rightPageRec, 0.02f, 4, parchmentBorder);
+
+
+
+        // Spine Crease & Shadow
+
+        DrawRectangleGradientH((int)(spineX - 34.0f), (int)pageY, 34, (int)pageH, Color{ 0, 0, 0, 0 }, Color{ 70, 45, 25, 95 });
+
+        DrawRectangleGradientH((int)(spineX), (int)pageY, 34, (int)pageH, Color{ 70, 45, 25, 95 }, Color{ 0, 0, 0, 0 });
+
+        DrawRectangle((int)(spineX - 5.0f), (int)pageY - 2, 10, (int)pageH + 4, Color{ 20, 12, 8, 255 });
+
+        DrawRectangleLines((int)(spineX - 5.0f), (int)pageY - 2, 10, (int)pageH + 4, Color{ 115, 80, 40, 200 });
+
+
+
+        // Crimson Silk Bookmark hanging from upper spine
+
+        DrawRectangle((int)spineX - 4, (int)bookY - 2, 8, 44, Color{ 185, 35, 35, 255 });
+
+        DrawTriangle({ spineX - 4.0f, bookY + 42.0f }, { spineX + 4.0f, bookY + 42.0f }, { spineX, bookY + 50.0f }, Color{ 230, 185, 60, 255 });
+
+
+
+        const auto& curFrag = frags[selectedFragmentIndex];
+
+
+
+        // =========================================================================
+
+        // LEFT PAGE CONTENT: CHAPTER INDEX & LOCATION CLUES
+
+        // =========================================================================
+
+        float lPad = leftPageX + 22.0f;
+
+        float lW = pageW - 44.0f;
+
+
+
+        // Left Header
+
+        FontManager::DrawText("CHRONICLES OF TYDESHIRE", (int)lPad, (int)pageY + 16, 14, Color{ 55, 35, 20, 255 }, GameFont::TITLE);
+
+        std::string progressStr = "Restored: " + std::to_string(discoveredFrags) + " / " + std::to_string(totalFrags) + " Fragments";
+
+        FontManager::DrawText(progressStr.c_str(), (int)lPad, (int)pageY + 34, 11, Color{ 135, 90, 35, 255 }, GameFont::BODY);
+
+        DrawLine((int)lPad, (int)pageY + 50, (int)(lPad + lW), (int)pageY + 50, Color{ 180, 150, 105, 200 });
+
+
+
+        // Bookmark Page Selector (10 clickable tabs across 2 rows)
+
+        FontManager::DrawText("PAGE BOOKMARKS (CLICK TO TURN PAGE):", (int)lPad, (int)pageY + 58, 10, Color{ 110, 80, 45, 240 }, GameFont::TITLE);
+
+        const char* romanNumerals[10] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+
+        float tabW = (lW - 16.0f) / 5.0f;
+
+        float tabH = 26.0f;
+
+
+
+        for (int i = 0; i < 10 && i < totalFrags; i++) {
+
+            int row = i / 5;
+
+            int col = i % 5;
+
+            float tx = lPad + (float)col * (tabW + 4.0f);
+
+            float ty = pageY + 76.0f + (float)row * (tabH + 4.0f);
+
+            Rectangle tabRec = { tx, ty, tabW, tabH };
+
+            bool isTabHov = CheckCollisionPointRec(mousePos, tabRec);
+
+            bool isTabSel = (selectedFragmentIndex == i);
+
+
+
+            Color tBg = isTabSel ? Color{ 215, 175, 90, 255 } : (isTabHov ? Color{ 232, 218, 186, 255 } : Color{ 238, 228, 205, 230 });
+
+            Color tBorder = isTabSel ? Color{ 120, 75, 25, 255 } : (frags[i].discovered ? Color{ 160, 130, 85, 220 } : Color{ 190, 175, 150, 180 });
+
+
+
+            DrawRectangleRounded(tabRec, 0.2f, 4, tBg);
+
+            DrawRectangleRoundedLines(tabRec, 0.2f, 4, tBorder);
+
+
+
+            std::string label = std::string(romanNumerals[i]);
+
+            int lbw = FontManager::MeasureText(label, 11, GameFont::TITLE);
+
+            Color textCol = isTabSel ? Color{ 35, 20, 10, 255 } : (frags[i].discovered ? Color{ 70, 45, 25, 240 } : Color{ 145, 130, 110, 200 });
+
+            FontManager::DrawText(label, (int)(tx + (tabW - lbw) * 0.5f), (int)ty + 6, 11, textCol, GameFont::TITLE);
+
+
+
+            // Red unread notification dot
+
+            if (frags[i].discovered && !frags[i].isRead) {
+
+                DrawCircle((int)tx + (int)tabW - 5, (int)ty + 5, 3.5f, Color{ 210, 45, 45, 255 });
+
+            }
+
+
+
+            if (isTabHov && isMousePressed && s_flipProgress >= 1.0f && selectedFragmentIndex != i) {
+
+                s_targetFragIndex = i;
+
+                s_flipDir = (i > selectedFragmentIndex) ? 1 : -1;
+
+                s_flipProgress = 0.0f;
+
+                SoundFX::PlayButtonClick();
+
+            }
+
+        }
+
+
+
+        // Active Chapter Summary
+
+        float sumY = pageY + 144.0f;
+
+        DrawLine((int)lPad, (int)sumY, (int)(lPad + lW), (int)sumY, Color{ 180, 150, 105, 180 });
+
+
+
+        std::string chapHeader = "SELECTED: " + curFrag.title;
+
+        FontManager::DrawText(chapHeader.c_str(), (int)lPad, (int)sumY + 8, 11, Color{ 45, 30, 18, 255 }, GameFont::TITLE);
+
+        std::string realmStr = "Origin Realm: " + curFrag.realm;
+
+        FontManager::DrawText(realmStr.c_str(), (int)lPad, (int)sumY + 24, 10, Color{ 85, 60, 35, 220 }, GameFont::BODY);
+
+
+
+        // DEDICATED LOCATION CLUE & COMPASS PARCHMENT PLAQUE
+
+        float clueBoxY = sumY + 44.0f;
+
+        float clueBoxH = 200.0f;
+
+        Rectangle clueRec = { lPad, clueBoxY, lW, clueBoxH };
+
+
+
+        DrawRectangleRounded(clueRec, 0.08f, 6, Color{ 238, 228, 204, 255 });
+
+        DrawRectangleRoundedLines(clueRec, 0.08f, 6, Color{ 165, 130, 80, 220 });
+
+        DrawRectangleRoundedLines(Rectangle{ lPad + 3.0f, clueBoxY + 3.0f, lW - 6.0f, clueBoxH - 6.0f }, 0.07f, 6, Color{ 215, 195, 160, 180 });
+
+
+
+        // Compass Rose Header
+
+        FontManager::DrawText("LOCATION CLUE & RECOVERY COMPASS", (int)lPad + 14, (int)clueBoxY + 12, 11, Color{ 160, 38, 28, 255 }, GameFont::TITLE);
+
+        DrawLine((int)lPad + 14, (int)clueBoxY + 28, (int)(lPad + lW - 14), (int)clueBoxY + 28, Color{ 180, 140, 95, 180 });
+
+
+
+        // Recovery Clue Body
+
+        std::string clueBody = curFrag.clue.empty() ? "Seek forgotten altars and guarded chests throughout Tydeshire." : curFrag.clue;
+
+        FontManager::DrawTextWrapped(clueBody, (int)lPad + 14, (int)clueBoxY + 38, (int)lW - 28, 12, 5, Color{ 48, 34, 22, 255 }, GameFont::BODY);
+
+
+
+        // Discovery Status Badge inside plaque
+
+        float badgeY = clueBoxY + clueBoxH - 36.0f;
+
+        if (curFrag.discovered) {
+
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 215, 240, 215, 255 });
+
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 40, 140, 60, 220 });
+
+            FontManager::DrawText("RECOVERED & CHRONICLED", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 20, 110, 45, 255 }, GameFont::TITLE);
+
+        } else {
+
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 245, 220, 215, 255 });
+
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 180, 50, 40, 220 });
+
+            FontManager::DrawText("SHROUDED - SEARCH THIS LOCATION", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 160, 35, 25, 255 }, GameFont::TITLE);
+
+        }
+
+
+
+        // Bottom Left Page Navigation: Previous Page Button
+
+        float navBtnY = pageY + pageH - 42.0f;
+
+        float navBtnW = 160.0f;
+
+        float navBtnH = 30.0f;
+
+        Rectangle prevBtnRec = { lPad, navBtnY, navBtnW, navBtnH };
+
+        bool canPrev = (selectedFragmentIndex > 0);
+
+        bool isPrevHov = canPrev && CheckCollisionPointRec(mousePos, prevBtnRec);
+
+
+
+        if (canPrev) {
+
+            DrawRectangleRounded(prevBtnRec, 0.25f, 4, isPrevHov ? Color{ 210, 185, 140, 255 } : Color{ 228, 214, 185, 255 });
+
+            DrawRectangleRoundedLines(prevBtnRec, 0.25f, 4, isPrevHov ? Color{ 110, 70, 25, 255 } : Color{ 155, 120, 75, 220 });
+
+            FontManager::DrawText("< PREV PAGE [A]", (int)lPad + 18, (int)navBtnY + 8, 11, isPrevHov ? Color{ 20, 12, 6, 255 } : Color{ 65, 42, 22, 240 }, GameFont::TITLE);
+
+
+
+            if (isPrevHov && isMousePressed && s_flipProgress >= 1.0f) {
+
+                s_targetFragIndex = selectedFragmentIndex - 1;
+
+                s_flipDir = -1;
+
+                s_flipProgress = 0.0f;
+
+                SoundFX::PlayButtonClick();
+
+            }
+
+        }
+
+
+
+        // =========================================================================
+
+        // RIGHT PAGE CONTENT: ILLUMINATED CHRONICLE SPREAD
+
+        // =========================================================================
+
+        float rPad = rightPageX + 22.0f;
+
+        float rW = pageW - 44.0f;
+
+
+
+        // Right Header & Page Number
+
+        std::string pageNumStr = "Page " + std::to_string(selectedFragmentIndex + 1) + " of " + std::to_string(totalFrags);
+
+        int pnw = FontManager::MeasureText(pageNumStr, 11, GameFont::BODY);
+
+        FontManager::DrawText(pageNumStr.c_str(), (int)(rPad + rW - pnw), (int)pageY + 16, 11, Color{ 120, 90, 50, 220 }, GameFont::BODY);
+
+
+
+        std::string rOrigin = "HISTORICAL RECORD // " + curFrag.realm;
+
+        FontManager::DrawText(rOrigin.c_str(), (int)rPad, (int)pageY + 16, 10, Color{ 40, 70, 95, 240 }, GameFont::TITLE);
+
+        DrawLine((int)rPad, (int)pageY + 32, (int)(rPad + rW), (int)pageY + 32, Color{ 180, 150, 105, 180 });
+
+
+
+        // Chronicle Title in Burnished Title Font
+
+        FontManager::DrawText(curFrag.title.c_str(), (int)rPad, (int)pageY + 42, 16, Color{ 68, 36, 18, 255 }, GameFont::TITLE);
+
+        DrawLine((int)rPad, (int)pageY + 68, (int)(rPad + rW), (int)pageY + 68, Color{ 160, 125, 65, 200 });
+
+
+
+        // Illuminated Body Content
+
+        if (curFrag.discovered) {
+
+            // Illuminated Initial Capital Letter Box
+
+            char firstChar = curFrag.fullText.empty() ? 'T' : curFrag.fullText[0];
+
+            std::string dropLetter(1, firstChar);
+
+            float dropBoxX = rPad;
+
+            float dropBoxY = pageY + 78.0f;
+
+            float dropBoxSize = 38.0f;
+
+
+
+            DrawRectangleRounded(Rectangle{ dropBoxX, dropBoxY, dropBoxSize, dropBoxSize }, 0.2f, 4, Color{ 225, 195, 130, 255 });
+
+            DrawRectangleRoundedLines(Rectangle{ dropBoxX, dropBoxY, dropBoxSize, dropBoxSize }, 0.2f, 4, Color{ 120, 75, 25, 255 });
+
+            int dlw = FontManager::MeasureText(dropLetter, 22, GameFont::TITLE);
+
+            FontManager::DrawText(dropLetter, (int)(dropBoxX + (dropBoxSize - dlw) * 0.5f), (int)dropBoxY + 8, 22, Color{ 65, 25, 12, 255 }, GameFont::TITLE);
+
+
+
+            // Narrative Text Body
+
+            std::string remainingText = (curFrag.fullText.size() > 1) ? curFrag.fullText.substr(1) : "";
+
+            FontManager::DrawTextWrapped(remainingText, (int)rPad + (int)dropBoxSize + 10, (int)dropBoxY + 4, (int)rW - (int)dropBoxSize - 10, 13, 6, Color{ 42, 30, 20, 255 }, GameFont::BODY);
+
+
+
+            // Bottom Historical Epilogue Quote
+
+            float quoteY = pageY + pageH - 74.0f;
+
+            DrawLine((int)rPad, (int)quoteY, (int)(rPad + rW), (int)quoteY, Color{ 180, 150, 105, 160 });
+
+            const char* bookQuote = "\"The truth of Tydeshire endures though crowns turn to rust and kings fall to madness.\"";
+
+            FontManager::DrawText(bookQuote, (int)rPad, (int)quoteY + 10, 10, Color{ 130, 95, 45, 220 }, GameFont::BODY);
+
+        } else {
+
+            // Shrouded Page Graphic
+
+            float shroudBoxY = pageY + 95.0f;
+
+            float shroudBoxH = 260.0f;
+
+            Rectangle shroudRec = { rPad, shroudBoxY, rW, shroudBoxH };
+
+
+
+            DrawRectangleRounded(shroudRec, 0.05f, 6, Color{ 232, 220, 195, 255 });
+
+            DrawRectangleRoundedLines(shroudRec, 0.05f, 6, Color{ 170, 140, 105, 200 });
+
+
+
+            // Arcane Runes Row
+
+            const char* runes = "* * *  R U N I C   S E A L  * * *";
+
+            int rnw = FontManager::MeasureText(runes, 11, GameFont::TITLE);
+
+            FontManager::DrawText(runes, (int)(rPad + (rW - rnw) * 0.5f), (int)shroudBoxY + 28, 11, Color{ 150, 110, 60, 220 }, GameFont::TITLE);
+
+
+
+            const char* shTitle = "THIS CHRONICLE FRAGMENT REMAINS SHROUDED";
+
+            int stw = FontManager::MeasureText(shTitle, 13, GameFont::TITLE);
+
+            FontManager::DrawText(shTitle, (int)(rPad + (rW - stw) * 0.5f), (int)shroudBoxY + 68, 13, Color{ 165, 40, 30, 255 }, GameFont::TITLE);
+
+
+
+            std::string shDesc =
+
+                "The parchment detailing this epoch was torn asunder when King Charlz succumbed to the outer corruption.\n\n"
+
+                "Examine the Recovery Compass on the left page to track down its hidden resting place across the realm.";
+
+            FontManager::DrawTextWrapped(shDesc, (int)rPad + 20, (int)shroudBoxY + 108, (int)rW - 40, 12, 6, Color{ 60, 45, 30, 240 }, GameFont::BODY);
+
+        }
+
+
+
+        // Bottom Right Page Navigation: Next Page Button
+
+        Rectangle nextBtnRec = { rPad + rW - navBtnW, navBtnY, navBtnW, navBtnH };
+
+        bool canNext = (selectedFragmentIndex < totalFrags - 1);
+
+        bool isNextHov = canNext && CheckCollisionPointRec(mousePos, nextBtnRec);
+
+
+
+        if (canNext) {
+
+            DrawRectangleRounded(nextBtnRec, 0.25f, 4, isNextHov ? Color{ 210, 185, 140, 255 } : Color{ 228, 214, 185, 255 });
+
+            DrawRectangleRoundedLines(nextBtnRec, 0.25f, 4, isNextHov ? Color{ 110, 70, 25, 255 } : Color{ 155, 120, 75, 220 });
+
+            FontManager::DrawText("NEXT PAGE [D] >", (int)(rPad + rW - navBtnW + 18), (int)navBtnY + 8, 11, isNextHov ? Color{ 20, 12, 6, 255 } : Color{ 65, 42, 22, 240 }, GameFont::TITLE);
+
+
+
+            if (isNextHov && isMousePressed && s_flipProgress >= 1.0f) {
+
+                s_targetFragIndex = selectedFragmentIndex + 1;
+
+                s_flipDir = 1;
+
+                s_flipProgress = 0.0f;
+
+                SoundFX::PlayButtonClick();
+
+            }
+
+        }
+
+
+
+        // =========================================================================
+
+        // ANIMATED 3D PAGE-FLIP OVERLAY EFFECT
+
+        // =========================================================================
+
+        if (s_flipProgress < 1.0f) {
+
+            float flipAngle = s_flipProgress * PI;
+
+            float cosVal = cosf(flipAngle);
+
+            float flipW = pageW * fabsf(cosVal);
+
+            float flipAlpha = sinf(flipAngle);
+
+
+
+            // Sweeping shadow cast across the stationary page
+
+            if (s_flipDir > 0) {
+
+                // Turning forward (right page flips over to left)
+
+                float shadowX = spineX + (1.0f - s_flipProgress) * (pageW * 0.7f);
+
+                DrawRectangleGradientH((int)spineX, (int)pageY, (int)(shadowX - spineX), (int)pageH, ColorAlpha(BLACK, 0.28f * flipAlpha), Color{ 0, 0, 0, 0 });
+
+            } else {
+
+                // Turning backward (left page flips over to right)
+
+                float shadowX = spineX - (1.0f - s_flipProgress) * (pageW * 0.7f);
+
+                DrawRectangleGradientH((int)shadowX, (int)pageY, (int)(spineX - shadowX), (int)pageH, Color{ 0, 0, 0, 0 }, ColorAlpha(BLACK, 0.28f * flipAlpha));
+
+            }
+
+
+
+            // The curling flipping page rectangle
+
+            Rectangle curlingPage;
+
+            if (cosVal >= 0.0f) {
+
+                // Page is still on the source side of the spine
+
+                if (s_flipDir > 0) {
+
+                    curlingPage = { spineX, pageY, flipW, pageH };
+
+                } else {
+
+                    curlingPage = { spineX - flipW, pageY, flipW, pageH };
+
+                }
+
+            } else {
+
+                // Page has crossed over the spine to the destination side
+
+                if (s_flipDir > 0) {
+
+                    curlingPage = { spineX - flipW, pageY, flipW, pageH };
+
+                } else {
+
+                    curlingPage = { spineX, pageY, flipW, pageH };
+
+                }
+
+            }
+
+
+
+            // Render curling parchment sheet with gradient curl shading
+
+            Color curlPaper = Color{ 242, 232, 208, 255 };
+
+            DrawRectangleRounded(curlingPage, 0.02f, 4, curlPaper);
+
+            DrawRectangleRoundedLines(curlingPage, 0.02f, 4, Color{ 170, 145, 110, 230 });
+
+
+
+            // Crease highlight on page turn
+
+            float curlEdgeX = (s_flipDir > 0) ? (curlingPage.x + curlingPage.width) : curlingPage.x;
+
+            DrawLineEx({ curlEdgeX, pageY }, { curlEdgeX, pageY + pageH }, 2.0f, ColorAlpha(Color{ 255, 245, 220, 255 }, 0.6f * flipAlpha));
+
+        }
+
     }
 
-    if (closeClicked) {
+
+
+    if (closeClicked || IsKeyPressed(KEY_ESCAPE)) {
+
         SoundFX::PlayButtonClick();
+
         return true;
+
     }
+
+
 
     return false;
+
 }
+
+
+
 
 
 int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool canRetry) {

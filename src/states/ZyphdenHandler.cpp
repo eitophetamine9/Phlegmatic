@@ -478,6 +478,31 @@ void ZyphdenHandler::CloseDialogue() {
 
 
 
+void ZyphdenHandler::Reset() {
+    questPhase = ZyphdenQuestPhase::SEEK_TAVERN;
+    hasTalkedToKing = false;
+    sparActive = false;
+    sparPendingStart = false;
+    hasSparredOnce = false;
+    lenonDefeated = false;
+    lenonSpawned = false;
+    lenonInTavern = false;
+    lenonSpawnTimer = 0.0f;
+    inTavern = false;
+    inForge = false;
+    forgeTab = 0;
+    inRoyalKeep = false;
+    entryBannerTimer = 4.0f;
+    showObjectives = true;
+    isDialogueOpen = false;
+    currentDialogueNPCId = "";
+    dialogueSpeaker = "";
+    dialoguePages.clear();
+    currentDialoguePage = 0;
+    isForgeOpen = false;
+    isProvisionsOpen = false;
+}
+
 void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera) {
 
     inTavern = false;
@@ -532,24 +557,12 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
 
 
 
-    bool hasPlate = player.GetInventory().HasArmor(ArmorType::CRUSADER_PLATE);
-
-    if (lenonDefeated || hasPlate || questPhase >= ZyphdenQuestPhase::VICTORIOUS) {
-
+    // Only set to VICTORIOUS if actually defeated and past that stage
+    if (lenonDefeated && questPhase >= ZyphdenQuestPhase::VICTORIOUS) {
         lenonDefeated = true;
-
-        if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
-
-            questPhase = ZyphdenQuestPhase::VICTORIOUS;
-
-        }
-
         lenonSpawned = true;
-
         lenonInTavern = false;
-
         knightLenonNPC.position = { 1490.0f, 700.0f };
-
     } else if (questPhase >= ZyphdenQuestPhase::SEEK_KING) {
 
         lenonDefeated = false;
