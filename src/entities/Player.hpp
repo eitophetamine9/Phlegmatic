@@ -94,6 +94,7 @@ public:
 
     int GetComboStep() const { return comboStep; }
     int GetHeavyStage() const { return heavyStage; }
+    int GetHalberdStabCount() const { return halberdStabCount; }
     bool IsDaggerLunging() const { return isDaggerLunging; }
     bool IsShockwaveActive() const { return shockwaveActive; }
     Vector2 GetShockwavePos() const { return shockwavePos; }
@@ -193,6 +194,7 @@ private:
     Vector2 heavyTargetPos;
     int heavyStage;
     float heavyStageTimer;
+    int halberdStabCount;
 
     int comboStep;
     float comboTimer;

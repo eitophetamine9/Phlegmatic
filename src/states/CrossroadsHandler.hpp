@@ -43,6 +43,7 @@ public:
     CrossroadsHandler();
 
     void Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera);
+    void Reset();
 
     void Update(
         float dt,
@@ -74,6 +75,8 @@ public:
     );
 
     bool HasClaimedTotemOfSanity() const { return chest.opened; }
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
     HiddenTotemChest chest;

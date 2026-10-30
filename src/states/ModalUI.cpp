@@ -236,6 +236,8 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
 
 
 
+
+// ==========================================
 bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player, int& activeTab, int& selectedFragmentIndex) {
 
     // Dimmed cinematic backdrop
@@ -1898,6 +1900,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
 
+
+
 int ModalUI::DrawZilDefeat(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, bool canRetry) {
 
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 4, 6, 225 });
@@ -3009,1154 +3013,230 @@ bool ModalUI::DrawQuarryTransition(int windowWidth, int windowHeight, Vector2 mo
 
 
 bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState) {
-
-    // 1. Dark Vignette Backdrop
-
-    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 14, 230 });
-
-
+    // 1. Dark Frosted Vignette Backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 4, 10, 14, 235 });
 
     const float modalW = 1140.0f;
-
-    const float modalH = 640.0f;
-
+    const float modalH = 650.0f;
     const float modalX = ((float)windowWidth - modalW) * 0.5f;
-
     const float modalY = ((float)windowHeight - modalH) * 0.5f;
-
     Rectangle modalRec = { modalX, modalY, modalW, modalH };
 
+    // Outer frosted teal glass backing
+    DrawRectangleRounded(modalRec, 0.03f, 8, Color{ 7, 18, 24, 252 });
+    DrawRectangleRoundedLines(modalRec, 0.03f, 8, Color{ 45, 180, 200, 230 });
+    DrawRectangleRoundedLines(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 0.025f, 8, Color{ 20, 75, 90, 180 });
 
-
-    // Outer backing card & filigree borders
-
-    DrawRectangleRounded(modalRec, 0.03f, 8, Color{ 14, 16, 24, 252 });
-
-    DrawRectangleRoundedLines(modalRec, 0.03f, 8, Color{ 215, 175, 65, 245 });
-
-    DrawRectangleRoundedLines(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 0.025f, 8, Color{ 55, 70, 95, 180 });
-
-
-
-    // Corner Filigree Ornaments
-
-    Color cornerCol = Color{ 255, 215, 80, 240 };
-
+    // Corner Filigree & Brackets (Image 2 style)
+    Color cornerCol = Color{ 80, 225, 245, 240 };
     DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 38, modalY + 12 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + 12, modalY + 12 }, { modalX + 12, modalY + 38 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 38, modalY + 12 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + modalW - 12, modalY + 12 }, { modalX + modalW - 12, modalY + 38 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 38, modalY + modalH - 12 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + 12, modalY + modalH - 12 }, { modalX + 12, modalY + modalH - 38 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 38, modalY + modalH - 12 }, 2.0f, cornerCol);
-
     DrawLineEx({ modalX + modalW - 12, modalY + modalH - 12 }, { modalX + modalW - 12, modalY + modalH - 38 }, 2.0f, cornerCol);
 
-
-
-    // 2. Header Section
-
-    FontManager::DrawText("REALM MAP OF TYDESHIRE & ZYPHDEN", (int)modalX + 32, (int)modalY + 16, 20, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
-
-    FontManager::DrawText("Imperial Cartography Guild Survey | Northern Marchlands & Frontier Territories", (int)modalX + 32, (int)modalY + 40, 11, Color{ 175, 195, 225, 220 }, GameFont::BODY);
-
-
-
-    // Interactive Legend & Filter Pills (0 = ALL, 1 = QUESTS, 2 = SERVICES, 3 = DANGER)
-
-    static int s_activeFilter = 0;
-
-    const char* filterLabels[4] = { "ALL [0]", "QUESTS [1]", "SERVICES [2]", "DANGER [3]" };
-
-    Color filterColors[4] = { Color{ 220, 235, 255, 255 }, Color{ 255, 215, 80, 255 }, Color{ 80, 210, 255, 255 }, Color{ 255, 100, 90, 255 } };
-
-
-
-    float filterStartX = modalX + 540.0f;
-
-    float filterY = modalY + 20.0f;
-
-    for (int i = 0; i < 4; i++) {
-
-        float fW = 95.0f;
-
-        float fH = 26.0f;
-
-        float fX = filterStartX + (float)i * 102.0f;
-
-        Rectangle fRec = { fX, filterY, fW, fH };
-
-        bool isFHov = CheckCollisionPointRec(mousePos, fRec);
-
-        if ((isFHov && isMousePressed) || (IsKeyPressed(KEY_ZERO + i))) {
-
-            s_activeFilter = i;
-
-            SoundFX::PlayButtonClick();
-
-        }
-
-
-
-        bool isActive = (s_activeFilter == i);
-
-        DrawRectangleRounded(fRec, 0.3f, 4, isActive ? Color{ 36, 48, 70, 240 } : (isFHov ? Color{ 25, 32, 48, 220 } : Color{ 18, 22, 34, 180 }));
-
-        DrawRectangleRoundedLines(fRec, 0.3f, 4, isActive ? filterColors[i] : (isFHov ? Color{ 140, 180, 220, 200 } : Color{ 55, 70, 95, 160 }));
-
-        FontManager::DrawText(filterLabels[i], (int)fX + 12, (int)filterY + 6, 10, isActive ? filterColors[i] : Color{ 170, 185, 205, 220 }, GameFont::BODY);
-
+    // Subtle Cartesian / Isometric Grid overlay lines (Image 2)
+    for (int gx = 0; gx < (int)modalW; gx += 40) {
+        DrawLine((int)modalX + gx, (int)modalY + 6, (int)modalX + gx, (int)modalY + (int)modalH - 6, Color{ 20, 60, 75, 35 });
+    }
+    for (int gy = 0; gy < (int)modalH; gy += 40) {
+        DrawLine((int)modalX + 6, (int)modalY + gy, (int)modalX + (int)modalW - 6, (int)modalY + gy, Color{ 20, 60, 75, 35 });
     }
 
+    // 2. HEADER SECTION (Image 2: Decorative wing lines, Game Stage title, 3 stars)
+    float headerX = modalX + 48.0f;
+    float headerY = modalY + 28.0f;
 
+    // Wing lines
+    DrawLineEx({ headerX, headerY + 14.0f }, { headerX + 45.0f, headerY + 14.0f }, 1.5f, Color{ 140, 215, 235, 180 });
+    DrawCircle((int)headerX + 45, (int)headerY + 14, 3.0f, Color{ 140, 215, 235, 220 });
+    DrawText("Game Stage", (int)headerX + 60, (int)headerY, 26, Color{ 255, 255, 255, 255 });
+    int stageW = MeasureText("Game Stage", 26);
+    DrawCircle((int)headerX + 60 + stageW + 15, (int)headerY + 14, 3.0f, Color{ 140, 215, 235, 220 });
+    DrawLineEx({ headerX + 60 + stageW + 15.0f, headerY + 14.0f }, { headerX + 60 + stageW + 60.0f, headerY + 14.0f }, 1.5f, Color{ 140, 215, 235, 180 });
 
-    // Close Button [ESC / M]
+    // Three Glowing Stars (Image 2)
+    float starX = headerX + 90.0f;
+    float starY = headerY + 36.0f;
+    DrawText("***", (int)starX, (int)starY, 22, Color{ 255, 220, 80, 255 });
 
-    const float closeW = 120.0f;
+    // Subtitle
+    DrawText("Explore Game Stages of Season 4 before your adventure through the world of Gaia begins.", (int)headerX, (int)starY + 26, 10, Color{ 140, 185, 205, 200 });
 
-    const float closeH = 30.0f;
-
-    float closeX = modalX + modalW - closeW - 32.0f;
-
-    float closeY = modalY + 18.0f;
-
-    Rectangle closeRec = { closeX, closeY, closeW, closeH };
-
+    // Top Right: Compass & Close Button
+    float closeW = 95.0f;
+    float closeH = 28.0f;
+    Rectangle closeRec = { modalX + modalW - closeW - 32.0f, modalY + 24.0f, closeW, closeH };
     bool isCloseHov = CheckCollisionPointRec(mousePos, closeRec);
-
-
-
-    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
-
-    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
-
-    FontManager::DrawText("CLOSE [ESC/M]", (int)closeX + 14, (int)closeY + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 }, GameFont::BODY);
-
-
-
+    DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 32, 70, 85, 255 } : Color{ 14, 32, 42, 220 });
+    DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 80, 225, 245, 255 } : Color{ 40, 100, 120, 200 });
+    DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
     bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_M);
 
+    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <5>) & LEYLINE MAP
+    struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
+    MapStage stages[5] = {
+        { 1, "STAGE #1: RUINED CASTLE", { modalX + 310.0f, modalY + 510.0f }, "Normal", "Min Level: 1", "At the beginning, run the foundations for playing via the newest patches. Dangerous foes are available and relevant leylines will lead all." },
+        { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
+        { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
+        { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
+        { 5, "STAGE #5: NORTH MARCHE", { modalX + 560.0f, modalY + 575.0f }, "Lethal", "Min Level: 30", "Alpine snowy mountain passes guarding the sealed gate toward the northern mist and the Liege of Kings." }
+    };
 
+    static int s_selectedStage = 1;
 
-    // 3. Map Viewport & Pan / Zoom Engine
+    // Determine which stage is active based on currentState
+    int activeStageId = 1;
+    if (currentState == GameState::RUINED_CASTLE) activeStageId = 1;
+    else if (currentState == GameState::CROSSROADS) activeStageId = 2;
+    else if ((currentState == GameState::ZYPHDEN_REALM || currentState == GameState::ZYPHDEN_TRANSITION)) activeStageId = 3;
 
-    const float viewX = modalX + 24.0f;
+    // Draw connecting leylines between diamond waypoints (Image 2)
+    Color leylineCol = Color{ 40, 140, 160, 180 };
+    DrawLineEx(stages[0].pos, stages[1].pos, 2.5f, leylineCol);
+    DrawLineEx(stages[1].pos, stages[2].pos, 2.5f, leylineCol);
+    DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
+    DrawLineEx(stages[1].pos, stages[4].pos, 2.0f, Color{ 35, 110, 130, 150 });
 
-    const float viewY = modalY + 68.0f;
+    // Draw Diamond Waypoints (<1> - <5>)
+    float animTime = (float)GetTime();
+    for (int i = 0; i < 5; i++) {
+        Vector2 pt = stages[i].pos;
+        bool isActive = (stages[i].id == activeStageId);
+        bool isSel = (stages[i].id == s_selectedStage);
 
-    const float viewW = modalW - 48.0f;
-
-    const float viewH = modalH - 126.0f;
-
-    Rectangle viewRec = { viewX, viewY, viewW, viewH };
-
-
-
-    static Vector2 s_mapPan = { 0.0f, 0.0f };
-
-    static float s_mapZoom = 1.0f;
-
-    static bool s_isDragging = false;
-
-    static Vector2 s_dragStart = { 0.0f, 0.0f };
-
-    static Vector2 s_panStart = { 0.0f, 0.0f };
-
-
-
-    bool inView = CheckCollisionPointRec(mousePos, viewRec);
-
-
-
-    // Mouse wheel zooming
-
-    if (inView) {
-
-        float wheel = GetMouseWheelMove();
-
-        if (wheel != 0.0f) {
-
-            s_mapZoom = fmaxf(0.75f, fminf(2.2f, s_mapZoom + wheel * 0.12f));
-
+        // Check hover/click
+        Rectangle clickBox = { pt.x - 22.0f, pt.y - 22.0f, 44.0f, 44.0f };
+        bool isNodeHov = CheckCollisionPointRec(mousePos, clickBox);
+        if (isNodeHov && isMousePressed) {
+            s_selectedStage = stages[i].id;
+            SoundFX::PlayButtonClick();
         }
 
-    }
-
-
-
-    // Mouse dragging
-
-    if (inView && isMousePressed) {
-
-        s_isDragging = true;
-
-        s_dragStart = mousePos;
-
-        s_panStart = s_mapPan;
-
-    }
-
-
-
-    if (s_isDragging) {
-
-        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-
-            s_mapPan.x = s_panStart.x + (mousePos.x - s_dragStart.x);
-
-            s_mapPan.y = s_panStart.y + (mousePos.y - s_dragStart.y);
-
+        // Active Player Beacon Pulse Rings (Image 2 cyan diamond <1>)
+        if (isActive) {
+            float pulse = sinf(animTime * 3.5f) * 6.0f;
+            DrawPolyLines(pt, 4, 30.0f + pulse, 45.0f, Color{ 0, 229, 255, 120 });
+            DrawPolyLines(pt, 4, 24.0f, 45.0f, Color{ 80, 240, 255, 200 });
+            DrawPoly(pt, 4, 20.0f, 45.0f, Color{ 0, 170, 210, 240 });
         } else {
-
-            s_isDragging = false;
-
+            DrawPoly(pt, 4, 18.0f, 45.0f, (isNodeHov || isSel) ? Color{ 25, 55, 70, 240 } : Color{ 14, 32, 42, 220 });
+            DrawPolyLines(pt, 4, 18.0f, 45.0f, (isNodeHov || isSel) ? Color{ 255, 225, 90, 255 } : Color{ 70, 160, 180, 200 });
         }
 
+        // Diamond arrows / brackets (Image 2 style: < 1 >)
+        DrawLineEx({ pt.x - 24.0f, pt.y }, { pt.x - 18.0f, pt.y - 6.0f }, 1.5f, Color{ 160, 225, 240, 220 });
+        DrawLineEx({ pt.x - 24.0f, pt.y }, { pt.x - 18.0f, pt.y + 6.0f }, 1.5f, Color{ 160, 225, 240, 220 });
+        DrawLineEx({ pt.x + 24.0f, pt.y }, { pt.x + 18.0f, pt.y - 6.0f }, 1.5f, Color{ 160, 225, 240, 220 });
+        DrawLineEx({ pt.x + 24.0f, pt.y }, { pt.x + 18.0f, pt.y + 6.0f }, 1.5f, Color{ 160, 225, 240, 220 });
+
+        std::string numStr = std::to_string(stages[i].id);
+        int nw = MeasureText(numStr.c_str(), 14);
+        DrawText(numStr.c_str(), (int)(pt.x - nw * 0.5f), (int)(pt.y - 7.0f), 14, isActive ? Color{ 255, 255, 255, 255 } : Color{ 220, 240, 255, 240 });
     }
 
-
-
-    // Clamp panning
-
-    s_mapPan.x = fmaxf(-450.0f * s_mapZoom, fminf(450.0f * s_mapZoom, s_mapPan.x));
-
-    s_mapPan.y = fmaxf(-320.0f * s_mapZoom, fminf(320.0f * s_mapZoom, s_mapPan.y));
-
-
-
-    // Recenter keyboard shortcut
-
-    if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_R)) {
-
-        s_mapPan = { 0.0f, 0.0f };
-
-        s_mapZoom = 1.0f;
-
-    }
-
-
-
-    // 4. Scissor Mode for Cartographic Map Canvas
-
-    BeginScissorMode((int)viewX, (int)viewY, (int)viewW, (int)viewH);
-
-
-
-    // Dark fantasy aged parchment paper canvas
-
-    Vector2 mapCenter = { viewX + viewW * 0.5f + s_mapPan.x, viewY + viewH * 0.5f + s_mapPan.y };
-
-    float paperW = 1120.0f * s_mapZoom;
-
-    float paperH = 660.0f * s_mapZoom;
-
-    Rectangle paperRec = { mapCenter.x - paperW * 0.5f, mapCenter.y - paperH * 0.5f, paperW, paperH };
-
-
-
-    // Aged parchment base fill
-
-    DrawRectangleRec(paperRec, Color{ 24, 21, 20, 255 });
-
-    DrawRectangleLinesEx(paperRec, 2.0f, Color{ 75, 62, 48, 200 });
-
-    DrawRectangleLinesEx(Rectangle{ paperRec.x + 4.0f, paperRec.y + 4.0f, paperRec.width - 8.0f, paperRec.height - 8.0f }, 1.0f, Color{ 55, 44, 34, 160 });
-
-
-
-    // Latitude & Longitude Coordinate Lines
-
-    Color gridCol = Color{ 48, 40, 34, 120 };
-
-    for (int gx = -400; gx <= 400; gx += 200) {
-
-        float lineX = mapCenter.x + (float)gx * s_mapZoom;
-
-        DrawLineEx({ lineX, paperRec.y }, { lineX, paperRec.y + paperRec.height }, 1.0f, gridCol);
-
-    }
-
-    for (int gy = -200; gy <= 200; gy += 150) {
-
-        float lineY = mapCenter.y + (float)gy * s_mapZoom;
-
-        DrawLineEx({ paperRec.x, lineY }, { paperRec.x + paperRec.width, lineY }, 1.0f, gridCol);
-
-    }
-
-
-
-    // A. Whispering Sea / Western Coastline
-
-    float coastX = mapCenter.x - 380.0f * s_mapZoom;
-
-    DrawRectangleRec(Rectangle{ paperRec.x, paperRec.y, coastX - paperRec.x, paperRec.height }, Color{ 18, 24, 32, 230 });
-
-    DrawLineEx({ coastX, paperRec.y }, { coastX, paperRec.y + paperRec.height }, 2.0f, Color{ 45, 65, 85, 200 });
-
-    // Coastline waves
-
-    for (float wy = paperRec.y + 40.0f; wy < paperRec.y + paperRec.height - 40.0f; wy += 60.0f * s_mapZoom) {
-
-        DrawText("~ ~ ~", (int)(coastX - 60.0f * s_mapZoom), (int)wy, (int)(11 * s_mapZoom), Color{ 50, 75, 105, 140 });
-
-    }
-
-    DrawText("THE WHISPERING SEA", (int)(paperRec.x + 20.0f), (int)(mapCenter.y - 120.0f * s_mapZoom), (int)(12 * s_mapZoom), Color{ 65, 95, 130, 160 });
-
-
-
-    // B. The River Tydes
-
-    Vector2 riverPoints[7] = {
-
-        { mapCenter.x + 40.0f * s_mapZoom, mapCenter.y - 300.0f * s_mapZoom },
-
-        { mapCenter.x - 10.0f * s_mapZoom, mapCenter.y - 180.0f * s_mapZoom },
-
-        { mapCenter.x - 45.0f * s_mapZoom, mapCenter.y - 80.0f * s_mapZoom },
-
-        { mapCenter.x + 20.0f * s_mapZoom, mapCenter.y + 10.0f * s_mapZoom },
-
-        { mapCenter.x - 20.0f * s_mapZoom, mapCenter.y + 110.0f * s_mapZoom },
-
-        { mapCenter.x - 60.0f * s_mapZoom, mapCenter.y + 200.0f * s_mapZoom },
-
-        { coastX, mapCenter.y + 260.0f * s_mapZoom }
-
-    };
-
-    for (int r = 0; r < 6; r++) {
-
-        DrawLineEx(riverPoints[r], riverPoints[r + 1], 4.5f * s_mapZoom, Color{ 36, 56, 80, 240 });
-
-        DrawLineEx(riverPoints[r], riverPoints[r + 1], 1.5f * s_mapZoom, Color{ 75, 130, 185, 220 });
-
-    }
-
-
-
-    // C. The Royal Highway (Cobblestone Highway)
-
-    Vector2 roadPoints[6] = {
-
-        { mapCenter.x - 40.0f * s_mapZoom, mapCenter.y + 170.0f * s_mapZoom }, // Ruined Castle (South)
-
-        { mapCenter.x - 10.0f * s_mapZoom, mapCenter.y + 65.0f * s_mapZoom },  // Crossroads
-
-        { mapCenter.x - 15.0f * s_mapZoom, mapCenter.y - 45.0f * s_mapZoom },  // Zyphden Gates
-
-        { mapCenter.x + 20.0f * s_mapZoom, mapCenter.y - 80.0f * s_mapZoom },  // Courtyard
-
-        { mapCenter.x + 5.0f * s_mapZoom, mapCenter.y - 145.0f * s_mapZoom },  // Royal Keep
-
-        { mapCenter.x + 15.0f * s_mapZoom, mapCenter.y - 220.0f * s_mapZoom }  // North Gate
-
-    };
-
-    for (int r = 0; r < 5; r++) {
-
-        DrawLineEx(roadPoints[r], roadPoints[r + 1], 3.5f * s_mapZoom, Color{ 75, 62, 45, 230 });
-
-        DrawLineEx(roadPoints[r], roadPoints[r + 1], 1.2f * s_mapZoom, Color{ 150, 125, 85, 200 });
-
-    }
-
-    // Road spur eastward to Quarry
-
-    Vector2 quarrySpurStart = roadPoints[3];
-
-    Vector2 quarrySpurEnd = { mapCenter.x + 230.0f * s_mapZoom, mapCenter.y - 40.0f * s_mapZoom };
-
-    DrawLineEx(quarrySpurStart, quarrySpurEnd, 3.0f * s_mapZoom, Color{ 75, 62, 45, 230 });
-
-    DrawLineEx(quarrySpurStart, quarrySpurEnd, 1.2f * s_mapZoom, Color{ 150, 125, 85, 200 });
-
-
-
-    // D. Northern Dragonspire Crags (Mountain Peaks)
-
-    for (float mx = mapCenter.x - 260.0f * s_mapZoom; mx <= mapCenter.x + 360.0f * s_mapZoom; mx += 65.0f * s_mapZoom) {
-
-        float peakY = mapCenter.y - 280.0f * s_mapZoom;
-
-        float peakH = 34.0f * s_mapZoom;
-
-        DrawTriangle(
-
-            Vector2{ mx, peakY - peakH },
-
-            Vector2{ mx - 32.0f * s_mapZoom, peakY },
-
-            Vector2{ mx + 32.0f * s_mapZoom, peakY },
-
-            Color{ 45, 38, 32, 240 }
-
-        );
-
-        DrawLineEx({ mx, peakY - peakH }, { mx + 32.0f * s_mapZoom, peakY }, 1.5f * s_mapZoom, Color{ 100, 85, 70, 220 });
-
-    }
-
-    DrawText("DRAGONSPIRE CRAGS", (int)(mapCenter.x - 80.0f * s_mapZoom), (int)(mapCenter.y - 295.0f * s_mapZoom), (int)(11 * s_mapZoom), Color{ 120, 100, 80, 200 });
-
-
-
-    // E. Eastern Quarry Plateau (Basalt Crags)
-
-    Rectangle quarryPlateau = { mapCenter.x + 160.0f * s_mapZoom, mapCenter.y - 80.0f * s_mapZoom, 150.0f * s_mapZoom, 90.0f * s_mapZoom };
-
-    DrawRectangleRounded(quarryPlateau, 0.2f, 4, Color{ 36, 30, 26, 230 });
-
-    DrawRectangleRoundedLines(quarryPlateau, 0.2f, 4, Color{ 110, 85, 55, 200 });
-
-    // Amber mineral vein sparkles
-
-    DrawCircle((int)(quarryPlateau.x + 30.0f * s_mapZoom), (int)(quarryPlateau.y + 25.0f * s_mapZoom), 2.5f * s_mapZoom, Color{ 255, 195, 60, 220 });
-
-    DrawCircle((int)(quarryPlateau.x + 85.0f * s_mapZoom), (int)(quarryPlateau.y + 55.0f * s_mapZoom), 3.0f * s_mapZoom, Color{ 255, 195, 60, 220 });
-
-    DrawCircle((int)(quarryPlateau.x + 120.0f * s_mapZoom), (int)(quarryPlateau.y + 35.0f * s_mapZoom), 2.5f * s_mapZoom, Color{ 255, 195, 60, 220 });
-
-
-
-    // F. City Walls of Zyphden
-
-    Rectangle cityWalls = { mapCenter.x - 170.0f * s_mapZoom, mapCenter.y - 170.0f * s_mapZoom, 320.0f * s_mapZoom, 155.0f * s_mapZoom };
-
-    DrawRectangleRounded(cityWalls, 0.12f, 6, Color{ 32, 28, 34, 210 });
-
-    DrawRectangleRoundedLines(cityWalls, 0.12f, 6, Color{ 90, 80, 105, 220 });
-
-    // Corner Turrets
-
-    DrawCircle((int)cityWalls.x, (int)cityWalls.y, 7.0f * s_mapZoom, Color{ 60, 52, 70, 240 });
-
-    DrawCircle((int)(cityWalls.x + cityWalls.width), (int)cityWalls.y, 7.0f * s_mapZoom, Color{ 60, 52, 70, 240 });
-
-    DrawCircle((int)cityWalls.x, (int)(cityWalls.y + cityWalls.height), 7.0f * s_mapZoom, Color{ 60, 52, 70, 240 });
-
-    DrawCircle((int)(cityWalls.x + cityWalls.width), (int)(cityWalls.y + cityWalls.height), 7.0f * s_mapZoom, Color{ 60, 52, 70, 240 });
-
-
-
-    // G. The Whispering Westwoods (Tree Clusters)
-
-    for (float tx = mapCenter.x - 300.0f * s_mapZoom; tx <= mapCenter.x - 180.0f * s_mapZoom; tx += 40.0f * s_mapZoom) {
-
-        for (float ty = mapCenter.y + 40.0f * s_mapZoom; ty <= mapCenter.y + 150.0f * s_mapZoom; ty += 45.0f * s_mapZoom) {
-
-            DrawCircle((int)tx, (int)ty, 10.0f * s_mapZoom, Color{ 28, 42, 32, 220 });
-
-            DrawCircle((int)tx, (int)ty, 7.0f * s_mapZoom, Color{ 36, 56, 40, 240 });
-
-        }
-
-    }
-
-    DrawText("THE WESTWOODS", (int)(mapCenter.x - 290.0f * s_mapZoom), (int)(mapCenter.y + 165.0f * s_mapZoom), (int)(11 * s_mapZoom), Color{ 80, 120, 90, 200 });
-
-
-
-    // H. Ornate Compass Rose (Top Right of parchment)
-
-    Vector2 compassCenter = { paperRec.x + paperRec.width - 80.0f * s_mapZoom, paperRec.y + 80.0f * s_mapZoom };
-
-    DrawCircleLines((int)compassCenter.x, (int)compassCenter.y, 28.0f * s_mapZoom, Color{ 140, 115, 65, 200 });
-
-    DrawCircleLines((int)compassCenter.x, (int)compassCenter.y, 16.0f * s_mapZoom, Color{ 90, 75, 45, 180 });
-
-    // North pointer (Gold)
-
-    DrawTriangle(
-
-        Vector2{ compassCenter.x, compassCenter.y - 34.0f * s_mapZoom },
-
-        Vector2{ compassCenter.x - 6.0f * s_mapZoom, compassCenter.y },
-
-        Vector2{ compassCenter.x + 6.0f * s_mapZoom, compassCenter.y },
-
-        Color{ 255, 215, 80, 255 }
-
-    );
-
-    // South pointer
-
-    DrawTriangle(
-
-        Vector2{ compassCenter.x, compassCenter.y + 34.0f * s_mapZoom },
-
-        Vector2{ compassCenter.x + 6.0f * s_mapZoom, compassCenter.y },
-
-        Vector2{ compassCenter.x - 6.0f * s_mapZoom, compassCenter.y },
-
-        Color{ 100, 85, 60, 255 }
-
-    );
-
-    // East / West pointers
-
-    DrawLineEx({ compassCenter.x - 30.0f * s_mapZoom, compassCenter.y }, { compassCenter.x + 30.0f * s_mapZoom, compassCenter.y }, 2.0f * s_mapZoom, Color{ 160, 130, 70, 240 });
-
-    DrawText("N", (int)(compassCenter.x - 4.0f * s_mapZoom), (int)(compassCenter.y - 48.0f * s_mapZoom), (int)(12 * s_mapZoom), Color{ 255, 220, 95, 255 });
-
-    DrawText("S", (int)(compassCenter.x - 4.0f * s_mapZoom), (int)(compassCenter.y + 38.0f * s_mapZoom), (int)(10 * s_mapZoom), Color{ 180, 150, 95, 220 });
-
-    DrawText("E", (int)(compassCenter.x + 34.0f * s_mapZoom), (int)(compassCenter.y - 5.0f * s_mapZoom), (int)(10 * s_mapZoom), Color{ 180, 150, 95, 220 });
-
-    DrawText("W", (int)(compassCenter.x - 45.0f * s_mapZoom), (int)(compassCenter.y - 5.0f * s_mapZoom), (int)(10 * s_mapZoom), Color{ 180, 150, 95, 220 });
-
-
-
-    // I. Imperial Guild Seal (Bottom Left)
-
-    Vector2 sealCenter = { paperRec.x + 80.0f * s_mapZoom, paperRec.y + paperRec.height - 70.0f * s_mapZoom };
-
-    DrawCircle((int)sealCenter.x, (int)sealCenter.y, 24.0f * s_mapZoom, Color{ 85, 30, 30, 220 });
-
-    DrawCircleLines((int)sealCenter.x, (int)sealCenter.y, 24.0f * s_mapZoom, Color{ 180, 70, 70, 240 });
-
-    DrawPolyLines(sealCenter, 6, 16.0f * s_mapZoom, 30.0f, Color{ 220, 150, 100, 200 });
-
-    DrawText("SIGIL", (int)(sealCenter.x - 12.0f * s_mapZoom), (int)(sealCenter.y - 5.0f * s_mapZoom), (int)(9 * s_mapZoom), Color{ 255, 200, 160, 220 });
-
-
-
-    // 5. Points of Interest (POIs) Definition & Rendering
-
-    struct RealmPOI {
-
-        Vector2 offset; // Offset from mapCenter
-
-        const char* name;
-
-        const char* subTag;
-
-        const char* resident;
-
-        const char* desc;
-
-        const char* status;
-
-        int category; // 1 = QUEST, 2 = SERVICE, 3 = DANGER
-
-        Color color;
-
-    };
-
-
-
-    RealmPOI pois[8] = {
-
-        {
-
-            { -40.0f, 170.0f },
-
-            "Ruined Castle of Zil",
-
-            "[REMEMBRANCE SHRINE]",
-
-            "Corrupted Zil Remnant",
-
-            "The desecrated sun courtyard where Champion Zil was defeated. Ancient solar altar hums in silence.",
-
-            "Sanctified & Cleared",
-
-            3,
-
-            Color{ 255, 100, 90, 255 }
-
-        },
-
-        {
-
-            { -10.0f, 65.0f },
-
-            "Crossroads Sanctum",
-
-            "[HIGHWAY WAYPOINT]",
-
-            "Wayfarer's Ancient Stele",
-
-            "The historic valley junction between southern ruins, western forests, and northern kingdom gates.",
-
-            "Safe Highway Passage",
-
-            2,
-
-            Color{ 80, 210, 255, 255 }
-
-        },
-
-        {
-
-            { -95.0f, -40.0f },
-
-            "Hearthside Tavern",
-
-            "[REST & PROVISIONS]",
-
-            "Tavernkeep Eldon",
-
-            "A warm gathering hall with crackling hearth, hearty braised stews, and frontier rumor whispers.",
-
-            "Safe Tavern Sanctuary",
-
-            2,
-
-            Color{ 80, 210, 255, 255 }
-
-        },
-
-        {
-
-            { -140.0f, -95.0f },
-
-            "Varek's Master Forge",
-
-            "[WEAPON CRAFTING]",
-
-            "Blacksmith Varek",
-
-            "Forging workshop. Craft Dual Daggers & War Maces with Quarry Ore Scraps; temper steel with Shingles.",
-
-            "Crafting & Upgrades Active",
-
-            2,
-
-            Color{ 255, 185, 60, 255 }
-
-        },
-
-        {
-
-            { 5.0f, -145.0f },
-
-            "The Royal Keep & Throne",
-
-            "[SOVEREIGN SEAT]",
-
-            "King Kreptu & Royal Marshals",
-
-            "Throne dais of King Kreptu. Grants audience to worthy duelists and sanctions exploration beyond borders.",
-
-            "Main Quest: Royal Audience",
-
-            1,
-
-            Color{ 255, 215, 80, 255 }
-
-        },
-
-        {
-
-            { 85.0f, -60.0f },
-
-            "Courtyard Sparring Ring",
-
-            "[MARTIAL DUEL]",
-
-            "Knight-Captain Lenon",
-
-            "The royal practice grounds where the Vanguard trains in poise-breaking counters and evasive maneuvers.",
-
-            "Martial Sparring Ground",
-
-            1,
-
-            Color{ 255, 215, 80, 255 }
-
-        },
-
-        {
-
-            { 230.0f, -40.0f },
-
-            "Eastern Ore Quarry",
-
-            "[RESOURCE HARVESTING]",
-
-            "Ore Golems (7s Respawn)",
-
-            "Gale-carved rocky plateau rich in metallic veins. Ore Golems patrol and drop vital crafting scraps.",
-
-            "Scrap Harvesting Ground (Active)",
-
-            3,
-
-            Color{ 255, 120, 60, 255 }
-
-        },
-
-        {
-
-            { 15.0f, -220.0f },
-
-            "Northern Frontier Gate",
-
-            "[NEXT REALM BORDER]",
-
-            "Royal Frontier Sentinels",
-
-            "Massive portcullis leading north to neighboring kingdoms. King Kreptu has granted open travel sanction.",
-
-            "Open Exploration Sanctioned",
-
-            1,
-
-            Color{ 255, 225, 100, 255 }
-
-        }
-
-    };
-
-
-
-    int hoveredPOIIndex = -1;
-
-
-
-    for (int i = 0; i < 8; i++) {
-
-        Vector2 poiScreenPos = { mapCenter.x + pois[i].offset.x * s_mapZoom, mapCenter.y + pois[i].offset.y * s_mapZoom };
-
-
-
-        bool filterMatch = (s_activeFilter == 0 || pois[i].category == s_activeFilter);
-
-        float alpha = filterMatch ? 1.0f : 0.25f;
-
-
-
-        // Hover test
-
-        float hitRadius = 18.0f * s_mapZoom;
-
-        if (inView && filterMatch && CheckCollisionPointCircle(mousePos, poiScreenPos, hitRadius)) {
-
-            hoveredPOIIndex = i;
-
-        }
-
-
-
-        bool isHov = (hoveredPOIIndex == i);
-
-
-
-        // Outer base pin circle
-
-        Color baseCol = ColorAlpha(pois[i].color, alpha);
-
-        Color rimCol = isHov ? Color{ 255, 255, 255, (unsigned char)(255 * alpha) } : ColorAlpha(Color{ 18, 22, 34, 240 }, alpha);
-
-
-
-        DrawCircle((int)poiScreenPos.x, (int)poiScreenPos.y, (12.0f + (isHov ? 3.0f : 0.0f)) * s_mapZoom, rimCol);
-
-        DrawCircle((int)poiScreenPos.x, (int)poiScreenPos.y, 8.5f * s_mapZoom, baseCol);
-
-        DrawCircleLines((int)poiScreenPos.x, (int)poiScreenPos.y, (12.0f + (isHov ? 3.0f : 0.0f)) * s_mapZoom, baseCol);
-
-
-
-        // Category Icon inside pin
-
-        if (pois[i].category == 1) {
-
-            // Crown / Shield icon (Quest)
-
-            DrawPolyLines(poiScreenPos, 3, 5.0f * s_mapZoom, 180.0f, ColorAlpha(WHITE, alpha));
-
-        } else if (pois[i].category == 2) {
-
-            // Star / Diamond icon (Service)
-
-            DrawPoly(poiScreenPos, 4, 4.5f * s_mapZoom, 45.0f, ColorAlpha(WHITE, alpha));
-
-        } else {
-
-            // Crossed swords / Skull icon (Danger)
-
-            DrawLineEx({ poiScreenPos.x - 4 * s_mapZoom, poiScreenPos.y - 4 * s_mapZoom }, { poiScreenPos.x + 4 * s_mapZoom, poiScreenPos.y + 4 * s_mapZoom }, 1.5f * s_mapZoom, ColorAlpha(WHITE, alpha));
-
-            DrawLineEx({ poiScreenPos.x - 4 * s_mapZoom, poiScreenPos.y + 4 * s_mapZoom }, { poiScreenPos.x + 4 * s_mapZoom, poiScreenPos.y - 4 * s_mapZoom }, 1.5f * s_mapZoom, ColorAlpha(WHITE, alpha));
-
-        }
-
-
-
-        // POI Label below pin
-
-        int lblW = MeasureText(pois[i].name, (int)(10 * s_mapZoom));
-
-        Color txtCol = isHov ? Color{ 255, 255, 255, (unsigned char)(255 * alpha) } : ColorAlpha(Color{ 215, 225, 240, 220 }, alpha);
-
-        FontManager::DrawGameTextShadow(pois[i].name, (int)(poiScreenPos.x - lblW * 0.5f), (int)(poiScreenPos.y + 14.0f * s_mapZoom), (int)(10 * s_mapZoom), txtCol);
-
-    }
-
-
-
-    // 6. Live Player Beacon
-
-    Vector2 playerOffset = { 0.0f, 0.0f };
-
-    std::string locName = "Zyphden Outskirts";
-
-
-
-    if (currentState == GameState::ZYPHDEN_REALM) {
-
-        Vector2 pPos = player.GetPosition();
-
-        if (pPos.x > 1550.0f) {
-
-            // In Eastern Quarry
-
-            float dx = (pPos.x - 1800.0f) * 0.12f;
-
-            float dy = (pPos.y - 700.0f) * 0.12f;
-
-            playerOffset = { 230.0f + dx, -40.0f + dy };
-
-            locName = "Eastern Ore Quarry Plateau";
-
-        } else if (pPos.y < 500.0f && pPos.x > 850.0f) {
-
-            playerOffset = { 5.0f, -145.0f };
-
-            locName = "The Royal Keep & Throne Dais";
-
-        } else if (pPos.x < 700.0f && pPos.y > 850.0f) {
-
-            playerOffset = { -95.0f, -40.0f };
-
-            locName = "Hearthside Tavern District";
-
-        } else if (pPos.x < 700.0f && pPos.y < 750.0f) {
-
-            playerOffset = { -140.0f, -95.0f };
-
-            locName = "Blacksmith Varek's Master Forge";
-
-        } else if (pPos.x > 1100.0f && pPos.y > 600.0f && pPos.y < 900.0f) {
-
-            playerOffset = { 85.0f, -60.0f };
-
-            locName = "Courtyard Sparring Grounds";
-
-        } else {
-
-            // General Zyphden Courtyard
-
-            float nx = (pPos.x - 1000.0f) * 0.10f;
-
-            float ny = (pPos.y - 800.0f) * 0.10f;
-
-            playerOffset = { nx, -70.0f + ny };
-
-            locName = "Kingdom of Zyphden - Grand Plaza";
-
-        }
-
-    } else if (currentState == GameState::QUARRY_DEPTHS) {
-
-        playerOffset = { 240.0f, -40.0f };
-
-        locName = "Quarry Mines & Primordial Altar";
-
-    } else if (currentState == GameState::CROSSROADS) {
-
-        playerOffset = { -10.0f, 65.0f };
-
-        locName = "Crossroads Highway & Sanctum";
-
-    } else if (currentState == GameState::RUINED_CASTLE) {
-
-        playerOffset = { -40.0f, 170.0f };
-
-        locName = "Ruined Castle of Zil (South)";
-
-    } else if (currentState == GameState::LOBBY) {
-
-        playerOffset = { -10.0f, 65.0f };
-
-        locName = "Armory Sanctuary (Nexus)";
-
-    }
-
-
-
-    Vector2 playerScreenPos = { mapCenter.x + playerOffset.x * s_mapZoom, mapCenter.y + playerOffset.y * s_mapZoom };
-
-
-
-    // Pulsing Radar Rings
-
-    float pTime = (float)GetTime();
-
-    float waveProgress = fmodf(pTime * 1.6f, 1.0f);
-
-    float waveRadius = (8.0f + waveProgress * 24.0f) * s_mapZoom;
-
-    unsigned char waveAlpha = (unsigned char)(220 * (1.0f - waveProgress));
-
-    DrawCircleLines((int)playerScreenPos.x, (int)playerScreenPos.y, waveRadius, Color{ 0, 229, 255, waveAlpha });
-
-    DrawCircleLines((int)playerScreenPos.x, (int)playerScreenPos.y, waveRadius * 0.6f, Color{ 255, 215, 80, (unsigned char)(waveAlpha * 0.8f) });
-
-
-
-    // Central Diamond Beacon
-
-    DrawPoly(playerScreenPos, 4, 8.0f * s_mapZoom, 45.0f, Color{ 20, 40, 65, 255 });
-
-    DrawPolyLines(playerScreenPos, 4, 8.0f * s_mapZoom, 45.0f, Color{ 0, 229, 255, 255 });
-
-    DrawPoly(playerScreenPos, 4, 5.0f * s_mapZoom, 45.0f, Color{ 255, 220, 90, 255 });
-
-    DrawCircle((int)playerScreenPos.x, (int)playerScreenPos.y, 2.5f * s_mapZoom, WHITE);
-
-
-
-    // "YOU ARE HERE" Banner
-
-    int youW = MeasureText("YOU ARE HERE", (int)(10 * s_mapZoom));
-
-    FontManager::DrawGameTextShadow("YOU ARE HERE", (int)(playerScreenPos.x - youW * 0.5f), (int)(playerScreenPos.y - 18.0f * s_mapZoom), (int)(10 * s_mapZoom), Color{ 140, 240, 255, 255 });
-
-
-
-    // 7. Interactive Hover Tooltip Card
-
-    if (hoveredPOIIndex >= 0 && hoveredPOIIndex < 8) {
-
-        const RealmPOI& hp = pois[hoveredPOIIndex];
-
-        Vector2 poiScreenPos = { mapCenter.x + hp.offset.x * s_mapZoom, mapCenter.y + hp.offset.y * s_mapZoom };
-
-
-
-        float ttW = 320.0f;
-
-        float ttH = 148.0f;
-
-        float ttX = poiScreenPos.x + 18.0f;
-
-        float ttY = poiScreenPos.y - ttH * 0.5f;
-
-
-
-        // Clamp tooltip within viewport
-
-        if (ttX + ttW > viewX + viewW - 12.0f) ttX = poiScreenPos.x - ttW - 18.0f;
-
-        if (ttY < viewY + 12.0f) ttY = viewY + 12.0f;
-
-        if (ttY + ttH > viewY + viewH - 12.0f) ttY = viewY + viewH - ttH - 12.0f;
-
-
-
-        Rectangle ttRec = { ttX, ttY, ttW, ttH };
-
-        DrawRectangleRounded(ttRec, 0.12f, 6, Color{ 14, 18, 28, 248 });
-
-        DrawRectangleRoundedLines(ttRec, 0.12f, 6, hp.color);
-
-        DrawRectangleLinesEx(Rectangle{ ttX + 3.0f, ttY + 3.0f, ttW - 6.0f, ttH - 6.0f }, 1.0f, Color{ 55, 75, 105, 160 });
-
-
-
-        // Category Tag
-
-        DrawText(hp.subTag, (int)ttX + 16, (int)ttY + 12, 10, hp.color);
-
-
-
-        // POI Title
-
-        FontManager::DrawText(hp.name, (int)ttX + 16, (int)ttY + 26, 14, Color{ 255, 255, 255, 255 }, GameFont::TITLE);
-
-
-
-        // Resident NPC Line
-
-        std::string resStr = "NPC: " + std::string(hp.resident);
-
-        DrawText(resStr.c_str(), (int)ttX + 16, (int)ttY + 48, 11, Color{ 140, 215, 255, 240 });
-
-
-
-        // Lore Description
-
-        DrawJournalWrappedText(hp.desc, (int)ttX + 16, (int)ttY + 66, (int)ttW - 32, 10, 4, Color{ 205, 220, 240, 225 });
-
-
-
-        // Status Line
-
-        DrawLine((int)ttX + 14, (int)ttY + ttH - 26, (int)(ttX + ttW - 14), (int)ttY + ttH - 26, Color{ 55, 70, 95, 160 });
-
-        std::string statStr = "STATUS: " + std::string(hp.status);
-
-        DrawText(statStr.c_str(), (int)ttX + 16, (int)ttY + ttH - 20, 10, Color{ 120, 255, 170, 230 });
-
-    }
-
-
-
-    EndScissorMode();
-
-
-
-    // 8. Footer Bar Section
-
-    float footerY = modalY + modalH - 50.0f;
-
-
-
-    // A. Current Location Badge (Bottom Left)
-
-    std::string locText = "LOCATION: " + locName;
-
-    DrawRectangleRounded(Rectangle{ modalX + 24.0f, footerY + 6.0f, 340.0f, 32.0f }, 0.25f, 4, Color{ 20, 26, 38, 230 });
-
-    DrawRectangleRoundedLines(Rectangle{ modalX + 24.0f, footerY + 6.0f, 340.0f, 32.0f }, 0.25f, 4, Color{ 70, 95, 135, 220 });
-
-    DrawCircle((int)(modalX + 40.0f), (int)(footerY + 22.0f), 4.0f, Color{ 0, 229, 255, 255 });
-
-    FontManager::DrawGameTextShadow(locText.c_str(), (int)(modalX + 52.0f), (int)(footerY + 15.0f), 11, Color{ 230, 245, 255, 255 });
-
-
-
-    // B. Navigation Hint (Center)
-
-    const char* navHint = "[Drag] Pan Map  |  [Wheel] Zoom  |  [SPACE / R] Recenter";
-
-    FontManager::DrawGameTextShadow(navHint, (int)(modalX + 400.0f), (int)(footerY + 16.0f), 11, Color{ 160, 185, 215, 210 });
-
-
-
-    // C. Action Buttons (Bottom Right)
-
-    // 1. Recenter Button
-
-    float rBtnX = modalX + modalW - 390.0f;
-
-    Rectangle rBtnRec = { rBtnX, footerY + 6.0f, 105.0f, 32.0f };
-
-    bool isRHov = CheckCollisionPointRec(mousePos, rBtnRec);
-
-    if ((isRHov && isMousePressed)) {
-
-        s_mapPan = { 0.0f, 0.0f };
-
-        s_mapZoom = 1.0f;
-
+    // 4. FLOATING STAGE INSPECTION CARD (Image 2: Left panel STAGE #1 with details)
+    float cardX = modalX + 50.0f;
+    float cardY = modalY + 140.0f;
+    float cardW = 340.0f;
+    float cardH = 340.0f;
+    Rectangle cardRec = { cardX, cardY, cardW, cardH };
+
+    DrawRectangleRounded(cardRec, 0.05f, 6, Color{ 10, 24, 32, 245 });
+    DrawRectangleRoundedLines(cardRec, 0.05f, 6, Color{ 45, 125, 145, 200 });
+
+    MapStage curStage = stages[s_selectedStage - 1];
+
+    // Card Header: STAGE #X
+    DrawText(curStage.name, (int)cardX + 22, (int)cardY + 22, 16, Color{ 255, 255, 255, 255 });
+
+    // Two capability / reward icon badges (Image 2)
+    float badge1X = cardX + cardW - 86.0f;
+    float badge2X = cardX + cardW - 46.0f;
+    float badgeY = cardY + 18.0f;
+    Rectangle b1 = { badge1X, badgeY, 32.0f, 32.0f };
+    Rectangle b2 = { badge2X, badgeY, 32.0f, 32.0f };
+    DrawRectangleRounded(b1, 0.2f, 4, Color{ 20, 50, 75, 255 });
+    DrawRectangleRoundedLines(b1, 0.2f, 4, Color{ 80, 200, 255, 220 });
+    DrawCircleLines((int)b1.x + 16, (int)b1.y + 16, 8.0f, Color{ 80, 200, 255, 255 });
+    DrawRectangleRounded(b2, 0.2f, 4, Color{ 50, 35, 20, 255 });
+    DrawRectangleRoundedLines(b2, 0.2f, 4, Color{ 255, 180, 60, 220 });
+    DrawPolyLines({ b2.x + 16.0f, b2.y + 16.0f }, 4, 8.0f, 45.0f, Color{ 255, 180, 60, 255 });
+
+    // Stats block
+    DrawText(curStage.minLvl, (int)cardX + 22, (int)cardY + 54, 11, Color{ 160, 200, 225, 200 });
+    std::string thStr = "Threat: " + std::string(curStage.threat);
+    DrawText(thStr.c_str(), (int)cardX + 22, (int)cardY + 72, 11, Color{ 160, 200, 225, 200 });
+    DrawText("Fragments: 4/10 Uncovered", (int)cardX + 22, (int)cardY + 90, 11, Color{ 160, 200, 225, 200 });
+
+    // Lore Description
+    DrawLine((int)cardX + 22, (int)cardY + 116, (int)(cardX + cardW - 22), (int)cardY + 116, Color{ 30, 75, 95, 180 });
+    DrawText(curStage.lore, (int)cardX + 22, (int)cardY + 128, 10, Color{ 180, 215, 235, 220 });
+
+    // [ DISCOVER MORE ] Button (Image 2)
+    float discW = 180.0f;
+    float discH = 34.0f;
+    Rectangle discRec = { cardX + (cardW - discW) * 0.5f, cardY + cardH - 52.0f, discW, discH };
+    bool isDiscHov = CheckCollisionPointRec(mousePos, discRec);
+    DrawRectangleRounded(discRec, 0.2f, 4, isDiscHov ? Color{ 35, 75, 95, 255 } : Color{ 18, 42, 54, 220 });
+    DrawRectangleRoundedLines(discRec, 0.2f, 4, isDiscHov ? Color{ 80, 225, 245, 255 } : Color{ 45, 110, 130, 200 });
+    DrawText("DISCOVER MORE", (int)discRec.x + 32, (int)discRec.y + 11, 11, isDiscHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 225, 240, 220 });
+
+    // Cycle stage arrows on card edges: < and >
+    Rectangle leftArrow = { cardX - 28.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
+    Rectangle rightArrow = { cardX + cardW + 4.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
+    if (CheckCollisionPointRec(mousePos, leftArrow) && isMousePressed) {
+        s_selectedStage = (s_selectedStage <= 1) ? 5 : (s_selectedStage - 1);
         SoundFX::PlayButtonClick();
-
     }
-
-    DrawRectangleRounded(rBtnRec, 0.25f, 4, isRHov ? Color{ 40, 55, 80, 240 } : Color{ 24, 30, 44, 210 });
-
-    DrawRectangleRoundedLines(rBtnRec, 0.25f, 4, isRHov ? Color{ 140, 210, 255, 255 } : Color{ 65, 85, 120, 200 });
-
-    FontManager::DrawText("RECENTER", (int)rBtnX + 16, (int)footerY + 15, 11, isRHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 205, 235, 220 }, GameFont::BODY);
-
-
-
-    // 2. Zoom Out (-)
-
-    float zmBtnX = rBtnX + 115.0f;
-
-    Rectangle zmRec = { zmBtnX, footerY + 6.0f, 42.0f, 32.0f };
-
-    bool isZmHov = CheckCollisionPointRec(mousePos, zmRec);
-
-    if (isZmHov && isMousePressed) {
-
-        s_mapZoom = fmaxf(0.75f, s_mapZoom - 0.2f);
-
+    if (CheckCollisionPointRec(mousePos, rightArrow) && isMousePressed) {
+        s_selectedStage = (s_selectedStage >= 5) ? 1 : (s_selectedStage + 1);
         SoundFX::PlayButtonClick();
-
     }
+    DrawText("<", (int)leftArrow.x + 8, (int)leftArrow.y + 8, 20, Color{ 80, 220, 245, 220 });
+    DrawText(">", (int)rightArrow.x + 8, (int)rightArrow.y + 8, 20, Color{ 80, 220, 245, 220 });
 
-    DrawRectangleRounded(zmRec, 0.25f, 4, isZmHov ? Color{ 40, 55, 80, 240 } : Color{ 24, 30, 44, 210 });
-
-    DrawRectangleRoundedLines(zmRec, 0.25f, 4, isZmHov ? Color{ 140, 210, 255, 255 } : Color{ 65, 85, 120, 200 });
-
-    FontManager::DrawText("-", (int)zmBtnX + 17, (int)footerY + 14, 14, WHITE, GameFont::TITLE);
-
-
-
-    // 3. Zoom In (+)
-
-    float zpBtnX = zmBtnX + 50.0f;
-
-    Rectangle zpRec = { zpBtnX, footerY + 6.0f, 42.0f, 32.0f };
-
-    bool isZpHov = CheckCollisionPointRec(mousePos, zpRec);
-
-    if (isZpHov && isMousePressed) {
-
-        s_mapZoom = fminf(2.2f, s_mapZoom + 0.2f);
-
+    // 5. CALL TO ACTION BUTTON (Image 2: Hexagonal angled banner [ PLAY NOW ] on bottom right)
+    float playW = 200.0f;
+    float playH = 44.0f;
+    Rectangle playRec = { modalX + modalW - playW - 48.0f, modalY + modalH - playH - 36.0f, playW, playH };
+    bool isPlayHov = CheckCollisionPointRec(mousePos, playRec);
+    if ((isPlayHov && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
         SoundFX::PlayButtonClick();
-
+        return true; // Closes map modal and resumes journey!
     }
 
-    DrawRectangleRounded(zpRec, 0.25f, 4, isZpHov ? Color{ 40, 55, 80, 240 } : Color{ 24, 30, 44, 210 });
+    // Angled / Hexagonal button shape (Image 2)
+    Vector2 p1 = { playRec.x + 14.0f, playRec.y };
+    Vector2 p2 = { playRec.x + playW - 14.0f, playRec.y };
+    Vector2 p3 = { playRec.x + playW, playRec.y + playH * 0.5f };
+    Vector2 p4 = { playRec.x + playW - 14.0f, playRec.y + playH };
+    Vector2 p5 = { playRec.x + 14.0f, playRec.y + playH };
+    Vector2 p6 = { playRec.x, playRec.y + playH * 0.5f };
 
-    DrawRectangleRoundedLines(zpRec, 0.25f, 4, isZpHov ? Color{ 140, 210, 255, 255 } : Color{ 65, 85, 120, 200 });
+    DrawTriangle(p1, p2, p3, isPlayHov ? Color{ 180, 110, 60, 255 } : Color{ 130, 75, 40, 230 });
+    DrawTriangle(p1, p3, p6, isPlayHov ? Color{ 180, 110, 60, 255 } : Color{ 130, 75, 40, 230 });
+    DrawTriangle(p6, p3, p4, isPlayHov ? Color{ 180, 110, 60, 255 } : Color{ 130, 75, 40, 230 });
+    DrawTriangle(p6, p4, p5, isPlayHov ? Color{ 180, 110, 60, 255 } : Color{ 130, 75, 40, 230 });
 
-    FontManager::DrawText("+", (int)zpBtnX + 15, (int)footerY + 14, 14, WHITE, GameFont::TITLE);
+    DrawLineEx(p1, p2, 2.0f, Color{ 255, 190, 120, 255 });
+    DrawLineEx(p2, p3, 2.0f, Color{ 255, 190, 120, 255 });
+    DrawLineEx(p3, p4, 2.0f, Color{ 255, 190, 120, 255 });
+    DrawLineEx(p4, p5, 2.0f, Color{ 255, 190, 120, 255 });
+    DrawLineEx(p5, p6, 2.0f, Color{ 255, 190, 120, 255 });
+    DrawLineEx(p6, p1, 2.0f, Color{ 255, 190, 120, 255 });
 
-
-
-    // 4. Return to Game Button
-
-    float retBtnX = zpBtnX + 58.0f;
-
-    Rectangle retRec = { retBtnX, footerY + 6.0f, 100.0f, 32.0f };
-
-    bool isRetHov = CheckCollisionPointRec(mousePos, retRec);
-
-    if (isRetHov && isMousePressed) {
-
-        shouldClose = true;
-
-        SoundFX::PlayButtonClick();
-
-    }
-
-    DrawRectangleRounded(retRec, 0.25f, 4, isRetHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
-
-    DrawRectangleRoundedLines(retRec, 0.25f, 4, isRetHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
-
-    FontManager::DrawText("RETURN", (int)retBtnX + 22, (int)footerY + 15, 11, isRetHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 }, GameFont::BODY);
-
-
+    int ptw = MeasureText("RESUME JOURNEY", 14);
+    DrawText("RESUME JOURNEY", (int)(playRec.x + (playW - ptw) * 0.5f), (int)(playRec.y + 15.0f), 14, Color{ 255, 255, 255, 255 });
 
     if (shouldClose) {
-
         SoundFX::PlayButtonClick();
-
         return true;
-
     }
 
-
-
     return false;
-
 }
-
-
 

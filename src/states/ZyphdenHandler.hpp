@@ -70,6 +70,7 @@ public:
     ZyphdenHandler();
 
     void Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera);
+    void Reset();
 
     void Update(
         float dt,
@@ -106,6 +107,8 @@ public:
     void SetLenonDefeated(bool d);
     int GetQuestPhase() const { return (int)questPhase; }
     void SetQuestPhase(int phase);
+    bool IsObjectivesVisible() const { return showObjectives; }
+    void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
     // Core NPCs
