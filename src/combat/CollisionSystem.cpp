@@ -9,6 +9,49 @@
 #include <cmath>
 
 void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera, std::vector<LootDrop>* outLootDrops) {
+    // 0. Armor skill pending AoE resolution
+    if (player.pendingArmorSkillAoE) {
+        player.pendingArmorSkillAoE = false;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float dist = Vector2Distance(player.GetPosition(), enemy.GetPosition());
+            if (dist <= player.pendingAoERadius) {
+                Vector2 kDir = Vector2Normalize(Vector2Subtract(enemy.GetPosition(), player.GetPosition()));
+                if (kDir.x == 0.0f && kDir.y == 0.0f) kDir = { 0.0f, -1.0f };
+                if (enemy.TakeDamage(player.pendingAoEDamage, kDir, particles, player.pendingAoEArmorShred)) {
+                    if (outLootDrops) {
+                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    }
+                }
+                if (player.pendingAoEStun > 0.0f) {
+                    enemy.ApplyStagger(player.pendingAoEStun);
+                }
+            }
+        }
+    }
+
+    // Basalt Pillars obstacle & projectile blocking
+    for (const auto& pillar : player.basaltPillars) {
+        if (!pillar.active) continue;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(pillar.position, enemy.GetPosition());
+            float minD = pillar.radius + enemy.GetRadius();
+            if (d < minD && d > 0.01f) {
+                Vector2 pushDir = Vector2Scale(Vector2Subtract(enemy.GetPosition(), pillar.position), 1.0f / d);
+                enemy.SetPosition(Vector2Add(pillar.position, Vector2Scale(pushDir, minD)));
+            }
+        }
+        for (auto& proj : projectiles) {
+            if (proj.IsActive() && !proj.IsFromPlayer()) {
+                if (CheckCollisionCircles(proj.GetPosition(), proj.GetRadius(), pillar.position, pillar.radius)) {
+                    proj.Destroy();
+                    particles.SpawnSparks(proj.GetPosition(), Color{ 160, 150, 140, 255 }, 10, 100.0f);
+                }
+            }
+        }
+    }
+
     // 1. Player melee attack vs enemies
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();

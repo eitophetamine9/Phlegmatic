@@ -11,8 +11,27 @@
 
 
 void PlayerRenderer::Draw(const Player& player) {
+    ArmorStats armorStats = GetCompositeArmorVisuals(player.equippedHelmet, player.equippedChestplate, player.equippedLeggings);
 
-    ArmorStats armorStats = GetArmorStats(player.currentArmor);
+    // Render active Basalt Pillars
+    for (const auto& pillar : player.basaltPillars) {
+        if (!pillar.active) continue;
+        float alpha = fminf(1.0f, pillar.timer / 0.5f);
+        Color pillarColor = Color{ 55, 60, 70, (unsigned char)(255 * alpha) };
+        Color edgeColor = Color{ 220, 130, 40, (unsigned char)(200 * alpha) };
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, pillarColor);
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius, edgeColor);
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 4.0f, Color{ 40, 45, 52, (unsigned char)(255 * alpha) });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, 6.0f, Color{ 255, 160, 50, (unsigned char)(220 * alpha) });
+    }
+
+    // Render active Shadow Decoy
+    if (player.shadowDecoy.active) {
+        float flicker = 0.6f + 0.3f * sinf((float)GetTime() * 12.0f);
+        Color shadowColor = Color{ 110, 60, 180, (unsigned char)(160 * flicker) };
+        DrawCircle((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius, shadowColor);
+        DrawCircleLines((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius + 3.0f, Color{ 180, 120, 255, (unsigned char)(200 * flicker) });
+    }
 
     Color bodyColor = armorStats.primaryColor;
 
@@ -71,6 +90,23 @@ void PlayerRenderer::Draw(const Player& player) {
 
 
     AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
+
+    // Crusader Plate Dawnfire Aegis Bubble
+    if (player.armorSkillShieldHp > 0.0f) {
+        float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f, Color{ 255, 230, 90, (unsigned char)(220 * pulse) });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 16.0f, Color{ 255, 200, 60, (unsigned char)(140 * pulse) });
+    }
+
+    // Forged Scrap Ironclad Spike Wall
+    if (player.armorSkillActiveTimer > 0.0f && player.HasFullArmorSet(ArmorSet::FORGED_SCRAP_IRON)) {
+        for (int i = 0; i < 8; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 8.0f) + (float)GetTime() * 2.0f;
+            Vector2 p1 = { player.position.x + cosf(ang) * (player.radius + 2.0f), player.position.y + sinf(ang) * (player.radius + 2.0f) };
+            Vector2 p2 = { player.position.x + cosf(ang) * (player.radius + 14.0f), player.position.y + sinf(ang) * (player.radius + 14.0f) };
+            DrawLineEx(p1, p2, 2.5f, Color{ 220, 225, 235, 240 });
+        }
+    }
 
 
 

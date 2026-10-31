@@ -46,6 +46,11 @@ public:
     bool CheckHit(const AttackInfo& attack) const;
 
     Vector2 GetPosition() const { return position; }
+    void SetPosition(Vector2 p) { position = p; }
+    void ApplyStagger(float duration) {
+        state = EnemyState::STUNNED;
+        stunDuration = duration;
+    }
     float GetRadius() const { return radius; }
     EnemyType GetType() const { return type; }
     EnemyState GetState() const { return state; }

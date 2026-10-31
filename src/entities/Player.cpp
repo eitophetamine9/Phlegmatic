@@ -27,6 +27,23 @@ Player::Player() {
     currentWeapon = WeaponType::SWORD;
 
     currentArmor = ArmorType::NONE;
+    equippedHelmet = HelmetType::NONE;
+    equippedChestplate = ChestplateType::NONE;
+    equippedLeggings = LeggingsType::NONE;
+    armorSkillCooldown = 0.0f;
+    armorSkillMaxCooldown = 30.0f;
+    armorSkillActiveTimer = 0.0f;
+    armorSkillShieldHp = 0.0f;
+    basaltShellCooldown = 0.0f;
+    speedBuffTimer = 0.0f;
+    speedBuffAmount = 0.0f;
+    shadowDecoy = { false, { 0.0f, 0.0f }, 0.0f, 3.5f };
+    basaltPillars.clear();
+    pendingArmorSkillAoE = false;
+    pendingAoEDamage = 0.0f;
+    pendingAoERadius = 0.0f;
+    pendingAoEStun = 0.0f;
+    pendingAoEArmorShred = 0.0f;
 
     currentTotem = TotemType::NONE;
 
@@ -277,103 +294,265 @@ void Player::SetWeapon(WeaponType newWeapon) {
 
 
 void Player::SetArmor(ArmorType newArmor) {
-
     currentArmor = newArmor;
-
+    switch (newArmor) {
+        case ArmorType::COMMONERS_SCRAP:
+            equippedHelmet = HelmetType::COMMONERS_HOOD;
+            equippedChestplate = ChestplateType::COMMONERS_TUNIC;
+            equippedLeggings = LeggingsType::COMMONERS_BREECHES;
+            break;
+        case ArmorType::CRUSADER_PLATE:
+            equippedHelmet = HelmetType::CRUSADER_HELM;
+            equippedChestplate = ChestplateType::CRUSADER_CUIRASS;
+            equippedLeggings = LeggingsType::CRUSADER_GREAVES;
+            break;
+        case ArmorType::VANGUARD_MAIL:
+            equippedHelmet = HelmetType::VANGUARD_GREATHELM;
+            equippedChestplate = ChestplateType::VANGUARD_CHEST;
+            equippedLeggings = LeggingsType::VANGUARD_GREAVES;
+            break;
+        case ArmorType::SHADOW_LEATHER:
+            equippedHelmet = HelmetType::SHADOW_COWL;
+            equippedChestplate = ChestplateType::SHADOW_GARB;
+            equippedLeggings = LeggingsType::SHADOW_LEGGINGS;
+            break;
+        case ArmorType::NONE:
+        default:
+            equippedHelmet = HelmetType::NONE;
+            equippedChestplate = ChestplateType::NONE;
+            equippedLeggings = LeggingsType::NONE;
+            break;
+    }
     inventory.UnlockArmor(newArmor);
-
+    inventory.SetEquippedHelmet(equippedHelmet);
+    inventory.SetEquippedChestplate(equippedChestplate);
+    inventory.SetEquippedLeggings(equippedLeggings);
     inventory.SetEquippedArmor(newArmor);
-
     maxHealth = GetMaxHealth();
-
     if (health > maxHealth) health = maxHealth;
-
     defense = GetDefense();
-
     will = GetWill();
-
     SoundFX::PlayEquipWeapon();
-
 }
 
+void Player::SetHelmet(HelmetType type) {
+    equippedHelmet = type;
+    inventory.UnlockHelmet(type);
+    inventory.SetEquippedHelmet(type);
+    maxHealth = GetMaxHealth();
+    if (health > maxHealth) health = maxHealth;
+    defense = GetDefense();
+    will = GetWill();
+    SoundFX::PlayEquipWeapon();
+}
 
+void Player::SetChestplate(ChestplateType type) {
+    equippedChestplate = type;
+    inventory.UnlockChestplate(type);
+    inventory.SetEquippedChestplate(type);
+    maxHealth = GetMaxHealth();
+    if (health > maxHealth) health = maxHealth;
+    defense = GetDefense();
+    will = GetWill();
+    SoundFX::PlayEquipWeapon();
+}
+
+void Player::SetLeggings(LeggingsType type) {
+    equippedLeggings = type;
+    inventory.UnlockLeggings(type);
+    inventory.SetEquippedLeggings(type);
+    maxHealth = GetMaxHealth();
+    if (health > maxHealth) health = maxHealth;
+    defense = GetDefense();
+    will = GetWill();
+    SoundFX::PlayEquipWeapon();
+}
+
+ArmorSet Player::GetActiveArmorSet() const {
+    return GetMatchingArmorSet(equippedHelmet, equippedChestplate, equippedLeggings);
+}
+
+bool Player::HasFullArmorSet(ArmorSet set) const {
+    if (set == ArmorSet::NONE) return false;
+    return GetActiveArmorSet() == set;
+}
+
+void Player::TriggerArmorSkill(ParticleSystem& particles) {
+    ArmorSet set = GetActiveArmorSet();
+    if (set == ArmorSet::NONE) return;
+    if (armorSkillCooldown > 0.0f) return;
+
+    ArmorSetInfo info = GetArmorSetInfo(set);
+    armorSkillMaxCooldown = info.skillCooldown;
+    armorSkillCooldown = info.skillCooldown;
+
+    switch (set) {
+        case ArmorSet::COMMONERS_SCRAP: {
+            speedBuffTimer = 4.0f;
+            speedBuffAmount = 0.35f;
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 15.0f;
+            pendingAoERadius = 180.0f;
+            pendingAoEStun = 1.5f;
+            pendingAoEArmorShred = 0.0f;
+            SoundFX::PlayParrySuccess();
+            particles.AddScreenShake(4.0f, 0.2f);
+            particles.SpawnFloatingText(position, "DUST BURST!", Color{ 220, 190, 140, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 200, 170, 110, 255 }, 30, 200.0f);
+            break;
+        }
+        case ArmorSet::CRUSADER_PLATE: {
+            armorSkillShieldHp = 60.0f;
+            armorSkillActiveTimer = 6.0f;
+            SoundFX::PlayTranceActivate();
+            particles.AddScreenShake(6.0f, 0.25f);
+            particles.SpawnFloatingText(position, "DAWNFIRE AEGIS!", Color{ 255, 230, 90, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 255, 225, 70, 255 }, 35, 220.0f);
+            break;
+        }
+        case ArmorSet::VANGUARD_BASTION: {
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 50.0f;
+            pendingAoERadius = 200.0f;
+            pendingAoEStun = 1.8f;
+            pendingAoEArmorShred = 0.25f;
+            SoundFX::PlayParrySuccess();
+            particles.AddScreenShake(10.0f, 0.35f);
+            particles.SpawnFloatingText(position, "SEISMIC QUAKE SLAM!", Color{ 255, 120, 60, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 200, 80, 50, 255 }, 40, 260.0f);
+            break;
+        }
+        case ArmorSet::SHADOWSTRIDER: {
+            shadowDecoy.active = true;
+            shadowDecoy.position = position;
+            shadowDecoy.timer = 3.5f;
+            shadowDecoy.duration = 3.5f;
+            iFrameTimer = 0.5f;
+            Vector2 forward = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+            position = Vector2Add(position, Vector2Scale(forward, 70.0f));
+            SoundFX::PlayDash();
+            particles.SpawnFloatingText(position, "SHADOW DECOY!", Color{ 160, 100, 255, 255 }, 24.0f);
+            particles.SpawnSparks(shadowDecoy.position, Color{ 140, 80, 240, 255 }, 35, 180.0f);
+            break;
+        }
+        case ArmorSet::FORGED_SCRAP_IRON: {
+            armorSkillActiveTimer = 6.0f;
+            SoundFX::PlayEquipWeapon();
+            particles.AddScreenShake(5.0f, 0.2f);
+            particles.SpawnFloatingText(position, "IRONCLAD SPIKE WALL!", Color{ 230, 200, 140, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 200, 210, 230, 255 }, 25, 200.0f);
+            break;
+        }
+        case ArmorSet::BASALT_GOLEM: {
+            basaltPillars.clear();
+            Vector2 forward = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+            Vector2 right = { -forward.y, forward.x };
+            Vector2 centerPillar = Vector2Add(position, Vector2Scale(forward, 65.0f));
+            Vector2 leftPillar = Vector2Add(centerPillar, Vector2Scale(right, -45.0f));
+            Vector2 rightPillar = Vector2Add(centerPillar, Vector2Scale(right, 45.0f));
+
+            basaltPillars.push_back({ true, leftPillar, 24.0f, 6.0f });
+            basaltPillars.push_back({ true, centerPillar, 26.0f, 6.0f });
+            basaltPillars.push_back({ true, rightPillar, 24.0f, 6.0f });
+
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 55.0f;
+            pendingAoERadius = 160.0f;
+            pendingAoEStun = 1.2f;
+            pendingAoEArmorShred = 0.15f;
+
+            SoundFX::PlayParrySuccess();
+            particles.AddScreenShake(9.0f, 0.3f);
+            particles.SpawnFloatingText(position, "BASALT SPIRE WALL!", Color{ 255, 160, 50, 255 }, 26.0f);
+            particles.SpawnSparks(centerPillar, Color{ 245, 140, 40, 255 }, 40, 220.0f);
+            break;
+        }
+        default:
+            break;
+    }
+}
 
 void Player::SetTotem(TotemType newTotem) {
-
     currentTotem = newTotem;
-
     inventory.UnlockTotem(newTotem);
-
     inventory.SetEquippedTotem(newTotem);
-
     defense = GetDefense();
-
     will = GetWill();
-
     SoundFX::PlayEquipWeapon();
-
 }
-
-
 
 float Player::GetMaxHealth() const {
-
-    return Config::PLAYER_MAX_HEALTH + GetArmorStats(currentArmor).maxHpBonus;
-
+    float bonus = GetHelmetStats(equippedHelmet).maxHpBonus
+                + GetChestplateStats(equippedChestplate).maxHpBonus
+                + GetLeggingsStats(equippedLeggings).maxHpBonus;
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
+        bonus += 40.0f;
+    }
+    return Config::PLAYER_MAX_HEALTH + bonus;
 }
-
-
 
 float Player::GetDefense() const {
-
-    float raw = 15.0f + GetArmorStats(currentArmor).defense;
-
-    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
-
-        raw += 25.0f; // High defense fortification
-
+    float raw = 15.0f
+              + GetHelmetStats(equippedHelmet).defense
+              + GetChestplateStats(equippedChestplate).defense
+              + GetLeggingsStats(equippedLeggings).defense;
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE)) {
+        raw *= 1.20f;
+    } else if (HasFullArmorSet(ArmorSet::FORGED_SCRAP_IRON)) {
+        raw += 18.0f;
+    } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+        raw += 35.0f;
     }
-
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        raw += 25.0f;
+    }
     return raw * GetTotemStats(currentTotem).defenseMultiplier;
-
 }
-
-
 
 float Player::GetWill() const {
-
-    float totalWill = 20.0f + GetArmorStats(currentArmor).willBonus + GetTotemStats(currentTotem).willBonus;
-
+    float totalWill = 20.0f
+                    + GetHelmetStats(equippedHelmet).willBonus
+                    + GetChestplateStats(equippedChestplate).willBonus
+                    + GetLeggingsStats(equippedLeggings).willBonus
+                    + GetTotemStats(currentTotem).willBonus;
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE)) {
+        totalWill += 25.0f;
+    }
     return totalWill;
-
 }
-
-
 
 float Player::GetSpeed() const {
-
-    return Config::PLAYER_SPEED * GetArmorStats(currentArmor).speedModifier * GetTotemStats(currentTotem).speedMultiplier;
-
+    float speedMult = GetHelmetStats(equippedHelmet).speedModifier
+                    * GetChestplateStats(equippedChestplate).speedModifier
+                    * GetLeggingsStats(equippedLeggings).speedModifier
+                    * GetTotemStats(currentTotem).speedMultiplier;
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
+        speedMult *= 1.15f;
+    } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+        speedMult *= 0.90f;
+    }
+    float base = Config::PLAYER_SPEED * speedMult;
+    if (speedBuffTimer > 0.0f) {
+        base *= (1.0f + speedBuffAmount);
+    }
+    return base;
 }
 
-
-
 float Player::GetStaminaRegenRate() const {
-
-    float rate = Config::STAMINA_REGEN_RATE * GetArmorStats(currentArmor).staminaRegenModifier * GetTotemStats(currentTotem).staminaRegenMultiplier;
-
-    if (IsDiscomposed()) {
-
-        rate *= 0.80f; // -20% stamina regen speed
-
-    } else if (HasStoicPoise()) {
-
-        rate *= 1.20f; // +20% stamina regen speed
-
+    float rate = Config::STAMINA_REGEN_RATE
+               * GetHelmetStats(equippedHelmet).staminaRegenModifier
+               * GetChestplateStats(equippedChestplate).staminaRegenModifier
+               * GetLeggingsStats(equippedLeggings).staminaRegenModifier
+               * GetTotemStats(currentTotem).staminaRegenMultiplier;
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP)) {
+        rate *= 1.15f;
     }
-
+    if (IsDiscomposed()) {
+        rate *= 0.80f;
+    } else if (HasStoicPoise()) {
+        rate *= 1.20f;
+    }
     return rate;
-
 }
 
 
@@ -534,12 +713,75 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
 
+    // Armor Skill activation via [V]
+    if (IsKeyPressed(KEY_V)) {
+        TriggerArmorSkill(particles);
+    }
+
+    if (armorSkillCooldown > 0.0f) {
+        armorSkillCooldown -= dt;
+        if (armorSkillCooldown < 0.0f) armorSkillCooldown = 0.0f;
+    }
+
+    if (armorSkillActiveTimer > 0.0f) {
+        armorSkillActiveTimer -= dt;
+        if (armorSkillActiveTimer <= 0.0f) {
+            armorSkillActiveTimer = 0.0f;
+            if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && armorSkillShieldHp > 0.0f) {
+                pendingArmorSkillAoE = true;
+                pendingAoEDamage = 45.0f;
+                pendingAoERadius = 180.0f;
+                pendingAoEStun = 1.5f;
+                particles.SpawnFloatingText(position, "DAWNFIRE DETONATION!", Color{ 255, 220, 80, 255 }, 26.0f);
+                particles.SpawnSparks(position, Color{ 255, 230, 90, 255 }, 30, 240.0f);
+                armorSkillShieldHp = 0.0f;
+            }
+        }
+    }
+
+    if (basaltShellCooldown > 0.0f) {
+        basaltShellCooldown -= dt;
+        if (basaltShellCooldown < 0.0f) basaltShellCooldown = 0.0f;
+    }
+
+    if (speedBuffTimer > 0.0f) {
+        speedBuffTimer -= dt;
+        if (speedBuffTimer <= 0.0f) {
+            speedBuffTimer = 0.0f;
+            speedBuffAmount = 0.0f;
+        }
+    }
+
+    if (shadowDecoy.active) {
+        shadowDecoy.timer -= dt;
+        particles.SpawnSparks(shadowDecoy.position, Color{ 140, 80, 220, 140 }, 1, 30.0f);
+        if (shadowDecoy.timer <= 0.0f) {
+            shadowDecoy.active = false;
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 40.0f;
+            pendingAoERadius = 160.0f;
+            pendingAoEStun = 1.0f;
+            particles.SpawnFloatingText(shadowDecoy.position, "DECOY BURST!", Color{ 180, 110, 255, 255 }, 24.0f);
+            particles.SpawnSparks(shadowDecoy.position, Color{ 160, 90, 240, 255 }, 30, 220.0f);
+            SoundFX::PlayHitImpact();
+        }
+    }
+
+    for (auto it = basaltPillars.begin(); it != basaltPillars.end(); ) {
+        if (it->active) {
+            it->timer -= dt;
+            if (it->timer <= 0.0f) {
+                particles.SpawnSparks(it->position, Color{ 140, 130, 120, 200 }, 10, 80.0f);
+                it = basaltPillars.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
+
     // Phlegmatic Trance activation via [SPACE] when composure is full (100%)
-
     if (IsKeyPressed(KEY_SPACE) && IsTranceReady()) {
-
         TriggerPhlegmaticTrance(particles);
-
     }
 
 
@@ -598,9 +840,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         dashTimer -= dt;
 
-        velocity.x = dashDir.x * Config::DASH_SPEED;
-
-        velocity.y = dashDir.y * Config::DASH_SPEED;
+        float currentDashSpeed = Config::DASH_SPEED;
+        if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
+            currentDashSpeed *= 1.25f;
+        }
+        velocity.x = dashDir.x * currentDashSpeed;
+        velocity.y = dashDir.y * currentDashSpeed;
 
 
 
@@ -1296,6 +1541,9 @@ void Player::TriggerDash(ParticleSystem& particles) {
 
 
     dashCooldown = stats.dashCooldown;
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
+        dashCooldown *= 0.65f;
+    }
 
     dashTimer = Config::DASH_DURATION;
 
@@ -1888,13 +2136,18 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
 
     // Parried
-
     if (isParrying) {
-
         OnParrySuccessful(particles);
-
         return false;
+    }
 
+    // Basalt Golem: 1 free heavy hit absorbed every 20s
+    if (HasFullArmorSet(ArmorSet::BASALT_GOLEM) && basaltShellCooldown <= 0.0f) {
+        basaltShellCooldown = 20.0f;
+        particles.SpawnFloatingText(position, "PRIMORDIAL CARAPACE ABSORBED!", Color{ 245, 175, 45, 255 }, 24.0f);
+        particles.SpawnSparks(position, Color{ 180, 160, 140, 255 }, 25, 180.0f);
+        SoundFX::PlayParrySuccess();
+        return false;
     }
 
 
@@ -1909,7 +2162,30 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
     float finalAmount = amount * damageFactor;
 
+    // Crusader Plate Dawnfire Aegis Shield
+    if (armorSkillShieldHp > 0.0f) {
+        float absorbed = fminf(armorSkillShieldHp, finalAmount);
+        armorSkillShieldHp -= absorbed;
+        finalAmount -= absorbed;
+        particles.SpawnFloatingText(position, "AEGIS SHIELD -" + std::to_string((int)absorbed), Color{ 255, 230, 90, 255 }, 22.0f);
+        if (armorSkillShieldHp <= 0.0f) {
+            armorSkillShieldHp = 0.0f;
+            armorSkillActiveTimer = 0.0f;
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 45.0f;
+            pendingAoERadius = 180.0f;
+            pendingAoEStun = 1.5f;
+            particles.SpawnFloatingText(position, "DAWNFIRE DETONATION!", Color{ 255, 220, 80, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 255, 230, 90, 255 }, 30, 240.0f);
+        }
+        if (finalAmount <= 0.0f) return false;
+    }
 
+    // Forged Scrap Iron: reflect 40% damage during Ironclad Spike Wall
+    if (armorSkillActiveTimer > 0.0f && HasFullArmorSet(ArmorSet::FORGED_SCRAP_IRON)) {
+        particles.SpawnFloatingText(position, "SPIKE REFLECT 40%!", Color{ 240, 210, 150, 255 }, 20.0f);
+        particles.SpawnSparks(position, Color{ 230, 220, 210, 255 }, 15, 150.0f);
+    }
 
     health -= finalAmount;
 
@@ -1927,7 +2203,7 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
 
 
-    float knockbackSpeed = HasStoicPoise() ? 60.0f : 240.0f; // Stoic Poise resists 75% knockback
+    float knockbackSpeed = (HasStoicPoise() || (isHeavyWindingUp && HasFullArmorSet(ArmorSet::VANGUARD_BASTION))) ? 0.0f : (HasStoicPoise() ? 60.0f : 240.0f);
 
     velocity.x += knockbackDir.x * knockbackSpeed;
 

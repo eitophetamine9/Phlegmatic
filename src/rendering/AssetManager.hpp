@@ -22,6 +22,7 @@ public:
     static void DrawEntityShadow(Vector2 position, float radius);
     static void DrawPlayerSilhouette(Vector2 position, float rotationAngle, Color bodyColor, bool isParrying, bool isDashing, Color trimColor = Color{ 80, 95, 130, 255 }, Color helmColor = Color{ 48, 58, 80, 255 }, Color visorColor = Color{ 0, 229, 255, 255 });
     static void DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned);
+    static void DrawCharacterDoll(Vector2 center, float scale, WeaponType weapon, HelmetType helm, ChestplateType chest, LeggingsType legs, TotemType totem, float time);
     static void DrawCharacterDoll(Vector2 center, float scale, WeaponType weapon, ArmorType armor, TotemType totem, float time);
 
     // Weapons

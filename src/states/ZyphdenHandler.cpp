@@ -851,7 +851,7 @@ void ZyphdenHandler::Update(
 
         for (auto& enemy : enemies) {
 
-            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
 
         }
 

@@ -3106,7 +3106,7 @@ void Game::Update(float dt) {
 
 
 
-            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
 
 
 

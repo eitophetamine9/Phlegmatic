@@ -35,11 +35,26 @@ public:
     void SetArmor(ArmorType newArmor);
     ArmorType GetArmor() const { return currentArmor; }
 
+    void SetHelmet(HelmetType type);
+    void SetChestplate(ChestplateType type);
+    void SetLeggings(LeggingsType type);
+    HelmetType GetHelmet() const { return equippedHelmet; }
+    ChestplateType GetChestplate() const { return equippedChestplate; }
+    LeggingsType GetLeggings() const { return equippedLeggings; }
+
+    ArmorSet GetActiveArmorSet() const;
+    bool HasFullArmorSet(ArmorSet set) const;
+    void TriggerArmorSkill(ParticleSystem& particles);
+    float GetArmorSkillCooldown() const { return armorSkillCooldown; }
+    float GetArmorSkillMaxCooldown() const { return armorSkillMaxCooldown; }
+    float GetArmorSkillShieldHp() const { return armorSkillShieldHp; }
+
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }
 
     // Position
     Vector2 GetPosition() const { return position; }
+    Vector2 GetTargetPosition() const { return shadowDecoy.active ? shadowDecoy.position : position; }
     void SetPosition(Vector2 pos) { position = pos; }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
@@ -133,6 +148,7 @@ public:
     const Inventory& GetInventory() const { return inventory; }
 
     friend class PlayerRenderer;
+    friend class CollisionSystem;
 
 private:
     Vector2 position;
@@ -142,8 +158,41 @@ private:
 
     WeaponType currentWeapon;
     ArmorType currentArmor;
+    HelmetType equippedHelmet;
+    ChestplateType equippedChestplate;
+    LeggingsType equippedLeggings;
     TotemType currentTotem;
     Inventory inventory;
+
+    float armorSkillCooldown;
+    float armorSkillMaxCooldown;
+    float armorSkillActiveTimer;
+    float armorSkillShieldHp;
+    float basaltShellCooldown;
+    float speedBuffTimer;
+    float speedBuffAmount;
+
+    struct ShadowDecoy {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float timer = 0.0f;
+        float duration = 3.5f;
+    } shadowDecoy;
+
+    struct BasaltPillar {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float radius = 24.0f;
+        float timer = 0.0f;
+        float duration = 6.0f;
+    };
+    std::vector<BasaltPillar> basaltPillars;
+
+    bool pendingArmorSkillAoE;
+    float pendingAoEDamage;
+    float pendingAoERadius;
+    float pendingAoEStun;
+    float pendingAoEArmorShred;
 
     // Phlegmatic Composure & Trance State
     float composure;
