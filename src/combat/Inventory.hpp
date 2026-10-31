@@ -131,6 +131,28 @@ public:
     int GetOreScraps() const { return oreScraps; }
     void SetOreScraps(int count) { oreScraps = count >= 0 ? count : 0; }
     void AddOreScraps(int count) { oreScraps += count; }
+
+    int GetEssenceOfMist() const { return essenceOfMist; }
+    void SetEssenceOfMist(int count) { essenceOfMist = count >= 0 ? count : 0; }
+    void AddEssenceOfMist(int count) { essenceOfMist += count; }
+    bool SpendEssenceOfMist(int count) {
+        if (essenceOfMist >= count) {
+            essenceOfMist -= count;
+            return true;
+        }
+        return false;
+    }
+
+    int GetShadowEssence() const { return shadowEssence; }
+    void SetShadowEssence(int count) { shadowEssence = count >= 0 ? count : 0; }
+    void AddShadowEssence(int count) { shadowEssence += count; }
+    bool SpendShadowEssence(int count) {
+        if (shadowEssence >= count) {
+            shadowEssence -= count;
+            return true;
+        }
+        return false;
+    }
     bool SpendOreScraps(int count) {
         if (oreScraps >= count) {
             oreScraps -= count;
@@ -177,5 +199,7 @@ private:
     int healthPotions = 1; // Default starting health potions
     int shingles = 0;      // Currency: Shingles
     int oreScraps = 0;     // Material: Ore Scraps (from Quarry Ore Golems)
+    int essenceOfMist = 0; // Material: Essence of Mist (from Gale Bandits)
+    int shadowEssence = 0; // Material: Shadow Essence (from Gale Archer Boss)
     int weaponUpgradeLevel[6] = { 0 };
 };
