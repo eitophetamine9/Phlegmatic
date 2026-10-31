@@ -2435,21 +2435,10 @@ void Game::Update(float dt) {
 
 
         zyphdenHandler.Update(
-
-
-
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
-
-
-
             [this]() { SaveArenaUnlock(); },
-
-
-
-            [this]() { EnterLobby(); }
-
-
-
+            [this]() { EnterLobby(); },
+            [this]() { EnterArena(); }
         );
 
 

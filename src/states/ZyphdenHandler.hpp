@@ -84,7 +84,8 @@ public:
         GameState& currentState,
         bool& testArenaUnlocked,
         const std::function<void()>& onSaveArenaUnlock,
-        const std::function<void()>& onEnterLobby
+        const std::function<void()>& onEnterLobby,
+        const std::function<void()>& onEnterArena = nullptr
     );
 
     void Render(
@@ -111,6 +112,7 @@ public:
     void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
+    std::function<void()> onEnterArenaCallback = nullptr;
     // Core NPCs
     ZyphdenNPC eldon;
     ZyphdenNPC noticeboard;

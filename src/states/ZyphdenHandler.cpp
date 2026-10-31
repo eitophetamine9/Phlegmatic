@@ -643,9 +643,10 @@ void ZyphdenHandler::Update(
 
     const std::function<void()>& onSaveArenaUnlock,
 
-    const std::function<void()>& onEnterLobby
-
+    const std::function<void()>& onEnterLobby,
+    const std::function<void()>& onEnterArena
 ) {
+    onEnterArenaCallback = onEnterArena;
 
     Vector2 mouseScreen = GetMousePosition();
 
@@ -1862,12 +1863,12 @@ void ZyphdenHandler::Update(
                     } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS || questPhase == ZyphdenQuestPhase::EXPLORE_REALM) {
 
                         std::vector<std::string> pages = {
-
-                            "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead."
-
+                            "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead.",
+                            "If you seek to test your mettle to its absolute limits, our Royal Combat Arena stands ready. 20 waves of increasingly vicious adversaries and realm bosses await.",
+                            "Step forward through the gates into the 20-wave trial whenever you are prepared!"
                         };
 
-                        OpenDialogue("lenon_spar_win", "KNIGHT LENON", pages, Color{ 225, 185, 65, 255 });
+                        OpenDialogue("lenon_arena_prompt", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
 
                     } else if (questPhase == ZyphdenQuestPhase::SEEK_KING) {
 
