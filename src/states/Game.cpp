@@ -476,7 +476,7 @@ void Game::EnterRestlessMistForest() {
 void Game::ReturnFromRestlessMistForest() {
     currentState = GameState::ZYPHDEN_REALM;
     map.Init(MapEnvironment::ZYPHDEN_REALM);
-    player.SetPosition({ 80.0f, 700.0f });
+    player.SetPosition({ 260.0f, 730.0f });
     camera.target = player.GetPosition();
     projectiles.clear();
     enemies.clear();

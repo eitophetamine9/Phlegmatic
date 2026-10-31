@@ -147,6 +147,7 @@ private:
     bool inTavern = false;
     bool inForge = false;
     int forgeTab = 0;
+    int armorForgePage = 0;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };

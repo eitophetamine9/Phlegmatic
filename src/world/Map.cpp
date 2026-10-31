@@ -102,7 +102,7 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 1070.0f, 1150.0f });
         torches.push_back({ 800.0f, 200.0f });
     } else if (env == MapEnvironment::ZYPHDEN_REALM) {
-        bounds = { 200.0f, 100.0f, 2200.0f, 1400.0f };
+        bounds = { 100.0f, 100.0f, 2300.0f, 1400.0f };
 
         // Town Square & Castle Pillars
         pillars.push_back({ { 750.0f, 400.0f }, 34.0f });
@@ -725,6 +725,17 @@ void GameMap::DrawZyphdenFloor() const {
 
     // 2. Central Town Square Cobblestone Paving
     Rectangle townSquare = { 650.0f, 450.0f, 550.0f, 900.0f };
+
+    // 2b. Western Alleyway & Mist Forest Road (runs from Town Square X: 650 to West Gate X: 100)
+    Rectangle westRoad = { 100.0f, 690.0f, 550.0f, 80.0f };
+    DrawRectangleRec(westRoad, Color{ 24, 30, 42, 255 });
+    DrawRectangleLinesEx(westRoad, 2.0f, Color{ 45, 58, 78, 160 });
+    for (int x = 100; x <= 650; x += 44) {
+        DrawLine(x, 690, x, 770, Color{ 36, 44, 58, 110 });
+    }
+    for (int i = 0; i < 7; ++i) {
+        DrawCircle(140 + i * 45, 715 + (i % 3) * 15, 12.0f + (float)(i % 3) * 4.0f, Color{ 35, 60, 50, 110 });
+    }
     DrawRectangleRec(townSquare, Color{ 26, 32, 44, 255 });
     DrawRectangleLinesEx(townSquare, 2.0f, Color{ 48, 60, 82, 180 });
 
@@ -848,6 +859,21 @@ void GameMap::DrawZyphdenWalls() const {
             DrawRectangleLinesEx(obs.rect, 2.0f, Color{ 110, 92, 68, 240 });
         }
     }
+
+    // Western Archway Portal into Restless Mist Forest
+    DrawRectangle(140, 660, 20, 24, Color{ 55, 65, 78, 255 });
+    DrawRectangle(140, 776, 20, 24, Color{ 55, 65, 78, 255 });
+    DrawRectangleLines(140, 660, 20, 24, Color{ 90, 120, 140, 240 });
+    DrawRectangleLines(140, 776, 20, 24, Color{ 90, 120, 140, 240 });
+
+    float mistPulse = 0.5f + 0.5f * sinf(time * 3.0f);
+    DrawCircleGradient(Vector2{ 150.0f, 730.0f }, 45.0f + 5.0f * mistPulse, Color{ 80, 225, 200, 80 }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines(150, 730, 36.0f, Color{ 90, 235, 210, (unsigned char)(140 + 60 * mistPulse) });
+    DrawCircleLines(150, 730, 24.0f, Color{ 140, 250, 225, 200 });
+
+    DrawRectangle(190, 662, 160, 24, Color{ 22, 28, 38, 230 });
+    DrawRectangleLines(190, 662, 160, 24, Color{ 90, 220, 195, 220 });
+    DrawText("RESTLESS MIST FOREST", 198, 668, 11, Color{ 120, 245, 220, 255 });
 
     // Eastern Quarry Gate Archway (Courtyard Exit to Quarry)
     DrawRectangle(1676, 646, 12, 12, Color{ 75, 60, 42, 255 });
