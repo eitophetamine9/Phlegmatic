@@ -81,13 +81,77 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                 }
 
+                // Weapon Heavy Attack Specific On-Hit Effects
+                float attackDamage = attack.damage;
+                if (attack.type == AttackType::HEAVY) {
+                    if (attack.weapon == WeaponType::DAGGERS) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Shadow Puncture inflicts bleed
+                            enemy.ApplyBleed(2.5f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "BLEED INFLICTED!", Color{ 255, 60, 60, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Backstab Cross-Slash (+40% bonus if enemy is bleeding or hit from rear)
+                            float enemyAngle = enemy.GetFacingAngle();
+                            float diff = fabsf(player.GetFacingAngle() - enemyAngle);
+                            while (diff > 180.0f) diff = 360.0f - diff;
+                            bool isBackstab = (diff < 65.0f);
+                            if (enemy.IsBleeding() || isBackstab) {
+                                attackDamage *= 1.40f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), isBackstab ? "BACKSTAB CRIT! +40%" : "HEMORRHAGE PUNISH! +40%", Color{ 255, 230, 80, 255 }, 22.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 210, 40, 255 }, 20, 180.0f);
+                            }
+                        } else if (player.GetHeavyStage() == 3) {
+                            // Stage 3: Vault Kick (100% poise stagger)
+                            enemy.ApplyStagger(1.2f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "STAGGERED!", Color{ 120, 255, 180, 255 }, 20.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::MACE) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Overhead Skull Crusher inflicts Armor Fracture (-20% def for 4s)
+                            enemy.ApplyArmorFracture(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR FRACTURE! (-20% DEF)", Color{ 255, 160, 40, 255 }, 20.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Seismic Tremor knocks flat / heavy stagger
+                            enemy.ApplyStagger(1.5f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "KNOCKDOWN!", Color{ 255, 120, 30, 255 }, 22.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::SWORD) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Crescent Cleave restores +12 Composure
+                            player.ModifyComposure(12.0f);
+                            particles.SpawnFloatingText(player.GetPosition(), "+12 COMPOSURE", Color{ 120, 220, 255, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Shock Thrust interrupts enemy windup
+                            enemy.ApplyStagger(0.7f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "INTERRUPTED!", Color{ 255, 220, 90, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 3) {
+                            // Stage 3: Radiant Execution (+50% damage bonus if enemy is staggered/vulnerable)
+                            if (enemy.GetState() == EnemyState::STUNNED) {
+                                attackDamage *= 1.50f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), "RADIANT SUNDER! +50%", Color{ 255, 240, 110, 255 }, 24.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 120, 255 }, 25, 220.0f);
+                            }
+                        }
+                    } else if (attack.weapon == WeaponType::TRUTH_SEEKER) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Dawnfire Ring applies Solar Burn
+                            enemy.ApplySolarBurn(3.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR BURN!", Color{ 255, 210, 50, 255 }, 20.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Sacred Judgment Pillar 100% defense pierce
+                            particles.SpawnFloatingText(enemy.GetPosition(), "JUDGMENT! (100% PIERCE)", Color{ 255, 255, 180, 255 }, 24.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 140, 255 }, 25, 220.0f);
+                        }
+                    }
+                }
+
                 Vector2 knockOrigin = (attack.hasShockwave && !enemy.CheckHit(attack)) ? attack.shockwavePos : player.GetPosition();
                 Vector2 knockbackDir = Vector2Normalize({
                     enemy.GetPosition().x - knockOrigin.x,
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                if (enemy.TakeDamage(attack.damage, knockbackDir, particles, attack.defensePierce)) {
+                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, attack.defensePierce)) {
                     if (outLootDrops) {
                         LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
                     }

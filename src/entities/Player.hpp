@@ -159,6 +159,13 @@ public:
     bool IsBleeding() const { return bleedTimer > 0.0f; }
     float GetBleedTimer() const { return bleedTimer; }
     void ApplyBleed(float duration, ParticleSystem& particles);
+    void CleanseDebuffs(ParticleSystem& particles) {
+        if (bleedTimer > 0.0f) {
+            bleedTimer = 0.0f;
+            particles.SpawnFloatingText(position, "CLEANSED!", Color{ 255, 255, 160, 255 }, 22.0f);
+            particles.SpawnSparks(position, Color{ 255, 240, 140, 255 }, 20, 160.0f);
+        }
+    }
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }

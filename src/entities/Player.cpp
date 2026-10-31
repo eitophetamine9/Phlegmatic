@@ -1086,7 +1086,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 currentAttack.arcAngle = 180.0f;
 
-                float baseDmg = (stats.upgradeLevel >= 2) ? 72.0f : ((stats.upgradeLevel >= 1) ? 62.0f : 52.0f);
+                float baseDmg = (stats.upgradeLevel >= 2) ? 58.0f : ((stats.upgradeLevel >= 1) ? 50.0f : 42.0f);
 
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
 
@@ -1112,7 +1112,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 currentAttack.arcAngle = 160.0f;
 
-                float baseDmg = (stats.upgradeLevel >= 2) ? 54.0f : ((stats.upgradeLevel >= 1) ? 48.0f : 42.0f);
+                float baseDmg = (stats.upgradeLevel >= 2) ? 40.0f : ((stats.upgradeLevel >= 1) ? 35.0f : 30.0f);
 
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
 
@@ -1166,7 +1166,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 currentAttack.arcAngle = 360.0f;
 
-                float baseDmg = (stats.upgradeLevel >= 1) ? 52.0f : 42.0f;
+                float baseDmg = (stats.upgradeLevel >= 1) ? 42.0f : 34.0f;
 
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
 
@@ -1238,106 +1238,59 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         if (currentAttack.timer <= 0.0f) {
 
-            // Check for Stage 2 follow-ups
-
+            // Check for Stage 2 & Stage 3 follow-ups
             if (currentAttack.type == AttackType::HEAVY && heavyStage == 1) {
-
                 Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
-
                 WeaponStats stats = GetEquippedWeaponStats();
 
-
-
                 if (currentWeapon == WeaponType::MACE) {
-
-                    // War Mace Heavy Stage 2: Followup full 360 AoE with 20% defense pierce!
-
+                    // War Mace Heavy Stage 2: Seismic Tremor (360 AoE with 25% defense pierce and knockdown stagger!)
                     heavyStage = 2;
-
                     currentAttack.type = AttackType::HEAVY;
-
                     currentAttack.isFrontalCircle = false;
-
                     currentAttack.range = 150.0f;
-
                     currentAttack.arcAngle = 360.0f;
-
-                    float baseDmg = (stats.upgradeLevel >= 2) ? 56.0f : ((stats.upgradeLevel >= 1) ? 50.0f : 44.0f);
-
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 50.0f : ((stats.upgradeLevel >= 1) ? 42.0f : 36.0f);
                     currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
-
                     currentAttack.knockback = 460.0f;
-
                     currentAttack.duration = 0.22f;
-
                     currentAttack.timer = 0.22f;
-
                     currentAttack.hasHit = false;
-
-                    currentAttack.defensePierce = 0.20f + stats.defensePierceBonus; // IGNORES 20% (+10% on Tier 2) DEFENSE!
-
+                    currentAttack.defensePierce = 0.25f + stats.defensePierceBonus;
                     currentAttack.hasShockwave = true;
-
                     currentAttack.shockwavePos = position;
-
                     currentAttack.shockwaveRadius = 150.0f;
 
-
-
                     shockwaveActive = true;
-
                     shockwaveTimer = 0.38f;
-
                     shockwaveRadius = 150.0f;
-
                     shockwavePos = position;
 
-
-
                     SoundFX::PlayCrusaderClash();
-
                     particles.AddScreenShake(9.0f, 0.28f);
-
                     particles.SpawnSparks(position, Color{ 255, 120, 30, 255 }, 35, 240.0f);
-
                 } else if (currentWeapon == WeaponType::SWORD) {
-
-                    // Broadsword Heavy Stage 2: Followup upward shock slash (line/box AoE)
-
+                    // Crusader Blade Heavy Stage 2: Shock Thrust (linear piercing box interrupting enemies)
                     heavyStage = 2;
-
                     currentAttack.type = AttackType::HEAVY;
-
-                    currentAttack.range = 135.0f;
-
-                    currentAttack.width = 50.0f;
-
+                    currentAttack.range = 150.0f;
+                    currentAttack.width = 48.0f;
                     currentAttack.isLineBox = true;
-
                     currentAttack.arcAngle = 0.0f;
-
-                    float baseDmg = (stats.upgradeLevel >= 2) ? 36.0f : ((stats.upgradeLevel >= 1) ? 32.0f : 28.0f);
-
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 32.0f : ((stats.upgradeLevel >= 1) ? 28.0f : 24.0f);
                     currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
-
                     currentAttack.knockback = 300.0f * stats.poiseMultiplier;
-
                     currentAttack.duration = 0.18f;
-
                     currentAttack.timer = 0.18f;
-
                     currentAttack.hasHit = false;
 
-
+                    velocity.x += forwardDir.x * 220.0f;
+                    velocity.y += forwardDir.y * 220.0f;
 
                     SoundFX::PlayCrusaderClash();
-
                     particles.AddScreenShake(5.0f, 0.16f);
-
                     particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 230, 110, 255 });
-
                     particles.SpawnSparks(position, Color{ 255, 200, 60, 255 }, 16, 160.0f);
-
                 } else if (currentWeapon == WeaponType::HALBERD) {
                     // Royal Halberd Heavy Stage 2: Wide 220-degree sweeping cleave AoE
                     heavyStage = 2;
@@ -1361,73 +1314,106 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     particles.SpawnSlashTrail(position, forwardDir, Color{ 160, 215, 255, 255 });
                     particles.SpawnSparks(position, Color{ 160, 210, 255, 255 }, 22, 170.0f);
                 } else if (currentWeapon == WeaponType::TRUTH_SEEKER) {
-
-                    // Truth Seeker Heavy Stage 2: Second consecutive 360 full circle AoE swing!
-
+                    // Truth Seeker Heavy Stage 2: Sacred Judgment Pillar (100% defense pierce beam + debuff cleanse)
                     heavyStage = 2;
-
                     currentAttack.type = AttackType::HEAVY;
-
-                    currentAttack.range = 145.0f;
-
-                    currentAttack.arcAngle = 360.0f;
-
-                    float baseDmg = (stats.upgradeLevel >= 1) ? 44.0f : 36.0f;
-
+                    currentAttack.isFrontalCircle = true;
+                    currentAttack.circleRadius = 90.0f;
+                    currentAttack.circleCenter = { position.x + forwardDir.x * 90.0f, position.y + forwardDir.y * 90.0f };
+                    currentAttack.range = 170.0f;
+                    currentAttack.arcAngle = 0.0f;
+                    currentAttack.isLineBox = false;
+                    float baseDmg = (stats.upgradeLevel >= 1) ? 46.0f : 38.0f;
                     currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
-
                     currentAttack.knockback = 380.0f;
-
-                    currentAttack.duration = 0.20f;
-
-                    currentAttack.timer = 0.20f;
-
+                    currentAttack.defensePierce = 1.0f; // 100% DEFENSE PIERCE!
+                    currentAttack.duration = 0.22f;
+                    currentAttack.timer = 0.22f;
                     currentAttack.hasHit = false;
 
-                    currentAttack.defensePierce = 0.0f;
+                    CleanseDebuffs(particles); // Cleanses player debuffs!
 
-
-
-                    SoundFX::PlayHeavyAttack();
-
-                    particles.AddScreenShake(7.0f, 0.22f);
-
-                    particles.SpawnSparks(position, Color{ 255, 240, 100, 255 }, 30, 220.0f);
-
+                    SoundFX::PlayTranceActivate();
+                    particles.AddScreenShake(8.0f, 0.26f);
+                    particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 240, 100, 255 }, 35, 220.0f);
                 } else {
-
                     currentAttack.type = AttackType::NONE;
-
                     heavyStage = 1;
-
                 }
-
-            } else if (currentAttack.type == AttackType::HEAVY && heavyStage == 2 && currentWeapon == WeaponType::HALBERD) {
-                // Royal Halberd Heavy Stage 3: Flurry of 3 consecutive rapid stabs (each deals 30% of base weapon damage)
-                heavyStage = 3;
-                halberdStabCount = 1;
+            } else if (currentAttack.type == AttackType::HEAVY && heavyStage == 2) {
                 Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
                 WeaponStats stats = GetEquippedWeaponStats();
 
-                currentAttack.type = AttackType::HEAVY;
-                currentAttack.isLineBox = true;
-                currentAttack.range = 165.0f;
-                currentAttack.width = 46.0f;
-                currentAttack.arcAngle = 0.0f;
+                if (currentWeapon == WeaponType::DAGGERS) {
+                    // Dual Daggers Heavy Stage 3: Vault Kick Disengage (100% poise stagger, backward leap)
+                    heavyStage = 3;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.weapon = WeaponType::DAGGERS;
+                    currentAttack.isLineBox = true;
+                    currentAttack.range = 75.0f;
+                    currentAttack.width = 46.0f;
+                    currentAttack.arcAngle = 0.0f;
+                    float kickBase = (stats.upgradeLevel >= 2) ? 16.0f : ((stats.upgradeLevel >= 1) ? 14.0f : 12.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (kickBase * 1.5f) : kickBase) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.knockback = 200.0f;
+                    currentAttack.duration = 0.14f;
+                    currentAttack.timer = 0.14f;
+                    currentAttack.hasHit = false;
 
-                float baseDmg = stats.lightDamage * 0.30f; // 30% of base weapon damage!
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
-                currentAttack.knockback = 180.0f;
-                currentAttack.defensePierce = 0.20f + stats.defensePierceBonus;
-                currentAttack.duration = 0.09f;
-                currentAttack.timer = 0.09f;
-                currentAttack.hasHit = false;
+                    velocity.x -= forwardDir.x * 380.0f;
+                    velocity.y -= forwardDir.y * 380.0f;
 
-                velocity.x += forwardDir.x * 110.0f;
-                velocity.y += forwardDir.y * 110.0f;
+                    SoundFX::PlayDash();
+                    particles.AddScreenShake(3.0f, 0.10f);
+                    particles.SpawnSlashTrail(position, Vector2Scale(forwardDir, -1.0f), Color{ 100, 255, 180, 220 });
+                } else if (currentWeapon == WeaponType::SWORD) {
+                    // Crusader Blade Heavy Stage 3: Radiant Execution (downward holy cleave with +50% stagger punish)
+                    heavyStage = 3;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.weapon = WeaponType::SWORD;
+                    currentAttack.isLineBox = true;
+                    currentAttack.range = 135.0f;
+                    currentAttack.width = 56.0f;
+                    currentAttack.arcAngle = 0.0f;
+                    float execBase = (stats.upgradeLevel >= 2) ? 46.0f : ((stats.upgradeLevel >= 1) ? 39.0f : 34.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (execBase * 1.5f) : execBase) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.knockback = 360.0f * stats.poiseMultiplier;
+                    currentAttack.duration = 0.22f;
+                    currentAttack.timer = 0.22f;
+                    currentAttack.hasHit = false;
 
-                SoundFX::PlayLightAttack();
-                particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 90.0f, position.y + forwardDir.y * 90.0f }, Color{ 220, 245, 255, 255 }, 10, 130.0f);
+                    velocity.x += forwardDir.x * 120.0f;
+                    velocity.y += forwardDir.y * 120.0f;
+
+                    SoundFX::PlayCrusaderClash();
+                    particles.AddScreenShake(7.0f, 0.22f);
+                    particles.SpawnSparks(position, Color{ 255, 230, 90, 255 }, 28, 200.0f);
+                } else if (currentWeapon == WeaponType::HALBERD) {
+                    // Royal Halberd Heavy Stage 3: Flurry of 3 consecutive rapid stabs (each deals 30% of base weapon damage)
+                    heavyStage = 3;
+                    halberdStabCount = 1;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isLineBox = true;
+                    currentAttack.range = 165.0f;
+                    currentAttack.width = 46.0f;
+                    currentAttack.arcAngle = 0.0f;
+                    float baseDmg = stats.lightDamage * 0.30f;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.knockback = 180.0f;
+                    currentAttack.defensePierce = 0.20f + stats.defensePierceBonus;
+                    currentAttack.duration = 0.09f;
+                    currentAttack.timer = 0.09f;
+                    currentAttack.hasHit = false;
+
+                    velocity.x += forwardDir.x * 110.0f;
+                    velocity.y += forwardDir.y * 110.0f;
+
+                    SoundFX::PlayLightAttack();
+                    particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 90.0f, position.y + forwardDir.y * 90.0f }, Color{ 220, 245, 255, 255 }, 10, 130.0f);
+                } else {
+                    currentAttack.type = AttackType::NONE;
+                    heavyStage = 1;
+                }
             } else if (currentAttack.type == AttackType::HEAVY && heavyStage == 3 && currentWeapon == WeaponType::HALBERD) {
                 if (halberdStabCount < 3) {
                     halberdStabCount++;
@@ -1440,7 +1426,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 46.0f;
                     currentAttack.arcAngle = 0.0f;
 
-                    float baseDmg = stats.lightDamage * 0.30f; // 30% of base weapon damage!
+                    float baseDmg = stats.lightDamage * 0.30f;
                     currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
                     currentAttack.knockback = 180.0f;
                     currentAttack.defensePierce = 0.20f + stats.defensePierceBonus;

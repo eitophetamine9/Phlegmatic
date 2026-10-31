@@ -303,6 +303,43 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         particles.SpawnSparks(position, Color{ 190, 120, 245, 140 }, 1, 15.0f);
     }
 
+    // Weapon Heavy Attack Debuff updates
+    if (bleedTimer > 0.0f) {
+        bleedTimer -= dt;
+        bleedTickTimer -= dt;
+        if (bleedTickTimer <= 0.0f) {
+            bleedTickTimer = 0.5f;
+            health -= 4.0f;
+            particles.SpawnSparks(position, Color{ 230, 30, 40, 220 }, 3, 40.0f);
+            particles.SpawnFloatingText(position, "-4 BLEED", Color{ 255, 60, 60, 220 }, 14.0f);
+            if (health <= 0.0f) {
+                health = 0.0f;
+                state = EnemyState::DEAD;
+                SoundFX::PlayEnemyDeath();
+                return;
+            }
+        }
+    }
+    if (solarBurnTimer > 0.0f) {
+        solarBurnTimer -= dt;
+        solarBurnTickTimer -= dt;
+        if (solarBurnTickTimer <= 0.0f) {
+            solarBurnTickTimer = 0.5f;
+            health -= 5.0f;
+            particles.SpawnSparks(position, Color{ 255, 200, 40, 240 }, 4, 50.0f);
+            particles.SpawnFloatingText(position, "-5 SOLAR BURN", Color{ 255, 210, 40, 240 }, 14.0f);
+            if (health <= 0.0f) {
+                health = 0.0f;
+                state = EnemyState::DEAD;
+                SoundFX::PlayEnemyDeath();
+                return;
+            }
+        }
+    }
+    if (armorFractureTimer > 0.0f) {
+        armorFractureTimer -= dt;
+    }
+
     float dx = playerPos.x - position.x;
     float dy = playerPos.y - position.y;
     float distToPlayer = sqrtf(dx * dx + dy * dy);
@@ -766,6 +803,9 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
 
     // Apply Enemy Defense formula with defense pierce and Melancholic shell shatter
     float activeDef = defense;
+    if (HasArmorFracture()) {
+        activeDef *= 0.80f; // -20% armor from War Mace Armor Fracture!
+    }
     if (IsShattered()) {
         activeDef *= 0.65f; // -35% armor on shattered defense shell!
     }
