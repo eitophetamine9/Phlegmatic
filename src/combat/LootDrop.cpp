@@ -57,9 +57,14 @@ void LootDrop::Update(float dt, Vector2 playerPos, Player& player, ParticleSyste
     const float pickupRadius = 26.0f;
     if (dist <= pickupRadius) {
         collected = true;
+        int finalAmount = amount;
+        if (player.HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && (type == LootType::SHINGLES || type == LootType::ORE_SCRAP)) {
+            finalAmount = (int)ceilf((float)amount * 1.15f);
+        }
+
         if (type == LootType::SHINGLES) {
-            player.GetInventory().AddShingles(amount);
-            std::string label = "+" + std::to_string(amount) + " Shingles";
+            player.GetInventory().AddShingles(finalAmount);
+            std::string label = "+" + std::to_string(finalAmount) + " Shingles";
             particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 230, 242, 255, 255 }, 18.0f);
             SoundFX::PlayCoinPickup();
             particles.SpawnSparks(position, Color{ 210, 230, 255, 255 }, 10, 100.0f);
@@ -70,8 +75,8 @@ void LootDrop::Update(float dt, Vector2 playerPos, Player& player, ParticleSyste
             SoundFX::PlayHeal();
             particles.SpawnSparks(position, Color{ 100, 255, 160, 255 }, 12, 120.0f);
         } else if (type == LootType::ORE_SCRAP) {
-            player.GetInventory().AddOreScraps(amount);
-            std::string label = "+" + std::to_string(amount) + " Ore Scrap" + (amount > 1 ? "s" : "");
+            player.GetInventory().AddOreScraps(finalAmount);
+            std::string label = "+" + std::to_string(finalAmount) + " Ore Scrap" + (finalAmount > 1 ? "s" : "");
             particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 255, 195, 60, 255 }, 20.0f);
             SoundFX::PlayParrySuccess();
             particles.SpawnSparks(position, Color{ 255, 185, 40, 255 }, 14, 110.0f);

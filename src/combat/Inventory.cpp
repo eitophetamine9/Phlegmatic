@@ -15,9 +15,15 @@ void Inventory::InitDefault() {
     // Default starting weapons
     unlockedWeapons.push_back(WeaponType::NONE);
 
-    // Default armors: ONLY NONE!
+    // Default armors & pieces: ONLY NONE!
     equippedArmor = ArmorType::NONE;
     unlockedArmors.push_back(ArmorType::NONE);
+    equippedHelmet = HelmetType::NONE;
+    unlockedHelmets.push_back(HelmetType::NONE);
+    equippedChestplate = ChestplateType::NONE;
+    unlockedChestplates.push_back(ChestplateType::NONE);
+    equippedLeggings = LeggingsType::NONE;
+    unlockedLeggings.push_back(LeggingsType::NONE);
 
     // Default totems: ONLY NONE!
     equippedTotem = TotemType::NONE;
@@ -164,6 +170,38 @@ void Inventory::UnlockWeapon(WeaponType type) {
     }
 }
 
+void Inventory::SetEquippedArmor(ArmorType type) {
+    equippedArmor = type;
+    switch (type) {
+        case ArmorType::COMMONERS_SCRAP:
+            equippedHelmet = HelmetType::COMMONERS_HOOD;
+            equippedChestplate = ChestplateType::COMMONERS_TUNIC;
+            equippedLeggings = LeggingsType::COMMONERS_BREECHES;
+            break;
+        case ArmorType::CRUSADER_PLATE:
+            equippedHelmet = HelmetType::CRUSADER_HELM;
+            equippedChestplate = ChestplateType::CRUSADER_CUIRASS;
+            equippedLeggings = LeggingsType::CRUSADER_GREAVES;
+            break;
+        case ArmorType::VANGUARD_MAIL:
+            equippedHelmet = HelmetType::VANGUARD_GREATHELM;
+            equippedChestplate = ChestplateType::VANGUARD_CHEST;
+            equippedLeggings = LeggingsType::VANGUARD_GREAVES;
+            break;
+        case ArmorType::SHADOW_LEATHER:
+            equippedHelmet = HelmetType::SHADOW_COWL;
+            equippedChestplate = ChestplateType::SHADOW_GARB;
+            equippedLeggings = LeggingsType::SHADOW_LEGGINGS;
+            break;
+        case ArmorType::NONE:
+        default:
+            equippedHelmet = HelmetType::NONE;
+            equippedChestplate = ChestplateType::NONE;
+            equippedLeggings = LeggingsType::NONE;
+            break;
+    }
+}
+
 bool Inventory::HasArmor(ArmorType type) const {
     for (ArmorType a : unlockedArmors) {
         if (a == type) return true;
@@ -174,6 +212,70 @@ bool Inventory::HasArmor(ArmorType type) const {
 void Inventory::UnlockArmor(ArmorType type) {
     if (!HasArmor(type)) {
         unlockedArmors.push_back(type);
+    }
+    switch (type) {
+        case ArmorType::COMMONERS_SCRAP:
+            UnlockHelmet(HelmetType::COMMONERS_HOOD);
+            UnlockChestplate(ChestplateType::COMMONERS_TUNIC);
+            UnlockLeggings(LeggingsType::COMMONERS_BREECHES);
+            break;
+        case ArmorType::CRUSADER_PLATE:
+            UnlockHelmet(HelmetType::CRUSADER_HELM);
+            UnlockChestplate(ChestplateType::CRUSADER_CUIRASS);
+            UnlockLeggings(LeggingsType::CRUSADER_GREAVES);
+            break;
+        case ArmorType::VANGUARD_MAIL:
+            UnlockHelmet(HelmetType::VANGUARD_GREATHELM);
+            UnlockChestplate(ChestplateType::VANGUARD_CHEST);
+            UnlockLeggings(LeggingsType::VANGUARD_GREAVES);
+            break;
+        case ArmorType::SHADOW_LEATHER:
+            UnlockHelmet(HelmetType::SHADOW_COWL);
+            UnlockChestplate(ChestplateType::SHADOW_GARB);
+            UnlockLeggings(LeggingsType::SHADOW_LEGGINGS);
+            break;
+        case ArmorType::NONE:
+        default:
+            break;
+    }
+}
+
+bool Inventory::HasHelmet(HelmetType type) const {
+    for (HelmetType h : unlockedHelmets) {
+        if (h == type) return true;
+    }
+    return false;
+}
+
+void Inventory::UnlockHelmet(HelmetType type) {
+    if (!HasHelmet(type)) {
+        unlockedHelmets.push_back(type);
+    }
+}
+
+bool Inventory::HasChestplate(ChestplateType type) const {
+    for (ChestplateType c : unlockedChestplates) {
+        if (c == type) return true;
+    }
+    return false;
+}
+
+void Inventory::UnlockChestplate(ChestplateType type) {
+    if (!HasChestplate(type)) {
+        unlockedChestplates.push_back(type);
+    }
+}
+
+bool Inventory::HasLeggings(LeggingsType type) const {
+    for (LeggingsType l : unlockedLeggings) {
+        if (l == type) return true;
+    }
+    return false;
+}
+
+void Inventory::UnlockLeggings(LeggingsType type) {
+    if (!HasLeggings(type)) {
+        unlockedLeggings.push_back(type);
     }
 }
 

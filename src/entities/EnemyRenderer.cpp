@@ -142,6 +142,8 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 32, 50, 85, 255 }; // Vanguard Crusader royal navy
     } else if (enemy.type == EnemyType::ORE_GOLEM) {
         bodyColor = Color{ 72, 78, 88, 255 }; // Slate quarry stone
+    } else if (enemy.type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+        bodyColor = Color{ 58, 62, 72, 255 }; // Compact volcanic basalt
     } else if (enemy.type == EnemyType::ELEMENTAL_GOLEM) {
         bodyColor = Color{ 36, 40, 50, 255 }; // Primordial dark basalt titan
     }
@@ -430,6 +432,12 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
             DrawCircleV(rightHand, 7.0f, Color{ 75, 80, 90, 255 });
             DrawCircleLines((int)rightHand.x, (int)rightHand.y, 7.0f, Color{ 110, 115, 125, 200 });
         }
+    } else if (enemy.type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+        DrawCircleV(enemy.position, enemy.radius * 0.9f, Color{ 48, 52, 60, 255 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius, Color{ 235, 140, 40, 200 });
+        float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 8.0f);
+        DrawCircleV(enemy.position, 5.0f * cPulse, Color{ 255, 160, 40, 255 });
+        DrawCircleV({ enemy.position.x + dir.x * 6.0f, enemy.position.y + dir.y * 6.0f }, 3.0f, Color{ 255, 220, 100, 255 });
     } else if (enemy.type == EnemyType::ELEMENTAL_GOLEM) {
         // Primordial Basalt Titan with 4 elemental crystal nodes (Fire, Frost, Earth, Storm)
         Vector2 leftHand = {

@@ -60,11 +60,11 @@ inline TotemStats GetTotemStats(TotemType type) {
         case TotemType::ELEMENTAL_CORE_TOTEM:
             return {
                 "Elemental Core Totem",
-                "A core of primordial magma, frost, and basalt dropped by the Elemental Golem. Channels elemental projectile bolts through blade strikes.",
-                "+25 Defense, Elemental Projectile on Light Attack (5s CD)",
-                "-15% Movement Speed",
-                1.0f, 1.35f, 0.85f, 1.0f, 1.0f, 25.0f,
-                Color{ 255, 130, 45, 255 }
+                "A core of primordial magma, frost, and basalt. Awakens a loyal Mini Elemental Golem companion (105 HP, 14 DMG) and unleashes infinitely piercing elemental bolts (54 DMG, 3s CD).",
+                "Friendly Mini Golem Companion, Infinitely Piercing Projectile (54 DMG, 3s CD)",
+                "Companion Dies: 60s Respawn | -10% Movement Speed",
+                1.0f, 1.25f, 0.90f, 1.0f, 1.0f, 25.0f,
+                Color{ 255, 140, 45, 255 }
             };
         case TotemType::NONE:
         default:

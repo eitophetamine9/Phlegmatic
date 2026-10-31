@@ -36,17 +36,45 @@ public:
     void ClearWeapons() { unlockedWeapons.clear(); }
     const std::vector<WeaponType>& GetUnlockedWeapons() const { return unlockedWeapons; }
 
-    // Armor Wardrobe
+    // Armor Wardrobe (Modular Pieces)
     bool HasArmor(ArmorType type) const;
     void UnlockArmor(ArmorType type);
     void ClearArmors() {
         unlockedArmors.clear();
         unlockedArmors.push_back(ArmorType::NONE);
         equippedArmor = ArmorType::NONE;
+        unlockedHelmets.clear();
+        unlockedHelmets.push_back(HelmetType::NONE);
+        equippedHelmet = HelmetType::NONE;
+        unlockedChestplates.clear();
+        unlockedChestplates.push_back(ChestplateType::NONE);
+        equippedChestplate = ChestplateType::NONE;
+        unlockedLeggings.clear();
+        unlockedLeggings.push_back(LeggingsType::NONE);
+        equippedLeggings = LeggingsType::NONE;
     }
     const std::vector<ArmorType>& GetUnlockedArmors() const { return unlockedArmors; }
     ArmorType GetEquippedArmor() const { return equippedArmor; }
-    void SetEquippedArmor(ArmorType type) { equippedArmor = type; }
+    void SetEquippedArmor(ArmorType type);
+
+    // Modular Piece Queries & Setters
+    bool HasHelmet(HelmetType type) const;
+    void UnlockHelmet(HelmetType type);
+    const std::vector<HelmetType>& GetUnlockedHelmets() const { return unlockedHelmets; }
+    HelmetType GetEquippedHelmet() const { return equippedHelmet; }
+    void SetEquippedHelmet(HelmetType type) { equippedHelmet = type; }
+
+    bool HasChestplate(ChestplateType type) const;
+    void UnlockChestplate(ChestplateType type);
+    const std::vector<ChestplateType>& GetUnlockedChestplates() const { return unlockedChestplates; }
+    ChestplateType GetEquippedChestplate() const { return equippedChestplate; }
+    void SetEquippedChestplate(ChestplateType type) { equippedChestplate = type; }
+
+    bool HasLeggings(LeggingsType type) const;
+    void UnlockLeggings(LeggingsType type);
+    const std::vector<LeggingsType>& GetUnlockedLeggings() const { return unlockedLeggings; }
+    LeggingsType GetEquippedLeggings() const { return equippedLeggings; }
+    void SetEquippedLeggings(LeggingsType type) { equippedLeggings = type; }
 
     // Totem Relics
     bool HasTotem(TotemType type) const;
@@ -130,6 +158,15 @@ private:
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;
     ArmorType equippedArmor = ArmorType::NONE;
+
+    std::vector<HelmetType> unlockedHelmets;
+    HelmetType equippedHelmet = HelmetType::NONE;
+
+    std::vector<ChestplateType> unlockedChestplates;
+    ChestplateType equippedChestplate = ChestplateType::NONE;
+
+    std::vector<LeggingsType> unlockedLeggings;
+    LeggingsType equippedLeggings = LeggingsType::NONE;
 
     std::vector<TotemType> unlockedTotems;
     TotemType equippedTotem = TotemType::NONE;

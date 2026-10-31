@@ -33,6 +33,14 @@ public:
     float GetDefensePierce() const { return defensePierce; }
     void SetDefensePierce(float p) { defensePierce = p; }
 
+    bool IsPiercing() const { return isPiercing; }
+    void SetPiercing(bool p) { isPiercing = p; }
+    bool HasHitEnemy(int id) const {
+        for (int h : hitEnemyIds) if (h == id) return true;
+        return false;
+    }
+    void RecordHitEnemy(int id) { hitEnemyIds.push_back(id); }
+
 private:
     Vector2 position;
     Vector2 velocity;
@@ -45,4 +53,6 @@ private:
     float lifetime;
     float maxLifetime;
     Color color;
+    bool isPiercing = false;
+    std::vector<int> hitEnemyIds;
 };

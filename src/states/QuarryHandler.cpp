@@ -30,12 +30,12 @@ void QuarryHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemi
     entryBannerTimer = 4.0f;
     doorCooldown = 0.5f;
 
-    // 4 Ore Golem Spawners across the Quarry plateau
+    // 4 Ore Golem Spawners relocated south away from Primordial Altar
     golemSpawners.clear();
-    golemSpawners.push_back({ { 600.0f, 550.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 1350.0f, 550.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 650.0f, 1000.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 1300.0f, 1000.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 550.0f, 950.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 1450.0f, 950.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 600.0f, 1350.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 1400.0f, 1350.0f }, 0.0f, true });
 
     for (const auto& spawner : golemSpawners) {
         enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
@@ -119,7 +119,7 @@ void QuarryHandler::Update(
     // Update active enemies
     for (auto& enemy : enemies) {
         if (enemy.IsAlive()) {
-            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
         }
     }
 
@@ -166,14 +166,21 @@ void QuarryHandler::Update(
                 }
             } else if (it->GetType() == EnemyType::ELEMENTAL_GOLEM) {
                 elementalBossDefeated = true;
-                player.GetInventory().UnlockTotem(TotemType::ELEMENTAL_CORE_TOTEM);
-                player.SetTotem(TotemType::ELEMENTAL_CORE_TOTEM);
+                elementalBossSummoned = false; // Allow re-awakening!
 
-                SoundFX::PlayGateOpen();
-                SoundFX::PlayCoinPickup();
-                particles.AddScreenShake(10.0f, 0.35f);
-                particles.SpawnSparks(it->GetPosition(), Color{ 255, 215, 80, 255 }, 40, 240.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "ELEMENTAL CORE TOTEM UNLOCKED & ATTUNED!", Color{ 255, 220, 90, 255 }, 24.0f);
+                // 25% drop chance for Elemental Core Totem
+                int roll = rand() % 100;
+                if (roll < 25 && !player.GetInventory().HasTotem(TotemType::ELEMENTAL_CORE_TOTEM)) {
+                    player.GetInventory().UnlockTotem(TotemType::ELEMENTAL_CORE_TOTEM);
+                    player.SetTotem(TotemType::ELEMENTAL_CORE_TOTEM);
+                    SoundFX::PlayGateOpen();
+                    SoundFX::PlayCoinPickup();
+                    particles.AddScreenShake(12.0f, 0.45f);
+                    particles.SpawnSparks(it->GetPosition(), Color{ 255, 215, 80, 255 }, 50, 260.0f);
+                    particles.SpawnFloatingText(player.GetPosition(), "RARE DROP: ELEMENTAL CORE TOTEM! (25%)", Color{ 255, 220, 90, 255 }, 26.0f);
+                } else {
+                    particles.SpawnFloatingText(player.GetPosition(), "ELEMENTAL TITAN VANQUISHED!", Color{ 255, 220, 90, 255 }, 24.0f);
+                }
             }
             it = enemies.erase(it);
         } else {
@@ -211,19 +218,42 @@ void QuarryHandler::Update(
         return;
     }
 
+    // Check boss summoning mini golems (up to 3 max)
+    for (auto& enemy : enemies) {
+        if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM && enemy.IsAlive() && enemy.NeedsMinionSpawn()) {
+            int activeMinis = 0;
+            for (const auto& other : enemies) {
+                if (other.GetType() == EnemyType::MINI_ELEMENTAL_GOLEM && other.IsAlive()) activeMinis++;
+            }
+            if (activeMinis < 3) {
+                int toSpawn = 3 - activeMinis;
+                for (int s = 0; s < toSpawn; ++s) {
+                    float ang = s * (2.0f * PI / (float)toSpawn) + (float)GetTime();
+                    Vector2 spawnPos = { enemy.GetPosition().x + cosf(ang) * 60.0f, enemy.GetPosition().y + sinf(ang) * 60.0f };
+                    enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, spawnPos);
+                    particles.SpawnSparks(spawnPos, Color{ 255, 160, 40, 255 }, 20, 140.0f);
+                }
+            }
+            enemy.ClearMinionSpawn();
+        }
+    }
+
     // Primordial Elemental Altar Interaction at { 1000.0f, 320.0f }
     bool nearAltar = Vector2Distance(playerPos, altarPosition) <= altarRadius;
     if (nearAltar && interactKey) {
-        if (elementalBossDefeated) {
-            particles.SpawnFloatingText(playerPos, "The Primordial Altar is pacified. The elemental core hums quietly.", Color{ 140, 220, 255, 255 }, 18.0f);
-            SoundFX::PlayParrySuccess();
-        } else if (elementalBossSummoned) {
-            particles.SpawnFloatingText(playerPos, "The Elemental Titan is already summoned! Vanquish the behemoth!", Color{ 255, 120, 120, 255 }, 20.0f);
+        bool bossAlive = false;
+        for (const auto& en : enemies) {
+            if (en.GetType() == EnemyType::ELEMENTAL_GOLEM && en.IsAlive()) {
+                bossAlive = true;
+                break;
+            }
+        }
+
+        if (bossAlive) {
+            particles.SpawnFloatingText(playerPos, "The Elemental Titan is already active in the arena!", Color{ 255, 120, 120, 255 }, 20.0f);
             SoundFX::PlayHitImpact();
         } else {
-            // Count unlocked lore fragments
             int unlockedCount = player.GetInventory().GetDiscoveredFragmentCount();
-
             if (unlockedCount < 10) {
                 char buf[128];
                 snprintf(buf, sizeof(buf), "The Primordial Altar demands all 10 Lore Fragments! (%d / 10 Collected)", unlockedCount);
@@ -231,7 +261,6 @@ void QuarryHandler::Update(
                 particles.AddScreenShake(3.5f, 0.15f);
                 SoundFX::PlayHitImpact();
             } else {
-                // Awakening the Secret Boss: ELEMENTAL GOLEM!
                 elementalBossSummoned = true;
                 SoundFX::PlayGateOpen();
                 SoundFX::PlayHeavyAttack();
@@ -310,15 +339,24 @@ void QuarryHandler::Render(
 
     // 2. Primordial Altar Prompt
     if (Vector2Distance(player.GetPosition(), altarPosition) <= 140.0f) {
-        if (elementalBossDefeated) {
-            FontManager::DrawGameTextShadow("[E] PRIMORDIAL ALTAR (PACIFIED)", 890, 205, 12, Color{ 140, 220, 255, 240 });
-        } else if (elementalBossSummoned) {
+        bool bossAlive = false;
+        for (const auto& en : enemies) {
+            if (en.GetType() == EnemyType::ELEMENTAL_GOLEM && en.IsAlive()) {
+                bossAlive = true;
+                break;
+            }
+        }
+        if (bossAlive) {
             FontManager::DrawGameTextShadow("[E] PRIMORDIAL ALTAR (TITAN ENGAGED)", 880, 205, 12, Color{ 255, 110, 110, 240 });
         } else {
             int unlockedCount = player.GetInventory().GetDiscoveredFragmentCount();
-            char buf[64];
-            snprintf(buf, sizeof(buf), "[E] PRIMORDIAL ALTAR (%d/10 FRAGMENTS)", unlockedCount);
-            FontManager::DrawGameTextShadow(buf, 860, 205, 12, (unlockedCount >= 10) ? Color{ 255, 215, 80, 255 } : Color{ 240, 140, 140, 240 });
+            if (unlockedCount >= 10) {
+                FontManager::DrawGameTextShadow("[E] AWAKEN ELEMENTAL TITAN (10/10 FRAGMENTS)", 830, 205, 12, Color{ 255, 215, 80, 255 });
+            } else {
+                char buf[64];
+                snprintf(buf, sizeof(buf), "[E] PRIMORDIAL ALTAR (%d/10 FRAGMENTS)", unlockedCount);
+                FontManager::DrawGameTextShadow(buf, 860, 205, 12, Color{ 240, 140, 140, 240 });
+            }
         }
     }
 

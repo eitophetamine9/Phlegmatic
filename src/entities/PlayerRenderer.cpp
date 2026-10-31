@@ -11,8 +11,27 @@
 
 
 void PlayerRenderer::Draw(const Player& player) {
+    ArmorStats armorStats = GetCompositeArmorVisuals(player.equippedHelmet, player.equippedChestplate, player.equippedLeggings);
 
-    ArmorStats armorStats = GetArmorStats(player.currentArmor);
+    // Render active Basalt Pillars
+    for (const auto& pillar : player.basaltPillars) {
+        if (!pillar.active) continue;
+        float alpha = fminf(1.0f, pillar.timer / 0.5f);
+        Color pillarColor = Color{ 55, 60, 70, (unsigned char)(255 * alpha) };
+        Color edgeColor = Color{ 220, 130, 40, (unsigned char)(200 * alpha) };
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, pillarColor);
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius, edgeColor);
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius - 4.0f, Color{ 40, 45, 52, (unsigned char)(255 * alpha) });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, 6.0f, Color{ 255, 160, 50, (unsigned char)(220 * alpha) });
+    }
+
+    // Render active Shadow Decoy
+    if (player.shadowDecoy.active) {
+        float flicker = 0.6f + 0.3f * sinf((float)GetTime() * 12.0f);
+        Color shadowColor = Color{ 110, 60, 180, (unsigned char)(160 * flicker) };
+        DrawCircle((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius, shadowColor);
+        DrawCircleLines((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius + 3.0f, Color{ 180, 120, 255, (unsigned char)(200 * flicker) });
+    }
 
     Color bodyColor = armorStats.primaryColor;
 
@@ -72,6 +91,23 @@ void PlayerRenderer::Draw(const Player& player) {
 
     AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
 
+    // Crusader Plate Dawnfire Aegis Bubble
+    if (player.armorSkillShieldHp > 0.0f) {
+        float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f, Color{ 255, 230, 90, (unsigned char)(220 * pulse) });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 16.0f, Color{ 255, 200, 60, (unsigned char)(140 * pulse) });
+    }
+
+    // Forged Scrap Ironclad Spike Wall
+    if (player.armorSkillActiveTimer > 0.0f && player.HasFullArmorSet(ArmorSet::FORGED_SCRAP_IRON)) {
+        for (int i = 0; i < 8; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 8.0f) + (float)GetTime() * 2.0f;
+            Vector2 p1 = { player.position.x + cosf(ang) * (player.radius + 2.0f), player.position.y + sinf(ang) * (player.radius + 2.0f) };
+            Vector2 p2 = { player.position.x + cosf(ang) * (player.radius + 14.0f), player.position.y + sinf(ang) * (player.radius + 14.0f) };
+            DrawLineEx(p1, p2, 2.5f, Color{ 220, 225, 235, 240 });
+        }
+    }
+
 
 
     Vector2 dir = { cosf(player.facingAngle * DEG2RAD), sinf(player.facingAngle * DEG2RAD) };
@@ -124,7 +160,28 @@ void PlayerRenderer::Draw(const Player& player) {
 
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
 
-            if (player.heavyStage == 2) {
+            if (player.heavyStage == 3) {
+                // Stage 3: Radiant Execution (downward holy cleave)
+                swordAngle = player.facingAngle - 90.0f + progress * 180.0f;
+                AssetManager::DrawSword(rightHand, swordAngle, 56.0f, Color{ 255, 255, 220, 255 }, Color{ 255, 215, 60, 255 });
+
+                float rad = player.facingAngle * DEG2RAD;
+                Vector2 dir = { cosf(rad), sinf(rad) };
+                Vector2 normal = { -dir.y, dir.x };
+                float halfWidth = (player.currentAttack.width > 0.0f ? player.currentAttack.width : 56.0f) * 0.5f;
+                float length = player.currentAttack.range;
+
+                Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+                Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+                Vector2 c3 = { c2.x + dir.x * length, c2.y + dir.y * length };
+                Vector2 c4 = { c1.x + dir.x * length, c1.y + dir.y * length };
+
+                DrawTriangle(c1, c2, c3, Color{ 255, 230, 80, (unsigned char)(100 * (1.0f - progress * 0.4f)) });
+                DrawTriangle(c1, c3, c4, Color{ 255, 230, 80, (unsigned char)(100 * (1.0f - progress * 0.4f)) });
+                DrawLineEx(c1, c4, 3.0f, Color{ 255, 255, 180, 240 });
+                DrawLineEx(c2, c3, 3.0f, Color{ 255, 255, 180, 240 });
+                DrawLineEx(c4, c3, 3.5f, Color{ 255, 255, 220, 255 });
+            } else if (player.heavyStage == 2) {
 
                 // Stage 2: Upward shock slash (LINE / BOX AoE)
 
@@ -303,26 +360,22 @@ void PlayerRenderer::Draw(const Player& player) {
             DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 120, 255, 200, 180 });
 
         } else if (player.currentAttack.type == AttackType::HEAVY) {
-
-            // 360 Whirlwind spin
-
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-
-            float spinAngle = player.facingAngle + progress * 360.0f;
-
-            angleR = spinAngle;
-
-            angleL = spinAngle + 180.0f;
-
-
-
-            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 200, 255 }, Color{ 80, 255, 160, 220 });
-
-            DrawCircleLines((int)player.position.x, (int)player.position.y, player.currentAttack.range, Color{ 80, 255, 160, 180 });
-
-            DrawCircle((int)player.position.x, (int)player.position.y, player.currentAttack.range * progress, Color{ 60, 240, 180, 40 });
-
-        } else {
+            // Dual Daggers Heavy Stages 2 & 3
+            if (player.heavyStage == 3) {
+                // Stage 3: Vault Kick (kick arc & backward disengage)
+                DrawCircleSector(player.position, player.currentAttack.range, player.facingAngle - 35.0f, player.facingAngle + 35.0f, 10, Color{ 80, 255, 170, (unsigned char)(80 * (1.0f - progress)) });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, player.facingAngle - 35.0f, player.facingAngle + 35.0f, 10, Color{ 140, 255, 200, 230 });
+                AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 255, 220, 255 }, Color{ 60, 240, 180, 200 });
+            } else {
+                // Stage 2: Backstab Cross-Slash 360 spin
+                float spinAngle = player.facingAngle + progress * 360.0f;
+                angleR = spinAngle;
+                angleL = spinAngle + 180.0f;
+                AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 220, 255, 200, 255 }, Color{ 80, 255, 160, 220 });
+                DrawCircleLines((int)player.position.x, (int)player.position.y, player.currentAttack.range, Color{ 80, 255, 160, 180 });
+                DrawCircle((int)player.position.x, (int)player.position.y, player.currentAttack.range * progress, Color{ 60, 240, 180, 40 });
+            }} else {
 
             AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 240, 220, 255 }, Color{ 60, 200, 160, 140 });
 
@@ -475,20 +528,24 @@ void PlayerRenderer::Draw(const Player& player) {
         } else if (player.currentAttack.type == AttackType::HEAVY) {
 
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            if (player.heavyStage == 2) {
+                // Stage 2: Sacred Judgment Pillar (sunray beam from above)
+                swordAngle = player.facingAngle - 40.0f;
+                AssetManager::DrawSword(rightHand, swordAngle, 56.0f, Color{ 255, 255, 200, 255 }, Color{ 255, 220, 60, 255 });
 
-            swordAngle = player.facingAngle + progress * 360.0f;
-
-            AssetManager::DrawSword(rightHand, swordAngle, 56.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 180, 30, 255 });
-
-
-
-            // Full 360 circle AoE swing
-
-            DrawCircleLines((int)player.position.x, (int)player.position.y, player.currentAttack.range, Color{ 255, 220, 70, 230 });
-
-            DrawCircle((int)player.position.x, (int)player.position.y, player.currentAttack.range * (0.4f + 0.6f * progress), Color{ 255, 190, 40, (unsigned char)(60 * (1.0f - progress)) });
-
-        } else if (player.isHeavyWindingUp) {
+                Vector2 center = player.currentAttack.circleCenter;
+                float pillarRadius = player.currentAttack.circleRadius;
+                Vector2 beamTop = { center.x, center.y - 280.0f };
+                DrawLineEx(beamTop, center, 14.0f, Color{ 255, 255, 210, (unsigned char)(200 * (1.0f - progress * 0.4f)) });
+                DrawCircleV(center, pillarRadius * (0.6f + 0.4f * progress), Color{ 255, 230, 80, (unsigned char)(90 * (1.0f - progress)) });
+                DrawCircleLines((int)center.x, (int)center.y, pillarRadius, Color{ 255, 245, 140, 240 });
+            } else {
+                // Stage 1: Dawnfire Ring 360 circle AoE swing
+                swordAngle = player.facingAngle + progress * 360.0f;
+                AssetManager::DrawSword(rightHand, swordAngle, 56.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 180, 30, 255 });
+                DrawCircleLines((int)player.position.x, (int)player.position.y, player.currentAttack.range, Color{ 255, 220, 70, 230 });
+                DrawCircle((int)player.position.x, (int)player.position.y, player.currentAttack.range * (0.4f + 0.6f * progress), Color{ 255, 190, 40, (unsigned char)(60 * (1.0f - progress)) });
+            }} else if (player.isHeavyWindingUp) {
 
             swordAngle = player.facingAngle - 95.0f;
 
@@ -654,10 +711,25 @@ void PlayerRenderer::Draw(const Player& player) {
         } else {
 
             AssetManager::DrawHalberd(rightHand, halberdAngle, 48.0f, Color{ 210, 225, 245, 255 }, Color{ 120, 160, 210, 160 });
-
         }
-
     }
 
+    // Friendly Mini Elemental Golem Companion
+    if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active) {
+        const auto& comp = player.GetCompanion();
+        DrawCircleV(comp.position, comp.radius * 0.9f, Color{ 48, 52, 60, 255 });
+        DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 100, 240, 180, 230 });
+        float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 6.0f);
+        DrawCircleV(comp.position, 5.0f * cPulse, Color{ 100, 255, 170, 255 });
+
+        float barW = 28.0f;
+        float barH = 4.0f;
+        float barX = comp.position.x - barW * 0.5f;
+        float barY = comp.position.y - comp.radius - 8.0f;
+        DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
+        float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+        DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
+        DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
+    }
 }
 

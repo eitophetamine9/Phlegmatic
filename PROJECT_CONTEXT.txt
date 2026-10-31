@@ -1,0 +1,324 @@
+================================================================================
+                    PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
+================================================================================
+Generated: October 28, 2026
+Branch: ver.0.0.1e
+Release Version: 0.0.1e
+Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
+Repository: eitophetamine9/Phlegmatic
+Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
+
+================================================================================
+1. PROJECT SUMMARY & VISION
+================================================================================
+"Phlegmatic" is a dark fantasy, top-down, high-tempo medieval action RPG set in the
+shattered Land of Tydeshire. The game blends deliberate precision combat (tight parry
+windows, directional dodging with invulnerability frames, stamina management, and
+weapon choreography) with medieval physiological lore centered on the Four Humors
+(Sanguine, Choleric, Melancholic, and Phlegmatic).
+
+Key Aesthetic & Technical Pillars:
+- Rich procedural vector rendering combined with custom illustration drops.
+- Procedural acoustic audio synthesis (SoundFX.cpp) creating authentic cathedral bells,
+  metallic parry rings, heavy armor impacts, and portcullis rumbles without bulky WAV dependencies.
+- Unified medieval typography engine with custom font atlas, codepoint mapping, and
+  special character sanitization.
+- Dual-page medieval grimoire lore journal with real-time 3D page curl animation,
+  illuminated drop caps, runic seals, and location discovery clues.
+- Multi-slot binary/JSON save architecture with timestamped metadata and autosave.
+- Zero-external-dependency standalone executable deployment.
+
+================================================================================
+2. TECHNOLOGY STACK & TOOLING
+================================================================================
+- Language: C++17 standard
+- Graphics & Windowing: Raylib 6.2 (Vendored under `vendor/raylib/`)
+- Platform Libraries: OpenGL32, GDI32, WinMM, Shell32
+- Compiler: GCC / MinGW-w64 (via system PATH or w64devkit)
+- Build System:
+  - `build.bat`: Automated batch compilation with `-O2 -static -std=c++17`, outputting
+    both root `phlegmatic.exe` and `bin/phlegmatic.exe`.
+  - `CMakeLists.txt`: Cross-platform CMake & Ninja build configuration.
+- Version Control: Git with branches `main`, `ver.0.0.1`, `ver.0.0.1a`, and `ver.0.0.1b`.
+
+Build Commands:
+  cmd.exe /c "build.bat"      # Primary build script
+  run.bat                     # Quick launcher
+
+================================================================================
+3. CODEBASE DIRECTORY ARCHITECTURE
+================================================================================
+Phlegmatic/
+├── .gitignore                     # Git ignore rules (build artifacts, saves, context)
+├── README.md                      # Primary project readme with controls, tables, and overview
+├── documentation.md               # Complete technical reference, math formulas, and lore codex
+├── PROJECT_CONTEXT.txt            # Master project context, technical architecture, and roadmap
+├── build.bat                      # Automated MinGW-w64 batch build script
+├── run.bat                        # Standalone execution launcher
+├── CMakeLists.txt                 # CMake configuration for Ninja / Make
+├── LICENSE                        # MIT License
+├── phlegmatic.exe                 # Root executable (compiled x64 binary)
+├── bin/
+│   └── phlegmatic.exe             # Duplicate binary in bin directory
+├── assets/                        # Custom art drop pipeline (16:9 transition artwork, sprites)
+│   └── zyphden_transition.png     # Custom 16:9 illustration of Zyphden ramparts & gates
+├── vendor/
+│   └── raylib/                    # Precompiled Raylib 6.2 headers and static libraries (libraylib.a)
+└── src/
+    ├── main.cpp                   # Application entry point, window initialization, main loop
+    ├── core/
+    │   ├── Config.hpp             # Engine constants, window dimensions (1280x720), timing constants
+    │   ├── GameEngine.hpp/.cpp    # Central state coordinator and master loop runner
+    │   ├── CameraManager.hpp/.cpp # Smooth lerp 2D camera with directional shake and trauma damping
+    │   ├── SoundFX.hpp/.cpp       # Procedural waveform acoustic audio synthesizer
+    │   └── FontManager.hpp/.cpp   # Medieval typography engine, glyph fallback, and text wrapping
+    ├── entities/
+    │   ├── Player.hpp/.cpp        # Player physics, stamina, composure meter, dodging, and attacking
+    │   ├── Enemy.hpp/.cpp         # Enemy base, AI state machines, Will stat, telegraph calculations
+    │   └── EnemyRenderer.hpp/.cpp # Procedural vector silhouettes (cultists, brutes, Zil, knights)
+    ├── combat/
+    │   ├── CombatSystem.hpp/.cpp  # Damage calculation, armor penetration, stagger formulas, parry windows
+    │   ├── Weapon.hpp             # Weapon catalog, damage stats, stamina costs, cooldowns, stance stages
+    │   ├── Inventory.hpp/.cpp     # Player equipment, potions, Shingles currency, lore fragments with clues
+    │   ├── Projectile.hpp/.cpp    # Piercing projectiles (Holy Beam, Cultist psionic orbs)
+    │   ├── LootManager.hpp/.cpp   # Physical Shingles loot drop physics (arc & bounce), magnet attraction
+    │   └── SaveManager.hpp/.cpp   # 3-slot save/load persistence architecture with metadata timestamps
+    ├── world/
+    │   ├── Map.hpp/.cpp           # Multi-environment world renderer (Castle, Crossroads, Zyphden, Keep, Forge, Tavern)
+    │   ├── WaveManager.hpp/.cpp   # 5-stage arena wave manager, drop scheduling, timers
+    │   └── Interactable.hpp/.cpp  # Monoliths, health pickups, dialogue triggers, portals, relic chests
+    └── states/
+        ├── Game.hpp/.cpp          # State coordinator, transition logic, update & render orchestration
+        ├── GameState.hpp          # GameState enum (TITLE, TUTORIAL, OVERWORLD, ZYPHDEN, FORGE, TAVERN, etc.)
+        ├── TitleUI.hpp/.cpp       # Title screen, menu options, 3-slot save selection modal
+        ├── ModalUI.hpp/.cpp       # Animated grimoire lore journal, pause menu, controls guide, dialogue boxes
+        ├── HUD.hpp/.cpp           # Action bar, health/stamina/composure bars, Shingles counter, potion icon
+        ├── Tutorial.hpp/.cpp      # Tutorial objective tracker, composure guide popup, boundary walls
+        └── RuinedCastleHandler.hpp/.cpp # Scripted gates, Zil encounter, and arena unlock trigger
+
+================================================================================
+4. CURRENT FEATURES & SYSTEMS (VERSION 0.0.1b)
+================================================================================
+1. Four Humors Alignment & Dynamic Auras:
+   - Enemies and player can be aligned with one of four classical bodily humors:
+     - Sanguine (Air / Blood): High speed, bleed over time, red chromatic trail.
+     - Choleric (Fire / Yellow Bile): High damage, armor shredding, amber flame aura.
+     - Melancholic (Earth / Black Bile): High armor, heavy poise, earthen particle ground cracks.
+     - Phlegmatic (Water / Phlegm): Calm fortitude, projectile deflection, glacial cyan pulse.
+   - Quenching & Shattering: Exploiting opposing humors triggers bonus damage and poise breaks.
+
+2. Phlegmatic Composure System:
+   - Dynamic 0-100 Composure Meter positioned beneath the Stamina bar.
+   - Passive Tiers:
+     - 0-29 (Agitated): Base stamina regen, standard parry window (0.15s).
+     - 30-59 (Steady): +15% stamina regeneration rate.
+     - 60-89 (Resolute): +25% stamina regen, +10% physical defense, +0.03s parry window.
+     - 90-100 (Phlegmatic): +40% stamina regen, +20% defense, +0.05s parry window.
+   - Phlegmatic Trance (`SPACE` / `[F]` key at 100 Composure):
+     - 5.0 seconds of complete invulnerability and zero stamina consumption.
+     - Radial deflection wave pushes back foes and reflects incoming missiles.
+
+3. Combat Juice & Kinetic Impact:
+   - Hit-Stop Micro-Pause: 0.06s freeze on critical hits, heavy staggers, and parries.
+   - Directional Camera Shake: Directional screen impulse aligned with strike angle,
+     damped using polynomial trauma decay.
+
+4. Will Stat & Combat Mathematics:
+   - Enemy Will Stat: Dictates poise resistance against staggers and stunlocks.
+   - Stagger Formula: Duration = BaseStagger * (100 / (100 + EnemyWill)).
+   - Anti-Stunlock Buffer: Enemies gain temporary stagger immunity after being stunned twice in 3 seconds.
+   - Health Potions: Player carries up to 3 elixirs, healing +45 HP (`1` or `H` key), 7.0s cooldown.
+
+5. Shingles Currency & Ground Loot Physics:
+   - Physical Loot Drops: Slaying enemies drops golden Shingles coins with arc trajectories,
+     gravity, and floor bounce physics.
+   - Magnetic Pickup: Coins smoothly glide toward player when within 60px proximity.
+   - Persistent Currency Counter rendered in top-right HUD.
+
+6. Merchant & Crafting Progression:
+   - Blacksmith Varek (Forge Interior):
+     - Weapon upgrade system with escalating Shingles cost.
+     - Increases light/heavy base damage and armor penetration.
+   - Tavernkeep Eldon (Hearthside Tavern):
+     - Sells health elixirs, hearty meals for temporary max health buffs, and local rumors.
+   - Dedicated Environments: Separate MapEnvironment states for Blacksmith Forge and Tavern.
+
+7. World Expansion & Progression Gating:
+   - Royal Keep: Expanded to 1200x1100 interior with ornate tiled floors, royal banners, and stained glass.
+   - King Kreptu: Centered upon royal throne dais with Royal Guard escort; story progression is strictly
+     gated through dialogue with the King.
+   - Knight Lenon: Defeat in duel allows player to speak with him again; duel initiates only after
+     the conversational dialogue window is closed.
+   - Universal Proximity Prompts: World interaction labels remain completely hidden until within range.
+   - Tutorial Cleanup: Slaying Zil permanently suppresses enemy respawns in the tutorial ruins.
+
+8. Animated Grimoire / Lore Journal:
+   - Two-page open medieval leather-bound book aesthetic.
+   - Aged parchment paper texture, deckle edges, ribbing shadows, and crimson silk ribbon bookmark.
+   - 3D Animated Page-Flip Effect: Sinusoidal perspective compression (`cosf(angle)`), moving drop
+     shadows, and edge highlights when turning pages (`[A]` / `[D]` keys or click buttons).
+   - Recovery Compass Clues: Every one of the 10 lore fragments features explicit in-game location
+     clues (e.g., Ruined Castle ramparts, Crossroads shrine, Zyphden square, Keep antechamber).
+   - Illuminated drop caps, authentic title typography, and runic seal plaques on shrouded pages.
+
+9. Zyphden Transition System:
+   - Responsive screen-space hit testing ensuring clicks register at all resolutions (1080p, 1440p, 4K).
+   - Multi-key input support: `SPACE`, `ENTER`, `E`, and mouse click advance through gates.
+   - High-resolution 16:9 limestone rampart artwork installed at `assets/zyphden_transition.png`.
+
+10. 3-Slot Save Architecture:
+    - Independent save slots (`save_slot_1.json`, `save_slot_2.json`, `save_slot_3.json`).
+    - Tracks play time, chapter, level, health, inventory, shingles, composure, and collected lore.
+    - Title Screen Record Select modal displays timestamps, current realm, and delete/load options.
+
+================================================================================
+5. ROADMAP & FUTURE PLANS FOR VERSION 0.0.1c
+================================================================================
+The upcoming `ver.0.0.1c` release focuses on visual accessibility, display scalability,
+expanded settings, and next-chapter narrative content:
+
+1. Font Visibility & Enlarging Options (High Priority):
+   - Dynamic UI Font Scaling:
+     - Implement configurable font size modes in Settings: Standard (100%), Large (125%), and Extra Large (150%).
+     - Enlarge dialogue text boxes, quest objectives, and tutorial hints for effortless readability from couch/monitor distances.
+     - Increase font point size for dialogue prose from 13/14pt to 16/18pt with proportional line wrapping adjustments.
+   - Readability & Text Legibility Enhancements:
+     - High-contrast text backing plaques with parchment/slate semi-translucent scrims.
+     - Drop-shadow outline rendering (`FontManager::DrawTextShadow`) to eliminate background clutter interference.
+     - Enhanced HUD numbers (Health, Stamina, Composure, Potion count, Shingles) rendered with bold, crisp glyphs.
+     - Larger in-world proximity interaction prompts (`[E] Speak with King Kreptu`).
+
+2. Fullscreen Toggle & Multi-Resolution Display (High Priority):
+   - Fullscreen Window Management:
+     - Support seamless toggling via `F11` key and `Alt + Enter` shortcut.
+     - Dedicated Fullscreen toggle checkbox in Pause Menu and Title Screen Settings.
+     - Implement Raylib `ToggleFullscreen()` with dynamic window desktop dimension queries.
+   - Aspect Ratio Letterboxing & Virtual Viewport:
+     - Maintain crisp 16:9 internal rendering target (1280x720 / 1920x1080) to avoid aspect distortion or stretching.
+     - Render letterbox / pillarbox bars with stylized medieval filigree or clean matte black borders.
+     - Virtual Mouse Coordinate Mapping: Transform `GetMousePosition()` via render-target scaling matrix
+       so button hovers, aim lines, and reticle targeting align perfectly in all fullscreen resolutions.
+
+3. Act IV: The Northern Marches & Realm Border Openings:
+   - Unlocking the borders of Azshden and Fleurshden from the Zyphden northern gates.
+   - Environmental weather systems: Howling gale winds affecting projectile paths, snowfall particles in alpine passes.
+   - New enemy types: Royal Vanguard Deserters, Frost Cultists, and Siege Ballista squads.
+
+4. Audio & Ambience Expansion:
+   - Dynamic background ambient audio loops (cathedral choir drones, howling fortress wind, hearth tavern crackle).
+   - Audio volume sliders in Settings (Master, Sound FX, Ambient Music).
+
+5. Extended Quest & Dialogue Chains:
+   - Multi-step royal quests assigned by King Kreptu.
+   - Blacksmith Varek rare material hunts (Meteoritic Ore found in deep crypts).
+   - Tavern rumors unlocking hidden side-dungeons and elite arena challenges.
+
+================================================================================
+6. HISTORICAL REVISION TRAJECTORY
+================================================================================
+Phase 1: Implementation Planning & Combat Adjustments
+- Rebalanced weapons, twin dagger zero-stamina light attacks, lunge i-frames, and mace defense ignore.
+
+Phase 2: Branch Creation & Git Strategy
+- Established feature branch workflow, protecting main branch.
+
+Phase 3: Visual & Telegraph Precision
+- Introduced LINE telegraph shapes and bandage item drops.
+
+Phase 4: Dagger Mechanics & Telepathic Cultist Telegraph Polish
+- Ground tinges for psionic casters, mouse-guided lunge trajectories.
+
+Phase 5: Progression Gating & Arena Access
+- Defeat gates for Zil, altar weapon retrieval, and 5-stage arena unlock.
+
+Phase 6: Text Cleansing & Zil's Fragment
+- ASCII sanitizer for Raylib font atlas, rename to Zil's Fragment (1% Power).
+
+Phase 7: Version 0.0.1a Foundation
+- Multi-slot save system, unified medieval typography engine, Will stat and stagger formulas.
+- Four Humors alignment, Shingles economy, Royal Keep expansion.
+
+Phase 8: Version 0.0.1b Polish & Mechanics Expansion
+- Phlegmatic Composure meter, passive tiers, and Phlegmatic Trance.
+- Hit-stop micro-pauses and directional camera shake.
+- Blacksmith Varek upgrade tiers and Tavernkeep provisions with dedicated Forge interior.
+- Centered King Kreptu on dais, Knight Lenon duel conversational restart.
+- Universal proximity text decluttering and tutorial respawn elimination.
+
+Phase 9: Zyphden Gate Freeze Fix & Animated Grimoire Journal
+- Decoupled update and render logic for Zyphden transition screen; fixed input coordinate mismatch.
+- Added custom 16:9 limestone rampart artwork (`assets/zyphden_transition.png`).
+- Rebuilt Lore Journal into a 3D animated flipping book with dual parchment pages, illuminated drop caps,
+  and recovery compass clues for all 10 fragments.
+
+Phase 10: Version 0.0.1c Display Scalability, Quest Flow, Ore Golems & Interactive Realm Map
+- 16:9 Virtual Framebuffer & Letterboxing: 1280x720 internal render target with matte borders, bilinear filtering,
+  virtual mouse coordinate mapping macro, and seamless F11 / Alt+Enter fullscreen toggling.
+- Dynamic Font Scaling & Typography Shadows: STANDARD (100%), LARGE (125%), EXTRA_LARGE (150%) scale modes
+  with multi-pass drop-shadow outlines for high-contrast readability against complex backgrounds.
+- Single-Objective Zyphden Quest HUD: Middle-left dynamic objective banner matching Tutorial layout (collapsible [O] tab,
+  step counters 1/7 through 7/7, contextual control hints, and sequential narrative progression).
+- King Kreptu Audience & Exploration Sanction: Post-spar royal dialogue commending victory over Captain Lenon, granting
+  sanction to journey to the next kingdom, and explicitly allowing free open exploration without worry.
+- Ore Golems & Eastern Quarry: New high-defense Melancholic enemy type in eastern perimeter with procedural vector chassis,
+  ground slam shockwaves, 7-second respawn timers after defeat, and metallic Ore Scrap drops with magnet physics.
+- Forge Weapon Crafting via Scraps: Blacksmith Varek forge interface allowing players to forge War Mace (12 Scraps + 40 Shingles)
+  and Dual Daggers (8 Scraps + 30 Shingles) with clanging anvil audio, sparks, floating text, and seamless upgrade transition.
+- Interactive Realm Map Engine ([M] Key & Journal Tab 3): Medieval parchment cartography modal with deckle edges,
+  pan & zoom controls (0.75x to 2.2x), live animated player beacon, 8 interactive POIs with rich hover tooltip cards,
+  category legend filters ([ALL], [QUESTS], [SERVICES], [DANGER]), and HUD quick-access buttons.
+- Enhanced Typography & Container Scaling: Replaced blurry fonts with crisp Georgia.ttf (size 38, bilinear filtering,
+  custom letter spacing), and expanded dialogue/objective containers (HUD dialogue box to 920x205, boss banner to 860x84,
+  objective card to 620x92, Forge modal to 880x615) eliminating all text overflow and box overlapping.
+- Gated Quarry Transition Screen: Eastern courtyard archway is locked until defeating Knight Lenon in combat spar; once
+  cleared, interacting with [E] launches dedicated QUARRY_TRANSITION map sequence into QUARRY_DEPTHS underground zone.
+- Suspicious Altar & Secret Boss "Elemental Golem": Deep in Quarry Depths, interacting with the ancient Primordial Altar
+  while possessing all 10 Lore Fragments awakens the secret boss Elemental Golem (850 HP, 55 defense, 4-phase attacks,
+  elemental bolt flings, frost tremors, and quad-seismic quakes).
+- Elemental Core Totem: Defeating the Elemental Golem pacifies the altar and awards the Elemental Core Totem (+25 flat Defense,
+  auto-fires Elemental Bolt projectile on light attacks with a 5-second cooldown timer, -15% movement speed penalty).
+
+Phase 11: Version 0.0.1d Input Decoupling, Tactical UI Overhauls, and Royal Halberd
+- InputRouter Centralization: Fixed hotkey dropping issues ([O], [M], [I], [ESC]) by separating key event polling from rendering passes and centralizing modal dispatching.
+- Royal Halberd & 3-Stage Heavy Attack Combo: Rebalanced Halberd (16 light / 28 heavy) with 3-stage progression: Stage 1 Long Lunge with i-frames, Stage 2 220Â° wide sweep cleave, Stage 3 rapid 3-stab flurry (30% weapon damage each).
+- Tactical Gear & Inventory Overhaul (Image 1): Modernized Tab 0 with glowing top navigation, real-time attributes strip, 3-column layout with wireframe armaments, hero pedestal doll, and apparel slots.
+- Tactical Frosted Realm Map Overhaul (Image 2): Frosted dark teal glass cartography with Cartesian isometric grid, 5 numbered diamond stage waypoints, active radar beacon, and stage inspection cards.
+- Procedural Ambience Synthesis & Audio Mixer: Real-time procedural audio synthesis for wind, subterranean reverberations, and crackling tavern hearths, with in-game mixer sliders.
+
+Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion & Weapon Combos
+- Modular 3-Piece Armor System: Split monolithic armors into Helmet, Chestplate, and Leggings slots (no boots, gloves, or rings). Equipping 3/3 matching pieces grants unique passive set bonuses and active [V] skills across 6 sets (Commoner, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt Golem).
+- Tactical Equipment HUD Overhaul (Image 3): Redesigned Tab 0 with EQUIPPED header, APPAREL HIDDEN cosmetic pill, central silhouette character doll flanked by 3 armor piece slots, single equippable TOTEMS slot, WEAPONS quick-slot row, and slide-out Selection Drawer with one-click equip. Fully preserved the Illuminated Book Lore Journal in Tab 1.
+- Blacksmith Varek Armor Forge: Added Tab 3 to Varek's forge in Zyphden for crafting Forged Scrap Iron and Basalt Golem armor pieces from collected Ore Scraps and Silver Shingles.
+- Quarry Arena & Elemental Golem Boss Overhaul: Shifted Ore Golem spawners south away from the altar arena. Made boss repeatable/respawnable with 25% totem drop rate and minion summoning (up to 3 Mini Elemental Golems on 22s CD).
+- Revamped Elemental Core Totem & Friendly Companion Minion: Summons a permanent friendly Mini Elemental Golem companion with 75% boss minion stats (105 HP, 14 DMG, 11 DEF) that follows the player, attacks hostiles, and features a 60s death respawn countdown widget in the HUD. Light attack projectile upgraded to infinitely piercing with 54 dmg and 3s CD.
+- Weapon Heavy Attack Combo Revamp & Damage Rebalancing:
+  - Dual Daggers (12 light / 58 heavy): 3-stage combo (Shadow Puncture with iframes & bleed, Backstab Cross-Slash with +40% bonus against bleeding/rear foes, Vault Kick with 100% poise stagger & backward leap).
+  - War Mace (24 light / 78 heavy): 2-stage combo (Overhead Skull Crusher with hyper-armor & -20% Armor Fracture, Seismic Tremor 360Â° shockwave with 25% defense pierce & knockdown).
+  - Crusader Blade (18 light / 88 heavy): 3-stage combo (Crescent Cleave restoring +12 Composure, Shock Thrust piercing line interrupting enemy windups, Radiant Execution downward holy cleave dealing +50% bonus against staggered foes).
+  - Truth Seeker (22 light / 72 heavy): 2-stage combo (Dawnfire Ring 360Â° sweep applying Solar Burn & firing holy beam, Sacred Judgment Pillar descending sunray beam with 100% defense pierce cleansing player debuffs).
+  - Royal Halberd (16 light / 28 heavy): 3-stage combo (Long Lunge with iframes, Sweeping Cleave 220Â° arc, rapid 3-stab flurry).
+
+================================================================================
+7. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
+================================================================================
+1. Zero Emojis Constraint:
+   - Never use emojis anywhere in the codebase, comments, git commit messages, documentation, or logs.
+   - Use clean, professional textual formatting and standard ASCII / Unicode symbols only where supported.
+
+2. Screen Dimensions vs Window Scaling:
+   - Always query `GetScreenWidth()` and `GetScreenHeight()` for modal overlays, transition screens,
+     and HUD bounding boxes rather than relying solely on static `Config::WINDOW_WIDTH` (1280) and
+     `Config::WINDOW_HEIGHT` (720).
+   - When updating hit-tests for buttons, verify that the coordinates match the render pass precisely.
+
+3. Typography Engine (`FontManager`):
+   - Never use raw `DrawText()` for body paragraphs or dialogue. Use `FontManager::DrawText()` or
+     `FontManager::DrawTextWrapped()` to ensure proper kerning, line heights, and glyph substitution.
+
+4. Binary Distributions:
+   - Always compile using `cmd.exe /c build.bat`. Ensure both `phlegmatic.exe` (root) and
+     `bin/phlegmatic.exe` are updated in tandem.
+
+================================================================================
+END OF PROJECT CONTEXT
+================================================================================

@@ -209,6 +209,27 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.radius = 190.0f;
             telegraph.warningColor = Color{ 240, 160, 40, 200 };
             bossAttackPhase = 0;
+            summonCooldown = 6.0f;
+            pendingMinionSummon = false;
+            isPerformingMeleeSmite = true;
+            break;
+
+        case EnemyType::MINI_ELEMENTAL_GOLEM:
+            humor = HumorType::MELANCHOLIC;
+            radius = 16.0f;
+            maxHealth = 140.0f;
+            defense = 15.0f;
+            will = 35.0f;
+            moveSpeed = 160.0f;
+            attackRange = 36.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.50f;
+            strikeDuration = 0.20f;
+            recoveryDuration = 0.65f;
+            stunDuration = 1.0f;
+            telegraph.shape = TelegraphShape::CIRCLE;
+            telegraph.radius = 42.0f;
+            telegraph.warningColor = Color{ 255, 140, 40, 180 };
             isPerformingMeleeSmite = true;
             break;
     }
@@ -228,6 +249,7 @@ std::string Enemy::GetName() const {
         case EnemyType::KNIGHT_LENON_BOSS: return "KNIGHT LENON - VANGUARD CAPTAIN";
         case EnemyType::ORE_GOLEM: return "ORE GOLEM";
         case EnemyType::ELEMENTAL_GOLEM: return "ELEMENTAL GOLEM (PRIMORDIAL TITAN)";
+        case EnemyType::MINI_ELEMENTAL_GOLEM: return "MINI ELEMENTAL GOLEM";
     }
     return "UNKNOWN";
 }
@@ -279,6 +301,43 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
     if (shatteredTimer > 0.0f) {
         shatteredTimer -= dt;
         particles.SpawnSparks(position, Color{ 190, 120, 245, 140 }, 1, 15.0f);
+    }
+
+    // Weapon Heavy Attack Debuff updates
+    if (bleedTimer > 0.0f) {
+        bleedTimer -= dt;
+        bleedTickTimer -= dt;
+        if (bleedTickTimer <= 0.0f) {
+            bleedTickTimer = 0.5f;
+            health -= 4.0f;
+            particles.SpawnSparks(position, Color{ 230, 30, 40, 220 }, 3, 40.0f);
+            particles.SpawnFloatingText(position, "-4 BLEED", Color{ 255, 60, 60, 220 }, 14.0f);
+            if (health <= 0.0f) {
+                health = 0.0f;
+                state = EnemyState::DEAD;
+                SoundFX::PlayEnemyDeath();
+                return;
+            }
+        }
+    }
+    if (solarBurnTimer > 0.0f) {
+        solarBurnTimer -= dt;
+        solarBurnTickTimer -= dt;
+        if (solarBurnTickTimer <= 0.0f) {
+            solarBurnTickTimer = 0.5f;
+            health -= 5.0f;
+            particles.SpawnSparks(position, Color{ 255, 200, 40, 240 }, 4, 50.0f);
+            particles.SpawnFloatingText(position, "-5 SOLAR BURN", Color{ 255, 210, 40, 240 }, 14.0f);
+            if (health <= 0.0f) {
+                health = 0.0f;
+                state = EnemyState::DEAD;
+                SoundFX::PlayEnemyDeath();
+                return;
+            }
+        }
+    }
+    if (armorFractureTimer > 0.0f) {
+        armorFractureTimer -= dt;
     }
 
     float dx = playerPos.x - position.x;
@@ -412,6 +471,16 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ELEMENTAL_GOLEM) {
+                    // Check minion summoning cooldown (22s cooldown)
+                    summonCooldown -= dt;
+                    if (summonCooldown <= 0.0f) {
+                        summonCooldown = 22.0f;
+                        pendingMinionSummon = true;
+                        particles.SpawnFloatingText(position, "TITAN CALLS EARTH SHARDS!", Color{ 255, 160, 40, 255 }, 24.0f);
+                        particles.SpawnSparks(position, Color{ 240, 140, 40, 255 }, 35, 220.0f);
+                        particles.AddScreenShake(6.0f, 0.25f);
+                    }
+
                     // 4-Phase Elemental Titan Cycle
                     if (bossAttackPhase == 0) {
                         // Quad-Seismic Shockwave (Massive Circle AoE)
@@ -734,6 +803,9 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
 
     // Apply Enemy Defense formula with defense pierce and Melancholic shell shatter
     float activeDef = defense;
+    if (HasArmorFracture()) {
+        activeDef *= 0.80f; // -20% armor from War Mace Armor Fracture!
+    }
     if (IsShattered()) {
         activeDef *= 0.65f; // -35% armor on shattered defense shell!
     }

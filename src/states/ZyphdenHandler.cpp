@@ -851,7 +851,7 @@ void ZyphdenHandler::Update(
 
         for (auto& enemy : enemies) {
 
-            enemy.Update(dt, player.GetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
 
         }
 
@@ -2598,48 +2598,128 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     // Category Tabs: [1] VANGUARD WEAPONS (4) | [2] SACRED RELICS (1)
 
     if (IsKeyPressed(KEY_ONE)) forgeTab = 0;
-
     if (IsKeyPressed(KEY_TWO)) forgeTab = 1;
+    if (IsKeyPressed(KEY_THREE)) forgeTab = 2;
 
-
-
-    Rectangle tab1Rec = { modalX + 32.0f, modalY + 52.0f, 210.0f, 24.0f };
-
-    Rectangle tab2Rec = { modalX + 252.0f, modalY + 52.0f, 200.0f, 24.0f };
+    Rectangle tab1Rec = { modalX + 32.0f, modalY + 52.0f, 190.0f, 24.0f };
+    Rectangle tab2Rec = { modalX + 230.0f, modalY + 52.0f, 175.0f, 24.0f };
+    Rectangle tab3Rec = { modalX + 415.0f, modalY + 52.0f, 185.0f, 24.0f };
 
     bool isT1Hov = CheckCollisionPointRec(mousePos, tab1Rec);
-
     bool isT2Hov = CheckCollisionPointRec(mousePos, tab2Rec);
+    bool isT3Hov = CheckCollisionPointRec(mousePos, tab3Rec);
 
     if (isT1Hov && isMousePressed) { forgeTab = 0; SoundFX::PlayButtonClick(); }
-
     if (isT2Hov && isMousePressed) { forgeTab = 1; SoundFX::PlayButtonClick(); }
-
-
+    if (isT3Hov && isMousePressed) { forgeTab = 2; SoundFX::PlayButtonClick(); }
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
-
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-
-    FontManager::DrawText("[1] VANGUARD WEAPONS (4)", (int)tab1Rec.x + 14, (int)tab1Rec.y + 6, 11, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
-
-
+    FontManager::DrawText("[1] VANGUARD WEAPONS (4)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 6, 11, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
-
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
+    FontManager::DrawText("[2] SACRED RELICS (1)", (int)tab2Rec.x + 12, (int)tab2Rec.y + 6, 11, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
 
-    FontManager::DrawText("[2] SACRED RELICS (1)", (int)tab2Rec.x + 18, (int)tab2Rec.y + 6, 11, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
-
-
+    DrawRectangleRounded(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 40, 56, 82, 255 } : (isT3Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
+    DrawRectangleRoundedLines(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
+    FontManager::DrawText("[3] ARMOR FORGE (6)", (int)tab3Rec.x + 14, (int)tab3Rec.y + 6, 11, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
 
     // Divider Line
-
     DrawLine((int)modalX + 30, (int)modalY + 82, (int)(modalX + modalW - 30), (int)modalY + 82, Color{ 70, 95, 135, 160 });
 
+    if (forgeTab == 2) {
+        // TAB 3: ARMOR FORGE (SCRAP METAL CRAFTING)
+        struct ArmorCraftRecipe {
+            int category; // 0 = Helm, 1 = Chest, 2 = Legs
+            int id;
+            const char* name;
+            const char* slotName;
+            int scrapCost;
+            int shingleCost;
+            const char* stats;
+            const char* setStr;
+            Color accentColor;
+            const char* desc;
+        };
 
+        ArmorCraftRecipe armorRecipes[6] = {
+            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw quarry slag." },
+            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap iron breastplate. Stout physical resilience." },
+            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal shin protectors granting stable footwork." },
+            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic stone crest imbued with primordial earth." },
+            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron bands." },
+            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense volcanic stone greaves that crush gravel with each step." }
+        };
 
-    struct ForgeEntry {
+        for (int i = 0; i < 6; ++i) {
+            int col = i % 2;
+            int row = i / 2;
+            float cardX = modalX + 28.0f + (float)col * 416.0f;
+            float cardY = modalY + 90.0f + (float)row * 150.0f;
+            float cardW = 404.0f;
+            float cardH = 142.0f;
+            Rectangle cardRec = { cardX, cardY, cardW, cardH };
+            bool isHov = CheckCollisionPointRec(mousePos, cardRec);
+
+            bool isOwned = false;
+            if (armorRecipes[i].category == 0) isOwned = player.GetInventory().HasHelmet((HelmetType)armorRecipes[i].id);
+            else if (armorRecipes[i].category == 1) isOwned = player.GetInventory().HasChestplate((ChestplateType)armorRecipes[i].id);
+            else if (armorRecipes[i].category == 2) isOwned = player.GetInventory().HasLeggings((LeggingsType)armorRecipes[i].id);
+
+            bool canAfford = (playerScraps >= armorRecipes[i].scrapCost && playerShingles >= armorRecipes[i].shingleCost);
+
+            DrawRectangleRounded(cardRec, 0.08f, 6, isOwned ? Color{ 22, 28, 40, 240 } : (isHov ? Color{ 26, 32, 48, 230 } : Color{ 18, 22, 34, 210 }));
+            DrawRectangleRoundedLines(cardRec, 0.08f, 6, isOwned ? Color{ 60, 160, 110, 200 } : (isHov ? armorRecipes[i].accentColor : Color{ 55, 75, 105, 180 }));
+
+            // Title & Slot Tag
+            DrawText(armorRecipes[i].name, (int)cardX + 14, (int)cardY + 10, 13, isOwned ? Color{ 120, 245, 180, 255 } : Color{ 255, 235, 140, 255 });
+            std::string slotTag = "[" + std::string(armorRecipes[i].slotName) + "]";
+            DrawText(slotTag.c_str(), (int)(cardX + cardW - 100.0f), (int)cardY + 11, 10, Color{ 140, 165, 195, 220 });
+
+            // Description & Stats
+            DrawText(armorRecipes[i].desc, (int)cardX + 14, (int)cardY + 30, 9, Color{ 175, 195, 220, 220 });
+            DrawText(armorRecipes[i].stats, (int)cardX + 14, (int)cardY + 48, 10, Color{ 100, 245, 180, 255 });
+            DrawText(armorRecipes[i].setStr, (int)cardX + 14, (int)cardY + 64, 9, armorRecipes[i].accentColor);
+
+            // Cost line
+            std::string costStr = "Cost: " + std::to_string(armorRecipes[i].scrapCost) + " Ore Scraps  +  " + std::to_string(armorRecipes[i].shingleCost) + " Shingles";
+            DrawText(costStr.c_str(), (int)cardX + 14, (int)cardY + 84, 10, isOwned ? Color{ 120, 140, 160, 200 } : (canAfford ? Color{ 255, 225, 90, 255 } : Color{ 240, 95, 95, 240 }));
+
+            // Bottom action button
+            Rectangle btnRec = { cardX + 14.0f, cardY + cardH - 34.0f, cardW - 28.0f, 26.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+
+            if (isOwned) {
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
+                DrawText("FORGED & UNLOCKED", (int)btnRec.x + (int)(btnRec.width - MeasureText("FORGED & UNLOCKED", 11)) / 2, (int)btnRec.y + 7, 11, Color{ 110, 245, 170, 240 });
+            } else if (canAfford) {
+                DrawRectangleRounded(btnRec, 0.2f, 4, isBtnHov ? Color{ 60, 95, 150, 255 } : Color{ 34, 52, 85, 240 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, isBtnHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 140, 220, 220 });
+                DrawText("FORGE & EQUIP PIECE", (int)btnRec.x + (int)(btnRec.width - MeasureText("FORGE & EQUIP PIECE", 11)) / 2, (int)btnRec.y + 7, 11, Color{ 255, 235, 130, 255 });
+
+                if (isBtnHov && isMousePressed) {
+                    player.GetInventory().AddOreScraps(-armorRecipes[i].scrapCost);
+                    player.GetInventory().AddShingles(-armorRecipes[i].shingleCost);
+                    if (armorRecipes[i].category == 0) player.SetHelmet((HelmetType)armorRecipes[i].id);
+                    else if (armorRecipes[i].category == 1) player.SetChestplate((ChestplateType)armorRecipes[i].id);
+                    else if (armorRecipes[i].category == 2) player.SetLeggings((LeggingsType)armorRecipes[i].id);
+
+                    SoundFX::PlayParrySuccess();
+                    particles.SpawnSparks(mousePos, Color{ 255, 215, 80, 255 }, 30, 200.0f);
+                    particles.AddScreenShake(4.0f, 0.18f);
+                    particles.SpawnFloatingText(mousePos, "FORGED: " + std::string(armorRecipes[i].name), Color{ 255, 220, 90, 255 }, 22.0f);
+                }
+            } else {
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                DrawText("INSUFFICIENT ORE SCRAPS OR SHINGLES", (int)btnRec.x + (int)(btnRec.width - MeasureText("INSUFFICIENT ORE SCRAPS OR SHINGLES", 10)) / 2, (int)btnRec.y + 7, 10, Color{ 220, 110, 110, 220 });
+            }
+        }
+    } else {
+        struct ForgeEntry {
+
 
         WeaponType type;
 
@@ -3152,6 +3232,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         }
 
     }
+    }
+
 
 
 

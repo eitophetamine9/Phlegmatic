@@ -17,7 +17,8 @@ enum class EnemyType {
     ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
     KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
     ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
-    ELEMENTAL_GOLEM  // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
+    ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
+    MINI_ELEMENTAL_GOLEM // Compact Elemental Golem minion summoned by Titan or player totem
 };
 
 enum class EnemyState {
@@ -46,7 +47,13 @@ public:
     bool CheckHit(const AttackInfo& attack) const;
 
     Vector2 GetPosition() const { return position; }
+    void SetPosition(Vector2 p) { position = p; }
+    void ApplyStagger(float duration) {
+        state = EnemyState::STUNNED;
+        stunDuration = duration;
+    }
     float GetRadius() const { return radius; }
+    float GetFacingAngle() const { return facingAngle; }
     EnemyType GetType() const { return type; }
     EnemyState GetState() const { return state; }
     bool IsAlive() const { return state != EnemyState::DEAD; }
@@ -55,6 +62,16 @@ public:
     float GetDefense() const { return defense; }
     float GetWill() const { return will; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
+    bool NeedsMinionSpawn() const { return pendingMinionSummon; }
+    void ClearMinionSpawn() { pendingMinionSummon = false; }
+
+    // Weapon Heavy Attack debuffs
+    void ApplyBleed(float duration) { bleedTimer = duration; }
+    bool IsBleeding() const { return bleedTimer > 0.0f; }
+    void ApplyArmorFracture(float duration) { armorFractureTimer = duration; }
+    bool HasArmorFracture() const { return armorFractureTimer > 0.0f; }
+    void ApplySolarBurn(float duration) { solarBurnTimer = duration; }
+    bool HasSolarBurn() const { return solarBurnTimer > 0.0f; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM; }
     bool HasMeleeHitbox() const {
@@ -85,6 +102,13 @@ private:
     float quenchedTimer;
     float shatteredTimer;
 
+    // Status effect debuff timers
+    float bleedTimer = 0.0f;
+    float bleedTickTimer = 0.0f;
+    float armorFractureTimer = 0.0f;
+    float solarBurnTimer = 0.0f;
+    float solarBurnTickTimer = 0.0f;
+
     Vector2 position;
     Vector2 velocity;
     float radius;
@@ -111,6 +135,8 @@ private:
     int bossAttackPhase;
     int burstShotsRemaining;
     float burstIntervalTimer;
+    float summonCooldown = 6.0f;
+    bool pendingMinionSummon = false;
 
     TelegraphIndicator telegraph;
 };

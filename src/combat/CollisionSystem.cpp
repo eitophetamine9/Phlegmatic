@@ -9,6 +9,49 @@
 #include <cmath>
 
 void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera, std::vector<LootDrop>* outLootDrops) {
+    // 0. Armor skill pending AoE resolution
+    if (player.pendingArmorSkillAoE) {
+        player.pendingArmorSkillAoE = false;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float dist = Vector2Distance(player.GetPosition(), enemy.GetPosition());
+            if (dist <= player.pendingAoERadius) {
+                Vector2 kDir = Vector2Normalize(Vector2Subtract(enemy.GetPosition(), player.GetPosition()));
+                if (kDir.x == 0.0f && kDir.y == 0.0f) kDir = { 0.0f, -1.0f };
+                if (enemy.TakeDamage(player.pendingAoEDamage, kDir, particles, player.pendingAoEArmorShred)) {
+                    if (outLootDrops) {
+                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    }
+                }
+                if (player.pendingAoEStun > 0.0f) {
+                    enemy.ApplyStagger(player.pendingAoEStun);
+                }
+            }
+        }
+    }
+
+    // Basalt Pillars obstacle & projectile blocking
+    for (const auto& pillar : player.basaltPillars) {
+        if (!pillar.active) continue;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(pillar.position, enemy.GetPosition());
+            float minD = pillar.radius + enemy.GetRadius();
+            if (d < minD && d > 0.01f) {
+                Vector2 pushDir = Vector2Scale(Vector2Subtract(enemy.GetPosition(), pillar.position), 1.0f / d);
+                enemy.SetPosition(Vector2Add(pillar.position, Vector2Scale(pushDir, minD)));
+            }
+        }
+        for (auto& proj : projectiles) {
+            if (proj.IsActive() && !proj.IsFromPlayer()) {
+                if (CheckCollisionCircles(proj.GetPosition(), proj.GetRadius(), pillar.position, pillar.radius)) {
+                    proj.Destroy();
+                    particles.SpawnSparks(proj.GetPosition(), Color{ 160, 150, 140, 255 }, 10, 100.0f);
+                }
+            }
+        }
+    }
+
     // 1. Player melee attack vs enemies
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
@@ -38,13 +81,77 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                 }
 
+                // Weapon Heavy Attack Specific On-Hit Effects
+                float attackDamage = attack.damage;
+                if (attack.type == AttackType::HEAVY) {
+                    if (attack.weapon == WeaponType::DAGGERS) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Shadow Puncture inflicts bleed
+                            enemy.ApplyBleed(2.5f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "BLEED INFLICTED!", Color{ 255, 60, 60, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Backstab Cross-Slash (+40% bonus if enemy is bleeding or hit from rear)
+                            float enemyAngle = enemy.GetFacingAngle();
+                            float diff = fabsf(player.GetFacingAngle() - enemyAngle);
+                            while (diff > 180.0f) diff = 360.0f - diff;
+                            bool isBackstab = (diff < 65.0f);
+                            if (enemy.IsBleeding() || isBackstab) {
+                                attackDamage *= 1.40f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), isBackstab ? "BACKSTAB CRIT! +40%" : "HEMORRHAGE PUNISH! +40%", Color{ 255, 230, 80, 255 }, 22.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 210, 40, 255 }, 20, 180.0f);
+                            }
+                        } else if (player.GetHeavyStage() == 3) {
+                            // Stage 3: Vault Kick (100% poise stagger)
+                            enemy.ApplyStagger(1.2f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "STAGGERED!", Color{ 120, 255, 180, 255 }, 20.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::MACE) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Overhead Skull Crusher inflicts Armor Fracture (-20% def for 4s)
+                            enemy.ApplyArmorFracture(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR FRACTURE! (-20% DEF)", Color{ 255, 160, 40, 255 }, 20.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Seismic Tremor knocks flat / heavy stagger
+                            enemy.ApplyStagger(1.5f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "KNOCKDOWN!", Color{ 255, 120, 30, 255 }, 22.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::SWORD) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Crescent Cleave restores +12 Composure
+                            player.ModifyComposure(12.0f);
+                            particles.SpawnFloatingText(player.GetPosition(), "+12 COMPOSURE", Color{ 120, 220, 255, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Shock Thrust interrupts enemy windup
+                            enemy.ApplyStagger(0.7f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "INTERRUPTED!", Color{ 255, 220, 90, 255 }, 18.0f);
+                        } else if (player.GetHeavyStage() == 3) {
+                            // Stage 3: Radiant Execution (+50% damage bonus if enemy is staggered/vulnerable)
+                            if (enemy.GetState() == EnemyState::STUNNED) {
+                                attackDamage *= 1.50f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), "RADIANT SUNDER! +50%", Color{ 255, 240, 110, 255 }, 24.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 120, 255 }, 25, 220.0f);
+                            }
+                        }
+                    } else if (attack.weapon == WeaponType::TRUTH_SEEKER) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Dawnfire Ring applies Solar Burn
+                            enemy.ApplySolarBurn(3.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR BURN!", Color{ 255, 210, 50, 255 }, 20.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Sacred Judgment Pillar 100% defense pierce
+                            particles.SpawnFloatingText(enemy.GetPosition(), "JUDGMENT! (100% PIERCE)", Color{ 255, 255, 180, 255 }, 24.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 140, 255 }, 25, 220.0f);
+                        }
+                    }
+                }
+
                 Vector2 knockOrigin = (attack.hasShockwave && !enemy.CheckHit(attack)) ? attack.shockwavePos : player.GetPosition();
                 Vector2 knockbackDir = Vector2Normalize({
                     enemy.GetPosition().x - knockOrigin.x,
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                if (enemy.TakeDamage(attack.damage, knockbackDir, particles, attack.defensePierce)) {
+                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, attack.defensePierce)) {
                     if (outLootDrops) {
                         LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
                     }
@@ -230,8 +337,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 }
             }
         } else {
-            // Reflected Player projectile vs Enemies
-            for (auto& enemy : enemies) {
+            // Player projectile vs Enemies (with infinite piercing support)
+            for (size_t eIdx = 0; eIdx < enemies.size(); ++eIdx) {
+                auto& enemy = enemies[eIdx];
                 if (!enemy.IsAlive()) continue;
 
                 float dx = enemy.GetPosition().x - proj.GetPosition().x;
@@ -239,15 +347,89 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 float dist = sqrtf(dx * dx + dy * dy);
 
                 if (dist <= enemy.GetRadius() + proj.GetRadius()) {
-                    Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
-                        if (outLootDrops) {
-                            LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    if (!proj.HasHitEnemy((int)eIdx)) {
+                        proj.RecordHitEnemy((int)eIdx);
+                        Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
+                        if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
+                            if (outLootDrops) {
+                                LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                            }
+                        }
+                        particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
+                        particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
+
+                        if (!proj.IsPiercing()) {
+                            proj.Destroy();
+                            break;
                         }
                     }
-                    particles.SpawnSparks(proj.GetPosition(), Color{ 100, 230, 255, 255 }, 14, 130.0f);
-                    particles.SpawnFloatingText(enemy.GetPosition(), "COUNTER HIT!", Color{ 255, 220, 40, 255 }, 20.0f);
-                    proj.Destroy();
+                }
+            }
+        }
+    }
+
+    // Friendly Mini Elemental Golem Companion combat & movement
+    if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active) {
+        auto& comp = player.GetCompanion();
+        if (comp.attackCooldown > 0.0f) comp.attackCooldown -= dt;
+
+        Enemy* nearestEnemy = nullptr;
+        float nearestDist = 320.0f;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(comp.position, enemy.GetPosition());
+            if (d < nearestDist) {
+                nearestDist = d;
+                nearestEnemy = &enemy;
+            }
+        }
+
+        if (nearestEnemy) {
+            Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
+            Vector2 dir = Vector2Normalize(toEnemy);
+            if (nearestDist > 32.0f) {
+                comp.position = Vector2Add(comp.position, Vector2Scale(dir, 165.0f * dt));
+            } else if (comp.attackCooldown <= 0.0f) {
+                comp.attackCooldown = 1.0f;
+                Vector2 knock = dir;
+                if (nearestEnemy->TakeDamage(comp.damage, knock, particles, 0.15f)) {
+                    if (outLootDrops) LootDrop::SpawnFromEnemy(*nearestEnemy, *outLootDrops);
+                }
+                particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 18, 140.0f);
+                particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -14", Color{ 100, 245, 180, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            }
+        } else {
+            float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
+            if (distToPlayer > 60.0f) {
+                Vector2 toPlayer = Vector2Normalize(Vector2Subtract(player.GetPosition(), comp.position));
+                comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 175.0f * dt));
+            }
+        }
+
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
+            if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 15.0f)) {
+                float effDef = comp.defense;
+                float baseDmg = 18.0f;
+                if (enemy.GetType() == EnemyType::BRUTE) baseDmg = 38.0f;
+                else if (enemy.GetType() == EnemyType::CHARGER) baseDmg = 22.0f;
+                else if (enemy.GetType() == EnemyType::ORE_GOLEM) baseDmg = 26.0f;
+                else if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM) baseDmg = 34.0f;
+                else if (enemy.GetType() == EnemyType::MINI_ELEMENTAL_GOLEM) baseDmg = 18.0f;
+                else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDmg = 45.0f;
+                else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDmg = 34.0f;
+                else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
+                float dmg = baseDmg * (100.0f / (100.0f + effDef));
+                comp.health -= dmg;
+                particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
+                particles.SpawnSparks(comp.position, Color{ 180, 160, 140, 255 }, 12, 120.0f);
+                if (comp.health <= 0.0f) {
+                    comp.active = false;
+                    comp.respawnTimer = 60.0f;
+                    particles.SpawnFloatingText(comp.position, "COMPANION SHATTERED! (60s Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+                    particles.SpawnSparks(comp.position, Color{ 255, 140, 50, 255 }, 35, 200.0f);
+                    SoundFX::PlayHitImpact();
                     break;
                 }
             }

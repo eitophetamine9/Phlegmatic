@@ -35,11 +35,43 @@ public:
     void SetArmor(ArmorType newArmor);
     ArmorType GetArmor() const { return currentArmor; }
 
+    void SetHelmet(HelmetType type);
+    void SetChestplate(ChestplateType type);
+    void SetLeggings(LeggingsType type);
+    HelmetType GetHelmet() const { return equippedHelmet; }
+    ChestplateType GetChestplate() const { return equippedChestplate; }
+    LeggingsType GetLeggings() const { return equippedLeggings; }
+
+    // Friendly Mini Elemental Golem Companion (75% stats of boss minion)
+    struct CompanionGolem {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float health = 105.0f;
+        float maxHealth = 105.0f;
+        float defense = 11.0f;
+        float damage = 14.0f;
+        float radius = 15.0f;
+        float attackCooldown = 0.0f;
+        float respawnTimer = 0.0f;
+        float strikeTimer = 0.0f;
+    } companion;
+
+    const CompanionGolem& GetCompanion() const { return companion; }
+    CompanionGolem& GetCompanion() { return companion; }
+
+    ArmorSet GetActiveArmorSet() const;
+    bool HasFullArmorSet(ArmorSet set) const;
+    void TriggerArmorSkill(ParticleSystem& particles);
+    float GetArmorSkillCooldown() const { return armorSkillCooldown; }
+    float GetArmorSkillMaxCooldown() const { return armorSkillMaxCooldown; }
+    float GetArmorSkillShieldHp() const { return armorSkillShieldHp; }
+
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }
 
     // Position
     Vector2 GetPosition() const { return position; }
+    Vector2 GetTargetPosition() const { return shadowDecoy.active ? shadowDecoy.position : position; }
     void SetPosition(Vector2 pos) { position = pos; }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
@@ -127,12 +159,20 @@ public:
     bool IsBleeding() const { return bleedTimer > 0.0f; }
     float GetBleedTimer() const { return bleedTimer; }
     void ApplyBleed(float duration, ParticleSystem& particles);
+    void CleanseDebuffs(ParticleSystem& particles) {
+        if (bleedTimer > 0.0f) {
+            bleedTimer = 0.0f;
+            particles.SpawnFloatingText(position, "CLEANSED!", Color{ 255, 255, 160, 255 }, 22.0f);
+            particles.SpawnSparks(position, Color{ 255, 240, 140, 255 }, 20, 160.0f);
+        }
+    }
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
     const Inventory& GetInventory() const { return inventory; }
 
     friend class PlayerRenderer;
+    friend class CollisionSystem;
 
 private:
     Vector2 position;
@@ -142,8 +182,41 @@ private:
 
     WeaponType currentWeapon;
     ArmorType currentArmor;
+    HelmetType equippedHelmet;
+    ChestplateType equippedChestplate;
+    LeggingsType equippedLeggings;
     TotemType currentTotem;
     Inventory inventory;
+
+    float armorSkillCooldown;
+    float armorSkillMaxCooldown;
+    float armorSkillActiveTimer;
+    float armorSkillShieldHp;
+    float basaltShellCooldown;
+    float speedBuffTimer;
+    float speedBuffAmount;
+
+    struct ShadowDecoy {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float timer = 0.0f;
+        float duration = 3.5f;
+    } shadowDecoy;
+
+    struct BasaltPillar {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float radius = 24.0f;
+        float timer = 0.0f;
+        float duration = 6.0f;
+    };
+    std::vector<BasaltPillar> basaltPillars;
+
+    bool pendingArmorSkillAoE;
+    float pendingAoEDamage;
+    float pendingAoERadius;
+    float pendingAoEStun;
+    float pendingAoEArmorShred;
 
     // Phlegmatic Composure & Trance State
     float composure;

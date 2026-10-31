@@ -78,7 +78,7 @@ void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
 }
 
 void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player) {
-    const int numSlots = 5;
+    const int numSlots = 6;
     const float slotW = 50.0f;
     const float slotH = 50.0f;
     const float slotSpacing = 8.0f;
@@ -174,6 +174,20 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     potSlot.isActive = false;
     potSlot.stockCount = player.GetInventory().GetHealthPotionCount();
     DrawActionSlot(potSlot);
+
+    // Slot 6: Armor Skill [V]
+    ArmorSet curSet = player.GetActiveArmorSet();
+    ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
+    ActionSlotInfo armorSkillSlot;
+    armorSkillSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
+    armorSkillSlot.actionName = (curSet != ArmorSet::NONE) ? setInfo.skillName.c_str() : "NO SET";
+    armorSkillSlot.keybind = "[V]";
+    armorSkillSlot.currentCooldown = player.GetArmorSkillCooldown();
+    armorSkillSlot.maxCooldown = (curSet != ArmorSet::NONE) ? setInfo.skillCooldown : 30.0f;
+    armorSkillSlot.themeColor = (curSet != ArmorSet::NONE) ? Color{ 255, 215, 80, 255 } : Color{ 110, 125, 145, 160 };
+    armorSkillSlot.isActive = (player.GetArmorSkillShieldHp() > 0.0f);
+    armorSkillSlot.stockCount = -1;
+    DrawActionSlot(armorSkillSlot);
 }
 
 static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& player) {
@@ -244,6 +258,41 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     char willBuf[32];
     snprintf(willBuf, sizeof(willBuf), "WILL: %d", (int)player.GetWill());
     DrawText(willBuf, (int)hudX + 88, (int)hudY + 78, 11, Color{ 255, 205, 110, 240 });
+
+    // Friendly Mini Elemental Golem Companion Status Widget
+    if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM) {
+        const auto& comp = player.GetCompanion();
+        float compW = 260.0f;
+        float compH = 46.0f;
+        float compX = hudX;
+        float compY = hudY - compH - 8.0f;
+
+        DrawRectangleRounded(Rectangle{ compX, compY, compW, compH }, 0.2f, 4, Color{ 14, 20, 28, 225 });
+        DrawRectangleRoundedLines(Rectangle{ compX, compY, compW, compH }, 0.2f, 4, comp.active ? Color{ 100, 245, 180, 220 } : Color{ 255, 120, 80, 200 });
+
+        // Amber/emerald crystal icon
+        DrawCircleV({ compX + 18.0f, compY + 23.0f }, 7.0f, comp.active ? Color{ 100, 245, 180, 255 } : Color{ 220, 80, 60, 255 });
+        DrawCircleLines((int)(compX + 18.0f), (int)(compY + 23.0f), 7.0f, WHITE);
+
+        if (comp.active) {
+            DrawText("MINI GOLEM COMPANION", (int)compX + 32, (int)compY + 8, 10, Color{ 120, 245, 180, 255 });
+            float barW = 120.0f;
+            float barH = 8.0f;
+            float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+            DrawRectangle((int)compX + 32, (int)compY + 24, (int)barW, (int)barH, Color{ 24, 30, 40, 220 });
+            DrawRectangle((int)compX + 32, (int)compY + 24, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
+            DrawRectangleLines((int)compX + 32, (int)compY + 24, (int)barW, (int)barH, Color{ 40, 60, 80, 200 });
+
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%d/%d HP", (int)comp.health, (int)comp.maxHealth);
+            DrawText(buf, (int)compX + 160, (int)compY + 23, 10, Color{ 210, 240, 230, 220 });
+        } else {
+            DrawText("MINI GOLEM (SHATTERED)", (int)compX + 32, (int)compY + 8, 10, Color{ 255, 120, 90, 255 });
+            char buf[48];
+            snprintf(buf, sizeof(buf), "Respawning in %ds...", (int)ceilf(comp.respawnTimer));
+            DrawText(buf, (int)compX + 32, (int)compY + 23, 10, Color{ 255, 200, 140, 240 });
+        }
+    }
 
     // STATUS BADGE PILL
     const float badgeX = hudX + 172.0f;
