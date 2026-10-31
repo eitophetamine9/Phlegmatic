@@ -30,6 +30,7 @@
 
 ## Table of Contents
 
+- [Release Highlights: Version 0.0.1e](#release-highlights-version-001e)
 - [Release Highlights: Version 0.0.1d](#release-highlights-version-001d)
 
 - [Release Highlights: Version 0.0.1c](#release-highlights-version-001c)
@@ -135,6 +136,85 @@
 ---
 
 
+
+## Release Highlights: Version 0.0.1e
+
+A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
+
+* **Modular 3-Piece Armor Architecture & Full Set Bonuses**:
+  * Replaced monolithic armor suits with a modular 3-piece gear system: **Helmet** (HelmetType), **Chestplate** (ChestplateType), and **Leggings** (LeggingsType). Boots, gloves, and rings were intentionally excluded to maintain focused tactical customization.
+  * Composite stat aggregation in Player.cpp dynamically calculates total Defense, Will, Movement Speed, Stamina Regeneration, and Maximum Health based on equipped pieces.
+  * Equipping all 3 matching pieces activates full set bonuses and an active signature skill triggered via the **[V]** key:
+    1. **Commoner's Scrap Set**:
+       * *Passive Bonus*: +15% Stamina Regen Rate, +15% Shingle & Ore drop chance.
+       * *Active Skill*: **Desperate Dust Burst** ([V], 30s Cooldown) â€” Unleashes a 180px dust vortex dealing 15 damage, stunning nearby enemies for 1.5s, and granting +35% movement speed for 4.0s.
+    2. **Crusader Plate Set**:
+       * *Passive Bonus*: +20% Total Defense, +25 Will stat.
+       * *Active Skill*: **Dawnfire Aegis** ([V], 35s Cooldown) â€” Summons a 60 HP holy light barrier for 6s that absorbs all incoming damage and bursts with radiant sparks upon expiration.
+    3. **Vanguard Bastion Set**:
+       * *Passive Bonus*: +40 Max Health, micro-stagger immunity (hyper-armor) during heavy attack windups.
+       * *Active Skill*: **Seismic Quake Slam** ([V], 22s Cooldown) â€” Slams the ground with a 200px shockwave dealing 50 damage, shredding enemy armor by 25% for 4s, and knocking enemies flat (1.8s stun).
+    4. **Shadowstrider Set**:
+       * *Passive Bonus*: +15% Movement Speed, -35% Dash Cooldown, +25% Dash Distance.
+       * *Active Skill*: **Shadow Decoy & Vanish** ([V], 25s Cooldown) â€” Grants 0.5s i-frames, blinks the player forward 70px, and leaves behind an ethereal decoy that draws enemy aggro before detonating for 40 shadow damage.
+    5. **Forged Scrap Iron Set**:
+       * *Passive Bonus*: +18 Flat Defense, +15% Poise Stagger Damage.
+       * *Active Skill*: **Ironclad Spike Wall** ([V], 25s Cooldown) â€” Enters a 6s bristling iron stance with hyper-armor that reflects 40% of incoming melee strike damage back at attackers.
+    6. **Basalt Golem Set**:
+       * *Passive Bonus*: +35 Flat Defense, -10% Movement Speed, *Melancholic Shell* (absorbs 1 heavy strike completely every 20s).
+       * *Active Skill*: **Basalt Spire Wall** ([V], 30s Cooldown) â€” Erects 3 indestructible basalt pillars in front of the player that block all enemy movement and projectiles, dealing 55 earth damage on eruption.
+
+* **Inventory HUD Overhaul & Illuminated Lore Grimoire Preservation**:
+  * **Tab 0 (Equipped Gear)** completely redesigned to match the updated UI layout:
+    * Header EQUIPPED with filigree divider and clickable APPAREL HIDDEN cosmetic toggle pill.
+    * Central hero silhouette paper doll flanked by **Helmet** (top), **Chestplate** (mid-left), and **Leggings** (mid-right).
+    * Section TOTEMS: strictly **only 1 equippable totem at a time** (replaces old accessory slots).
+    * Section WEAPONS: quick-slot weapon cards with equipped highlight.
+    * Active Set Bonus banner at the bottom displaying active 3/3 set name, passives, and [V] skill info.
+    * Interactive slide-out **Selection & Arsenal Drawer** allowing one-click equipment swapping for all unlocked weapons, helmets, chestplates, leggings, and totems.
+  * **Tab 1 (Illuminated Book Lore Journal)**: Completely preserved and protected, maintaining 3D parchment turning animations, golden drop caps, runic seals, and historical chapter entries.
+
+* **Blacksmith Varek Armor Forge Expansion**:
+  * Added Tab 3 [3] ARMOR FORGE (6) to Varek's forge in Zyphden.
+  * Players can forge modular armor pieces using collected Ore Scraps and Silver Shingles:
+    * *Scrap Sallet*: 8 Ore Scraps + 15 Shingles (+6 DEF, +4 Will).
+    * *Scrap Cuirass*: 14 Ore Scraps + 25 Shingles (+12 DEF, -3% SPD).
+    * *Scrap Greaves*: 10 Ore Scraps + 20 Shingles (+7 DEF, +5% Stamina Regen).
+    * *Basalt Greathelm*: 12 Ore Scraps + 25 Shingles (+12 DEF, -4% SPD).
+    * *Basalt Cuirass*: 20 Ore Scraps + 40 Shingles (+22 DEF, -8% SPD).
+    * *Basalt Greaves*: 15 Ore Scraps + 30 Shingles (+14 DEF, -3% SPD).
+
+* **Quarry Arena & Elemental Golem Boss Overhaul**:
+  * Relocated Ore Golem spawners south away from the Primordial Altar arena to eliminate interference during boss encounters.
+  * Elemental Golem is now repeatable/respawnable at the Primordial Altar whenever not currently active on the field.
+  * Altar boss totem drop rate set to **5%** for ELEMENTAL_CORE_TOTEM.
+  * Revamped boss attack cadence: summons up to 3 MINI_ELEMENTAL_GOLEM minions on a 22-second cooldown.
+
+* **Revamped Elemental Core Totem & Friendly Companion Minion**:
+  * Equipping the totem automatically summons a friendly Mini Elemental Golem companion with **75% stats** of the boss's minion (105 HP, 14 DMG, 11 DEF).
+  * Companion follows the player, attacks hostile enemies, and absorbs damage.
+  * If slain, enters a **60-second respawn timer**, tracked in real time via a dedicated HUD Companion Status Widget above the player card.
+  * Light attack projectile upgraded to **infinitely piercing**, damage increased to **54.0**, and cooldown reduced to **3.0s**.
+
+* **Weapon Heavy Attack Combo Revamp & Damage Rebalancing**:
+  * **Dual Daggers** (12.0 light / 58.0 heavy combo):
+    * Stage 1: *Shadow Puncture* (18 dmg, 0.2s iframes, applies 2.5s Bleed debuff).
+    * Stage 2: *Backstab Cross-Slash* (28 dmg, +40% bonus against bleeding or rear-facing targets).
+    * Stage 3: *Vault Kick Disengage* (12 dmg, 100% poise stagger, backward leap impulse).
+  * **War Mace** (24.0 light / 78.0 heavy combo):
+    * Stage 1: *Overhead Skull Crusher* (42 dmg, hyper-armor, inflicts -20% Armor Fracture debuff for 4s).
+    * Stage 2: *Seismic Tremor* (36 dmg, 360Â° circular shockwave, 25% defense pierce, knocks foes flat).
+  * **Crusader Blade** (18.0 light / 88.0 heavy combo):
+    * Stage 1: *Crescent Cleave* (30 dmg, restores +12 player Composure on hit).
+    * Stage 2: *Shock Thrust* (24 dmg, linear thrust box interrupting enemy windups).
+    * Stage 3: *Radiant Execution* (34 dmg, downward holy cleave dealing +50% bonus damage to staggered foes).
+  * **Truth Seeker** (22.0 light / 72.0 heavy combo):
+    * Stage 1: *Dawnfire Ring* (34 dmg, 360Â° sweep applying Solar Burn & firing holy beam).
+    * Stage 2: *Sacred Judgment Pillar* (38 dmg, descending sunray beam with 100% defense pierce that cleanses player debuffs).
+  * **Royal Halberd** (16.0 light / 28.0 heavy combo):
+    * Stage 1: *Long Lunge* (iframes, line box) -> Stage 2: *Sweeping Cleave* (220Â° arc) -> Stage 3: *Flurry* of 3 consecutive rapid stabs (30% weapon damage each).
+
+---
 
 ## Release Highlights: Version 0.0.1d
 

@@ -44,7 +44,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 16, 225 });
 
     const float modalW = 780.0f;
-    const float modalH = 540.0f;
+    const float modalH = 580.0f;
     float modalX = ((float)windowWidth - modalW) * 0.5f;
     float modalY = ((float)windowHeight - modalH) * 0.5f;
 
