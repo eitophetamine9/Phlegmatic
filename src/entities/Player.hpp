@@ -46,10 +46,10 @@ public:
     struct CompanionGolem {
         bool active = false;
         Vector2 position = { 0.0f, 0.0f };
-        float health = 105.0f;
-        float maxHealth = 105.0f;
-        float defense = 11.0f;
-        float damage = 14.0f;
+        float health = 240.0f;     // 75% of mini golem (320 HP)
+        float maxHealth = 240.0f;
+        float defense = 28.0f;     // 75% of mini golem (38 DEF)
+        float damage = 18.0f;
         float radius = 15.0f;
         float attackCooldown = 0.0f;
         float respawnTimer = 0.0f;
@@ -241,6 +241,7 @@ private:
     float counterBuffTimer;
     float potionCooldown;
     float elementalProjectileCooldown;
+    int daggerLightAttackCounter = 0;
 
     // Stagger & Poise State
     float staggerTimer;

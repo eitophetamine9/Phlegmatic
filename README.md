@@ -37,7 +37,7 @@
 | :--- | :--- | :--- |
 | **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid obstacle collision. |
 | **Aiming** | `Mouse Cursor` | Reticle targeting for weapon thrusts, dashes, and parry reflections. |
-| **Light Attack** | `Left Mouse Button` | Swift slash/thrust combo (Daggers 0 stam, Truth Seeker 2-hit combo, Elemental Totem piercing bolt). |
+| **Light Attack** | `Left Mouse Button` | Swift slash/thrust combo (Daggers every 5th strike consumes 14 stamina, Truth Seeker 2-hit combo, Elemental Totem piercing bolt). |
 | **Heavy Signature Combo** | `Right Mouse Button` | Multi-stage weapon combos (Daggers 3-stage, Mace 2-stage, Crusader Blade 3-stage, Truth Seeker 2-stage, Halberd 3-stage). |
 | **Armor Set Special Skill** | `V Key` | Triggers active skill on 3/3 matching armor sets (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
@@ -69,7 +69,7 @@
 >     - **Commoner's Scrap**: *Scrapper's Tenacity* (+15% Stamina Regen, +15% Shingle/Ore drops) | Skill: *Desperate Dust Burst* (30s CD, 180px 1.5s stun AoE, +35% move speed for 4s).
 >     - **Crusader Plate**: *Aegis of the Sun* (+20% Defense, +25 Will) | Skill: *Dawnfire Aegis* (35s CD, 60 HP radiant barrier absorbing all strikes with holy detonation).
 >     - **Vanguard Bastion**: *Unstoppable Juggernaut* (+40 Max HP, hyper-armor micro-stagger immunity during heavy attacks) | Skill: *Seismic Quake Slam* (22s CD, 200px 50 dmg shockwave, -25% armor shred, knocks foes flat).
->     - **Shadowstrider**: *Veil of the Mist* (+15% Move Speed, -35% dash CD, +25% dash distance) | Skill: *Shadow Decoy & Vanish* (25s CD, 0.5s i-frames, leaves illusion decoy drawing enemy aggro, explodes for 40 shadow dmg).
+>     - **Shadowstrider**: *Veil of the Mist* (+25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, & +40% extended Dodge i-frames) | Skill: *Shadow Decoy & Vanish* (25s CD, 0.5s i-frames, leaves illusion decoy drawing enemy aggro, explodes for 40 shadow dmg).
 >     - **Forged Scrap Iron**: *Tempered Slag* (+18 Defense, +15% poise damage) | Skill: *Ironclad Spike Wall* (25s CD, 6s defensive stance reflecting 40% melee damage with hyper-armor).
 >     - **Basalt Golem**: *Primordial Earth Carapace* (+35 Defense, -10% Speed, Melancholic Shell absorbing 1 heavy hit every 20s) | Skill: *Basalt Spire Wall* (30s CD, summons 3 impenetrable basalt pillars blocking enemy movement and projectiles, dealing 55 earth dmg).
 > * **Tactical Equipment HUD Redesign (Image Reference)**:
@@ -85,10 +85,20 @@
 >   - Altar boss totem drop rate set to **25%** for `ELEMENTAL_CORE_TOTEM`.
 >   - Revamped boss attack summoning up to 3 `MINI_ELEMENTAL_GOLEM`s on a 22s cooldown.
 > * **Revamped Elemental Core Totem & Friendly Companion Minion**:
->   - Automatically spawns a friendly Mini Elemental Golem companion with **75% stats** of the boss's minion (105 HP, 14 DMG, 11 DEF).
+>   - Automatically spawns a friendly Mini Elemental Golem companion with **75% stats** of the boss's minion (240 HP, 18 DMG, 28 DEF).
 >   - Companion follows the player, attacks hostile enemies, and absorbs damage.
 >   - If shattered, companion enters a **60-second respawn timer**, tracked in real time via a dedicated HUD Companion Status Widget above the player card.
 >   - Light attack projectile upgraded to **infinitely piercing**, damage increased to **54.0**, and cooldown reduced to **3.0s**.
+> * **Save File Modular Armor & Totem Persistence**:
+>   - Crafted and unlocked modular armor pieces (`equippedHelmet`, `equippedChestplate`, `equippedLeggings`, `unlockedHelmets`, `unlockedChestplates`, `unlockedLeggings`, `unlockedTotems`) are now fully serialized into save slots (`save_slot_*.json`) and restored upon loading, preventing crafted gear loss.
+> * **Ore Golem Leash & Return AI**:
+>   - Relocated Ore Golem spawners into open quarry clearings away from colliders. Golems pursue targets within 320px and automatically de-aggro and walk back to their patrol spawn when lured beyond 420px.
+> * **NPC Dialogue Game Pause**:
+>   - Conversing with NPCs or inspecting monoliths now safely pauses player physics, enemy AI, projectiles, and combat collisions, granting complete immunity from damage during dialogue.
+> * **Responsive UI & Text Enlargement**:
+>   - Dynamically scales font sizes and bounding containers across both windowed (1280x720) and fullscreen (1080p+) resolutions, ensuring text never overflows or clips dialogue boxes, banners, or inventory panels.
+> * **Boss Minion Summon Fix & Mini Golem Tankiness**:
+>   - Elemental Golem boss now summons Mini Elemental Golems on an active 22s cooldown and immediately upon awakening. Mini Golems are buffed to 320 HP and 38 DEF to avoid being 1-shot and perform a telegraphed long-range Elemental Bolt snipe every 7 seconds.
 > * **Weapon Heavy Attack Combo Revamp & Damage Rebalancing**:
 >   - **Dual Daggers** (12.0 light / 58.0 heavy): 3-stage combo — *Shadow Puncture* (18 dmg, 0.2s iframes, applies 2.5s Bleed) -> *Backstab Cross-Slash* (28 dmg, +40% bonus against bleeding/rear targets) -> *Vault Kick* (12 dmg, 100% poise stagger, backward leap impulse).
 >   - **War Mace** (24.0 light / 78.0 heavy): 2-stage combo — *Overhead Skull Crusher* (42 dmg, hyper-armor, inflicts -20% Armor Fracture debuff for 4s) -> *Seismic Tremor* (36 dmg, 360° circular shockwave, 25% defense pierce, knocks foes flat).

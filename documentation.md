@@ -196,6 +196,30 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * If slain, enters a **60-second respawn timer**, tracked in real time via a dedicated HUD Companion Status Widget above the player card.
   * Light attack projectile upgraded to **infinitely piercing**, damage increased to **54.0**, and cooldown reduced to **3.0s**.
 
+* **Save File Modular Armor & Totem Persistence Architecture**:
+  * Added `equippedHelmet`, `equippedChestplate`, `equippedLeggings`, `unlockedHelmets[7]`, `unlockedChestplates[7]`, `unlockedLeggings[7]`, and `unlockedTotems[6]` serialization to `SaveManager.hpp` / `SaveManager.cpp`.
+  * `Game::SaveActiveGame` and `Game::LoadActiveGame` now serialize all crafted modular pieces and accurately restore both the unlocked wardrobe and equipped piece configurations, fixing crafted gear loss on save reload.
+
+* **Ore Golem Patrol, Leash & Return AI**:
+  * Added `spawnPoint` tracking to `Enemy.hpp`.
+  * Ore Golems chase the player when within 320px, but if the player retreats or lures the golem beyond a 420px leash radius, the golem disengages, de-aggros, and walks back to its spawn anchor.
+  * Relocated 4 Ore Golem spawners in `QuarryHandler.cpp` to open clearings `{680, 850}`, `{1280, 850}`, `{680, 1150}`, `{1280, 1150}` away from boulders and map bounds.
+
+* **NPC Dialogue Complete Combat Pause**:
+  * During NPC dialogue or monolith inspection in `ZyphdenHandler.cpp` and `RuinedCastleHandler.cpp`, player physics, enemy AI updates, hostile projectiles, and `CollisionSystem::CheckCombatCollisions` are safely suspended, granting complete immunity from damage during conversation.
+
+* **Responsive UI Scaling & Font Layout Engine**:
+  * `FontManager` dynamically scales text metrics relative to viewport resolution (`resFactor = screenH / 720.0f`), guaranteeing sharp, legible text in both windowed and native 1080p+ fullscreen modes.
+  * Dialogue boxes, boss banners, and the Equipment & Grimoire modal adapt their width, height, and text wrap bounds responsively to eliminate any text overflow or container clipping.
+
+* **Boss Minion Summon Fix & Mini Elemental Golem 7s Snipe**:
+  * Elemental Golem's minion summoning cooldown (`summonCooldown -= dt;`) now runs unconditionally every frame at the top of `Enemy::Update`, with an immediate summon wave upon boss awakening.
+  * Mini Elemental Golems are scaled with high resilience (**320 HP, 38 DEF, 55 Will**) to prevent 1-shot kills, and execute a telegraphed piercing Elemental Bolt long-range projectile snipe every 7 seconds.
+  * Companion golem from Elemental Core Totem is re-scaled to 75% of mini golem stats (**240 HP, 18 DMG, 28 DEF**).
+
+* **Dual Daggers 5-Hit Stamina Balance**:
+  * Dual Daggers now track a rapid combo counter in `Player.hpp`. Every 5th consecutive light attack consumes 14 stamina, adding tactical resource management while preserving light attack fluidity.
+
 * **Weapon Heavy Attack Combo Revamp & Damage Rebalancing**:
   * **Dual Daggers** (12.0 light / 58.0 heavy combo):
     * Stage 1: *Shadow Puncture* (18 dmg, 0.2s iframes, applies 2.5s Bleed debuff).

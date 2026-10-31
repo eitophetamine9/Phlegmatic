@@ -871,23 +871,23 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
 }
 
 void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {
-    float bannerW = 920.0f;
-    float bannerH = 104.0f;
+    float bannerW = std::min(1140.0f, (float)windowWidth - 64.0f);
+    float bannerH = 116.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
-    float bannerY = (float)windowHeight - bannerH - 40.0f;
+    float bannerY = (float)windowHeight - bannerH - 36.0f;
 
     DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.16f, 6, Color{ 12, 15, 22, 240 });
     DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.16f, 6, accentColor);
     DrawRectangleRoundedLines(Rectangle{ bannerX + 3.0f, bannerY + 3.0f, bannerW - 6.0f, bannerH - 6.0f }, 0.14f, 6, Color{ 45, 60, 85, 180 });
 
     // Speaker Name
-    int speakerSize = FontManager::GetScaledSize(14);
-    FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 24, (int)bannerY + 12, speakerSize, accentColor);
+    int speakerSize = FontManager::GetScaledSize(16);
+    FontManager::DrawTextTitleShadow(speaker, (int)bannerX + 26, (int)bannerY + 14, speakerSize, accentColor);
 
     // Text Quote (Word wrapped so it never overflows)
-    int quoteSize = FontManager::GetScaledSize(15);
-    int lineSpacing = FontManager::GetScaledSize(5);
-    FontManager::DrawTextWrappedShadow(text, (int)bannerX + 24, (int)bannerY + 36, (int)bannerW - 48, quoteSize, lineSpacing, Color{ 240, 244, 255, 250 });
+    int quoteSize = FontManager::GetScaledSize(17);
+    int lineSpacing = FontManager::GetScaledSize(6);
+    FontManager::DrawTextWrappedShadow(text, (int)bannerX + 26, (int)bannerY + 40, (int)bannerW - 52, quoteSize, lineSpacing, Color{ 240, 244, 255, 250 });
 }
 
 bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const std::string& speaker, const std::vector<std::string>& pages, int& currentPage, Color accentColor) {
@@ -902,11 +902,11 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
         return false;
     }
 
-    // Modal dimensions (Spacious container to prevent any text clipping)
-    const float boxW = 960.0f;
-    const float boxH = 225.0f;
+    // Responsive modal dimensions: adapts to windowed and fullscreen without clipping
+    const float boxW = std::min(1160.0f, (float)windowWidth - 64.0f);
+    const float boxH = std::min(252.0f, (float)windowHeight * 0.36f);
     const float boxX = ((float)windowWidth - boxW) * 0.5f;
-    const float boxY = (float)windowHeight - boxH - 24.0f;
+    const float boxY = (float)windowHeight - boxH - 22.0f;
 
     // Dark backdrop card with accent border
     DrawRectangleRounded(Rectangle{ boxX, boxY, boxW, boxH }, 0.14f, 6, Color{ 14, 18, 28, 245 });
@@ -914,25 +914,25 @@ bool HUD::DrawNPCDialogueBox(int windowWidth, int windowHeight, Vector2 mousePos
     DrawRectangleRoundedLines(Rectangle{ boxX + 3.0f, boxY + 3.0f, boxW - 6.0f, boxH - 6.0f }, 0.12f, 6, Color{ 45, 60, 85, 180 });
 
     // Speaker Name Header (Golden/Accent) with drop shadow
-    int titleSize = FontManager::GetScaledSize(18);
+    int titleSize = FontManager::GetScaledSize(20);
     FontManager::DrawTextTitleShadow(speaker, (int)boxX + 28, (int)boxY + 16, titleSize, accentColor);
 
     // Page indicator top-right
     char pageBuf[32];
     snprintf(pageBuf, sizeof(pageBuf), "Page %d / %d", currentPage + 1, (int)pages.size());
-    int pageIndSize = FontManager::GetScaledSize(12);
-    FontManager::DrawGameTextShadow(pageBuf, (int)(boxX + boxW - 130.0f), (int)boxY + 18, pageIndSize, Color{ 170, 190, 220, 230 });
+    int pageIndSize = FontManager::GetScaledSize(13);
+    FontManager::DrawGameTextShadow(pageBuf, (int)(boxX + boxW - 140.0f), (int)boxY + 18, pageIndSize, Color{ 170, 190, 220, 230 });
 
     // Word-wrapped text rendering with authentic medieval typography & drop shadow
     const std::string& text = pages[currentPage];
     const float maxLineWidth = boxW - 56.0f;
-    int proseSize = FontManager::GetScaledSize(16);
-    int lineSpacing = FontManager::GetScaledSize(6);
-    FontManager::DrawTextWrappedShadow(text, (int)boxX + 28, (int)boxY + 46, (int)maxLineWidth, proseSize, lineSpacing, Color{ 235, 240, 252, 250 });
+    int proseSize = FontManager::GetScaledSize(17);
+    int lineSpacing = FontManager::GetScaledSize(7);
+    FontManager::DrawTextWrappedShadow(text, (int)boxX + 28, (int)boxY + 48, (int)maxLineWidth, proseSize, lineSpacing, Color{ 235, 240, 252, 250 });
 
     // Navigation Buttons at Bottom
-    const float btnY = boxY + boxH - 40.0f;
-    const float btnH = 26.0f;
+    const float btnY = boxY + boxH - 44.0f;
+    const float btnH = 30.0f;
 
     // 1. [ < PREV (A) ] Button
     bool hasPrev = (currentPage > 0);

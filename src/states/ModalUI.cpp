@@ -246,9 +246,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
 
-    float modalW = 1080.0f;
+    float modalW = std::min(1220.0f, (float)windowWidth - 50.0f);
 
-    float modalH = 640.0f;
+    float modalH = std::min(690.0f, (float)windowHeight - 34.0f);
 
     float modalX = ((float)windowWidth - modalW) * 0.5f;
 
@@ -444,8 +444,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         static bool s_apparelHidden = false;
 
         float leftX = modalX + 24.0f;
-        float leftW = 460.0f;
-        float leftH = 500.0f;
+        float leftW = (modalW - 64.0f) * 0.46f;
+        float leftH = modalH - 142.0f;
 
         // Container backdrop for Left Column
         DrawRectangleRounded(Rectangle{ leftX, contentY - 8.0f, leftW, leftH }, 0.04f, 6, Color{ 14, 18, 26, 230 });
@@ -606,9 +606,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // =========================================================================
         // RIGHT COLUMN: SELECTION & ARSENAL DRAWER (SLIDE-OUT INSPECTOR)
         // =========================================================================
-        float rightX = modalX + 504.0f;
-        float rightW = 548.0f;
-        float rightH = 500.0f;
+        float rightX = leftX + leftW + 16.0f;
+        float rightW = modalW - 48.0f - leftW - 16.0f;
+        float rightH = leftH;
 
         DrawRectangleRounded(Rectangle{ rightX, contentY - 8.0f, rightW, rightH }, 0.04f, 6, Color{ 14, 18, 26, 230 });
         DrawRectangleRoundedLines(Rectangle{ rightX, contentY - 8.0f, rightW, rightH }, 0.04f, 6, Color{ 45, 60, 85, 200 });

@@ -6,6 +6,8 @@
 #include <cmath>
 
 Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) {
+    spawnPoint = startPos;
+    miniGolemRangedTimer = 7.0f;
     velocity = { 0.0f, 0.0f };
     state = EnemyState::IDLE_CHASE;
     stateTimer = 0.0f;
@@ -209,18 +211,19 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.radius = 190.0f;
             telegraph.warningColor = Color{ 240, 160, 40, 200 };
             bossAttackPhase = 0;
-            summonCooldown = 6.0f;
+            summonCooldown = 2.0f;
             pendingMinionSummon = false;
             isPerformingMeleeSmite = true;
             break;
 
         case EnemyType::MINI_ELEMENTAL_GOLEM:
             humor = HumorType::MELANCHOLIC;
-            radius = 16.0f;
-            maxHealth = 140.0f;
-            defense = 15.0f;
-            will = 35.0f;
-            moveSpeed = 160.0f;
+            radius = 18.0f;
+            maxHealth = 320.0f; // Tanky chassis: avoids getting 1-shot
+            defense = 38.0f;    // Rocky armor plating
+            will = 55.0f;       // Solid poise
+            moveSpeed = 155.0f;
+            miniGolemRangedTimer = 7.0f;
             attackRange = 36.0f;
             kitingRange = 0.0f;
             windupDuration = 0.50f;
@@ -292,6 +295,18 @@ void Enemy::ShatterShell(ParticleSystem& particles) {
 
 void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSystem& particles, std::vector<Projectile>& outProjectiles) {
     if (state == EnemyState::DEAD) return;
+
+    // Boss Minion Summoning cooldown countdown (runs unconditionally every frame)
+    if (type == EnemyType::ELEMENTAL_GOLEM) {
+        summonCooldown -= dt;
+        if (summonCooldown <= 0.0f) {
+            summonCooldown = 22.0f;
+            pendingMinionSummon = true;
+            particles.SpawnFloatingText(position, "TITAN CALLS EARTH SHARDS!", Color{ 255, 160, 40, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 240, 140, 40, 255 }, 35, 220.0f);
+            particles.AddScreenShake(6.0f, 0.25f);
+        }
+    }
 
     // Humoral status effect timers
     if (quenchedTimer > 0.0f) {
@@ -471,16 +486,6 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ELEMENTAL_GOLEM) {
-                    // Check minion summoning cooldown (22s cooldown)
-                    summonCooldown -= dt;
-                    if (summonCooldown <= 0.0f) {
-                        summonCooldown = 22.0f;
-                        pendingMinionSummon = true;
-                        particles.SpawnFloatingText(position, "TITAN CALLS EARTH SHARDS!", Color{ 255, 160, 40, 255 }, 24.0f);
-                        particles.SpawnSparks(position, Color{ 240, 140, 40, 255 }, 35, 220.0f);
-                        particles.AddScreenShake(6.0f, 0.25f);
-                    }
-
                     // 4-Phase Elemental Titan Cycle
                     if (bossAttackPhase == 0) {
                         // Quad-Seismic Shockwave (Massive Circle AoE)
@@ -520,15 +525,48 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     }
                 }
             } else {
-                if (type == EnemyType::ORE_GOLEM && distToPlayer > 450.0f) {
-                    // Ore Golems remain sentinel in their quarry plateau until player enters ~450px
-                    velocity = { 0.0f, 0.0f };
+                if (type == EnemyType::ORE_GOLEM) {
+                    float distFromSpawn = Vector2Distance(position, spawnPoint);
+                    if (distToPlayer <= 320.0f && distFromSpawn <= 420.0f) {
+                        // Aggroed! Move towards player
+                        Vector2 moveDir = Vector2Normalize({ dx, dy });
+                        float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
+                        velocity.x = moveDir.x * currentSpeed;
+                        velocity.y = moveDir.y * currentSpeed;
+                    } else {
+                        // Leashed / De-aggroed: return towards spawnPoint!
+                        if (distFromSpawn > 20.0f) {
+                            Vector2 toSpawn = Vector2Normalize({ spawnPoint.x - position.x, spawnPoint.y - position.y });
+                            velocity.x = toSpawn.x * (moveSpeed * 0.75f);
+                            velocity.y = toSpawn.y * (moveSpeed * 0.75f);
+                            facingAngle = atan2f(toSpawn.y, toSpawn.x) * RAD2DEG;
+                        } else {
+                            velocity = { 0.0f, 0.0f };
+                        }
+                    }
                 } else {
                     // Approach player
                     Vector2 moveDir = Vector2Normalize({ dx, dy });
                     float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
                     velocity.x = moveDir.x * currentSpeed;
                     velocity.y = moveDir.y * currentSpeed;
+                }
+            }
+
+            // Mini Elemental Golem 7-second Long Range Attack check
+            if (type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+                miniGolemRangedTimer -= dt;
+                if (miniGolemRangedTimer <= 0.0f && distToPlayer <= 550.0f) {
+                    miniGolemRangedTimer = 7.0f; // Reset 7-second cooldown
+                    state = EnemyState::TELEGRAPH_WINDUP;
+                    windupDuration = 0.65f;
+                    stateTimer = windupDuration;
+                    telegraph.shape = TelegraphShape::LINE;
+                    telegraph.radius = 380.0f;
+                    telegraph.width = 26.0f;
+                    telegraph.warningColor = Color{ 255, 140, 50, 200 };
+                    isPerformingMeleeSmite = false; // Projectile attack
+                    velocity = { 0.0f, 0.0f };
                 }
             }
             break;
@@ -729,6 +767,22 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
 
                     // Cycle boss attack phase across 4 elemental phases
                     bossAttackPhase = (bossAttackPhase + 1) % 4;
+                } else if (type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+                    if (!isPerformingMeleeSmite) {
+                        // 7-second Long-range Elemental Bolt projectile
+                        float rad = facingAngle * DEG2RAD;
+                        Vector2 dir = { cosf(rad), sinf(rad) };
+                        Vector2 spawnPos = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
+                        Vector2 projVel = { dir.x * 420.0f, dir.y * 420.0f };
+                        outProjectiles.emplace_back(spawnPos, projVel, 8.0f, 20.0f, ProjectileType::ELEMENTAL_BOLT, false);
+                        SoundFX::PlayProjectileShoot();
+                        particles.SpawnSparks(spawnPos, Color{ 255, 140, 40, 255 }, 14, 120.0f);
+                        particles.AddScreenShake(3.0f, 0.10f);
+                    } else {
+                        // Close-range melee swing
+                        particles.SpawnSparks(position, Color{ 240, 150, 50, 255 }, 12, 110.0f);
+                        SoundFX::PlayLightAttack();
+                    }
                 }
             }
             break;

@@ -20,12 +20,14 @@ FontScaleMode FontManager::GetScaleMode() {
 }
 
 float FontManager::GetScaleFactor() {
+    float screenH = (float)GetScreenHeight();
+    float resFactor = (screenH > 720.0f) ? (screenH / 720.0f) : 1.0f;
     switch (currentScaleMode) {
-        case FontScaleMode::LARGE: return 1.25f;
-        case FontScaleMode::EXTRA_LARGE: return 1.50f;
+        case FontScaleMode::EXTRA_LARGE: return 1.50f * resFactor;
+        case FontScaleMode::LARGE: return 1.30f * resFactor;
         case FontScaleMode::STANDARD:
         default:
-            return 1.00f;
+            return 1.15f * resFactor; // Enlarge baseline font scaling for clear readability
     }
 }
 

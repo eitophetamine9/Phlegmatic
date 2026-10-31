@@ -299,7 +299,48 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
   - Royal Halberd (16 light / 28 heavy): 3-stage combo (Long Lunge with iframes, Sweeping Cleave 220Â° arc, rapid 3-stab flurry).
 
 ================================================================================
-7. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
+7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
+================================================================================
+1. Save File Modular Armor & Totem Persistence:
+   - Fixed crafted modular armor and totem loss on save file reload.
+   - Serialized `equippedHelmet`, `equippedChestplate`, `equippedLeggings`, `unlockedHelmets[7]`,
+     `unlockedChestplates[7]`, `unlockedLeggings[7]`, and `unlockedTotems[6]` into JSON save files.
+   - Restored both the unlocked wardrobe vector and equipped pieces upon loading active saves.
+
+2. Ore Golem Leash & De-Aggro Return AI:
+   - Added `spawnPoint` anchor to `Enemy.hpp`.
+   - Ore Golems engage and pursue players within 320px, but if the player retreats or lures the
+     golem beyond 420px from its spawn anchor, the golem de-aggros and walks back to its spawn.
+   - Relocated 4 Ore Golem spawners in `QuarryHandler.cpp` to open clearings far from boulders.
+
+3. NPC Dialogue Complete Game Pause:
+   - When conversing with NPCs or reading monoliths in Zyphden or Ruined Castle, player physics,
+     enemy AI, hostile projectiles, and collision damage checks are safely suspended, preventing
+     any damage to the player during dialogue.
+
+4. Responsive UI & Text Scaling Engine:
+   - `FontManager` dynamically scales text metrics relative to screen resolution (`resFactor = screenH / 720.0f`),
+     ensuring crisp readability in both 1280x720 windowed and 1080p+ native fullscreen modes.
+   - Dialogue boxes, banners, objective cards, and inventory modals scale responsively so text never
+     clips or overflows bounding boxes.
+
+5. Shadowstrider Armor Set Mobility & Dodge Buff:
+   - Buffed passive bonuses: +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost.
+   - Extended Dodge i-frame invulnerability window from 0.25s to 0.35s (+40% extra dodge safety).
+
+6. Dual Daggers 5th Strike Stamina Exertion:
+   - Added `daggerLightAttackCounter` to `Player.hpp`.
+   - Every 5th consecutive light attack consumes 14 stamina, adding balanced resource management to rapid flurries.
+
+7. Elemental Golem Boss Minion Spawn Cooldown Fix & Mini Golem Tankiness:
+   - Fixed minion summoning cooldown (`summonCooldown -= dt;`) to count down unconditionally every frame
+     at the top of `Enemy::Update`. Boss immediately summons 2 mini golems upon awakening.
+   - Mini Elemental Golems buffed to 320 HP, 38 DEF, and 55 Will to avoid being 1-shot, and fire a
+     telegraphed piercing Elemental Bolt projectile snipe every 7 seconds.
+   - Friendly companion golem from Elemental Core Totem scaled to 75% of mini golem stats (240 HP, 28 DEF).
+
+================================================================================
+8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
 ================================================================================
 1. Zero Emojis Constraint:
    - Never use emojis anywhere in the codebase, comments, git commit messages, documentation, or logs.

@@ -847,37 +847,25 @@ void ZyphdenHandler::Update(
 
 
 
-    if (!inTavern && !inForge && !inRoyalKeep) {
-
-        for (auto& enemy : enemies) {
-
-            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
-
+    // When NPC dialogue is open, pause enemy AI, projectiles, and collisions so player is completely safe!
+    if (!isDialogueOpen) {
+        if (!inTavern && !inForge && !inRoyalKeep) {
+            for (auto& enemy : enemies) {
+                enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+            }
         }
 
-    }
-
-
-
-    for (auto& proj : projectiles) {
-
-        if (proj.IsActive()) {
-
-            proj.Update(dt, map, particles);
-
+        for (auto& proj : projectiles) {
+            if (proj.IsActive()) {
+                proj.Update(dt, map, particles);
+            }
         }
+        projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const Projectile& p) {
+            return !p.IsActive();
+        }), projectiles.end());
 
+        CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
     }
-
-    projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const Projectile& p) {
-
-        return !p.IsActive();
-
-    }), projectiles.end());
-
-
-
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
 
 
 
