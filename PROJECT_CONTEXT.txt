@@ -301,6 +301,46 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
+8. Restless Mist Forest Realm & Gale Archer Boss:
+   - Added western realm `GameState::RESTLESS_MIST_FOREST` (`MapEnvironment::RESTLESS_MIST_FOREST`).
+   - Populated with 5 respawning spawners for Gale Bandits (22s cooldown).
+   - Drop Table Rules: Gale Bandits drop Silver Shingles and Essence of Mist (35% drop rate; strictly NO Ore Scraps).
+   - Ancient Altar of Whispers at { 1130.0f, 650.0f }: player offers 2x Essence of Mist to summon The Gale Archer Boss.
+   - Gale Archer Boss executes a 3-phase combat cadence (Triple Windshot, Gale Piercer Beam, Storm Rain Barrage).
+   - Gale Archer drops guaranteed Shadow Essence (1-2x), Silver Shingles, and rolls for Totem of Mist at an exact 15% drop rate (strictly NO Ore Scraps).
+
+9. Shadowstrider Armor Set Crafting at Varek's Forge:
+   - Added Tab 3 Blacksmith Varek recipes for Shadowstrider Cowl (2 Mist Ess. + 1 Shadow Ess. + 30 Shingles),
+     Doublet (4 Mist Ess. + 2 Shadow Ess. + 50 Shingles), and Tights (3 Mist Ess. + 1 Shadow Ess. + 40 Shingles).
+   - Set bonus Veil of the Mist grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost,
+     +40% extended Dodge i-frames, and active signature skill Shadow Decoy & Vanish ([V] key, 25s CD, 0.5s i-frames,
+     exploding decoy for 40 shadow dmg).
+
+10. Royal Combat Arena 20-Wave Expansion & Synergies:
+   - Expanded WaveManager from 5 to 20 escalating humoral challenge waves.
+   - Boss milestones every 5 waves:
+     - Wave 5: The Grand Inquisitor + Pyromancers + Brute
+     - Wave 10: Zil's Remnant (Truth Seeker duel) + Chargers + Archers
+     - Wave 15: The Gale Archer + Gale Bandits + Chargers
+     - Wave 20: The Primordial Elemental Golem Titan + Mini Golems + Pyromancers
+
+11. Title Screen Arena Removal & Knight Lenon Campaign Gating:
+   - Removed direct [3] COMBAT ARENA button from title menu.
+   - Accessible only in campaign by defeating Knight Lenon in Zyphden Courtyard spar ([R] ENTER ARENA prompt).
+   - Complete inventory, weapons, modular armors, totems, and materials are preserved into the arena.
+
+12. Arena Sanctuary Teleport Portal & Return to Zyphden:
+   - Active Exit Sanctuary Portal rendered at { 1200.0f, 520.0f } with glowing runic circles.
+   - Pressing [E] or [T] at the portal or pressing [T] at any time safely teleports player back to Knight Lenon in Zyphden.
+
+13. Tactical Equipment Screen Redesign & Text Word-Wrapping:
+   - Redesigned 1560x860 modal matching user reference layout:
+     - Left side: Loadout diamonds [ I ] [ II ] [ III ], framed slots for Armor, Weapons, Totem, and Materials Bar.
+     - Right side: Hero Doll (scale 1.75x) on glowing runic dais + live aggregate stats strip.
+   - Integrated FontManager::DrawTextWrapped on all drawer item cards and set bonuses to eliminate horizontal text clipping.
+
+14. Save File Expansion:
+   - Serialized essenceOfMist, shadowEssence, galeArcherDefeated, and arenaHighestWave in SaveManager.
 1. Save File Modular Armor & Totem Persistence:
    - Fixed crafted modular armor and totem loss on save file reload.
    - Serialized `equippedHelmet`, `equippedChestplate`, `equippedLeggings`, `unlockedHelmets[7]`,
