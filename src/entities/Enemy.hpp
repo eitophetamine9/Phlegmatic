@@ -109,6 +109,7 @@ private:
     float solarBurnTimer = 0.0f;
     float solarBurnTickTimer = 0.0f;
 
+    Vector2 spawnPoint;
     Vector2 position;
     Vector2 velocity;
     float radius;
@@ -135,7 +136,8 @@ private:
     int bossAttackPhase;
     int burstShotsRemaining;
     float burstIntervalTimer;
-    float summonCooldown = 6.0f;
+    float summonCooldown = 2.0f;
+    float miniGolemRangedTimer = 7.0f;
     bool pendingMinionSummon = false;
 
     TelegraphIndicator telegraph;

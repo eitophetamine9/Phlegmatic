@@ -107,6 +107,12 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.equippedWeapon = ExtractIntValue(line);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
             outSummary.equippedArmor = ExtractIntValue(line);
+        } else if (line.find("\"equippedHelmet\"") != std::string::npos) {
+            outSummary.equippedHelmet = ExtractIntValue(line);
+        } else if (line.find("\"equippedChestplate\"") != std::string::npos) {
+            outSummary.equippedChestplate = ExtractIntValue(line);
+        } else if (line.find("\"equippedLeggings\"") != std::string::npos) {
+            outSummary.equippedLeggings = ExtractIntValue(line);
         } else if (line.find("\"equippedTotem\"") != std::string::npos) {
             outSummary.equippedTotem = ExtractIntValue(line);
         } else if (line.find("\"playtimeSeconds\"") != std::string::npos) {
@@ -167,6 +173,12 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.equippedWeapon = ExtractIntValue(line);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
             outData.equippedArmor = ExtractIntValue(line);
+        } else if (line.find("\"equippedHelmet\"") != std::string::npos) {
+            outData.equippedHelmet = ExtractIntValue(line);
+        } else if (line.find("\"equippedChestplate\"") != std::string::npos) {
+            outData.equippedChestplate = ExtractIntValue(line);
+        } else if (line.find("\"equippedLeggings\"") != std::string::npos) {
+            outData.equippedLeggings = ExtractIntValue(line);
         } else if (line.find("\"equippedTotem\"") != std::string::npos) {
             outData.equippedTotem = ExtractIntValue(line);
         } else if (line.find("\"bossZilDefeated\"") != std::string::npos) {
@@ -258,6 +270,9 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"oreScraps\": " << data.oreScraps << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";
+    file << "  \"equippedHelmet\": " << data.equippedHelmet << ",\n";
+    file << "  \"equippedChestplate\": " << data.equippedChestplate << ",\n";
+    file << "  \"equippedLeggings\": " << data.equippedLeggings << ",\n";
     file << "  \"equippedTotem\": " << data.equippedTotem << ",\n";
 
     // Weapon upgrades
@@ -271,6 +286,34 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"unlockedWeapons\": [";
     for (int i = 0; i < 6; ++i) {
         file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 5 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Unlocked modular helmets
+    file << "  \"unlockedHelmets\": [";
+    for (int i = 0; i < 7; ++i) {
+        file << (data.unlockedHelmets[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Unlocked modular chestplates
+    file << "  \"unlockedChestplates\": [";
+    for (int i = 0; i < 7; ++i) {
+        file << (data.unlockedChestplates[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Unlocked modular leggings
+    file << "  \"unlockedLeggings\": [";
+    for (int i = 0; i < 7; ++i) {
+        file << (data.unlockedLeggings[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Unlocked totems
+    file << "  \"unlockedTotems\": [";
+    for (int i = 0; i < 6; ++i) {
+        file << (data.unlockedTotems[i] ? "true" : "false") << (i < 5 ? ", " : "");
     }
     file << "],\n";
 

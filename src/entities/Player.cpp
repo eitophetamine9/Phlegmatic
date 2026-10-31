@@ -274,8 +274,8 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
 
 
 void Player::SetWeapon(WeaponType newWeapon) {
-
     currentWeapon = newWeapon;
+    daggerLightAttackCounter = 0;
 
     inventory.UnlockWeapon(newWeapon);
 
@@ -536,7 +536,7 @@ float Player::GetSpeed() const {
                     * GetLeggingsStats(equippedLeggings).speedModifier
                     * GetTotemStats(currentTotem).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-        speedMult *= 1.15f;
+        speedMult *= 1.25f; // +25% Move Speed
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
         speedMult *= 0.90f;
     }
@@ -865,7 +865,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         float currentDashSpeed = Config::DASH_SPEED;
         if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-            currentDashSpeed *= 1.25f;
+            currentDashSpeed *= 1.35f; // +35% Dash Distance & Velocity
         }
         velocity.x = dashDir.x * currentDashSpeed;
         velocity.y = dashDir.y * currentDashSpeed;
@@ -1532,33 +1532,32 @@ void Player::TriggerDash(ParticleSystem& particles) {
     WeaponStats stats = GetEquippedWeaponStats();
 
     if (!isInPhlegmaticTrance) {
-
-        if (stamina < stats.dashStaminaCost) {
-
-            ModifyComposure(-15.0f); // Out of stamina dash penalty
-
-            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
-
-            return;
-
+        float effectiveDashStamina = stats.dashStaminaCost;
+        if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
+            effectiveDashStamina *= 0.70f; // -30% Dash Stamina Cost
         }
 
-        stamina -= stats.dashStaminaCost;
+        if (stamina < effectiveDashStamina) {
+            ModifyComposure(-15.0f); // Out of stamina dash penalty
+            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+            return;
+        }
 
+        stamina -= effectiveDashStamina;
     }
 
 
 
     dashCooldown = stats.dashCooldown;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-        dashCooldown *= 0.65f;
+        dashCooldown *= 0.50f; // -50% Dash Cooldown!
     }
 
     dashTimer = Config::DASH_DURATION;
 
     isDashing = true;
 
-    iFrameTimer = 0.25f; // Reliable 0.25s I-Frame window!
+    iFrameTimer = HasFullArmorSet(ArmorSet::SHADOWSTRIDER) ? 0.35f : 0.25f; // Extended 0.35s I-Frame window!
 
 
 
@@ -1608,22 +1607,29 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
     WeaponStats stats = GetEquippedWeaponStats();
 
-    // Daggers light attack costs 0 stamina, and Phlegmatic Trance grants zero stamina cost
-
-    if (!isInPhlegmaticTrance && currentWeapon != WeaponType::DAGGERS) {
-
-        if (stamina < stats.lightStamina) {
-
-            ModifyComposure(-15.0f); // Out of stamina attack penalty
-
-            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
-
-            return;
-
+    // Daggers light attack combo: every 5th strike consumes 14 stamina to balance rapid flurry
+    if (currentWeapon == WeaponType::DAGGERS) {
+        daggerLightAttackCounter++;
+        if (daggerLightAttackCounter >= 5) {
+            daggerLightAttackCounter = 0;
+            if (!isInPhlegmaticTrance) {
+                float daggerCost = 14.0f;
+                if (stamina < daggerCost) {
+                    ModifyComposure(-15.0f);
+                    particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+                    return;
+                }
+                stamina -= daggerCost;
+                particles.SpawnFloatingText(position, "5-STRIKE EXERTION (-14 STAMINA)", Color{ 255, 200, 100, 220 }, 15.0f);
+            }
         }
-
+    } else if (!isInPhlegmaticTrance) {
+        if (stamina < stats.lightStamina) {
+            ModifyComposure(-15.0f); // Out of stamina attack penalty
+            particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
+            return;
+        }
         stamina -= stats.lightStamina;
-
     }
 
     lightCooldown = stats.lightCooldown * GetTotemStats(currentTotem).cooldownMultiplier;

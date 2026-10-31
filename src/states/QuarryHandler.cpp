@@ -30,12 +30,12 @@ void QuarryHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemi
     entryBannerTimer = 4.0f;
     doorCooldown = 0.5f;
 
-    // 4 Ore Golem Spawners relocated south away from Primordial Altar
+    // 4 Ore Golem Spawners positioned in open clearings (clear of boulders & borders)
     golemSpawners.clear();
-    golemSpawners.push_back({ { 550.0f, 950.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 1450.0f, 950.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 600.0f, 1350.0f }, 0.0f, true });
-    golemSpawners.push_back({ { 1400.0f, 1350.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 680.0f, 850.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 1280.0f, 850.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 680.0f, 1150.0f }, 0.0f, true });
+    golemSpawners.push_back({ { 1280.0f, 1150.0f }, 0.0f, true });
 
     for (const auto& spawner : golemSpawners) {
         enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
@@ -273,6 +273,11 @@ void QuarryHandler::Update(
                 particles.SpawnFloatingText(bossSpawn, "ELEMENTAL GOLEM AWAKENS!", Color{ 255, 220, 80, 255 }, 26.0f);
 
                 enemies.emplace_back(EnemyType::ELEMENTAL_GOLEM, bossSpawn);
+                // Immediately spawn 2 guardian mini elemental golems
+                enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ bossSpawn.x - 70.0f, bossSpawn.y + 40.0f });
+                enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ bossSpawn.x + 70.0f, bossSpawn.y + 40.0f });
+                particles.SpawnSparks(Vector2{ bossSpawn.x - 70.0f, bossSpawn.y + 40.0f }, Color{ 255, 140, 40, 255 }, 20, 140.0f);
+                particles.SpawnSparks(Vector2{ bossSpawn.x + 70.0f, bossSpawn.y + 40.0f }, Color{ 255, 140, 40, 255 }, 20, 140.0f);
             }
         }
     }

@@ -181,30 +181,33 @@ void RuinedCastleHandler::Update(
         return;
     }
 
-    player.Update(dt, map, mouseWorld, particles);
+    // When dialogue with Zil is open, completely pause game physics, enemy AI, and damage!
+    if (!isZilDialogueOpen) {
+        player.Update(dt, map, mouseWorld, particles);
 
-    // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
-    for (const auto& p : player.GetSpawnedProjectiles()) {
-        projectiles.push_back(p);
-    }
-    player.GetSpawnedProjectiles().clear();
-
-    // Update enemies
-    for (auto& enemy : enemies) {
-        enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
-    }
-
-    // Update projectiles
-    for (auto& proj : projectiles) {
-        if (proj.IsActive()) {
-            proj.Update(dt, map, particles);
+        // Flush player spawned projectiles (e.g. Truth Seeker Holy Beam)
+        for (const auto& p : player.GetSpawnedProjectiles()) {
+            projectiles.push_back(p);
         }
-    }
-    projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const Projectile& p) {
-        return !p.IsActive();
-    }), projectiles.end());
+        player.GetSpawnedProjectiles().clear();
 
-    CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+        // Update enemies
+        for (auto& enemy : enemies) {
+            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+        }
+
+        // Update projectiles
+        for (auto& proj : projectiles) {
+            if (proj.IsActive()) {
+                proj.Update(dt, map, particles);
+            }
+        }
+        projectiles.erase(std::remove_if(projectiles.begin(), projectiles.end(), [](const Projectile& p) {
+            return !p.IsActive();
+        }), projectiles.end());
+
+        CollisionSystem::CheckCombatCollisions(player, enemies, projectiles, particles, camera, &lootDrops);
+    }
 
     // Update active loot drops
     for (auto& drop : lootDrops) {

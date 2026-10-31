@@ -863,13 +863,10 @@ void Game::SaveActiveGame() {
 
 
     data.equippedWeapon = (int)player.GetWeapon();
-
-
-
     data.equippedArmor = (int)player.GetArmor();
-
-
-
+    data.equippedHelmet = (int)player.GetHelmet();
+    data.equippedChestplate = (int)player.GetChestplate();
+    data.equippedLeggings = (int)player.GetLeggings();
     data.equippedTotem = (int)player.GetTotem();
 
 
@@ -879,17 +876,16 @@ void Game::SaveActiveGame() {
 
 
     for (int i = 0; i < 6; ++i) {
-
-
-
         data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
-
-
-
         data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
-
-
-
+    }
+    for (int i = 0; i < 7; ++i) {
+        data.unlockedHelmets[i] = player.GetInventory().HasHelmet((HelmetType)i);
+        data.unlockedChestplates[i] = player.GetInventory().HasChestplate((ChestplateType)i);
+        data.unlockedLeggings[i] = player.GetInventory().HasLeggings((LeggingsType)i);
+    }
+    for (int i = 0; i < 6; ++i) {
+        data.unlockedTotems[i] = player.GetInventory().HasTotem((TotemType)i);
     }
 
 
@@ -1027,17 +1023,24 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
         if (data.unlockedWeapons[i]) {
-
-
-
             player.GetInventory().UnlockWeapon((WeaponType)i);
-
-
-
         }
-
-
-
+    }
+    for (int i = 0; i < 7; ++i) {
+        if (data.unlockedHelmets[i]) {
+            player.GetInventory().UnlockHelmet((HelmetType)i);
+        }
+        if (data.unlockedChestplates[i]) {
+            player.GetInventory().UnlockChestplate((ChestplateType)i);
+        }
+        if (data.unlockedLeggings[i]) {
+            player.GetInventory().UnlockLeggings((LeggingsType)i);
+        }
+    }
+    for (int i = 0; i < 6; ++i) {
+        if (data.unlockedTotems[i]) {
+            player.GetInventory().UnlockTotem((TotemType)i);
+        }
     }
 
 
@@ -1075,14 +1078,15 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.SetWeapon((WeaponType)data.equippedWeapon);
-
-
-
     player.SetArmor((ArmorType)data.equippedArmor);
-
-
-
+    player.SetHelmet((HelmetType)data.equippedHelmet);
+    player.SetChestplate((ChestplateType)data.equippedChestplate);
+    player.SetLeggings((LeggingsType)data.equippedLeggings);
+    player.GetInventory().SetEquippedHelmet((HelmetType)data.equippedHelmet);
+    player.GetInventory().SetEquippedChestplate((ChestplateType)data.equippedChestplate);
+    player.GetInventory().SetEquippedLeggings((LeggingsType)data.equippedLeggings);
     player.SetTotem((TotemType)data.equippedTotem);
+    player.GetInventory().SetEquippedTotem((TotemType)data.equippedTotem);
 
 
 
