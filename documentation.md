@@ -187,7 +187,7 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
 * **Quarry Arena & Elemental Golem Boss Overhaul**:
   * Relocated Ore Golem spawners south away from the Primordial Altar arena to eliminate interference during boss encounters.
   * Elemental Golem is now repeatable/respawnable at the Primordial Altar whenever not currently active on the field.
-  * Altar boss totem drop rate set to **5%** for ELEMENTAL_CORE_TOTEM.
+  * Altar boss totem drop rate set to **25%** for ELEMENTAL_CORE_TOTEM.
   * Revamped boss attack cadence: summons up to 3 MINI_ELEMENTAL_GOLEM minions on a 22-second cooldown.
 
 * **Revamped Elemental Core Totem & Friendly Companion Minion**:
@@ -1112,7 +1112,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 | **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
 
-| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths) | **+25 Defense, Projectile on Light Attack (5.0s Cooldown)** | **-15% Movement Speed** | Molten Amber (`[255, 130, 45]`) |
+| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths - 25% drop rate) | **+25 Defense, Projectile on Light Attack (5.0s Cooldown)** | **-15% Movement Speed** | Molten Amber (`[255, 130, 45]`) |
 
 
 

@@ -82,7 +82,7 @@
 > * **Quarry Arena & Elemental Golem Boss Overhaul**:
 >   - Relocated Ore Golem spawners south away from the altar arena to prevent crowding.
 >   - Elemental Golem is now repeatable/respawnable at the Primordial Altar whenever not currently active on the field.
->   - Altar boss totem drop rate set to **5%** for `ELEMENTAL_CORE_TOTEM`.
+>   - Altar boss totem drop rate set to **25%** for `ELEMENTAL_CORE_TOTEM`.
 >   - Revamped boss attack summoning up to 3 `MINI_ELEMENTAL_GOLEM`s on a 22s cooldown.
 > * **Revamped Elemental Core Totem & Friendly Companion Minion**:
 >   - Automatically spawns a friendly Mini Elemental Golem companion with **75% stats** of the boss's minion (105 HP, 14 DMG, 11 DEF).

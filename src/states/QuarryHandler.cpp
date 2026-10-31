@@ -168,16 +168,16 @@ void QuarryHandler::Update(
                 elementalBossDefeated = true;
                 elementalBossSummoned = false; // Allow re-awakening!
 
-                // 5% drop chance for Elemental Core Totem
+                // 25% drop chance for Elemental Core Totem
                 int roll = rand() % 100;
-                if (roll < 5 && !player.GetInventory().HasTotem(TotemType::ELEMENTAL_CORE_TOTEM)) {
+                if (roll < 25 && !player.GetInventory().HasTotem(TotemType::ELEMENTAL_CORE_TOTEM)) {
                     player.GetInventory().UnlockTotem(TotemType::ELEMENTAL_CORE_TOTEM);
                     player.SetTotem(TotemType::ELEMENTAL_CORE_TOTEM);
                     SoundFX::PlayGateOpen();
                     SoundFX::PlayCoinPickup();
                     particles.AddScreenShake(12.0f, 0.45f);
                     particles.SpawnSparks(it->GetPosition(), Color{ 255, 215, 80, 255 }, 50, 260.0f);
-                    particles.SpawnFloatingText(player.GetPosition(), "RARE DROP: ELEMENTAL CORE TOTEM! (5%)", Color{ 255, 220, 90, 255 }, 26.0f);
+                    particles.SpawnFloatingText(player.GetPosition(), "RARE DROP: ELEMENTAL CORE TOTEM! (25%)", Color{ 255, 220, 90, 255 }, 26.0f);
                 } else {
                     particles.SpawnFloatingText(player.GetPosition(), "ELEMENTAL TITAN VANQUISHED!", Color{ 255, 220, 90, 255 }, 24.0f);
                 }

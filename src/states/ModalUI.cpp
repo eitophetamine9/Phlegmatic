@@ -779,7 +779,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { TotemType::TOTEM_INSANITY, "Sandbox Arena / Testing supplies" },
                 { TotemType::TOTEM_MIST, "Sandbox Arena / Testing supplies" },
                 { TotemType::CRUSADER_TOTEM, "Zyphden Castle — Royal Knight armory" },
-                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Primordial Altar — 5% Secret Boss drop" }
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Primordial Altar — 25% Secret Boss drop" }
             };
             for (int i = 0; i < 6; ++i) {
                 float iy = drawerListY + (float)i * 72.0f;
