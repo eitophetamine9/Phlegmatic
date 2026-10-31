@@ -273,8 +273,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 }
             }
         } else {
-            // Reflected Player projectile vs Enemies
-            for (auto& enemy : enemies) {
+            // Player projectile vs Enemies (with infinite piercing support)
+            for (size_t eIdx = 0; eIdx < enemies.size(); ++eIdx) {
+                auto& enemy = enemies[eIdx];
                 if (!enemy.IsAlive()) continue;
 
                 float dx = enemy.GetPosition().x - proj.GetPosition().x;
@@ -282,15 +283,89 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 float dist = sqrtf(dx * dx + dy * dy);
 
                 if (dist <= enemy.GetRadius() + proj.GetRadius()) {
-                    Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
-                        if (outLootDrops) {
-                            LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    if (!proj.HasHitEnemy((int)eIdx)) {
+                        proj.RecordHitEnemy((int)eIdx);
+                        Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
+                        if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
+                            if (outLootDrops) {
+                                LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                            }
+                        }
+                        particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
+                        particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
+
+                        if (!proj.IsPiercing()) {
+                            proj.Destroy();
+                            break;
                         }
                     }
-                    particles.SpawnSparks(proj.GetPosition(), Color{ 100, 230, 255, 255 }, 14, 130.0f);
-                    particles.SpawnFloatingText(enemy.GetPosition(), "COUNTER HIT!", Color{ 255, 220, 40, 255 }, 20.0f);
-                    proj.Destroy();
+                }
+            }
+        }
+    }
+
+    // Friendly Mini Elemental Golem Companion combat & movement
+    if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active) {
+        auto& comp = player.GetCompanion();
+        if (comp.attackCooldown > 0.0f) comp.attackCooldown -= dt;
+
+        Enemy* nearestEnemy = nullptr;
+        float nearestDist = 320.0f;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(comp.position, enemy.GetPosition());
+            if (d < nearestDist) {
+                nearestDist = d;
+                nearestEnemy = &enemy;
+            }
+        }
+
+        if (nearestEnemy) {
+            Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
+            Vector2 dir = Vector2Normalize(toEnemy);
+            if (nearestDist > 32.0f) {
+                comp.position = Vector2Add(comp.position, Vector2Scale(dir, 165.0f * dt));
+            } else if (comp.attackCooldown <= 0.0f) {
+                comp.attackCooldown = 1.0f;
+                Vector2 knock = dir;
+                if (nearestEnemy->TakeDamage(comp.damage, knock, particles, 0.15f)) {
+                    if (outLootDrops) LootDrop::SpawnFromEnemy(*nearestEnemy, *outLootDrops);
+                }
+                particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 18, 140.0f);
+                particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -14", Color{ 100, 245, 180, 255 }, 20.0f);
+                SoundFX::PlayHitImpact();
+            }
+        } else {
+            float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
+            if (distToPlayer > 60.0f) {
+                Vector2 toPlayer = Vector2Normalize(Vector2Subtract(player.GetPosition(), comp.position));
+                comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 175.0f * dt));
+            }
+        }
+
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
+            if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 15.0f)) {
+                float effDef = comp.defense;
+                float baseDmg = 18.0f;
+                if (enemy.GetType() == EnemyType::BRUTE) baseDmg = 38.0f;
+                else if (enemy.GetType() == EnemyType::CHARGER) baseDmg = 22.0f;
+                else if (enemy.GetType() == EnemyType::ORE_GOLEM) baseDmg = 26.0f;
+                else if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM) baseDmg = 34.0f;
+                else if (enemy.GetType() == EnemyType::MINI_ELEMENTAL_GOLEM) baseDmg = 18.0f;
+                else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDmg = 45.0f;
+                else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDmg = 34.0f;
+                else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
+                float dmg = baseDmg * (100.0f / (100.0f + effDef));
+                comp.health -= dmg;
+                particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
+                particles.SpawnSparks(comp.position, Color{ 180, 160, 140, 255 }, 12, 120.0f);
+                if (comp.health <= 0.0f) {
+                    comp.active = false;
+                    comp.respawnTimer = 60.0f;
+                    particles.SpawnFloatingText(comp.position, "COMPANION SHATTERED! (60s Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+                    particles.SpawnSparks(comp.position, Color{ 255, 140, 50, 255 }, 35, 200.0f);
+                    SoundFX::PlayHitImpact();
                     break;
                 }
             }

@@ -476,6 +476,15 @@ void Player::SetTotem(TotemType newTotem) {
     currentTotem = newTotem;
     inventory.UnlockTotem(newTotem);
     inventory.SetEquippedTotem(newTotem);
+    if (newTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        if (!companion.active && companion.respawnTimer <= 0.0f) {
+            companion.active = true;
+            companion.health = companion.maxHealth;
+            companion.position = Vector2Add(position, { 35.0f, 10.0f });
+        }
+    } else {
+        companion.active = false;
+    }
     defense = GetDefense();
     will = GetWill();
     SoundFX::PlayEquipWeapon();
@@ -693,12 +702,26 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
 
-    // Elemental Core Totem projectile cooldown
-
+    // Elemental Core Totem & Companion Update
     if (elementalProjectileCooldown > 0.0f) {
-
         elementalProjectileCooldown -= dt;
+    }
 
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        if (!companion.active) {
+            companion.respawnTimer -= dt;
+            if (companion.respawnTimer <= 0.0f) {
+                companion.active = true;
+                companion.health = companion.maxHealth;
+                companion.respawnTimer = 0.0f;
+                companion.position = Vector2Add(position, { 35.0f, 10.0f });
+                particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+                particles.SpawnSparks(companion.position, Color{ 255, 170, 50, 255 }, 25, 180.0f);
+                SoundFX::PlayParrySuccess();
+            }
+        }
+    } else {
+        companion.active = false;
     }
 
 
@@ -1673,22 +1696,16 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 
 
-    // Elemental Core Totem: Projectile on Light Attack (5s cooldown)
-
+    // Elemental Core Totem: Infinitely Piercing Projectile on Light Attack (3s cooldown, 54 damage)
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM && elementalProjectileCooldown <= 0.0f) {
-
         Vector2 spawnPos = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
-
-        Vector2 projVel = { forwardDir.x * 560.0f, forwardDir.y * 560.0f };
-
-        spawnedProjectiles.emplace_back(spawnPos, projVel, 10.0f, 32.0f, ProjectileType::ELEMENTAL_BOLT, true, 0.20f);
-
-        elementalProjectileCooldown = 5.0f;
-
-        particles.SpawnSparks(spawnPos, Color{ 255, 140, 50, 255 }, 18, 140.0f);
-
+        Vector2 projVel = { forwardDir.x * 580.0f, forwardDir.y * 580.0f };
+        Projectile proj(spawnPos, projVel, 11.0f, 54.0f, ProjectileType::ELEMENTAL_BOLT, true, 0.25f);
+        proj.SetPiercing(true);
+        spawnedProjectiles.push_back(proj);
+        elementalProjectileCooldown = 3.0f;
+        particles.SpawnSparks(spawnPos, Color{ 255, 140, 50, 255 }, 22, 170.0f);
         SoundFX::PlayCrusaderClash();
-
     }
 
 

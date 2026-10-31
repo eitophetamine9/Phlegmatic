@@ -42,6 +42,23 @@ public:
     ChestplateType GetChestplate() const { return equippedChestplate; }
     LeggingsType GetLeggings() const { return equippedLeggings; }
 
+    // Friendly Mini Elemental Golem Companion (75% stats of boss minion)
+    struct CompanionGolem {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float health = 105.0f;
+        float maxHealth = 105.0f;
+        float defense = 11.0f;
+        float damage = 14.0f;
+        float radius = 15.0f;
+        float attackCooldown = 0.0f;
+        float respawnTimer = 0.0f;
+        float strikeTimer = 0.0f;
+    } companion;
+
+    const CompanionGolem& GetCompanion() const { return companion; }
+    CompanionGolem& GetCompanion() { return companion; }
+
     ArmorSet GetActiveArmorSet() const;
     bool HasFullArmorSet(ArmorSet set) const;
     void TriggerArmorSkill(ParticleSystem& particles);

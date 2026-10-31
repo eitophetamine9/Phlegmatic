@@ -690,10 +690,25 @@ void PlayerRenderer::Draw(const Player& player) {
         } else {
 
             AssetManager::DrawHalberd(rightHand, halberdAngle, 48.0f, Color{ 210, 225, 245, 255 }, Color{ 120, 160, 210, 160 });
-
         }
-
     }
 
+    // Friendly Mini Elemental Golem Companion
+    if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active) {
+        const auto& comp = player.GetCompanion();
+        DrawCircleV(comp.position, comp.radius * 0.9f, Color{ 48, 52, 60, 255 });
+        DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 100, 240, 180, 230 });
+        float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 6.0f);
+        DrawCircleV(comp.position, 5.0f * cPulse, Color{ 100, 255, 170, 255 });
+
+        float barW = 28.0f;
+        float barH = 4.0f;
+        float barX = comp.position.x - barW * 0.5f;
+        float barY = comp.position.y - comp.radius - 8.0f;
+        DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
+        float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+        DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
+        DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
+    }
 }
 
