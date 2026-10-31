@@ -69,7 +69,13 @@
 >   - Encounter respawning **Gale Bandits**—agile dual-dagger skirmishers who throw swift daggers and drop Silver Shingles and **Essence of Mist** (35% drop rate; strictly NO Ore Scraps).
 >   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist.
 >   - Defeat the Gale Archer across 3 telegraphed combat phases (Triple Windshot, Gale Piercer Beam, and Storm Rain Barrage) to earn guaranteed **Shadow Essence** and roll for the sacred **Totem of Mist** at an exact **15% drop rate** (strictly NO Ore Scraps).
-> * **Shadowstrider Armor Set Crafting at Varek's Forge**:
+> * **Shadowstrider Armor Set Crafting & Forge Pagination**:
+>   - Blacksmith Varek in Zyphden now features **paginated armor crafting** under Tab 3 `[3] ARMOR FORGE (9)` (Page 1: Forged Scrap-Iron & Basalt Golem, Page 2: Shadowstrider) with clickable `[< PREV PAGE]` and `[NEXT PAGE >]` buttons and A/D / Arrow key navigation, eliminating UI overlap.
+>   - Header now live-tracks all 4 crafting materials: Silver Shingles, Ore Scraps, **Essence of Mist**, and **Shadow Essence**.
+>   - Strictly enforces component requirements for crafting Shadowstrider pieces: Cowl (2 Mist + 1 Shadow + 30 Shingles), Doublet (4 Mist + 2 Shadow + 50 Shingles), and Tights (3 Mist + 1 Shadow + 40 Shingles); pieces cannot be forged with shingles alone.
+> * **Western Access Gate to Restless Mist Forest**:
+>   - Extended Zyphden Realm western bounds to X: 100 and paved a cobblestone/moss pathway through the western alleyway (between Workshop and Tavern) connecting Town Square directly to the **Western Mist Archway** at `{ 160.0f, 730.0f }`.
+>   - Features an ethereal glowing cyan portal, road signpost, and interactive floating prompt `[E] ENTER RESTLESS MIST FOREST`.
 >   - Blacksmith Varek in Zyphden can now craft the agility-focused **Shadowstrider Set** (Cowl, Doublet, Tights) in Tab 3 using Essence of Mist, Shadow Essence, and Silver Shingles.
 >   - Full 3/3 Set Bonus *Veil of the Mist* grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, +40% extended Dodge i-frames, and the active signature skill **Shadow Decoy & Vanish** ([V] key, 25s CD, 0.5s i-frames, creates an aggro-drawing illusion decoy that explodes for 40 shadow dmg).
 > * **Royal Combat Arena 20-Wave Expansion & Difficulty Curve**:

@@ -309,7 +309,20 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - Gale Archer Boss executes a 3-phase combat cadence (Triple Windshot, Gale Piercer Beam, Storm Rain Barrage).
    - Gale Archer drops guaranteed Shadow Essence (1-2x), Silver Shingles, and rolls for Totem of Mist at an exact 15% drop rate (strictly NO Ore Scraps).
 
-9. Shadowstrider Armor Set Crafting at Varek's Forge:
+9. Shadowstrider Armor Set Crafting & Forge Pagination:
+   - Added 2-page pagination to Varek's Master Forge under Tab 3 `[3] ARMOR FORGE (9)`:
+     - Page 1: Scrap-Iron Set & Basalt Golem Set (6 items).
+     - Page 2: Shadowstrider Set (3 items).
+     - Prev/Next page navigation buttons, page indicator, and keyboard navigation (A/D, Arrows).
+   - Displayed all 4 crafting materials in top header: Shingles, Ore Scraps, Essence of Mist, Shadow Essence.
+   - Strictly enforced crafting requirements for Shadowstrider armor pieces: Cowl (2 Mist + 1 Shadow + 30 Shingles),
+     Doublet (4 Mist + 2 Shadow + 50 Shingles), and Tights (3 Mist + 1 Shadow + 40 Shingles). Prevents forging
+     without prerequisite essences.
+
+9b. Western Access Gate & Pathway to Restless Mist Forest:
+   - Extended Zyphden Realm map bounds from X: 200 to X: 100.
+   - Paved western alleyway road connecting Town Square to Western Mist Archway at { 160.0f, 730.0f }.
+   - Added glowing cyan mist portal, road signpost, and floating interactive prompt `[E] ENTER RESTLESS MIST FOREST`.
    - Added Tab 3 Blacksmith Varek recipes for Shadowstrider Cowl (2 Mist Ess. + 1 Shadow Ess. + 30 Shingles),
      Doublet (4 Mist Ess. + 2 Shadow Ess. + 50 Shingles), and Tights (3 Mist Ess. + 1 Shadow Ess. + 40 Shingles).
    - Set bonus Veil of the Mist grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost,

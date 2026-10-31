@@ -154,7 +154,20 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
     3. *Storm Rain Barrage*: Unleashes aerial wind arrows around the player.
   * Gale Archer drops guaranteed **Shadow Essence** (1-2x), Silver Shingles, and rolls for the sacred **Totem of Mist** at an exact **15% drop rate**; strictly **never drops Ore Scraps**.
 
-* **Shadowstrider Armor Set Crafting at Varek's Forge**:
+* **Shadowstrider Armor Set Crafting & Forge Pagination**:
+  * Blacksmith Varek in Zyphden Courtyard now provides a paginated interface for **[3] ARMOR FORGE (9)**:
+    * **Page 1**: Forged Scrap-Iron Set (Sallet, Cuirass, Greaves) and Basalt Golem Set (Greathelm, Bastion, Heavy Greaves).
+    * **Page 2**: Shadowstrider Set (Cowl, Doublet, Tights).
+    * Features interactive `[< PREV PAGE]` and `[NEXT PAGE >]` buttons, page indicators (`PAGE X / 2`), and keyboard hotkeys (`A`/`D` and Left/Right Arrows), preventing vertical UI overflow.
+  * Live Material Tracking: Added header display badges for all 4 resources: Silver Shingles, Ore Scraps, **Essence of Mist**, and **Shadow Essence**.
+  * Strict Material Verification: Shadowstrider crafting strictly validates and consumes all required essence components before allowing piece assembly:
+    * *Shadowstrider Cowl*: 2x Essence of Mist + 1x Shadow Essence + 30 Shingles.
+    * *Shadowstrider Doublet*: 4x Essence of Mist + 2x Shadow Essence + 50 Shingles.
+    * *Shadowstrider Tights*: 3x Essence of Mist + 1x Shadow Essence + 40 Shingles.
+
+* **Western Access Gate & Pathway to Restless Mist Forest**:
+  * Extended Zyphden Realm boundary collision westward to X: 100.0f and paved a cobblestone and moss woodland pathway between the Masonry Workshop and Hearthside Tavern.
+  * Erected the **Western Mist Archway** at `{ 160.0f, 730.0f }`, featuring stone gateposts, an ethereal swirling cyan portal, a road signpost (`RESTLESS MIST FOREST`), and an interactive floating prompt `[E] ENTER RESTLESS MIST FOREST`.
   * Blacksmith Varek in Zyphden Courtyard now provides crafting recipes for the agility-focused **Shadowstrider Set** under Tab 3 `[3] ARMOR FORGE (9)`:
     * *Shadowstrider Cowl*: 2x Essence of Mist + 1x Shadow Essence + 30 Shingles (+8 DEF, +12 Will, +8% Move Speed).
     * *Shadowstrider Doublet*: 4x Essence of Mist + 2x Shadow Essence + 50 Shingles (+18 DEF, +10% Move Speed, -15% Dash Cooldown).
