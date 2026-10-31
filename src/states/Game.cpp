@@ -484,6 +484,109 @@ void Game::ReturnFromRestlessMistForest() {
     SaveActiveGame();
 }
 
+void Game::StartRealmTransition(const std::function<void()>& onSwitch, const std::string& title, const std::string& subtitle, float fadeOut, float hold, float fadeIn) {
+    if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
+        screenTransition.onMidpointSwitch = onSwitch;
+        screenTransition.realmTitle = title;
+        screenTransition.realmSubtitle = subtitle;
+        return;
+    }
+
+    screenTransition.mode = ScreenFadeMode::FADE_OUT;
+    screenTransition.timer = 0.0f;
+    screenTransition.alpha = 0.0f;
+    screenTransition.fadeOutDuration = (fadeOut > 0.05f) ? fadeOut : 0.35f;
+    screenTransition.holdDuration = (hold >= 0.0f) ? hold : 0.25f;
+    screenTransition.fadeInDuration = (fadeIn > 0.05f) ? fadeIn : 0.40f;
+    screenTransition.onMidpointSwitch = onSwitch;
+    screenTransition.realmTitle = title;
+    screenTransition.realmSubtitle = subtitle;
+}
+
+bool Game::IsTransitionActive() const {
+    return screenTransition.mode == ScreenFadeMode::FADE_OUT || screenTransition.mode == ScreenFadeMode::HOLD;
+}
+
+void Game::UpdateScreenTransition(float dt) {
+    if (screenTransition.mode == ScreenFadeMode::NONE) return;
+
+    screenTransition.timer += dt;
+
+    if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
+        screenTransition.alpha = screenTransition.timer / screenTransition.fadeOutDuration;
+        if (screenTransition.alpha >= 1.0f) {
+            screenTransition.alpha = 1.0f;
+            screenTransition.mode = ScreenFadeMode::HOLD;
+            screenTransition.timer = 0.0f;
+
+            if (screenTransition.onMidpointSwitch) {
+                auto callback = screenTransition.onMidpointSwitch;
+                screenTransition.onMidpointSwitch = nullptr;
+                callback();
+            }
+        }
+    } else if (screenTransition.mode == ScreenFadeMode::HOLD) {
+        screenTransition.alpha = 1.0f;
+        if (screenTransition.timer >= screenTransition.holdDuration) {
+            screenTransition.mode = ScreenFadeMode::FADE_IN;
+            screenTransition.timer = 0.0f;
+        }
+    } else if (screenTransition.mode == ScreenFadeMode::FADE_IN) {
+        screenTransition.alpha = 1.0f - (screenTransition.timer / screenTransition.fadeInDuration);
+        if (screenTransition.alpha <= 0.0f) {
+            screenTransition.alpha = 0.0f;
+            screenTransition.mode = ScreenFadeMode::NONE;
+            screenTransition.timer = 0.0f;
+            screenTransition.realmTitle.clear();
+            screenTransition.realmSubtitle.clear();
+        }
+    }
+}
+
+void Game::RenderScreenTransition() {
+    if (screenTransition.mode == ScreenFadeMode::NONE || screenTransition.alpha <= 0.001f) {
+        return;
+    }
+
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+
+    float clampedAlpha = screenTransition.alpha;
+    if (clampedAlpha > 1.0f) clampedAlpha = 1.0f;
+    if (clampedAlpha < 0.0f) clampedAlpha = 0.0f;
+
+    Color fadeColor = Color{ 8, 10, 16, (unsigned char)(255.0f * clampedAlpha) };
+    DrawRectangle(0, 0, sw, sh, fadeColor);
+
+    if (screenTransition.alpha >= 0.35f && !screenTransition.realmTitle.empty()) {
+        float textAlpha = (screenTransition.alpha - 0.35f) / 0.65f;
+        if (textAlpha > 1.0f) textAlpha = 1.0f;
+        if (textAlpha < 0.0f) textAlpha = 0.0f;
+
+        Color titleColor = Color{ 255, 230, 130, (unsigned char)(255 * textAlpha) };
+        Color subColor = Color{ 175, 220, 245, (unsigned char)(220 * textAlpha) };
+        Color lineGold = Color{ 230, 195, 95, (unsigned char)(190 * textAlpha) };
+        Color diamondColor = Color{ 110, 245, 220, (unsigned char)(230 * textAlpha) };
+
+        int centerY = sh / 2;
+
+        Vector2 diamondCenter = { (float)sw * 0.5f, (float)centerY - 45.0f };
+        DrawPoly(diamondCenter, 4, 10.0f, 45.0f, diamondColor);
+        DrawPolyLines(diamondCenter, 4, 14.0f, 45.0f, Color{ 255, 255, 255, (unsigned char)(140 * textAlpha) });
+
+        FontManager::DrawTextTitleCenteredShadow(screenTransition.realmTitle, sw / 2, centerY - 20, 30, titleColor);
+
+        float lineWidth = 340.0f * textAlpha;
+        DrawLineEx({ (float)sw * 0.5f - lineWidth * 0.5f, (float)centerY + 18.0f },
+                   { (float)sw * 0.5f + lineWidth * 0.5f, (float)centerY + 18.0f },
+                   2.0f, lineGold);
+
+        if (!screenTransition.realmSubtitle.empty()) {
+            FontManager::DrawTextCenteredShadow(screenTransition.realmSubtitle, sw / 2, centerY + 30, 14, subColor);
+        }
+    }
+}
+
 
 
 
@@ -1129,6 +1232,14 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
+    } else if (targetState == GameState::RESTLESS_MIST_FOREST) {
+
+
+
+        EnterRestlessMistForest();
+
+
+
     } else if (targetState == GameState::LOBBY) {
 
 
@@ -1259,7 +1370,11 @@ void Game::LoadActiveGame(int slotIndex) {
 
     isRestoringSave = false;
 
-
+    // Smooth realm fade-in upon loading
+    screenTransition.mode = ScreenFadeMode::FADE_IN;
+    screenTransition.alpha = 1.0f;
+    screenTransition.fadeInDuration = 0.5f;
+    screenTransition.timer = 0.0f;
 
 }
 
@@ -1278,6 +1393,14 @@ void Game::Update(float dt) {
 
 
     camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
+
+    UpdateScreenTransition(dt);
+
+    // Shield input and damage during blackout transition
+    if (IsTransitionActive()) {
+        SoundFX::UpdateAmbience(dt, (int)currentState);
+        return;
+    }
 
 
 
@@ -2165,7 +2288,11 @@ void Game::Update(float dt) {
 
 
 
-            EnterCrossroads();
+            StartRealmTransition(
+                [this]() { EnterCrossroads(); },
+                "THE CROSSROADS OF THE DAMNED",
+                "Ancient Highway of Divided Faiths"
+            );
 
 
 
@@ -2281,11 +2408,14 @@ void Game::Update(float dt) {
 
 
 
-            EnterZyphden();
-
-
-
-            currentState = GameState::ZYPHDEN_REALM;
+            StartRealmTransition(
+                [this]() {
+                    EnterZyphden();
+                    currentState = GameState::ZYPHDEN_REALM;
+                },
+                "FORTIFIED REALM OF ZYPHDEN",
+                "Seat of King Kreptu & The Vanguard"
+            );
 
 
 
@@ -2385,7 +2515,13 @@ void Game::Update(float dt) {
 
 
 
-            EnterQuarryDepths();
+            StartRealmTransition(
+                [this]() {
+                    EnterQuarryDepths();
+                },
+                "SUBTERRANEAN QUARRY DEPTHS",
+                "Domain of the Ore Golems & Primordial Altar"
+            );
 
 
 
@@ -2441,8 +2577,20 @@ void Game::Update(float dt) {
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
-            [this]() { EnterArena(); },
-            [this]() { EnterRestlessMistForest(); }
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterArena(); },
+                    "THE ROYAL COMBAT ARENA",
+                    "20 Waves of Humoral Trials & Boss Encounters"
+                );
+            },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterRestlessMistForest(); },
+                    "RESTLESS MIST FOREST",
+                    "Haunt of the Gale Bandits & The Whispering Altar"
+                );
+            }
         );
 
 
@@ -2491,31 +2639,20 @@ void Game::Update(float dt) {
 
 
 
-                map.Init(MapEnvironment::ZYPHDEN_REALM);
-
-
-
-                player.SetPosition({ 1620.0f, 700.0f });
-
-
-
-                camera.target = player.GetPosition();
-
-
-
-                currentState = GameState::ZYPHDEN_REALM;
-
-
-
-                enemies.clear();
-
-
-
-                projectiles.clear();
-
-
-
-                particles.Clear();
+                StartRealmTransition(
+                    [this]() {
+                        map.Init(MapEnvironment::ZYPHDEN_REALM);
+                        player.SetPosition({ 1620.0f, 700.0f });
+                        camera.target = player.GetPosition();
+                        currentState = GameState::ZYPHDEN_REALM;
+                        enemies.clear();
+                        projectiles.clear();
+                        particles.Clear();
+                        SaveActiveGame();
+                    },
+                    "FORTIFIED REALM OF ZYPHDEN",
+                    "Courtyard of the Northern Vanguard"
+                );
 
 
 
@@ -2545,7 +2682,11 @@ void Game::Update(float dt) {
         restlessMistForestHandler.Update(
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
             [this]() {
-                ReturnFromRestlessMistForest();
+                StartRealmTransition(
+                    [this]() { ReturnFromRestlessMistForest(); },
+                    "FORTIFIED REALM OF ZYPHDEN",
+                    "Seat of King Kreptu & The Vanguard"
+                );
             },
             [this]() { EnterLobby(); }
         );
@@ -2938,7 +3079,11 @@ void Game::Update(float dt) {
 
 
 
-            ReturnFromArena();
+            StartRealmTransition(
+                [this]() { ReturnFromArena(); },
+                "FORTIFIED REALM OF ZYPHDEN",
+                "Return from the Arena of Trials"
+            );
 
 
 
@@ -3452,7 +3597,11 @@ void Game::Update(float dt) {
     float distToExit = Vector2Distance(player.GetPosition(), arenaExitPortal);
     if ((distToExit < 90.0f && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T))) || IsKeyPressed(KEY_T)) {
         particles.SpawnFloatingText(player.GetPosition(), "RETURNING TO ZYPHDEN REALM...", Color{ 140, 210, 255, 255 }, 24.0f);
-        ReturnFromArena();
+        StartRealmTransition(
+            [this]() { ReturnFromArena(); },
+            "FORTIFIED REALM OF ZYPHDEN",
+            "Return from the Arena of Trials"
+        );
         return;
     }
 
@@ -4189,7 +4338,8 @@ void Game::Render() {
 
     RenderScene();
 
-
+    // Universal Realm Transition Fade Overlay
+    RenderScreenTransition();
 
     EndDrawing();
 
