@@ -17,7 +17,8 @@ enum class EnemyType {
     ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
     KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
     ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
-    ELEMENTAL_GOLEM  // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
+    ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
+    MINI_ELEMENTAL_GOLEM // Compact Elemental Golem minion summoned by Titan or player totem
 };
 
 enum class EnemyState {
@@ -60,6 +61,8 @@ public:
     float GetDefense() const { return defense; }
     float GetWill() const { return will; }
     TelegraphIndicator GetTelegraph() const { return telegraph; }
+    bool NeedsMinionSpawn() const { return pendingMinionSummon; }
+    void ClearMinionSpawn() { pendingMinionSummon = false; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM; }
     bool HasMeleeHitbox() const {
@@ -116,6 +119,8 @@ private:
     int bossAttackPhase;
     int burstShotsRemaining;
     float burstIntervalTimer;
+    float summonCooldown = 6.0f;
+    bool pendingMinionSummon = false;
 
     TelegraphIndicator telegraph;
 };
