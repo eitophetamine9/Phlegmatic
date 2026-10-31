@@ -85,7 +85,8 @@ public:
         bool& testArenaUnlocked,
         const std::function<void()>& onSaveArenaUnlock,
         const std::function<void()>& onEnterLobby,
-        const std::function<void()>& onEnterArena = nullptr
+        const std::function<void()>& onEnterArena = nullptr,
+        const std::function<void()>& onEnterRestlessMistForest = nullptr
     );
 
     void Render(
@@ -113,6 +114,7 @@ public:
 
 private:
     std::function<void()> onEnterArenaCallback = nullptr;
+    std::function<void()> onEnterMistForestCallback = nullptr;
     // Core NPCs
     ZyphdenNPC eldon;
     ZyphdenNPC noticeboard;

@@ -13,5 +13,6 @@ enum class GameState {
     ARENA,
     GAME_OVER,
     VICTORY,
-    BORDERLANDS_GATE
+    BORDERLANDS_GATE,
+    RESTLESS_MIST_FOREST
 };

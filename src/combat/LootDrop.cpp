@@ -80,6 +80,18 @@ void LootDrop::Update(float dt, Vector2 playerPos, Player& player, ParticleSyste
             particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 255, 195, 60, 255 }, 20.0f);
             SoundFX::PlayParrySuccess();
             particles.SpawnSparks(position, Color{ 255, 185, 40, 255 }, 14, 110.0f);
+        } else if (type == LootType::MIST_ESSENCE) {
+            player.GetInventory().AddEssenceOfMist(finalAmount);
+            std::string label = "+" + std::to_string(finalAmount) + " Essence of Mist";
+            particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 90, 235, 215, 255 }, 20.0f);
+            SoundFX::PlayParrySuccess();
+            particles.SpawnSparks(position, Color{ 90, 235, 215, 255 }, 16, 120.0f);
+        } else if (type == LootType::SHADOW_ESSENCE) {
+            player.GetInventory().AddShadowEssence(finalAmount);
+            std::string label = "+" + std::to_string(finalAmount) + " Shadow Essence";
+            particles.SpawnFloatingText({ playerPos.x, playerPos.y - 18.0f }, label, Color{ 190, 110, 255, 255 }, 22.0f);
+            SoundFX::PlayParrySuccess();
+            particles.SpawnSparks(position, Color{ 190, 110, 255, 255 }, 20, 150.0f);
         }
     }
 }
@@ -151,6 +163,20 @@ void LootDrop::Draw(float time) const {
         // Metallic glint
         DrawPixel((int)position.x, (int)drawY - 4, WHITE);
         DrawPixel((int)position.x + 1, (int)drawY - 4, WHITE);
+    } else if (type == LootType::MIST_ESSENCE) {
+        // Swirling Cyan Mist Essence Orb
+        float pulse = 0.75f + 0.25f * sinf(age * 5.0f);
+        DrawCircleGradient(Vector2{ position.x, drawY }, 24.0f * pulse, Color{ 90, 235, 215, (unsigned char)(90 * pulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleV(Vector2{ position.x, drawY }, 6.5f, Color{ 40, 120, 110, 230 });
+        DrawCircleV(Vector2{ position.x, drawY }, 4.5f, Color{ 140, 255, 240, 255 });
+        DrawCircleLines((int)position.x, (int)drawY, 9.0f * pulse, Color{ 100, 245, 225, 200 });
+    } else if (type == LootType::SHADOW_ESSENCE) {
+        // Abyssal Violet Shadow Essence Core
+        float pulse = 0.75f + 0.25f * sinf(age * 4.5f);
+        DrawCircleGradient(Vector2{ position.x, drawY }, 26.0f * pulse, Color{ 175, 75, 255, (unsigned char)(95 * pulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleV(Vector2{ position.x, drawY }, 7.5f, Color{ 35, 18, 55, 240 });
+        DrawCircleV(Vector2{ position.x, drawY }, 5.0f, Color{ 220, 160, 255, 255 });
+        DrawCircleLines((int)position.x, (int)drawY, 11.0f * pulse, Color{ 190, 120, 255, 220 });
     }
 }
 
@@ -182,6 +208,20 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 16.0f, pos.y }, 1);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 16.0f, pos.y }, 1);
+    } else if (type == EnemyType::GALE_BANDIT) {
+        // Gale Bandit: 8-16 Shingles + 35% Essence of Mist (STRICTLY NO Ore Scraps!)
+        int shingleCount = 8 + (rand() % 9);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        if ((rand() % 100) < 35) {
+            outDrops.emplace_back(LootType::MIST_ESSENCE, Vector2{ pos.x + 12.0f, pos.y }, 1);
+        }
+    } else if (type == EnemyType::GALE_ARCHER_BOSS) {
+        // Gale Archer Boss: 50-80 Shingles + Guaranteed 1-2 Shadow Essence + 1 Elixir (STRICTLY NO Ore Scraps!)
+        int shingleCount = 50 + (rand() % 31);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        int shadowCount = 1 + (rand() % 2);
+        outDrops.emplace_back(LootType::SHADOW_ESSENCE, Vector2{ pos.x - 14.0f, pos.y }, shadowCount);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
     } else if (type == EnemyType::BRUTE || type == EnemyType::CHARGER || type == EnemyType::PYROMANCER) {
         // Elite / Heavy Mobs: 10-25 Shingles + 35% Elixir
         int shingleCount = 10 + (rand() % 16);

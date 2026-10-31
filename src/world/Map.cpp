@@ -244,6 +244,24 @@ void GameMap::Init(MapEnvironment env) {
         // Wing lanterns
         torches.push_back({ 460.0f, 200.0f });
         torches.push_back({ 1540.0f, 200.0f });
+    } else if (env == MapEnvironment::RESTLESS_MIST_FOREST) {
+        // Western Realm: Restless Mist Forest (1800x1300)
+        bounds = { 100.0f, 100.0f, 1800.0f, 1300.0f };
+
+        // The Altar of Whispers (Center-East dais: 1050-1200, 580-720)
+        obstacles.push_back({ { 1050.0f, 580.0f, 160.0f, 140.0f } });
+
+        // Mossy Ancient Pine Trees (Pillars with 28px radius)
+        pillars.push_back({ { 400.0f, 350.0f }, 28.0f });
+        pillars.push_back({ { 750.0f, 300.0f }, 28.0f });
+        pillars.push_back({ { 1450.0f, 380.0f }, 28.0f });
+        pillars.push_back({ { 450.0f, 950.0f }, 28.0f });
+        pillars.push_back({ { 850.0f, 1050.0f }, 28.0f });
+        pillars.push_back({ { 1400.0f, 920.0f }, 28.0f });
+
+        // Ancient Mossy Boulders
+        obstacles.push_back({ { 550.0f, 650.0f, 120.0f, 85.0f } });
+        obstacles.push_back({ { 1350.0f, 680.0f, 130.0f, 90.0f } });
     } else if (env == MapEnvironment::QUARRY_DEPTHS) {
         // Eastern Quarry Mines & Basalt Depths (1600x1200)
         bounds = { 200.0f, 150.0f, 1600.0f, 1200.0f };
@@ -337,6 +355,8 @@ void GameMap::DrawFloor(Vector2 playerPos) const {
         DrawRoyalKeepFloor();
     } else if (currentEnv == MapEnvironment::QUARRY_DEPTHS) {
         DrawQuarryDepthsFloor();
+    } else if (currentEnv == MapEnvironment::RESTLESS_MIST_FOREST) {
+        DrawRestlessMistForestFloor();
     }
 
     float time = (float)GetTime();
@@ -439,6 +459,8 @@ void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
         DrawRoyalKeepWalls();
     } else if (currentEnv == MapEnvironment::QUARRY_DEPTHS) {
         DrawQuarryDepthsWalls(playerPos);
+    } else if (currentEnv == MapEnvironment::RESTLESS_MIST_FOREST) {
+        DrawRestlessMistForestWalls(playerPos);
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -1297,3 +1319,76 @@ void GameMap::DrawQuarryDepthsWalls(Vector2 playerPos) const {
 
 
 
+
+void GameMap::DrawRestlessMistForestFloor() const {
+    float time = (float)GetTime();
+
+    // 1. Dark loam and mossy pine needle forest floor
+    DrawRectangleRec(bounds, Color{ 16, 26, 22, 255 });
+
+    // 2. Woven roots & moss patches
+    int cols = (int)(bounds.width / 160.0f);
+    int rows = (int)(bounds.height / 160.0f);
+    for (int r = 0; r < rows; ++r) {
+        for (int c = 0; c < cols; ++c) {
+            float px = bounds.x + (float)c * 160.0f;
+            float py = bounds.y + (float)r * 160.0f;
+            if ((r + c) % 2 == 0) {
+                DrawRectangle((int)px, (int)py, 160, 160, Color{ 20, 32, 28, 255 });
+            }
+            if ((r * 3 + c * 7) % 5 == 0) {
+                DrawCircle((int)(px + 80), (int)(py + 80), 45.0f, Color{ 28, 48, 40, 140 });
+            }
+        }
+    }
+
+    // 3. Swirling ground mist clouds
+    for (int i = 0; i < 8; ++i) {
+        float mx = bounds.x + 200.0f + (float)i * 180.0f + sinf(time * 0.4f + (float)i) * 50.0f;
+        float my = bounds.y + 250.0f + (float)(i % 4) * 260.0f + cosf(time * 0.3f + (float)i) * 40.0f;
+        DrawCircleGradient(Vector2{ mx, my }, 140.0f, Color{ 70, 150, 135, 38 }, Color{ 0, 0, 0, 0 });
+    }
+
+    // 4. Border wall lines
+    DrawRectangleLinesEx(bounds, 4.0f, Color{ 35, 60, 50, 240 });
+}
+
+void GameMap::DrawRestlessMistForestWalls(Vector2 playerPos) const {
+    float time = (float)GetTime();
+
+    // 1. The Altar of Whispers (Center-East Dais: 1050, 580, 160, 140)
+    Rectangle altarRec = { 1050.0f, 580.0f, 160.0f, 140.0f };
+    Vector2 altarCenter = { altarRec.x + altarRec.width * 0.5f, altarRec.y + altarRec.height * 0.5f };
+
+    // Outer runic circle glow
+    float aPulse = (sinf(time * 3.5f) + 1.0f) * 0.5f;
+    DrawCircleGradient(altarCenter, 110.0f + 10.0f * aPulse, Color{ 80, 240, 215, 60 }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 75.0f, Color{ 100, 245, 225, 200 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 60.0f, Color{ 140, 255, 240, 180 });
+
+    // Stone plinth
+    DrawRectangleRounded(altarRec, 0.15f, 4, Color{ 24, 38, 34, 255 });
+    DrawRectangleRoundedLines(altarRec, 0.15f, 4, Color{ 90, 230, 210, 240 });
+    DrawText("ALTAR OF WHISPERS", (int)altarRec.x + 14, (int)altarRec.y + 60, 11, Color{ 140, 255, 240, 240 });
+
+    // 2. Mossy Ancient Pine Trees (Pillars)
+    for (const auto& pillar : pillars) {
+        // Shadow
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.5f), pillar.radius * 1.3f, Color{ 10, 16, 14, 150 });
+        // Trunk
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius * 0.6f, Color{ 48, 32, 22, 255 });
+        // Pine Canopy Layers
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 10.0f), pillar.radius * 1.15f, Color{ 22, 44, 36, 240 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 18.0f), pillar.radius * 0.9f, Color{ 32, 62, 50, 240 });
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y - 25.0f), pillar.radius * 0.65f, Color{ 45, 85, 68, 255 });
+    }
+
+    // 3. Mossy Boulders (Obstacles except the altar plinth)
+    for (size_t i = 1; i < obstacles.size(); ++i) {
+        Rectangle r = obstacles[i].rect;
+        DrawRectangleRounded(r, 0.35f, 4, Color{ 36, 48, 44, 255 });
+        DrawRectangleRoundedLines(r, 0.35f, 4, Color{ 65, 88, 80, 220 });
+        // Moss top
+        DrawLine((int)r.x + 10, (int)r.y + 6, (int)(r.x + r.width - 10), (int)r.y + 6, Color{ 60, 110, 85, 220 });
+    }
+}

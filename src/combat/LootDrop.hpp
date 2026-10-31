@@ -5,7 +5,9 @@
 enum class LootType {
     SHINGLES,      // Ancient hammered silver shingles
     ELIXIR_FLASK,  // Restorative health potion flask
-    ORE_SCRAP      // Raw metallic quarry ore scrap used for blacksmith forging
+    ORE_SCRAP,     // Raw metallic quarry ore scrap used for blacksmith forging
+    MIST_ESSENCE,  // Swirling cyan mist essence from Restless Mist Forest Gale Bandits
+    SHADOW_ESSENCE // Abyssal shadow essence from Gale Archer Boss for crafting Shadowstrider set
 };
 
 class Player;

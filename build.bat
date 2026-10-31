@@ -40,6 +40,7 @@ g++ -std=c++17 -O2 -static ^
     src\states\CrossroadsHandler.cpp ^
     src\states\ZyphdenHandler.cpp ^
     src\states\QuarryHandler.cpp ^
+    src\states\RestlessMistForestHandler.cpp ^
     src\states\Game.cpp ^
     -Isrc ^
     -Isrc\core ^

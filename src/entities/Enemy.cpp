@@ -235,6 +235,47 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.warningColor = Color{ 255, 140, 40, 180 };
             isPerformingMeleeSmite = true;
             break;
+
+        case EnemyType::GALE_BANDIT:
+            humor = HumorType::SANGUINE; // High speed & dexterity
+            radius = 18.0f;
+            maxHealth = 190.0f;
+            defense = 22.0f;
+            will = 35.0f;
+            moveSpeed = 165.0f;
+            attackRange = 46.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.35f;
+            strikeDuration = 0.15f;
+            recoveryDuration = 0.45f;
+            stunDuration = 0.70f;
+            telegraph.shape = TelegraphShape::CONE;
+            telegraph.radius = 52.0f;
+            telegraph.arcAngle = 90.0f;
+            telegraph.warningColor = Color{ 90, 235, 215, 200 };
+            isPerformingMeleeSmite = true;
+            break;
+
+        case EnemyType::GALE_ARCHER_BOSS:
+            humor = HumorType::PHLEGMATIC; // Fluid wind mobility
+            radius = 26.0f;
+            maxHealth = 1100.0f;
+            defense = 34.0f;
+            will = 85.0f;
+            moveSpeed = 180.0f;
+            attackRange = 420.0f;
+            kitingRange = 240.0f;
+            windupDuration = 0.65f;
+            strikeDuration = 0.20f;
+            recoveryDuration = 0.60f;
+            stunDuration = 0.85f;
+            telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
+            telegraph.radius = 420.0f;
+            telegraph.spreadAngle = 20.0f * DEG2RAD;
+            telegraph.spreadCount = 3;
+            telegraph.warningColor = Color{ 100, 245, 220, 220 };
+            isPerformingMeleeSmite = false;
+            break;
     }
 
     health = maxHealth;
@@ -253,6 +294,8 @@ std::string Enemy::GetName() const {
         case EnemyType::ORE_GOLEM: return "ORE GOLEM";
         case EnemyType::ELEMENTAL_GOLEM: return "ELEMENTAL GOLEM (PRIMORDIAL TITAN)";
         case EnemyType::MINI_ELEMENTAL_GOLEM: return "MINI ELEMENTAL GOLEM";
+        case EnemyType::GALE_BANDIT: return "GALE BANDIT";
+        case EnemyType::GALE_ARCHER_BOSS: return "GALE ARCHER (MIST WARDEN)";
     }
     return "UNKNOWN";
 }
@@ -485,6 +528,36 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.warningColor = Color{ 255, 235, 100, 210 };
                         isPerformingMeleeSmite = true;
                     }
+                } else if (type == EnemyType::GALE_ARCHER_BOSS) {
+                    // 3-Phase Gale Archer Cycle
+                    if (bossAttackPhase == 0) {
+                        // Phase 0: Triple Windshot (Fan of 3 wind arrows)
+                        windupDuration = 0.60f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::PROJECTILE_SPREAD;
+                        telegraph.radius = 450.0f;
+                        telegraph.spreadAngle = 22.0f * DEG2RAD;
+                        telegraph.spreadCount = 3;
+                        telegraph.warningColor = Color{ 110, 245, 220, 220 };
+                        isPerformingMeleeSmite = false;
+                    } else if (bossAttackPhase == 1) {
+                        // Phase 1: Gale Piercer Beam (Direct linear armor piercing shaft)
+                        windupDuration = 0.70f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 500.0f;
+                        telegraph.width = 24.0f;
+                        telegraph.warningColor = Color{ 140, 255, 240, 240 };
+                        isPerformingMeleeSmite = false;
+                    } else {
+                        // Phase 2: Storm Rain Barrage (Circle AoE at player position)
+                        windupDuration = 0.75f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 95.0f;
+                        telegraph.warningColor = Color{ 90, 225, 205, 220 };
+                        isPerformingMeleeSmite = true;
+                    }
                 } else if (type == EnemyType::ELEMENTAL_GOLEM) {
                     // 4-Phase Elemental Titan Cycle
                     if (bossAttackPhase == 0) {
@@ -550,6 +623,21 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
                     velocity.x = moveDir.x * currentSpeed;
                     velocity.y = moveDir.y * currentSpeed;
+                }
+            }
+
+            // Gale Bandit Throwing Dagger check
+            if (type == EnemyType::GALE_BANDIT) {
+                galeDaggerTimer -= dt;
+                if (galeDaggerTimer <= 0.0f && distToPlayer >= 120.0f && distToPlayer <= 380.0f) {
+                    galeDaggerTimer = 4.0f;
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 dir = { cosf(rad), sinf(rad) };
+                    Vector2 spawn = { position.x + dir.x * (radius + 8.0f), position.y + dir.y * (radius + 8.0f) };
+                    Vector2 vel = { dir.x * 390.0f, dir.y * 390.0f };
+                    outProjectiles.emplace_back(spawn, vel, 6.0f, 15.0f, ProjectileType::THROWING_DAGGER, false);
+                    SoundFX::PlayProjectileShoot();
+                    particles.SpawnSparks(position, Color{ 180, 220, 240, 255 }, 8, 80.0f);
                 }
             }
 
@@ -735,6 +823,34 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         SoundFX::PlayLightAttack();
                     }
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
+                } else if (type == EnemyType::GALE_ARCHER_BOSS) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+                    if (bossAttackPhase == 0) {
+                        // Triple Windshot
+                        for (int s = -1; s <= 1; ++s) {
+                            float shotAngle = (facingAngle + (float)s * 18.0f) * DEG2RAD;
+                            Vector2 sDir = { cosf(shotAngle), sinf(shotAngle) };
+                            Vector2 spawn = { position.x + sDir.x * (radius + 12.0f), position.y + sDir.y * (radius + 12.0f) };
+                            Vector2 vel = { sDir.x * 460.0f, sDir.y * 460.0f };
+                            outProjectiles.emplace_back(spawn, vel, 8.0f, 22.0f, ProjectileType::GALE_ARROW, false);
+                        }
+                        SoundFX::PlayProjectileShoot();
+                        particles.SpawnSparks(position, Color{ 110, 245, 225, 255 }, 20, 160.0f);
+                    } else if (bossAttackPhase == 1) {
+                        // Gale Piercer Beam
+                        Vector2 spawn = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
+                        Vector2 vel = { forwardDir.x * 580.0f, forwardDir.y * 580.0f };
+                        outProjectiles.emplace_back(spawn, vel, 10.0f, 36.0f, ProjectileType::GALE_ARROW, false);
+                        SoundFX::PlayCrusaderClash();
+                        particles.SpawnSparks(position, Color{ 140, 255, 245, 255 }, 25, 220.0f);
+                    } else {
+                        // Storm Rain Barrage
+                        particles.AddScreenShake(6.0f, 0.22f);
+                        particles.SpawnSparks(playerPos, Color{ 90, 240, 220, 255 }, 30, 200.0f);
+                        SoundFX::PlayHeavyAttack();
+                    }
+                    bossAttackPhase = (bossAttackPhase + 1) % 3;
                 } else if (type == EnemyType::ELEMENTAL_GOLEM) {
                     float rad = facingAngle * DEG2RAD;
                     Vector2 forwardDir = { cosf(rad), sinf(rad) };
@@ -881,7 +997,9 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
         state = EnemyState::DEAD;
         SoundFX::PlayEnemyDeath();
         particles.SpawnSparks(position, Color{ 200, 40, 40, 255 }, 25, 220.0f);
-        particles.SpawnFloatingText({ position.x, position.y - 10.0f }, (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM) ? "BOSS SLAIN" : "DEFEATED", Color{ 255, 100, 100, 255 }, 24.0f);
+        particles.SpawnFloatingText({ position.x, position.y - 10.0f }, 
+            (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::GALE_ARCHER_BOSS) ? "BOSS SLAIN" : "DEFEATED", 
+            Color{ 255, 100, 100, 255 }, 24.0f);
         return true;
     }
 

@@ -20,6 +20,7 @@
 #include "CrossroadsHandler.hpp"
 #include "ZyphdenHandler.hpp"
 #include "QuarryHandler.hpp"
+#include "RestlessMistForestHandler.hpp"
 
 class Game {
 public:
@@ -39,8 +40,11 @@ private:
     void EnterCrossroads();
     void EnterZyphden();
     void EnterQuarryDepths();
+    void EnterRestlessMistForest();
+    void ReturnFromRestlessMistForest();
     void EnterLobby();
     void EnterArena();
+    void ReturnFromArena();
     void SaveActiveGame();
     void LoadActiveGame(int slotIndex);
 
@@ -78,6 +82,7 @@ private:
     CrossroadsHandler crossroadsHandler;
     ZyphdenHandler zyphdenHandler;
     QuarryHandler quarryHandler;
+    RestlessMistForestHandler restlessMistForestHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 

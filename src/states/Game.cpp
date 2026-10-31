@@ -460,8 +460,28 @@ void Game::EnterRuinedCastle() {
 
     SaveActiveGame();
 
+}
 
+void Game::EnterRestlessMistForest() {
+    restlessMistForestHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::RESTLESS_MIST_FOREST;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
 
+void Game::ReturnFromRestlessMistForest() {
+    currentState = GameState::ZYPHDEN_REALM;
+    map.Init(MapEnvironment::ZYPHDEN_REALM);
+    player.SetPosition({ 80.0f, 700.0f });
+    camera.target = player.GetPosition();
+    projectiles.clear();
+    enemies.clear();
+    particles.Clear();
+    SaveActiveGame();
 }
 
 
@@ -678,47 +698,24 @@ void Game::EnterLobby() {
 
 
 
+
+void Game::ReturnFromArena() {
+    EnterZyphden();
+    player.SetPosition({ 1420.0f, 700.0f });
+    camera.target = player.GetPosition();
+    SaveActiveGame();
+}
+
 void Game::EnterArena() {
 
 
 
     map.Init(MapEnvironment::ARENA);
 
-
-
-    WeaponType keepWeapon = player.GetWeapon();
-
-
-
-    player.Init({ 1200.0f, 900.0f });
-
-
-
-    if (keepWeapon != WeaponType::NONE) {
-
-
-
-        player.SetWeapon(keepWeapon);
-
-
-
-    } else if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
-
-
-
-        player.SetWeapon(WeaponType::TRUTH_SEEKER);
-
-
-
-    } else if (player.GetInventory().HasWeapon(WeaponType::SWORD)) {
-
-
-
-        player.SetWeapon(WeaponType::SWORD);
-
-
-
-    }
+    // CRITICAL: Preserve all campaign weapons, modular armor sets, totems, and materials!
+    player.SetPosition({ 1200.0f, 900.0f });
+    player.SetHealth(player.GetMaxHealth());
+    player.ResetStamina();
 
 
 
@@ -859,6 +856,9 @@ void Game::SaveActiveGame() {
 
 
     data.oreScraps = player.GetInventory().GetOreScraps();
+    data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
+    data.shadowEssence = player.GetInventory().GetShadowEssence();
+    data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
 
 
 
@@ -1007,6 +1007,9 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.GetInventory().SetOreScraps(data.oreScraps);
+    player.GetInventory().SetEssenceOfMist(data.essenceOfMist);
+    player.GetInventory().SetShadowEssence(data.shadowEssence);
+    restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
 
 
 
@@ -2438,7 +2441,8 @@ void Game::Update(float dt) {
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
             [this]() { SaveArenaUnlock(); },
             [this]() { EnterLobby(); },
-            [this]() { EnterArena(); }
+            [this]() { EnterArena(); },
+            [this]() { EnterRestlessMistForest(); }
         );
 
 
@@ -2531,6 +2535,21 @@ void Game::Update(float dt) {
 
 
 
+    }
+
+    if (currentState == GameState::RESTLESS_MIST_FOREST) {
+        if (map.GetEnvironment() != MapEnvironment::RESTLESS_MIST_FOREST) {
+            map.Init(MapEnvironment::RESTLESS_MIST_FOREST);
+        }
+
+        restlessMistForestHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                ReturnFromRestlessMistForest();
+            },
+            [this]() { EnterLobby(); }
+        );
+        return;
     }
 
 
@@ -2915,11 +2934,11 @@ void Game::Update(float dt) {
 
 
 
-        if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE)) {
+        if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_T) || IsKeyPressed(KEY_ESCAPE)) {
 
 
 
-            EnterLobby();
+            ReturnFromArena();
 
 
 
@@ -3427,6 +3446,16 @@ void Game::Update(float dt) {
 
 
 
+    
+    // Return to Zyphden from Arena
+    Vector2 arenaExitPortal = { 1200.0f, 520.0f };
+    float distToExit = Vector2Distance(player.GetPosition(), arenaExitPortal);
+    if ((distToExit < 90.0f && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T))) || IsKeyPressed(KEY_T)) {
+        particles.SpawnFloatingText(player.GetPosition(), "RETURNING TO ZYPHDEN REALM...", Color{ 140, 210, 255, 255 }, 24.0f);
+        ReturnFromArena();
+        return;
+    }
+
     camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
 
 
@@ -3652,21 +3681,14 @@ void Game::RenderScene() {
 
 
         quarryHandler.Render(
-
-
-
             camera, map, enemies, projectiles, lootDrops, player, particles,
-
-
-
             w, h, false, false, 0, 0
-
-
-
         );
-
-
-
+    } else if (currentState == GameState::RESTLESS_MIST_FOREST) {
+        restlessMistForestHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
     } else if (currentState == GameState::LOBBY) {
 
 
@@ -3817,6 +3839,23 @@ void Game::RenderScene() {
 
         map.DrawFloor();
 
+        // Arena Return Gateway Portal
+        Vector2 exitPortal = { 1200.0f, 520.0f };
+        float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
+        DrawCircleV(exitPortal, 46.0f + 4.0f * pulse, Color{ 80, 160, 240, 40 });
+        DrawCircleLines((int)exitPortal.x, (int)exitPortal.y, 42.0f, Color{ 120, 200, 255, 180 });
+        DrawCircleLines((int)exitPortal.x, (int)exitPortal.y, 28.0f, Color{ 160, 220, 255, 220 });
+        DrawCircleV(exitPortal, 14.0f + 2.0f * pulse, Color{ 200, 240, 255, 200 });
+        float distToExit = Vector2Distance(player.GetPosition(), exitPortal);
+        if (distToExit < 120.0f) {
+            const char* prompt = "[E] / [T] RETURN TO ZYPHDEN REALM";
+            int tw = MeasureText(prompt, 18);
+            DrawRectangleRounded({ exitPortal.x - tw / 2.0f - 10.0f, exitPortal.y - 65.0f, tw + 20.0f, 26.0f }, 0.3f, 4, Color{ 15, 20, 30, 220 });
+            DrawRectangleRoundedLines({ exitPortal.x - tw / 2.0f - 10.0f, exitPortal.y - 65.0f, tw + 20.0f, 26.0f }, 0.3f, 4, Color{ 140, 200, 255, 255 });
+            DrawText(prompt, (int)(exitPortal.x - tw / 2.0f), (int)(exitPortal.y - 60.0f), 18, Color{ 220, 245, 255, 255 });
+        }
+
+
 
 
 
@@ -3960,6 +3999,7 @@ void Game::RenderScene() {
 
 
         GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+        DrawText("[T] RETURN TO REALM", 24, h - 36, 16, Color{ 160, 210, 255, 200 });
 
 
 

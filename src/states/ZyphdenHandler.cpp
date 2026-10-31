@@ -644,9 +644,11 @@ void ZyphdenHandler::Update(
     const std::function<void()>& onSaveArenaUnlock,
 
     const std::function<void()>& onEnterLobby,
-    const std::function<void()>& onEnterArena
+    const std::function<void()>& onEnterArena,
+    const std::function<void()>& onEnterRestlessMistForest
 ) {
     onEnterArenaCallback = onEnterArena;
+    onEnterMistForestCallback = onEnterRestlessMistForest;
 
     Vector2 mouseScreen = GetMousePosition();
 
@@ -659,6 +661,16 @@ void ZyphdenHandler::Update(
     }
 
 
+
+    // Western Archway: Restless Mist Forest
+    Vector2 westForestGate = { 40.0f, 700.0f };
+    float distToWestGate = Vector2Distance(player.GetPosition(), westForestGate);
+    if (distToWestGate <= 75.0f) {
+        if (IsKeyPressed(KEY_E) && onEnterMistForestCallback) {
+            onEnterMistForestCallback();
+            return;
+        }
+    }
 
     if (doorCooldown > 0.0f) {
 
@@ -2630,18 +2642,23 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             const char* setStr;
             Color accentColor;
             const char* desc;
+            int mistCost;
+            int shadowCost;
         };
 
-        ArmorCraftRecipe armorRecipes[6] = {
-            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw quarry slag." },
-            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap iron breastplate. Stout physical resilience." },
-            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal shin protectors granting stable footwork." },
-            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic stone crest imbued with primordial earth." },
-            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron bands." },
-            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense volcanic stone greaves that crush gravel with each step." }
+        ArmorCraftRecipe armorRecipes[9] = {
+            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw quarry slag.", 0, 0 },
+            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap iron breastplate. Stout physical resilience.", 0, 0 },
+            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal shin protectors granting stable footwork.", 0, 0 },
+            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic stone crest imbued with primordial earth.", 0, 0 },
+            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron bands.", 0, 0 },
+            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense volcanic stone greaves that crush gravel with each step.", 0, 0 },
+            { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Hood woven from mist essence. Sharpens wind reflexes.", 2, 1 },
+            { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence. Swift as a zephyr.", 4, 2 },
+            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings enabling silent, agile strides.", 3, 1 }
         };
 
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 9; ++i) {
             int col = i % 2;
             int row = i / 2;
             float cardX = modalX + 28.0f + (float)col * 416.0f;
@@ -2689,8 +2706,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 DrawText("FORGE & EQUIP PIECE", (int)btnRec.x + (int)(btnRec.width - MeasureText("FORGE & EQUIP PIECE", 11)) / 2, (int)btnRec.y + 7, 11, Color{ 255, 235, 130, 255 });
 
                 if (isBtnHov && isMousePressed) {
-                    player.GetInventory().AddOreScraps(-armorRecipes[i].scrapCost);
-                    player.GetInventory().AddShingles(-armorRecipes[i].shingleCost);
+                    if (armorRecipes[i].scrapCost > 0) player.GetInventory().SpendOreScraps(armorRecipes[i].scrapCost);
+                    if (armorRecipes[i].shingleCost > 0) player.GetInventory().SpendShingles(armorRecipes[i].shingleCost);
+                    if (armorRecipes[i].mistCost > 0) player.GetInventory().SpendEssenceOfMist(armorRecipes[i].mistCost);
+                    if (armorRecipes[i].shadowCost > 0) player.GetInventory().SpendShadowEssence(armorRecipes[i].shadowCost);
                     if (armorRecipes[i].category == 0) player.SetHelmet((HelmetType)armorRecipes[i].id);
                     else if (armorRecipes[i].category == 1) player.SetChestplate((ChestplateType)armorRecipes[i].id);
                     else if (armorRecipes[i].category == 2) player.SetLeggings((LeggingsType)armorRecipes[i].id);

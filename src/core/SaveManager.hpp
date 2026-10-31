@@ -11,6 +11,10 @@ struct SaveSlotSummary {
     float playerMaxHealth = 100.0f;
     int shingles = 0;
     int oreScraps = 0;
+    int essenceOfMist = 0;
+    int shadowEssence = 0;
+    bool galeArcherDefeated = false;
+    int arenaHighestWave = 0;
     int potionCount = 1;
     int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker, 5: Halberd
     int equippedArmor = 0;
@@ -37,6 +41,9 @@ struct GameSaveData {
     int potionCount = 1;
     int shingles = 0;
     int oreScraps = 0;
+    int essenceOfMist = 0;
+    int shadowEssence = 0;
+    bool galeArcherDefeated = false;
     int equippedWeapon = 1;
     int equippedArmor = 0;
     int equippedHelmet = 0;

@@ -9,7 +9,9 @@ enum class ProjectileType {
     NOVA_STAR,      // Boss radial star
     BEAM_SHARD,     // Boss focused beam / shard
     HOLY_BEAM,      // Truth Seeker piercing holy beam
-    ELEMENTAL_BOLT  // Elemental Golem & Elemental Core Totem projectile
+    ELEMENTAL_BOLT, // Elemental Golem & Elemental Core Totem projectile
+    GALE_ARROW,     // Gale Archer high-speed wind piercing projectile
+    THROWING_DAGGER // Gale Bandit throwing knife
 };
 
 class Projectile {

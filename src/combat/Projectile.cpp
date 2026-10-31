@@ -31,6 +31,14 @@ Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, Pro
             maxLifetime = 2.4f;
             color = isFromPlayer ? Color{ 255, 140, 45, 255 } : Color{ 255, 90, 50, 255 };
             break;
+        case ProjectileType::GALE_ARROW:
+            maxLifetime = 2.2f;
+            color = Color{ 110, 245, 225, 255 };
+            break;
+        case ProjectileType::THROWING_DAGGER:
+            maxLifetime = 1.5f;
+            color = Color{ 210, 225, 245, 255 };
+            break;
     }
 }
 
