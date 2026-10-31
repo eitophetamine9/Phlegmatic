@@ -460,8 +460,131 @@ void Game::EnterRuinedCastle() {
 
     SaveActiveGame();
 
+}
 
+void Game::EnterRestlessMistForest() {
+    restlessMistForestHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::RESTLESS_MIST_FOREST;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
 
+void Game::ReturnFromRestlessMistForest() {
+    currentState = GameState::ZYPHDEN_REALM;
+    map.Init(MapEnvironment::ZYPHDEN_REALM);
+    player.SetPosition({ 260.0f, 730.0f });
+    camera.target = player.GetPosition();
+    projectiles.clear();
+    enemies.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
+void Game::StartRealmTransition(const std::function<void()>& onSwitch, const std::string& title, const std::string& subtitle, float fadeOut, float hold, float fadeIn) {
+    if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
+        screenTransition.onMidpointSwitch = onSwitch;
+        screenTransition.realmTitle = title;
+        screenTransition.realmSubtitle = subtitle;
+        return;
+    }
+
+    screenTransition.mode = ScreenFadeMode::FADE_OUT;
+    screenTransition.timer = 0.0f;
+    screenTransition.alpha = 0.0f;
+    screenTransition.fadeOutDuration = (fadeOut > 0.05f) ? fadeOut : 0.35f;
+    screenTransition.holdDuration = (hold >= 0.0f) ? hold : 0.25f;
+    screenTransition.fadeInDuration = (fadeIn > 0.05f) ? fadeIn : 0.40f;
+    screenTransition.onMidpointSwitch = onSwitch;
+    screenTransition.realmTitle = title;
+    screenTransition.realmSubtitle = subtitle;
+}
+
+bool Game::IsTransitionActive() const {
+    return screenTransition.mode == ScreenFadeMode::FADE_OUT || screenTransition.mode == ScreenFadeMode::HOLD;
+}
+
+void Game::UpdateScreenTransition(float dt) {
+    if (screenTransition.mode == ScreenFadeMode::NONE) return;
+
+    screenTransition.timer += dt;
+
+    if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
+        screenTransition.alpha = screenTransition.timer / screenTransition.fadeOutDuration;
+        if (screenTransition.alpha >= 1.0f) {
+            screenTransition.alpha = 1.0f;
+            screenTransition.mode = ScreenFadeMode::HOLD;
+            screenTransition.timer = 0.0f;
+
+            if (screenTransition.onMidpointSwitch) {
+                auto callback = screenTransition.onMidpointSwitch;
+                screenTransition.onMidpointSwitch = nullptr;
+                callback();
+            }
+        }
+    } else if (screenTransition.mode == ScreenFadeMode::HOLD) {
+        screenTransition.alpha = 1.0f;
+        if (screenTransition.timer >= screenTransition.holdDuration) {
+            screenTransition.mode = ScreenFadeMode::FADE_IN;
+            screenTransition.timer = 0.0f;
+        }
+    } else if (screenTransition.mode == ScreenFadeMode::FADE_IN) {
+        screenTransition.alpha = 1.0f - (screenTransition.timer / screenTransition.fadeInDuration);
+        if (screenTransition.alpha <= 0.0f) {
+            screenTransition.alpha = 0.0f;
+            screenTransition.mode = ScreenFadeMode::NONE;
+            screenTransition.timer = 0.0f;
+            screenTransition.realmTitle.clear();
+            screenTransition.realmSubtitle.clear();
+        }
+    }
+}
+
+void Game::RenderScreenTransition() {
+    if (screenTransition.mode == ScreenFadeMode::NONE || screenTransition.alpha <= 0.001f) {
+        return;
+    }
+
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+
+    float clampedAlpha = screenTransition.alpha;
+    if (clampedAlpha > 1.0f) clampedAlpha = 1.0f;
+    if (clampedAlpha < 0.0f) clampedAlpha = 0.0f;
+
+    Color fadeColor = Color{ 8, 10, 16, (unsigned char)(255.0f * clampedAlpha) };
+    DrawRectangle(0, 0, sw, sh, fadeColor);
+
+    if (screenTransition.alpha >= 0.35f && !screenTransition.realmTitle.empty()) {
+        float textAlpha = (screenTransition.alpha - 0.35f) / 0.65f;
+        if (textAlpha > 1.0f) textAlpha = 1.0f;
+        if (textAlpha < 0.0f) textAlpha = 0.0f;
+
+        Color titleColor = Color{ 255, 230, 130, (unsigned char)(255 * textAlpha) };
+        Color subColor = Color{ 175, 220, 245, (unsigned char)(220 * textAlpha) };
+        Color lineGold = Color{ 230, 195, 95, (unsigned char)(190 * textAlpha) };
+        Color diamondColor = Color{ 110, 245, 220, (unsigned char)(230 * textAlpha) };
+
+        int centerY = sh / 2;
+
+        Vector2 diamondCenter = { (float)sw * 0.5f, (float)centerY - 45.0f };
+        DrawPoly(diamondCenter, 4, 10.0f, 45.0f, diamondColor);
+        DrawPolyLines(diamondCenter, 4, 14.0f, 45.0f, Color{ 255, 255, 255, (unsigned char)(140 * textAlpha) });
+
+        FontManager::DrawTextTitleCenteredShadow(screenTransition.realmTitle, sw / 2, centerY - 20, 30, titleColor);
+
+        float lineWidth = 340.0f * textAlpha;
+        DrawLineEx({ (float)sw * 0.5f - lineWidth * 0.5f, (float)centerY + 18.0f },
+                   { (float)sw * 0.5f + lineWidth * 0.5f, (float)centerY + 18.0f },
+                   2.0f, lineGold);
+
+        if (!screenTransition.realmSubtitle.empty()) {
+            FontManager::DrawTextCenteredShadow(screenTransition.realmSubtitle, sw / 2, centerY + 30, 14, subColor);
+        }
+    }
 }
 
 
@@ -678,47 +801,24 @@ void Game::EnterLobby() {
 
 
 
+
+void Game::ReturnFromArena() {
+    EnterZyphden();
+    player.SetPosition({ 1420.0f, 700.0f });
+    camera.target = player.GetPosition();
+    SaveActiveGame();
+}
+
 void Game::EnterArena() {
 
 
 
     map.Init(MapEnvironment::ARENA);
 
-
-
-    WeaponType keepWeapon = player.GetWeapon();
-
-
-
-    player.Init({ 1200.0f, 900.0f });
-
-
-
-    if (keepWeapon != WeaponType::NONE) {
-
-
-
-        player.SetWeapon(keepWeapon);
-
-
-
-    } else if (player.GetInventory().HasWeapon(WeaponType::TRUTH_SEEKER)) {
-
-
-
-        player.SetWeapon(WeaponType::TRUTH_SEEKER);
-
-
-
-    } else if (player.GetInventory().HasWeapon(WeaponType::SWORD)) {
-
-
-
-        player.SetWeapon(WeaponType::SWORD);
-
-
-
-    }
+    // CRITICAL: Preserve all campaign weapons, modular armor sets, totems, and materials!
+    player.SetPosition({ 1200.0f, 900.0f });
+    player.SetHealth(player.GetMaxHealth());
+    player.ResetStamina();
 
 
 
@@ -859,6 +959,9 @@ void Game::SaveActiveGame() {
 
 
     data.oreScraps = player.GetInventory().GetOreScraps();
+    data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
+    data.shadowEssence = player.GetInventory().GetShadowEssence();
+    data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
 
 
 
@@ -1007,6 +1110,9 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.GetInventory().SetOreScraps(data.oreScraps);
+    player.GetInventory().SetEssenceOfMist(data.essenceOfMist);
+    player.GetInventory().SetShadowEssence(data.shadowEssence);
+    restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
 
 
 
@@ -1123,6 +1229,14 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
         EnterQuarryDepths();
+
+
+
+    } else if (targetState == GameState::RESTLESS_MIST_FOREST) {
+
+
+
+        EnterRestlessMistForest();
 
 
 
@@ -1256,7 +1370,11 @@ void Game::LoadActiveGame(int slotIndex) {
 
     isRestoringSave = false;
 
-
+    // Smooth realm fade-in upon loading
+    screenTransition.mode = ScreenFadeMode::FADE_IN;
+    screenTransition.alpha = 1.0f;
+    screenTransition.fadeInDuration = 0.5f;
+    screenTransition.timer = 0.0f;
 
 }
 
@@ -1275,6 +1393,14 @@ void Game::Update(float dt) {
 
 
     camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
+
+    UpdateScreenTransition(dt);
+
+    // Shield input and damage during blackout transition
+    if (IsTransitionActive()) {
+        SoundFX::UpdateAmbience(dt, (int)currentState);
+        return;
+    }
 
 
 
@@ -2162,7 +2288,11 @@ void Game::Update(float dt) {
 
 
 
-            EnterCrossroads();
+            StartRealmTransition(
+                [this]() { EnterCrossroads(); },
+                "THE CROSSROADS OF THE DAMNED",
+                "Ancient Highway of Divided Faiths"
+            );
 
 
 
@@ -2278,11 +2408,14 @@ void Game::Update(float dt) {
 
 
 
-            EnterZyphden();
-
-
-
-            currentState = GameState::ZYPHDEN_REALM;
+            StartRealmTransition(
+                [this]() {
+                    EnterZyphden();
+                    currentState = GameState::ZYPHDEN_REALM;
+                },
+                "FORTIFIED REALM OF ZYPHDEN",
+                "Seat of King Kreptu & The Vanguard"
+            );
 
 
 
@@ -2382,7 +2515,13 @@ void Game::Update(float dt) {
 
 
 
-            EnterQuarryDepths();
+            StartRealmTransition(
+                [this]() {
+                    EnterQuarryDepths();
+                },
+                "SUBTERRANEAN QUARRY DEPTHS",
+                "Domain of the Ore Golems & Primordial Altar"
+            );
 
 
 
@@ -2435,21 +2574,23 @@ void Game::Update(float dt) {
 
 
         zyphdenHandler.Update(
-
-
-
             dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState, testArenaUnlocked,
-
-
-
             [this]() { SaveArenaUnlock(); },
-
-
-
-            [this]() { EnterLobby(); }
-
-
-
+            [this]() { EnterLobby(); },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterArena(); },
+                    "THE ROYAL COMBAT ARENA",
+                    "20 Waves of Humoral Trials & Boss Encounters"
+                );
+            },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterRestlessMistForest(); },
+                    "RESTLESS MIST FOREST",
+                    "Haunt of the Gale Bandits & The Whispering Altar"
+                );
+            }
         );
 
 
@@ -2498,31 +2639,20 @@ void Game::Update(float dt) {
 
 
 
-                map.Init(MapEnvironment::ZYPHDEN_REALM);
-
-
-
-                player.SetPosition({ 1620.0f, 700.0f });
-
-
-
-                camera.target = player.GetPosition();
-
-
-
-                currentState = GameState::ZYPHDEN_REALM;
-
-
-
-                enemies.clear();
-
-
-
-                projectiles.clear();
-
-
-
-                particles.Clear();
+                StartRealmTransition(
+                    [this]() {
+                        map.Init(MapEnvironment::ZYPHDEN_REALM);
+                        player.SetPosition({ 1620.0f, 700.0f });
+                        camera.target = player.GetPosition();
+                        currentState = GameState::ZYPHDEN_REALM;
+                        enemies.clear();
+                        projectiles.clear();
+                        particles.Clear();
+                        SaveActiveGame();
+                    },
+                    "FORTIFIED REALM OF ZYPHDEN",
+                    "Courtyard of the Northern Vanguard"
+                );
 
 
 
@@ -2542,6 +2672,25 @@ void Game::Update(float dt) {
 
 
 
+    }
+
+    if (currentState == GameState::RESTLESS_MIST_FOREST) {
+        if (map.GetEnvironment() != MapEnvironment::RESTLESS_MIST_FOREST) {
+            map.Init(MapEnvironment::RESTLESS_MIST_FOREST);
+        }
+
+        restlessMistForestHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                StartRealmTransition(
+                    [this]() { ReturnFromRestlessMistForest(); },
+                    "FORTIFIED REALM OF ZYPHDEN",
+                    "Seat of King Kreptu & The Vanguard"
+                );
+            },
+            [this]() { EnterLobby(); }
+        );
+        return;
     }
 
 
@@ -2926,11 +3075,15 @@ void Game::Update(float dt) {
 
 
 
-        if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_ESCAPE)) {
+        if (IsKeyPressed(KEY_L) || IsKeyPressed(KEY_T) || IsKeyPressed(KEY_ESCAPE)) {
 
 
 
-            EnterLobby();
+            StartRealmTransition(
+                [this]() { ReturnFromArena(); },
+                "FORTIFIED REALM OF ZYPHDEN",
+                "Return from the Arena of Trials"
+            );
 
 
 
@@ -3438,6 +3591,20 @@ void Game::Update(float dt) {
 
 
 
+    
+    // Return to Zyphden from Arena
+    Vector2 arenaExitPortal = { 1200.0f, 520.0f };
+    float distToExit = Vector2Distance(player.GetPosition(), arenaExitPortal);
+    if ((distToExit < 90.0f && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T))) || IsKeyPressed(KEY_T)) {
+        particles.SpawnFloatingText(player.GetPosition(), "RETURNING TO ZYPHDEN REALM...", Color{ 140, 210, 255, 255 }, 24.0f);
+        StartRealmTransition(
+            [this]() { ReturnFromArena(); },
+            "FORTIFIED REALM OF ZYPHDEN",
+            "Return from the Arena of Trials"
+        );
+        return;
+    }
+
     camera.target = Vector2Lerp(camera.target, desiredTarget, 8.0f * dt);
 
 
@@ -3663,21 +3830,14 @@ void Game::RenderScene() {
 
 
         quarryHandler.Render(
-
-
-
             camera, map, enemies, projectiles, lootDrops, player, particles,
-
-
-
             w, h, false, false, 0, 0
-
-
-
         );
-
-
-
+    } else if (currentState == GameState::RESTLESS_MIST_FOREST) {
+        restlessMistForestHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
     } else if (currentState == GameState::LOBBY) {
 
 
@@ -3828,6 +3988,23 @@ void Game::RenderScene() {
 
         map.DrawFloor();
 
+        // Arena Return Gateway Portal
+        Vector2 exitPortal = { 1200.0f, 520.0f };
+        float pulse = 0.5f + 0.5f * sinf(time * 3.0f);
+        DrawCircleV(exitPortal, 46.0f + 4.0f * pulse, Color{ 80, 160, 240, 40 });
+        DrawCircleLines((int)exitPortal.x, (int)exitPortal.y, 42.0f, Color{ 120, 200, 255, 180 });
+        DrawCircleLines((int)exitPortal.x, (int)exitPortal.y, 28.0f, Color{ 160, 220, 255, 220 });
+        DrawCircleV(exitPortal, 14.0f + 2.0f * pulse, Color{ 200, 240, 255, 200 });
+        float distToExit = Vector2Distance(player.GetPosition(), exitPortal);
+        if (distToExit < 120.0f) {
+            const char* prompt = "[E] / [T] RETURN TO ZYPHDEN REALM";
+            int tw = MeasureText(prompt, 18);
+            DrawRectangleRounded({ exitPortal.x - tw / 2.0f - 10.0f, exitPortal.y - 65.0f, tw + 20.0f, 26.0f }, 0.3f, 4, Color{ 15, 20, 30, 220 });
+            DrawRectangleRoundedLines({ exitPortal.x - tw / 2.0f - 10.0f, exitPortal.y - 65.0f, tw + 20.0f, 26.0f }, 0.3f, 4, Color{ 140, 200, 255, 255 });
+            DrawText(prompt, (int)(exitPortal.x - tw / 2.0f), (int)(exitPortal.y - 60.0f), 18, Color{ 220, 245, 255, 255 });
+        }
+
+
 
 
 
@@ -3971,6 +4148,7 @@ void Game::RenderScene() {
 
 
         GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+        DrawText("[T] RETURN TO REALM", 24, h - 36, 16, Color{ 160, 210, 255, 200 });
 
 
 
@@ -4160,7 +4338,8 @@ void Game::Render() {
 
     RenderScene();
 
-
+    // Universal Realm Transition Fade Overlay
+    RenderScreenTransition();
 
     EndDrawing();
 

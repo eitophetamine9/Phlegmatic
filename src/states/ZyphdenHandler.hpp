@@ -84,7 +84,9 @@ public:
         GameState& currentState,
         bool& testArenaUnlocked,
         const std::function<void()>& onSaveArenaUnlock,
-        const std::function<void()>& onEnterLobby
+        const std::function<void()>& onEnterLobby,
+        const std::function<void()>& onEnterArena = nullptr,
+        const std::function<void()>& onEnterRestlessMistForest = nullptr
     );
 
     void Render(
@@ -111,6 +113,8 @@ public:
     void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
+    std::function<void()> onEnterArenaCallback = nullptr;
+    std::function<void()> onEnterMistForestCallback = nullptr;
     // Core NPCs
     ZyphdenNPC eldon;
     ZyphdenNPC noticeboard;
@@ -143,6 +147,7 @@ private:
     bool inTavern = false;
     bool inForge = false;
     int forgeTab = 0;
+    int armorForgePage = 0;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };

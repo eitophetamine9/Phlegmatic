@@ -54,6 +54,7 @@
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
 | **Title Screen** | `~ Key` (Tilde / Grave) | Instantly return to the Title Screen from any state. |
 | **Restart / Respawn** | `R Key` | Instantly respawn after defeat or restart the trial. |
+| **Return from Arena** | `T Key` | Teleport from Combat Arena back to Knight Lenon in Zyphden. |
 
 ---
 
@@ -63,6 +64,46 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
+> * **Universal Screen Fade & Realm Transition System**:
+  - Implemented a smooth cinematic transition system across all realm and map boundaries:
+    - Zyphden <-> Restless Mist Forest
+    - Zyphden <-> Royal Combat Arena
+    - Zyphden <-> Subterranean Quarry Depths
+    - Crossroads <-> Zyphden Realm
+    - Ruined Castle <-> Crossroads
+  - Transitions fade smoothly to full blackout (`ScreenFadeMode::FADE_OUT`, 0.35s), display a stylized gold and runic realm title card and subtitle during hold (`HOLD`, 0.25s) while executing map loading and player positioning at the midpoint, and then smoothly fade back into the destination landing screen (`FADE_IN`, 0.40s).
+  - Input shielding during blackout prevents unintended player movement, skill activation, or combat damage during map transitions.
+  - Fixes the Restless Mist Forest black screen bug by providing a complete 2D camera world render pass and combat update loop.
+  - Smooth fade-in also accompanies save game loading, eliminating visual jarring or sudden screen snaps.
+* **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
+>   - Journey through the western gates of Zyphden into the atmospheric **Restless Mist Forest** (1800x1300 woodland expanse).
+>   - Encounter respawning **Gale Bandits**—agile dual-dagger skirmishers who throw swift daggers and drop Silver Shingles and **Essence of Mist** (35% drop rate; strictly NO Ore Scraps).
+>   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist.
+>   - Defeat the Gale Archer across 3 telegraphed combat phases (Triple Windshot, Gale Piercer Beam, and Storm Rain Barrage) to earn guaranteed **Shadow Essence** and roll for the sacred **Totem of Mist** at an exact **15% drop rate** (strictly NO Ore Scraps).
+> * **Shadowstrider Armor Set Crafting & Forge Pagination**:
+>   - Blacksmith Varek in Zyphden now features **paginated armor crafting** under Tab 3 `[3] ARMOR FORGE (9)` (Page 1: Forged Scrap-Iron & Basalt Golem, Page 2: Shadowstrider) with clickable `[< PREV PAGE]` and `[NEXT PAGE >]` buttons and A/D / Arrow key navigation, eliminating UI overlap.
+>   - Header now live-tracks all 4 crafting materials: Silver Shingles, Ore Scraps, **Essence of Mist**, and **Shadow Essence**.
+>   - Strictly enforces component requirements for crafting Shadowstrider pieces: Cowl (2 Mist + 1 Shadow + 30 Shingles), Doublet (4 Mist + 2 Shadow + 50 Shingles), and Tights (3 Mist + 1 Shadow + 40 Shingles); pieces cannot be forged with shingles alone.
+> * **Western Access Gate to Restless Mist Forest**:
+>   - Extended Zyphden Realm western bounds to X: 100 and paved a cobblestone/moss pathway through the western alleyway (between Workshop and Tavern) connecting Town Square directly to the **Western Mist Archway** at `{ 160.0f, 730.0f }`.
+>   - Features an ethereal glowing cyan portal, road signpost, and interactive floating prompt `[E] ENTER RESTLESS MIST FOREST`.
+>   - Blacksmith Varek in Zyphden can now craft the agility-focused **Shadowstrider Set** (Cowl, Doublet, Tights) in Tab 3 using Essence of Mist, Shadow Essence, and Silver Shingles.
+>   - Full 3/3 Set Bonus *Veil of the Mist* grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, +40% extended Dodge i-frames, and the active signature skill **Shadow Decoy & Vanish** ([V] key, 25s CD, 0.5s i-frames, creates an aggro-drawing illusion decoy that explodes for 40 shadow dmg).
+> * **Royal Combat Arena 20-Wave Expansion & Difficulty Curve**:
+>   - Expanded Arena from 5 waves to **20 escalating waves** featuring advanced humoral synergies across all enemy archetypes.
+>   - Major boss encounters scheduled every 5 waves:
+>     - **Wave 5**: *The Grand Inquisitor* + Pyromancers + Brute
+>     - **Wave 10**: *Zil's Remnant* (Truth Seeker duel) + Chargers + Archers
+>     - **Wave 15**: *The Gale Archer* + Gale Bandits + Chargers
+>     - **Wave 20**: *The Primordial Elemental Golem Titan* + Mini Golems + Pyromancers
+> * **Knight Lenon Arena Gating & Sanctuary Teleport Gateway**:
+>   - Removed the direct Combat Arena shortcut button from the title screen.
+>   - Arena is now exclusively accessible within the campaign by speaking with Knight Lenon in Zyphden Courtyard after proving your worth by defeating him in the sparring duel (`[R] ENTER ARENA (20 WAVES)`).
+>   - An active **Exit Sanctuary Portal** at `{ 1200.0f, 520.0f }` and quick shortcut key **`[T]`** allow seamless teleportation from the Arena back to Knight Lenon in Zyphden at any time without losing campaign inventory or progression.
+> * **Equipment HUD Overhaul & Text Word-Wrapping**:
+>   - Expanded equipment modal to a spacious 1560x860 canvas with diamond loadout badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for modular armor, weapons, single totem relic, and material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence).
+>   - Right side features a 1.75x Hero showcase paper doll upon a glowing runic dais accompanied by live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
+>   - Implemented strict word wrapping on item drawer cards and set bonus descriptions via `FontManager::DrawTextWrapped` to eliminate horizontal text clipping across all display resolutions.
 > * **Modular 3-Piece Armor System & Full Set Bonuses**:
 >   - Replaced monolithic suits with 3 modular equippable slots: **Helmet**, **Chestplate**, and **Leggings** (strictly NO boots, gloves, or rings).
 >   - Equipping a matching 3/3 set activates unique passive stat bonuses and an active signature skill triggered by the **`[V]`** key:

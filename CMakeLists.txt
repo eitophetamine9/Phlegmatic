@@ -31,6 +31,7 @@ set(SOURCES
     src/states/CrossroadsHandler.cpp
     src/states/ZyphdenHandler.cpp
     src/states/QuarryHandler.cpp
+    src/states/RestlessMistForestHandler.cpp
     src/states/Game.cpp
 )
 

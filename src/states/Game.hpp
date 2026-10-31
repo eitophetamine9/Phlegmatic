@@ -20,8 +20,33 @@
 #include "CrossroadsHandler.hpp"
 #include "ZyphdenHandler.hpp"
 #include "QuarryHandler.hpp"
+#include "RestlessMistForestHandler.hpp"
+#include <functional>
+#include <string>
+
+enum class ScreenFadeMode {
+    NONE,
+    FADE_OUT,
+    HOLD,
+    FADE_IN
+};
+
+struct RealmTransition {
+    ScreenFadeMode mode = ScreenFadeMode::NONE;
+    float alpha = 0.0f;
+    float timer = 0.0f;
+    float fadeOutDuration = 0.35f;
+    float holdDuration = 0.25f;
+    float fadeInDuration = 0.40f;
+    std::function<void()> onMidpointSwitch = nullptr;
+    std::string realmTitle = "";
+    std::string realmSubtitle = "";
+};
 
 class Game {
+public:
+    void StartRealmTransition(const std::function<void()>& onSwitch, const std::string& title = "", const std::string& subtitle = "", float fadeOut = 0.35f, float hold = 0.25f, float fadeIn = 0.40f);
+    bool IsTransitionActive() const;
 public:
     Game();
     ~Game();
@@ -39,8 +64,11 @@ private:
     void EnterCrossroads();
     void EnterZyphden();
     void EnterQuarryDepths();
+    void EnterRestlessMistForest();
+    void ReturnFromRestlessMistForest();
     void EnterLobby();
     void EnterArena();
+    void ReturnFromArena();
     void SaveActiveGame();
     void LoadActiveGame(int slotIndex);
 
@@ -78,6 +106,7 @@ private:
     CrossroadsHandler crossroadsHandler;
     ZyphdenHandler zyphdenHandler;
     QuarryHandler quarryHandler;
+    RestlessMistForestHandler restlessMistForestHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 
@@ -89,4 +118,9 @@ private:
     // Virtual Viewport & Window State
     RenderTexture2D virtualTarget;
     bool isFullscreen;
+
+    // Universal Realm Transition & Fade
+    RealmTransition screenTransition;
+    void UpdateScreenTransition(float dt);
+    void RenderScreenTransition();
 };

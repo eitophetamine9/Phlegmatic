@@ -45,39 +45,8 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
     int playW = FontManager::MeasureText(playText, playSize);
     FontManager::DrawText(playText, (int)(center.x - playW * 0.5f), (int)(playY + 14), playSize, playHovered ? Color{ 255, 255, 255, 255 } : Color{ 210, 230, 255, 240 });
 
-    // 2. TEST ARENA BUTTON
-    float arenaBtnY = playY + btnHeight + btnGap;
-    Rectangle arenaRec = { btnX, arenaBtnY, btnWidth, btnHeight };
-    bool arenaHovered = CheckCollisionPointRec(mousePos, arenaRec);
-
-    if (isArenaUnlocked) {
-        Color arenaBg = arenaHovered ? Color{ 75, 45, 105, 255 } : Color{ 36, 24, 52, 230 };
-        Color arenaBorder = arenaHovered ? Color{ 255, 215, 80, 255 } : Color{ 175, 110, 230, 240 };
-        DrawRectangleRounded(arenaRec, 0.25f, 6, arenaBg);
-        DrawRectangleRoundedLines(arenaRec, 0.25f, 6, arenaBorder);
-
-        const char* arenaText = "TEST ARENA - 5 STAGES";
-        int arenaSize = 16;
-        int arenaW = FontManager::MeasureText(arenaText, arenaSize);
-        FontManager::DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 15), arenaSize, arenaHovered ? Color{ 255, 255, 255, 255 } : Color{ 235, 205, 255, 240 });
-    } else {
-        DrawRectangleRounded(arenaRec, 0.25f, 6, Color{ 18, 20, 28, 160 });
-        DrawRectangleRoundedLines(arenaRec, 0.25f, 6, Color{ 45, 52, 68, 160 });
-
-        const char* arenaText = "TEST ARENA [LOCKED]";
-        int arenaSize = 15;
-        int arenaW = FontManager::MeasureText(arenaText, arenaSize);
-        FontManager::DrawText(arenaText, (int)(center.x - arenaW * 0.5f), (int)(arenaBtnY + 16), arenaSize, Color{ 110, 120, 140, 180 });
-
-        if (arenaHovered && !showSlotModal) {
-            const char* lockMsg = "Duel Zil's Fragment in Chapter 1 to unlock the 5-Stage Combat Arena";
-            int lmW = FontManager::MeasureText(lockMsg, 12);
-            FontManager::DrawText(lockMsg, (int)(center.x - lmW * 0.5f), (int)(windowHeight - 72), 12, Color{ 255, 180, 70, 240 });
-        }
-    }
-
-    // 3. CONTROLS BUTTON
-    float ctrlBtnY = arenaBtnY + btnHeight + btnGap;
+    // 2. CONTROLS BUTTON
+    float ctrlBtnY = playY + btnHeight + btnGap;
     Rectangle ctrlRec = { btnX, ctrlBtnY, btnWidth, btnHeight };
     bool ctrlHovered = CheckCollisionPointRec(mousePos, ctrlRec);
 
@@ -93,9 +62,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
 
     // Quick Hint at bottom
     if (!showSlotModal) {
-        const char* hint = isArenaUnlocked
-            ? "Select [PLAY CAMPAIGN] to choose a Save Record  |  [TEST ARENA] for Combat Waves"
-            : "Select [PLAY CAMPAIGN] to begin or continue your Pilgrimage";
+        const char* hint = "Select [PLAY CAMPAIGN] to begin or continue your Pilgrimage";
         int hintW = FontManager::MeasureText(hint, 13);
         FontManager::DrawText(hint, (int)(center.x - hintW * 0.5f), (int)(windowHeight - 45), 13, Color{ 140, 165, 195, 200 });
 
@@ -106,10 +73,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
                 deletingSlotIndex = 0;
                 return 0;
             }
-            if (isArenaUnlocked && arenaHovered) {
-                SoundFX::PlayEquipWeapon();
-                return 2; // Test Arena
-            }
+
             if (ctrlHovered) {
                 SoundFX::PlayButtonClick();
                 return 1; // Controls

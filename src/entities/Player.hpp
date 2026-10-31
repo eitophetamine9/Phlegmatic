@@ -80,6 +80,7 @@ public:
     float GetMaxHealth() const;
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
+    void ResetStamina() { stamina = maxStamina; }
     bool IsParrying() const { return isParrying; }
     bool IsDashing() const { return isDashing; }
     bool IsAlive() const { return health > 0.0f; }

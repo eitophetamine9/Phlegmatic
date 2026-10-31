@@ -146,6 +146,10 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 58, 62, 72, 255 }; // Compact volcanic basalt
     } else if (enemy.type == EnemyType::ELEMENTAL_GOLEM) {
         bodyColor = Color{ 36, 40, 50, 255 }; // Primordial dark basalt titan
+    } else if (enemy.type == EnemyType::GALE_BANDIT) {
+        bodyColor = Color{ 38, 78, 68, 255 }; // Misty woodland hunter
+    } else if (enemy.type == EnemyType::GALE_ARCHER_BOSS) {
+        bodyColor = Color{ 26, 62, 55, 255 }; // Gale Archer feathered mantle
     }
 
     // Humoral Alignment Visual Auras
@@ -189,6 +193,26 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         enemy.position.x + normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f,
         enemy.position.y + normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f
     };
+
+    // Gale Archer Boss & Gale Bandit Visuals
+    if (enemy.type == EnemyType::GALE_ARCHER_BOSS) {
+        // Glowing teal wind-feathered mantle
+        float wPulse = (sinf((float)GetTime() * 5.0f) + 1.0f) * 0.5f;
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 2.0f * wPulse, Color{ 90, 235, 215, 180 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 10.0f, Color{ 140, 255, 235, 120 });
+        // Golden recurve bow
+        Vector2 bowCenter = { enemy.position.x + dir.x * (enemy.radius + 6.0f), enemy.position.y + dir.y * (enemy.radius + 6.0f) };
+        Vector2 bowTop = { bowCenter.x - normal.x * 16.0f, bowCenter.y - normal.y * 16.0f };
+        Vector2 bowBot = { bowCenter.x + normal.x * 16.0f, bowCenter.y + normal.y * 16.0f };
+        DrawLineEx(bowTop, bowCenter, 2.5f, Color{ 245, 215, 80, 255 });
+        DrawLineEx(bowCenter, bowBot, 2.5f, Color{ 245, 215, 80, 255 });
+        DrawLineEx(bowTop, bowBot, 1.0f, Color{ 230, 250, 255, 200 }); // Bowstring
+    } else if (enemy.type == EnemyType::GALE_BANDIT) {
+        // Dual twin curved daggers
+        Vector2 leftHand = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f, enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f };
+        DrawLineEx(rightHand, { rightHand.x + dir.x * 14.0f, rightHand.y + dir.y * 14.0f }, 2.0f, Color{ 200, 220, 240, 255 });
+        DrawLineEx(leftHand, { leftHand.x + dir.x * 14.0f, leftHand.y + dir.y * 14.0f }, 2.0f, Color{ 200, 220, 240, 255 });
+    }
 
     // Enemy Attack Visuals & Weapon Animations
     if (enemy.type == EnemyType::SLASHER) {

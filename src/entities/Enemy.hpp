@@ -18,7 +18,9 @@ enum class EnemyType {
     KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
     ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
     ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
-    MINI_ELEMENTAL_GOLEM // Compact Elemental Golem minion summoned by Titan or player totem
+    MINI_ELEMENTAL_GOLEM, // Compact Elemental Golem minion summoned by Titan or player totem
+    GALE_BANDIT,          // Agile skirmisher rogue in Restless Mist Forest (drops Mist Essence, NO ore)
+    GALE_ARCHER_BOSS      // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
 };
 
 enum class EnemyState {
@@ -138,6 +140,8 @@ private:
     float burstIntervalTimer;
     float summonCooldown = 2.0f;
     float miniGolemRangedTimer = 7.0f;
+    float galeDaggerTimer = 4.0f;
+    float galeVaultTimer = 5.0f;
     bool pendingMinionSummon = false;
 
     TelegraphIndicator telegraph;

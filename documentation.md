@@ -63,7 +63,9 @@
 
   - [Act IV: Subterranean Quarry Depths & Primordial Altar](#act-iv-subterranean-quarry-depths--primordial-altar)
 
-  - [Combat Arena & Endless Wave Defense](#combat-arena--endless-wave-defense)
+  - [Act V: Restless Mist Forest & Altar of Whispers](#act-v-restless-mist-forest--altar-of-whispers)
+
+  - [Combat Arena & 20-Wave Humoral Gauntlet](#combat-arena--20-wave-humoral-gauntlet)
 
 - [3. Combat Systems & Mathematical Formulas](#3-combat-systems--mathematical-formulas)
 
@@ -140,6 +142,75 @@
 ## Release Highlights: Version 0.0.1e
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
+
+* **Universal Screen Fade & Realm Transition System**:
+  * Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game` to provide smooth, cinematic screen transitions between all game maps.
+  * Transitions fade smoothly into dark charcoal blackout (0.35s), present a glowing golden realm title and silver-cyan subtitle with runic diamond separators (0.25s hold), execute the destination map switch and player relocation at the midpoint, and then smoothly fade back into the target world (0.40s).
+  * Input & Damage Shielding: During the blackout phase, player inputs and combat damage are shielded to prevent accidental actions or hazards during transitions.
+  * Universal Map Integration:
+    * Zyphden -> Restless Mist Forest: "RESTLESS MIST FOREST" / "Haunt of the Gale Bandits & The Whispering Altar"
+    * Restless Mist Forest -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Seat of King Kreptu & The Vanguard"
+    * Zyphden -> Royal Combat Arena: "THE ROYAL COMBAT ARENA" / "20 Waves of Humoral Trials & Boss Encounters"
+    * Arena -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Return from the Arena of Trials"
+    * Crossroads -> Zyphden (via cutscene card): "FORTIFIED REALM OF ZYPHDEN" / "Seat of King Kreptu & The Vanguard"
+    * Zyphden -> Quarry Depths (via cutscene card): "SUBTERRANEAN QUARRY DEPTHS" / "Domain of the Ore Golems & Primordial Altar"
+    * Quarry Depths -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Courtyard of the Northern Vanguard"
+    * Ruined Castle -> Crossroads: "THE CROSSROADS OF THE DAMNED" / "Ancient Highway of Divided Faiths"
+  * Restless Mist Forest Black Screen Fix: Overhauled `RestlessMistForestHandler::Render` with a complete 2D camera rendering pipeline (`map.DrawFloor`, telegraphs, `map.DrawWallsAndPillars`, projectiles, enemies, loot drops, player, particles, floating interaction prompts, and campaign HUD), resolving the black screen issue.
+  * Save File Smooth Fade-In: Added a 0.5s smooth fade-in upon loading save files.
+* **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
+  * Added western realm `GameState::RESTLESS_MIST_FOREST` (`MapEnvironment::RESTLESS_MIST_FOREST`), a 1800x1300 atmospheric woodland accessible through the western gates of Zyphden Courtyard.
+  * Populated by 5 respawning spawners of **Gale Bandits** (`EnemyType::GALE_BANDIT`) on a 22-second respawn timer.
+  * **Strict Drop Table Rules**: Gale Bandits drop Silver Shingles and **Essence of Mist** at an exact **35% drop rate**; Gale Bandits strictly **never drop Ore Scraps**.
+  * Features the ancient **Altar of Whispers** at `{ 1130.0f, 650.0f }`: player sacrifices 2x Essence of Mist to summon **The Gale Archer Boss** (`EnemyType::GALE_ARCHER_BOSS`).
+  * Gale Archer Boss executes a dynamic 3-phase combat cycle:
+    1. *Triple Windshot*: Rapid three-arrow spread with knockback.
+    2. *Gale Piercer Beam*: High-velocity piercing wind line with 2.5s telegraph.
+    3. *Storm Rain Barrage*: Unleashes aerial wind arrows around the player.
+  * Gale Archer drops guaranteed **Shadow Essence** (1-2x), Silver Shingles, and rolls for the sacred **Totem of Mist** at an exact **15% drop rate**; strictly **never drops Ore Scraps**.
+
+* **Shadowstrider Armor Set Crafting & Forge Pagination**:
+  * Blacksmith Varek in Zyphden Courtyard now provides a paginated interface for **[3] ARMOR FORGE (9)**:
+    * **Page 1**: Forged Scrap-Iron Set (Sallet, Cuirass, Greaves) and Basalt Golem Set (Greathelm, Bastion, Heavy Greaves).
+    * **Page 2**: Shadowstrider Set (Cowl, Doublet, Tights).
+    * Features interactive `[< PREV PAGE]` and `[NEXT PAGE >]` buttons, page indicators (`PAGE X / 2`), and keyboard hotkeys (`A`/`D` and Left/Right Arrows), preventing vertical UI overflow.
+  * Live Material Tracking: Added header display badges for all 4 resources: Silver Shingles, Ore Scraps, **Essence of Mist**, and **Shadow Essence**.
+  * Strict Material Verification: Shadowstrider crafting strictly validates and consumes all required essence components before allowing piece assembly:
+    * *Shadowstrider Cowl*: 2x Essence of Mist + 1x Shadow Essence + 30 Shingles.
+    * *Shadowstrider Doublet*: 4x Essence of Mist + 2x Shadow Essence + 50 Shingles.
+    * *Shadowstrider Tights*: 3x Essence of Mist + 1x Shadow Essence + 40 Shingles.
+
+* **Western Access Gate & Pathway to Restless Mist Forest**:
+  * Extended Zyphden Realm boundary collision westward to X: 100.0f and paved a cobblestone and moss woodland pathway between the Masonry Workshop and Hearthside Tavern.
+  * Erected the **Western Mist Archway** at `{ 160.0f, 730.0f }`, featuring stone gateposts, an ethereal swirling cyan portal, a road signpost (`RESTLESS MIST FOREST`), and an interactive floating prompt `[E] ENTER RESTLESS MIST FOREST`.
+  * Blacksmith Varek in Zyphden Courtyard now provides crafting recipes for the agility-focused **Shadowstrider Set** under Tab 3 `[3] ARMOR FORGE (9)`:
+    * *Shadowstrider Cowl*: 2x Essence of Mist + 1x Shadow Essence + 30 Shingles (+8 DEF, +12 Will, +8% Move Speed).
+    * *Shadowstrider Doublet*: 4x Essence of Mist + 2x Shadow Essence + 50 Shingles (+18 DEF, +10% Move Speed, -15% Dash Cooldown).
+    * *Shadowstrider Tights*: 3x Essence of Mist + 1x Shadow Essence + 40 Shingles (+11 DEF, +7% Move Speed, +15% Stamina Regen).
+  * Equipping the complete 3/3 set activates the *Veil of the Mist* set bonus (+25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, +40% extended Dodge i-frames) and the active signature skill **Shadow Decoy & Vanish** ([V] key, 25s CD, 0.5s i-frames, spawns an aggro-drawing decoy exploding for 40 shadow dmg).
+
+* **Royal Combat Arena 20-Wave Expansion & Synergies**:
+  * Expanded `WaveManager` from 5 waves to **20 escalating challenge waves**, combining all humoral enemies in tactical combos:
+    * Waves 1-4: Sanguine cultist swarms, Pyromancer skirmishers, and heavy Brute vanguards.
+    * **Wave 5 (Boss)**: *The Grand Inquisitor* accompanied by Pyromancers and Brutes.
+    * Waves 6-9: Rapid Charger vanguards, Archer snipers, and high-health Ore Golem phalanxes.
+    * **Wave 10 (Boss)**: *Zil's Remnant* armed with Truth Seeker alongside Chargers and Snipers.
+    * Waves 11-14: Gale Bandit skirmishers, Ore Golems, and Pyromancer suppression teams.
+    * **Wave 15 (Boss)**: *The Gale Archer* flanked by agile Gale Bandits and Chargers.
+    * Waves 16-19: Mini Golem snipers, Inquisitors, and elite combined arms assault squads.
+    * **Wave 20 (Final Boss)**: *The Primordial Elemental Golem Titan* supported by Mini Golems and Pyromancers.
+
+* **Knight Lenon Arena Gating & Return to Realm Teleportation**:
+  * Removed the direct `[3] COMBAT ARENA` button from the main title menu.
+  * Combat Arena is strictly gated behind the main campaign narrative: players must travel to Zyphden and defeat Knight Lenon in the courtyard spar. Afterwards, Lenon offers the 20-wave trial via `[R] ENTER ARENA (20 WAVES)`.
+  * Complete campaign inventory, upgraded weapons, modular armor, and materials are preserved into the arena and saved back out upon return.
+  * Added an **Exit Sanctuary Portal** at `{ 1200.0f, 520.0f }` and quick shortcut key **`[T]`** within the arena to return safely to Knight Lenon in Zyphden at any moment.
+
+* **Tactical Equipment HUD Modal Redesign & Text Word-Wrapping**:
+  * Redesigned equipment screen matching reference UI layout on a spacious 1560x860 canvas:
+    * Left side (~50%): Loadout diamond badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for Helmet, Chestplate, Leggings, Weapons, Totem Relic, material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence), and active 3/3 Set Bonus card.
+    * Right side (~50%): Hero showcase doll scaled up to 1.75x standing on a glowing runic pedestal with live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
+    * Integrated `FontManager::DrawTextWrapped` on all drawer item cards and Set Bonus descriptions, eliminating horizontal text overflow.
 
 * **Modular 3-Piece Armor Architecture & Full Set Bonuses**:
   * Replaced monolithic armor suits with a modular 3-piece gear system: **Helmet** (HelmetType), **Chestplate** (ChestplateType), and **Leggings** (LeggingsType). Boots, gloves, and rings were intentionally excluded to maintain focused tactical customization.
@@ -638,7 +709,18 @@ Gated behind defeating Knight Lenon in the courtyard martial spar:
 
 
 
-### Combat Arena & Endless Wave Defense
+### Act V: Restless Mist Forest & Altar of Whispers
+
+Beyond the western ramparts of Zyphden Courtyard lies the **Restless Mist Forest** (`GameState::RESTLESS_MIST_FOREST`), an ancient woodland veiled in perpetual twilight.
+
+- **Environment Dimensions**: 1800x1300 woodland with moss-covered stone pillars, twisted oak boughs, and dense ground fog.
+- **Inhabitants**: **Gale Bandits**, outlaws who harness the turbulent winds. They wield dual daggers for quick melee flurries and throw high-speed throwing knives from medium range.
+- **Drop Tables**:
+  - Gale Bandits: Silver Shingles and **Essence of Mist** (35% drop rate). **Strictly NO Ore Scraps**.
+  - Altar Offering: Placing 2x Essence of Mist upon the **Altar of Whispers** (`{ 1130.0f, 650.0f }`) awakens **The Gale Archer**.
+  - Gale Archer: Guaranteed **Shadow Essence** (1-2x), Silver Shingles, and a **15% roll for the Totem of Mist**. **Strictly NO Ore Scraps**.
+
+### Combat Arena & 20-Wave Humoral Gauntlet
 
 Unlocked permanently upon completing the Chapter 1 storyline:
 

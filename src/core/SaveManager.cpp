@@ -101,6 +101,14 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.shingles = ExtractIntValue(line);
         } else if (line.find("\"oreScraps\"") != std::string::npos) {
             outSummary.oreScraps = ExtractIntValue(line);
+        } else if (line.find("\"essenceOfMist\"") != std::string::npos) {
+            outSummary.essenceOfMist = ExtractIntValue(line);
+        } else if (line.find("\"shadowEssence\"") != std::string::npos) {
+            outSummary.shadowEssence = ExtractIntValue(line);
+        } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
+            outSummary.galeArcherDefeated = ExtractBoolValue(line);
+        } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
+            outSummary.arenaHighestWave = ExtractIntValue(line);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
             outSummary.potionCount = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
@@ -169,6 +177,14 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.shingles = ExtractIntValue(line);
         } else if (line.find("\"oreScraps\"") != std::string::npos) {
             outData.oreScraps = ExtractIntValue(line);
+        } else if (line.find("\"essenceOfMist\"") != std::string::npos) {
+            outData.essenceOfMist = ExtractIntValue(line);
+        } else if (line.find("\"shadowEssence\"") != std::string::npos) {
+            outData.shadowEssence = ExtractIntValue(line);
+        } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
+            outData.galeArcherDefeated = ExtractBoolValue(line);
+        } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
+            outData.arenaHighestWave = ExtractIntValue(line);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
             outData.equippedWeapon = ExtractIntValue(line);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
@@ -268,6 +284,10 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"potionCount\": " << data.potionCount << ",\n";
     file << "  \"shingles\": " << data.shingles << ",\n";
     file << "  \"oreScraps\": " << data.oreScraps << ",\n";
+    file << "  \"essenceOfMist\": " << data.essenceOfMist << ",\n";
+    file << "  \"shadowEssence\": " << data.shadowEssence << ",\n";
+    file << "  \"galeArcherDefeated\": " << (data.galeArcherDefeated ? "true" : "false") << ",\n";
+    file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";
     file << "  \"equippedHelmet\": " << data.equippedHelmet << ",\n";
