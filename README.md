@@ -64,7 +64,18 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
-> * **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
+> * **Universal Screen Fade & Realm Transition System**:
+  - Implemented a smooth cinematic transition system across all realm and map boundaries:
+    - Zyphden <-> Restless Mist Forest
+    - Zyphden <-> Royal Combat Arena
+    - Zyphden <-> Subterranean Quarry Depths
+    - Crossroads <-> Zyphden Realm
+    - Ruined Castle <-> Crossroads
+  - Transitions fade smoothly to full blackout (`ScreenFadeMode::FADE_OUT`, 0.35s), display a stylized gold and runic realm title card and subtitle during hold (`HOLD`, 0.25s) while executing map loading and player positioning at the midpoint, and then smoothly fade back into the destination landing screen (`FADE_IN`, 0.40s).
+  - Input shielding during blackout prevents unintended player movement, skill activation, or combat damage during map transitions.
+  - Fixes the Restless Mist Forest black screen bug by providing a complete 2D camera world render pass and combat update loop.
+  - Smooth fade-in also accompanies save game loading, eliminating visual jarring or sudden screen snaps.
+* **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
 >   - Journey through the western gates of Zyphden into the atmospheric **Restless Mist Forest** (1800x1300 woodland expanse).
 >   - Encounter respawning **Gale Bandits**—agile dual-dagger skirmishers who throw swift daggers and drop Silver Shingles and **Essence of Mist** (35% drop rate; strictly NO Ore Scraps).
 >   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist.

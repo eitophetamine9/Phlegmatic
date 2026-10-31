@@ -143,6 +143,21 @@
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
 
+* **Universal Screen Fade & Realm Transition System**:
+  * Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game` to provide smooth, cinematic screen transitions between all game maps.
+  * Transitions fade smoothly into dark charcoal blackout (0.35s), present a glowing golden realm title and silver-cyan subtitle with runic diamond separators (0.25s hold), execute the destination map switch and player relocation at the midpoint, and then smoothly fade back into the target world (0.40s).
+  * Input & Damage Shielding: During the blackout phase, player inputs and combat damage are shielded to prevent accidental actions or hazards during transitions.
+  * Universal Map Integration:
+    * Zyphden -> Restless Mist Forest: "RESTLESS MIST FOREST" / "Haunt of the Gale Bandits & The Whispering Altar"
+    * Restless Mist Forest -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Seat of King Kreptu & The Vanguard"
+    * Zyphden -> Royal Combat Arena: "THE ROYAL COMBAT ARENA" / "20 Waves of Humoral Trials & Boss Encounters"
+    * Arena -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Return from the Arena of Trials"
+    * Crossroads -> Zyphden (via cutscene card): "FORTIFIED REALM OF ZYPHDEN" / "Seat of King Kreptu & The Vanguard"
+    * Zyphden -> Quarry Depths (via cutscene card): "SUBTERRANEAN QUARRY DEPTHS" / "Domain of the Ore Golems & Primordial Altar"
+    * Quarry Depths -> Zyphden: "FORTIFIED REALM OF ZYPHDEN" / "Courtyard of the Northern Vanguard"
+    * Ruined Castle -> Crossroads: "THE CROSSROADS OF THE DAMNED" / "Ancient Highway of Divided Faiths"
+  * Restless Mist Forest Black Screen Fix: Overhauled `RestlessMistForestHandler::Render` with a complete 2D camera rendering pipeline (`map.DrawFloor`, telegraphs, `map.DrawWallsAndPillars`, projectiles, enemies, loot drops, player, particles, floating interaction prompts, and campaign HUD), resolving the black screen issue.
+  * Save File Smooth Fade-In: Added a 0.5s smooth fade-in upon loading save files.
 * **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
   * Added western realm `GameState::RESTLESS_MIST_FOREST` (`MapEnvironment::RESTLESS_MIST_FOREST`), a 1800x1300 atmospheric woodland accessible through the western gates of Zyphden Courtyard.
   * Populated by 5 respawning spawners of **Gale Bandits** (`EnemyType::GALE_BANDIT`) on a 22-second respawn timer.

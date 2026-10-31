@@ -301,6 +301,16 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
+7b. Universal Screen Fade & Realm Transition System:
+   - Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game`.
+   - Transitions smoothly fade to black (0.35s), display glowing realm title cards and subtitles during hold (0.25s),
+     execute destination map loading and player relocation at the midpoint, and fade back into the landing screen (0.40s).
+   - Applied universally across all map transitions: Zyphden <-> Restless Mist Forest, Zyphden <-> Arena,
+     Zyphden <-> Quarry Depths, Crossroads <-> Zyphden, and Ruined Castle <-> Crossroads.
+   - Input and combat damage are shielded during transition blackouts.
+   - Restless Mist Forest Black Screen Fix: Implemented full 2D world render pass and combat update loop in `RestlessMistForestHandler`.
+   - Added 0.5s smooth fade-in upon save game loading.
+
 8. Restless Mist Forest Realm & Gale Archer Boss:
    - Added western realm `GameState::RESTLESS_MIST_FOREST` (`MapEnvironment::RESTLESS_MIST_FOREST`).
    - Populated with 5 respawning spawners for Gale Bandits (22s cooldown).
