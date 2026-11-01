@@ -327,6 +327,23 @@ void AssetManager::DrawCharacterDoll(Vector2 center, float scale, WeaponType wea
         DrawTriangle({ collar.x, collar.y }, { collar.x + 12.0f * scale, collar.y - 3.0f * scale }, { collar.x + 2.0f * scale, collar.y + 10.0f * scale }, Color{ 200, 220, 245, 255 });
         DrawLineEx(collar, { collar.x - 8.0f * scale, collar.y + 2.0f * scale }, 2.5f * scale, Color{ 180, 195, 215, 255 });
     }
+    else if (weapon == WeaponType::ZEPHYR_DAGGERS) {
+        Vector2 hiltR = { handR.x + 2.0f * scale, handR.y };
+        Vector2 tipR = { hiltR.x + 12.0f * scale, hiltR.y + 36.0f * scale };
+        Vector2 hiltL = { p.x - 21.0f * scale, p.y + 28.0f * scale };
+        Vector2 tipL = { hiltL.x - 12.0f * scale, hiltL.y + 36.0f * scale };
+        DrawLineEx(hiltR, tipR, 3.0f * scale, Color{ 110, 245, 220, 255 });
+        DrawLineEx(hiltL, tipL, 3.0f * scale, Color{ 110, 245, 220, 255 });
+        DrawCircleV(tipR, 2.0f * scale, Color{ 255, 255, 255, 220 });
+        DrawCircleV(tipL, 2.0f * scale, Color{ 255, 255, 255, 220 });
+    }
+    else if (weapon == WeaponType::WINDRUNNER_RECURVE) {
+        Vector2 bowCenter = { p.x - 21.0f * scale, p.y + 10.0f * scale };
+        Vector2 upperTip = { bowCenter.x + 6.0f * scale, bowCenter.y - 48.0f * scale };
+        Vector2 lowerTip = { bowCenter.x + 6.0f * scale, bowCenter.y + 48.0f * scale };
+        DrawSplineSegmentBezierQuadratic(upperTip, { bowCenter.x - 14.0f * scale, bowCenter.y }, lowerTip, 3.0f * scale, Color{ 140, 240, 215, 255 });
+        DrawLineEx(upperTip, lowerTip, 1.5f * scale, Color{ 255, 255, 255, 180 });
+    }
 }
 
 void AssetManager::DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned) {
@@ -473,6 +490,23 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
         DrawHalberd({ weaponAnchor.x - 14.0f, weaponAnchor.y + 14.0f }, -45.0f, 44.0f, Color{ 230, 240, 255, 255 }, Color{ 140, 200, 255, 220 });
         if (isSelected || isHovered) {
             const char* name = "ROYAL HALBERD";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
+    } else if (weapon == WeaponType::ZEPHYR_DAGGERS) {
+        DrawDaggers({ weaponAnchor.x - 8.0f, weaponAnchor.y }, { weaponAnchor.x + 8.0f, weaponAnchor.y }, -60.0f, -120.0f, Color{ 110, 245, 220, 255 }, Color{ 40, 210, 180, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "TWIN ZEPHYR DAGGERS";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
+    } else if (weapon == WeaponType::WINDRUNNER_RECURVE) {
+        Vector2 upperTip = { weaponAnchor.x - 14.0f, weaponAnchor.y - 18.0f };
+        Vector2 lowerTip = { weaponAnchor.x + 14.0f, weaponAnchor.y + 18.0f };
+        DrawSplineSegmentBezierQuadratic(upperTip, { weaponAnchor.x - 6.0f, weaponAnchor.y }, lowerTip, 2.5f, Color{ 110, 245, 220, 255 });
+        DrawLineEx(upperTip, lowerTip, 1.2f, Color{ 255, 255, 255, 180 });
+        if (isSelected || isHovered) {
+            const char* name = "WINDRUNNER'S RECURVE";
             int w = MeasureText(name, 11);
             DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
         }

@@ -555,16 +555,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 11, Color{ 255, 215, 90, 240 });
 
         struct WepBtnInfo { WeaponType type; const char* label; };
-        WepBtnInfo wepBtns[5] = {
+        WepBtnInfo wepBtns[7] = {
             { WeaponType::SWORD, "Sword" },
             { WeaponType::DAGGERS, "Daggers" },
             { WeaponType::MACE, "Mace" },
             { WeaponType::HALBERD, "Halberd" },
-            { WeaponType::TRUTH_SEEKER, "Seeker" }
+            { WeaponType::TRUTH_SEEKER, "Seeker" },
+            { WeaponType::ZEPHYR_DAGGERS, "Zephyr" },
+            { WeaponType::WINDRUNNER_RECURVE, "Recurve" }
         };
-        float wepBtnW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float wepBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
         float wepBtnH = 38.0f;
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 7; ++i) {
             Rectangle wRec = { leftX + 16.0f + (float)i * (wepBtnW + 4.0f), secWepY + 24.0f, wepBtnW, wepBtnH };
             bool isWUnlocked = player.GetInventory().HasWeapon(wepBtns[i].type);
             bool isWEquipped = (player.GetWeapon() == wepBtns[i].type);
@@ -741,7 +743,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // Category tabs on drawer
         const char* slotCatNames[5] = { "1. HELMET", "2. CHEST", "3. LEGGINGS", "4. TOTEM", "5. WEAPONS" };
         float tabW = (rightW - 32.0f - 16.0f) / 5.0f;
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 7; ++i) {
             Rectangle catRec = { rightX + 16.0f + (float)i * (tabW + 4.0f), drawerY, tabW, 26.0f };
             bool isCatHov = CheckCollisionPointRec(mousePos, catRec);
             if (isCatHov && isMousePressed) {
@@ -918,7 +920,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 68.0f : 56.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 7; ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -956,16 +958,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         } else if (s_selectedSlot == 4) {
             // WEAPONS LIST
             struct WepListEntry { WeaponType type; const char* lockMsg; };
-            WepListEntry weps[5] = {
+            WepListEntry weps[7] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal" },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal" },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal" },
                 { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal" },
-                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" }
+                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" },
+                { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences" },
+                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" }
             };
             float itemSpacing = (modalH > 780.0f) ? 82.0f : 68.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 7; ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };

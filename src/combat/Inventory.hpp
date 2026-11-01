@@ -164,16 +164,16 @@ public:
     // Weapon Upgrades (+0, +1, +2)
     int GetWeaponUpgrade(WeaponType type) const {
         int idx = (int)type;
-        if (idx >= 0 && idx < 6) return weaponUpgradeLevel[idx];
+        if (idx >= 0 && idx < 10) return weaponUpgradeLevel[idx];
         return 0;
     }
     void SetWeaponUpgrade(WeaponType type, int level) {
         int idx = (int)type;
-        if (idx >= 0 && idx < 6) weaponUpgradeLevel[idx] = level;
+        if (idx >= 0 && idx < 10) weaponUpgradeLevel[idx] = level;
     }
     void UpgradeWeapon(WeaponType type) {
         int idx = (int)type;
-        if (idx >= 0 && idx < 6) weaponUpgradeLevel[idx]++;
+        if (idx >= 0 && idx < 10) weaponUpgradeLevel[idx]++;
     }
 
 private:
@@ -201,5 +201,5 @@ private:
     int oreScraps = 0;     // Material: Ore Scraps (from Quarry Ore Golems)
     int essenceOfMist = 0; // Material: Essence of Mist (from Gale Bandits)
     int shadowEssence = 0; // Material: Shadow Essence (from Gale Archer Boss)
-    int weaponUpgradeLevel[6] = { 0 };
+    int weaponUpgradeLevel[10] = { 0 };
 };
