@@ -316,6 +316,7 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - Populated with 5 respawning spawners for Gale Bandits (22s cooldown).
    - Drop Table Rules: Gale Bandits drop Silver Shingles and Essence of Mist (35% drop rate; strictly NO Ore Scraps).
    - Ancient Altar of Whispers at { 1130.0f, 650.0f }: player offers 2x Essence of Mist to summon The Gale Archer Boss.
+     - Resolved interaction collider bug: expanded check to 165px rectangle bounds, added [E/Space/Enter] keys, live boss active check, and real-time essence count feedback.
    - Gale Archer Boss executes a 3-phase combat cadence (Triple Windshot, Gale Piercer Beam, Storm Rain Barrage).
    - Gale Archer drops guaranteed Shadow Essence (1-2x), Silver Shingles, and rolls for Totem of Mist at an exact 15% drop rate (strictly NO Ore Scraps).
 

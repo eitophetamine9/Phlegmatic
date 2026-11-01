@@ -163,6 +163,11 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * Populated by 5 respawning spawners of **Gale Bandits** (`EnemyType::GALE_BANDIT`) on a 22-second respawn timer.
   * **Strict Drop Table Rules**: Gale Bandits drop Silver Shingles and **Essence of Mist** at an exact **35% drop rate**; Gale Bandits strictly **never drop Ore Scraps**.
   * Features the ancient **Altar of Whispers** at `{ 1130.0f, 650.0f }`: player sacrifices 2x Essence of Mist to summon **The Gale Archer Boss** (`EnemyType::GALE_ARCHER_BOSS`).
+    * **Altar Interaction & Summoning Mechanics**:
+      * Expanded interaction bounds with rectangular collision check and `distToAltar <= 165.0f` (resolves collider block where the 160x140 solid plinth prevented reaching the previous 95px threshold).
+      * Supports `[E]`, `[SPACE]`, and `[ENTER]` hotkeys.
+      * Dynamically checks if Gale Archer is currently alive in the arena: shows warning if engaged, and allows repeated summoning once vanquished.
+      * Floating prompt displays real-time Essence of Mist inventory count and alerts the player if more essences are needed.
   * Gale Archer Boss executes a dynamic 3-phase combat cycle:
     1. *Triple Windshot*: Rapid three-arrow spread with knockback.
     2. *Gale Piercer Beam*: High-velocity piercing wind line with 2.5s telegraph.

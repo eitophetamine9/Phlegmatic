@@ -78,7 +78,7 @@
 * **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
 >   - Journey through the western gates of Zyphden into the atmospheric **Restless Mist Forest** (1800x1300 woodland expanse).
 >   - Encounter respawning **Gale Bandits**—agile dual-dagger skirmishers who throw swift daggers and drop Silver Shingles and **Essence of Mist** (35% drop rate; strictly NO Ore Scraps).
->   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist.
+>   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist (featuring 165px omni-directional interaction bounds, multi-key support [E/Space/Enter], live boss active detection, dynamic runic altar glow, and real-time essence count feedback).
 >   - Defeat the Gale Archer across 3 telegraphed combat phases (Triple Windshot, Gale Piercer Beam, and Storm Rain Barrage) to earn guaranteed **Shadow Essence** and roll for the sacred **Totem of Mist** at an exact **15% drop rate** (strictly NO Ore Scraps).
 > * **Shadowstrider Armor Set Crafting & Forge Pagination**:
 >   - Blacksmith Varek in Zyphden now features **paginated armor crafting** under Tab 3 `[3] ARMOR FORGE (9)` (Page 1: Forged Scrap-Iron & Basalt Golem, Page 2: Shadowstrider) with clickable `[< PREV PAGE]` and `[NEXT PAGE >]` buttons and A/D / Arrow key navigation, eliminating UI overlap.
