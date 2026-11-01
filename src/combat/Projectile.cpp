@@ -175,5 +175,31 @@ void Projectile::Draw() const {
             DrawCircle((int)(position.x - ox), (int)(position.y - oy), 2.5f, Color{ 255, 215, 60, 240 }); // Earth spark
             break;
         }
+
+        case ProjectileType::GALE_ARROW: {
+            Vector2 tip = { position.x + dir.x * (radius * 3.0f), position.y + dir.y * (radius * 3.0f) };
+            Vector2 tail = { position.x - dir.x * (radius * 2.8f), position.y - dir.y * (radius * 2.8f) };
+            Vector2 featherL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.3f), position.y - dir.y * 2.0f - normal.y * (radius * 1.3f) };
+            Vector2 featherR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.3f), position.y - dir.y * 2.0f + normal.y * (radius * 1.3f) };
+
+            DrawCircleGradient(position, radius * 2.0f, Color{ 80, 240, 210, 90 }, Color{ 0, 0, 0, 0 });
+            DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
+            DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
+            DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+            break;
+        }
+
+        case ProjectileType::THROWING_DAGGER: {
+            float spin = (float)GetTime() * 18.0f;
+            Vector2 tip = { position.x + cosf(spin) * (radius * 2.2f), position.y + sinf(spin) * (radius * 2.2f) };
+            Vector2 pommel = { position.x - cosf(spin) * (radius * 1.8f), position.y - sinf(spin) * (radius * 1.8f) };
+            Vector2 sideA = { position.x - sinf(spin) * (radius * 0.7f), position.y + cosf(spin) * (radius * 0.7f) };
+            Vector2 sideB = { position.x + sinf(spin) * (radius * 0.7f), position.y - sinf(spin) * (radius * 0.7f) };
+
+            DrawTriangle(tip, sideA, sideB, Color{ 210, 230, 245, 255 });
+            DrawLineEx(pommel, tip, 2.5f, Color{ 160, 185, 205, 255 });
+            DrawCircleV(pommel, 2.0f, Color{ 80, 95, 110, 255 });
+            break;
+        }
     }
 }

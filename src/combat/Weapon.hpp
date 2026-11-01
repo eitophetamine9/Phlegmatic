@@ -132,6 +132,54 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             }
             return stats;
 
+        case WeaponType::ZEPHYR_DAGGERS:
+            stats = {
+                "Twin Zephyr Daggers",
+                "Gale-forged dual curved blades pulsing with Shadow Essence. Light attack unleashes an effortless wind flurry (0 stamina). Heavy attack performs an evasive Shadow-Step with invulnerability frames, striking in a 360-deg whirlwind and leaving an explosive decoy.",
+                16.0f, 75.0f, 105.0f, 0.12f, 0.15f, 0.0f,
+                68.0f, 110.0f, 360.0f, 0.15f, 0.12f, 1.50f, 15.0f,
+                10.0f, 0.35f,
+                0, 1.0f, 0.15f, 1.15f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Twin Zephyr Daggers +1";
+                stats.lightDamage = 20.0f;
+                stats.heavyDamage = 80.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Twin Zephyr Daggers +2";
+                stats.lightDamage = 25.0f;
+                stats.heavyDamage = 95.0f;
+                stats.defensePierceBonus = 0.25f;
+            }
+            return stats;
+
+        case WeaponType::WINDRUNNER_RECURVE:
+            stats = {
+                "Windrunner's Recurve",
+                "Acrobatic wind bow crafted from Gale Archer trophies. Light attack fires high-velocity piercing wind arrows across long range. Heavy attack channels a Gale Piercer Drill Arrow with 40% defense pierce and heavy poise knockback.",
+                24.0f, 520.0f, 20.0f, 0.20f, 0.32f, 10.0f,
+                82.0f, 620.0f, 25.0f, 0.35f, 0.25f, 2.40f, 25.0f,
+                14.0f, 0.60f,
+                0, 1.10f, 0.40f, 1.20f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Windrunner's Recurve +1";
+                stats.lightDamage = 29.0f;
+                stats.heavyDamage = 98.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Windrunner's Recurve +2";
+                stats.lightDamage = 35.0f;
+                stats.heavyDamage = 115.0f;
+                stats.defensePierceBonus = 0.50f;
+            }
+            return stats;
+
         case WeaponType::SWORD:
         default:
             stats = {

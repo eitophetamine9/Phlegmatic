@@ -26,6 +26,7 @@ void QuarryHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemi
     enemies.clear();
     projectiles.clear();
     altarPosition = { 1000.0f, 320.0f };
+    campfire = { 4, "Subterranean Miners' Hearth", { 960.0f, 660.0f } };
     altarRadius = 95.0f;
     entryBannerTimer = 4.0f;
     doorCooldown = 0.5f;
@@ -109,6 +110,7 @@ void QuarryHandler::Update(
     }
 
     player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
     // Flush player spawned projectiles (e.g. Elemental Bolt or Holy Beam)
     for (const auto& p : player.GetSpawnedProjectiles()) {
@@ -147,6 +149,10 @@ void QuarryHandler::Update(
     // Check dead enemies & update Ore Golem respawn timers
     for (auto it = enemies.begin(); it != enemies.end(); ) {
         if (!it->IsAlive()) {
+            int kIdx = -1;
+            if (it->GetType() == EnemyType::ORE_GOLEM || it->GetType() == EnemyType::MINI_ELEMENTAL_GOLEM) kIdx = 5;
+            else if (it->GetType() == EnemyType::ELEMENTAL_GOLEM) kIdx = 6;
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
             if (it->GetType() == EnemyType::ORE_GOLEM) {
                 // Start 7-second respawn timer on closest spawner
                 float bestDist = 999999.0f;
@@ -335,6 +341,7 @@ void QuarryHandler::Render(
     }
 
     particles.Draw();
+    campfire.Draw((float)GetTime(), player);
 
     // World Space Interactive Prompts
     // 1. West Exit Archway Prompt

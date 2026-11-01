@@ -1,4 +1,5 @@
 #pragma once
+#include "../world/Campfire.hpp"
 #include "raylib.h"
 #include "raymath.h"
 #include "GameState.hpp"
@@ -60,6 +61,7 @@ public:
     void SetBossDefeated(bool defeated) { galeArcherDefeated = defeated; }
 
 private:
+    Campfire campfire;
     std::vector<MistForestSpawner> spawners;
     bool galeArcherSummoned = false;
     bool galeArcherDefeated = false;
@@ -68,4 +70,3 @@ private:
     float gateCooldown = 0.0f;
     Vector2 altarPosition = { 1130.0f, 650.0f };
 };
-

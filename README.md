@@ -64,7 +64,26 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
-> * **Universal Screen Fade & Realm Transition System**:
+> * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+  - Added two high-tier weapon archetypes forged from Gale Archer trophies (Shadow Essence) and Gale Bandit materials at Blacksmith Varek's Master Forge:
+    - **Twin Zephyr Daggers**: High-velocity dual curved blades. Light attack unleashes an effortless wind flurry (0 stamina on hits 1-4, 10 on 5th hit). Heavy attack triggers *Shadow Slip*, an evasive 120px dash with 0.32s invulnerability frames that strikes in a 360-degree whirlwind (68 dmg) and leaves an explosive decoy.
+    - **Windrunner's Recurve**: Phlegmatic's first player-usable ranged bow archetype. Light attack fires high-velocity piercing wind arrows across long range (24 dmg, 10 stamina). Heavy attack channels the *Gale Piercer Drill Arrow* (82 dmg) with 40% defense pierce and heavy poise knockback.
+  - Full support in the Equipment modal quick-switch row and selection drawer, with dedicated 3D character doll hand-drawn vectors.
+* **Campfire Waypoints & Realm Fast Travel**:
+  - Erected interactive Campfire sites across all 5 major world realms:
+    1. *Ruined Castle Courtyard Hearth* (`{ 780.0f, 650.0f }`)
+    2. *Crossroads Highway Camp* (`{ 740.0f, 480.0f }`)
+    3. *Zyphden Town Square Fire* (`{ 880.0f, 680.0f }`)
+    4. *Subterranean Miners' Hearth* (`{ 960.0f, 660.0f }`)
+    5. *Restless Glade Bonfire* (`{ 540.0f, 640.0f }`)
+  - Interacting with any campfire (`[E] REST AT CAMPFIRE`) fully restores health and stamina, refills health potions to maximum (5 flasks), and permanently attunes the waypoint.
+  - Opening the Realm Map (`[M]`) and selecting any attuned stage unlocks the **`[E] FAST TRAVEL TO CAMPFIRE`** action, initiating a seamless cinematic screen transition and teleporting the player directly beside the target campfire.
+* **Humoral Bestiary & Tactical Lore Codex**:
+  - Expanded the Lore Journal modal with a dedicated third section: **`[3] HUMORAL BESTIARY`**.
+  - Features real-time kill tracking across all 9 enemy archetypes: Corrupted Slasher, Corrupted Archer, Void Pyromancer, Iron Brute, Grand Inquisitor, Ore Golem & Mini Golems, Elemental Golem Titan, Gale Bandit, and Gale Archer.
+  - Displays humoral alignments, animated vector silhouettes, combat cadences, known weaknesses, and exact drop tables.
+  - Features 3 progressive unlockable lore seals for each enemy: *Initiate Seal* (1 Kill), *Adept Seal* (5 Kills), and *Master Seal* (15 Kills).
+* **Universal Screen Fade & Realm Transition System**:
   - Implemented a smooth cinematic transition system across all realm and map boundaries:
     - Zyphden <-> Restless Mist Forest
     - Zyphden <-> Royal Combat Arena
@@ -78,7 +97,7 @@
 * **New Western Realm: Restless Mist Forest & Gale Archer Boss**:
 >   - Journey through the western gates of Zyphden into the atmospheric **Restless Mist Forest** (1800x1300 woodland expanse).
 >   - Encounter respawning **Gale Bandits**—agile dual-dagger skirmishers who throw swift daggers and drop Silver Shingles and **Essence of Mist** (35% drop rate; strictly NO Ore Scraps).
->   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist.
+>   - Awaken the **Gale Archer Boss** at the ancient Altar of Whispers by offering 2x Essence of Mist (featuring 165px omni-directional interaction bounds, multi-key support [E/Space/Enter], live boss active detection, dynamic runic altar glow, and real-time essence count feedback).
 >   - Defeat the Gale Archer across 3 telegraphed combat phases (Triple Windshot, Gale Piercer Beam, and Storm Rain Barrage) to earn guaranteed **Shadow Essence** and roll for the sacred **Totem of Mist** at an exact **15% drop rate** (strictly NO Ore Scraps).
 > * **Shadowstrider Armor Set Crafting & Forge Pagination**:
 >   - Blacksmith Varek in Zyphden now features **paginated armor crafting** under Tab 3 `[3] ARMOR FORGE (9)` (Page 1: Forged Scrap-Iron & Basalt Golem, Page 2: Shadowstrider) with clickable `[< PREV PAGE]` and `[NEXT PAGE >]` buttons and A/D / Arrow key navigation, eliminating UI overlap.
@@ -104,6 +123,7 @@
 >   - Expanded equipment modal to a spacious 1560x860 canvas with diamond loadout badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for modular armor, weapons, single totem relic, and material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence).
 >   - Right side features a 1.75x Hero showcase paper doll upon a glowing runic dais accompanied by live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
 >   - Implemented strict word wrapping on item drawer cards and set bonus descriptions via `FontManager::DrawTextWrapped` to eliminate horizontal text clipping across all display resolutions.
+>   - Resolved crash when opening inventory modal: Fixed out-of-bounds loop indices in `ModalUI.cpp` for drawer category tabs (`slotCatNames[5]`) and totem relics (`totems[5]`), restricting iterations strictly to 5 elements.
 > * **Modular 3-Piece Armor System & Full Set Bonuses**:
 >   - Replaced monolithic suits with 3 modular equippable slots: **Helmet**, **Chestplate**, and **Leggings** (strictly NO boots, gloves, or rings).
 >   - Equipping a matching 3/3 set activates unique passive stat bonuses and an active signature skill triggered by the **`[V]`** key:
@@ -146,6 +166,22 @@
 >   - **Crusader Blade** (18.0 light / 88.0 heavy): 3-stage combo — *Crescent Cleave* (30 dmg, restores +12 Composure) -> *Shock Thrust* (24 dmg, piercing line interrupting enemy windups) -> *Radiant Execution* (34 dmg, downward holy cleave dealing +50% bonus damage to staggered foes).
 >   - **Truth Seeker** (22.0 light / 72.0 heavy): 2-stage combo — *Dawnfire Ring* (34 dmg, 360° sweep applying Solar Burn & firing holy beam) -> *Sacred Judgment Pillar* (38 dmg, descending sunray beam with 100% defense pierce that cleanses player debuffs).
 >   - **Royal Halberd** (16.0 light / 28.0 heavy): 3-stage combo — *Long Lunge* with iframes -> *Sweeping Cleave* (220° arc) -> *Flurry* of 3 consecutive rapid stabs (30% weapon damage each).
+> 
+> * **Restless Mist Forest, Gale Archer Boss & Altar of Whispers**:
+>   - Journey through the Western Mist Archway in Zyphden into the atmospheric woodland of the Restless Mist Forest.
+>   - Defeat respawning Gale Bandits (35% Essence of Mist drop rate, zero Ore Scraps) and offer 2x Essence of Mist at the Altar of Whispers to summon the Gale Archer Boss.
+>   - Gale Archer drops Shadow Essence and a 15% drop rate for the Totem of Mist.
+> * **Shadowstrider Armor Set & Paginated Forge**:
+>   - Craft the high-agility Shadowstrider set (Cowl, Doublet, Tights) at Blacksmith Varek's paginated armor forge using Essence of Mist, Shadow Essence, and Shingles.
+>   - Full set bonus grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, +40% extended dodge i-frames, and the active [V] skill Shadow Decoy.
+> * **Zephyr Daggers & Windrunner Recurve Armaments**:
+>   - Twin Zephyr Daggers feature rapid mist slashes and the Shadow Slip whirlwind burst.
+>   - Windrunner Recurve introduces ranged archery with piercing Gale Arrows and the infinite-penetration Gale Piercer Drill Arrow.
+> * **Campfire Waypoints, Realm Fast Travel & Humoral Bestiary**:
+>   - Rest at bonfires across all 5 realms to restore vitality, replenish elixirs, and attune fast-travel waypoints on the realm map modal (`[M]`).
+>   - Track kills across all 9 enemy archetypes in the 3-tier Humoral Bestiary lore grimoire.
+> * **Engine Resilience & Crash Stabilization**:
+>   - Fixed save array overflow during state transitions, unified totem and campfire serialization, repaired projectile and weapon rendering pipelines, and added smooth fade transitions across all map boundaries.
 > 
 > For detailed release notes, system mechanics breakdowns, math formulas, and lore codices, please consult **[DOCUMENTATION.md](documentation.md)**.
 

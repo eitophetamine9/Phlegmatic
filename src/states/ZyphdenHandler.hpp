@@ -1,3 +1,4 @@
+#include "../world/Campfire.hpp"
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
@@ -113,6 +114,7 @@ public:
     void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
+    Campfire campfire;
     std::function<void()> onEnterArenaCallback = nullptr;
     std::function<void()> onEnterMistForestCallback = nullptr;
     // Core NPCs

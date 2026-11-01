@@ -326,7 +326,8 @@ void ZyphdenLoreItem::Draw(float time, Vector2 playerPos) const {
 
 
 
-ZyphdenHandler::ZyphdenHandler() {
+ZyphdenHandler::ZyphdenHandler() :
+      campfire{ 3, "Zyphden Town Square Fire", { 880.0f, 680.0f } } {
 
     inTavern = false;
 
@@ -844,6 +845,7 @@ void ZyphdenHandler::Update(
     if (!isDialogueOpen) {
 
         player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
     }
 
@@ -2190,6 +2192,7 @@ void ZyphdenHandler::Render(
 
 
     particles.Draw();
+    campfire.Draw((float)GetTime(), player);
 
     EndMode2D();
 
@@ -2590,7 +2593,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     std::string mistStr = std::to_string(playerMist) + " Mist Ess";
     FontManager::DrawText(mistStr, (int)mistBadgeX + 28, (int)badgeY + 7, 11, Color{ 180, 250, 235, 255 }, GameFont::BODY);
 
-    // Category Tabs: [1] VANGUARD WEAPONS (4) | [2] SACRED RELICS (1) | [3] ARMOR FORGE (9)
+    // Category Tabs: [1] VANGUARD WEAPONS (6) | [2] SACRED RELICS (1) | [3] ARMOR FORGE (9)
     if (IsKeyPressed(KEY_ONE)) { forgeTab = 0; armorForgePage = 0; }
     if (IsKeyPressed(KEY_TWO)) { forgeTab = 1; armorForgePage = 0; }
     if (IsKeyPressed(KEY_THREE)) { forgeTab = 2; }
@@ -2609,7 +2612,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawText("[1] VANGUARD WEAPONS (4)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 6, 11, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
+    FontManager::DrawText("[1] VANGUARD WEAPONS (6)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 6, 11, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
@@ -2807,6 +2810,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
         const char* craftDesc;
 
+        int craftMistCost = 0;
+
+        int craftShadowCost = 0;
+
     };
 
 
@@ -2903,6 +2910,54 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
                 "Long ashwood halberd. Extended linear thrusts & wide 220-degree vault cleaves."
 
+            },
+
+            {
+
+                WeaponType::ZEPHYR_DAGGERS,
+
+                "Twin Zephyr Daggers",
+
+                "MIST-FORGED BLADES",
+
+                2, 70, 140,
+
+                "+4 Damage (20 Light / 80 Heavy)",
+
+                "+9 Damage (25 Light / 95 Heavy), +25% Armor Pierce",
+
+                Color{ 110, 245, 220, 255 },
+
+                0, 60,
+
+                "Dual curved blades forged with Shadow Essence. Heavy attack shadow-steps with iframes.",
+
+                4, 3
+
+            },
+
+            {
+
+                WeaponType::WINDRUNNER_RECURVE,
+
+                "Windrunner's Recurve",
+
+                "GALE ARCHER'S BOW",
+
+                2, 80, 160,
+
+                "+5 Damage (29 Light / 98 Heavy)",
+
+                "+11 Damage (35 Light / 115 Heavy), +50% Defense Pierce",
+
+                Color{ 130, 255, 235, 255 },
+
+                0, 80,
+
+                "Acrobatic wind bow. Fires high-speed piercing gale arrows and channeled drill shots.",
+
+                6, 4
+
             }
 
         };
@@ -2973,9 +3028,13 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
 
 
-        bool canCraft = (!isOwned && entries[i].craftScrapCost > 0);
+        bool canCraft = (!isOwned && (entries[i].craftScrapCost > 0 || entries[i].craftMistCost > 0));
 
-        bool canAffordCraft = canCraft && (playerScraps >= entries[i].craftScrapCost && playerShingles >= entries[i].craftShingleCost);
+        bool canAffordCraft = canCraft &&
+                              (playerScraps >= entries[i].craftScrapCost) &&
+                              (playerShingles >= entries[i].craftShingleCost) &&
+                              (playerMist >= entries[i].craftMistCost) &&
+                              (playerShadow >= entries[i].craftShadowCost);
 
 
 
@@ -3075,9 +3134,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
                     if (isBtnHov && isMousePressed) {
 
-                        player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
-
-                        player.GetInventory().SpendShingles(entries[i].craftShingleCost);
+                        if (entries[i].craftScrapCost > 0) player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
+                        if (entries[i].craftMistCost > 0) player.GetInventory().SpendEssenceOfMist(entries[i].craftMistCost);
+                        if (entries[i].craftShadowCost > 0) player.GetInventory().SpendShadowEssence(entries[i].craftShadowCost);
+                        if (entries[i].craftShingleCost > 0) player.GetInventory().SpendShingles(entries[i].craftShingleCost);
 
                         player.GetInventory().UnlockWeapon(entries[i].type);
 

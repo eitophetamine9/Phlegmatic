@@ -405,27 +405,32 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
 
-    // Tab 3: Realm Map [M]
-
-    Rectangle tab3Rec = { modalX + 496, tabY, 190.0f, 34.0f };
-
+    // Tab 3: Humoral Bestiary
+    Rectangle tab3Rec = { modalX + 496, tabY, 210.0f, 34.0f };
     bool isTab3Hov = CheckCollisionPointRec(mousePos, tab3Rec);
-
-    if ((isTab3Hov && isMousePressed) || IsKeyPressed(KEY_THREE) || IsKeyPressed(KEY_M)) {
-
+    if ((isTab3Hov && isMousePressed) || IsKeyPressed(KEY_THREE)) {
         activeTab = 2;
-
         SoundFX::PlayButtonClick();
-
-        return true; // Signals closing inventory and opening map
-
+    }
+    if (activeTab == 2) {
+        DrawRectangleRounded(tab3Rec, 0.2f, 4, Color{ 32, 42, 64, 255 });
+        DrawRectangleRoundedLines(tab3Rec, 0.2f, 4, Color{ 255, 215, 80, 240 });
+        DrawText("3. HUMORAL BESTIARY", (int)tab3Rec.x + 16, (int)tab3Rec.y + 10, 13, Color{ 255, 225, 100, 255 });
+    } else {
+        DrawRectangleRounded(tab3Rec, 0.2f, 4, isTab3Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
+        DrawText("3. HUMORAL BESTIARY", (int)tab3Rec.x + 16, (int)tab3Rec.y + 10, 13, isTab3Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
     }
 
-
-
-    DrawRectangleRounded(tab3Rec, 0.2f, 4, isTab3Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
-
-    DrawText("3. REALM MAP [M]", (int)tab3Rec.x + 16, (int)tab3Rec.y + 10, 13, isTab3Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
+    // Tab 4: Realm Map [M]
+    Rectangle tab4Rec = { modalX + 716, tabY, 190.0f, 34.0f };
+    bool isTab4Hov = CheckCollisionPointRec(mousePos, tab4Rec);
+    if ((isTab4Hov && isMousePressed) || IsKeyPressed(KEY_FOUR) || IsKeyPressed(KEY_M)) {
+        activeTab = 3;
+        SoundFX::PlayButtonClick();
+        return true; // Signals closing inventory and opening map
+    }
+    DrawRectangleRounded(tab4Rec, 0.2f, 4, isTab4Hov ? Color{ 24, 30, 46, 220 } : Color{ 18, 22, 34, 180 });
+    DrawText("4. REALM MAP [M]", (int)tab4Rec.x + 16, (int)tab4Rec.y + 10, 13, isTab4Hov ? Color{ 240, 245, 255, 255 } : Color{ 160, 175, 195, 200 });
 
 
 
@@ -555,16 +560,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 11, Color{ 255, 215, 90, 240 });
 
         struct WepBtnInfo { WeaponType type; const char* label; };
-        WepBtnInfo wepBtns[5] = {
+        WepBtnInfo wepBtns[7] = {
             { WeaponType::SWORD, "Sword" },
             { WeaponType::DAGGERS, "Daggers" },
             { WeaponType::MACE, "Mace" },
             { WeaponType::HALBERD, "Halberd" },
-            { WeaponType::TRUTH_SEEKER, "Seeker" }
+            { WeaponType::TRUTH_SEEKER, "Seeker" },
+            { WeaponType::ZEPHYR_DAGGERS, "Zephyr" },
+            { WeaponType::WINDRUNNER_RECURVE, "Recurve" }
         };
-        float wepBtnW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float wepBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
         float wepBtnH = 38.0f;
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < 7; ++i) {
             Rectangle wRec = { leftX + 16.0f + (float)i * (wepBtnW + 4.0f), secWepY + 24.0f, wepBtnW, wepBtnH };
             bool isWUnlocked = player.GetInventory().HasWeapon(wepBtns[i].type);
             bool isWEquipped = (player.GetWeapon() == wepBtns[i].type);
@@ -956,16 +963,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         } else if (s_selectedSlot == 4) {
             // WEAPONS LIST
             struct WepListEntry { WeaponType type; const char* lockMsg; };
-            WepListEntry weps[5] = {
+            WepListEntry weps[7] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal" },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal" },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal" },
                 { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal" },
-                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" }
+                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" },
+                { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences" },
+                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" }
             };
             float itemSpacing = (modalH > 780.0f) ? 82.0f : 68.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < 7; ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -1005,6 +1014,201 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 }
             }
         }
+    } else if (activeTab == 2) {
+        // =========================================================================
+        // TAB 2: THE HUMORAL BESTIARY & TACTICAL CODEX (v0.0.1e)
+        // Displays all 9 enemy archetypes, animated 3D silhouettes, humoral affinities,
+        // tactical weaknesses, and 3-tier unlockable lore seals based on kill counts!
+        // =========================================================================
+        static int s_selectedBestiary = 0;
+        struct BestiaryEntry {
+            const char* name;
+            const char* latinTitle;
+            const char* humorName;
+            Color humorColor;
+            int killIdx;
+            const char* combatStyle;
+            const char* weakness;
+            const char* drops;
+            const char* lore1; // 1 kill
+            const char* lore5; // 5 kills
+            const char* lore15;// 15 kills
+        };
+
+        static const BestiaryEntry s_entries[9] = {
+            {
+                "Corrupted Slasher", "Sanguis Corruptus", "SANGUINE (Blood)", Color{ 240, 80, 70, 255 }, 0,
+                "Swarms in agile packs. Erratic curved-blade lunges.",
+                "Easily deflected with shield parries into lethal ripostes.",
+                "Silver Shingles (1-5), Elixir Flasks (15%)",
+                "Maddened survivors who drank the tainted fountain waters of Old Tydeshiire.",
+                "Their flesh has ossified into crude weapon fragments; they feel no fatigue.",
+                "Vanguard records confirm they retain fragments of human grief in their dying gasps."
+            },
+            {
+                "Corrupted Archer", "Sagittarius Profanus", "SANGUINE (Blood)", Color{ 240, 80, 70, 255 }, 1,
+                "Maintains long distance. Piercing crimson arrows.",
+                "Stationary during reload; dashing disrupts aiming lines.",
+                "Silver Shingles (1-5), Elixir Flasks (15%)",
+                "Former royal garrison marksmen blinded by sanguine miasma.",
+                "Their bows are strung with sinew pulled from fallen comrades.",
+                "Target their quiver cords to inflict immediate critical poise damage."
+            },
+            {
+                "Void Pyromancer", "Ignis Abyssi", "CHOLERIC (Fire)", Color{ 255, 120, 40, 255 }, 2,
+                "Casts tracking void orbs and eruptive flame fissures.",
+                "Light defense; staggering with daggers or halberd interrupts casting.",
+                "Silver Shingles (10-25), Elixir Flasks (35%)",
+                "Heretical scholars seeking warmth in the darkness after the Citadel fell.",
+                "Their occult flame feeds upon the victim's internal composure.",
+                "Ancient grimoires warn that extinguishing their embers summons abyssal echoes."
+            },
+            {
+                "Iron Brute", "Malleus Furens", "CHOLERIC (Fire)", Color{ 255, 120, 40, 255 }, 3,
+                "Relentless greatclub cleaves with unstoppable momentum.",
+                "War Mace skull crusher inflicts -20% armor fracture, shattering hyper-armor.",
+                "Silver Shingles (10-25), Elixir Flasks (35%)",
+                "Vanguard infantry welded into their armor plates by heat and dark magic.",
+                "Their iron plating deflects slashing blades; blunt force is mandatory.",
+                "Each fallen brute yields tempered slag prized by master blacksmiths."
+            },
+            {
+                "The Grand Inquisitor", "Inquisitor Magnus", "CHOLERIC (Fire Boss)", Color{ 255, 60, 50, 255 }, 4,
+                "Radial nova starbursts and crushing overhead judgment smites.",
+                "Parrying his ground slam exposes his guard for 3 full seconds.",
+                "High Shingles (100-150), 2x Guaranteed Elixir Flasks",
+                "High prelate of the broken church, burning heresy where no truth remains.",
+                "Wields the censer of cleansing flame, turning holy hymns into deadly shockwaves.",
+                "His defeat shattered the cathedral wards, opening the highway to the Crossroads."
+            },
+            {
+                "Ore Golem & Mini Golems", "Geomantis Primordialis", "MELANCHOLIC (Earth)", Color{ 230, 180, 60, 255 }, 5,
+                "Impenetrable stone phalanx with long-range 7-second artillery snipes.",
+                "Blunt War Mace deals devastating crushing damage and breaks stone carapaces.",
+                "Ore Scraps (Exclusive Crafting Material), Silver Shingles",
+                "Animated quarry slag and volcanic basalt bound by ancient geomancy.",
+                "Mini golems detach from the parent core to flank and suppress intruders.",
+                "Their dense obsidian hearts retain primordial heat and grant unbreakable will."
+            },
+            {
+                "Elemental Golem Titan", "Colossus Elementorum", "MELANCHOLIC (Earth Boss)", Color{ 245, 160, 40, 255 }, 6,
+                "Sweeping basalt spires, minion summons, and earthquake quakes.",
+                "Shattering legs with heavy weapon combos interrupts his spire eruption.",
+                "Elemental Core Totem (25% Drop Rate), High Shingle Stashes",
+                "Ancient guardian slumbering in the basalt depths since King Kreptu's father.",
+                "Channels the elemental humors of the continent through his magma core.",
+                "Binds the friendly elemental companion to whoever proves worthy of his totem."
+            },
+            {
+                "Gale Bandit", "Praedo Zephyri", "PHLEGMATIC (Wind)", Color{ 90, 235, 215, 255 }, 7,
+                "Acrobatic dual-dagger lunges, back-dash evasions, and throwing daggers.",
+                "Extended reach weapons (Royal Halberd) out-range their knives; parry breaks poise.",
+                "Essence of Mist (35% Drop Rate), Silver Shingles (Strictly NO Ore Scraps)",
+                "Outcasts haunting the misty glades west of Zyphden, raiding supply convoys.",
+                "They harvest Essence of Mist to brew agility tinctures and temper shadow garments.",
+                "Their loyalty belongs entirely to the Whispering Altar and the Gale Archer."
+            },
+            {
+                "The Gale Archer", "Custos Nebulae", "PHLEGMATIC (Wind Boss)", Color{ 110, 255, 230, 255 }, 8,
+                "Triple windshot spread, Gale Piercer piercing beam, and Storm Rain barrages.",
+                "Dash-dodging through wind beams allows closing in for rapid melee flurries.",
+                "Totem of Mist (15% Drop Rate), Guaranteed Shadow Essence (1-2x), Shingles",
+                "Guardian spirit of the Whispering Altar, testing mastery of wind and shadow.",
+                "Her bow was carved from the roots of the world pine before the mist arrived.",
+                "Her sacred Shadow Essence can forge the Shadowstrider set and Zephyr armaments."
+            }
+        };
+
+        // Layout: Left column (list of 9 cards), Right column (illuminated codex page)
+        float bLeftX = modalX + 28.0f;
+        float bLeftW = 420.0f;
+        float bLeftH = modalH - 146.0f;
+
+        float bRightX = bLeftX + bLeftW + 18.0f;
+        float bRightW = modalW - bLeftW - 74.0f;
+        float bRightH = bLeftH;
+
+        // Draw Left List Card Container
+        Rectangle listRec = { bLeftX, contentY, bLeftW, bLeftH };
+        DrawRectangleRounded(listRec, 0.04f, 6, Color{ 12, 16, 24, 240 });
+        DrawRectangleRoundedLines(listRec, 0.04f, 6, Color{ 45, 65, 95, 200 });
+
+        float itemH = (bLeftH - 24.0f) / 9.0f;
+        for (int i = 0; i < 9; ++i) {
+            float itemY = contentY + 12.0f + (float)i * itemH;
+            Rectangle itemRec = { bLeftX + 12.0f, itemY, bLeftW - 24.0f, itemH - 4.0f };
+            bool isHov = CheckCollisionPointRec(mousePos, itemRec);
+            bool isSel = (s_selectedBestiary == i);
+
+            if (isHov && isMousePressed) {
+                s_selectedBestiary = i;
+                SoundFX::PlayButtonClick();
+            }
+
+            int kills = player.GetInventory().GetEnemyKills(s_entries[i].killIdx);
+            DrawRectangleRounded(itemRec, 0.15f, 4, isSel ? Color{ 36, 52, 78, 255 } : (isHov ? Color{ 22, 30, 46, 220 } : Color{ 16, 20, 30, 180 }));
+            DrawRectangleRoundedLines(itemRec, 0.15f, 4, isSel ? Color{ 255, 215, 80, 240 } : (isHov ? s_entries[i].humorColor : Color{ 40, 55, 75, 160 }));
+
+            // Name
+            FontManager::DrawText(s_entries[i].name, (int)itemRec.x + 12, (int)itemRec.y + 6, 12, isSel ? Color{ 255, 235, 130, 255 } : Color{ 225, 235, 250, 240 }, GameFont::TITLE);
+            // Humor badge
+            FontManager::DrawGameTextShadow(s_entries[i].humorName, (int)itemRec.x + 12, (int)itemRec.y + 22, 9, s_entries[i].humorColor);
+            // Kills pill
+            std::string killStr = "KILLS: " + std::to_string(kills);
+            FontManager::DrawGameTextShadow(killStr, (int)(itemRec.x + itemRec.width - 70), (int)itemRec.y + 14, 10, (kills > 0) ? Color{ 120, 255, 180, 220 } : Color{ 140, 150, 165, 180 });
+        }
+
+        // Draw Right Codex Card Container (Illuminated Grimoire Parchment)
+        Rectangle codexRec = { bRightX, contentY, bRightW, bRightH };
+        DrawRectangleRounded(codexRec, 0.04f, 6, Color{ 24, 20, 18, 255 });
+        DrawRectangleRoundedLines(codexRec, 0.04f, 6, Color{ 175, 130, 55, 240 });
+        DrawRectangleRoundedLines(Rectangle{ bRightX + 4.0f, contentY + 4.0f, bRightW - 8.0f, bRightH - 8.0f }, 0.035f, 6, Color{ 75, 48, 25, 180 });
+
+        const auto& cur = s_entries[s_selectedBestiary];
+        int curKills = player.GetInventory().GetEnemyKills(cur.killIdx);
+
+        // Header Title
+        FontManager::DrawTextTitleCenteredShadow(cur.name, (int)(bRightX + bRightW * 0.5f), (int)contentY + 16, 20, Color{ 255, 235, 140, 255 });
+        std::string sub = std::string(cur.latinTitle) + "  —  " + cur.humorName;
+        FontManager::DrawTextCenteredShadow(sub, (int)(bRightX + bRightW * 0.5f), (int)contentY + 44, 12, cur.humorColor);
+
+        // Ornamental divider
+        DrawLineEx({ bRightX + 40.0f, contentY + 65.0f }, { bRightX + bRightW - 40.0f, contentY + 65.0f }, 1.5f, Color{ 175, 130, 55, 180 });
+
+        // Tactical Combat Dossier
+        float secY = contentY + 76.0f;
+        FontManager::DrawText("TACTICAL COMBAT DOSSIER", (int)bRightX + 32, (int)secY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
+        FontManager::DrawGameTextShadow("Combat Cadence: ", (int)bRightX + 32, (int)secY + 22, 11, Color{ 180, 200, 220, 220 });
+        FontManager::DrawGameTextShadow(cur.combatStyle, (int)bRightX + 135, (int)secY + 22, 11, Color{ 245, 245, 245, 255 });
+
+        FontManager::DrawGameTextShadow("Known Weakness: ", (int)bRightX + 32, (int)secY + 40, 11, Color{ 180, 200, 220, 220 });
+        FontManager::DrawGameTextShadow(cur.weakness, (int)bRightX + 135, (int)secY + 40, 11, Color{ 110, 245, 220, 255 });
+
+        FontManager::DrawGameTextShadow("Yield / Drops: ", (int)bRightX + 32, (int)secY + 58, 11, Color{ 180, 200, 220, 220 });
+        FontManager::DrawGameTextShadow(cur.drops, (int)bRightX + 135, (int)secY + 58, 11, Color{ 255, 225, 120, 255 });
+
+        // Divider
+        DrawLineEx({ bRightX + 32.0f, secY + 82.0f }, { bRightX + bRightW - 32.0f, secY + 82.0f }, 1.0f, Color{ 85, 60, 40, 180 });
+
+        // Progressive Lore Seals
+        float loreY = secY + 94.0f;
+        FontManager::DrawText("CODEX EXCERPTS & REALM LORE ARCHIVES", (int)bRightX + 32, (int)loreY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
+
+        // Seal 1: 1 Kill
+        bool u1 = (curKills >= 1);
+        FontManager::DrawGameTextShadow(u1 ? "[SEAL I - INITIATE (1 KILL)]" : "[SEAL I - LOCKED (REQUIRES 1 KILL)]", (int)bRightX + 32, (int)loreY + 24, 11, u1 ? Color{ 120, 255, 180, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u1 ? cur.lore1 : "Defeat this enemy once to unlock initial reconnaissance notes.", (int)bRightX + 48, (int)loreY + 42, 11, u1 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+
+        // Seal 2: 5 Kills
+        bool u5 = (curKills >= 5);
+        FontManager::DrawGameTextShadow(u5 ? "[SEAL II - ADEPT (5 KILLS)]" : "[SEAL II - LOCKED (REQUIRES 5 KILLS)]", (int)bRightX + 32, (int)loreY + 70, 11, u5 ? Color{ 100, 220, 255, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u5 ? cur.lore5 : "Achieve 5 victories to decipher deeper humoral vulnerabilities.", (int)bRightX + 48, (int)loreY + 88, 11, u5 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+
+        // Seal 3: 15 Kills
+        bool u15 = (curKills >= 15);
+        FontManager::DrawGameTextShadow(u15 ? "[SEAL III - MASTER (15 KILLS)]" : "[SEAL III - LOCKED (REQUIRES 15 KILLS)]", (int)bRightX + 32, (int)loreY + 116, 11, u15 ? Color{ 255, 215, 80, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u15 ? cur.lore15 : "Achieve 15 victories to unveil ancient grimoire archives.", (int)bRightX + 48, (int)loreY + 134, 11, u15 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+
     } else {
 
         // =========================================================================
@@ -2855,7 +3059,7 @@ bool ModalUI::DrawQuarryTransition(int windowWidth, int windowHeight, Vector2 mo
 
 
 
-bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState) {
+bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, const Player& player, GameState currentState, int* outFastTravelStage) {
     // 1. Dark Frosted Vignette Backdrop
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 4, 10, 14, 235 });
 
@@ -2926,7 +3130,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
         { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
         { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
         { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
-        { 5, "STAGE #5: NORTH MARCHE", { modalX + 560.0f, modalY + 575.0f }, "Lethal", "Min Level: 30", "Alpine snowy mountain passes guarding the sealed gate toward the northern mist and the Liege of Kings." }
+        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." }
     };
 
     static int s_selectedStage = 1;
@@ -2936,13 +3140,15 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     if (currentState == GameState::RUINED_CASTLE) activeStageId = 1;
     else if (currentState == GameState::CROSSROADS) activeStageId = 2;
     else if ((currentState == GameState::ZYPHDEN_REALM || currentState == GameState::ZYPHDEN_TRANSITION)) activeStageId = 3;
+    else if (currentState == GameState::QUARRY_DEPTHS) activeStageId = 4;
+    else if (currentState == GameState::RESTLESS_MIST_FOREST) activeStageId = 5;
 
     // Draw connecting leylines between diamond waypoints (Image 2)
     Color leylineCol = Color{ 40, 140, 160, 180 };
     DrawLineEx(stages[0].pos, stages[1].pos, 2.5f, leylineCol);
     DrawLineEx(stages[1].pos, stages[2].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
-    DrawLineEx(stages[1].pos, stages[4].pos, 2.0f, Color{ 35, 110, 130, 150 });
+    DrawLineEx(stages[2].pos, stages[4].pos, 2.5f, Color{ 40, 140, 160, 180 });
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
@@ -3047,9 +3253,13 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     float playH = 44.0f;
     Rectangle playRec = { modalX + modalW - playW - 48.0f, modalY + modalH - playH - 36.0f, playW, playH };
     bool isPlayHov = CheckCollisionPointRec(mousePos, playRec);
+    bool canTravel = (s_selectedStage != activeStageId) && player.GetInventory().IsCampfireUnlocked(s_selectedStage);
     if ((isPlayHov && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
         SoundFX::PlayButtonClick();
-        return true; // Closes map modal and resumes journey!
+        if (outFastTravelStage && canTravel) {
+            *outFastTravelStage = s_selectedStage;
+        }
+        return true; // Closes map modal and resumes journey / fast travels!
     }
 
     // Angled / Hexagonal button shape (Image 2)
@@ -3072,8 +3282,9 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx(p5, p6, 2.0f, Color{ 255, 190, 120, 255 });
     DrawLineEx(p6, p1, 2.0f, Color{ 255, 190, 120, 255 });
 
-    int ptw = MeasureText("RESUME JOURNEY", 14);
-    DrawText("RESUME JOURNEY", (int)(playRec.x + (playW - ptw) * 0.5f), (int)(playRec.y + 15.0f), 14, Color{ 255, 255, 255, 255 });
+    const char* btnLabel = canTravel ? "FAST TRAVEL" : "RESUME JOURNEY";
+    int ptw = MeasureText(btnLabel, 14);
+    DrawText(btnLabel, (int)(playRec.x + (playW - ptw) * 0.5f), (int)(playRec.y + 15.0f), 14, Color{ 255, 255, 255, 255 });
 
     if (shouldClose) {
         SoundFX::PlayButtonClick();

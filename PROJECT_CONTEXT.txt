@@ -301,7 +301,21 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
-7b. Universal Screen Fade & Realm Transition System:
+7b. Wind & Shadow Armaments (Gale Archer Signature Crafting):
+   - Added `WeaponType::ZEPHYR_DAGGERS` (16 light / 68 heavy, Shadow Slip iframes dash) and `WeaponType::WINDRUNNER_RECURVE` (24 light / 82 heavy, player ranged gale arrow projectiles).
+   - Crafted at Varek's Master Forge using Shadow Essence, Essence of Mist, and Silver Shingles.
+   - Fully integrated into Equipment UI and hero doll vector rendering.
+
+7c. Campfire Waypoints & Realm Fast Travel:
+   - Added interactive Campfires in Ruined Castle, Crossroads, Zyphden, Quarry Depths, and Restless Mist Forest.
+   - Resting at campfires restores health/stamina, refills potions to 5, and attunes the waypoint.
+   - Unlocked waypoints enable fast travel directly from Realm Map modal [M] via `Game::ExecuteFastTravel`.
+
+7d. Humoral Bestiary & Tactical Lore Codex:
+   - Added Tab 3 `[3] HUMORAL BESTIARY` to Inventory/Journal modal.
+   - Tracks kills across all 9 enemy types; displays animated silhouettes, humoral alignments, combat styles, weaknesses, drops, and 3-tier lore seals (1, 5, 15 kills).
+
+7e. Universal Screen Fade & Realm Transition System:
    - Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game`.
    - Transitions smoothly fade to black (0.35s), display glowing realm title cards and subtitles during hold (0.25s),
      execute destination map loading and player relocation at the midpoint, and fade back into the landing screen (0.40s).
@@ -316,6 +330,7 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - Populated with 5 respawning spawners for Gale Bandits (22s cooldown).
    - Drop Table Rules: Gale Bandits drop Silver Shingles and Essence of Mist (35% drop rate; strictly NO Ore Scraps).
    - Ancient Altar of Whispers at { 1130.0f, 650.0f }: player offers 2x Essence of Mist to summon The Gale Archer Boss.
+     - Resolved interaction collider bug: expanded check to 165px rectangle bounds, added [E/Space/Enter] keys, live boss active check, and real-time essence count feedback.
    - Gale Archer Boss executes a 3-phase combat cadence (Triple Windshot, Gale Piercer Beam, Storm Rain Barrage).
    - Gale Archer drops guaranteed Shadow Essence (1-2x), Silver Shingles, and rolls for Totem of Mist at an exact 15% drop rate (strictly NO Ore Scraps).
 
@@ -401,6 +416,24 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - Mini Elemental Golems buffed to 320 HP, 38 DEF, and 55 Will to avoid being 1-shot, and fire a
      telegraphed piercing Elemental Bolt projectile snipe every 7 seconds.
    - Friendly companion golem from Elemental Core Totem scaled to 75% of mini golem stats (240 HP, 28 DEF).
+
+8. Restless Mist Forest Stabilization & Engine Resilience:
+   - Fixed array out-of-bounds loop in SaveManager::SaveGame where unlockedTotems (size 6)
+     was iterated 8 times, reading unallocated stack memory and corrupting save_slot_*.json.
+   - Fixed header guard ordering in RestlessMistForestHandler.hpp (#pragma once placed first).
+   - Added complete serialization and deserialization for unlockedHelmets, unlockedChestplates,
+     unlockedLeggings, unlockedTotems, unlockedCampfires, and bestiaryKills in SaveManager.
+   - Updated weapon save/load loops in Game.cpp to iterate i < 8, fully preserving Zephyr Daggers
+     and Windrunner Recurve.
+   - Added custom visual rendering for ProjectileType::GALE_ARROW and ProjectileType::THROWING_DAGGER.
+   - Added custom weapon rendering for WeaponType::ZEPHYR_DAGGERS and WeaponType::WINDRUNNER_RECURVE.
+   - Wired fast travel target execution from ModalUI::DrawMapModal into Game::ExecuteFastTravel.
+
+9. Inventory Modal Drawer Loop Bound Crash Fix:
+   - Fixed access violation (SIGSEGV / code 0xC0000005) occurring immediately when opening the Equipment & Arsenal inventory modal ([I] or clicking the HUD).
+   - In `src/states/ModalUI.cpp`, `slotCatNames` (5 category tabs: Helmet, Chest, Leggings, Totem, Weapons) was iterated 7 times instead of 5, dereferencing stack garbage as string pointers into `DrawText()`.
+   - In the Totem drawer subpanel, `totems` (5 attunable relics) was iterated 7 times instead of 5, reading out-of-bounds stack memory into `totems[i].lockMsg`.
+   - Fully restored stability across inventory opening, drawer switching, and weapon/armor/totem inspection.
 
 ================================================================================
 8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS

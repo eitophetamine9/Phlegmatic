@@ -473,6 +473,68 @@ void Game::EnterRestlessMistForest() {
     SaveActiveGame();
 }
 
+void Game::ExecuteFastTravel(int stageId) {
+    switch (stageId) {
+        case 1: // Ruined Castle
+            StartRealmTransition(
+                [this]() {
+                    EnterRuinedCastle();
+                    player.SetPosition({ 780.0f, 650.0f });
+                    camera.target = player.GetPosition();
+                },
+                "RUINED CASTLE TYDESHIIRE",
+                "Shattered Keep of the Fallen Vanguard"
+            );
+            break;
+        case 2: // Crossroads
+            StartRealmTransition(
+                [this]() {
+                    EnterCrossroads();
+                    player.SetPosition({ 740.0f, 480.0f });
+                    camera.target = player.GetPosition();
+                },
+                "THE CROSSROADS OF THE DAMNED",
+                "Ancient Highway of Divided Faiths"
+            );
+            break;
+        case 3: // Zyphden Realm
+            StartRealmTransition(
+                [this]() {
+                    EnterZyphden();
+                    player.SetPosition({ 880.0f, 680.0f });
+                    camera.target = player.GetPosition();
+                },
+                "FORTIFIED REALM OF ZYPHDEN",
+                "Seat of King Kreptu & The Vanguard"
+            );
+            break;
+        case 4: // Quarry Depths
+            StartRealmTransition(
+                [this]() {
+                    EnterQuarryDepths();
+                    player.SetPosition({ 960.0f, 660.0f });
+                    camera.target = player.GetPosition();
+                },
+                "SUBTERRANEAN QUARRY DEPTHS",
+                "Domain of the Ore Golems & Primordial Altar"
+            );
+            break;
+        case 5: // Restless Mist Forest
+            StartRealmTransition(
+                [this]() {
+                    EnterRestlessMistForest();
+                    player.SetPosition({ 540.0f, 640.0f });
+                    camera.target = player.GetPosition();
+                },
+                "RESTLESS MIST FOREST",
+                "Haunt of the Gale Bandits & The Whispering Altar"
+            );
+            break;
+        default:
+            break;
+    }
+}
+
 void Game::ReturnFromRestlessMistForest() {
     currentState = GameState::ZYPHDEN_REALM;
     map.Init(MapEnvironment::ZYPHDEN_REALM);
@@ -978,7 +1040,7 @@ void Game::SaveActiveGame() {
 
 
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
         data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
         data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
     }
@@ -989,6 +1051,12 @@ void Game::SaveActiveGame() {
     }
     for (int i = 0; i < 6; ++i) {
         data.unlockedTotems[i] = player.GetInventory().HasTotem((TotemType)i);
+    }
+    for (int i = 0; i < 5; ++i) {
+        data.unlockedCampfires[i] = player.GetInventory().IsCampfireUnlocked(i + 1);
+    }
+    for (int i = 0; i < 9; ++i) {
+        data.bestiaryKills[i] = player.GetInventory().GetEnemyKills(i);
     }
 
 
@@ -1120,7 +1188,7 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
 
 
 
@@ -1147,6 +1215,12 @@ void Game::LoadActiveGame(int slotIndex) {
         if (data.unlockedTotems[i]) {
             player.GetInventory().UnlockTotem((TotemType)i);
         }
+    }
+    for (int i = 0; i < 5; ++i) {
+        player.GetInventory().SetCampfireUnlocked(i + 1, data.unlockedCampfires[i]);
+    }
+    for (int i = 0; i < 9; ++i) {
+        player.GetInventory().SetEnemyKills(i, data.bestiaryKills[i]);
     }
 
 
@@ -4296,7 +4370,9 @@ void Game::RenderScene() {
 
 
 
-        bool close = GameUI::DrawMapModal(w, h, mousePos, isMousePressed, player, currentState);
+        int fastTravelStage = 0;
+
+        bool close = GameUI::DrawMapModal(w, h, mousePos, isMousePressed, player, currentState, &fastTravelStage);
 
 
 
@@ -4305,6 +4381,12 @@ void Game::RenderScene() {
 
 
             showMapModal = false;
+
+            if (fastTravelStage > 0) {
+
+                ExecuteFastTravel(fastTravelStage);
+
+            }
 
 
 

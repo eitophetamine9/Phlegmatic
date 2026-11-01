@@ -143,6 +143,7 @@ CrossroadsHandler::CrossroadsHandler() {
     crossroadsPillar = { "frag_09", "Inscribed Highway Monolith", { 1100.0f, 680.0f }, 26.0f, false };
 
     crossroadsChest = { "", 2, "Crossroads Supply Chest", { 680.0f, 420.0f }, 28.0f, false };
+    campfire = { 2, "Crossroads Highway Camp", { 740.0f, 480.0f } };
 
     showObjectives = true;
 
@@ -203,6 +204,7 @@ void CrossroadsHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& e
     crossroadsPillar = { "frag_09", "Inscribed Highway Monolith", { 1100.0f, 680.0f }, 26.0f, player.GetInventory().HasFragment("frag_09") };
 
     crossroadsChest = { "", 2, "Crossroads Supply Chest", { 680.0f, 420.0f }, 28.0f, false };
+    campfire = { 2, "Crossroads Highway Camp", { 740.0f, 480.0f } };
 
     enemiesSpawned = true;
 
@@ -329,6 +331,7 @@ void CrossroadsHandler::Update(
 
 
     player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
 
 
@@ -551,6 +554,7 @@ void CrossroadsHandler::Render(
         crossroadsPillar.Draw((float)GetTime(), player.GetPosition());
 
         crossroadsChest.Draw((float)GetTime(), player.GetPosition());
+        campfire.Draw((float)GetTime(), player);
 
 
 

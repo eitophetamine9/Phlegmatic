@@ -1344,7 +1344,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
                 WeaponStats stats = GetEquippedWeaponStats();
 
-                if (currentWeapon == WeaponType::DAGGERS) {
+                if (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS) {
                     // Dual Daggers Heavy Stage 3: Vault Kick Disengage (100% poise stagger, backward leap)
                     heavyStage = 3;
                     currentAttack.type = AttackType::HEAVY;
@@ -1608,12 +1608,12 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     WeaponStats stats = GetEquippedWeaponStats();
 
     // Daggers light attack combo: every 5th strike consumes 14 stamina to balance rapid flurry
-    if (currentWeapon == WeaponType::DAGGERS) {
+    if (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS) {
         daggerLightAttackCounter++;
         if (daggerLightAttackCounter >= 5) {
             daggerLightAttackCounter = 0;
             if (!isInPhlegmaticTrance) {
-                float daggerCost = 14.0f;
+                float daggerCost = (currentWeapon == WeaponType::ZEPHYR_DAGGERS) ? 10.0f : 14.0f;
                 if (stamina < daggerCost) {
                     ModifyComposure(-15.0f);
                     particles.SpawnFloatingText(position, "EXHAUSTED", Color{ 240, 100, 100, 200 }, 16.0f);
@@ -1687,6 +1687,17 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     currentAttack.defensePierce = 0.0f;
 
 
+
+    // Windrunner's Recurve: Light Attack fires high-speed piercing wind arrow
+    if (currentWeapon == WeaponType::WINDRUNNER_RECURVE) {
+        Vector2 spawnPos = { position.x + forwardDir.x * (radius + 16.0f), position.y + forwardDir.y * (radius + 16.0f) };
+        Vector2 projVel = { forwardDir.x * 750.0f, forwardDir.y * 750.0f };
+        Projectile proj(spawnPos, projVel, 8.0f, currentAttack.damage, ProjectileType::GALE_ARROW, true, 0.20f);
+        proj.SetPiercing(true);
+        spawnedProjectiles.push_back(proj);
+        particles.SpawnSparks(spawnPos, Color{ 110, 245, 220, 255 }, 12, 140.0f);
+        SoundFX::PlayLightAttack();
+    }
 
     // Elemental Core Totem: Infinitely Piercing Projectile on Light Attack (3s cooldown, 54 damage)
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM && elementalProjectileCooldown <= 0.0f) {
@@ -1870,7 +1881,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 
 
 
-    if (currentWeapon == WeaponType::DAGGERS) {
+    if (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS) {
 
         // Dual Daggers: Balanced high-speed piercing lunge forward!
 

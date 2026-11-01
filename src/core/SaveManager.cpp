@@ -220,7 +220,7 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
                 std::stringstream ss(inner);
                 std::string item;
                 int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 6) {
+                while (std::getline(ss, item, ',') && idx < 8) {
                     outData.weaponUpgrades[idx++] = std::stoi(item);
                 }
             }
@@ -232,8 +232,84 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
                 std::stringstream ss(inner);
                 std::string item;
                 int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 6) {
+                while (std::getline(ss, item, ',') && idx < 8) {
                     outData.unlockedWeapons[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"unlockedHelmets\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 7) {
+                    outData.unlockedHelmets[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"unlockedChestplates\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 7) {
+                    outData.unlockedChestplates[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"unlockedLeggings\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 7) {
+                    outData.unlockedLeggings[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"unlockedTotems\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 6) {
+                    outData.unlockedTotems[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"unlockedCampfires\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 5) {
+                    outData.unlockedCampfires[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
+                }
+            }
+        } else if (line.find("\"bestiaryKills\"") != std::string::npos) {
+            size_t openBracket = line.find('[');
+            size_t closeBracket = line.find(']');
+            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
+                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
+                std::stringstream ss(inner);
+                std::string item;
+                int idx = 0;
+                while (std::getline(ss, item, ',') && idx < 9) {
+                    try {
+                        outData.bestiaryKills[idx++] = std::stoi(item);
+                    } catch (...) {
+                        idx++;
+                    }
                 }
             }
         } else if (line.find("\"unlockedFragments\"") != std::string::npos) {
@@ -297,15 +373,15 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
 
     // Weapon upgrades
     file << "  \"weaponUpgrades\": [";
-    for (int i = 0; i < 6; ++i) {
-        file << data.weaponUpgrades[i] << (i < 5 ? ", " : "");
+    for (int i = 0; i < 8; ++i) {
+        file << data.weaponUpgrades[i] << (i < 7 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked weapons
     file << "  \"unlockedWeapons\": [";
-    for (int i = 0; i < 6; ++i) {
-        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 5 ? ", " : "");
+    for (int i = 0; i < 8; ++i) {
+        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 7 ? ", " : "");
     }
     file << "],\n";
 
@@ -336,6 +412,21 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
         file << (data.unlockedTotems[i] ? "true" : "false") << (i < 5 ? ", " : "");
     }
     file << "],\n";
+
+    // Unlocked campfires
+    file << "  \"unlockedCampfires\": [";
+    for (int i = 0; i < 5; ++i) {
+        file << (data.unlockedCampfires[i] ? "true" : "false") << (i < 4 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Bestiary kills
+    file << "  \"bestiaryKills\": [";
+    for (int i = 0; i < 9; ++i) {
+        file << data.bestiaryKills[i] << (i < 8 ? ", " : "");
+    }
+    file << "],\n";
+
 
     // Unlocked fragments
     file << "  \"unlockedFragments\": [";

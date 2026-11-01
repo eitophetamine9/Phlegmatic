@@ -70,6 +70,7 @@ private:
     void EnterArena();
     void ReturnFromArena();
     void SaveActiveGame();
+    void ExecuteFastTravel(int stageId);
     void LoadActiveGame(int slotIndex);
 
     GameState currentState;

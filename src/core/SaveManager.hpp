@@ -50,12 +50,14 @@ struct GameSaveData {
     int equippedChestplate = 0;
     int equippedLeggings = 0;
     int equippedTotem = 0;
-    int weaponUpgrades[6] = { 0 };
-    bool unlockedWeapons[6] = { true, true, false, false, false, false };
+    int weaponUpgrades[10] = { 0 };
+    bool unlockedWeapons[8] = { true, true, false, false, false, false, false, false };
     bool unlockedHelmets[7] = { true, false, false, false, false, false, false };
     bool unlockedChestplates[7] = { true, false, false, false, false, false, false };
     bool unlockedLeggings[7] = { true, false, false, false, false, false, false };
     bool unlockedTotems[6] = { true, false, false, false, false, false };
+    bool unlockedCampfires[5] = { true, false, false, false, false };
+    int bestiaryKills[9] = { 0 };
     bool unlockedFragments[10] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;

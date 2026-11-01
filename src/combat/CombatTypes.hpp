@@ -7,7 +7,9 @@ enum class WeaponType {
     DAGGERS,
     MACE,
     TRUTH_SEEKER,
-    HALBERD
+    HALBERD,
+    ZEPHYR_DAGGERS,
+    WINDRUNNER_RECURVE
 };
 
 enum class ArmorType {

@@ -8,6 +8,7 @@
 
 RestlessMistForestHandler::RestlessMistForestHandler() {
     // 5 Gale Bandit Spawners spread across the woodland glades
+    campfire = { 5, "Restless Glade Bonfire", { 540.0f, 640.0f } };
     spawners = {
         { { 500.0f, 450.0f }, 0.0f, false },
         { { 850.0f, 380.0f }, 0.0f, false },
@@ -97,6 +98,7 @@ void RestlessMistForestHandler::Update(
 
     // Update Player Physics and Animation
     player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
     // Flush any projectiles spawned by the player
     for (const auto& p : player.GetSpawnedProjectiles()) {
@@ -146,6 +148,10 @@ void RestlessMistForestHandler::Update(
     // Check dead enemies, boss defeat, and spawner cooldowns
     for (auto it = enemies.begin(); it != enemies.end(); ) {
         if (!it->IsAlive()) {
+            int kIdx = -1;
+            if (it->GetType() == EnemyType::GALE_BANDIT) kIdx = 7;
+            else if (it->GetType() == EnemyType::GALE_ARCHER_BOSS) kIdx = 8;
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
             if (it->GetType() == EnemyType::GALE_ARCHER_BOSS) {
                 if (galeArcherSummoned && !galeArcherDefeated) {
                     galeArcherDefeated = true;
@@ -195,17 +201,41 @@ void RestlessMistForestHandler::Update(
         }
     }
 
+    // Check if Gale Archer is currently alive in the arena
+    bool galeArcherActive = false;
+    for (const auto& en : enemies) {
+        if (en.GetType() == EnemyType::GALE_ARCHER_BOSS && en.IsAlive()) {
+            galeArcherActive = true;
+            break;
+        }
+    }
+    if (!galeArcherActive) {
+        galeArcherSummoned = false;
+    }
+
     // Altar of Whispers Interaction
+    // The altar obstacle is a 160x140 plinth centered at { 1130.0f, 650.0f }.
+    // We check an expanded bounding box and radius (165.0f) so interaction
+    // works reliably from any direction (North, South, East, West, and all corners).
+    Rectangle altarPlinth = { 1050.0f, 580.0f, 160.0f, 140.0f };
+    Rectangle altarInteractRec = { altarPlinth.x - 55.0f, altarPlinth.y - 55.0f, altarPlinth.width + 110.0f, altarPlinth.height + 110.0f };
     float distToAltar = Vector2Distance(player.GetPosition(), altarPosition);
-    if (distToAltar <= 95.0f && !galeArcherSummoned) {
-        if (IsKeyPressed(KEY_E)) {
-            if (player.GetInventory().GetEssenceOfMist() >= 2) {
+    bool nearAltar = CheckCollisionPointRec(player.GetPosition(), altarInteractRec) || (distToAltar <= 165.0f);
+    bool interactKey = IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER);
+
+    if (nearAltar && interactKey) {
+        if (galeArcherActive) {
+            particles.SpawnFloatingText(altarPosition, "Gale Archer is already hunting you!", Color{ 255, 120, 120, 255 }, 20.0f);
+            SoundFX::PlayHitImpact();
+        } else {
+            int mistCount = player.GetInventory().GetEssenceOfMist();
+            if (mistCount >= 2) {
                 player.GetInventory().SpendEssenceOfMist(2);
                 galeArcherSummoned = true;
                 galeArcherDefeated = false;
 
-                // Spawn the Gale Archer Boss
-                Vector2 bossPos = { altarPosition.x, altarPosition.y - 130.0f };
+                // Spawn the Gale Archer Boss 140px north of the altar in the clearing
+                Vector2 bossPos = { altarPosition.x, altarPosition.y - 140.0f };
                 enemies.emplace_back(EnemyType::GALE_ARCHER_BOSS, bossPos);
 
                 particles.AddScreenShake(9.0f, 0.45f);
@@ -213,8 +243,9 @@ void RestlessMistForestHandler::Update(
                 particles.SpawnFloatingText(altarPosition, "GALE ARCHER HAS AWAKENED!", Color{ 110, 255, 230, 255 }, 26.0f);
                 SoundFX::PlayCrusaderClash();
             } else {
-                particles.SpawnFloatingText(player.GetPosition(), "Requires 2x Essence of Mist from Gale Bandits!", Color{ 255, 110, 110, 255 }, 18.0f);
-                SoundFX::PlayGateOpen();
+                std::string warn = "Requires 2x Essence of Mist from Gale Bandits! (" + std::to_string(mistCount) + " / 2)";
+                particles.SpawnFloatingText(player.GetPosition(), warn, Color{ 255, 110, 110, 255 }, 18.0f);
+                SoundFX::PlayHitImpact();
             }
         }
     }
@@ -289,14 +320,42 @@ void RestlessMistForestHandler::Render(
     }
 
     particles.Draw();
+    campfire.Draw(time, player);
 
-    // Floating prompt above Altar of Whispers
+    // Floating prompt and runic beacon above Altar of Whispers
+    Rectangle altarPlinth = { 1050.0f, 580.0f, 160.0f, 140.0f };
+    Rectangle altarInteractRec = { altarPlinth.x - 55.0f, altarPlinth.y - 55.0f, altarPlinth.width + 110.0f, altarPlinth.height + 110.0f };
     float distToAltar = Vector2Distance(player.GetPosition(), altarPosition);
-    if (distToAltar <= 140.0f && !galeArcherSummoned) {
-        int mistCount = player.GetInventory().GetEssenceOfMist();
-        std::string altarMsg = "[E] ALTAR OF WHISPERS: Offer 2x Essence of Mist (You have: " + std::to_string(mistCount) + ")";
-        FontManager::DrawGameTextShadow(altarMsg, (int)altarPosition.x - 170, (int)altarPosition.y - 75, 11,
-            (mistCount >= 2) ? Color{ 110, 255, 230, 240 } : Color{ 255, 130, 130, 240 });
+    bool nearAltar = CheckCollisionPointRec(player.GetPosition(), altarInteractRec) || (distToAltar <= 165.0f);
+
+    bool galeArcherActive = false;
+    for (const auto& en : enemies) {
+        if (en.GetType() == EnemyType::GALE_ARCHER_BOSS && en.IsAlive()) {
+            galeArcherActive = true;
+            break;
+        }
+    }
+
+    if (nearAltar) {
+        float pulse = (sinf(time * 4.0f) + 1.0f) * 0.5f;
+        Color runeColor = galeArcherActive ? Color{ 255, 110, 90, (unsigned char)(140 + 80 * pulse) }
+                        : ((player.GetInventory().GetEssenceOfMist() >= 2) ? Color{ 110, 255, 230, (unsigned char)(160 + 80 * pulse) }
+                                                                           : Color{ 255, 140, 140, (unsigned char)(120 + 60 * pulse) });
+        DrawCircleLines((int)altarPosition.x, (int)altarPosition.y, 45.0f + 6.0f * pulse, runeColor);
+        DrawPolyLines(altarPosition, 4, 30.0f, time * 35.0f, runeColor);
+
+        if (galeArcherActive) {
+            FontManager::DrawGameTextShadow("[E] ALTAR OF WHISPERS (GALE ARCHER ACTIVE)", (int)altarPosition.x - 145, (int)altarPosition.y - 85, 12, Color{ 255, 130, 110, 240 });
+        } else {
+            int mistCount = player.GetInventory().GetEssenceOfMist();
+            if (mistCount >= 2) {
+                std::string altarMsg = "[E] ALTAR OF WHISPERS: Offer 2x Essence of Mist (" + std::to_string(mistCount) + " Available)";
+                FontManager::DrawGameTextShadow(altarMsg, (int)altarPosition.x - 175, (int)altarPosition.y - 85, 12, Color{ 110, 255, 230, 255 });
+            } else {
+                std::string altarMsg = "[E] ALTAR OF WHISPERS: Requires 2x Essence of Mist (" + std::to_string(mistCount) + "/2)";
+                FontManager::DrawGameTextShadow(altarMsg, (int)altarPosition.x - 165, (int)altarPosition.y - 85, 12, Color{ 255, 140, 140, 240 });
+            }
+        }
     }
 
     // Floating prompt at Eastern Gateway

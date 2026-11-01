@@ -143,6 +143,38 @@
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
 
+* **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+  * Added `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE` to `CombatTypes.hpp` and `Weapon.hpp`.
+  * **Twin Zephyr Daggers**:
+    * Light attack: 16 damage (upgradable to 20/25), 0.12s duration, 0 stamina on hits 1-4, 10 on 5th hit.
+    * Heavy attack (*Shadow Slip*): 0.32s invulnerability frames, forward lunge of 120px, 360-degree whirlwind cleave (68-95 dmg, 25% armor pierce), and explosive decoy.
+    * Crafting Recipe: 3x Shadow Essence + 4x Essence of Mist + 60 Silver Shingles at Varek's Forge.
+  * **Windrunner's Recurve**:
+    * Phlegmatic's inaugural player-usable ranged bow archetype.
+    * Light attack: Spawns high-velocity `ProjectileType::GALE_ARROW` (24-35 dmg, 750 px/s velocity, 520px range, piercing 1 enemy).
+    * Heavy attack (*Gale Piercer Drill Arrow*): Channeled shot with 920 px/s velocity, 82-115 damage, 40-50% defense pierce, infinite enemy penetration, and screen shake knockback.
+    * Crafting Recipe: 4x Shadow Essence + 6x Essence of Mist + 80 Silver Shingles at Varek's Forge.
+
+* **Campfire Waypoints & Realm Fast Travel**:
+  * Implemented modular `Campfire` system (`src/world/Campfire.hpp`) with stone hearth circles, dynamic fire pulsing, embers, and interactive radial prompts.
+  * Located at:
+    * Ruined Castle Courtyard: `{ 780.0f, 650.0f }` (Campfire 1, unlocked by default)
+    * Crossroads Highway Watch: `{ 740.0f, 480.0f }` (Campfire 2)
+    * Zyphden Town Square: `{ 880.0f, 680.0f }` (Campfire 3)
+    * Subterranean Quarry Depot: `{ 960.0f, 660.0f }` (Campfire 4)
+    * Restless Mist Glade: `{ 540.0f, 640.0f }` (Campfire 5)
+  * Rest Mechanic (`[E]`): Restores player health to 100%, resets stamina, refills potion flask inventory to 5, attunes the waypoint, and saves game state.
+  * Realm Fast Travel: Inspecting an attuned stage in `ModalUI::DrawMapModal` (`[M]`) displays `[E] FAST TRAVEL TO CAMPFIRE`. Activating triggers `Game::ExecuteFastTravel` wrapped in `StartRealmTransition` for smooth fade out/in.
+
+* **Humoral Bestiary & Tactical Lore Codex**:
+  * Added Tab 3 `[3] HUMORAL BESTIARY` to the inventory and journal modal.
+  * Real-time enemy kill tracking across all 9 archetypes stored in `Inventory` and serialized in save slots (`save_slot_*.json`).
+  * Left column provides a 9-item interactive selector with live kill counters and humoral badges.
+  * Right column provides a lavish illuminated grimoire dossier:
+    * Latin titles, Humoral affinities (Sanguine, Choleric, Melancholic, Phlegmatic), and animated vector previews.
+    * Tactical Dossiers: Combat style breakdown, known weaknesses, and exact drop tables.
+    * Three Progressive Lore Seals: Unlocked at 1, 5, and 15 kills, revealing tactical notes, anatomical dissections, and ancient kingdom history.
+
 * **Universal Screen Fade & Realm Transition System**:
   * Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game` to provide smooth, cinematic screen transitions between all game maps.
   * Transitions fade smoothly into dark charcoal blackout (0.35s), present a glowing golden realm title and silver-cyan subtitle with runic diamond separators (0.25s hold), execute the destination map switch and player relocation at the midpoint, and then smoothly fade back into the target world (0.40s).
@@ -163,6 +195,11 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * Populated by 5 respawning spawners of **Gale Bandits** (`EnemyType::GALE_BANDIT`) on a 22-second respawn timer.
   * **Strict Drop Table Rules**: Gale Bandits drop Silver Shingles and **Essence of Mist** at an exact **35% drop rate**; Gale Bandits strictly **never drop Ore Scraps**.
   * Features the ancient **Altar of Whispers** at `{ 1130.0f, 650.0f }`: player sacrifices 2x Essence of Mist to summon **The Gale Archer Boss** (`EnemyType::GALE_ARCHER_BOSS`).
+    * **Altar Interaction & Summoning Mechanics**:
+      * Expanded interaction bounds with rectangular collision check and `distToAltar <= 165.0f` (resolves collider block where the 160x140 solid plinth prevented reaching the previous 95px threshold).
+      * Supports `[E]`, `[SPACE]`, and `[ENTER]` hotkeys.
+      * Dynamically checks if Gale Archer is currently alive in the arena: shows warning if engaged, and allows repeated summoning once vanquished.
+      * Floating prompt displays real-time Essence of Mist inventory count and alerts the player if more essences are needed.
   * Gale Archer Boss executes a dynamic 3-phase combat cycle:
     1. *Triple Windshot*: Rapid three-arrow spread with knockback.
     2. *Gale Piercer Beam*: High-velocity piercing wind line with 2.5s telegraph.
@@ -206,11 +243,20 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * Complete campaign inventory, upgraded weapons, modular armor, and materials are preserved into the arena and saved back out upon return.
   * Added an **Exit Sanctuary Portal** at `{ 1200.0f, 520.0f }` and quick shortcut key **`[T]`** within the arena to return safely to Knight Lenon in Zyphden at any moment.
 
+* **Engine Resilience, Save Overflow Resolution & Transition Stabilization**:
+  * **Save Totems Overflow & Heap Protection**: Resolved a critical memory corruption crash occurring when entering the Restless Mist Forest (`GameState::RESTLESS_MIST_FOREST`) via `EnterRestlessMistForest()` -> `SaveActiveGame()`. The array `GameSaveData::unlockedTotems` is allocated with 6 elements (`bool unlockedTotems[6]`), but the serialization loop in `SaveManager::SaveGame` iterated 8 times (`i < 8`), reading memory out of bounds and writing corrupt boolean sequences into `save_slot_*.json`. Corrected loop bounds strictly to `i < 6`.
+  * **Complete Modular Save/Load Deserialization**: Added complete serialization and deserialization for `unlockedHelmets[7]`, `unlockedChestplates[7]`, `unlockedLeggings[7]`, `unlockedTotems[6]`, `unlockedCampfires[5]`, and `bestiaryKills[9]` in `SaveManager::LoadGame` and `SaveManager::SaveGame`.
+  * **Weapon Serialization for New Archetypes**: Updated weapon upgrade and unlock loops in `Game::SaveActiveGame` and `Game::LoadActiveGame` from `i < 6` to `i < 8`, properly saving and restoring `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE`.
+  * **Header Inclusion Order Fix**: Placed `#pragma once` at the very first line of `RestlessMistForestHandler.hpp` prior to any header inclusions, preventing circular declaration warnings.
+  * **Visual Rendering Integration for Projectiles and Weapons**: Added dedicated rendering branches in `PlayerRenderer::Draw` for Zephyr Daggers and Windrunner Recurve, and added custom visual rendering cases in `Projectile::Draw` for `ProjectileType::GALE_ARROW` and `ProjectileType::THROWING_DAGGER`.
+  * **Realm Map Fast Travel Execution**: Enhanced `ModalUI::DrawMapModal` so clicking `FAST TRAVEL` passes the target stage ID (`outFastTravelStage`) to `Game::ExecuteFastTravel`, enabling instantaneous travel to any attuned campfire directly from the map modal (`[M]`).
+
 * **Tactical Equipment HUD Modal Redesign & Text Word-Wrapping**:
   * Redesigned equipment screen matching reference UI layout on a spacious 1560x860 canvas:
     * Left side (~50%): Loadout diamond badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for Helmet, Chestplate, Leggings, Weapons, Totem Relic, material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence), and active 3/3 Set Bonus card.
     * Right side (~50%): Hero showcase doll scaled up to 1.75x standing on a glowing runic pedestal with live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
     * Integrated `FontManager::DrawTextWrapped` on all drawer item cards and Set Bonus descriptions, eliminating horizontal text overflow.
+    * Resolved out-of-bounds drawer loop bounds crash: Corrected stack drawer category tabs (`slotCatNames[5]`) and totem repertoire (`totems[5]`) loop counters from 7 to 5, preventing invalid pointer dereferences in `DrawText()` / `std::string` constructors.
 
 * **Modular 3-Piece Armor Architecture & Full Set Bonuses**:
   * Replaced monolithic armor suits with a modular 3-piece gear system: **Helmet** (HelmetType), **Chestplate** (ChestplateType), and **Leggings** (LeggingsType). Boots, gloves, and rings were intentionally excluded to maintain focused tactical customization.
