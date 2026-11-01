@@ -56,6 +56,8 @@ struct GameSaveData {
     bool unlockedChestplates[7] = { true, false, false, false, false, false, false };
     bool unlockedLeggings[7] = { true, false, false, false, false, false, false };
     bool unlockedTotems[6] = { true, false, false, false, false, false };
+    bool unlockedCampfires[5] = { true, false, false, false, false };
+    int bestiaryKills[9] = { 0 };
     bool unlockedFragments[10] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;

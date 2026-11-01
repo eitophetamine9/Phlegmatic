@@ -8,6 +8,7 @@
 
 RestlessMistForestHandler::RestlessMistForestHandler() {
     // 5 Gale Bandit Spawners spread across the woodland glades
+    campfire = { 5, "Restless Glade Bonfire", { 540.0f, 640.0f } };
     spawners = {
         { { 500.0f, 450.0f }, 0.0f, false },
         { { 850.0f, 380.0f }, 0.0f, false },
@@ -97,6 +98,7 @@ void RestlessMistForestHandler::Update(
 
     // Update Player Physics and Animation
     player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
     // Flush any projectiles spawned by the player
     for (const auto& p : player.GetSpawnedProjectiles()) {
@@ -146,6 +148,10 @@ void RestlessMistForestHandler::Update(
     // Check dead enemies, boss defeat, and spawner cooldowns
     for (auto it = enemies.begin(); it != enemies.end(); ) {
         if (!it->IsAlive()) {
+            int kIdx = -1;
+            if (it->GetType() == EnemyType::GALE_BANDIT) kIdx = 7;
+            else if (it->GetType() == EnemyType::GALE_ARCHER_BOSS) kIdx = 8;
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
             if (it->GetType() == EnemyType::GALE_ARCHER_BOSS) {
                 if (galeArcherSummoned && !galeArcherDefeated) {
                     galeArcherDefeated = true;
@@ -314,6 +320,7 @@ void RestlessMistForestHandler::Render(
     }
 
     particles.Draw();
+    campfire.Draw(time, player);
 
     // Floating prompt and runic beacon above Altar of Whispers
     Rectangle altarPlinth = { 1050.0f, 580.0f, 160.0f, 140.0f };

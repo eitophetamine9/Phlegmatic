@@ -420,6 +420,7 @@ void RuinedCastleHandler::Render(
     }
 
     particles.Draw();
+    campfire.Draw(time, player);
     EndMode2D();
 
     Vector2 mousePos = GetMousePosition();

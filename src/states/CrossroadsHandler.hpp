@@ -1,3 +1,4 @@
+#include "../world/Campfire.hpp"
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
@@ -79,6 +80,7 @@ public:
     void ToggleObjectives() { showObjectives = !showObjectives; }
 
 private:
+    Campfire campfire;
     HiddenTotemChest chest;
     RoadsideJournal journal;
     InscribedPillar crossroadsPillar;

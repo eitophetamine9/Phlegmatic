@@ -176,6 +176,35 @@ public:
         if (idx >= 0 && idx < 10) weaponUpgradeLevel[idx]++;
     }
 
+    // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest)
+    bool unlockedCampfires[5] = { true, false, false, false, false };
+    bool IsCampfireUnlocked(int id) const {
+        if (id >= 1 && id <= 5) return unlockedCampfires[id - 1];
+        return false;
+    }
+    void UnlockCampfire(int id) {
+        if (id >= 1 && id <= 5) unlockedCampfires[id - 1] = true;
+    }
+    const bool* GetUnlockedCampfires() const { return unlockedCampfires; }
+    void SetCampfireUnlocked(int id, bool val) {
+        if (id >= 1 && id <= 5) unlockedCampfires[id - 1] = val;
+    }
+
+    // Bestiary Kill Tracking
+    // 0: Slasher, 1: Archer, 2: Pyromancer, 3: Brute, 4: Inquisitor Boss,
+    // 5: Ore/Mini Golem, 6: Elemental Golem Boss, 7: Gale Bandit, 8: Gale Archer Boss
+    int enemyKillCounts[9] = { 0 };
+    void RecordEnemyKill(int typeIdx) {
+        if (typeIdx >= 0 && typeIdx < 9) enemyKillCounts[typeIdx]++;
+    }
+    int GetEnemyKills(int idx) const {
+        if (idx >= 0 && idx < 9) return enemyKillCounts[idx];
+        return 0;
+    }
+    void SetEnemyKills(int idx, int val) {
+        if (idx >= 0 && idx < 9) enemyKillCounts[idx] = val;
+    }
+
 private:
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;

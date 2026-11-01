@@ -326,7 +326,8 @@ void ZyphdenLoreItem::Draw(float time, Vector2 playerPos) const {
 
 
 
-ZyphdenHandler::ZyphdenHandler() {
+ZyphdenHandler::ZyphdenHandler() :
+      campfire{ 3, "Zyphden Town Square Fire", { 880.0f, 680.0f } } {
 
     inTavern = false;
 
@@ -844,6 +845,7 @@ void ZyphdenHandler::Update(
     if (!isDialogueOpen) {
 
         player.Update(dt, map, mouseWorld, particles);
+    campfire.Update(player, particles);
 
     }
 
@@ -2190,6 +2192,7 @@ void ZyphdenHandler::Render(
 
 
     particles.Draw();
+    campfire.Draw((float)GetTime(), player);
 
     EndMode2D();
 

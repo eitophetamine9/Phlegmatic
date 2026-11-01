@@ -1,3 +1,4 @@
+#include "../world/Campfire.hpp"
 #pragma once
 #include "raylib.h"
 #include "GameState.hpp"
@@ -61,11 +62,13 @@ public:
     bool ShowZilDefeatModal() const { return showZilDefeatModal; }
 
 private:
+    Campfire campfire;
     bool zilEncounterActive;
     bool zilDefeated;
     bool zilSparedPlayer;
     bool hasUsedZilRetry;
-    bool showZilDefeatModal;
+    bool showZilDefeatModal;
+
     int pendingZilChoice = 0;
     float zilDialogueTimer;
     std::string zilDialogueSpeaker;

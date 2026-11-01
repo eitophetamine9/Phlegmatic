@@ -1,3 +1,4 @@
+#include "../world/Campfire.hpp"
 #pragma once
 #include "raylib.h"
 #include "raymath.h"
@@ -60,6 +61,7 @@ public:
     void SetBossDefeated(bool defeated) { galeArcherDefeated = defeated; }
 
 private:
+    Campfire campfire;
     std::vector<MistForestSpawner> spawners;
     bool galeArcherSummoned = false;
     bool galeArcherDefeated = false;
