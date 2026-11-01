@@ -429,6 +429,12 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - Added custom weapon rendering for WeaponType::ZEPHYR_DAGGERS and WeaponType::WINDRUNNER_RECURVE.
    - Wired fast travel target execution from ModalUI::DrawMapModal into Game::ExecuteFastTravel.
 
+9. Inventory Modal Drawer Loop Bound Crash Fix:
+   - Fixed access violation (SIGSEGV / code 0xC0000005) occurring immediately when opening the Equipment & Arsenal inventory modal ([I] or clicking the HUD).
+   - In `src/states/ModalUI.cpp`, `slotCatNames` (5 category tabs: Helmet, Chest, Leggings, Totem, Weapons) was iterated 7 times instead of 5, dereferencing stack garbage as string pointers into `DrawText()`.
+   - In the Totem drawer subpanel, `totems` (5 attunable relics) was iterated 7 times instead of 5, reading out-of-bounds stack memory into `totems[i].lockMsg`.
+   - Fully restored stability across inventory opening, drawer switching, and weapon/armor/totem inspection.
+
 ================================================================================
 8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
 ================================================================================

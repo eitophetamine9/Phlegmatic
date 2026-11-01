@@ -123,6 +123,7 @@
 >   - Expanded equipment modal to a spacious 1560x860 canvas with diamond loadout badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for modular armor, weapons, single totem relic, and material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence).
 >   - Right side features a 1.75x Hero showcase paper doll upon a glowing runic dais accompanied by live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
 >   - Implemented strict word wrapping on item drawer cards and set bonus descriptions via `FontManager::DrawTextWrapped` to eliminate horizontal text clipping across all display resolutions.
+>   - Resolved crash when opening inventory modal: Fixed out-of-bounds loop indices in `ModalUI.cpp` for drawer category tabs (`slotCatNames[5]`) and totem relics (`totems[5]`), restricting iterations strictly to 5 elements.
 > * **Modular 3-Piece Armor System & Full Set Bonuses**:
 >   - Replaced monolithic suits with 3 modular equippable slots: **Helmet**, **Chestplate**, and **Leggings** (strictly NO boots, gloves, or rings).
 >   - Equipping a matching 3/3 set activates unique passive stat bonuses and an active signature skill triggered by the **`[V]`** key:

@@ -256,6 +256,7 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
     * Left side (~50%): Loadout diamond badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for Helmet, Chestplate, Leggings, Weapons, Totem Relic, material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence), and active 3/3 Set Bonus card.
     * Right side (~50%): Hero showcase doll scaled up to 1.75x standing on a glowing runic pedestal with live aggregate combat attributes (HP, STAM, DEF, WILL, SPEED, STAM REGEN).
     * Integrated `FontManager::DrawTextWrapped` on all drawer item cards and Set Bonus descriptions, eliminating horizontal text overflow.
+    * Resolved out-of-bounds drawer loop bounds crash: Corrected stack drawer category tabs (`slotCatNames[5]`) and totem repertoire (`totems[5]`) loop counters from 7 to 5, preventing invalid pointer dereferences in `DrawText()` / `std::string` constructors.
 
 * **Modular 3-Piece Armor Architecture & Full Set Bonuses**:
   * Replaced monolithic armor suits with a modular 3-piece gear system: **Helmet** (HelmetType), **Chestplate** (ChestplateType), and **Leggings** (LeggingsType). Boots, gloves, and rings were intentionally excluded to maintain focused tactical customization.

@@ -748,7 +748,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // Category tabs on drawer
         const char* slotCatNames[5] = { "1. HELMET", "2. CHEST", "3. LEGGINGS", "4. TOTEM", "5. WEAPONS" };
         float tabW = (rightW - 32.0f - 16.0f) / 5.0f;
-        for (int i = 0; i < 7; ++i) {
+        for (int i = 0; i < 5; ++i) {
             Rectangle catRec = { rightX + 16.0f + (float)i * (tabW + 4.0f), drawerY, tabW, 26.0f };
             bool isCatHov = CheckCollisionPointRec(mousePos, catRec);
             if (isCatHov && isMousePressed) {
@@ -925,7 +925,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 68.0f : 56.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < 5; ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
