@@ -712,6 +712,40 @@ void PlayerRenderer::Draw(const Player& player) {
 
             AssetManager::DrawHalberd(rightHand, halberdAngle, 48.0f, Color{ 210, 225, 245, 255 }, Color{ 120, 160, 210, 160 });
         }
+    } else if (player.currentWeapon == WeaponType::ZEPHYR_DAGGERS) {
+        float angleL = player.facingAngle - 25.0f;
+        float angleR = player.facingAngle + 25.0f;
+        if (player.currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            angleR = player.facingAngle - 35.0f + progress * 85.0f;
+            angleL = player.facingAngle + 35.0f - progress * 85.0f;
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 140, 255, 235, 255 }, Color{ 90, 240, 215, 220 });
+            float startAngle = player.facingAngle - 45.0f;
+            float sweepAngle = progress * player.currentAttack.arcAngle;
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 14, Color{ 90, 240, 215, 60 });
+        } else if (player.currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            float spinAngle = player.facingAngle + progress * 360.0f;
+            angleR = spinAngle;
+            angleL = spinAngle + 180.0f;
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 180, 255, 245, 255 }, Color{ 110, 255, 230, 240 });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, player.currentAttack.range, Color{ 110, 255, 230, 180 });
+        } else {
+            AssetManager::DrawDaggers(leftHand, rightHand, angleL, angleR, Color{ 120, 235, 215, 255 }, Color{ 80, 210, 190, 180 });
+        }
+    } else if (player.currentWeapon == WeaponType::WINDRUNNER_RECURVE) {
+        float rad = player.facingAngle * DEG2RAD;
+        Vector2 bowDir = { cosf(rad), sinf(rad) };
+        Vector2 bowNorm = { -bowDir.y, bowDir.x };
+        Vector2 bowCenter = { rightHand.x + bowDir.x * 12.0f, rightHand.y + bowDir.y * 12.0f };
+        Vector2 bowTop = { bowCenter.x + bowNorm.x * 20.0f - bowDir.x * 6.0f, bowCenter.y + bowNorm.y * 20.0f - bowDir.y * 6.0f };
+        Vector2 bowBot = { bowCenter.x - bowNorm.x * 20.0f - bowDir.x * 6.0f, bowCenter.y - bowNorm.y * 20.0f - bowDir.y * 6.0f };
+        DrawLineEx(bowTop, bowCenter, 2.5f, Color{ 255, 215, 80, 255 });
+        DrawLineEx(bowCenter, bowBot, 2.5f, Color{ 255, 215, 80, 255 });
+        DrawLineEx(bowTop, bowBot, 1.2f, Color{ 120, 245, 225, 220 });
+        if (player.currentAttack.type == AttackType::LIGHT || player.currentAttack.type == AttackType::HEAVY) {
+            DrawLineEx(bowCenter, { bowCenter.x + bowDir.x * 22.0f, bowCenter.y + bowDir.y * 22.0f }, 2.0f, Color{ 180, 255, 240, 255 });
+        }
     }
 
     // Friendly Mini Elemental Golem Companion

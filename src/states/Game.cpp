@@ -1040,7 +1040,7 @@ void Game::SaveActiveGame() {
 
 
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
         data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
         data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
     }
@@ -1188,7 +1188,7 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 8; ++i) {
 
 
 

@@ -1,5 +1,5 @@
-#include "../world/Campfire.hpp"
 #pragma once
+#include "../world/Campfire.hpp"
 #include "raylib.h"
 #include "raymath.h"
 #include "GameState.hpp"
@@ -70,4 +70,3 @@ private:
     float gateCooldown = 0.0f;
     Vector2 altarPosition = { 1130.0f, 650.0f };
 };
-

@@ -243,6 +243,14 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * Complete campaign inventory, upgraded weapons, modular armor, and materials are preserved into the arena and saved back out upon return.
   * Added an **Exit Sanctuary Portal** at `{ 1200.0f, 520.0f }` and quick shortcut key **`[T]`** within the arena to return safely to Knight Lenon in Zyphden at any moment.
 
+* **Engine Resilience, Save Overflow Resolution & Transition Stabilization**:
+  * **Save Totems Overflow & Heap Protection**: Resolved a critical memory corruption crash occurring when entering the Restless Mist Forest (`GameState::RESTLESS_MIST_FOREST`) via `EnterRestlessMistForest()` -> `SaveActiveGame()`. The array `GameSaveData::unlockedTotems` is allocated with 6 elements (`bool unlockedTotems[6]`), but the serialization loop in `SaveManager::SaveGame` iterated 8 times (`i < 8`), reading memory out of bounds and writing corrupt boolean sequences into `save_slot_*.json`. Corrected loop bounds strictly to `i < 6`.
+  * **Complete Modular Save/Load Deserialization**: Added complete serialization and deserialization for `unlockedHelmets[7]`, `unlockedChestplates[7]`, `unlockedLeggings[7]`, `unlockedTotems[6]`, `unlockedCampfires[5]`, and `bestiaryKills[9]` in `SaveManager::LoadGame` and `SaveManager::SaveGame`.
+  * **Weapon Serialization for New Archetypes**: Updated weapon upgrade and unlock loops in `Game::SaveActiveGame` and `Game::LoadActiveGame` from `i < 6` to `i < 8`, properly saving and restoring `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE`.
+  * **Header Inclusion Order Fix**: Placed `#pragma once` at the very first line of `RestlessMistForestHandler.hpp` prior to any header inclusions, preventing circular declaration warnings.
+  * **Visual Rendering Integration for Projectiles and Weapons**: Added dedicated rendering branches in `PlayerRenderer::Draw` for Zephyr Daggers and Windrunner Recurve, and added custom visual rendering cases in `Projectile::Draw` for `ProjectileType::GALE_ARROW` and `ProjectileType::THROWING_DAGGER`.
+  * **Realm Map Fast Travel Execution**: Enhanced `ModalUI::DrawMapModal` so clicking `FAST TRAVEL` passes the target stage ID (`outFastTravelStage`) to `Game::ExecuteFastTravel`, enabling instantaneous travel to any attuned campfire directly from the map modal (`[M]`).
+
 * **Tactical Equipment HUD Modal Redesign & Text Word-Wrapping**:
   * Redesigned equipment screen matching reference UI layout on a spacious 1560x860 canvas:
     * Left side (~50%): Loadout diamond badges (`[ I ]`, `[ II ]`, `[ III ]`), large framed slots for Helmet, Chestplate, Leggings, Weapons, Totem Relic, material inventory bar (Potions, Shingles, Ore Scraps, Mist Essence, Shadow Essence), and active 3/3 Set Bonus card.

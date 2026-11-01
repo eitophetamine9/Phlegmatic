@@ -166,6 +166,22 @@
 >   - **Truth Seeker** (22.0 light / 72.0 heavy): 2-stage combo — *Dawnfire Ring* (34 dmg, 360° sweep applying Solar Burn & firing holy beam) -> *Sacred Judgment Pillar* (38 dmg, descending sunray beam with 100% defense pierce that cleanses player debuffs).
 >   - **Royal Halberd** (16.0 light / 28.0 heavy): 3-stage combo — *Long Lunge* with iframes -> *Sweeping Cleave* (220° arc) -> *Flurry* of 3 consecutive rapid stabs (30% weapon damage each).
 > 
+> * **Restless Mist Forest, Gale Archer Boss & Altar of Whispers**:
+>   - Journey through the Western Mist Archway in Zyphden into the atmospheric woodland of the Restless Mist Forest.
+>   - Defeat respawning Gale Bandits (35% Essence of Mist drop rate, zero Ore Scraps) and offer 2x Essence of Mist at the Altar of Whispers to summon the Gale Archer Boss.
+>   - Gale Archer drops Shadow Essence and a 15% drop rate for the Totem of Mist.
+> * **Shadowstrider Armor Set & Paginated Forge**:
+>   - Craft the high-agility Shadowstrider set (Cowl, Doublet, Tights) at Blacksmith Varek's paginated armor forge using Essence of Mist, Shadow Essence, and Shingles.
+>   - Full set bonus grants +25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, +40% extended dodge i-frames, and the active [V] skill Shadow Decoy.
+> * **Zephyr Daggers & Windrunner Recurve Armaments**:
+>   - Twin Zephyr Daggers feature rapid mist slashes and the Shadow Slip whirlwind burst.
+>   - Windrunner Recurve introduces ranged archery with piercing Gale Arrows and the infinite-penetration Gale Piercer Drill Arrow.
+> * **Campfire Waypoints, Realm Fast Travel & Humoral Bestiary**:
+>   - Rest at bonfires across all 5 realms to restore vitality, replenish elixirs, and attune fast-travel waypoints on the realm map modal (`[M]`).
+>   - Track kills across all 9 enemy archetypes in the 3-tier Humoral Bestiary lore grimoire.
+> * **Engine Resilience & Crash Stabilization**:
+>   - Fixed save array overflow during state transitions, unified totem and campfire serialization, repaired projectile and weapon rendering pipelines, and added smooth fade transitions across all map boundaries.
+> 
 > For detailed release notes, system mechanics breakdowns, math formulas, and lore codices, please consult **[DOCUMENTATION.md](documentation.md)**.
 
 ---

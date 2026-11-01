@@ -3130,7 +3130,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
         { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
         { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
         { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
-        { 5, "STAGE #5: NORTH MARCHE", { modalX + 560.0f, modalY + 575.0f }, "Lethal", "Min Level: 30", "Alpine snowy mountain passes guarding the sealed gate toward the northern mist and the Liege of Kings." }
+        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." }
     };
 
     static int s_selectedStage = 1;
@@ -3140,13 +3140,15 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     if (currentState == GameState::RUINED_CASTLE) activeStageId = 1;
     else if (currentState == GameState::CROSSROADS) activeStageId = 2;
     else if ((currentState == GameState::ZYPHDEN_REALM || currentState == GameState::ZYPHDEN_TRANSITION)) activeStageId = 3;
+    else if (currentState == GameState::QUARRY_DEPTHS) activeStageId = 4;
+    else if (currentState == GameState::RESTLESS_MIST_FOREST) activeStageId = 5;
 
     // Draw connecting leylines between diamond waypoints (Image 2)
     Color leylineCol = Color{ 40, 140, 160, 180 };
     DrawLineEx(stages[0].pos, stages[1].pos, 2.5f, leylineCol);
     DrawLineEx(stages[1].pos, stages[2].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
-    DrawLineEx(stages[1].pos, stages[4].pos, 2.0f, Color{ 35, 110, 130, 150 });
+    DrawLineEx(stages[2].pos, stages[4].pos, 2.5f, Color{ 40, 140, 160, 180 });
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
@@ -3251,9 +3253,13 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     float playH = 44.0f;
     Rectangle playRec = { modalX + modalW - playW - 48.0f, modalY + modalH - playH - 36.0f, playW, playH };
     bool isPlayHov = CheckCollisionPointRec(mousePos, playRec);
+    bool canTravel = (s_selectedStage != activeStageId) && player.GetInventory().IsCampfireUnlocked(s_selectedStage);
     if ((isPlayHov && isMousePressed) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
         SoundFX::PlayButtonClick();
-        return true; // Closes map modal and resumes journey!
+        if (outFastTravelStage && canTravel) {
+            *outFastTravelStage = s_selectedStage;
+        }
+        return true; // Closes map modal and resumes journey / fast travels!
     }
 
     // Angled / Hexagonal button shape (Image 2)
@@ -3276,8 +3282,9 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx(p5, p6, 2.0f, Color{ 255, 190, 120, 255 });
     DrawLineEx(p6, p1, 2.0f, Color{ 255, 190, 120, 255 });
 
-    int ptw = MeasureText("RESUME JOURNEY", 14);
-    DrawText("RESUME JOURNEY", (int)(playRec.x + (playW - ptw) * 0.5f), (int)(playRec.y + 15.0f), 14, Color{ 255, 255, 255, 255 });
+    const char* btnLabel = canTravel ? "FAST TRAVEL" : "RESUME JOURNEY";
+    int ptw = MeasureText(btnLabel, 14);
+    DrawText(btnLabel, (int)(playRec.x + (playW - ptw) * 0.5f), (int)(playRec.y + 15.0f), 14, Color{ 255, 255, 255, 255 });
 
     if (shouldClose) {
         SoundFX::PlayButtonClick();

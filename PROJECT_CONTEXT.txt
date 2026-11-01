@@ -417,6 +417,18 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
      telegraphed piercing Elemental Bolt projectile snipe every 7 seconds.
    - Friendly companion golem from Elemental Core Totem scaled to 75% of mini golem stats (240 HP, 28 DEF).
 
+8. Restless Mist Forest Stabilization & Engine Resilience:
+   - Fixed array out-of-bounds loop in SaveManager::SaveGame where unlockedTotems (size 6)
+     was iterated 8 times, reading unallocated stack memory and corrupting save_slot_*.json.
+   - Fixed header guard ordering in RestlessMistForestHandler.hpp (#pragma once placed first).
+   - Added complete serialization and deserialization for unlockedHelmets, unlockedChestplates,
+     unlockedLeggings, unlockedTotems, unlockedCampfires, and bestiaryKills in SaveManager.
+   - Updated weapon save/load loops in Game.cpp to iterate i < 8, fully preserving Zephyr Daggers
+     and Windrunner Recurve.
+   - Added custom visual rendering for ProjectileType::GALE_ARROW and ProjectileType::THROWING_DAGGER.
+   - Added custom weapon rendering for WeaponType::ZEPHYR_DAGGERS and WeaponType::WINDRUNNER_RECURVE.
+   - Wired fast travel target execution from ModalUI::DrawMapModal into Game::ExecuteFastTravel.
+
 ================================================================================
 8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
 ================================================================================
