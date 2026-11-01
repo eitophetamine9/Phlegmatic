@@ -1,4 +1,6 @@
 #include "SaveManager.hpp"
+#include "SaveHelpers.hpp"
+#include "GameConstants.hpp"
 #include "../states/GameState.hpp"
 #include <fstream>
 #include <sstream>
@@ -10,7 +12,7 @@ int SaveManager::activeSlotIndex = 1;
 
 std::string SaveManager::GetSlotFilePath(int slotIndex) {
     if (slotIndex < 1) slotIndex = 1;
-    if (slotIndex > 3) slotIndex = 3;
+    if (slotIndex > GameLimits::MAX_SAVE_SLOTS) slotIndex = GameLimits::MAX_SAVE_SLOTS;
     return "save_slot_" + std::to_string(slotIndex) + ".json";
 }
 
@@ -29,47 +31,6 @@ bool SaveManager::HasSave(int slotIndex) {
     return false;
 }
 
-static std::string ExtractStringValue(const std::string& line) {
-    size_t colon = line.find(':');
-    if (colon == std::string::npos) return "";
-    size_t firstQuote = line.find('"', colon);
-    if (firstQuote == std::string::npos) return "";
-    size_t secondQuote = line.find('"', firstQuote + 1);
-    if (secondQuote == std::string::npos) return "";
-    return line.substr(firstQuote + 1, secondQuote - firstQuote - 1);
-}
-
-static int ExtractIntValue(const std::string& line) {
-    size_t colon = line.find(':');
-    if (colon == std::string::npos) return 0;
-    std::string sub = line.substr(colon + 1);
-    int val = 0;
-    if (sscanf(sub.c_str(), "%d", &val) == 1) {
-        return val;
-    }
-    return 0;
-}
-
-static float ExtractFloatValue(const std::string& line) {
-    size_t colon = line.find(':');
-    if (colon == std::string::npos) return 0.0f;
-    std::string sub = line.substr(colon + 1);
-    float val = 0.0f;
-    if (sscanf(sub.c_str(), "%f", &val) == 1) {
-        return val;
-    }
-    return 0.0f;
-}
-
-static bool ExtractBoolValue(const std::string& line) {
-    size_t colon = line.find(':');
-    if (colon == std::string::npos) return false;
-    if (line.find("true", colon) != std::string::npos || line.find("1", colon) != std::string::npos) {
-        return true;
-    }
-    return false;
-}
-
 bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
     std::string path = GetSlotFilePath(slotIndex);
     std::ifstream file(path);
@@ -81,54 +42,52 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
 
     outSummary.slotIndex = slotIndex;
     outSummary.isValid = false;
-    outSummary.totalFragments = 10;
+    outSummary.totalFragments = GameLimits::LORE_FRAGMENT_COUNT;
     outSummary.discoveredFragments = 0;
 
     std::string line;
-    bool inFragArray = false;
     int fragCount = 0;
 
     while (std::getline(file, line)) {
         if (line.find("\"isValid\"") != std::string::npos) {
-            outSummary.isValid = ExtractBoolValue(line);
+            outSummary.isValid = SaveHelpers::ExtractBoolValue(line);
         } else if (line.find("\"realmName\"") != std::string::npos) {
-            outSummary.realmName = ExtractStringValue(line);
+            outSummary.realmName = SaveHelpers::ExtractStringValue(line);
         } else if (line.find("\"playerHealth\"") != std::string::npos) {
-            outSummary.playerHealth = ExtractFloatValue(line);
+            outSummary.playerHealth = SaveHelpers::ExtractFloatValue(line, 100.0f);
         } else if (line.find("\"playerMaxHealth\"") != std::string::npos) {
-            outSummary.playerMaxHealth = ExtractFloatValue(line);
+            outSummary.playerMaxHealth = SaveHelpers::ExtractFloatValue(line, 100.0f);
         } else if (line.find("\"shingles\"") != std::string::npos) {
-            outSummary.shingles = ExtractIntValue(line);
+            outSummary.shingles = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"oreScraps\"") != std::string::npos) {
-            outSummary.oreScraps = ExtractIntValue(line);
+            outSummary.oreScraps = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"essenceOfMist\"") != std::string::npos) {
-            outSummary.essenceOfMist = ExtractIntValue(line);
+            outSummary.essenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"shadowEssence\"") != std::string::npos) {
-            outSummary.shadowEssence = ExtractIntValue(line);
+            outSummary.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
-            outSummary.galeArcherDefeated = ExtractBoolValue(line);
+            outSummary.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
-            outSummary.arenaHighestWave = ExtractIntValue(line);
+            outSummary.arenaHighestWave = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
-            outSummary.potionCount = ExtractIntValue(line);
+            outSummary.potionCount = SaveHelpers::ExtractIntValue(line, 1);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
-            outSummary.equippedWeapon = ExtractIntValue(line);
+            outSummary.equippedWeapon = SaveHelpers::ExtractIntValue(line, 1);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
-            outSummary.equippedArmor = ExtractIntValue(line);
+            outSummary.equippedArmor = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedHelmet\"") != std::string::npos) {
-            outSummary.equippedHelmet = ExtractIntValue(line);
+            outSummary.equippedHelmet = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedChestplate\"") != std::string::npos) {
-            outSummary.equippedChestplate = ExtractIntValue(line);
+            outSummary.equippedChestplate = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedLeggings\"") != std::string::npos) {
-            outSummary.equippedLeggings = ExtractIntValue(line);
+            outSummary.equippedLeggings = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedTotem\"") != std::string::npos) {
-            outSummary.equippedTotem = ExtractIntValue(line);
+            outSummary.equippedTotem = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"playtimeSeconds\"") != std::string::npos) {
-            outSummary.playtimeSeconds = (uint32_t)ExtractIntValue(line);
+            outSummary.playtimeSeconds = (uint32_t)SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"dateString\"") != std::string::npos) {
-            outSummary.dateString = ExtractStringValue(line);
+            outSummary.dateString = SaveHelpers::ExtractStringValue(line);
         } else if (line.find("\"unlockedFragments\"") != std::string::npos) {
-            // Count trues in the fragment list
             size_t pos = 0;
             while ((pos = line.find("true", pos)) != std::string::npos) {
                 fragCount++;
@@ -156,174 +115,95 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
     std::string line;
     while (std::getline(file, line)) {
         if (line.find("\"isValid\"") != std::string::npos) {
-            outData.isValid = ExtractBoolValue(line);
+            outData.isValid = SaveHelpers::ExtractBoolValue(line);
         } else if (line.find("\"gameState\"") != std::string::npos) {
-            outData.gameState = ExtractIntValue(line);
+            outData.gameState = SaveHelpers::ExtractIntValue(line, 1);
         } else if (line.find("\"realmName\"") != std::string::npos) {
-            outData.realmName = ExtractStringValue(line);
+            outData.realmName = SaveHelpers::ExtractStringValue(line);
         } else if (line.find("\"playerX\"") != std::string::npos) {
-            outData.playerX = ExtractFloatValue(line);
+            outData.playerX = SaveHelpers::ExtractFloatValue(line, 800.0f);
         } else if (line.find("\"playerY\"") != std::string::npos) {
-            outData.playerY = ExtractFloatValue(line);
+            outData.playerY = SaveHelpers::ExtractFloatValue(line, 800.0f);
         } else if (line.find("\"playerHealth\"") != std::string::npos) {
-            outData.playerHealth = ExtractFloatValue(line);
+            outData.playerHealth = SaveHelpers::ExtractFloatValue(line, 100.0f);
         } else if (line.find("\"playerMaxHealth\"") != std::string::npos) {
-            outData.playerMaxHealth = ExtractFloatValue(line);
+            outData.playerMaxHealth = SaveHelpers::ExtractFloatValue(line, 100.0f);
         } else if (line.find("\"playerComposure\"") != std::string::npos) {
-            outData.playerComposure = ExtractFloatValue(line);
+            outData.playerComposure = SaveHelpers::ExtractFloatValue(line, 50.0f);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
-            outData.potionCount = ExtractIntValue(line);
+            outData.potionCount = SaveHelpers::ExtractIntValue(line, 1);
         } else if (line.find("\"shingles\"") != std::string::npos) {
-            outData.shingles = ExtractIntValue(line);
+            outData.shingles = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"oreScraps\"") != std::string::npos) {
-            outData.oreScraps = ExtractIntValue(line);
+            outData.oreScraps = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"essenceOfMist\"") != std::string::npos) {
-            outData.essenceOfMist = ExtractIntValue(line);
+            outData.essenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"shadowEssence\"") != std::string::npos) {
-            outData.shadowEssence = ExtractIntValue(line);
+            outData.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
-            outData.galeArcherDefeated = ExtractBoolValue(line);
+            outData.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
-            outData.arenaHighestWave = ExtractIntValue(line);
+            outData.arenaHighestWave = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
-            outData.equippedWeapon = ExtractIntValue(line);
+            outData.equippedWeapon = SaveHelpers::ExtractIntValue(line, 1);
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
-            outData.equippedArmor = ExtractIntValue(line);
+            outData.equippedArmor = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedHelmet\"") != std::string::npos) {
-            outData.equippedHelmet = ExtractIntValue(line);
+            outData.equippedHelmet = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedChestplate\"") != std::string::npos) {
-            outData.equippedChestplate = ExtractIntValue(line);
+            outData.equippedChestplate = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedLeggings\"") != std::string::npos) {
-            outData.equippedLeggings = ExtractIntValue(line);
+            outData.equippedLeggings = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedTotem\"") != std::string::npos) {
-            outData.equippedTotem = ExtractIntValue(line);
+            outData.equippedTotem = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"bossZilDefeated\"") != std::string::npos) {
-            outData.bossZilDefeated = ExtractBoolValue(line);
+            outData.bossZilDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"knightLenonSparCompleted\"") != std::string::npos) {
-            outData.knightLenonSparCompleted = ExtractBoolValue(line);
+            outData.knightLenonSparCompleted = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"zyphdenQuestPhase\"") != std::string::npos) {
-            outData.zyphdenQuestPhase = ExtractIntValue(line);
-        } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
-            outData.arenaHighestWave = ExtractIntValue(line);
+            outData.zyphdenQuestPhase = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"playtimeSeconds\"") != std::string::npos) {
-            outData.playtimeSeconds = (uint32_t)ExtractIntValue(line);
+            outData.playtimeSeconds = (uint32_t)SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"timestamp\"") != std::string::npos) {
-            outData.timestamp = (uint64_t)ExtractIntValue(line);
+            outData.timestamp = (uint64_t)SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"dateString\"") != std::string::npos) {
-            outData.dateString = ExtractStringValue(line);
+            outData.dateString = SaveHelpers::ExtractStringValue(line);
         } else if (line.find("\"weaponUpgrades\"") != std::string::npos) {
-            // e.g. [0, 1, 0, 0, 0]
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 8) {
-                    outData.weaponUpgrades[idx++] = std::stoi(item);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.weaponUpgrades, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
         } else if (line.find("\"unlockedWeapons\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 8) {
-                    outData.unlockedWeapons[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedWeapons, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"unlockedHelmets\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 7) {
-                    outData.unlockedHelmets[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedHelmets, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"unlockedChestplates\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 7) {
-                    outData.unlockedChestplates[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedChestplates, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"unlockedLeggings\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 7) {
-                    outData.unlockedLeggings[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedLeggings, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"unlockedTotems\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 6) {
-                    outData.unlockedTotems[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedTotems, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"unlockedCampfires\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 5) {
-                    outData.unlockedCampfires[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedCampfires, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"bestiaryKills\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 9) {
-                    try {
-                        outData.bestiaryKills[idx++] = std::stoi(item);
-                    } catch (...) {
-                        idx++;
-                    }
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.bestiaryKills, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
         } else if (line.find("\"unlockedFragments\"") != std::string::npos) {
-            size_t openBracket = line.find('[');
-            size_t closeBracket = line.find(']');
-            if (openBracket != std::string::npos && closeBracket != std::string::npos) {
-                std::string inner = line.substr(openBracket + 1, closeBracket - openBracket - 1);
-                std::stringstream ss(inner);
-                std::string item;
-                int idx = 0;
-                while (std::getline(ss, item, ',') && idx < 10) {
-                    outData.unlockedFragments[idx++] = (item.find("true") != std::string::npos || item.find("1") != std::string::npos);
-                }
-            }
+            SaveHelpers::ParseJsonArray(line, outData.unlockedFragments, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         }
     }
 
@@ -373,65 +253,64 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
 
     // Weapon upgrades
     file << "  \"weaponUpgrades\": [";
-    for (int i = 0; i < 8; ++i) {
-        file << data.weaponUpgrades[i] << (i < 7 ? ", " : "");
+    for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
+        file << data.weaponUpgrades[i] << (i < GameLimits::WEAPON_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked weapons
     file << "  \"unlockedWeapons\": [";
-    for (int i = 0; i < 8; ++i) {
-        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < 7 ? ", " : "");
+    for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
+        file << (data.unlockedWeapons[i] ? "true" : "false") << (i < GameLimits::WEAPON_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked modular helmets
     file << "  \"unlockedHelmets\": [";
-    for (int i = 0; i < 7; ++i) {
-        file << (data.unlockedHelmets[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    for (int i = 0; i < GameLimits::HELMET_COUNT; ++i) {
+        file << (data.unlockedHelmets[i] ? "true" : "false") << (i < GameLimits::HELMET_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked modular chestplates
     file << "  \"unlockedChestplates\": [";
-    for (int i = 0; i < 7; ++i) {
-        file << (data.unlockedChestplates[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    for (int i = 0; i < GameLimits::CHESTPLATE_COUNT; ++i) {
+        file << (data.unlockedChestplates[i] ? "true" : "false") << (i < GameLimits::CHESTPLATE_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked modular leggings
     file << "  \"unlockedLeggings\": [";
-    for (int i = 0; i < 7; ++i) {
-        file << (data.unlockedLeggings[i] ? "true" : "false") << (i < 6 ? ", " : "");
+    for (int i = 0; i < GameLimits::LEGGINGS_COUNT; ++i) {
+        file << (data.unlockedLeggings[i] ? "true" : "false") << (i < GameLimits::LEGGINGS_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked totems
     file << "  \"unlockedTotems\": [";
-    for (int i = 0; i < 6; ++i) {
-        file << (data.unlockedTotems[i] ? "true" : "false") << (i < 5 ? ", " : "");
+    for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        file << (data.unlockedTotems[i] ? "true" : "false") << (i < GameLimits::TOTEM_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Unlocked campfires
     file << "  \"unlockedCampfires\": [";
-    for (int i = 0; i < 5; ++i) {
-        file << (data.unlockedCampfires[i] ? "true" : "false") << (i < 4 ? ", " : "");
+    for (int i = 0; i < GameLimits::CAMPFIRE_COUNT; ++i) {
+        file << (data.unlockedCampfires[i] ? "true" : "false") << (i < GameLimits::CAMPFIRE_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
     // Bestiary kills
     file << "  \"bestiaryKills\": [";
-    for (int i = 0; i < 9; ++i) {
-        file << data.bestiaryKills[i] << (i < 8 ? ", " : "");
+    for (int i = 0; i < GameLimits::BESTIARY_COUNT; ++i) {
+        file << data.bestiaryKills[i] << (i < GameLimits::BESTIARY_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
-
     // Unlocked fragments
     file << "  \"unlockedFragments\": [";
-    for (int i = 0; i < 10; ++i) {
-        file << (data.unlockedFragments[i] ? "true" : "false") << (i < 9 ? ", " : "");
+    for (int i = 0; i < GameLimits::LORE_FRAGMENT_COUNT; ++i) {
+        file << (data.unlockedFragments[i] ? "true" : "false") << (i < GameLimits::LORE_FRAGMENT_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 
@@ -454,7 +333,7 @@ bool SaveManager::DeleteSave(int slotIndex) {
 }
 
 void SaveManager::SetActiveSlot(int slotIndex) {
-    if (slotIndex >= 1 && slotIndex <= 3) {
+    if (slotIndex >= 1 && slotIndex <= GameLimits::MAX_SAVE_SLOTS) {
         activeSlotIndex = slotIndex;
     }
 }
@@ -465,12 +344,15 @@ int SaveManager::GetActiveSlot() {
 
 std::string SaveManager::GetRealmNameFromState(int state) {
     switch ((GameState)state) {
+        case GameState::TITLE_SCREEN: return "Title Screen";
+        case GameState::PROLOGUE_CUTSCENE: return "The Awakening";
         case GameState::RUINED_CASTLE: return "The Ruined Castle";
         case GameState::CROSSROADS: return "The Crossroads of the Damned";
         case GameState::ZYPHDEN_TRANSITION: return "Zyphden Threshold";
         case GameState::ZYPHDEN_REALM: return "Fortified Realm of Zyphden";
         case GameState::QUARRY_TRANSITION: return "Basalt Passageway";
         case GameState::QUARRY_DEPTHS: return "Eastern Quarry Depths";
+        case GameState::RESTLESS_MIST_FOREST: return "Restless Mist Forest";
         case GameState::LOBBY: return "The Armory Sanctuary";
         case GameState::ARENA: return "The Royal Combat Arena";
         case GameState::BORDERLANDS_GATE: return "Borderlands Gateway";

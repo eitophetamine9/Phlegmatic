@@ -64,7 +64,17 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
-> * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+> * **Mini Ore Golem Companion Map Transition Synchronization & Leash Warping**:
+  - Resolved the top-left { 0.0f, 0.0f } spawning bug when transitioning maps with the Elemental Core Totem equipped.
+  - Implemented Player::RelocateCompanionToPlayer() which dynamically positions the loyal minion beside the player's flank/rear upon map transitions, teleportation, campfire fast travel, and save file loading.
+  - Added a 350px leash warping safeguard in CollisionSystem that teleports separated or stuck companions directly back to the player with an elemental spark burst.
+* **Centralized Game Constants (GameConstants.hpp) & Safe Save Helpers (SaveHelpers.hpp)**:
+  - Eliminated all hardcoded magic numbers (8, 7, 6, 5, 9, 10) across save serialization, inventory queries, game states, and drawer loops, preventing array out-of-bounds access violations (SIGSEGV) and save data regressions.
+  - Added robust JSON token parsing with whitespace trimming and exception-shielded numeric extractors (SafeParseInt, SafeParseFloat, SafeParseBool), protecting against malformed or legacy save file crashes.
+* **Architectural Restructuring & Dedicated UI Subsystem (src/ui/)**:
+  - Decluttered src/states/ by bundling all interface renderers and modals (HUD, ModalUI, TitleUI, UI) into a dedicated src/ui/ directory.
+  - Separated helper parsers and game limit constants into src/core/, streamlining project maintainability.
+* **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
   - Added two high-tier weapon archetypes forged from Gale Archer trophies (Shadow Essence) and Gale Bandit materials at Blacksmith Varek's Master Forge:
     - **Twin Zephyr Daggers**: High-velocity dual curved blades. Light attack unleashes an effortless wind flurry (0 stamina on hits 1-4, 10 on 5th hit). Heavy attack triggers *Shadow Slip*, an evasive 120px dash with 0.32s invulnerability frames that strikes in a 360-degree whirlwind (68 dmg) and leaves an explosive decoy.
     - **Windrunner's Recurve**: Phlegmatic's first player-usable ranged bow archetype. Light attack fires high-velocity piercing wind arrows across long range (24 dmg, 10 stamina). Heavy attack channels the *Gale Piercer Drill Arrow* (82 dmg) with 40% defense pierce and heavy poise knockback.

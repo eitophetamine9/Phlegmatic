@@ -21,10 +21,10 @@ set(SOURCES
     src/combat/Inventory.cpp
     src/combat/CollisionSystem.cpp
     src/combat/LootDrop.cpp
-    src/states/TitleUI.cpp
-    src/states/HUD.cpp
-    src/states/ModalUI.cpp
-    src/states/UI.cpp
+    src/ui/TitleUI.cpp
+    src/ui/HUD.cpp
+    src/ui/ModalUI.cpp
+    src/ui/UI.cpp
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp
     src/states/RuinedCastleHandler.cpp
@@ -45,6 +45,7 @@ target_include_directories(phlegmatic PRIVATE
     src/entities
     src/rendering
     src/states
+    src/ui
     vendor/raylib/include
 )
 

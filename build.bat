@@ -30,10 +30,10 @@ g++ -std=c++17 -O2 -static ^
     src\combat\Inventory.cpp ^
     src\combat\CollisionSystem.cpp ^
     src\combat\LootDrop.cpp ^
-    src\states\TitleUI.cpp ^
-    src\states\HUD.cpp ^
-    src\states\ModalUI.cpp ^
-    src\states\UI.cpp ^
+    src\ui\TitleUI.cpp ^
+    src\ui\HUD.cpp ^
+    src\ui\ModalUI.cpp ^
+    src\ui\UI.cpp ^
     src\states\Cutscene.cpp ^
     src\states\Tutorial.cpp ^
     src\states\RuinedCastleHandler.cpp ^
@@ -49,6 +49,7 @@ g++ -std=c++17 -O2 -static ^
     -Isrc\entities ^
     -Isrc\rendering ^
     -Isrc\states ^
+    -Isrc\ui ^
     -Ivendor\raylib\include ^
     -Lvendor\raylib\lib ^
     -lraylib -lopengl32 -lgdi32 -lwinmm ^

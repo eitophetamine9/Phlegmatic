@@ -143,6 +143,22 @@
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
 
+* **Mini Ore Golem Companion Map Transition Synchronization & Leash Warping**:
+  * Resolved the top-left { 0.0f, 0.0f } spawning bug when transitioning maps with the Elemental Core Totem equipped.
+  * Implemented Player::RelocateCompanionToPlayer() which dynamically positions the loyal minion beside the player's flank/rear upon map transitions, teleportation, campfire fast travel, and save file loading.
+  * Added a 350px leash warping safeguard in CollisionSystem that teleports separated or stuck companions directly back to the player with an elemental spark burst.
+
+* **Centralized Game Constants (GameConstants.hpp) & Safe Save Helpers (SaveHelpers.hpp)**:
+  * Completely eliminated hardcoded magic numbers (8, 7, 6, 5, 9, 10) across save serialization, inventory queries, game states, and drawer loops, preventing array out-of-bounds access violations (SIGSEGV) and save data regressions.
+  * Bound all fixed-size arrays and loops to GameLimits namespace constants.
+  * Added robust JSON token parsing with whitespace trimming and exception-shielded numeric extractors (SafeParseInt, SafeParseFloat, SafeParseBool), protecting against malformed or legacy save file crashes.
+  * Replaced all raw drawer loop limits in ModalUI.cpp with compile-time std::size bounds.
+
+* **Architectural Restructuring & Dedicated UI Subsystem (src/ui/)**:
+  * Decluttered src/states/ by bundling all interface renderers and modals (HUD, ModalUI, TitleUI, UI) into a dedicated src/ui/ directory.
+  * Separated helper parsers and game limit constants into src/core/, streamlining project maintainability.
+  * Updated uild.bat and CMakeLists.txt with -Isrc/ui and updated source mappings.
+
 * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
   * Added `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE` to `CombatTypes.hpp` and `Weapon.hpp`.
   * **Twin Zephyr Daggers**:

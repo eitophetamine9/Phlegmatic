@@ -58,6 +58,7 @@ public:
 
     const CompanionGolem& GetCompanion() const { return companion; }
     CompanionGolem& GetCompanion() { return companion; }
+    void RelocateCompanionToPlayer();
 
     ArmorSet GetActiveArmorSet() const;
     bool HasFullArmorSet(ArmorSet set) const;
@@ -72,7 +73,12 @@ public:
     // Position
     Vector2 GetPosition() const { return position; }
     Vector2 GetTargetPosition() const { return shadowDecoy.active ? shadowDecoy.position : position; }
-    void SetPosition(Vector2 pos) { position = pos; }
+    void SetPosition(Vector2 pos) {
+        position = pos;
+        if (companion.active || (companion.position.x == 0.0f && companion.position.y == 0.0f)) {
+            RelocateCompanionToPlayer();
+        }
+    }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     float GetHealth() const { return health; }

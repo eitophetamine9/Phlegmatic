@@ -154,6 +154,7 @@ Player::Player() {
 void Player::Init(Vector2 startPos) {
 
     position = startPos;
+    RelocateCompanionToPlayer();
 
     maxHealth = GetMaxHealth();
 
@@ -220,6 +221,7 @@ void Player::Init(Vector2 startPos) {
 void Player::Revive(Vector2 startPos, float hpPercent) {
 
     position = startPos;
+    RelocateCompanionToPlayer();
 
     maxHealth = GetMaxHealth();
 
@@ -472,6 +474,13 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
     }
 }
 
+void Player::RelocateCompanionToPlayer() {
+    float sideAngle = (facingAngle - 90.0f) * DEG2RAD;
+    Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
+    companion.position = Vector2Add(position, offset);
+    companion.attackCooldown = 0.0f;
+}
+
 void Player::SetTotem(TotemType newTotem) {
     currentTotem = newTotem;
     inventory.UnlockTotem(newTotem);
@@ -480,7 +489,7 @@ void Player::SetTotem(TotemType newTotem) {
         if (!companion.active && companion.respawnTimer <= 0.0f) {
             companion.active = true;
             companion.health = companion.maxHealth;
-            companion.position = Vector2Add(position, { 35.0f, 10.0f });
+            RelocateCompanionToPlayer();
         }
     } else {
         companion.active = false;
@@ -714,7 +723,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 companion.active = true;
                 companion.health = companion.maxHealth;
                 companion.respawnTimer = 0.0f;
-                companion.position = Vector2Add(position, { 35.0f, 10.0f });
+                RelocateCompanionToPlayer();
                 particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
                 particles.SpawnSparks(companion.position, Color{ 255, 170, 50, 255 }, 25, 180.0f);
                 SoundFX::PlayParrySuccess();
