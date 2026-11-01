@@ -143,6 +143,38 @@
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
 
+* **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+  * Added `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE` to `CombatTypes.hpp` and `Weapon.hpp`.
+  * **Twin Zephyr Daggers**:
+    * Light attack: 16 damage (upgradable to 20/25), 0.12s duration, 0 stamina on hits 1-4, 10 on 5th hit.
+    * Heavy attack (*Shadow Slip*): 0.32s invulnerability frames, forward lunge of 120px, 360-degree whirlwind cleave (68-95 dmg, 25% armor pierce), and explosive decoy.
+    * Crafting Recipe: 3x Shadow Essence + 4x Essence of Mist + 60 Silver Shingles at Varek's Forge.
+  * **Windrunner's Recurve**:
+    * Phlegmatic's inaugural player-usable ranged bow archetype.
+    * Light attack: Spawns high-velocity `ProjectileType::GALE_ARROW` (24-35 dmg, 750 px/s velocity, 520px range, piercing 1 enemy).
+    * Heavy attack (*Gale Piercer Drill Arrow*): Channeled shot with 920 px/s velocity, 82-115 damage, 40-50% defense pierce, infinite enemy penetration, and screen shake knockback.
+    * Crafting Recipe: 4x Shadow Essence + 6x Essence of Mist + 80 Silver Shingles at Varek's Forge.
+
+* **Campfire Waypoints & Realm Fast Travel**:
+  * Implemented modular `Campfire` system (`src/world/Campfire.hpp`) with stone hearth circles, dynamic fire pulsing, embers, and interactive radial prompts.
+  * Located at:
+    * Ruined Castle Courtyard: `{ 780.0f, 650.0f }` (Campfire 1, unlocked by default)
+    * Crossroads Highway Watch: `{ 740.0f, 480.0f }` (Campfire 2)
+    * Zyphden Town Square: `{ 880.0f, 680.0f }` (Campfire 3)
+    * Subterranean Quarry Depot: `{ 960.0f, 660.0f }` (Campfire 4)
+    * Restless Mist Glade: `{ 540.0f, 640.0f }` (Campfire 5)
+  * Rest Mechanic (`[E]`): Restores player health to 100%, resets stamina, refills potion flask inventory to 5, attunes the waypoint, and saves game state.
+  * Realm Fast Travel: Inspecting an attuned stage in `ModalUI::DrawMapModal` (`[M]`) displays `[E] FAST TRAVEL TO CAMPFIRE`. Activating triggers `Game::ExecuteFastTravel` wrapped in `StartRealmTransition` for smooth fade out/in.
+
+* **Humoral Bestiary & Tactical Lore Codex**:
+  * Added Tab 3 `[3] HUMORAL BESTIARY` to the inventory and journal modal.
+  * Real-time enemy kill tracking across all 9 archetypes stored in `Inventory` and serialized in save slots (`save_slot_*.json`).
+  * Left column provides a 9-item interactive selector with live kill counters and humoral badges.
+  * Right column provides a lavish illuminated grimoire dossier:
+    * Latin titles, Humoral affinities (Sanguine, Choleric, Melancholic, Phlegmatic), and animated vector previews.
+    * Tactical Dossiers: Combat style breakdown, known weaknesses, and exact drop tables.
+    * Three Progressive Lore Seals: Unlocked at 1, 5, and 15 kills, revealing tactical notes, anatomical dissections, and ancient kingdom history.
+
 * **Universal Screen Fade & Realm Transition System**:
   * Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game` to provide smooth, cinematic screen transitions between all game maps.
   * Transitions fade smoothly into dark charcoal blackout (0.35s), present a glowing golden realm title and silver-cyan subtitle with runic diamond separators (0.25s hold), execute the destination map switch and player relocation at the midpoint, and then smoothly fade back into the target world (0.40s).

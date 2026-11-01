@@ -64,7 +64,26 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
-> * **Universal Screen Fade & Realm Transition System**:
+> * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+  - Added two high-tier weapon archetypes forged from Gale Archer trophies (Shadow Essence) and Gale Bandit materials at Blacksmith Varek's Master Forge:
+    - **Twin Zephyr Daggers**: High-velocity dual curved blades. Light attack unleashes an effortless wind flurry (0 stamina on hits 1-4, 10 on 5th hit). Heavy attack triggers *Shadow Slip*, an evasive 120px dash with 0.32s invulnerability frames that strikes in a 360-degree whirlwind (68 dmg) and leaves an explosive decoy.
+    - **Windrunner's Recurve**: Phlegmatic's first player-usable ranged bow archetype. Light attack fires high-velocity piercing wind arrows across long range (24 dmg, 10 stamina). Heavy attack channels the *Gale Piercer Drill Arrow* (82 dmg) with 40% defense pierce and heavy poise knockback.
+  - Full support in the Equipment modal quick-switch row and selection drawer, with dedicated 3D character doll hand-drawn vectors.
+* **Campfire Waypoints & Realm Fast Travel**:
+  - Erected interactive Campfire sites across all 5 major world realms:
+    1. *Ruined Castle Courtyard Hearth* (`{ 780.0f, 650.0f }`)
+    2. *Crossroads Highway Camp* (`{ 740.0f, 480.0f }`)
+    3. *Zyphden Town Square Fire* (`{ 880.0f, 680.0f }`)
+    4. *Subterranean Miners' Hearth* (`{ 960.0f, 660.0f }`)
+    5. *Restless Glade Bonfire* (`{ 540.0f, 640.0f }`)
+  - Interacting with any campfire (`[E] REST AT CAMPFIRE`) fully restores health and stamina, refills health potions to maximum (5 flasks), and permanently attunes the waypoint.
+  - Opening the Realm Map (`[M]`) and selecting any attuned stage unlocks the **`[E] FAST TRAVEL TO CAMPFIRE`** action, initiating a seamless cinematic screen transition and teleporting the player directly beside the target campfire.
+* **Humoral Bestiary & Tactical Lore Codex**:
+  - Expanded the Lore Journal modal with a dedicated third section: **`[3] HUMORAL BESTIARY`**.
+  - Features real-time kill tracking across all 9 enemy archetypes: Corrupted Slasher, Corrupted Archer, Void Pyromancer, Iron Brute, Grand Inquisitor, Ore Golem & Mini Golems, Elemental Golem Titan, Gale Bandit, and Gale Archer.
+  - Displays humoral alignments, animated vector silhouettes, combat cadences, known weaknesses, and exact drop tables.
+  - Features 3 progressive unlockable lore seals for each enemy: *Initiate Seal* (1 Kill), *Adept Seal* (5 Kills), and *Master Seal* (15 Kills).
+* **Universal Screen Fade & Realm Transition System**:
   - Implemented a smooth cinematic transition system across all realm and map boundaries:
     - Zyphden <-> Restless Mist Forest
     - Zyphden <-> Royal Combat Arena

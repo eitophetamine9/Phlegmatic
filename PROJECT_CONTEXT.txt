@@ -301,7 +301,21 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
-7b. Universal Screen Fade & Realm Transition System:
+7b. Wind & Shadow Armaments (Gale Archer Signature Crafting):
+   - Added `WeaponType::ZEPHYR_DAGGERS` (16 light / 68 heavy, Shadow Slip iframes dash) and `WeaponType::WINDRUNNER_RECURVE` (24 light / 82 heavy, player ranged gale arrow projectiles).
+   - Crafted at Varek's Master Forge using Shadow Essence, Essence of Mist, and Silver Shingles.
+   - Fully integrated into Equipment UI and hero doll vector rendering.
+
+7c. Campfire Waypoints & Realm Fast Travel:
+   - Added interactive Campfires in Ruined Castle, Crossroads, Zyphden, Quarry Depths, and Restless Mist Forest.
+   - Resting at campfires restores health/stamina, refills potions to 5, and attunes the waypoint.
+   - Unlocked waypoints enable fast travel directly from Realm Map modal [M] via `Game::ExecuteFastTravel`.
+
+7d. Humoral Bestiary & Tactical Lore Codex:
+   - Added Tab 3 `[3] HUMORAL BESTIARY` to Inventory/Journal modal.
+   - Tracks kills across all 9 enemy types; displays animated silhouettes, humoral alignments, combat styles, weaknesses, drops, and 3-tier lore seals (1, 5, 15 kills).
+
+7e. Universal Screen Fade & Realm Transition System:
    - Added `ScreenFadeMode` (`NONE`, `FADE_OUT`, `HOLD`, `FADE_IN`) and `RealmTransition` state controller to `Game`.
    - Transitions smoothly fade to black (0.35s), display glowing realm title cards and subtitles during hold (0.25s),
      execute destination map loading and player relocation at the midpoint, and fade back into the landing screen (0.40s).
