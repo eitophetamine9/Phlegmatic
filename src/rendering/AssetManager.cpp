@@ -344,6 +344,22 @@ void AssetManager::DrawCharacterDoll(Vector2 center, float scale, WeaponType wea
         DrawSplineSegmentBezierQuadratic(upperTip, { bowCenter.x - 14.0f * scale, bowCenter.y }, lowerTip, 3.0f * scale, Color{ 140, 240, 215, 255 });
         DrawLineEx(upperTip, lowerTip, 1.5f * scale, Color{ 255, 255, 255, 180 });
     }
+    else if (weapon == WeaponType::SUN_CLAYMORE) {
+        Vector2 hilt = { handR.x + 3.0f * scale, handR.y - 2.0f * scale };
+        Vector2 tip = { hilt.x + 10.0f * scale, hilt.y - 78.0f * scale };
+        DrawLineEx(hilt, tip, 10.0f * scale, Color{ 255, 160, 40, 140 });
+        DrawLineEx(hilt, tip, 6.0f * scale, Color{ 255, 220, 100, 255 });
+        DrawLineEx({ hilt.x - 18.0f * scale, hilt.y }, { hilt.x + 18.0f * scale, hilt.y }, 5.0f * scale, Color{ 240, 180, 50, 255 });
+        DrawCircleV({ hilt.x, hilt.y + 14.0f * scale }, 4.5f * scale, Color{ 255, 215, 80, 255 });
+    }
+    else if (weapon == WeaponType::STORM_GLAIVE) {
+        Vector2 hilt = { handR.x + 2.0f * scale, handR.y + 16.0f * scale };
+        Vector2 tip = { hilt.x + 10.0f * scale, hilt.y - 84.0f * scale };
+        DrawLineEx(hilt, tip, 4.0f * scale, Color{ 55, 42, 32, 255 });
+        Vector2 collar = { tip.x - 2.0f * scale, tip.y + 20.0f * scale };
+        DrawLineEx(collar, tip, 5.0f * scale, Color{ 100, 245, 230, 255 });
+        DrawLineEx(collar, { collar.x + 14.0f * scale, collar.y - 4.0f * scale }, 3.5f * scale, Color{ 160, 255, 240, 255 });
+    }
 }
 
 void AssetManager::DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned) {
@@ -510,6 +526,20 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
             int w = MeasureText(name, 11);
             DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
         }
+    } else if (weapon == WeaponType::SUN_CLAYMORE) {
+        DrawClaymore({ weaponAnchor.x - 14.0f, weaponAnchor.y + 16.0f }, -45.0f, 48.0f, Color{ 255, 220, 110, 255 }, Color{ 255, 140, 30, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "SUN-FORGED CLAYMORE";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
+    } else if (weapon == WeaponType::STORM_GLAIVE) {
+        DrawGlaive({ weaponAnchor.x - 14.0f, weaponAnchor.y + 14.0f }, -45.0f, 48.0f, Color{ 140, 255, 235, 255 }, Color{ 60, 210, 190, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "STORM GLAIVE";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
     }
 
     if (isSelected) {
@@ -558,4 +588,59 @@ void AssetManager::DrawHalberd(Vector2 origin, float angle, float length, Color 
 
     // Shaft butt cap
     DrawCircleV(origin, 3.5f, Color{ 160, 175, 195, 255 });
+}
+
+void AssetManager::DrawClaymore(Vector2 origin, float angle, float length, Color bladeColor, Color glowColor) {
+    float rad = angle * DEG2RAD;
+    Vector2 dir = { cosf(rad), sinf(rad) };
+    Vector2 normal = { -dir.y, dir.x };
+    Vector2 tip = { origin.x + dir.x * length, origin.y + dir.y * length };
+
+    // Two-handed grip & pommel
+    Vector2 pommel = { origin.x - dir.x * 12.0f, origin.y - dir.y * 12.0f };
+    DrawLineEx(pommel, origin, 4.5f, Color{ 48, 32, 22, 255 });
+    DrawCircleV(pommel, 5.0f, Color{ 230, 180, 60, 255 });
+
+    // Wide heavy crossguard
+    Vector2 guardL = { origin.x - normal.x * 20.0f, origin.y - normal.y * 20.0f };
+    Vector2 guardR = { origin.x + normal.x * 20.0f, origin.y + normal.y * 20.0f };
+    DrawLineEx(guardL, guardR, 5.0f, Color{ 220, 175, 55, 255 });
+    DrawCircleV(guardL, 3.5f, Color{ 255, 215, 80, 255 });
+    DrawCircleV(guardR, 3.5f, Color{ 255, 215, 80, 255 });
+
+    // Broad heavy cleaving blade
+    DrawLineEx(origin, tip, 9.0f, glowColor);
+    DrawLineEx(origin, tip, 5.0f, bladeColor);
+    // Holy sun fuller channel
+    DrawLineEx(origin, { origin.x + dir.x * (length - 14.0f), origin.y + dir.y * (length - 14.0f) }, 2.0f, Color{ 255, 245, 170, 255 });
+    DrawCircleV(tip, 3.0f, bladeColor);
+}
+
+void AssetManager::DrawGlaive(Vector2 origin, float angle, float length, Color headColor, Color glowColor) {
+    float rad = angle * DEG2RAD;
+    Vector2 dir = { cosf(rad), sinf(rad) };
+    Vector2 normal = { -dir.y, dir.x };
+    Vector2 tip = { origin.x + dir.x * length, origin.y + dir.y * length };
+
+    // Long darkwood shaft
+    DrawLineEx(origin, tip, 4.0f, Color{ 55, 42, 32, 255 });
+    DrawLineEx(origin, tip, 2.0f, Color{ 120, 95, 70, 255 });
+
+    // Steel collar & aerodynamic fin
+    Vector2 collar = { origin.x + dir.x * (length - 24.0f), origin.y + dir.y * (length - 24.0f) };
+    DrawCircleV(collar, 4.5f, Color{ 100, 235, 215, 240 });
+
+    // Sweeping curving cleaver blade
+    Vector2 bladeTip = { origin.x + dir.x * (length + 12.0f) + normal.x * 6.0f, origin.y + dir.y * (length + 12.0f) + normal.y * 6.0f };
+    Vector2 bladeSpine = { collar.x + normal.x * 12.0f + dir.x * 14.0f, collar.y + normal.y * 12.0f + dir.y * 14.0f };
+    DrawTriangle(collar, bladeTip, bladeSpine, glowColor);
+    DrawTriangle(collar, bladeTip, bladeSpine, headColor);
+    DrawTriangleLines(collar, bladeTip, bladeSpine, Color{ 40, 70, 85, 255 });
+
+    // Aerodynamic wind tassel
+    Vector2 tassel = { collar.x - normal.x * 8.0f - dir.x * 4.0f, collar.y - normal.y * 8.0f - dir.y * 4.0f };
+    DrawLineEx(collar, tassel, 2.5f, Color{ 130, 255, 235, 220 });
+
+    // Shaft butt cap
+    DrawCircleV(origin, 3.5f, Color{ 180, 210, 230, 255 });
 }

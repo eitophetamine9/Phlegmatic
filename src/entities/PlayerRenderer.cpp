@@ -152,9 +152,13 @@ void PlayerRenderer::Draw(const Player& player) {
 
             float sweepAngle = progress * player.currentAttack.arcAngle;
 
-            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 0, 220, 255, 60 });
-
-            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 120, 245, 255, 180 });
+            // Enhanced multi-layer luminous swing arc
+            DrawCircleSector(player.position, player.currentAttack.range * 1.06f, startAngle, startAngle + sweepAngle, 18, Color{ 0, 180, 255, 30 });
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 40, 220, 255, 95 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 18, Color{ 160, 245, 255, 220 });
+            float leadRad = (startAngle + sweepAngle) * DEG2RAD;
+            Vector2 tipFlare = { player.position.x + cosf(leadRad) * player.currentAttack.range, player.position.y + sinf(leadRad) * player.currentAttack.range };
+            DrawCircleV(tipFlare, 3.5f, Color{ 255, 255, 255, 240 });
 
         } else if (player.currentAttack.type == AttackType::HEAVY) {
 
@@ -745,6 +749,76 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawLineEx(bowTop, bowBot, 1.2f, Color{ 120, 245, 225, 220 });
         if (player.currentAttack.type == AttackType::LIGHT || player.currentAttack.type == AttackType::HEAVY) {
             DrawLineEx(bowCenter, { bowCenter.x + bowDir.x * 22.0f, bowCenter.y + bowDir.y * 22.0f }, 2.0f, Color{ 180, 255, 240, 255 });
+        }
+    } else if (player.currentWeapon == WeaponType::SUN_CLAYMORE) {
+        float claymoreAngle = player.facingAngle + 35.0f;
+        if (player.currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            claymoreAngle = player.facingAngle - 70.0f + progress * player.currentAttack.arcAngle;
+            AssetManager::DrawClaymore(rightHand, claymoreAngle, 56.0f, Color{ 255, 220, 100, 255 }, Color{ 255, 140, 30, 240 });
+
+            float startAngle = player.facingAngle - 70.0f;
+            float sweepAngle = progress * player.currentAttack.arcAngle;
+            DrawCircleSector(player.position, player.currentAttack.range * 1.08f, startAngle, startAngle + sweepAngle, 20, Color{ 255, 140, 30, 45 });
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 195, 60, 110 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 255, 245, 160, 240 });
+            float leadRad = (startAngle + sweepAngle) * DEG2RAD;
+            Vector2 tipFlare = { player.position.x + cosf(leadRad) * player.currentAttack.range, player.position.y + sinf(leadRad) * player.currentAttack.range };
+            DrawCircleV(tipFlare, 4.5f, Color{ 255, 255, 220, 255 });
+        } else if (player.currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            claymoreAngle = player.facingAngle - 100.0f + progress * 200.0f;
+            AssetManager::DrawClaymore(rightHand, claymoreAngle, 64.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 160, 40, 255 });
+
+            float startAngle = player.facingAngle - 100.0f;
+            float sweepAngle = progress * 200.0f;
+            DrawCircleSector(player.position, player.currentAttack.range * 1.12f, startAngle, startAngle + sweepAngle, 24, Color{ 255, 100, 20, 60 });
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 24, Color{ 255, 190, 50, 130 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 24, Color{ 255, 250, 200, 255 });
+        } else if (player.isHeavyWindingUp) {
+            claymoreAngle = player.facingAngle - 110.0f;
+            AssetManager::DrawClaymore(rightHand, claymoreAngle, 58.0f, Color{ 255, 210, 80, 255 }, Color{ 255, 120, 20, 230 });
+        } else {
+            AssetManager::DrawClaymore(rightHand, claymoreAngle, 52.0f, Color{ 245, 205, 90, 255 }, Color{ 200, 120, 30, 180 });
+        }
+    } else if (player.currentWeapon == WeaponType::STORM_GLAIVE) {
+        float glaiveAngle = player.facingAngle + 40.0f;
+        if (player.currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            glaiveAngle = player.facingAngle;
+            AssetManager::DrawGlaive(rightHand, glaiveAngle, 56.0f, Color{ 160, 255, 240, 255 }, Color{ 80, 235, 215, 230 });
+
+            // Linear thrust box & wind trail
+            float rad = player.facingAngle * DEG2RAD;
+            Vector2 dir = { cosf(rad), sinf(rad) };
+            Vector2 normal = { -dir.y, dir.x };
+            float halfWidth = 23.0f;
+            float length = player.currentAttack.range;
+            Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+            Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+            Vector2 c3 = { c2.x + dir.x * length, c2.y + dir.y * length };
+            Vector2 c4 = { c1.x + dir.x * length, c1.y + dir.y * length };
+            DrawTriangle(c1, c2, c3, Color{ 100, 245, 230, (unsigned char)(70 * (1.0f - progress * 0.4f)) });
+            DrawTriangle(c1, c3, c4, Color{ 100, 245, 230, (unsigned char)(70 * (1.0f - progress * 0.4f)) });
+            DrawLineEx(c4, c3, 3.0f, Color{ 180, 255, 245, 240 });
+        } else if (player.currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            glaiveAngle = player.facingAngle - 120.0f + progress * 240.0f;
+            AssetManager::DrawGlaive(rightHand, glaiveAngle, 60.0f, Color{ 180, 255, 245, 255 }, Color{ 90, 245, 225, 240 });
+
+            float startAngle = player.facingAngle - 120.0f;
+            float sweepAngle = progress * 240.0f;
+            DrawCircleSector(player.position, player.currentAttack.range * 1.06f, startAngle, startAngle + sweepAngle, 22, Color{ 80, 220, 205, 40 });
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 110, 245, 230, 95 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 180, 255, 245, 240 });
+            float leadRad = (startAngle + sweepAngle) * DEG2RAD;
+            Vector2 tipFlare = { player.position.x + cosf(leadRad) * player.currentAttack.range, player.position.y + sinf(leadRad) * player.currentAttack.range };
+            DrawCircleV(tipFlare, 4.0f, Color{ 220, 255, 250, 255 });
+        } else if (player.isHeavyWindingUp) {
+            glaiveAngle = player.facingAngle - 120.0f;
+            AssetManager::DrawGlaive(rightHand, glaiveAngle, 54.0f, Color{ 140, 240, 225, 255 }, Color{ 70, 210, 195, 220 });
+        } else {
+            AssetManager::DrawGlaive(rightHand, glaiveAngle, 48.0f, Color{ 120, 230, 215, 255 }, Color{ 60, 180, 165, 180 });
         }
     }
 

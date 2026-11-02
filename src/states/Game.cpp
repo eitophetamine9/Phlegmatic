@@ -585,6 +585,7 @@ void Game::UpdateScreenTransition(float dt) {
                 auto callback = screenTransition.onMidpointSwitch;
                 screenTransition.onMidpointSwitch = nullptr;
                 callback();
+                player.RelocateCompanionToPlayer();
             }
         }
     } else if (screenTransition.mode == ScreenFadeMode::HOLD) {
@@ -1024,6 +1025,7 @@ void Game::SaveActiveGame() {
     data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
     data.shadowEssence = player.GetInventory().GetShadowEssence();
     data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
+    data.elementalGolemDefeated = quarryHandler.IsBossDefeated();
 
 
 
@@ -1040,22 +1042,22 @@ void Game::SaveActiveGame() {
 
 
 
-    for (int i = 0; i < 8; ++i) {
+    for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
         data.weaponUpgrades[i] = player.GetInventory().GetWeaponUpgrade((WeaponType)i);
         data.unlockedWeapons[i] = player.GetInventory().HasWeapon((WeaponType)i);
     }
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < GameLimits::HELMET_COUNT; ++i) {
         data.unlockedHelmets[i] = player.GetInventory().HasHelmet((HelmetType)i);
         data.unlockedChestplates[i] = player.GetInventory().HasChestplate((ChestplateType)i);
         data.unlockedLeggings[i] = player.GetInventory().HasLeggings((LeggingsType)i);
     }
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
         data.unlockedTotems[i] = player.GetInventory().HasTotem((TotemType)i);
     }
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < GameLimits::CAMPFIRE_COUNT; ++i) {
         data.unlockedCampfires[i] = player.GetInventory().IsCampfireUnlocked(i + 1);
     }
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < GameLimits::BESTIARY_COUNT; ++i) {
         data.bestiaryKills[i] = player.GetInventory().GetEnemyKills(i);
     }
 
@@ -1069,7 +1071,7 @@ void Game::SaveActiveGame() {
 
 
 
-    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
+    for (size_t i = 0; i < frags.size() && i < GameLimits::LORE_FRAGMENT_COUNT; ++i) {
 
 
 
@@ -1188,10 +1190,7 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
-    for (int i = 0; i < 8; ++i) {
-
-
-
+    for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
         player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
 
 
@@ -1200,7 +1199,7 @@ void Game::LoadActiveGame(int slotIndex) {
             player.GetInventory().UnlockWeapon((WeaponType)i);
         }
     }
-    for (int i = 0; i < 7; ++i) {
+    for (int i = 0; i < GameLimits::HELMET_COUNT; ++i) {
         if (data.unlockedHelmets[i]) {
             player.GetInventory().UnlockHelmet((HelmetType)i);
         }
@@ -1211,15 +1210,15 @@ void Game::LoadActiveGame(int slotIndex) {
             player.GetInventory().UnlockLeggings((LeggingsType)i);
         }
     }
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
         if (data.unlockedTotems[i]) {
             player.GetInventory().UnlockTotem((TotemType)i);
         }
     }
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < GameLimits::CAMPFIRE_COUNT; ++i) {
         player.GetInventory().SetCampfireUnlocked(i + 1, data.unlockedCampfires[i]);
     }
-    for (int i = 0; i < 9; ++i) {
+    for (int i = 0; i < GameLimits::BESTIARY_COUNT; ++i) {
         player.GetInventory().SetEnemyKills(i, data.bestiaryKills[i]);
     }
 
@@ -1233,7 +1232,7 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
-    for (size_t i = 0; i < frags.size() && i < 10; ++i) {
+    for (size_t i = 0; i < frags.size() && i < GameLimits::LORE_FRAGMENT_COUNT; ++i) {
 
 
 
@@ -1363,6 +1362,11 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
+    quarryHandler.SetBossDefeated(data.elementalGolemDefeated);
+    restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
+    if (data.bossZilDefeated && !player.GetInventory().HasQuestItem("zils_token")) {
+        player.GetInventory().AddQuestItem(QuestItem{ "zils_token", "Zil's Token", "A scorched iron crusade badge bestowed by Zil. Proves you survived the trial of the Ruined Castle.", Color{ 255, 180, 60, 255 } });
+    }
 
 
 
@@ -2158,55 +2162,40 @@ void Game::Update(float dt) {
 
 
 
+            ruinedCastleHandler.Reset();
+            crossroadsHandler.Reset();
+            zyphdenHandler.Reset();
+            quarryHandler.Reset();
+            restlessMistForestHandler.Reset();
             LoadActiveGame(slot);
-
-
 
         } else if (action >= 21 && action <= 23) {
 
-
-
             int slot = action - 20;
-
-
 
             SaveManager::SetActiveSlot(slot);
 
-
-
+            player.SetHealth(100.0f);
+            player.SetComposure(50.0f);
             player.GetInventory().InitDefault();
-
-
 
             player.SetWeapon(WeaponType::NONE);
 
-
-
             player.SetArmor(ArmorType::NONE);
-
-
 
             player.SetTotem(TotemType::NONE);
 
-
-
             player.GetInventory().ClearWeapons();
-
-
 
             player.GetInventory().ClearArmors();
 
-
-
             player.GetInventory().ClearTotems();
 
-
-
             ruinedCastleHandler.Reset();
-
             crossroadsHandler.Reset();
-
             zyphdenHandler.Reset();
+            quarryHandler.Reset();
+            restlessMistForestHandler.Reset();
 
 
 

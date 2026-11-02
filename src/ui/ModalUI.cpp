@@ -17,6 +17,8 @@
 #include <cmath>
 
 #include <sstream>
+#include <iterator>
+#include "../core/GameConstants.hpp"
 
 
 
@@ -94,7 +96,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
         };
 
         float rowHeight = 38.0f;
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < (int)std::size(items); i++) {
             float rowY = startY + (float)i * rowHeight;
 
             if (i % 2 == 1) {
@@ -131,7 +133,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
         float sliderW = modalW - 200.0f;
         float sliderH = 14.0f;
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < (int)std::size(vcs); i++) {
             float groupY = startY + 68.0f + (float)i * 88.0f;
 
             // Title & Value text
@@ -468,7 +470,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         float loadoutX = leftX + 190.0f;
         DrawText("LOADOUTS:", (int)loadoutX, (int)headerY + 4, 10, Color{ 160, 180, 210, 200 });
         const char* loadoutLabels[3] = { "I", "II", "III" };
-        for (int lo = 0; lo < 3; ++lo) {
+        for (int lo = 0; lo < (int)std::size(loadoutLabels); ++lo) {
             float loBtnX = loadoutX + 66.0f + (float)lo * 32.0f;
             Rectangle loRec = { loBtnX, headerY - 1.0f, 26.0f, 22.0f };
             bool isLoActive = (s_activeLoadout == lo + 1);
@@ -560,18 +562,20 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 11, Color{ 255, 215, 90, 240 });
 
         struct WepBtnInfo { WeaponType type; const char* label; };
-        WepBtnInfo wepBtns[7] = {
+        WepBtnInfo wepBtns[9] = {
             { WeaponType::SWORD, "Sword" },
-            { WeaponType::DAGGERS, "Daggers" },
+            { WeaponType::DAGGERS, "Dagger" },
             { WeaponType::MACE, "Mace" },
             { WeaponType::HALBERD, "Halberd" },
             { WeaponType::TRUTH_SEEKER, "Seeker" },
             { WeaponType::ZEPHYR_DAGGERS, "Zephyr" },
-            { WeaponType::WINDRUNNER_RECURVE, "Recurve" }
+            { WeaponType::WINDRUNNER_RECURVE, "Recurve" },
+            { WeaponType::SUN_CLAYMORE, "Claymore" },
+            { WeaponType::STORM_GLAIVE, "Glaive" }
         };
-        float wepBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
+        float wepBtnW = (leftW - 32.0f - 32.0f) / 9.0f;
         float wepBtnH = 38.0f;
-        for (int i = 0; i < 7; ++i) {
+        for (int i = 0; i < (int)std::size(wepBtns); ++i) {
             Rectangle wRec = { leftX + 16.0f + (float)i * (wepBtnW + 4.0f), secWepY + 24.0f, wepBtnW, wepBtnH };
             bool isWUnlocked = player.GetInventory().HasWeapon(wepBtns[i].type);
             bool isWEquipped = (player.GetWeapon() == wepBtns[i].type);
@@ -633,7 +637,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         };
         float matW = (leftW - 32.0f - 16.0f) / 5.0f;
         float matH = 46.0f;
-        for (int m = 0; m < 5; ++m) {
+        for (int m = 0; m < (int)std::size(matSlots); ++m) {
             Rectangle mRec = { leftX + 16.0f + (float)m * (matW + 4.0f), secMatY + 24.0f, matW, matH };
             DrawRectangleRounded(mRec, 0.12f, 4, Color{ 18, 23, 34, 220 });
             DrawRectangleRoundedLines(mRec, 0.12f, 4, Color{ 45, 60, 85, 180 });
@@ -729,7 +733,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         };
 
         float statRowH = (heroBoxH - 42.0f) / 6.0f;
-        for (int sr = 0; sr < 6; ++sr) {
+        for (int sr = 0; sr < (int)std::size(statRows); ++sr) {
             float sry = heroBoxRec.y + 32.0f + (float)sr * statRowH;
             DrawText(statRows[sr].name, (int)statPanelX + 4, (int)sry, 10, Color{ 150, 170, 195, 210 });
             int valW = FontManager::MeasureGameText(statRows[sr].val, 10, GameFont::BODY);
@@ -748,7 +752,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // Category tabs on drawer
         const char* slotCatNames[5] = { "1. HELMET", "2. CHEST", "3. LEGGINGS", "4. TOTEM", "5. WEAPONS" };
         float tabW = (rightW - 32.0f - 16.0f) / 5.0f;
-        for (int i = 0; i < 5; ++i) {
+        for (int i = 0; i < (int)std::size(slotCatNames); ++i) {
             Rectangle catRec = { rightX + 16.0f + (float)i * (tabW + 4.0f), drawerY, tabW, 26.0f };
             bool isCatHov = CheckCollisionPointRec(mousePos, catRec);
             if (isCatHov && isMousePressed) {
@@ -778,7 +782,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 58.0f : 48.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(helms); ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -829,7 +833,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 58.0f : 48.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(chests); ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -878,7 +882,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 58.0f : 48.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(legs); ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -925,7 +929,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             };
             float itemSpacing = (modalH > 780.0f) ? 68.0f : 56.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < (int)std::size(totems); ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -963,18 +967,20 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         } else if (s_selectedSlot == 4) {
             // WEAPONS LIST
             struct WepListEntry { WeaponType type; const char* lockMsg; };
-            WepListEntry weps[7] = {
+            WepListEntry weps[9] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal" },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal" },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal" },
                 { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal" },
                 { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" },
                 { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences" },
-                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" }
+                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" },
+                { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag" },
+                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel" }
             };
             float itemSpacing = (modalH > 780.0f) ? 82.0f : 68.0f;
             float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(weps); ++i) {
                 float iy = drawerListY + (float)i * itemSpacing;
                 if (iy + itemH > contentY + rightH) break;
                 Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
@@ -1134,7 +1140,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawRectangleRoundedLines(listRec, 0.04f, 6, Color{ 45, 65, 95, 200 });
 
         float itemH = (bLeftH - 24.0f) / 9.0f;
-        for (int i = 0; i < 9; ++i) {
+        for (int i = 0; i < (int)std::size(s_entries); ++i) {
             float itemY = contentY + 12.0f + (float)i * itemH;
             Rectangle itemRec = { bLeftX + 12.0f, itemY, bLeftW - 24.0f, itemH - 4.0f };
             bool isHov = CheckCollisionPointRec(mousePos, itemRec);
@@ -1481,7 +1487,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
 
-        for (int i = 0; i < 10 && i < totalFrags; i++) {
+        for (int i = 0; i < GameLimits::LORE_FRAGMENT_COUNT && i < totalFrags; i++) {
 
             int row = i / 5;
 
@@ -2231,7 +2237,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
 
 
-    for (int k = 0; k < 5; k++) {
+    for (int k = 0; k < (int)std::size(realms); k++) {
 
         float rcardX = cardX + 44.0f + (float)k * (rcardW + 10.0f);
 
@@ -3152,7 +3158,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < (int)std::size(stages); i++) {
         Vector2 pt = stages[i].pos;
         bool isActive = (stages[i].id == activeStageId);
         bool isSel = (stages[i].id == s_selectedStage);

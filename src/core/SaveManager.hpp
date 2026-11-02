@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include "GameConstants.hpp"
 
 struct SaveSlotSummary {
     int slotIndex = 1;                     // 1, 2, or 3
@@ -14,6 +15,7 @@ struct SaveSlotSummary {
     int essenceOfMist = 0;
     int shadowEssence = 0;
     bool galeArcherDefeated = false;
+    bool elementalGolemDefeated = false;
     int arenaHighestWave = 0;
     int potionCount = 1;
     int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker, 5: Halberd
@@ -23,7 +25,7 @@ struct SaveSlotSummary {
     int equippedLeggings = 0;
     int equippedTotem = 0;
     int discoveredFragments = 0;
-    int totalFragments = 10;
+    int totalFragments = GameLimits::LORE_FRAGMENT_COUNT;
     uint32_t playtimeSeconds = 0;
     std::string dateString = "";
 };
@@ -44,21 +46,22 @@ struct GameSaveData {
     int essenceOfMist = 0;
     int shadowEssence = 0;
     bool galeArcherDefeated = false;
+    bool elementalGolemDefeated = false;
     int equippedWeapon = 1;
     int equippedArmor = 0;
     int equippedHelmet = 0;
     int equippedChestplate = 0;
     int equippedLeggings = 0;
     int equippedTotem = 0;
-    int weaponUpgrades[10] = { 0 };
-    bool unlockedWeapons[8] = { true, true, false, false, false, false, false, false };
-    bool unlockedHelmets[7] = { true, false, false, false, false, false, false };
-    bool unlockedChestplates[7] = { true, false, false, false, false, false, false };
-    bool unlockedLeggings[7] = { true, false, false, false, false, false, false };
-    bool unlockedTotems[6] = { true, false, false, false, false, false };
-    bool unlockedCampfires[5] = { true, false, false, false, false };
-    int bestiaryKills[9] = { 0 };
-    bool unlockedFragments[10] = { false };
+    int weaponUpgrades[GameLimits::WEAPON_COUNT] = { 0 };
+    bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false, false, false };
+    bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false };
+    bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false };
+    bool unlockedLeggings[GameLimits::LEGGINGS_COUNT] = { true, false, false, false, false, false, false };
+    bool unlockedTotems[GameLimits::TOTEM_COUNT] = { true, false, false, false, false, false };
+    bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false };
+    int bestiaryKills[GameLimits::BESTIARY_COUNT] = { 0 };
+    bool unlockedFragments[GameLimits::LORE_FRAGMENT_COUNT] = { false };
     bool bossZilDefeated = false;
     bool knightLenonSparCompleted = false;
     int zyphdenQuestPhase = 0;

@@ -384,7 +384,11 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
         }
 
-        if (nearestEnemy) {
+        float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
+        if (distToPlayer > 350.0f) {
+            player.RelocateCompanionToPlayer();
+            particles.SpawnSparks(comp.position, Color{ 255, 170, 50, 255 }, 14, 120.0f);
+        } else if (nearestEnemy) {
             Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
             Vector2 dir = Vector2Normalize(toEnemy);
             if (nearestDist > 32.0f) {
@@ -400,7 +404,6 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 SoundFX::PlayHitImpact();
             }
         } else {
-            float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
             if (distToPlayer > 60.0f) {
                 Vector2 toPlayer = Vector2Normalize(Vector2Subtract(player.GetPosition(), comp.position));
                 comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 175.0f * dt));

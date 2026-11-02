@@ -9,7 +9,9 @@ enum class WeaponType {
     TRUTH_SEEKER,
     HALBERD,
     ZEPHYR_DAGGERS,
-    WINDRUNNER_RECURVE
+    WINDRUNNER_RECURVE,
+    SUN_CLAYMORE,
+    STORM_GLAIVE
 };
 
 enum class ArmorType {

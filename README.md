@@ -64,7 +64,38 @@
 > Phlegmatic is currently on **Version 0.0.1e**.
 >
 > ### Version 0.0.1e Release Highlights
-> * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
+> * **Master Forge Weapon Pagination & Header Layout Resolution**:
+>   - Eliminated the modal bottom border and footer button overlap by restructuring Blacksmith Varek's Vanguard Weapons tab into a clean 2x2 paginated grid (4 weapon cards per page across 2 pages).
+>   - Integrated `< PREV PAGE` and `NEXT PAGE >` navigation buttons with keyboard controls (`A`/`D` and Arrow keys).
+>   - Rescaled font hierarchy from cramped 9-11pt up to 12-16pt with high-contrast text and widened borders, resolving collisions between the title, subtitle, tabs, and divider.
+>   - Shifted `[T] Discuss Armorcraft Lore` and `LEAVE FORGE [ESC]` to dedicated bottom padding zones to prevent any overlap with craftable cards.
+> * **Weapon Arsenal Expansion & Rebalancing (10 Total Armaments)**:
+>   - Introduced two new craftable high-tier vanguard weapons at Varek's Master Forge:
+>     - **Sun-Forged Claymore**: Colossal holy two-handed blade. Light attack delivers a broad sweeping cleave (34 base dmg). Heavy attack unleashes the *Solar Rupture* (92 dmg) with an expansive golden shockwave ring and hyper-armor damage mitigation.
+>     - **Storm Glaive**: Swift vanguard reach polearm. Light attack executes a rapid linear thrust (28 base dmg). Heavy attack unleashes the *Tempest Vortex* (78 dmg), a 240-degree sweeping cleave with heavy posture break.
+>   - Rebalanced **Royal Halberd** heavy attack damage scaling from 28/34/40 to 58/72/88 across upgrade tiers.
+>   - Integrated all 10 armaments into the Equipment grimoire, quick-switch drawer, 3D character doll hand-drawn vectors, and save serialization.
+> * **Material Economy Rebalance & Acquisition Nerf**:
+>   - Rebalanced drop rates across all standard hostiles to curb material inflation: common enemies now drop 1-3 Silver Shingles at a 60% chance (previously 100% chance for 2-5).
+>   - Subterranean Ore Golems now drop 1 Ore Scrap at a 65% chance (previously guaranteed 2-4 drops), with their respawn timer increased from 7.0s to 18.0s.
+>   - Reduced Shingles drop yields from Cultist Pyromancers, Corrupted Archers, and Iron Brutes.
+> * **Save Slot Persistence Isolation & Realm State Cleanse**:
+>   - Ensured complete independence across Save Slots 1, 2, and 3: loading a slot or starting a New Game now executes a full state reset across all 5 realm handlers prior to state restoration, preventing cross-slot data leakage.
+>   - Added `elementalGolemDefeated` to save metadata summaries and slot payloads, ensuring boss defeats and key inventory items (such as Zil's Token) remain persistently tracked.
+> * **Enhanced Weapon Swing Animations & Environmental Polish**:
+>   - Weapon swing visual overhaul in `PlayerRenderer.cpp`: multi-tier luminous swoosh arcs, tip sparks, and distinct trajectory trails tailored for each weapon archetype.
+>   - Environment floor aesthetics upgraded in `Map.cpp`: subtle alternating stone flagstone shading, ambient wall contact shadow gradients, and floating atmospheric motes (ruined castle dust motes, crossroads wind dust, golden town motes, quarry amber slag cinders, and ethereal forest mist spores).
+> * **Mini Ore Golem Companion Map Transition Synchronization & Leash Warping**:
+  - Resolved the top-left { 0.0f, 0.0f } spawning bug when transitioning maps with the Elemental Core Totem equipped.
+  - Implemented Player::RelocateCompanionToPlayer() which dynamically positions the loyal minion beside the player's flank/rear upon map transitions, teleportation, campfire fast travel, and save file loading.
+  - Added a 350px leash warping safeguard in CollisionSystem that teleports separated or stuck companions directly back to the player with an elemental spark burst.
+* **Centralized Game Constants (GameConstants.hpp) & Safe Save Helpers (SaveHelpers.hpp)**:
+  - Eliminated all hardcoded magic numbers (8, 7, 6, 5, 9, 10) across save serialization, inventory queries, game states, and drawer loops, preventing array out-of-bounds access violations (SIGSEGV) and save data regressions.
+  - Added robust JSON token parsing with whitespace trimming and exception-shielded numeric extractors (SafeParseInt, SafeParseFloat, SafeParseBool), protecting against malformed or legacy save file crashes.
+* **Architectural Restructuring & Dedicated UI Subsystem (src/ui/)**:
+  - Decluttered src/states/ by bundling all interface renderers and modals (HUD, ModalUI, TitleUI, UI) into a dedicated src/ui/ directory.
+  - Separated helper parsers and game limit constants into src/core/, streamlining project maintainability.
+* **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
   - Added two high-tier weapon archetypes forged from Gale Archer trophies (Shadow Essence) and Gale Bandit materials at Blacksmith Varek's Master Forge:
     - **Twin Zephyr Daggers**: High-velocity dual curved blades. Light attack unleashes an effortless wind flurry (0 stamina on hits 1-4, 10 on 5th hit). Heavy attack triggers *Shadow Slip*, an evasive 120px dash with 0.32s invulnerability frames that strikes in a 360-degree whirlwind (68 dmg) and leaves an explosive decoy.
     - **Windrunner's Recurve**: Phlegmatic's first player-usable ranged bow archetype. Light attack fires high-velocity piercing wind arrows across long range (24 dmg, 10 stamina). Heavy attack channels the *Gale Piercer Drill Arrow* (82 dmg) with 40% defense pierce and heavy poise knockback.

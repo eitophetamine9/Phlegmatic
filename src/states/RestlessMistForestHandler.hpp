@@ -59,6 +59,13 @@ public:
     bool IsBossSummoned() const { return galeArcherSummoned; }
     bool IsBossDefeated() const { return galeArcherDefeated; }
     void SetBossDefeated(bool defeated) { galeArcherDefeated = defeated; }
+    void Reset() {
+        galeArcherSummoned = false;
+        galeArcherDefeated = false;
+        spawners.clear();
+        entryBannerTimer = 0.0f;
+        gateCooldown = 0.0f;
+    }
 
 private:
     Campfire campfire;

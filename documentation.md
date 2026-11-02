@@ -143,6 +143,49 @@
 
 A comprehensive technical breakdown of all systems, gameplay mechanics, modular armor architecture, companion AI, visual overhauls, and combat rebalances introduced in **Version 0.0.1e**:
 
+* **Master Forge Weapon Pagination & High-Contrast Typography**:
+  * Eliminated the modal bottom border overlap and footer action button collisions in Blacksmith Varek's Master Forge by dividing Vanguard Weapons into a 2x2 paginated grid (4 cards per page across 2 pages).
+  * Implemented `< PREV PAGE` and `NEXT PAGE >` navigation with dual mouse and keyboard shortcuts (`A`/`D` and Arrow keys).
+  * Rescaled typography across headers, tabs, item titles, damage statistics, and upgrade requirements from 9-11pt to 12-16pt with high-contrast palette values.
+  * Relocated `[T] Discuss Armorcraft Lore` and `LEAVE FORGE [ESC]` into dedicated bottom padding zones with clear separation from craftable cards.
+
+* **Weapon Arsenal Expansion (10 Weapons) & Balance Tuning**:
+  * Added `WeaponType::SUN_CLAYMORE` and `WeaponType::STORM_GLAIVE` to core weapon registries, forge tables, quick drawers, and character doll vector renderers:
+    * **Sun-Forged Claymore**: Light attack: 34 base dmg (sweeping 120-degree arc); Heavy attack (*Solar Rupture*): 92 dmg with expanding holy shockwave ring and hyper-armor damage mitigation during the swing.
+    * **Storm Glaive**: Light attack: 28 base dmg (extended linear spear thrust); Heavy attack (*Tempest Vortex*): 78 dmg with a 240-degree sweeping cleave that inflicts high poise knockback.
+  * Rebalanced `WeaponType::HALBERD` heavy combo damage scaling from 28/34/40 to 58/72/88 across upgrade tiers.
+  * Expanded `GameLimits::WEAPON_COUNT` to 10 and `WEAPON_DRAWER_COUNT` to 9.
+
+* **Material Economy Rebalance & Acquisition Nerf**:
+  * Reduced common mob Shingles drop rates from guaranteed 2-5 down to 1-3 Shingles at a 60% probability.
+  * Subterranean Ore Golems now drop 1 Ore Scrap at a 65% chance (previously 2-4 guaranteed).
+  * Subterranean Ore Golem respawn timer increased from 7.0s to 18.0s, preventing rapid scrap farming.
+  * Reduced Shingles drops across cultists, archers, and brutes to enforce thoughtful crafting progression.
+
+* **Save Slot Persistence Isolation & Realm State Cleanse**:
+  * Ensured complete independence across Save Slots 1, 2, and 3: loading any save slot or initializing a New Game now executes a comprehensive state reset across all 5 realm handlers prior to state restoration, preventing cross-slot data contamination.
+  * Added `elementalGolemDefeated` to save metadata summaries and slot payloads, ensuring boss defeats and key inventory items (such as Zil's Token) remain persistently tracked.
+
+* **Enhanced Weapon Swing Animations & Environmental Polish**:
+  * Multi-tier luminous swoosh arcs, tip sparks, and distinct trajectory trails tailored for each weapon archetype in `PlayerRenderer.cpp`.
+  * Environment floor aesthetics upgraded in `Map.cpp`: subtle alternating stone flagstone shading, ambient wall contact shadow gradients, and floating atmospheric motes (ruined castle dust motes, crossroads wind dust, golden town motes, quarry amber slag cinders, and ethereal forest mist spores).
+
+* **Mini Ore Golem Companion Map Transition Synchronization & Leash Warping**:
+  * Resolved the top-left { 0.0f, 0.0f } spawning bug when transitioning maps with the Elemental Core Totem equipped.
+  * Implemented Player::RelocateCompanionToPlayer() which dynamically positions the loyal minion beside the player's flank/rear upon map transitions, teleportation, campfire fast travel, and save file loading.
+  * Added a 350px leash warping safeguard in CollisionSystem that teleports separated or stuck companions directly back to the player with an elemental spark burst.
+
+* **Centralized Game Constants (GameConstants.hpp) & Safe Save Helpers (SaveHelpers.hpp)**:
+  * Completely eliminated hardcoded magic numbers (8, 7, 6, 5, 9, 10) across save serialization, inventory queries, game states, and drawer loops, preventing array out-of-bounds access violations (SIGSEGV) and save data regressions.
+  * Bound all fixed-size arrays and loops to GameLimits namespace constants.
+  * Added robust JSON token parsing with whitespace trimming and exception-shielded numeric extractors (SafeParseInt, SafeParseFloat, SafeParseBool), protecting against malformed or legacy save file crashes.
+  * Replaced all raw drawer loop limits in ModalUI.cpp with compile-time std::size bounds.
+
+* **Architectural Restructuring & Dedicated UI Subsystem (src/ui/)**:
+  * Decluttered src/states/ by bundling all interface renderers and modals (HUD, ModalUI, TitleUI, UI) into a dedicated src/ui/ directory.
+  * Separated helper parsers and game limit constants into src/core/, streamlining project maintainability.
+  * Updated uild.bat and CMakeLists.txt with -Isrc/ui and updated source mappings.
+
 * **Wind & Shadow Armaments (Gale Archer Signature Crafting)**:
   * Added `WeaponType::ZEPHYR_DAGGERS` and `WeaponType::WINDRUNNER_RECURVE` to `CombatTypes.hpp` and `Weapon.hpp`.
   * **Twin Zephyr Daggers**:
@@ -1205,6 +1248,16 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 | **Dual Daggers** | 11 dmg (**0 Stamina**) | 60 dmg (Lunge + Spin) | 0.50s | Zero stamina light attacks. Heavy executes a high-velocity piercing lunge (**22 dmg + i-frames**) followed by a 360° whirlwind (**38 dmg**). |
 
 | **War Mace** | 28 dmg (Frontal Smack) | 96 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes an earth-shattering overhead smash followed by a 360° ground tremor that **ignores 20% of enemy defense**. |
+
+| **Royal Halberd** | 22 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.95s | Extended reach polearm. Heavy combo features Stage 1 invulnerable vault lunge (32 dmg), Stage 2 wide 220° sweep (44 dmg), and Stage 3 rapid multi-thrust flurry (58/72/88 dmg). |
+
+| **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360° whirlwind, and an explosive shadow decoy. |
+
+| **Windrunner's Recurve** | 24 dmg (Gale Arrow) | 82 dmg (Gale Piercer) | 0.60s | Ranged combat bow. Light attack fires high-velocity piercing arrows (520px range). Heavy channels a piercing drill arrow with 40% armor penetration. |
+
+| **Sun-Forged Claymore** | 34 dmg (120° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
+
+| **Storm Glaive** | 28 dmg (Spear Thrust) | 78 dmg (Tempest Vortex) | 0.70s | Vanguard polearm. Light attack delivers an extended linear thrust. Heavy executes a 240° tempest cleave with heavy posture knockback. |
 
 
 

@@ -68,33 +68,48 @@ Phlegmatic/
     ├── main.cpp                   # Application entry point, window initialization, main loop
     ├── core/
     │   ├── Config.hpp             # Engine constants, window dimensions (1280x720), timing constants
-    │   ├── GameEngine.hpp/.cpp    # Central state coordinator and master loop runner
-    │   ├── CameraManager.hpp/.cpp # Smooth lerp 2D camera with directional shake and trauma damping
+    │   ├── GameConstants.hpp      # Centralized limits, array bounds, and enum counts (GameLimits)
+    │   ├── SaveHelpers.hpp        # Exception-safe JSON token extractors and string trim helpers
+    │   ├── SaveManager.hpp/.cpp   # 3-slot save/load persistence architecture with metadata timestamps
     │   ├── SoundFX.hpp/.cpp       # Procedural waveform acoustic audio synthesizer
-    │   └── FontManager.hpp/.cpp   # Medieval typography engine, glyph fallback, and text wrapping
+    │   └── Particles.hpp/.cpp     # Particle system, screen trauma, and spark emitters
     ├── entities/
-    │   ├── Player.hpp/.cpp        # Player physics, stamina, composure meter, dodging, and attacking
+    │   ├── Player.hpp/.cpp        # Player physics, stamina, composure meter, dodging, and companion minion
+    │   ├── PlayerRenderer.hpp/.cpp# Procedural vector silhouettes and weapon models
     │   ├── Enemy.hpp/.cpp         # Enemy base, AI state machines, Will stat, telegraph calculations
     │   └── EnemyRenderer.hpp/.cpp # Procedural vector silhouettes (cultists, brutes, Zil, knights)
     ├── combat/
-    │   ├── CombatSystem.hpp/.cpp  # Damage calculation, armor penetration, stagger formulas, parry windows
+    │   ├── CombatTypes.hpp        # Core combat enums (weapons, armor pieces, totems, humors)
+    │   ├── CollisionSystem.hpp/.cpp# Damage calculation, armor penetration, stagger, parry, companion AI
     │   ├── Weapon.hpp             # Weapon catalog, damage stats, stamina costs, cooldowns, stance stages
+    │   ├── Armor.hpp              # Modular 3-piece armor sets, attributes, and set bonuses
+    │   ├── Totem.hpp              # Attunable sacred relics and companion minion stats
     │   ├── Inventory.hpp/.cpp     # Player equipment, potions, Shingles currency, lore fragments with clues
-    │   ├── Projectile.hpp/.cpp    # Piercing projectiles (Holy Beam, Cultist psionic orbs)
-    │   ├── LootManager.hpp/.cpp   # Physical Shingles loot drop physics (arc & bounce), magnet attraction
-    │   └── SaveManager.hpp/.cpp   # 3-slot save/load persistence architecture with metadata timestamps
+    │   ├── Projectile.hpp/.cpp    # Piercing projectiles (Holy Beam, Cultist psionic orbs, Gale Arrow)
+    │   └── LootDrop.hpp/.cpp      # Physical Shingles and scrap loot drop physics, magnet attraction
     ├── world/
     │   ├── Map.hpp/.cpp           # Multi-environment world renderer (Castle, Crossroads, Zyphden, Keep, Forge, Tavern)
-    │   ├── WaveManager.hpp/.cpp   # 5-stage arena wave manager, drop scheduling, timers
+    │   ├── Campfire.hpp           # Attunable bonfire waypoints and resting mechanics
+    │   ├── WaveManager.hpp/.cpp   # 20-stage arena wave manager, drop scheduling, timers
     │   └── Interactable.hpp/.cpp  # Monoliths, health pickups, dialogue triggers, portals, relic chests
+    ├── rendering/
+    │   ├── AssetManager.hpp/.cpp  # Vector sprite loader and character paper doll renderer
+    │   └── FontManager.hpp/.cpp   # Medieval typography engine, glyph fallback, and text wrapping
+    ├── ui/
+    │   ├── HUD.hpp/.cpp           # Action bar, health/stamina/composure bars, Shingles counter, potion icon
+    │   ├── ModalUI.hpp/.cpp       # Animated grimoire lore journal, equipment paper doll, realm map modal
+    │   ├── TitleUI.hpp/.cpp       # Title screen, menu options, 3-slot save selection modal
+    │   └── UI.hpp/.cpp            # High-level UI dispatcher and facade
     └── states/
         ├── Game.hpp/.cpp          # State coordinator, transition logic, update & render orchestration
-        ├── GameState.hpp          # GameState enum (TITLE, TUTORIAL, OVERWORLD, ZYPHDEN, FORGE, TAVERN, etc.)
-        ├── TitleUI.hpp/.cpp       # Title screen, menu options, 3-slot save selection modal
-        ├── ModalUI.hpp/.cpp       # Animated grimoire lore journal, pause menu, controls guide, dialogue boxes
-        ├── HUD.hpp/.cpp           # Action bar, health/stamina/composure bars, Shingles counter, potion icon
+        ├── GameState.hpp          # GameState enum (TITLE_SCREEN, RUINED_CASTLE, ZYPHDEN, etc.)
         ├── Tutorial.hpp/.cpp      # Tutorial objective tracker, composure guide popup, boundary walls
-        └── RuinedCastleHandler.hpp/.cpp # Scripted gates, Zil encounter, and arena unlock trigger
+        ├── Cutscene.hpp/.cpp      # Cinematic storytelling cutscenes and epilogues
+        ├── RuinedCastleHandler.hpp/.cpp # Scripted gates, Zil encounter, and arena unlock trigger
+        ├── CrossroadsHandler.hpp/.cpp   # Roadside shrines, enemy patrols, highway monoliths
+        ├── ZyphdenHandler.hpp/.cpp      # Keep throne, Knight Lenon spar, Varek forge, tavern
+        ├── QuarryHandler.hpp/.cpp       # Subterranean depths, Ore Golems, Primordial Altar
+        └── RestlessMistForestHandler.hpp/.cpp # Foggy western realm, Gale Bandits, Altar of Whispers
 
 ================================================================================
 4. CURRENT FEATURES & SYSTEMS (VERSION 0.0.1b)
@@ -301,6 +316,34 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
+7a. Master Forge Weapon Pagination & Header Redesign:
+   - Paginated Tab 1 [1] VANGUARD WEAPONS (8) in Blacksmith Varek's Master Forge into a clean 2x2 grid (4 weapon cards per page across 2 pages).
+   - Added Prev/Next page navigation buttons, keyboard shortcuts (A/D and Arrow keys), and page count indicators.
+   - Rescaled font hierarchy from 9-11pt to 12-16pt with high-contrast palette values.
+   - Fixed header text collisions between title, subtitle, tabs, and divider.
+   - Repositioned [T] Discuss Armorcraft Lore and LEAVE FORGE [ESC] to dedicated bottom padding zones, completely eliminating card overlap.
+
+7a1. Weapon Arsenal Expansion (10 Weapons) & Heavy Attack Tuning:
+   - Added Sun-Forged Claymore (WeaponType::SUN_CLAYMORE): 34 base dmg wide sweep light attack, 92 dmg Solar Rupture heavy attack with expanding holy shockwave ring and hyper-armor mitigation.
+   - Added Storm Glaive (WeaponType::STORM_GLAIVE): 28 base dmg extended linear thrust light attack, 78 dmg Tempest Vortex heavy attack with 240-degree sweep and heavy poise knockback.
+   - Rebalanced Royal Halberd heavy attack combo scaling from 28/34/40 to 58/72/88.
+   - Updated GameLimits::WEAPON_COUNT to 10 and WEAPON_DRAWER_COUNT to 9 across all menus, drawers, and vector renderers.
+
+7a2. Material Economy Rebalance & Acquisition Nerf:
+   - Common enemies drop 1-3 Silver Shingles at a 60% probability (nerfed from guaranteed 2-5).
+   - Subterranean Ore Golems drop 1 Ore Scrap at 65% chance (nerfed from guaranteed 2-4).
+   - Ore Golem respawn timer increased from 7.0s to 18.0s.
+   - Reduced Shingles rewards from cultists, archers, and brutes.
+
+7a3. Save Slot Persistence Isolation & Realm State Cleanse:
+   - Ensured complete save independence across Slots 1, 2, and 3: loading a slot or starting a New Game executes a full state reset across all 5 realm handlers prior to state restoration, preventing cross-slot state bleeding.
+   - Serialized elementalGolemDefeated into SaveSlotSummary and GameSaveData.
+   - Restored boss defeat flags and inventory rewards on save slot load.
+
+7a4. Visual Overhaul of Swing Animations & Realm Environments:
+   - Overhauled swing visual effects in PlayerRenderer.cpp: multi-tier luminous swoosh arcs, tip sparks, and custom trajectory trails for all 10 weapons.
+   - Elevated floor aesthetics in Map.cpp across all 5 realms: alternating stone flagstone shading, ambient wall contact shadow gradients, and floating atmospheric motes (ruined castle dust motes, crossroads wind dust, golden town motes, quarry amber slag cinders, and ethereal forest mist spores).
+
 7b. Wind & Shadow Armaments (Gale Archer Signature Crafting):
    - Added `WeaponType::ZEPHYR_DAGGERS` (16 light / 68 heavy, Shadow Slip iframes dash) and `WeaponType::WINDRUNNER_RECURVE` (24 light / 82 heavy, player ranged gale arrow projectiles).
    - Crafted at Varek's Master Forge using Shadow Essence, Essence of Mist, and Silver Shingles.
@@ -434,6 +477,21 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
    - In `src/states/ModalUI.cpp`, `slotCatNames` (5 category tabs: Helmet, Chest, Leggings, Totem, Weapons) was iterated 7 times instead of 5, dereferencing stack garbage as string pointers into `DrawText()`.
    - In the Totem drawer subpanel, `totems` (5 attunable relics) was iterated 7 times instead of 5, reading out-of-bounds stack memory into `totems[i].lockMsg`.
    - Fully restored stability across inventory opening, drawer switching, and weapon/armor/totem inspection.
+
+10. Mini Ore Golem Companion Map Transition Synchronization & Leash Warping:
+   - Fixed top-left { 0, 0 } spawning glitch when moving between maps or loading save files with Elemental Core Totem equipped.
+   - Added `Player::RelocateCompanionToPlayer()` called upon `Player::SetPosition`, `Player::Init`, `Player::Revive`, `Player::SetTotem`, and screen transition midpoint callbacks.
+   - Integrated a 350px emergency leash warp safeguard in `CollisionSystem.cpp` preventing companion loss or snagging on terrain.
+
+11. Centralized Game Constants (`GameConstants.hpp`) & Safe Save Helpers (`SaveHelpers.hpp`):
+   - Completely eliminated hardcoded magic array bounds (`8`, `7`, `6`, `5`, `9`, `10`) across save serialization, inventory queries, game state loops, and UI drawers.
+   - Bound all fixed-size arrays and loops to `GameLimits` namespace constants.
+   - Created `SaveHelpers.hpp` with exception-shielded string/int/float parsers and safe JSON array extractors.
+   - Replaced all raw drawer loop limits in `ModalUI.cpp` with compile-time `std::size` bounds.
+
+12. Project Architecture Restructuring & Dedicated UI Module (`src/ui/`):
+   - Decluttered `src/states/` by extracting all UI components (`HUD`, `ModalUI`, `TitleUI`, `UI`) into a clean, dedicated `src/ui/` subsystem.
+   - Updated `build.bat` and `CMakeLists.txt` with `-Isrc/ui` and source mappings.
 
 ================================================================================
 8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS
