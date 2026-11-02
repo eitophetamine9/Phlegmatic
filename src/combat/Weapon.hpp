@@ -111,22 +111,22 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             stats = {
                 "Royal Halberd",
                 "Vanguard polearm with extended reach. Heavy attack performs a 3-stage combo: a long lunge with invulnerability frames, a sweeping 220-deg cleave, and a rapid flurry of 3 consecutive stabs dealing 30% weapon damage.",
-                16.0f, 140.0f, 45.0f, 0.20f, 0.35f, 14.0f,
-                28.0f, 155.0f, 220.0f, 0.26f, 0.35f, 1.80f, 24.0f,
+                18.0f, 140.0f, 45.0f, 0.20f, 0.35f, 14.0f,
+                58.0f, 155.0f, 220.0f, 0.26f, 0.35f, 1.80f, 24.0f,
                 18.0f, 0.80f,
                 0, 1.25f, 0.10f, 1.0f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Royal Halberd +1";
-                stats.lightDamage = 20.0f;
-                stats.heavyDamage = 34.0f;
+                stats.lightDamage = 22.0f;
+                stats.heavyDamage = 72.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Royal Halberd +2";
-                stats.lightDamage = 24.0f;
-                stats.heavyDamage = 40.0f;
+                stats.lightDamage = 26.0f;
+                stats.heavyDamage = 88.0f;
                 stats.defensePierceBonus = 0.20f;
                 stats.poiseMultiplier = 1.35f;
             }
@@ -177,6 +177,56 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.lightDamage = 35.0f;
                 stats.heavyDamage = 115.0f;
                 stats.defensePierceBonus = 0.50f;
+            }
+            return stats;
+
+        case WeaponType::SUN_CLAYMORE:
+            stats = {
+                "Sun-Forged Claymore",
+                "Colossal two-handed broadsword bathed in golden sunfire. Generates unstoppable hyper-armor and sweeping 200-deg holy cleaves that shatter enemy guards.",
+                30.0f, 115.0f, 140.0f, 0.30f, 0.45f, 24.0f,
+                105.0f, 165.0f, 200.0f, 0.42f, 0.38f, 2.60f, 38.0f,
+                24.0f, 1.15f,
+                0, 1.40f, 0.15f, 1.0f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Sun-Forged Claymore +1";
+                stats.lightDamage = 36.0f;
+                stats.heavyDamage = 124.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Sun-Forged Claymore +2";
+                stats.lightDamage = 42.0f;
+                stats.heavyDamage = 145.0f;
+                stats.defensePierceBonus = 0.25f;
+                stats.poiseMultiplier = 1.60f;
+            }
+            return stats;
+
+        case WeaponType::STORM_GLAIVE:
+            stats = {
+                "Storm Glaive",
+                "Aerodynamic wind polearm infused with condensed Gale Mist. Light attacks execute linear piercing thrusts. Heavy attacks unleash a sweeping tempest vortex cleave.",
+                20.0f, 155.0f, 55.0f, 0.18f, 0.28f, 12.0f,
+                72.0f, 180.0f, 240.0f, 0.28f, 0.32f, 1.90f, 26.0f,
+                16.0f, 0.70f,
+                0, 1.15f, 0.25f, 1.15f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Storm Glaive +1";
+                stats.lightDamage = 25.0f;
+                stats.heavyDamage = 86.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Storm Glaive +2";
+                stats.lightDamage = 31.0f;
+                stats.heavyDamage = 102.0f;
+                stats.defensePierceBonus = 0.35f;
+                stats.critMultiplier = 1.25f;
             }
             return stats;
 

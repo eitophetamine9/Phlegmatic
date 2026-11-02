@@ -1025,6 +1025,7 @@ void Game::SaveActiveGame() {
     data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
     data.shadowEssence = player.GetInventory().GetShadowEssence();
     data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
+    data.elementalGolemDefeated = quarryHandler.IsBossDefeated();
 
 
 
@@ -1361,6 +1362,11 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     ruinedCastleHandler.SetZilDefeated(data.bossZilDefeated);
+    quarryHandler.SetBossDefeated(data.elementalGolemDefeated);
+    restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
+    if (data.bossZilDefeated && !player.GetInventory().HasQuestItem("zils_token")) {
+        player.GetInventory().AddQuestItem(QuestItem{ "zils_token", "Zil's Token", "A scorched iron crusade badge bestowed by Zil. Proves you survived the trial of the Ruined Castle.", Color{ 255, 180, 60, 255 } });
+    }
 
 
 
@@ -2156,55 +2162,40 @@ void Game::Update(float dt) {
 
 
 
+            ruinedCastleHandler.Reset();
+            crossroadsHandler.Reset();
+            zyphdenHandler.Reset();
+            quarryHandler.Reset();
+            restlessMistForestHandler.Reset();
             LoadActiveGame(slot);
-
-
 
         } else if (action >= 21 && action <= 23) {
 
-
-
             int slot = action - 20;
-
-
 
             SaveManager::SetActiveSlot(slot);
 
-
-
+            player.SetHealth(100.0f);
+            player.SetComposure(50.0f);
             player.GetInventory().InitDefault();
-
-
 
             player.SetWeapon(WeaponType::NONE);
 
-
-
             player.SetArmor(ArmorType::NONE);
-
-
 
             player.SetTotem(TotemType::NONE);
 
-
-
             player.GetInventory().ClearWeapons();
-
-
 
             player.GetInventory().ClearArmors();
 
-
-
             player.GetInventory().ClearTotems();
 
-
-
             ruinedCastleHandler.Reset();
-
             crossroadsHandler.Reset();
-
             zyphdenHandler.Reset();
+            quarryHandler.Reset();
+            restlessMistForestHandler.Reset();
 
 
 

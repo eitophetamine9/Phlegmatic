@@ -1205,6 +1205,46 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 particles.SpawnSparks(position, Color{ 255, 230, 80, 255 }, 28, 200.0f);
 
+            } else if (currentWeapon == WeaponType::SUN_CLAYMORE) {
+
+                currentAttack.range = stats.heavyRange;
+                currentAttack.arcAngle = stats.heavyArc;
+                float baseDmg = stats.heavyDamage;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.knockback = 420.0f * stats.poiseMultiplier;
+                currentAttack.defensePierce = stats.defensePierceBonus;
+                currentAttack.duration = stats.heavyDuration;
+                currentAttack.timer = stats.heavyDuration;
+                currentAttack.hasShockwave = true;
+                currentAttack.shockwavePos = { position.x + forwardDir.x * 60.0f, position.y + forwardDir.y * 60.0f };
+                currentAttack.shockwaveRadius = 120.0f;
+
+                SoundFX::PlayHeavyAttack();
+                SoundFX::PlayCrusaderClash();
+                particles.AddScreenShake(8.0f, 0.25f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 175, 40, 255 });
+                particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 32, 220.0f);
+                velocity.x += forwardDir.x * 120.0f;
+                velocity.y += forwardDir.y * 120.0f;
+
+            } else if (currentWeapon == WeaponType::STORM_GLAIVE) {
+
+                currentAttack.range = stats.heavyRange;
+                currentAttack.arcAngle = stats.heavyArc;
+                float baseDmg = stats.heavyDamage;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.knockback = 300.0f * stats.poiseMultiplier;
+                currentAttack.defensePierce = stats.defensePierceBonus;
+                currentAttack.duration = stats.heavyDuration;
+                currentAttack.timer = stats.heavyDuration;
+
+                SoundFX::PlayHeavyAttack();
+                particles.AddScreenShake(5.0f, 0.16f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 245, 230, 255 });
+                particles.SpawnSparks(position, Color{ 140, 255, 240, 255 }, 24, 180.0f);
+                velocity.x += forwardDir.x * 240.0f;
+                velocity.y += forwardDir.y * 240.0f;
+
             } else {
 
                 currentAttack.range = stats.heavyRange;
@@ -1815,6 +1855,30 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
             particles.SpawnSlashTrail(position, forwardDir, Color{ 120, 230, 255, 255 });
 
         }
+
+    } else if (currentWeapon == WeaponType::SUN_CLAYMORE) {
+
+        currentAttack.range = stats.lightRange;
+        currentAttack.arcAngle = stats.lightArc;
+        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        currentAttack.knockback = 260.0f;
+        currentAttack.defensePierce = stats.defensePierceBonus;
+        SoundFX::PlayLightAttack();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 175, 40, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 50.0f, position.y + forwardDir.y * 50.0f }, Color{ 255, 215, 80, 255 }, 12, 120.0f);
+
+    } else if (currentWeapon == WeaponType::STORM_GLAIVE) {
+
+        currentAttack.isLineBox = true;
+        currentAttack.range = stats.lightRange;
+        currentAttack.width = 46.0f;
+        currentAttack.arcAngle = 0.0f;
+        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        currentAttack.knockback = 210.0f;
+        currentAttack.defensePierce = stats.defensePierceBonus;
+        SoundFX::PlayLightAttack();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 245, 230, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 60.0f, position.y + forwardDir.y * 60.0f }, Color{ 140, 255, 240, 255 }, 10, 110.0f);
 
     } else {
 

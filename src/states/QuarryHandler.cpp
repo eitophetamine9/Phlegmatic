@@ -168,7 +168,7 @@ void QuarryHandler::Update(
                 }
                 if (bestIdx != -1) {
                     golemSpawners[bestIdx].isAlive = false;
-                    golemSpawners[bestIdx].respawnTimer = 7.0f;
+                    golemSpawners[bestIdx].respawnTimer = 18.0f;
                 }
             } else if (it->GetType() == EnemyType::ELEMENTAL_GOLEM) {
                 elementalBossDefeated = true;

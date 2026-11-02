@@ -316,6 +316,34 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 ================================================================================
 7. VERSION 0.0.1e RECENT ENHANCEMENTS & ARCHITECTURAL FIXES
 ================================================================================
+7a. Master Forge Weapon Pagination & Header Redesign:
+   - Paginated Tab 1 [1] VANGUARD WEAPONS (8) in Blacksmith Varek's Master Forge into a clean 2x2 grid (4 weapon cards per page across 2 pages).
+   - Added Prev/Next page navigation buttons, keyboard shortcuts (A/D and Arrow keys), and page count indicators.
+   - Rescaled font hierarchy from 9-11pt to 12-16pt with high-contrast palette values.
+   - Fixed header text collisions between title, subtitle, tabs, and divider.
+   - Repositioned [T] Discuss Armorcraft Lore and LEAVE FORGE [ESC] to dedicated bottom padding zones, completely eliminating card overlap.
+
+7a1. Weapon Arsenal Expansion (10 Weapons) & Heavy Attack Tuning:
+   - Added Sun-Forged Claymore (WeaponType::SUN_CLAYMORE): 34 base dmg wide sweep light attack, 92 dmg Solar Rupture heavy attack with expanding holy shockwave ring and hyper-armor mitigation.
+   - Added Storm Glaive (WeaponType::STORM_GLAIVE): 28 base dmg extended linear thrust light attack, 78 dmg Tempest Vortex heavy attack with 240-degree sweep and heavy poise knockback.
+   - Rebalanced Royal Halberd heavy attack combo scaling from 28/34/40 to 58/72/88.
+   - Updated GameLimits::WEAPON_COUNT to 10 and WEAPON_DRAWER_COUNT to 9 across all menus, drawers, and vector renderers.
+
+7a2. Material Economy Rebalance & Acquisition Nerf:
+   - Common enemies drop 1-3 Silver Shingles at a 60% probability (nerfed from guaranteed 2-5).
+   - Subterranean Ore Golems drop 1 Ore Scrap at 65% chance (nerfed from guaranteed 2-4).
+   - Ore Golem respawn timer increased from 7.0s to 18.0s.
+   - Reduced Shingles rewards from cultists, archers, and brutes.
+
+7a3. Save Slot Persistence Isolation & Realm State Cleanse:
+   - Ensured complete save independence across Slots 1, 2, and 3: loading a slot or starting a New Game executes a full state reset across all 5 realm handlers prior to state restoration, preventing cross-slot state bleeding.
+   - Serialized elementalGolemDefeated into SaveSlotSummary and GameSaveData.
+   - Restored boss defeat flags and inventory rewards on save slot load.
+
+7a4. Visual Overhaul of Swing Animations & Realm Environments:
+   - Overhauled swing visual effects in PlayerRenderer.cpp: multi-tier luminous swoosh arcs, tip sparks, and custom trajectory trails for all 10 weapons.
+   - Elevated floor aesthetics in Map.cpp across all 5 realms: alternating stone flagstone shading, ambient wall contact shadow gradients, and floating atmospheric motes (ruined castle dust motes, crossroads wind dust, golden town motes, quarry amber slag cinders, and ethereal forest mist spores).
+
 7b. Wind & Shadow Armaments (Gale Archer Signature Crafting):
    - Added `WeaponType::ZEPHYR_DAGGERS` (16 light / 68 heavy, Shadow Slip iframes dash) and `WeaponType::WINDRUNNER_RECURVE` (24 light / 82 heavy, player ranged gale arrow projectiles).
    - Crafted at Varek's Master Forge using Shadow Essence, Essence of Mist, and Silver Shingles.

@@ -6,8 +6,8 @@ namespace GameLimits {
     inline constexpr int MAX_SAVE_SLOTS = 3;
 
     // Arsenal & Armaments
-    inline constexpr int WEAPON_COUNT = 8;          // NONE, SWORD, DAGGERS, MACE, TRUTH_SEEKER, HALBERD, ZEPHYR_DAGGERS, WINDRUNNER_RECURVE
-    inline constexpr int WEAPON_DRAWER_COUNT = 7;   // Playable weapons listed in UI (excluding NONE)
+    inline constexpr int WEAPON_COUNT = 10;         // NONE, SWORD, DAGGERS, MACE, TRUTH_SEEKER, HALBERD, ZEPHYR_DAGGERS, WINDRUNNER_RECURVE, SUN_CLAYMORE, STORM_GLAIVE
+    inline constexpr int WEAPON_DRAWER_COUNT = 9;   // Playable weapons listed in UI (excluding NONE)
 
     // Modular Armor Pieces
     inline constexpr int HELMET_COUNT = 7;          // NONE, COMMONERS_HOOD, CRUSADER_HELM, VANGUARD_GREATHELM, SHADOW_COWL, SCRAP_SALLET, BASALT_GREATHELM

@@ -562,16 +562,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 11, Color{ 255, 215, 90, 240 });
 
         struct WepBtnInfo { WeaponType type; const char* label; };
-        WepBtnInfo wepBtns[7] = {
+        WepBtnInfo wepBtns[9] = {
             { WeaponType::SWORD, "Sword" },
-            { WeaponType::DAGGERS, "Daggers" },
+            { WeaponType::DAGGERS, "Dagger" },
             { WeaponType::MACE, "Mace" },
             { WeaponType::HALBERD, "Halberd" },
             { WeaponType::TRUTH_SEEKER, "Seeker" },
             { WeaponType::ZEPHYR_DAGGERS, "Zephyr" },
-            { WeaponType::WINDRUNNER_RECURVE, "Recurve" }
+            { WeaponType::WINDRUNNER_RECURVE, "Recurve" },
+            { WeaponType::SUN_CLAYMORE, "Claymore" },
+            { WeaponType::STORM_GLAIVE, "Glaive" }
         };
-        float wepBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
+        float wepBtnW = (leftW - 32.0f - 32.0f) / 9.0f;
         float wepBtnH = 38.0f;
         for (int i = 0; i < (int)std::size(wepBtns); ++i) {
             Rectangle wRec = { leftX + 16.0f + (float)i * (wepBtnW + 4.0f), secWepY + 24.0f, wepBtnW, wepBtnH };
@@ -965,14 +967,16 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         } else if (s_selectedSlot == 4) {
             // WEAPONS LIST
             struct WepListEntry { WeaponType type; const char* lockMsg; };
-            WepListEntry weps[7] = {
+            WepListEntry weps[9] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal" },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal" },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal" },
                 { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal" },
                 { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" },
                 { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences" },
-                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" }
+                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" },
+                { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag" },
+                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel" }
             };
             float itemSpacing = (modalH > 780.0f) ? 82.0f : 68.0f;
             float itemH = itemSpacing - 4.0f;

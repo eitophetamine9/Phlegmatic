@@ -369,7 +369,7 @@ void GameMap::DrawFloor(Vector2 playerPos) const {
 void GameMap::DrawRuinedCastleFloor() const {
     float time = (float)GetTime();
 
-    // 1. Weathered Stone Flagstone base
+    // 1. Weathered Stone Flagstone base with alternating tile shading
     DrawRectangleRec(bounds, Color{ 22, 26, 34, 255 });
 
     const int tileSize = 52;
@@ -378,12 +378,26 @@ void GameMap::DrawRuinedCastleFloor() const {
     int startY = (int)bounds.y;
     int endY = (int)(bounds.y + bounds.height);
 
+    for (int x = startX; x < endX; x += tileSize) {
+        for (int y = startY; y < endY; y += tileSize) {
+            int tileIndex = ((x - startX) / tileSize) + ((y - startY) / tileSize);
+            if (tileIndex % 2 == 0) {
+                DrawRectangle(x, y, tileSize, tileSize, Color{ 26, 31, 42, 255 });
+            }
+        }
+    }
+
     for (int x = startX; x <= endX; x += tileSize) {
-        DrawLine(x, startY, x, endY, Color{ 30, 36, 48, 120 });
+        DrawLine(x, startY, x, endY, Color{ 32, 38, 52, 130 });
     }
     for (int y = startY; y <= endY; y += tileSize) {
-        DrawLine(startX, y, endX, y, Color{ 30, 36, 48, 120 });
+        DrawLine(startX, y, endX, y, Color{ 32, 38, 52, 130 });
     }
+
+    // Ambient wall contact shadows for depth
+    DrawRectangleGradientV((int)bounds.x, (int)bounds.y, (int)bounds.width, 24, Color{ 8, 10, 16, 170 }, Color{ 8, 10, 16, 0 });
+    DrawRectangleGradientH((int)bounds.x, (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 16, 150 }, Color{ 8, 10, 16, 0 });
+    DrawRectangleGradientH((int)(bounds.x + bounds.width - 24), (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 16, 0 }, Color{ 8, 10, 16, 150 });
 
     // 2. Overgrown Moss Patches
     for (int i = 0; i < 28; i++) {
@@ -433,6 +447,15 @@ void GameMap::DrawRuinedCastleFloor() const {
     // Lower Courtyard Awakening Circle
     Vector2 awakenCenter = { 800.0f, 1180.0f };
     DrawCircleLines((int)awakenCenter.x, (int)awakenCenter.y, 45.0f, Color{ 45, 60, 85, 160 });
+
+    // Floating ambient dust motes catching torchlight
+    for (int i = 0; i < 22; i++) {
+        float dx = bounds.x + fmodf((float)(i * 97) + sinf(time * 0.4f + (float)i * 1.3f) * 40.0f, bounds.width);
+        float dy = bounds.y + fmodf((float)(i * 143) - time * (12.0f + (float)(i % 5) * 4.0f), bounds.height);
+        if (dy < bounds.y) dy += bounds.height;
+        float alpha = 0.22f + 0.22f * sinf(time * 1.5f + (float)i);
+        DrawCircle((int)dx, (int)dy, 1.8f, ColorAlpha(Color{ 180, 205, 240, 255 }, alpha));
+    }
 }
 
 void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
@@ -677,6 +700,19 @@ void GameMap::DrawCrossroadsFloor(Vector2 playerPos) const {
     if (inGateRange) {
         DrawText("GATES OF ZYPHDEN", 720, (int)bounds.y + 30, 15, Color{ 255, 215, 80, 240 });
     }
+
+    // 6. Ambient border contact shadows and drifting wind dust motes
+    DrawRectangleGradientV((int)bounds.x, (int)bounds.y, (int)bounds.width, 24, Color{ 8, 10, 14, 160 }, Color{ 8, 10, 14, 0 });
+    DrawRectangleGradientH((int)bounds.x, (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 14, 150 }, Color{ 8, 10, 14, 0 });
+    DrawRectangleGradientH((int)(bounds.x + bounds.width - 24), (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 14, 0 }, Color{ 8, 10, 14, 150 });
+
+    for (int i = 0; i < 20; i++) {
+        float wx = bounds.x + fmodf((float)(i * 107) + time * (22.0f + (float)(i % 4) * 8.0f), bounds.width);
+        float wy = bounds.y + fmodf((float)(i * 163) - time * (14.0f + (float)(i % 3) * 6.0f), bounds.height);
+        if (wy < bounds.y) wy += bounds.height;
+        float alpha = 0.22f + 0.22f * sinf(time * 2.0f + (float)i);
+        DrawCircle((int)wx, (int)wy, 1.5f, ColorAlpha(Color{ 200, 190, 160, 255 }, alpha));
+    }
 }
 
 void GameMap::DrawCrossroadsWalls(Vector2 playerPos) const {
@@ -802,6 +838,19 @@ void GameMap::DrawZyphdenFloor() const {
     DrawLineEx({ 1720.0f, 752.0f }, { 2350.0f, 752.0f }, 3.0f, Color{ 68, 76, 92, 240 });
     for (int rx = 1730; rx < 2350; rx += 24) {
         DrawLineEx({ (float)rx, 731.0f }, { (float)rx, 757.0f }, 2.5f, Color{ 48, 38, 30, 240 });
+    }
+
+    // 8. Ambient wall contact shadows & floating golden town motes
+    DrawRectangleGradientV((int)bounds.x, (int)bounds.y, (int)bounds.width, 24, Color{ 8, 10, 14, 160 }, Color{ 8, 10, 14, 0 });
+    DrawRectangleGradientH((int)bounds.x, (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 14, 150 }, Color{ 8, 10, 14, 0 });
+    DrawRectangleGradientH((int)(bounds.x + bounds.width - 24), (int)bounds.y, 24, (int)bounds.height, Color{ 8, 10, 14, 0 }, Color{ 8, 10, 14, 150 });
+
+    for (int i = 0; i < 24; i++) {
+        float zx = bounds.x + fmodf((float)(i * 113) + sinf(time * 0.5f + (float)i) * 35.0f, bounds.width);
+        float zy = bounds.y + fmodf((float)(i * 173) - time * (10.0f + (float)(i % 4) * 5.0f), bounds.height);
+        if (zy < bounds.y) zy += bounds.height;
+        float alpha = 0.22f + 0.22f * sinf(time * 1.8f + (float)i);
+        DrawCircle((int)zx, (int)zy, 1.6f, ColorAlpha(Color{ 255, 215, 120, 255 }, alpha));
     }
 }
 
@@ -1270,6 +1319,20 @@ void GameMap::DrawQuarryDepthsFloor() const {
     // 4. Storm Rune (South-East)
     DrawCircleGradient(Vector2{ altarCenter.x + 70.0f, altarCenter.y + 70.0f }, 32.0f, Color{ 190, 110, 255, 60 }, Color{ 0, 0, 0, 0 });
     DrawPoly(Vector2{ altarCenter.x + 70.0f, altarCenter.y + 70.0f }, 4, 9.0f, time * 30.0f, Color{ 210, 130, 255, 220 });
+
+    // 5. Ambient border shadows & rising amber cinder sparks
+    DrawRectangleGradientV((int)bounds.x, (int)bounds.y, (int)bounds.width, 24, Color{ 6, 8, 12, 170 }, Color{ 6, 8, 12, 0 });
+    DrawRectangleGradientH((int)bounds.x, (int)bounds.y, 24, (int)bounds.height, Color{ 6, 8, 12, 160 }, Color{ 6, 8, 12, 0 });
+    DrawRectangleGradientH((int)(bounds.x + bounds.width - 24), (int)bounds.y, 24, (int)bounds.height, Color{ 6, 8, 12, 0 }, Color{ 6, 8, 12, 160 });
+
+    for (int i = 0; i < 28; i++) {
+        float qx = bounds.x + fmodf((float)(i * 89) + sinf(time * 0.8f + (float)i) * 25.0f, bounds.width);
+        float qy = bounds.y + fmodf((float)(i * 131) - time * (20.0f + (float)(i % 5) * 8.0f), bounds.height);
+        if (qy < bounds.y) qy += bounds.height;
+        float alpha = 0.28f + 0.28f * sinf(time * 2.8f + (float)i);
+        Color sparkCol = (i % 3 == 0) ? Color{ 255, 215, 80, 255 } : Color{ 255, 125, 40, 255 };
+        DrawCircle((int)qx, (int)qy, 1.8f, ColorAlpha(sparkCol, alpha));
+    }
 }
 
 void GameMap::DrawQuarryDepthsWalls(Vector2 playerPos) const {
@@ -1375,8 +1438,21 @@ void GameMap::DrawRestlessMistForestFloor() const {
         DrawCircleGradient(Vector2{ mx, my }, 140.0f, Color{ 70, 150, 135, 38 }, Color{ 0, 0, 0, 0 });
     }
 
-    // 4. Border wall lines
+    // 4. Border wall lines and ambient shadow gradients
     DrawRectangleLinesEx(bounds, 4.0f, Color{ 35, 60, 50, 240 });
+    DrawRectangleGradientV((int)bounds.x, (int)bounds.y, (int)bounds.width, 24, Color{ 6, 12, 10, 160 }, Color{ 6, 12, 10, 0 });
+    DrawRectangleGradientH((int)bounds.x, (int)bounds.y, 24, (int)bounds.height, Color{ 6, 12, 10, 150 }, Color{ 6, 12, 10, 0 });
+    DrawRectangleGradientH((int)(bounds.x + bounds.width - 24), (int)bounds.y, 24, (int)bounds.height, Color{ 6, 12, 10, 0 }, Color{ 6, 12, 10, 150 });
+
+    // 5. Ethereal glowing teal forest spores and fireflies
+    for (int i = 0; i < 30; i++) {
+        float fx = bounds.x + fmodf((float)(i * 91) + sinf(time * 0.6f + (float)i * 1.2f) * 45.0f, bounds.width);
+        float fy = bounds.y + fmodf((float)(i * 137) + cosf(time * 0.5f + (float)i * 0.9f) * 35.0f - time * 8.0f, bounds.height);
+        if (fy < bounds.y) fy += bounds.height;
+        float alpha = 0.28f + 0.28f * sinf(time * 2.2f + (float)i);
+        Color sporeCol = (i % 2 == 0) ? Color{ 80, 240, 215, 255 } : Color{ 140, 255, 240, 255 };
+        DrawCircle((int)fx, (int)fy, 2.0f, ColorAlpha(sporeCol, alpha));
+    }
 }
 
 void GameMap::DrawRestlessMistForestWalls(Vector2 playerPos) const {

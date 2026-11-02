@@ -15,6 +15,7 @@ struct SaveSlotSummary {
     int essenceOfMist = 0;
     int shadowEssence = 0;
     bool galeArcherDefeated = false;
+    bool elementalGolemDefeated = false;
     int arenaHighestWave = 0;
     int potionCount = 1;
     int equippedWeapon = 1;                // 0: Unarmed, 1: Sword, 2: Daggers, 3: Mace, 4: Truth Seeker, 5: Halberd
@@ -45,6 +46,7 @@ struct GameSaveData {
     int essenceOfMist = 0;
     int shadowEssence = 0;
     bool galeArcherDefeated = false;
+    bool elementalGolemDefeated = false;
     int equippedWeapon = 1;
     int equippedArmor = 0;
     int equippedHelmet = 0;
@@ -52,7 +54,7 @@ struct GameSaveData {
     int equippedLeggings = 0;
     int equippedTotem = 0;
     int weaponUpgrades[GameLimits::WEAPON_COUNT] = { 0 };
-    bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false };
+    bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false, false, false };
     bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false };
     bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false };
     bool unlockedLeggings[GameLimits::LEGGINGS_COUNT] = { true, false, false, false, false, false, false };

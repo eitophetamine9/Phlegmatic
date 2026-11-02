@@ -67,6 +67,8 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
             outSummary.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
+        } else if (line.find("\"elementalGolemDefeated\"") != std::string::npos) {
+            outSummary.elementalGolemDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
             outSummary.arenaHighestWave = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"potionCount\"") != std::string::npos) {
@@ -142,6 +144,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
             outData.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
+        } else if (line.find("\"elementalGolemDefeated\"") != std::string::npos) {
+            outData.elementalGolemDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"arenaHighestWave\"") != std::string::npos) {
             outData.arenaHighestWave = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
@@ -243,6 +247,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"essenceOfMist\": " << data.essenceOfMist << ",\n";
     file << "  \"shadowEssence\": " << data.shadowEssence << ",\n";
     file << "  \"galeArcherDefeated\": " << (data.galeArcherDefeated ? "true" : "false") << ",\n";
+    file << "  \"elementalGolemDefeated\": " << (data.elementalGolemDefeated ? "true" : "false") << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";

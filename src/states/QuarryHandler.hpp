@@ -59,6 +59,13 @@ public:
     bool IsBossSummoned() const { return elementalBossSummoned; }
     bool IsBossDefeated() const { return elementalBossDefeated; }
     void SetBossDefeated(bool defeated) { elementalBossDefeated = defeated; }
+    void Reset() {
+        elementalBossSummoned = false;
+        elementalBossDefeated = false;
+        golemSpawners.clear();
+        entryBannerTimer = 0.0f;
+        doorCooldown = 0.0f;
+    }
 
 private:
     Campfire campfire;

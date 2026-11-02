@@ -185,55 +185,55 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
     EnemyType type = enemy.GetType();
 
     if (type == EnemyType::ELEMENTAL_GOLEM) {
-        // Secret Boss Elemental Golem: 12-18 Ore Scraps + 150-250 Shingles + 3 Elixirs
-        int scrapCount = 12 + (rand() % 7);
+        // Secret Boss Elemental Golem: 8-12 Ore Scraps + 80-120 Shingles + 2 Elixirs
+        int scrapCount = 8 + (rand() % 5);
         outDrops.emplace_back(LootType::ORE_SCRAP, pos, scrapCount);
-        int shingleCount = 150 + (rand() % 101);
+        int shingleCount = 80 + (rand() % 41);
         outDrops.emplace_back(LootType::SHINGLES, Vector2{ pos.x + 16.0f, pos.y }, shingleCount);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 18.0f, pos.y }, 1);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 18.0f, pos.y }, 1);
-        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x, pos.y - 18.0f }, 1);
     } else if (type == EnemyType::ORE_GOLEM) {
-        // Ore Golem: 2-4 Ore Scraps + 15-30 Shingles + 40% Elixir
-        int scrapCount = 2 + (rand() % 3);
-        outDrops.emplace_back(LootType::ORE_SCRAP, pos, scrapCount);
-        int shingleCount = 15 + (rand() % 16);
+        // Ore Golem (Nerfed): 65% chance for 1 Ore Scrap + 4-8 Shingles + 20% Elixir
+        if ((rand() % 100) < 65) {
+            outDrops.emplace_back(LootType::ORE_SCRAP, pos, 1);
+        }
+        int shingleCount = 4 + (rand() % 5);
         outDrops.emplace_back(LootType::SHINGLES, Vector2{ pos.x + 12.0f, pos.y }, shingleCount);
-        if ((rand() % 100) < 40) {
+        if ((rand() % 100) < 20) {
             outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 12.0f, pos.y }, 1);
         }
     } else if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS) {
-        // Boss Drops: 100-150 Shingles + 2 Guaranteed Elixirs
-        int shingleCount = 100 + (rand() % 51);
+        // Boss Drops (Rebalanced): 50-75 Shingles + 1 Guaranteed Elixir
+        int shingleCount = 50 + (rand() % 26);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 16.0f, pos.y }, 1);
-        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 16.0f, pos.y }, 1);
     } else if (type == EnemyType::GALE_BANDIT) {
-        // Gale Bandit: 8-16 Shingles + 35% Essence of Mist (STRICTLY NO Ore Scraps!)
-        int shingleCount = 8 + (rand() % 9);
+        // Gale Bandit (Nerfed): 3-6 Shingles + 20% Essence of Mist (STRICTLY NO Ore Scraps!)
+        int shingleCount = 3 + (rand() % 4);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
-        if ((rand() % 100) < 35) {
+        if ((rand() % 100) < 20) {
             outDrops.emplace_back(LootType::MIST_ESSENCE, Vector2{ pos.x + 12.0f, pos.y }, 1);
         }
     } else if (type == EnemyType::GALE_ARCHER_BOSS) {
-        // Gale Archer Boss: 50-80 Shingles + Guaranteed 1-2 Shadow Essence + 1 Elixir (STRICTLY NO Ore Scraps!)
-        int shingleCount = 50 + (rand() % 31);
+        // Gale Archer Boss: 30-50 Shingles + 1 Shadow Essence + 1 Elixir (STRICTLY NO Ore Scraps!)
+        int shingleCount = 30 + (rand() % 21);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
-        int shadowCount = 1 + (rand() % 2);
-        outDrops.emplace_back(LootType::SHADOW_ESSENCE, Vector2{ pos.x - 14.0f, pos.y }, shadowCount);
+        outDrops.emplace_back(LootType::SHADOW_ESSENCE, Vector2{ pos.x - 14.0f, pos.y }, 1);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
     } else if (type == EnemyType::BRUTE || type == EnemyType::CHARGER || type == EnemyType::PYROMANCER) {
-        // Elite / Heavy Mobs: 10-25 Shingles + 35% Elixir
-        int shingleCount = 10 + (rand() % 16);
+        // Elite / Heavy Mobs: 4-8 Shingles + 20% Elixir
+        int shingleCount = 4 + (rand() % 5);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
-        if ((rand() % 100) < 35) {
+        if ((rand() % 100) < 20) {
             outDrops.emplace_back(LootType::ELIXIR_FLASK, pos, 1);
         }
     } else {
-        // Standard Mobs (Slasher, Archer): 1-5 Shingles + 15% Elixir
-        int shingleCount = 1 + (rand() % 5);
-        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
-        if ((rand() % 100) < 15) {
+        // Standard Mobs (Slasher, Archer): 60% chance for 1-3 Shingles + 10% Elixir
+        if ((rand() % 100) < 60) {
+            int shingleCount = 1 + (rand() % 3);
+            outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        }
+        if ((rand() % 100) < 10) {
             outDrops.emplace_back(LootType::ELIXIR_FLASK, pos, 1);
         }
     }
