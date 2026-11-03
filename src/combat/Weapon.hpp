@@ -159,24 +159,24 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::WINDRUNNER_RECURVE:
             stats = {
                 "Windrunner's Recurve",
-                "Acrobatic wind bow crafted from Gale Archer trophies. Light attack fires high-velocity piercing wind arrows across long range. Heavy attack channels a Gale Piercer Drill Arrow with 40% defense pierce and heavy poise knockback.",
-                24.0f, 520.0f, 20.0f, 0.20f, 0.32f, 10.0f,
-                82.0f, 620.0f, 25.0f, 0.35f, 0.25f, 2.40f, 25.0f,
+                "Acrobatic wind bow crafted from Gale Archer trophies. Light attack fires high-velocity single-target wind arrows. Heavy attack channels a Gale Piercer Drill Arrow with 50% defense pierce that shatters enemy armor and stuns foes.",
+                16.0f, 520.0f, 20.0f, 0.20f, 0.52f, 12.0f,
+                58.0f, 620.0f, 25.0f, 0.45f, 0.28f, 2.60f, 28.0f,
                 14.0f, 0.60f,
-                0, 1.10f, 0.40f, 1.20f, 0.0f
+                0, 1.30f, 0.50f, 1.25f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Windrunner's Recurve +1";
-                stats.lightDamage = 29.0f;
-                stats.heavyDamage = 98.0f;
+                stats.lightDamage = 20.0f;
+                stats.heavyDamage = 70.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Windrunner's Recurve +2";
-                stats.lightDamage = 35.0f;
-                stats.heavyDamage = 115.0f;
-                stats.defensePierceBonus = 0.50f;
+                stats.lightDamage = 24.0f;
+                stats.heavyDamage = 82.0f;
+                stats.defensePierceBonus = 0.60f;
             }
             return stats;
 

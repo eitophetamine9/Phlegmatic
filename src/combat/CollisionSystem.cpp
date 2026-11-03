@@ -52,6 +52,28 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
     }
 
+    // Shadowstrider 5th Dash Mist Trail DoT vs Enemies
+    for (auto& zone : player.GetMistTrailZones()) {
+        if (!zone.active || zone.damageTimer > 0.0f) continue;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(zone.position, enemy.GetPosition());
+            if (d <= zone.radius + enemy.GetRadius()) {
+                zone.damageTimer = 0.35f;
+                Vector2 kDir = Vector2Normalize(Vector2Subtract(enemy.GetPosition(), zone.position));
+                if (kDir.x == 0.0f && kDir.y == 0.0f) kDir = { 0.0f, -1.0f };
+                if (enemy.TakeDamage(12.0f, kDir, particles, 0.20f)) {
+                    if (outLootDrops) {
+                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    }
+                }
+                enemy.ApplyStagger(0.20f);
+                particles.SpawnSparks(enemy.GetPosition(), Color{ 80, 240, 210, 255 }, 6, 60.0f);
+                particles.SpawnFloatingText(enemy.GetPosition(), "MIST DoT -12", Color{ 100, 245, 215, 255 }, 16.0f);
+            }
+        }
+    }
+
     // 1. Player melee attack vs enemies
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
@@ -357,6 +379,12 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         }
                         particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
                         particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
+                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 12.0f) {
+                            enemy.ApplyArmorFracture(4.0f);
+                            enemy.ApplyStagger(1.2f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR SHATTERED! STUNNED!", Color{ 100, 255, 230, 255 }, 22.0f);
+                            particles.AddScreenShake(4.5f, 0.15f);
+                        }
 
                         if (!proj.IsPiercing()) {
                             proj.Destroy();

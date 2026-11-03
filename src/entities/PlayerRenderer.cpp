@@ -839,5 +839,47 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
         DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
     }
+
+    // Friendly Mist Fairy Companion (Totem of Mist)
+    if (player.GetTotem() == TotemType::TOTEM_MIST && player.GetMistFairy().active) {
+        Vector2 fPos = player.GetMistFairy().position;
+        float time = (float)GetTime();
+        float wingFlap = sinf(time * 18.0f) * 8.0f;
+
+        DrawCircleGradient(fPos, 22.0f, Color{ 80, 240, 220, 90 }, Color{ 0, 0, 0, 0 });
+
+        Vector2 w1L = { fPos.x - 2.0f, fPos.y - 3.0f };
+        Vector2 w2L = { fPos.x - 12.0f, fPos.y - 12.0f + wingFlap };
+        Vector2 w3L = { fPos.x - 10.0f, fPos.y + 4.0f };
+        DrawTriangle(w1L, w2L, w3L, Color{ 140, 255, 235, 180 });
+
+        Vector2 w1R = { fPos.x + 2.0f, fPos.y - 3.0f };
+        Vector2 w2R = { fPos.x + 12.0f, fPos.y - 12.0f - wingFlap };
+        Vector2 w3R = { fPos.x + 10.0f, fPos.y + 4.0f };
+        DrawTriangle(w1R, w3R, w2R, Color{ 140, 255, 235, 180 });
+
+        DrawCircleV(fPos, 4.5f, Color{ 60, 210, 195, 240 });
+        DrawCircleV(fPos, 2.5f, Color{ 255, 255, 255, 255 });
+    }
+
+    // Active Mist Healing Orbs on ground
+    for (const auto& orb : player.GetMistHealingOrbs()) {
+        if (!orb.active) continue;
+        float pulse = 0.8f + 0.2f * sinf((float)GetTime() * 5.0f);
+        DrawCircleGradient(orb.position, 28.0f * pulse, Color{ 90, 255, 190, 100 }, Color{ 0, 0, 0, 0 });
+        DrawCircleV(orb.position, 7.0f * pulse, Color{ 40, 180, 140, 240 });
+        DrawCircleV(orb.position, 4.5f, Color{ 140, 255, 220, 255 });
+        DrawCircleV(orb.position, 2.0f, Color{ 255, 255, 255, 255 });
+        DrawCircleLines((int)orb.position.x, (int)orb.position.y, 9.0f * pulse, Color{ 120, 255, 210, 220 });
+    }
+
+    // Shadowstrider 5th Dash Mist Trail Zones
+    for (const auto& zone : player.GetMistTrailZones()) {
+        if (!zone.active) continue;
+        float alpha = fminf(1.0f, zone.lifetime / 1.5f);
+        Color mCol = Color{ 70, 230, 200, (unsigned char)(80 * alpha) };
+        DrawCircleGradient(zone.position, zone.radius, mCol, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)zone.position.x, (int)zone.position.y, zone.radius * 0.7f, Color{ 100, 245, 215, (unsigned char)(120 * alpha) });
+    }
 }
 

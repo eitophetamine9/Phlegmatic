@@ -60,6 +60,41 @@ public:
     CompanionGolem& GetCompanion() { return companion; }
     void RelocateCompanionToPlayer();
 
+    // Friendly Mist Fairy Companion (Totem of Mist)
+    struct MistFairy {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float healOrbTimer = 16.0f;
+        float flutterTime = 0.0f;
+    } mistFairy;
+
+    struct MistHealingOrb {
+        Vector2 position = { 0.0f, 0.0f };
+        float lifetime = 20.0f;
+        float healAmount = 30.0f;
+        bool active = true;
+    };
+    std::vector<MistHealingOrb> mistHealingOrbs;
+
+    // Shadowstrider 5th Dash Mist Trail DoT
+    int shadowDashCounter = 0;
+    struct MistTrailZone {
+        Vector2 position = { 0.0f, 0.0f };
+        float lifetime = 4.0f;
+        float damageTimer = 0.0f;
+        float radius = 32.0f;
+        bool active = true;
+    };
+    std::vector<MistTrailZone> mistTrailZones;
+
+    const MistFairy& GetMistFairy() const { return mistFairy; }
+    MistFairy& GetMistFairy() { return mistFairy; }
+    const std::vector<MistHealingOrb>& GetMistHealingOrbs() const { return mistHealingOrbs; }
+    std::vector<MistHealingOrb>& GetMistHealingOrbs() { return mistHealingOrbs; }
+    const std::vector<MistTrailZone>& GetMistTrailZones() const { return mistTrailZones; }
+    std::vector<MistTrailZone>& GetMistTrailZones() { return mistTrailZones; }
+    int GetShadowDashCounter() const { return shadowDashCounter; }
+
     ArmorSet GetActiveArmorSet() const;
     bool HasFullArmorSet(ArmorSet set) const;
     void TriggerArmorSkill(ParticleSystem& particles);

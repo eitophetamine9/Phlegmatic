@@ -330,6 +330,25 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
         }
     }
 
+    // Friendly Mist Fairy Companion Status Widget
+    if (player.GetTotem() == TotemType::TOTEM_MIST) {
+        float fairyW = 280.0f;
+        float fairyH = 46.0f;
+        float fairyX = hudX;
+        float fairyY = hudY - fairyH - 8.0f;
+
+        DrawRectangleRounded(Rectangle{ fairyX, fairyY, fairyW, fairyH }, 0.2f, 4, Color{ 12, 22, 28, 230 });
+        DrawRectangleRoundedLines(Rectangle{ fairyX, fairyY, fairyW, fairyH }, 0.2f, 4, Color{ 90, 240, 220, 220 });
+
+        DrawCircleV({ fairyX + 18.0f, fairyY + 23.0f }, 7.0f, Color{ 100, 255, 230, 255 });
+        DrawCircleLines((int)(fairyX + 18.0f), (int)(fairyY + 23.0f), 7.0f, WHITE);
+
+        DrawText("MIST FAIRY (+20% CRIT | +35% CRIT DMG)", (int)fairyX + 32, (int)fairyY + 8, 10, Color{ 120, 255, 230, 255 });
+        int secRemaining = (int)ceilf(player.GetMistFairy().healOrbTimer);
+        std::string orbStatus = "Healing Orb Ready in " + std::to_string(secRemaining) + "s...";
+        DrawText(orbStatus.c_str(), (int)fairyX + 32, (int)fairyY + 23, 10, Color{ 180, 245, 225, 220 });
+    }
+
     // STATUS BADGE PILL
     const float badgeX = hudX + 172.0f;
     const float badgeY = hudY + 74.0f;

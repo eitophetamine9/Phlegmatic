@@ -208,10 +208,10 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 16.0f, pos.y }, 1);
     } else if (type == EnemyType::GALE_BANDIT) {
-        // Gale Bandit (Nerfed): 3-6 Shingles + 20% Essence of Mist (STRICTLY NO Ore Scraps!)
+        // Gale Bandit: 3-6 Shingles + 38% Essence of Mist (buffed drop rate; STRICTLY NO Ore Scraps!)
         int shingleCount = 3 + (rand() % 4);
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
-        if ((rand() % 100) < 20) {
+        if ((rand() % 100) < 38) {
             outDrops.emplace_back(LootType::MIST_ESSENCE, Vector2{ pos.x + 12.0f, pos.y }, 1);
         }
     } else if (type == EnemyType::GALE_ARCHER_BOSS) {
