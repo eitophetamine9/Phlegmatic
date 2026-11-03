@@ -485,6 +485,13 @@ void Player::SetTotem(TotemType newTotem) {
     currentTotem = newTotem;
     inventory.UnlockTotem(newTotem);
     inventory.SetEquippedTotem(newTotem);
+    if (newTotem == TotemType::TOTEM_MIST) {
+        mistFairy.active = true;
+        mistFairy.healOrbTimer = 16.0f;
+        mistFairy.position = { position.x - 30.0f, position.y - 30.0f };
+    } else {
+        mistFairy.active = false;
+    }
     if (newTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
         if (!companion.active && companion.respawnTimer <= 0.0f) {
             companion.active = true;
@@ -874,7 +881,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         float currentDashSpeed = Config::DASH_SPEED;
         if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-            currentDashSpeed *= 1.35f; // +35% Dash Distance & Velocity
+            currentDashSpeed *= 1.10f; // Rebalanced dash distance
         }
         velocity.x = dashDir.x * currentDashSpeed;
         velocity.y = dashDir.y * currentDashSpeed;
@@ -1224,9 +1231,32 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 particles.AddScreenShake(8.0f, 0.25f);
                 particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 175, 40, 255 });
                 particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 32, 220.0f);
+                if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+                    currentAttack.hasShockwave = true;
+                    currentAttack.shockwaveRadius = 150.0f;
+                    currentAttack.damage += 30.0f;
+                    particles.SpawnFloatingText(position, "EARTH RUPTURE +30", Color{ 255, 180, 60, 255 }, 22.0f);
+                }
                 velocity.x += forwardDir.x * 120.0f;
                 velocity.y += forwardDir.y * 120.0f;
 
+            } else if (currentWeapon == WeaponType::WINDRUNNER_RECURVE) {
+                Vector2 spawnPos = { position.x + forwardDir.x * (radius + 18.0f), position.y + forwardDir.y * (radius + 18.0f) };
+                Vector2 projVel = { forwardDir.x * 850.0f, forwardDir.y * 850.0f };
+                float baseDmg = stats.heavyDamage;
+                float finalDmg = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+
+                Projectile proj(spawnPos, projVel, 13.0f, finalDmg, ProjectileType::GALE_ARROW, true, 0.50f);
+                proj.SetPiercing(true);
+                spawnedProjectiles.push_back(proj);
+
+                velocity.x -= forwardDir.x * 160.0f;
+                velocity.y -= forwardDir.y * 160.0f;
+
+                SoundFX::PlayHeavyAttack();
+                particles.AddScreenShake(6.0f, 0.20f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 80, 240, 210, 255 });
+                particles.SpawnSparks(spawnPos, Color{ 120, 255, 230, 255 }, 24, 180.0f);
             } else if (currentWeapon == WeaponType::STORM_GLAIVE) {
 
                 currentAttack.range = stats.heavyRange;
@@ -1431,7 +1461,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.timer = 0.22f;
                     currentAttack.hasHit = false;
 
-                    velocity.x += forwardDir.x * 120.0f;
+                    if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+                    currentAttack.hasShockwave = true;
+                    currentAttack.shockwaveRadius = 150.0f;
+                    currentAttack.damage += 30.0f;
+                    particles.SpawnFloatingText(position, "EARTH RUPTURE +30", Color{ 255, 180, 60, 255 }, 22.0f);
+                }
+                velocity.x += forwardDir.x * 120.0f;
                     velocity.y += forwardDir.y * 120.0f;
 
                     SoundFX::PlayCrusaderClash();
@@ -1725,7 +1761,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
     currentAttack.arcAngle = stats.lightArc;
 
-    currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+    float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
 
     currentAttack.comboStep = comboStep;
 
@@ -1772,7 +1838,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
         currentAttack.circleCenter = { position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f };
 
-        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
 
         currentAttack.range = 105.0f;
 
@@ -1798,7 +1894,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
         currentAttack.arcAngle = 0.0f;
 
-        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
 
         currentAttack.knockback = 220.0f;
 
@@ -1844,7 +1970,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
             // Hit 1: Original golden horizontal sweep
 
-            currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+            float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
 
             currentAttack.knockback = 200.0f;
 
@@ -1860,7 +2016,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
         currentAttack.range = stats.lightRange;
         currentAttack.arcAngle = stats.lightArc;
-        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
         currentAttack.knockback = 260.0f;
         currentAttack.defensePierce = stats.defensePierceBonus;
         SoundFX::PlayLightAttack();
@@ -1873,7 +2059,37 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range = stats.lightRange;
         currentAttack.width = 46.0f;
         currentAttack.arcAngle = 0.0f;
-        currentAttack.damage = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+    // Critical hit chance & multiplier from Mist Fairy & Shadowstrider
+    float critChance = 0.05f;
+    float critMult = stats.critMultiplier;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        critChance += 0.20f;
+        critMult += 0.35f;
+    }
+    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && 
+        (currentWeapon == WeaponType::DAGGERS || currentWeapon == WeaponType::ZEPHYR_DAGGERS || currentWeapon == WeaponType::WINDRUNNER_RECURVE)) {
+        critChance += 0.15f;
+    }
+    if ((rand() % 100) < (int)(critChance * 100.0f)) {
+        baseLightDmg *= critMult;
+        particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+    }
+
+    // Armor set weapon synergies
+    if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE) && (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::SWORD)) {
+        baseLightDmg *= 1.25f;
+    }
+    if (HasFullArmorSet(ArmorSet::COMMONERS_SCRAP) && currentWeapon == WeaponType::SWORD) {
+        lightCooldown *= 0.85f;
+    }
+    if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION) && (currentWeapon == WeaponType::HALBERD || currentWeapon == WeaponType::STORM_GLAIVE)) {
+        currentAttack.range += 25.0f;
+    }
+
+    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
         currentAttack.knockback = 210.0f;
         currentAttack.defensePierce = stats.defensePierceBonus;
         SoundFX::PlayLightAttack();

@@ -255,8 +255,8 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
             return {
                 ArmorSet::COMMONERS_SCRAP,
                 "Commoner's Scrap",
-                "Scrapper's Tenacity",
-                "+15% Stamina Regen & +15% Loot Find (Shingles & Ore Scraps).",
+                "Scrapper's Versatility",
+                "+20% Stamina Regen & +15% Loot Find. [Sword Synergy]: +15% attack speed and -25% stamina cost.",
                 "Desperate Dust Burst",
                 "Slams pocket dust into the ground: stuns adjacent enemies for 1.5s & grants +35% move speed for 4s.",
                 30.0f
@@ -265,8 +265,8 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
             return {
                 ArmorSet::CRUSADER_PLATE,
                 "Crusader Plate",
-                "Aegis of the Sun",
-                "+20% Total Physical Defense & +25 Will / Posture Break Resistance.",
+                "Aegis of the Dawnfire",
+                "+20% Physical Defense & +25 Will. [Truth Seeker & Sword Synergy]: Attacks deal +25% holy damage, and holy beams pierce +20% defense.",
                 "Dawnfire Aegis",
                 "Envelops player in a radiant golden bubble absorbing 60 damage for 6s. Detonates in a holy stun flash!",
                 35.0f
@@ -275,8 +275,8 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
             return {
                 ArmorSet::VANGUARD_BASTION,
                 "Vanguard Bastion",
-                "Unstoppable Juggernaut",
-                "+40 Max HP & complete immunity to micro-staggers and knockback while charging heavy attacks.",
+                "Unstoppable Phalanx",
+                "+40 Max HP & hyper-armor during heavy windups. [Halberd & Glaive Synergy]: Reach extended +25px and heavy cleaves deal +25% poise damage.",
                 "Seismic Quake Slam",
                 "Heavy jump stomp dealing 50 AoE damage, shredding 25% armor, and knocking approaching enemies flat.",
                 22.0f
@@ -286,7 +286,7 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 ArmorSet::SHADOWSTRIDER,
                 "Shadowstrider Garb",
                 "Veil of the Mist",
-                "+25% Move Speed, -50% Dash Cooldown, +35% Dash Distance, -30% Dash Stamina Cost, & +40% extended Dodge i-frame invulnerability.",
+                "+20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge i-frames. [Daggers & Bow Synergy]: +15% Crit Chance. Every 5th dash leaves a swirling Mist Trail that inflicts damage over time.",
                 "Shadow Decoy & Vanish",
                 "Vaporizes into mist with 0.5s invulnerability. Leaves an illusion decoy drawing aggro before exploding for 40 dmg.",
                 25.0f
@@ -295,8 +295,8 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
             return {
                 ArmorSet::FORGED_SCRAP_IRON,
                 "Forged Scrap Iron",
-                "Tempered Slag",
-                "+18 Flat Physical Defense & heavy strikes deal +15% bonus Poise break damage.",
+                "Tempered Ironclad",
+                "+18 Physical Defense & +20% Poise Damage. [War Mace Synergy]: Heavy attacks inflict -25% Armor Fracture, and light hits generate +50% extra Composure.",
                 "Ironclad Spike Wall",
                 "Jagged metal spikes erupt from armor for 6s, reflecting 40% melee damage & granting hyper-armor.",
                 25.0f
@@ -305,8 +305,8 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
             return {
                 ArmorSet::BASALT_GOLEM,
                 "Basalt Golem Carapace",
-                "Primordial Earth Carapace",
-                "+35 Physical Defense (-10% Speed). Melancholic Shell completely absorbs 1 heavy strike every 20s.",
+                "Primordial Titan Carapace",
+                "+35 Physical Defense, 70% knockback resist, absorbs 1 heavy strike every 20s. [Sun Claymore Synergy]: Heavy attacks unleash a secondary molten shockwave (+30 earth dmg) with unbreakable hyper-armor.",
                 "Basalt Spire Wall",
                 "Slams ground erecting 3 jagged basalt pillars blocking pathing and enemy projectiles while dealing 55 dmg.",
                 30.0f
