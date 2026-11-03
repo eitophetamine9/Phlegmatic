@@ -547,7 +547,8 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1f)
 
 - Armor Weapon Synergies & Shadowstrider / Vanguard Overhaul:
   * Vanguard Bastion: Added craftable recipes at Blacksmith Varek's Armor Forge (12 recipes across 3 pages: Greathelm, Bastion Mail, Heavy Legguards). Set bonus grants +50 Max HP and unbreakable hyper-armor during attacks. Halberd & Glaive synergy: +35px reach, +25% armor penetration, and concussive shockwaves. Special skill [V]: Phalanx Vanguard Charge (180px rush, 65 damage, -30% armor shred for 5s, 1.8s stun, 50 HP Fortification shield).
-  * Shadowstrider: Daggers & Bow synergy (+15% crit chance). Removed 5th dash trail; perfect evades roll a 15% chance to spawn an AoE Smoke Mist (95px radius, 6s duration) that grants the player 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
+  * Shadowstrider: Daggers & Bow synergy (+15% crit chance). Removed 5th dash trail; perfect evades roll a 15% chance to spawn an AoE Smoke Mist (95px radius, 7s duration with automatic cleanup) that grants the player 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
+  * Whispering Guardian Spirit: Hovering over the Whispering Altar in the Restless Mist Forest whenever the Gale Archer boss is not active.
   * Commoner's Scrap: Sword synergy (+15% attack speed, -25% stamina cost).
   * Crusader Plate: Truth Seeker synergy (+25% holy damage, +20% beam defense pierce).
   * Forged Scrap Iron: War Mace synergy (-25% Armor Fracture, +50% composure).

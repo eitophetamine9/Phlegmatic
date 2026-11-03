@@ -841,8 +841,11 @@ void PlayerRenderer::Draw(const Player& player) {
     }
 
     // Friendly Mist Fairy Companion (Totem of Mist)
-    if (player.GetTotem() == TotemType::TOTEM_MIST && player.GetMistFairy().active) {
+    if (player.GetTotem() == TotemType::TOTEM_MIST) {
         Vector2 fPos = player.GetMistFairy().position;
+        if (fPos.x == 0.0f && fPos.y == 0.0f) {
+            fPos = { player.GetPosition().x - 32.0f, player.GetPosition().y - 20.0f };
+        }
         float time = (float)GetTime();
         float wingFlap = sinf(time * 18.0f) * 8.0f;
 

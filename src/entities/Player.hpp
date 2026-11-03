@@ -79,7 +79,7 @@ public:
     // Shadowstrider Evasion Smoke Mist (15% chance on perfect evade)
     struct SmokeMistZone {
         Vector2 position = { 0.0f, 0.0f };
-        float duration = 6.0f;
+        float duration = 7.0f;
         float tickTimer = 0.0f;
         float radius = 95.0f;
         bool active = true;
@@ -324,3 +324,4 @@ private:
 
     float walkCycle;
 };
+

@@ -483,6 +483,10 @@ void Player::RelocateCompanionToPlayer() {
     Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
     companion.position = Vector2Add(position, offset);
     companion.attackCooldown = 0.0f;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        mistFairy.active = true;
+        mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
+    }
 }
 
 void Player::SetTotem(TotemType newTotem) {
@@ -491,7 +495,7 @@ void Player::SetTotem(TotemType newTotem) {
     inventory.SetEquippedTotem(newTotem);
     if (newTotem == TotemType::TOTEM_MIST) {
         mistFairy.active = true;
-        mistFairy.healOrbTimer = 16.0f;
+        mistFairy.healOrbTimer = 14.0f; mistFairy.flutterTime = 0.0f;
         mistFairy.position = { position.x - 30.0f, position.y - 30.0f };
     } else {
         mistFairy.active = false;
@@ -742,6 +746,87 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         }
     } else {
         companion.active = false;
+    }
+
+    // Totem of Mist & Mist Fairy Companion Update
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        if (!mistFairy.active) {
+            mistFairy.active = true;
+            mistFairy.healOrbTimer = 14.0f;
+            mistFairy.flutterTime = 0.0f;
+            mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
+        }
+
+        mistFairy.flutterTime += dt;
+
+        // Dynamic hovering anchor orbiting near player
+        float hoverAngle = mistFairy.flutterTime * 2.2f;
+        Vector2 targetFairyPos = {
+            position.x + cosf(hoverAngle) * 36.0f,
+            position.y - 22.0f + sinf(hoverAngle * 1.5f) * 12.0f
+        };
+
+        float distToPlayer = Vector2Distance(mistFairy.position, position);
+        if (distToPlayer > 260.0f || (mistFairy.position.x == 0.0f && mistFairy.position.y == 0.0f)) {
+            mistFairy.position = targetFairyPos;
+        } else {
+            mistFairy.position = Vector2Lerp(mistFairy.position, targetFairyPos, fminf(1.0f, 6.5f * dt));
+        }
+
+        if (fmodf(mistFairy.flutterTime, 0.22f) < dt) {
+            particles.SpawnSparks(mistFairy.position, Color{ 110, 245, 225, 150 }, 1, 15.0f);
+        }
+
+        mistFairy.healOrbTimer -= dt;
+        if (mistFairy.healOrbTimer <= 0.0f) {
+            mistFairy.healOrbTimer = 14.0f;
+            MistHealingOrb orb;
+            orb.position = mistFairy.position;
+            orb.lifetime = 20.0f;
+            orb.healAmount = 30.0f;
+            orb.active = true;
+            mistHealingOrbs.push_back(orb);
+            particles.SpawnSparks(orb.position, Color{ 90, 255, 200, 255 }, 18, 90.0f);
+            particles.SpawnFloatingText(orb.position, "MIST HEALING ORB!", Color{ 110, 255, 215, 255 }, 20.0f);
+        }
+    } else {
+        mistFairy.active = false;
+    }
+
+    // Active Mist Healing Orbs decay & pickup collision
+    for (auto it = mistHealingOrbs.begin(); it != mistHealingOrbs.end(); ) {
+        if (it->active) {
+            it->lifetime -= dt;
+            if (it->lifetime <= 0.0f) {
+                it->active = false;
+                it = mistHealingOrbs.erase(it);
+                continue;
+            }
+            float d = Vector2Distance(position, it->position);
+            if (d <= radius + 36.0f) {
+                Heal(it->healAmount);
+                particles.SpawnFloatingText(position, "+30 HP (Mist Orb)", Color{ 90, 255, 180, 255 }, 22.0f);
+                particles.SpawnSparks(it->position, Color{ 120, 255, 220, 255 }, 20, 140.0f);
+                SoundFX::PlayParrySuccess();
+                it->active = false;
+                it = mistHealingOrbs.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
+
+    // Shadowstrider Smoke Mist Zones duration decay (7-second lifetime)
+    for (auto it = smokeMistZones.begin(); it != smokeMistZones.end(); ) {
+        if (it->active) {
+            it->duration -= dt;
+            if (it->duration <= 0.0f) {
+                it->active = false;
+                it = smokeMistZones.erase(it);
+                continue;
+            }
+        }
+        ++it;
     }
 
 
@@ -2469,7 +2554,7 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
             SmokeMistZone smoke;
             smoke.position = position;
             smoke.radius = 95.0f;
-            smoke.duration = 6.0f;
+            smoke.duration = 7.0f;
             smoke.tickTimer = 0.0f;
             smoke.active = true;
             smokeMistZones.push_back(smoke);

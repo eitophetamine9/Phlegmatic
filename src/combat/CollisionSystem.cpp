@@ -311,7 +311,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         Player::SmokeMistZone smoke;
                         smoke.position = playerPos;
                         smoke.radius = 95.0f;
-                        smoke.duration = 6.0f;
+                        smoke.duration = 7.0f;
                         smoke.tickTimer = 0.0f;
                         smoke.active = true;
                         player.GetSmokeMistZones().push_back(smoke);
