@@ -24,6 +24,7 @@ public:
     bool IsActive() const { return active; }
     void Destroy() { active = false; }
 
+    bool CheckCollisionWithCircle(Vector2 center, float targetRadius) const;
     void Reflect(Vector2 newVel);
 
     Vector2 GetPosition() const { return position; }
