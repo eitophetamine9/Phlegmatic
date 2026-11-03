@@ -6,16 +6,19 @@
 #include <cmath>
 #include <algorithm>
 
-RestlessMistForestHandler::RestlessMistForestHandler() {
-    // 5 Gale Bandit Spawners spread across the woodland glades
+void RestlessMistForestHandler::InitSpawners() {
     campfire = { 5, "Restless Glade Bonfire", { 540.0f, 640.0f } };
     spawners = {
-        { { 500.0f, 450.0f }, 0.0f, false },
-        { { 850.0f, 380.0f }, 0.0f, false },
-        { { 580.0f, 850.0f }, 0.0f, false },
-        { { 950.0f, 920.0f }, 0.0f, false },
-        { { 1450.0f, 650.0f }, 0.0f, false }
+        { { 500.0f, 450.0f }, 0.0f, true },
+        { { 850.0f, 380.0f }, 0.0f, true },
+        { { 580.0f, 850.0f }, 0.0f, true },
+        { { 950.0f, 920.0f }, 0.0f, true },
+        { { 1450.0f, 650.0f }, 0.0f, true }
     };
+}
+
+RestlessMistForestHandler::RestlessMistForestHandler() {
+    InitSpawners();
 }
 
 void RestlessMistForestHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera) {
@@ -24,6 +27,8 @@ void RestlessMistForestHandler::Init(Player& player, GameMap& map, std::vector<E
     camera.target = player.GetPosition();
     projectiles.clear();
     enemies.clear();
+
+    InitSpawners();
 
     // Spawn regular Gale Bandits at clearings
     for (auto& spawner : spawners) {
@@ -60,6 +65,7 @@ void RestlessMistForestHandler::Update(
             player.Revive({ 180.0f, 700.0f });
             camera.target = player.GetPosition();
             enemies.clear();
+            InitSpawners();
             for (auto& spawner : spawners) {
                 enemies.emplace_back(EnemyType::GALE_BANDIT, spawner.spawnPos);
                 spawner.isAlive = true;
@@ -134,7 +140,7 @@ void RestlessMistForestHandler::Update(
         return d.IsCollected();
     }), lootDrops.end());
 
-    // Ambient floating mist particles
+    // Ambient floating mist particles and woodland audio
     ambientMistTimer += dt;
     if (ambientMistTimer >= 0.16f) {
         ambientMistTimer = 0.0f;
@@ -144,6 +150,15 @@ void RestlessMistForestHandler::Update(
         };
         particles.SpawnSparks(mistPos, Color{ 100, 240, 215, 60 }, 3, 35.0f);
     }
+
+    forestWindTimer += dt;
+    if (forestWindTimer >= 6.8f) {
+        forestWindTimer = 0.0f;
+        SoundFX::PlayDash();
+    }
+
+    // Dynamic boss audio ducking
+    SoundFX::SetBossCombatMode(galeArcherSummoned && !galeArcherDefeated);
 
     // Check dead enemies, boss defeat, and spawner cooldowns
     for (auto it = enemies.begin(); it != enemies.end(); ) {

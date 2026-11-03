@@ -30,6 +30,7 @@
 
 ## Table of Contents
 
+- [Release Highlights: Version 0.0.1f](#release-highlights-version-001f)
 - [Release Highlights: Version 0.0.1e](#release-highlights-version-001e)
 - [Release Highlights: Version 0.0.1d](#release-highlights-version-001d)
 
@@ -138,6 +139,51 @@
 ---
 
 
+
+## Release Highlights: Version 0.0.1f
+
+A comprehensive technical breakdown of all systems, gameplay mechanics, combat feedback tuning, audio ambience, and UI enhancements introduced in **Version 0.0.1f**:
+
+* **Royal Combat Arena Wave Milestones & Rewards**:
+  * Implemented milestone resource chest payouts triggered upon completing boss waves across the 20-wave trial:
+    * **Wave 5 Milestone**: Grants 10 Silver Shingles and 4 Ore Scraps with floating HUD reward banner.
+    * **Wave 10 Milestone**: Grants 20 Silver Shingles, 8 Ore Scraps, and 1 Essence of Mist.
+    * **Wave 15 Milestone**: Grants 30 Silver Shingles, 12 Ore Scraps, 2 Essence of Mist, and 1 Shadow Essence.
+    * **Wave 20 Grand Victory**: Grants 50 Silver Shingles, 20 Ore Scraps, 4 Shadow Essence, and permanently unlocks the **Victor's Crest** (item_arena_victor_crest) campaign quest trophy, crowning the player Champion of Tydeshire.
+  * Enhanced Arena HUD banner layout with dynamic wave counter, milestone markers ([BOSS MILESTONE]), and victory celebration banner.
+
+* **Procedural Audio Ambience & Dynamic Boss Combat Ducking**:
+  * Added procedural audio generation in SoundFX.cpp for immersive environmental soundscapes:
+    * PlayAnvilStrike(): Dynamic anvil clink with high-frequency iron resonance and lingering acoustic decay near Blacksmith Varek in Zyphden.
+    * PlayHearthCrackle(): Warm crackling ember sounds inside the Zyphden Tavern near the central hearth.
+    * Ambient wind rushes through the trees in the Restless Mist Forest.
+  * Implemented dynamic boss combat audio ducking (SoundFX::SetBossCombatMode(bool)):
+    * Environmental background audio smoothly interpolates down to 38% volume upon entering high-intensity boss encounters (Knight Lenon sparring duel, Gale Archer boss battle, Corrupted Zil, and Arena boss milestone waves 5, 10, 15, and 20).
+    * Audio smoothly fades back to full ambient volume upon boss defeat or exiting combat encounters.
+
+* **HUD Equipment Loadout Badges & Weapon Tier Upgrade Indicators**:
+  * Upgraded bottom-left player HUD card in HUD.cpp:
+    * Added mini modular armor loadout badges ([H: Set] [C: Set] [L: Set]) color-coded to each active armor archetype (Commoner's Scrap, Forged Iron, Basalt Golem, Shadowstrider, Crusader, Vanguard).
+    * Prominently displays the active full set bonus status directly on the HUD (e.g. [SET: BASALT GOLEM], [SET: SHADOWSTRIDER]).
+    * Added weapon tier upgrade markers (+0 BASE, +1 FORGED, +2 MASTERWORK, CONSECRATED) and live Light/Heavy attack damage indicators on the bottom-right weapon badge.
+
+* **Combat Feedback & Poise Tuning**:
+  * **Heavy Weapon Hyper-Armor**:
+    * Heavy attack windup startup on colossal armaments (WeaponType::SUN_CLAYMORE, WeaponType::MACE, WeaponType::HALBERD, WeaponType::STORM_GLAIVE, and the ArmorSet::VANGUARD_BASTION set) grants complete stagger interruption immunity.
+    * During hyper-armor windups, incoming damage is mitigated by 30%, accompanied by golden deflection sparks (particles.SpawnSparks), floating HYPER-ARMOR! text, and parry deflection audio cues.
+  * **Basalt Golem Armor Poise Feedback**:
+    * Wearing the complete Basalt Golem armor set grants 70% knockback resistance against hostile attacks, reducing standard 240.0f knockback impulses to 70.0f.
+    * Absorbing heavy strikes triggers grounded screen shake (3.5f) and releases dense stone dust impact particles (Color{ 160, 140, 120, 240 }).
+  * **Standardized Projectile Collision Hitboxes**:
+    * Added Projectile::CheckCollisionWithCircle in Projectile.cpp with line-segment swept-circle testing for elongated directional projectiles (BOLT, BEAM_SHARD, HOLY_BEAM, GALE_ARROW).
+    * Eliminates high-velocity tunneling through thin colliders and resolves ghost misses where visual projectile tips pierced targets before the center registered collision.
+
+* **World & UI Quality-of-Life Fixes**:
+  * Restless Mist Forest enemy spawners automatically re-initialize upon map entry, state reset, and player revive, ensuring consistent forest enemy population.
+  * Rescaled Blacksmith Varek's Forge modal typography from cramped 9-11pt up to 12-16pt with high-contrast text and widened borders, preventing text clipping and footer button overlap.
+  * Restored Knight Lenon dialogue option to enter the 20-wave Royal Combat Arena after sparring victory in the Zyphden courtyard ([R] ENTER ARENA (20 WAVES)).
+
+---
 
 ## Release Highlights: Version 0.0.1e
 

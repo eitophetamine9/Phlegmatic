@@ -70,6 +70,36 @@ void Projectile::Update(float dt, const GameMap& map, ParticleSystem& particles)
     }
 }
 
+bool Projectile::CheckCollisionWithCircle(Vector2 center, float targetRadius) const {
+    if (!active) return false;
+
+    if (type == ProjectileType::BOLT || type == ProjectileType::BEAM_SHARD || 
+        type == ProjectileType::HOLY_BEAM || type == ProjectileType::GALE_ARROW) {
+        float speed = Vector2Length(velocity);
+        if (speed > 0.001f) {
+            Vector2 dir = { velocity.x / speed, velocity.y / speed };
+            Vector2 tip = { position.x + dir.x * (radius * 2.5f), position.y + dir.y * (radius * 2.5f) };
+            Vector2 tail = { position.x - dir.x * (radius * 1.5f), position.y - dir.y * (radius * 1.5f) };
+
+            Vector2 seg = Vector2Subtract(tip, tail);
+            float segLenSq = seg.x * seg.x + seg.y * seg.y;
+            if (segLenSq > 0.0001f) {
+                Vector2 toPt = Vector2Subtract(center, tail);
+                float t = fmaxf(0.0f, fminf(1.0f, (toPt.x * seg.x + toPt.y * seg.y) / segLenSq));
+                Vector2 closest = { tail.x + seg.x * t, tail.y + seg.y * t };
+                float distSq = (center.x - closest.x) * (center.x - closest.x) + (center.y - closest.y) * (center.y - closest.y);
+                float totalR = radius + targetRadius;
+                return distSq <= (totalR * totalR);
+            }
+        }
+    }
+
+    float dx = center.x - position.x;
+    float dy = center.y - position.y;
+    float totalR = radius + targetRadius;
+    return (dx * dx + dy * dy) <= (totalR * totalR);
+}
+
 void Projectile::Reflect(Vector2 newVel) {
     isFromPlayer = true;
     velocity = newVel;

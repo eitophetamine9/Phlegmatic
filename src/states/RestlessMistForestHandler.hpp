@@ -59,10 +59,11 @@ public:
     bool IsBossSummoned() const { return galeArcherSummoned; }
     bool IsBossDefeated() const { return galeArcherDefeated; }
     void SetBossDefeated(bool defeated) { galeArcherDefeated = defeated; }
+    void InitSpawners();
     void Reset() {
         galeArcherSummoned = false;
         galeArcherDefeated = false;
-        spawners.clear();
+        InitSpawners();
         entryBannerTimer = 0.0f;
         gateCooldown = 0.0f;
     }
@@ -73,6 +74,7 @@ private:
     bool galeArcherSummoned = false;
     bool galeArcherDefeated = false;
     float ambientMistTimer = 0.0f;
+    float forestWindTimer = 0.0f;
     float entryBannerTimer = 0.0f;
     float gateCooldown = 0.0f;
     Vector2 altarPosition = { 1130.0f, 650.0f };

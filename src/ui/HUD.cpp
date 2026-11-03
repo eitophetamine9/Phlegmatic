@@ -253,11 +253,47 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     // ATTRIBUTES ROW: DEFENSE & WILL
     char defBuf[32];
     snprintf(defBuf, sizeof(defBuf), "DEF: %d", (int)player.GetDefense());
-    DrawText(defBuf, (int)hudX + 14, (int)hudY + 78, 11, Color{ 140, 210, 255, 240 });
+    DrawText(defBuf, (int)hudX + 14, (int)hudY + 76, 11, Color{ 140, 210, 255, 240 });
 
     char willBuf[32];
     snprintf(willBuf, sizeof(willBuf), "WILL: %d", (int)player.GetWill());
-    DrawText(willBuf, (int)hudX + 88, (int)hudY + 78, 11, Color{ 255, 205, 110, 240 });
+    DrawText(willBuf, (int)hudX + 84, (int)hudY + 76, 11, Color{ 255, 205, 110, 240 });
+
+    // Mini Modular Armor Badges
+    const char* hStr = "H:-";
+    Color hCol = Color{ 140, 160, 185, 200 };
+    if (player.GetHelmet() == HelmetType::SCRAP_SALLET) { hStr = "H:Scrap"; hCol = Color{ 240, 180, 70, 255 }; }
+    else if (player.GetHelmet() == HelmetType::BASALT_GREATHELM) { hStr = "H:Basalt"; hCol = Color{ 255, 140, 40, 255 }; }
+    else if (player.GetHelmet() == HelmetType::SHADOW_COWL) { hStr = "H:Shadow"; hCol = Color{ 110, 245, 220, 255 }; }
+    else if (player.GetHelmet() == HelmetType::CRUSADER_HELM) { hStr = "H:Crusader"; hCol = Color{ 255, 215, 80, 255 }; }
+    else if (player.GetHelmet() == HelmetType::VANGUARD_GREATHELM) { hStr = "H:Vanguard"; hCol = Color{ 140, 215, 255, 255 }; }
+
+    const char* cStr = "C:-";
+    Color cCol = Color{ 140, 160, 185, 200 };
+    if (player.GetChestplate() == ChestplateType::SCRAP_CUIRASS) { cStr = "C:Scrap"; cCol = Color{ 240, 180, 70, 255 }; }
+    else if (player.GetChestplate() == ChestplateType::BASALT_CUIRASS) { cStr = "C:Basalt"; cCol = Color{ 255, 140, 40, 255 }; }
+    else if (player.GetChestplate() == ChestplateType::SHADOW_GARB) { cStr = "C:Shadow"; cCol = Color{ 110, 245, 220, 255 }; }
+    else if (player.GetChestplate() == ChestplateType::CRUSADER_CUIRASS) { cStr = "C:Crusader"; cCol = Color{ 255, 215, 80, 255 }; }
+
+    const char* lStr = "L:-";
+    Color lCol = Color{ 140, 160, 185, 200 };
+    if (player.GetLeggings() == LeggingsType::SCRAP_GREAVES) { lStr = "L:Scrap"; lCol = Color{ 240, 180, 70, 255 }; }
+    else if (player.GetLeggings() == LeggingsType::BASALT_GREAVES) { lStr = "L:Basalt"; lCol = Color{ 255, 140, 40, 255 }; }
+    else if (player.GetLeggings() == LeggingsType::SHADOW_LEGGINGS) { lStr = "L:Shadow"; lCol = Color{ 110, 245, 220, 255 }; }
+    else if (player.GetLeggings() == LeggingsType::CRUSADER_GREAVES) { lStr = "L:Crusader"; lCol = Color{ 255, 215, 80, 255 }; }
+
+    DrawText(hStr, (int)hudX + 154, (int)hudY + 76, 10, hCol);
+    DrawText(cStr, (int)hudX + 208, (int)hudY + 76, 10, cCol);
+    DrawText(lStr, (int)hudX + 264, (int)hudY + 76, 10, lCol);
+
+    ArmorSet activeSet = player.GetActiveArmorSet();
+    if (activeSet != ArmorSet::NONE) {
+        ArmorSetInfo setInfo = GetArmorSetInfo(activeSet);
+        std::string setBonusStr = "SET BONUS: " + setInfo.name;
+        DrawText(setBonusStr.c_str(), (int)hudX + 14, (int)hudY + 94, 9, Color{ 110, 245, 170, 240 });
+    } else {
+        DrawText("ARMOR: Modular Wardrobe", (int)hudX + 14, (int)hudY + 94, 9, Color{ 140, 165, 195, 180 });
+    }
 
     // Friendly Mini Elemental Golem Companion Status Widget
     if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM) {
@@ -420,29 +456,46 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
-    const float wBadgeW = 200.0f;
-    const float wBadgeH = 46.0f;
+    int currentTier = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), currentTier);
+    const float wBadgeW = 210.0f;
+    const float wBadgeH = 52.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
     float wBadgeY = (float)windowHeight - wBadgeH - 24.0f;
 
-    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 210 });
-    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 220 });
-    DrawText("WEAPON:", (int)wBadgeX + 12, (int)wBadgeY + 8, 10, Color{ 255, 215, 80, 255 });
-    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
+    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 220 });
+    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 230 });
+
+    std::string tierStr = (currentTier == 0) ? "+0 BASE" : ((currentTier == 1) ? "+1 FORGED" : "+2 MASTERWORK");
+    if (player.GetWeapon() == WeaponType::TRUTH_SEEKER && currentTier >= 1) tierStr = "CONSECRATED";
+    Color tierCol = (currentTier == 0) ? Color{ 175, 195, 220, 220 } : ((currentTier == 1) ? Color{ 120, 220, 255, 255 } : Color{ 110, 245, 170, 255 });
+
+    DrawText("WEAPON", (int)wBadgeX + 12, (int)wBadgeY + 6, 10, Color{ 255, 215, 80, 255 });
+    DrawText(tierStr.c_str(), (int)(wBadgeX + wBadgeW - MeasureText(tierStr.c_str(), 10) - 12), (int)wBadgeY + 6, 10, tierCol);
+    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 19, 13, Color{ 255, 255, 255, 255 });
+
+    char dmgBuf[48];
+    snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
+    DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
 
     // Top Wave Status Banner
-    const float bannerW = 280.0f;
-    const float bannerH = 40.0f;
+    bool isMilestoneWave = (currentWave % 5 == 0);
+    const float bannerW = isMilestoneWave ? 380.0f : 300.0f;
+    const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 16, 20, 28, 210 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 55, 70, 95, 230 });
+    Color bannerBg = isMilestoneWave ? Color{ 36, 18, 24, 235 } : Color{ 16, 20, 28, 210 };
+    Color bannerBorder = isMilestoneWave ? Color{ 255, 100, 80, 255 } : Color{ 55, 70, 95, 230 };
 
-    std::string waveStr = "COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves);
-    int waveW = MeasureText(waveStr.c_str(), 14);
-    DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBg);
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBorder);
+
+    std::string waveStr = isMilestoneWave ?
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves) + " [BOSS MILESTONE]") :
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves));
+    int waveW = FontManager::MeasureGameText(waveStr, 13, GameFont::BODY);
+    FontManager::DrawGameTextShadow(waveStr, (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 12), 13, isMilestoneWave ? Color{ 255, 215, 80, 255 } : Color{ 255, 220, 100, 255 });
 
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
@@ -512,16 +565,27 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     DrawActionBar(windowWidth, windowHeight, player);
 
     // Active Weapon Badge (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
-    const float wBadgeW = 200.0f;
-    const float wBadgeH = 46.0f;
+    int currentTier = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
+    WeaponStats stats = GetWeaponStats(player.GetWeapon(), currentTier);
+    const float wBadgeW = 210.0f;
+    const float wBadgeH = 52.0f;
     float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
     float wBadgeY = (float)windowHeight - wBadgeH - 24.0f;
 
-    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 210 });
-    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 220 });
-    DrawText("WEAPON:", (int)wBadgeX + 12, (int)wBadgeY + 8, 10, Color{ 255, 215, 80, 255 });
-    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
+    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 220 });
+    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 230 });
+
+    std::string tierStr = (currentTier == 0) ? "+0 BASE" : ((currentTier == 1) ? "+1 FORGED" : "+2 MASTERWORK");
+    if (player.GetWeapon() == WeaponType::TRUTH_SEEKER && currentTier >= 1) tierStr = "CONSECRATED";
+    Color tierCol = (currentTier == 0) ? Color{ 175, 195, 220, 220 } : ((currentTier == 1) ? Color{ 120, 220, 255, 255 } : Color{ 110, 245, 170, 255 });
+
+    DrawText("WEAPON", (int)wBadgeX + 12, (int)wBadgeY + 6, 10, Color{ 255, 215, 80, 255 });
+    DrawText(tierStr.c_str(), (int)(wBadgeX + wBadgeW - MeasureText(tierStr.c_str(), 10) - 12), (int)wBadgeY + 6, 10, tierCol);
+    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 19, 13, Color{ 255, 255, 255, 255 });
+
+    char dmgBuf[48];
+    snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
+    DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
 
     // Top Location Header Banner (NO wave counter in campaign!)
     DrawLocationHeader(windowWidth, locationName);
@@ -699,17 +763,23 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, float hp, float maxHp, f
     DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
 
     // Top Wave Status Banner
-    const float bannerW = 280.0f;
-    const float bannerH = 40.0f;
+    bool isMilestoneWave = (currentWave % 5 == 0);
+    const float bannerW = isMilestoneWave ? 380.0f : 300.0f;
+    const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 16, 20, 28, 210 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 55, 70, 95, 230 });
+    Color bannerBg = isMilestoneWave ? Color{ 36, 18, 24, 235 } : Color{ 16, 20, 28, 210 };
+    Color bannerBorder = isMilestoneWave ? Color{ 255, 100, 80, 255 } : Color{ 55, 70, 95, 230 };
 
-    std::string waveStr = "COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves);
-    int waveW = MeasureText(waveStr.c_str(), 14);
-    DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBg);
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBorder);
+
+    std::string waveStr = isMilestoneWave ?
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves) + " [BOSS MILESTONE]") :
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves));
+    int waveW = FontManager::MeasureGameText(waveStr, 13, GameFont::BODY);
+    FontManager::DrawGameTextShadow(waveStr, (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 12), 13, isMilestoneWave ? Color{ 255, 215, 80, 255 } : Color{ 255, 220, 100, 255 });
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -999,7 +1069,8 @@ void HUD::DrawGameOver(int windowWidth, int windowHeight) {
 }
 
 void HUD::DrawVictory(int windowWidth, int windowHeight) {
-    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 210 });
-    FontManager::DrawTextTitleCentered("ARENA CLEARED", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 225, 80, 255 });
-    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 210, 240, 225, 230 });
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 220 });
+    FontManager::DrawTextTitleCentered("ROYAL ARENA CONQUERED", windowWidth / 2, windowHeight / 2 - 50, 42, Color{ 255, 225, 80, 255 });
+    FontManager::DrawTextCentered("Grand Champion Spoils & Victor's Crest Awarded!", windowWidth / 2, windowHeight / 2 + 6, 16, Color{ 140, 240, 200, 255 });
+    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Realm Lobby", windowWidth / 2, windowHeight / 2 + 36, 14, Color{ 210, 240, 225, 220 });
 }

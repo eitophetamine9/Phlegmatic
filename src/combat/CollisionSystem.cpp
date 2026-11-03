@@ -44,7 +44,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
         for (auto& proj : projectiles) {
             if (proj.IsActive() && !proj.IsFromPlayer()) {
-                if (CheckCollisionCircles(proj.GetPosition(), proj.GetRadius(), pillar.position, pillar.radius)) {
+                if (proj.CheckCollisionWithCircle(pillar.position, pillar.radius)) {
                     proj.Destroy();
                     particles.SpawnSparks(proj.GetPosition(), Color{ 160, 150, 140, 255 }, 10, 100.0f);
                 }
@@ -302,7 +302,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 continue;
             }
 
-            if (dist <= playerRadius + proj.GetRadius()) {
+            if (proj.CheckCollisionWithCircle(playerPos, playerRadius)) {
                 if (player.IsDashing() || player.IsDaggerLunging() || player.HasInvulnerability()) {
                     // Dash / Dagger Lunge invulnerability frames: Evaded!
                     player.ModifyComposure(15.0f); // Evasive Dash through projectile hitbox
@@ -346,7 +346,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 float dy = enemy.GetPosition().y - proj.GetPosition().y;
                 float dist = sqrtf(dx * dx + dy * dy);
 
-                if (dist <= enemy.GetRadius() + proj.GetRadius()) {
+                if (proj.CheckCollisionWithCircle(enemy.GetPosition(), enemy.GetRadius())) {
                     if (!proj.HasHitEnemy((int)eIdx)) {
                         proj.RecordHitEnemy((int)eIdx);
                         Vector2 knockDir = Vector2Normalize(proj.GetVelocity());

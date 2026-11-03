@@ -2,8 +2,8 @@
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
 Generated: October 28, 2026
-Branch: ver.0.0.1e
-Release Version: 0.0.1e
+Branch: ver.0.0.1f
+Release Version: 0.0.1f
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -492,6 +492,15 @@ Phase 12: Version 0.0.1e Modular Armor Pieces, Full Set Skills, Companion Minion
 12. Project Architecture Restructuring & Dedicated UI Module (`src/ui/`):
    - Decluttered `src/states/` by extracting all UI components (`HUD`, `ModalUI`, `TitleUI`, `UI`) into a clean, dedicated `src/ui/` subsystem.
    - Updated `build.bat` and `CMakeLists.txt` with `-Isrc/ui` and source mappings.
+
+13. Version 0.0.1f Incremental Systems & Combat Polish:
+   - Royal Combat Arena Wave Milestones & Rewards: Added resource chests on Waves 5, 10, and 15 awarding tiered Ore Scraps, Silver Shingles, Mist Essence, and Shadow Essence. Wave 20 Grand Victory unlocks the 'item_arena_victor_crest' (Victor's Crest) quest item and crowns the player Champion of Tydeshire.
+   - Environmental Audio Immersion & Dynamic Boss Ducking: Added procedural acoustic sound generators in SoundFX for blacksmith anvil strikes, tavern hearth fire crackles, and forest wind gusts. Implemented dynamic ambient volume ducking to 38% during intense boss battles.
+   - HUD Equipment & Weapon Tier Markers: Added mini modular armor loadout badges ([H] [C] [L]) with set-themed color coding and active set bonus status on the player HUD card. Weapon slots now display live tier upgrade markers (+0 BASE, +1 FORGED, +2 MASTERWORK, CONSECRATED) and light/heavy attack damage stats.
+   - Heavy Weapon Hyper-Armor & Poise Tuning: Heavy attacks on colossal armaments (Sun Claymore, War Mace, Royal Halberd, Storm Glaive, and Vanguard Bastion armor) grant hyper-armor during startup (stagger interrupt immunity, 30% damage reduction, golden deflection sparks, and audio cues).
+   - Basalt Golem Poise Impact: Equipping the full Basalt Golem armor set grants 70% knockback resistance against hostile attacks, triggers grounded screen shake, and releases dense stone dust impact particles.
+   - Projectile Collision Standardization: Implemented Projectile::CheckCollisionWithCircle with directional segment testing for high-velocity directional projectiles (BOLT, BEAM_SHARD, HOLY_BEAM, GALE_ARROW), eliminating tunneling and ghost misses.
+   - Restless Mist Forest & Blacksmith Varek UI Polish: Fixed spawner initialization ensuring consistent forest enemy population; rescaled Blacksmith Varek's Forge modal typography, layout, and button alignments; enabled dialogue access to the 20-wave Royal Combat Arena from Knight Lenon.
 
 ================================================================================
 8. IMPORTANT CONVENTIONS & GOTCHAS FOR FUTURE MAINTAINERS

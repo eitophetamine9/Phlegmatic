@@ -234,9 +234,9 @@ void ZyphdenNPC::Draw(float time, Vector2 playerPos) const {
 
 
 
-        // Eldon and Varek have dedicated contextual action prompts rendered by caller
+        // Eldon, Varek, and Lenon have dedicated contextual action prompts rendered by caller
 
-        if (id != "eldon" && id != "varek") {
+        if (id != "eldon" && id != "varek" && id != "lenon") {
 
             std::string prompt = "[E] " + name;
 
@@ -502,6 +502,8 @@ void ZyphdenHandler::Reset() {
     currentDialoguePage = 0;
     isForgeOpen = false;
     isProvisionsOpen = false;
+    weaponForgePage = 0;
+    armorForgePage = 0;
 }
 
 void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, Camera2D& camera) {
@@ -706,6 +708,14 @@ void ZyphdenHandler::Update(
 
     if (isDialogueOpen) {
 
+        if (currentDialogueNPCId == "lenon_arena_prompt" && IsKeyPressed(KEY_R)) {
+            CloseDialogue();
+            if (onEnterArenaCallback) {
+                onEnterArenaCallback();
+                return;
+            }
+        }
+
         if (IsKeyPressed(KEY_ESCAPE)) {
 
             CloseDialogue();
@@ -840,7 +850,32 @@ void ZyphdenHandler::Update(
 
     }
 
+    // Environmental Ambience Audio Logic
+    SoundFX::SetBossCombatMode(sparActive);
 
+    if (inForge || (!inTavern && !inRoyalKeep && Vector2Distance(player.GetPosition(), { 430.0f, 656.0f }) <= 320.0f)) {
+        forgeAnvilTimer += dt;
+        if (forgeAnvilTimer >= 4.2f) {
+            forgeAnvilTimer = 0.0f;
+            float distFactor = inForge ? 1.0f : (1.0f - Vector2Distance(player.GetPosition(), { 430.0f, 656.0f }) / 320.0f);
+            SoundFX::PlayAnvilStrike(0.55f * distFactor);
+            if (inForge) {
+                particles.SpawnSparks({ 750.0f, 530.0f }, Color{ 255, 215, 80, 255 }, 6, 45.0f);
+            }
+        }
+    } else {
+        forgeAnvilTimer = 0.0f;
+    }
+
+    if (inTavern) {
+        tavernHearthTimer += dt;
+        if (tavernHearthTimer >= 3.6f) {
+            tavernHearthTimer = 0.0f;
+            SoundFX::PlayHearthCrackle(0.42f);
+        }
+    } else {
+        tavernHearthTimer = 0.0f;
+    }
 
     if (!isDialogueOpen) {
 
@@ -1735,6 +1770,17 @@ void ZyphdenHandler::Update(
 
 
 
+            bool isNearLenon = (lenonSpawned && !sparActive && !lenonInTavern && knightLenonNPC.CheckInteraction(playerPos));
+            bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
+
+            if (isNearLenon && isLenonBeaten && IsKeyPressed(KEY_R)) {
+                SoundFX::PlayParrySuccess();
+                if (onEnterArenaCallback) {
+                    onEnterArenaCallback();
+                    return;
+                }
+            }
+
             if (interactKey) {
 
                 // 2. Scholar Cedric (Zyphden Lore)
@@ -1875,12 +1921,12 @@ void ZyphdenHandler::Update(
 
                         OpenDialogue("lenon_spar_start", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
 
-                    } else if (questPhase == ZyphdenQuestPhase::VICTORIOUS || questPhase == ZyphdenQuestPhase::EXPLORE_REALM) {
+                    } else if (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS) {
 
                         std::vector<std::string> pages = {
                             "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead.",
                             "If you seek to test your mettle to its absolute limits, our Royal Combat Arena stands ready. 20 waves of increasingly vicious adversaries and realm bosses await.",
-                            "Step forward through the gates into the 20-wave trial whenever you are prepared!"
+                            "Press [R] or click below to enter the 20-wave trial whenever you are prepared!"
                         };
 
                         OpenDialogue("lenon_arena_prompt", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
@@ -2072,6 +2118,17 @@ void ZyphdenHandler::Render(
         if (lenonSpawned && !sparActive && !lenonInTavern) {
 
             knightLenonNPC.Draw(time, player.GetPosition());
+
+            if (knightLenonNPC.CheckInteraction(player.GetPosition())) {
+                bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
+                std::string prompt = isLenonBeaten ? "[E] Talk | [R] ENTER ARENA (20 WAVES)" : "[E] Challenge Knight Lenon";
+                int pw = FontManager::MeasureGameText(prompt, 13, GameFont::BODY);
+                int px = (int)knightLenonNPC.position.x - pw / 2;
+                int py = (int)knightLenonNPC.position.y - 48;
+                DrawRectangleRounded(Rectangle{ (float)px - 8.0f, (float)py - 4.0f, (float)pw + 16.0f, 22.0f }, 0.25f, 4, Color{ 12, 16, 26, 220 });
+                DrawRectangleRoundedLines(Rectangle{ (float)px - 8.0f, (float)py - 4.0f, (float)pw + 16.0f, 22.0f }, 0.25f, 4, isLenonBeaten ? Color{ 255, 215, 80, 240 } : Color{ 140, 180, 225, 200 });
+                FontManager::DrawGameTextShadow(prompt, px, py, 13, isLenonBeaten ? Color{ 255, 235, 120, 255 } : Color{ 220, 235, 255, 255 });
+            }
 
         }
 
@@ -2456,6 +2513,30 @@ void ZyphdenHandler::Render(
 
         );
 
+        if (currentDialogueNPCId == "lenon_arena_prompt") {
+            const float boxW = std::min(1160.0f, (float)screenWidth - 64.0f);
+            const float boxH = std::min(252.0f, (float)screenHeight * 0.36f);
+            const float boxX = ((float)screenWidth - boxW) * 0.5f;
+            const float boxY = (float)screenHeight - boxH - 22.0f;
+            const float btnY = boxY + boxH - 44.0f;
+            const float btnH = 30.0f;
+
+            Rectangle arenaBtn = { boxX + (boxW - 350.0f) * 0.5f, btnY, 350.0f, btnH };
+            bool isArenaHov = CheckCollisionPointRec(mousePos, arenaBtn);
+            DrawRectangleRounded(arenaBtn, 0.25f, 4, isArenaHov ? Color{ 160, 40, 50, 255 } : Color{ 90, 25, 35, 240 });
+            DrawRectangleRoundedLines(arenaBtn, 0.25f, 4, isArenaHov ? Color{ 255, 230, 120, 255 } : Color{ 225, 185, 65, 220 });
+            int abw = FontManager::MeasureGameText("[R] ENTER COMBAT ARENA (20 WAVES)", 12, GameFont::BODY);
+            FontManager::DrawGameTextShadow("[R] ENTER COMBAT ARENA (20 WAVES)", (int)(arenaBtn.x + (arenaBtn.width - abw) * 0.5f), (int)arenaBtn.y + 7, 12, Color{ 255, 235, 140, 255 });
+
+            if (isArenaHov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                CloseDialogue();
+                if (onEnterArenaCallback) {
+                    onEnterArenaCallback();
+                    return;
+                }
+            }
+        }
+
         if (!stillOpen) {
 
             CloseDialogue();
@@ -2493,58 +2574,31 @@ void ZyphdenHandler::Render(
 
 
 void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed) {
-
     // Backdrop dimming
-
     DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 6, 8, 14, 215 });
 
-
-
-    const float modalW = 880.0f;
-
-    const float modalH = 615.0f;
-
+    const float modalW = 960.0f;
+    const float modalH = 640.0f;
     const float modalX = ((float)screenWidth - modalW) * 0.5f;
-
     const float modalY = ((float)screenHeight - modalH) * 0.5f;
-
-
 
     Rectangle modalRec = { modalX, modalY, modalW, modalH };
 
-
-
     // Ornate double border panel
-
-    DrawRectangleRounded(modalRec, 0.04f, 8, Color{ 15, 18, 26, 250 });
-
-    DrawRectangleRoundedLines(modalRec, 0.04f, 8, Color{ 215, 175, 65, 255 });
-
+    DrawRectangleRounded(modalRec, 0.03f, 8, Color{ 15, 18, 26, 250 });
+    DrawRectangleRoundedLines(modalRec, 0.03f, 8, Color{ 215, 175, 65, 255 });
     DrawRectangleLinesEx(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 1.5f, Color{ 65, 85, 120, 180 });
 
-
-
     // Corner Filigree Accents
-
     float cfSize = 14.0f;
-
     DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
-
     DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + cfSize + 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
-
     DrawPolyLines(Vector2{ modalX + cfSize + 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
-
     DrawPolyLines(Vector2{ modalX + modalW - cfSize - 2, modalY + modalH - cfSize - 2 }, 4, cfSize, 45.0f, Color{ 255, 215, 80, 255 });
 
-
-
     // Header
-
-    FontManager::DrawText("VAREK'S MASTER FORGE", (int)modalX + 32, (int)modalY + 18, 22, Color{ 255, 225, 95, 255 }, GameFont::TITLE);
-
-    FontManager::DrawText("Craft armaments with Quarry Ore Scraps and temper steel with silver Shingles.", (int)modalX + 32, (int)modalY + 42, 12, Color{ 180, 205, 235, 210 }, GameFont::BODY);
-
-
+    FontManager::DrawGameTextShadow("VAREK'S MASTER FORGE", (int)modalX + 32, (int)modalY + 20, 24, Color{ 255, 225, 95, 255 }, Color{ 10, 12, 18, 240 }, 2, GameFont::TITLE);
+    FontManager::DrawGameTextShadow("Craft armaments with Quarry Ore Scraps and temper steel with silver Shingles.", (int)modalX + 32, (int)modalY + 49, 13, Color{ 180, 205, 235, 220 }, Color{ 10, 12, 18, 240 }, 1, GameFont::BODY);
 
     // Live Currency & Material Badges in Top-Right of Modal Header
     int playerShingles = player.GetInventory().GetShingles();
@@ -2552,55 +2606,55 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     int playerMist = player.GetInventory().GetEssenceOfMist();
     int playerShadow = player.GetInventory().GetShadowEssence();
 
-    float badgeH = 28.0f;
-    float badgeY = modalY + 20.0f;
+    float badgeH = 26.0f;
+    float badgeY = modalY + 18.0f;
 
     // 1. Shingles Badge
-    float shingleBadgeW = 125.0f;
+    float shingleBadgeW = 120.0f;
     float shingleBadgeX = modalX + modalW - shingleBadgeW - 28.0f;
     DrawRectangleRounded(Rectangle{ shingleBadgeX, badgeY, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
     DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, badgeY, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
-    DrawRectanglePro(Rectangle{ shingleBadgeX + 16.0f, badgeY + 14.0f, 9.0f, 9.0f }, Vector2{ 4.5f, 4.5f }, 45.0f, Color{ 220, 235, 255, 255 });
-    DrawPolyLines(Vector2{ shingleBadgeX + 16.0f, badgeY + 14.0f }, 4, 6.5f, 45.0f, Color{ 100, 135, 180, 255 });
+    DrawRectanglePro(Rectangle{ shingleBadgeX + 16.0f, badgeY + 13.0f, 9.0f, 9.0f }, Vector2{ 4.5f, 4.5f }, 45.0f, Color{ 220, 235, 255, 255 });
+    DrawPolyLines(Vector2{ shingleBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, Color{ 100, 135, 180, 255 });
     std::string shingleStr = std::to_string(playerShingles) + " Shingles";
-    FontManager::DrawText(shingleStr, (int)shingleBadgeX + 30, (int)badgeY + 7, 11, Color{ 230, 245, 255, 255 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow(shingleStr, (int)shingleBadgeX + 30, (int)badgeY + 6, 12, Color{ 230, 245, 255, 255 });
 
     // 2. Ore Scraps Badge
-    float scrapBadgeW = 135.0f;
+    float scrapBadgeW = 128.0f;
     float scrapBadgeX = shingleBadgeX - scrapBadgeW - 8.0f;
     DrawRectangleRounded(Rectangle{ scrapBadgeX, badgeY, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 26, 22, 16, 240 });
     DrawRectangleRoundedLines(Rectangle{ scrapBadgeX, badgeY, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 225, 175, 55, 220 });
-    DrawPoly(Vector2{ scrapBadgeX + 16.0f, badgeY + 14.0f }, 4, 6.5f, 45.0f, Color{ 255, 195, 55, 255 });
-    DrawPolyLinesEx(Vector2{ scrapBadgeX + 16.0f, badgeY + 14.0f }, 4, 6.5f, 45.0f, 1.5f, Color{ 255, 235, 140, 255 });
+    DrawPoly(Vector2{ scrapBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, Color{ 255, 195, 55, 255 });
+    DrawPolyLinesEx(Vector2{ scrapBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, 1.5f, Color{ 255, 235, 140, 255 });
     std::string scrapStr = std::to_string(playerScraps) + " Ore Scraps";
-    FontManager::DrawText(scrapStr, (int)scrapBadgeX + 30, (int)badgeY + 7, 11, Color{ 255, 225, 120, 255 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow(scrapStr, (int)scrapBadgeX + 30, (int)badgeY + 6, 12, Color{ 255, 225, 120, 255 });
 
     // 3. Shadow Essence Badge
-    float shadowBadgeW = 130.0f;
+    float shadowBadgeW = 124.0f;
     float shadowBadgeX = scrapBadgeX - shadowBadgeW - 8.0f;
     DrawRectangleRounded(Rectangle{ shadowBadgeX, badgeY, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 26, 18, 36, 240 });
     DrawRectangleRoundedLines(Rectangle{ shadowBadgeX, badgeY, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 190, 110, 255, 220 });
-    DrawPoly(Vector2{ shadowBadgeX + 16.0f, badgeY + 14.0f }, 5, 6.0f, 0.0f, Color{ 200, 120, 255, 255 });
+    DrawPoly(Vector2{ shadowBadgeX + 16.0f, badgeY + 13.0f }, 5, 6.0f, 0.0f, Color{ 200, 120, 255, 255 });
     std::string shadowStr = std::to_string(playerShadow) + " Shadow Ess";
-    FontManager::DrawText(shadowStr, (int)shadowBadgeX + 30, (int)badgeY + 7, 11, Color{ 225, 180, 255, 255 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow(shadowStr, (int)shadowBadgeX + 30, (int)badgeY + 6, 12, Color{ 225, 180, 255, 255 });
 
     // 4. Mist Essence Badge
-    float mistBadgeW = 115.0f;
+    float mistBadgeW = 114.0f;
     float mistBadgeX = shadowBadgeX - mistBadgeW - 8.0f;
     DrawRectangleRounded(Rectangle{ mistBadgeX, badgeY, mistBadgeW, badgeH }, 0.25f, 4, Color{ 16, 28, 32, 240 });
     DrawRectangleRoundedLines(Rectangle{ mistBadgeX, badgeY, mistBadgeW, badgeH }, 0.25f, 4, Color{ 100, 235, 215, 220 });
-    DrawCircle((int)(mistBadgeX + 16.0f), (int)(badgeY + 14.0f), 5.5f, Color{ 110, 245, 220, 255 });
+    DrawCircle((int)(mistBadgeX + 16.0f), (int)(badgeY + 13.0f), 5.5f, Color{ 110, 245, 220, 255 });
     std::string mistStr = std::to_string(playerMist) + " Mist Ess";
-    FontManager::DrawText(mistStr, (int)mistBadgeX + 28, (int)badgeY + 7, 11, Color{ 180, 250, 235, 255 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow(mistStr, (int)mistBadgeX + 28, (int)badgeY + 6, 12, Color{ 180, 250, 235, 255 });
 
     // Category Tabs: [1] VANGUARD WEAPONS (8) | [2] SACRED RELICS (1) | [3] ARMOR FORGE (9)
     if (IsKeyPressed(KEY_ONE)) { forgeTab = 0; weaponForgePage = 0; armorForgePage = 0; }
     if (IsKeyPressed(KEY_TWO)) { forgeTab = 1; weaponForgePage = 0; armorForgePage = 0; }
-    if (IsKeyPressed(KEY_THREE)) { forgeTab = 2; }
+    if (IsKeyPressed(KEY_THREE)) { forgeTab = 2; weaponForgePage = 0; armorForgePage = 0; }
 
-    Rectangle tab1Rec = { modalX + 32.0f, modalY + 64.0f, 210.0f, 26.0f };
-    Rectangle tab2Rec = { modalX + 250.0f, modalY + 64.0f, 185.0f, 26.0f };
-    Rectangle tab3Rec = { modalX + 443.0f, modalY + 64.0f, 195.0f, 26.0f };
+    Rectangle tab1Rec = { modalX + 32.0f, modalY + 76.0f, 220.0f, 28.0f };
+    Rectangle tab2Rec = { modalX + 260.0f, modalY + 76.0f, 190.0f, 28.0f };
+    Rectangle tab3Rec = { modalX + 458.0f, modalY + 76.0f, 200.0f, 28.0f };
 
     bool isT1Hov = CheckCollisionPointRec(mousePos, tab1Rec);
     bool isT2Hov = CheckCollisionPointRec(mousePos, tab2Rec);
@@ -2608,25 +2662,28 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     if (isT1Hov && isMousePressed) { forgeTab = 0; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
     if (isT2Hov && isMousePressed) { forgeTab = 1; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
-    if (isT3Hov && isMousePressed) { forgeTab = 2; SoundFX::PlayButtonClick(); }
+    if (isT3Hov && isMousePressed) { forgeTab = 2; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawText("[1] VANGUARD WEAPONS (8)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 7, 11, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (8)", (int)tab1Rec.x + 12, (int)tab1Rec.y + 7, 13, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawText("[2] SACRED RELICS (1)", (int)tab2Rec.x + 12, (int)tab2Rec.y + 7, 11, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow("[2] SACRED RELICS (1)", (int)tab2Rec.x + 14, (int)tab2Rec.y + 7, 13, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 40, 56, 82, 255 } : (isT3Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawText("[3] ARMOR FORGE (9)", (int)tab3Rec.x + 14, (int)tab3Rec.y + 7, 11, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 }, GameFont::BODY);
+    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (9)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     // Divider Line
-    DrawLine((int)modalX + 30, (int)modalY + 96, (int)(modalX + modalW - 30), (int)modalY + 96, Color{ 70, 95, 135, 160 });
+    DrawLine((int)modalX + 28, (int)modalY + 112, (int)(modalX + modalW - 28), (int)modalY + 112, Color{ 70, 95, 135, 160 });
+
+    int currentTabTotalPages = 1;
+    int currentTabCurrentPage = 0;
 
     if (forgeTab == 2) {
-        // TAB 3: ARMOR FORGE (PAGINATED: SCRAP, BASALT & SHADOWSTRIDER)
+        // TAB 3: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT & SHADOWSTRIDER)
         struct ArmorCraftRecipe {
             int category; // 0 = Helm, 1 = Chest, 2 = Legs
             int id;
@@ -2643,20 +2700,20 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         };
 
         ArmorCraftRecipe armorRecipes[9] = {
-            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw quarry slag.", 0, 0 },
-            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap iron breastplate. Stout physical resilience.", 0, 0 },
-            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal shin protectors granting stable footwork.", 0, 0 },
-            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic stone crest imbued with primordial earth.", 0, 0 },
-            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron bands.", 0, 0 },
-            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense volcanic stone greaves that crush gravel with each step.", 0, 0 },
-            { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Hood woven from mist essence. Sharpens wind reflexes.", 2, 1 },
-            { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence. Swift as a zephyr.", 4, 2 },
-            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Move Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings enabling silent, agile strides.", 3, 1 }
+            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw slag.", 0, 0 },
+            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap breastplate. Stout physical resilience.", 0, 0 },
+            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal greaves granting stable footwork.", 0, 0 },
+            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic crest imbued with primordial earth.", 0, 0 },
+            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron.", 0, 0 },
+            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense stone greaves that crush gravel with each step.", 0, 0 },
+            { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Mist-woven cowl that sharpens wind reflexes.", 2, 1 },
+            { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence.", 4, 2 },
+            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1 }
         };
 
         int totalRecipes = 9;
-        int itemsPerPage = 6;
-        int totalPages = 2;
+        int itemsPerPage = 4;
+        int totalPages = (totalRecipes + itemsPerPage - 1) / itemsPerPage;
         if (armorForgePage < 0) armorForgePage = 0;
         if (armorForgePage >= totalPages) armorForgePage = totalPages - 1;
 
@@ -2673,6 +2730,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             }
         }
 
+        currentTabTotalPages = totalPages;
+        currentTabCurrentPage = armorForgePage;
+
         int startIndex = armorForgePage * itemsPerPage;
         int endIndex = std::min(startIndex + itemsPerPage, totalRecipes);
 
@@ -2680,10 +2740,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             int slot = i - startIndex;
             int col = slot % 2;
             int row = slot / 2;
-            float cardX = modalX + 28.0f + (float)col * 416.0f;
-            float cardY = modalY + 104.0f + (float)row * 140.0f;
-            float cardW = 404.0f;
-            float cardH = 136.0f;
+            float cardX = modalX + 32.0f + (float)col * 456.0f;
+            float cardY = modalY + 122.0f + (float)row * 224.0f;
+            float cardW = 436.0f;
+            float cardH = 210.0f;
             Rectangle cardRec = { cardX, cardY, cardW, cardH };
             bool isHov = CheckCollisionPointRec(mousePos, cardRec);
 
@@ -2701,14 +2761,14 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             DrawRectangleRoundedLines(cardRec, 0.08f, 6, isOwned ? Color{ 60, 160, 110, 200 } : (isHov ? armorRecipes[i].accentColor : Color{ 55, 75, 105, 180 }));
 
             // Title & Slot Tag
-            DrawText(armorRecipes[i].name, (int)cardX + 14, (int)cardY + 10, 13, isOwned ? Color{ 120, 245, 180, 255 } : Color{ 255, 235, 140, 255 });
+            FontManager::DrawGameTextShadow(armorRecipes[i].name, (int)cardX + 18, (int)cardY + 14, 17, isOwned ? Color{ 120, 245, 180, 255 } : Color{ 255, 235, 140, 255 }, Color{ 10, 12, 18, 240 }, 2, GameFont::TITLE);
             std::string slotTag = "[" + std::string(armorRecipes[i].slotName) + "]";
-            DrawText(slotTag.c_str(), (int)(cardX + cardW - 100.0f), (int)cardY + 11, 10, Color{ 140, 165, 195, 220 });
+            FontManager::DrawGameTextShadow(slotTag, (int)(cardX + cardW - 120.0f), (int)cardY + 16, 13, Color{ 160, 185, 215, 220 });
 
             // Description & Stats
-            DrawText(armorRecipes[i].desc, (int)cardX + 14, (int)cardY + 28, 9, Color{ 175, 195, 220, 220 });
-            DrawText(armorRecipes[i].stats, (int)cardX + 14, (int)cardY + 45, 10, Color{ 100, 245, 180, 255 });
-            DrawText(armorRecipes[i].setStr, (int)cardX + 14, (int)cardY + 61, 9, armorRecipes[i].accentColor);
+            FontManager::DrawGameTextShadow(armorRecipes[i].desc, (int)cardX + 18, (int)cardY + 38, 13, Color{ 190, 210, 235, 230 });
+            FontManager::DrawGameTextShadow(armorRecipes[i].stats, (int)cardX + 18, (int)cardY + 62, 14, Color{ 110, 245, 190, 255 });
+            FontManager::DrawGameTextShadow(armorRecipes[i].setStr, (int)cardX + 18, (int)cardY + 84, 13, armorRecipes[i].accentColor);
 
             // Cost line
             std::string costStr;
@@ -2720,20 +2780,22 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 costStr = "Cost: " + std::to_string(armorRecipes[i].scrapCost) + " Ore Scraps  +  " +
                           std::to_string(armorRecipes[i].shingleCost) + " Shingles";
             }
-            DrawText(costStr.c_str(), (int)cardX + 14, (int)cardY + 79, 10, isOwned ? Color{ 120, 140, 160, 200 } : (canAfford ? Color{ 255, 225, 90, 255 } : Color{ 240, 95, 95, 240 }));
+            FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 18, (int)cardY + 106, 13, isOwned ? Color{ 140, 160, 180, 200 } : (canAfford ? Color{ 255, 225, 95, 255 } : Color{ 245, 110, 110, 255 }));
 
             // Bottom action button
-            Rectangle btnRec = { cardX + 14.0f, cardY + cardH - 32.0f, cardW - 28.0f, 24.0f };
+            Rectangle btnRec = { cardX + 16.0f, cardY + cardH - 38.0f, cardW - 32.0f, 30.0f };
             bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
 
             if (isOwned) {
                 DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 200 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
-                DrawText("FORGED & UNLOCKED", (int)btnRec.x + (int)(btnRec.width - MeasureText("FORGED & UNLOCKED", 11)) / 2, (int)btnRec.y + 6, 11, Color{ 110, 245, 170, 240 });
+                int bw = FontManager::MeasureGameText("FORGED & UNLOCKED", 13, GameFont::BODY);
+                FontManager::DrawGameTextShadow("FORGED & UNLOCKED", (int)btnRec.x + (int)(btnRec.width - bw) / 2, (int)btnRec.y + 7, 13, Color{ 110, 245, 170, 240 });
             } else if (canAfford) {
                 DrawRectangleRounded(btnRec, 0.2f, 4, isBtnHov ? Color{ 60, 95, 150, 255 } : Color{ 34, 52, 85, 240 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, isBtnHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 140, 220, 220 });
-                DrawText("FORGE & EQUIP PIECE", (int)btnRec.x + (int)(btnRec.width - MeasureText("FORGE & EQUIP PIECE", 11)) / 2, (int)btnRec.y + 6, 11, Color{ 255, 235, 130, 255 });
+                int bw = FontManager::MeasureGameText("FORGE & EQUIP PIECE", 13, GameFont::BODY);
+                FontManager::DrawGameTextShadow("FORGE & EQUIP PIECE", (int)btnRec.x + (int)(btnRec.width - bw) / 2, (int)btnRec.y + 7, 13, Color{ 255, 235, 130, 255 });
 
                 if (isBtnHov && isMousePressed) {
                     if (armorRecipes[i].scrapCost > 0) player.GetInventory().SpendOreScraps(armorRecipes[i].scrapCost);
@@ -2753,598 +2815,423 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
                 const char* errMsg = (armorRecipes[i].mistCost > 0 || armorRecipes[i].shadowCost > 0) ? "INSUFFICIENT ESSENCES OR SHINGLES" : "INSUFFICIENT ORE SCRAPS OR SHINGLES";
-                DrawText(errMsg, (int)btnRec.x + (int)(btnRec.width - MeasureText(errMsg, 10)) / 2, (int)btnRec.y + 6, 10, Color{ 220, 110, 110, 220 });
+                int bw = FontManager::MeasureGameText(errMsg, 12, GameFont::BODY);
+                FontManager::DrawGameTextShadow(errMsg, (int)btnRec.x + (int)(btnRec.width - bw) / 2, (int)btnRec.y + 7, 12, Color{ 220, 110, 110, 220 });
             }
         }
-
-        // Pagination Bar at Bottom-Left of Modal
-        Rectangle prevBtnRec = { modalX + 32.0f, modalY + modalH - 46.0f, 100.0f, 30.0f };
-        Rectangle nextBtnRec = { modalX + 225.0f, modalY + modalH - 46.0f, 100.0f, 30.0f };
-        bool isPrevHov = CheckCollisionPointRec(mousePos, prevBtnRec);
-        bool isNextHov = CheckCollisionPointRec(mousePos, nextBtnRec);
-
-        if (isPrevHov && isMousePressed && armorForgePage > 0) {
-            armorForgePage--;
-            SoundFX::PlayButtonClick();
-        }
-        if (isNextHov && isMousePressed && armorForgePage < totalPages - 1) {
-            armorForgePage++;
-            SoundFX::PlayButtonClick();
-        }
-
-        DrawRectangleRounded(prevBtnRec, 0.2f, 4, (armorForgePage > 0) ? (isPrevHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
-        DrawRectangleRoundedLines(prevBtnRec, 0.2f, 4, (armorForgePage > 0) ? (isPrevHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
-        DrawText("< PREV PAGE", (int)prevBtnRec.x + 12, (int)prevBtnRec.y + 8, 11, (armorForgePage > 0) ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
-
-        std::string pageStr = "PAGE " + std::to_string(armorForgePage + 1) + " / " + std::to_string(totalPages);
-        DrawText(pageStr.c_str(), (int)modalX + 144, (int)modalY + modalH - 38, 11, Color{ 255, 220, 100, 240 });
-
-        DrawRectangleRounded(nextBtnRec, 0.2f, 4, (armorForgePage < totalPages - 1) ? (isNextHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
-        DrawRectangleRoundedLines(nextBtnRec, 0.2f, 4, (armorForgePage < totalPages - 1) ? (isNextHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
-        DrawText("NEXT PAGE >", (int)nextBtnRec.x + 12, (int)nextBtnRec.y + 8, 11, (armorForgePage < totalPages - 1) ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
     } else {
         struct ForgeEntry {
-
-
-        WeaponType type;
-
-        const char* name;
-
-        const char* iconTag;
-
-        int maxTier;
-
-        int costT1;
-
-        int costT2;
-
-        const char* perkT1;
-
-        const char* perkT2;
-
-        Color accentColor;
-
-        int craftScrapCost;
-
-        int craftShingleCost;
-
-        const char* craftDesc;
-
-        int craftMistCost = 0;
-
-        int craftShadowCost = 0;
-
-    };
-
-
-
-    std::vector<ForgeEntry> entries;
-
-    if (forgeTab == 0) {
-
-        entries = {
-
-            {
-
-                WeaponType::SWORD,
-
-                "Crusader's Broadsword",
-
-                "BALANCED BLADE",
-
-                2, 50, 120,
-
-                "+4 Damage (22 Light / 80 Heavy)",
-
-                "+8 Damage (26 Light / 90 Heavy), +5% Poise Knockback",
-
-                Color{ 255, 215, 80, 255 },
-
-                0, 0,
-
-                "Tempered steel longsword of the Royal Vanguard."
-
-            },
-
-            {
-
-                WeaponType::MACE,
-
-                "War Mace",
-
-                "CRUSHING HAMMER",
-
-                2, 60, 140,
-
-                "+6 Damage (34 Light / 112 Heavy)",
-
-                "+12 Damage (40 Light / 128 Heavy), +10% Armor Pierce (30% Total)",
-
-                Color{ 255, 150, 60, 255 },
-
-                12, 40,
-
-                "Heavy iron-shod mace. Shatters brittle Melancholic defense shells."
-
-            },
-
-            {
-
-                WeaponType::DAGGERS,
-
-                "Dual Daggers",
-
-                "TWIN FLURRY",
-
-                2, 45, 110,
-
-                "+3 Damage (14 Light / 72 Heavy)",
-
-                "+6 Damage (17 Light / 84 Heavy), +10% Lunge Critical",
-
-                Color{ 80, 230, 190, 255 },
-
-                8, 30,
-
-                "Twin razor daggers. Enables lightning rapid strikes and evasive lunges."
-
-            },
-
-            {
-
-                WeaponType::HALBERD,
-
-                "Royal Halberd",
-
-                "VANGUARD POLEARM",
-
-                2, 65, 130,
-
-                "+6 Damage (30 Light / 104 Heavy)",
-
-                "+12 Damage (36 Light / 120 Heavy), +10% Armor Pierce (30% Total)",
-
-                Color{ 140, 215, 255, 255 },
-
-                10, 35,
-
-                "Long ashwood halberd. Extended linear thrusts & wide 220-degree vault cleaves."
-
-            },
-
-            {
-
-                WeaponType::ZEPHYR_DAGGERS,
-
-                "Twin Zephyr Daggers",
-
-                "MIST-FORGED BLADES",
-
-                2, 70, 140,
-
-                "+4 Damage (20 Light / 80 Heavy)",
-
-                "+9 Damage (25 Light / 95 Heavy), +25% Armor Pierce",
-
-                Color{ 110, 245, 220, 255 },
-
-                0, 60,
-
-                "Dual curved blades forged with Shadow Essence. Heavy attack shadow-steps with iframes.",
-
-                4, 3
-
-            },
-
-            {
-
-                WeaponType::WINDRUNNER_RECURVE,
-
-                "Windrunner's Recurve",
-
-                "GALE ARCHER'S BOW",
-
-                2, 80, 160,
-
-                "+5 Damage (29 Light / 98 Heavy)",
-
-                "+11 Damage (35 Light / 115 Heavy), +50% Defense Pierce",
-
-                Color{ 130, 255, 235, 255 },
-
-                0, 80,
-
-                "Acrobatic wind bow. Fires high-speed piercing gale arrows and channeled drill shots.",
-
-                6, 4
-
-            },
-
-            {
-
-                WeaponType::SUN_CLAYMORE,
-
-                "Sun-Forged Claymore",
-
-                "HEAVY GREATSWORD",
-
-                2, 75, 150,
-
-                "+6 Damage (36 Light / 124 Heavy)",
-
-                "+12 Damage (42 Light / 145 Heavy), +25% Poise / Defense Pierce",
-
-                Color{ 255, 175, 40, 255 },
-
-                16, 65,
-
-                "Colossal two-handed broadsword. Unstoppable hyper-armor cleaves shatter defenses.",
-
-                0, 0
-
-            },
-
-            {
-
-                WeaponType::STORM_GLAIVE,
-
-                "Storm Glaive",
-
-                "MIST-FORGED POLEARM",
-
-                2, 70, 140,
-
-                "+5 Damage (25 Light / 86 Heavy)",
-
-                "+11 Damage (31 Light / 102 Heavy), +35% Defense Pierce, +25% Crit",
-
-                Color{ 100, 245, 230, 255 },
-
-                10, 50,
-
-                "Aerodynamic wind polearm. Piercing line thrusts and sweeping 240-deg tempest vortex.",
-
-                3, 1
-
-            }
-
+            WeaponType type;
+            const char* name;
+            const char* iconTag;
+            int maxTier;
+            int costT1;
+            int costT2;
+            const char* perkT1;
+            const char* perkT2;
+            Color accentColor;
+            int craftScrapCost;
+            int craftShingleCost;
+            const char* craftDesc;
+            int craftMistCost = 0;
+            int craftShadowCost = 0;
         };
 
-    } else {
+        std::vector<ForgeEntry> entries;
 
-        entries = {
-
-            {
-
-                WeaponType::TRUTH_SEEKER,
-
-                "Truth Seeker",
-
-                "HOLY SUNBLADE",
-
-                1, 180, 0,
-
-                "Consecration I (+6 Holy Beam Dmg -> 28, 32 Light / 96 Heavy)",
-
-                "",
-
-                Color{ 140, 220, 255, 255 },
-
-                0, 0,
-
-                "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
-
-            }
-
-        };
-
-    }
-
-
-
-    int totalWeapons = (int)entries.size();
-    int wepPerPage = 4;
-    int totalWepPages = (totalWeapons + wepPerPage - 1) / wepPerPage;
-    if (totalWepPages < 1) totalWepPages = 1;
-    if (weaponForgePage < 0) weaponForgePage = 0;
-    if (weaponForgePage >= totalWepPages) weaponForgePage = totalWepPages - 1;
-
-    if (forgeTab == 0) {
-        if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) {
-            if (weaponForgePage > 0) {
-                weaponForgePage--;
-                SoundFX::PlayButtonClick();
-            }
-        }
-        if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) {
-            if (weaponForgePage < totalWepPages - 1) {
-                weaponForgePage++;
-                SoundFX::PlayButtonClick();
-            }
-        }
-    }
-
-    int startIndex = (forgeTab == 0) ? (weaponForgePage * wepPerPage) : 0;
-    int endIndex = (forgeTab == 0) ? std::min(startIndex + wepPerPage, totalWeapons) : totalWeapons;
-
-    for (int i = startIndex; i < endIndex; ++i) {
-        int slot = i - startIndex;
-        int col = slot % 2;
-        int row = slot / 2;
-        float cardX = modalX + 28.0f + (float)col * 416.0f;
-        float cardY = modalY + 104.0f + (float)row * 210.0f;
-        float cardW = 404.0f;
-        float cardH = 200.0f;
-
-        Rectangle cardRec = { cardX, cardY, cardW, cardH };
-        bool isHov = CheckCollisionPointRec(mousePos, cardRec);
-
-        bool isOwned = player.GetInventory().HasWeapon(entries[i].type);
-        int currentTier = player.GetInventory().GetWeaponUpgrade(entries[i].type);
-        bool isMax = isOwned && (currentTier >= entries[i].maxTier);
-        int upgradeCost = (currentTier == 0) ? entries[i].costT1 : entries[i].costT2;
-        bool canAffordUpgrade = isOwned && (playerShingles >= upgradeCost);
-
-        bool canCraft = (!isOwned && (entries[i].craftScrapCost > 0 || entries[i].craftMistCost > 0));
-        bool canAffordCraft = canCraft &&
-                              (playerScraps >= entries[i].craftScrapCost) &&
-                              (playerShingles >= entries[i].craftShingleCost) &&
-                              (playerMist >= entries[i].craftMistCost) &&
-                              (playerShadow >= entries[i].craftShadowCost);
-
-        // Card Background
-        DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
-        DrawRectangleRoundedLines(cardRec, 0.08f, 6, isMax ? Color{ 100, 225, 160, 220 } : (isHov ? entries[i].accentColor : Color{ 55, 75, 105, 180 }));
-
-        // Category Tag
-        FontManager::DrawGameTextShadow(entries[i].iconTag, (int)cardX + 16, (int)cardY + 12, 11, Color{ 160, 195, 235, 220 });
-
-        // Weapon Title
-        FontManager::DrawText(entries[i].name, (int)cardX + 16, (int)cardY + 28, 16, Color{ 255, 255, 255, 255 }, GameFont::TITLE);
-
-        // Action Button coordinates
-        float btnW = cardW - 32.0f;
-        float btnH = 32.0f;
-        float btnX = cardX + 16.0f;
-        float btnY = cardY + cardH - btnH - 12.0f;
-        Rectangle btnRec = { btnX, btnY, btnW, btnH };
-        bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
-
-        if (!isOwned) {
-            if (canCraft) {
-                // Status Badge: CRAFTABLE
-                std::string badge = "[CRAFTABLE]";
-                int tbw = FontManager::MeasureText(badge, 12);
-                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 45, 30, 16, 230 });
-                FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 12, Color{ 255, 185, 60, 255 });
-
-                // Weapon description
-                FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 54, 11, Color{ 200, 215, 235, 220 });
-
-                // Crafting Cost Line
-                FontManager::DrawGameTextShadow("FORGE CRAFTING COST:", (int)cardX + 16, (int)cardY + 78, 11, Color{ 255, 215, 80, 240 });
-
-                std::string costText = "";
-                if (entries[i].craftMistCost > 0 || entries[i].craftShadowCost > 0) {
-                    costText = std::to_string(entries[i].craftMistCost) + " Mist Ess  +  " + std::to_string(entries[i].craftShadowCost) + " Shadow Ess  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
-                } else {
-                    costText = std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
+        if (forgeTab == 0) {
+            entries = {
+                {
+                    WeaponType::SWORD,
+                    "Crusader's Broadsword",
+                    "BALANCED BLADE",
+                    2, 50, 120,
+                    "+4 Damage (22 Light / 80 Heavy)",
+                    "+8 Damage (26 Light / 90 Heavy), +5% Poise Knockback",
+                    Color{ 255, 215, 80, 255 },
+                    0, 0,
+                    "Tempered steel longsword of the Royal Vanguard."
+                },
+                {
+                    WeaponType::MACE,
+                    "War Mace",
+                    "CRUSHING HAMMER",
+                    2, 60, 140,
+                    "+6 Damage (34 Light / 112 Heavy)",
+                    "+12 Damage (40 Light / 128 Heavy), +10% Armor Pierce (30% Total)",
+                    Color{ 255, 150, 60, 255 },
+                    12, 40,
+                    "Heavy iron-shod mace. Shatters brittle Melancholic defense shells."
+                },
+                {
+                    WeaponType::DAGGERS,
+                    "Dual Daggers",
+                    "TWIN FLURRY",
+                    2, 45, 110,
+                    "+3 Damage (14 Light / 72 Heavy)",
+                    "+6 Damage (17 Light / 84 Heavy), +10% Lunge Critical",
+                    Color{ 80, 230, 190, 255 },
+                    8, 30,
+                    "Twin razor daggers. Enables lightning rapid strikes and evasive lunges."
+                },
+                {
+                    WeaponType::HALBERD,
+                    "Royal Halberd",
+                    "VANGUARD POLEARM",
+                    2, 65, 130,
+                    "+6 Damage (30 Light / 104 Heavy)",
+                    "+12 Damage (36 Light / 120 Heavy), +10% Armor Pierce (30% Total)",
+                    Color{ 140, 215, 255, 255 },
+                    10, 35,
+                    "Long ashwood halberd. Extended linear thrusts & wide 220-degree vault cleaves."
+                },
+                {
+                    WeaponType::ZEPHYR_DAGGERS,
+                    "Twin Zephyr Daggers",
+                    "MIST-FORGED BLADES",
+                    2, 70, 140,
+                    "+4 Damage (20 Light / 80 Heavy)",
+                    "+9 Damage (25 Light / 95 Heavy), +25% Armor Pierce",
+                    Color{ 110, 245, 220, 255 },
+                    0, 60,
+                    "Dual curved blades forged with Shadow Essence. Heavy attack shadow-steps.",
+                    4, 3
+                },
+                {
+                    WeaponType::WINDRUNNER_RECURVE,
+                    "Windrunner's Recurve",
+                    "GALE ARCHER'S BOW",
+                    2, 80, 160,
+                    "+5 Damage (29 Light / 98 Heavy)",
+                    "+11 Damage (35 Light / 115 Heavy), +50% Defense Pierce",
+                    Color{ 130, 255, 235, 255 },
+                    0, 80,
+                    "Acrobatic wind bow. Fires piercing gale arrows and channeled drill shots.",
+                    6, 4
+                },
+                {
+                    WeaponType::SUN_CLAYMORE,
+                    "Sun-Forged Claymore",
+                    "HEAVY GREATSWORD",
+                    2, 75, 150,
+                    "+6 Damage (36 Light / 124 Heavy)",
+                    "+12 Damage (42 Light / 145 Heavy), +25% Poise / Defense Pierce",
+                    Color{ 255, 175, 40, 255 },
+                    16, 65,
+                    "Colossal two-handed broadsword. Hyper-armor cleaves shatter defenses.",
+                    0, 0
+                },
+                {
+                    WeaponType::STORM_GLAIVE,
+                    "Storm Glaive",
+                    "MIST-FORGED POLEARM",
+                    2, 70, 140,
+                    "+5 Damage (25 Light / 86 Heavy)",
+                    "+11 Damage (31 Light / 102 Heavy), +35% Defense Pierce, +25% Crit",
+                    Color{ 100, 245, 230, 255 },
+                    10, 50,
+                    "Aerodynamic wind polearm. Piercing line thrusts and tempest vortex.",
+                    3, 1
                 }
-                Color costCol = canAffordCraft ? Color{ 120, 255, 170, 255 } : Color{ 245, 110, 110, 255 };
-                FontManager::DrawGameTextShadow(costText.c_str(), (int)cardX + 16, (int)cardY + 98, 12, costCol);
-
-                if (canAffordCraft) {
-                    Color btnBg = isBtnHov ? Color{ 75, 55, 20, 255 } : Color{ 50, 36, 15, 240 };
-                    Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 225, 175, 55, 220 };
-                    DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
-                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
-
-                    std::string btnStr = "CRAFT " + std::string(entries[i].name);
-                    int bw = FontManager::MeasureText(btnStr, 12);
-                    FontManager::DrawGameTextShadow(btnStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 8, 12, Color{ 255, 235, 140, 255 });
-
-                    if (isBtnHov && isMousePressed) {
-                        if (entries[i].craftScrapCost > 0) player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
-                        if (entries[i].craftMistCost > 0) player.GetInventory().SpendEssenceOfMist(entries[i].craftMistCost);
-                        if (entries[i].craftShadowCost > 0) player.GetInventory().SpendShadowEssence(entries[i].craftShadowCost);
-                        if (entries[i].craftShingleCost > 0) player.GetInventory().SpendShingles(entries[i].craftShingleCost);
-                        player.GetInventory().UnlockWeapon(entries[i].type);
-                        player.SetWeapon(entries[i].type);
-
-                        SoundFX::PlayCrusaderClash();
-                        SoundFX::PlayCoinPickup();
-                        particles.SpawnSparks(player.GetPosition(), entries[i].accentColor, 35, 220.0f);
-                        particles.AddScreenShake(4.5f, 0.18f);
-
-                        std::string feedback = std::string(entries[i].name) + " Crafted & Equipped!";
-                        particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 24.0f);
-                    }
-                } else {
-                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 20, 200 });
-                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
-                    std::string needStr = "INSUFFICIENT MATERIALS";
-                    int bw = FontManager::MeasureText(needStr, 12);
-                    FontManager::DrawGameTextShadow(needStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 8, 12, Color{ 220, 110, 110, 220 });
-                }
-            } else {
-                std::string badge = "[NOT ACQUIRED]";
-                int tbw = FontManager::MeasureText(badge, 12);
-                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
-                FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 12, Color{ 140, 155, 180, 200 });
-
-                FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 16, (int)cardY + 54, 11, Color{ 160, 175, 195, 200 });
-                FontManager::DrawGameTextShadow("REQUIRES: Defeat Corrupted Zil in Castle Ruins", (int)cardX + 16, (int)cardY + 84, 11, Color{ 230, 150, 70, 220 });
-
-                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 20, 22, 28, 180 });
-                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 48, 54, 68, 180 });
-
-                const char* lockLabel = "LOCKED (SEEK ZIL IN RUINS)";
-                int bw = FontManager::MeasureText(lockLabel, 12);
-                FontManager::DrawGameTextShadow(lockLabel, (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 8, 12, Color{ 130, 140, 155, 190 });
-            }
+            };
         } else {
-            // Weapon is OWNED
-            std::string tierBadge;
-            Color tierCol;
-            if (currentTier == 0) {
-                tierBadge = "[TIER: BASE]";
-                tierCol = Color{ 160, 180, 205, 220 };
-            } else if (currentTier == 1) {
-                tierBadge = (entries[i].type == WeaponType::TRUTH_SEEKER) ? "[CONSECRATED I]" : "[TIER +1]";
-                tierCol = Color{ 120, 215, 255, 255 };
-            } else {
-                tierBadge = "[MASTERWORK +2]";
-                tierCol = Color{ 110, 245, 170, 255 };
-            }
-
-            int tbw = FontManager::MeasureText(tierBadge, 12);
-            DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 20.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
-            FontManager::DrawGameTextShadow(tierBadge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 12, tierCol);
-
-            WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
-            std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
-            FontManager::DrawGameTextShadow(curDmgStr.c_str(), (int)cardX + 16, (int)cardY + 54, 12, Color{ 200, 220, 245, 240 });
-
-            FontManager::DrawGameTextShadow("NEXT FORGE UPGRADE:", (int)cardX + 16, (int)cardY + 76, 11, Color{ 255, 215, 80, 240 });
-
-            if (isMax) {
-                FontManager::DrawGameTextShadow("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 16, (int)cardY + 94, 11, Color{ 110, 245, 170, 240 });
-            } else if (currentTier == 0) {
-                FontManager::DrawGameTextShadow(entries[i].perkT1, (int)cardX + 16, (int)cardY + 94, 11, Color{ 160, 235, 255, 240 });
-                std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
-                FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 16, (int)cardY + 114, 12, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
-            } else if (currentTier == 1) {
-                FontManager::DrawGameTextShadow(entries[i].perkT2, (int)cardX + 16, (int)cardY + 94, 11, Color{ 160, 235, 255, 240 });
-                std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
-                FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 16, (int)cardY + 114, 12, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
-            }
-
-            if (isMax) {
-                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
-                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
-                int bw = FontManager::MeasureText("MAX TIER TEMPERED", 12);
-                FontManager::DrawGameTextShadow("MAX TIER TEMPERED", (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 8, 12, Color{ 110, 245, 170, 220 });
-            } else {
-                std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
-                if (entries[i].type == WeaponType::TRUTH_SEEKER) {
-                    btnLabel = "CONSECRATE BLADE (" + std::to_string(upgradeCost) + " SHINGLES)";
+            entries = {
+                {
+                    WeaponType::TRUTH_SEEKER,
+                    "Truth Seeker",
+                    "HOLY SUNBLADE",
+                    1, 180, 0,
+                    "Consecration I (+6 Holy Beam Dmg -> 28, 32 Light / 96 Heavy)",
+                    "",
+                    Color{ 140, 220, 255, 255 },
+                    0, 0,
+                    "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
                 }
+            };
+        }
 
-                if (canAffordUpgrade) {
-                    Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
-                    Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
-                    DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
-                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
-                    int bw = FontManager::MeasureText(btnLabel, 12);
-                    FontManager::DrawGameTextShadow(btnLabel.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 8, 12, Color{ 255, 255, 255, 255 });
+        int totalWeapons = (int)entries.size();
+        int wepPerPage = 4;
+        int totalWepPages = (totalWeapons + wepPerPage - 1) / wepPerPage;
+        if (totalWepPages < 1) totalWepPages = 1;
+        if (weaponForgePage < 0) weaponForgePage = 0;
+        if (weaponForgePage >= totalWepPages) weaponForgePage = totalWepPages - 1;
 
-                    if (isBtnHov && isMousePressed) {
-                        player.GetInventory().SpendShingles(upgradeCost);
-                        player.GetInventory().UpgradeWeapon(entries[i].type);
-                        SoundFX::PlayCrusaderClash();
-                        SoundFX::PlayCoinPickup();
-                        particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 24, 180.0f);
-                        std::string feedback = std::string(entries[i].name) + " Upgraded!";
-                        particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+        if (forgeTab == 0) {
+            if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) {
+                if (weaponForgePage > 0) {
+                    weaponForgePage--;
+                    SoundFX::PlayButtonClick();
+                }
+            }
+            if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) {
+                if (weaponForgePage < totalWepPages - 1) {
+                    weaponForgePage++;
+                    SoundFX::PlayButtonClick();
+                }
+            }
+        }
+
+        currentTabTotalPages = totalWepPages;
+        currentTabCurrentPage = weaponForgePage;
+
+        int startIndex = (forgeTab == 0) ? (weaponForgePage * wepPerPage) : 0;
+        int endIndex = (forgeTab == 0) ? std::min(startIndex + wepPerPage, totalWeapons) : totalWeapons;
+
+        for (int i = startIndex; i < endIndex; ++i) {
+            int slot = i - startIndex;
+            int col = slot % 2;
+            int row = slot / 2;
+            float cardX = modalX + 32.0f + (float)col * 456.0f;
+            float cardY = modalY + 122.0f + (float)row * 224.0f;
+            float cardW = 436.0f;
+            float cardH = 210.0f;
+
+            Rectangle cardRec = { cardX, cardY, cardW, cardH };
+            bool isHov = CheckCollisionPointRec(mousePos, cardRec);
+
+            bool isOwned = player.GetInventory().HasWeapon(entries[i].type);
+            int currentTier = player.GetInventory().GetWeaponUpgrade(entries[i].type);
+            bool isMax = isOwned && (currentTier >= entries[i].maxTier);
+            int upgradeCost = (currentTier == 0) ? entries[i].costT1 : entries[i].costT2;
+            bool canAffordUpgrade = isOwned && (playerShingles >= upgradeCost);
+
+            bool canCraft = (!isOwned && (entries[i].craftScrapCost > 0 || entries[i].craftMistCost > 0));
+            bool canAffordCraft = canCraft &&
+                                  (playerScraps >= entries[i].craftScrapCost) &&
+                                  (playerShingles >= entries[i].craftShingleCost) &&
+                                  (playerMist >= entries[i].craftMistCost) &&
+                                  (playerShadow >= entries[i].craftShadowCost);
+
+            // Card Background
+            DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
+            DrawRectangleRoundedLines(cardRec, 0.08f, 6, isMax ? Color{ 100, 225, 160, 220 } : (isHov ? entries[i].accentColor : Color{ 55, 75, 105, 180 }));
+
+            // Category Tag
+            FontManager::DrawGameTextShadow(entries[i].iconTag, (int)cardX + 18, (int)cardY + 14, 13, Color{ 160, 195, 235, 220 });
+
+            // Weapon Title
+            FontManager::DrawGameTextShadow(entries[i].name, (int)cardX + 18, (int)cardY + 32, 17, Color{ 255, 255, 255, 255 }, Color{ 10, 12, 18, 240 }, 2, GameFont::TITLE);
+
+            // Action Button coordinates
+            float btnW = cardW - 32.0f;
+            float btnH = 30.0f;
+            float btnX = cardX + 16.0f;
+            float btnY = cardY + cardH - btnH - 8.0f;
+            Rectangle btnRec = { btnX, btnY, btnW, btnH };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+
+            if (!isOwned) {
+                if (canCraft) {
+                    // Status Badge: CRAFTABLE
+                    std::string badge = "[CRAFTABLE]";
+                    int tbw = FontManager::MeasureGameText(badge, 13, GameFont::BODY);
+                    DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 22.0f }, 0.25f, 4, Color{ 45, 30, 16, 230 });
+                    FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 13, Color{ 255, 185, 60, 255 });
+
+                    // Weapon description
+                    FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 18, (int)cardY + 54, 13, Color{ 200, 215, 235, 220 });
+
+                    // Crafting Cost Line
+                    FontManager::DrawGameTextShadow("FORGE CRAFTING COST:", (int)cardX + 18, (int)cardY + 80, 13, Color{ 255, 215, 80, 240 });
+
+                    std::string costText = "";
+                    if (entries[i].craftMistCost > 0 || entries[i].craftShadowCost > 0) {
+                        costText = std::to_string(entries[i].craftMistCost) + " Mist Ess  +  " + std::to_string(entries[i].craftShadowCost) + " Shadow Ess  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
+                    } else {
+                        costText = std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
+                    }
+                    Color costCol = canAffordCraft ? Color{ 120, 255, 170, 255 } : Color{ 245, 110, 110, 255 };
+                    FontManager::DrawGameTextShadow(costText.c_str(), (int)cardX + 18, (int)cardY + 102, 13, costCol);
+
+                    if (canAffordCraft) {
+                        Color btnBg = isBtnHov ? Color{ 75, 55, 20, 255 } : Color{ 50, 36, 15, 240 };
+                        Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 225, 175, 55, 220 };
+                        DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+
+                        std::string btnStr = "CRAFT " + std::string(entries[i].name);
+                        int bw = FontManager::MeasureGameText(btnStr, 13, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(btnStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 255, 235, 140, 255 });
+
+                        if (isBtnHov && isMousePressed) {
+                            if (entries[i].craftScrapCost > 0) player.GetInventory().SpendOreScraps(entries[i].craftScrapCost);
+                            if (entries[i].craftMistCost > 0) player.GetInventory().SpendEssenceOfMist(entries[i].craftMistCost);
+                            if (entries[i].craftShadowCost > 0) player.GetInventory().SpendShadowEssence(entries[i].craftShadowCost);
+                            if (entries[i].craftShingleCost > 0) player.GetInventory().SpendShingles(entries[i].craftShingleCost);
+                            player.GetInventory().UnlockWeapon(entries[i].type);
+                            player.SetWeapon(entries[i].type);
+
+                            SoundFX::PlayCrusaderClash();
+                            SoundFX::PlayCoinPickup();
+                            particles.SpawnSparks(player.GetPosition(), entries[i].accentColor, 35, 220.0f);
+                            particles.AddScreenShake(4.5f, 0.18f);
+
+                            std::string feedback = std::string(entries[i].name) + " Crafted & Equipped!";
+                            particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 24.0f);
+                        }
+                    } else {
+                        DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 20, 200 });
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                        std::string needStr = "INSUFFICIENT MATERIALS";
+                        int bw = FontManager::MeasureGameText(needStr, 13, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(needStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 220, 110, 110, 220 });
                     }
                 } else {
-                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
-                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
-                    std::string needStr = "INSUFFICIENT SHINGLES (" + std::to_string(upgradeCost) + " NEEDED)";
-                    DrawText(needStr.c_str(), (int)btnX + (int)(btnW - MeasureText(needStr.c_str(), 11)) / 2, (int)btnY + 9, 11, Color{ 220, 110, 110, 220 });
+                    std::string badge = "[NOT ACQUIRED]";
+                    int tbw = FontManager::MeasureGameText(badge, 13, GameFont::BODY);
+                    DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 22.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
+                    FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 13, Color{ 140, 155, 180, 200 });
+
+                    FontManager::DrawGameTextShadow(entries[i].craftDesc, (int)cardX + 18, (int)cardY + 54, 13, Color{ 160, 175, 195, 200 });
+                    FontManager::DrawGameTextShadow("REQUIRES: Defeat Corrupted Zil in Castle Ruins", (int)cardX + 18, (int)cardY + 84, 13, Color{ 230, 150, 70, 220 });
+
+                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 20, 22, 28, 180 });
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 48, 54, 68, 180 });
+
+                    const char* lockLabel = "LOCKED (SEEK ZIL IN RUINS)";
+                    int bw = FontManager::MeasureGameText(lockLabel, 13, GameFont::BODY);
+                    FontManager::DrawGameTextShadow(lockLabel, (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 130, 140, 155, 190 });
+                }
+            } else {
+                // Weapon is OWNED
+                std::string tierBadge;
+                Color tierCol;
+                if (currentTier == 0) {
+                    tierBadge = "[TIER: BASE]";
+                    tierCol = Color{ 160, 180, 205, 220 };
+                } else if (currentTier == 1) {
+                    tierBadge = (entries[i].type == WeaponType::TRUTH_SEEKER) ? "[CONSECRATED I]" : "[TIER +1]";
+                    tierCol = Color{ 120, 215, 255, 255 };
+                } else {
+                    tierBadge = "[MASTERWORK +2]";
+                    tierCol = Color{ 110, 245, 170, 255 };
+                }
+
+                int tbw = FontManager::MeasureGameText(tierBadge, 13, GameFont::BODY);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 22.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
+                FontManager::DrawGameTextShadow(tierBadge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 13, tierCol);
+
+                WeaponStats currentStats = GetWeaponStats(entries[i].type, currentTier);
+                std::string curDmgStr = "Current: " + std::to_string((int)currentStats.lightDamage) + " Light / " + std::to_string((int)currentStats.heavyDamage) + " Heavy";
+                FontManager::DrawGameTextShadow(curDmgStr.c_str(), (int)cardX + 18, (int)cardY + 54, 13, Color{ 200, 220, 245, 240 });
+
+                FontManager::DrawGameTextShadow("NEXT FORGE UPGRADE:", (int)cardX + 18, (int)cardY + 76, 13, Color{ 255, 215, 80, 240 });
+
+                if (isMax) {
+                    FontManager::DrawGameTextShadow("Max masterwork tier attained. Blade is fully tempered.", (int)cardX + 18, (int)cardY + 98, 13, Color{ 110, 245, 170, 240 });
+                } else if (currentTier == 0) {
+                    FontManager::DrawGameTextShadow(entries[i].perkT1, (int)cardX + 18, (int)cardY + 98, 13, Color{ 160, 235, 255, 240 });
+                    std::string costStr = "Cost: " + std::to_string(entries[i].costT1) + " Shingles";
+                    FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 18, (int)cardY + 118, 13, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+                } else if (currentTier == 1) {
+                    FontManager::DrawGameTextShadow(entries[i].perkT2, (int)cardX + 18, (int)cardY + 98, 13, Color{ 160, 235, 255, 240 });
+                    std::string costStr = "Cost: " + std::to_string(entries[i].costT2) + " Shingles";
+                    FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 18, (int)cardY + 118, 13, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+                }
+
+                if (isMax) {
+                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 24, 45, 35, 220 });
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 60, 160, 110, 200 });
+                    int bw = FontManager::MeasureGameText("MAX TIER TEMPERED", 13, GameFont::BODY);
+                    FontManager::DrawGameTextShadow("MAX TIER TEMPERED", (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 110, 245, 170, 220 });
+                } else {
+                    std::string btnLabel = (currentTier == 0) ? ("TEMPER TO +1 (" + std::to_string(upgradeCost) + " SHINGLES)") : ("FORGE TO +2 (" + std::to_string(upgradeCost) + " SHINGLES)");
+                    if (entries[i].type == WeaponType::TRUTH_SEEKER) {
+                        btnLabel = "CONSECRATE BLADE (" + std::to_string(upgradeCost) + " SHINGLES)";
+                    }
+
+                    if (canAffordUpgrade) {
+                        Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
+                        Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
+                        DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+                        int bw = FontManager::MeasureGameText(btnLabel, 13, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(btnLabel.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 255, 255, 255, 255 });
+
+                        if (isBtnHov && isMousePressed) {
+                            player.GetInventory().SpendShingles(upgradeCost);
+                            player.GetInventory().UpgradeWeapon(entries[i].type);
+                            SoundFX::PlayCrusaderClash();
+                            SoundFX::PlayCoinPickup();
+                            particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 24, 180.0f);
+                            std::string feedback = std::string(entries[i].name) + " Upgraded!";
+                            particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+                        }
+                    } else {
+                        DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                        std::string needStr = "INSUFFICIENT SHINGLES (" + std::to_string(upgradeCost) + " NEEDED)";
+                        int bw = FontManager::MeasureGameText(needStr, 12, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(needStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 12, Color{ 220, 110, 110, 220 });
+                    }
                 }
             }
         }
     }
 
-    if (forgeTab == 0 && totalWepPages > 1) {
-        Rectangle prevBtnRec = { modalX + 32.0f, modalY + modalH - 46.0f, 100.0f, 30.0f };
-        Rectangle nextBtnRec = { modalX + 225.0f, modalY + modalH - 46.0f, 100.0f, 30.0f };
+    // Bottom Footer Controls
+    // 1. Pagination Controls (Left)
+    if (currentTabTotalPages > 1) {
+        Rectangle prevBtnRec = { modalX + 32.0f, modalY + modalH - 46.0f, 105.0f, 32.0f };
+        Rectangle nextBtnRec = { modalX + 242.0f, modalY + modalH - 46.0f, 105.0f, 32.0f };
         bool isPrevHov = CheckCollisionPointRec(mousePos, prevBtnRec);
         bool isNextHov = CheckCollisionPointRec(mousePos, nextBtnRec);
 
-        if (isPrevHov && isMousePressed && weaponForgePage > 0) {
-            weaponForgePage--;
+        if (isPrevHov && isMousePressed) {
+            if (forgeTab == 0 && weaponForgePage > 0) weaponForgePage--;
+            else if (forgeTab == 2 && armorForgePage > 0) armorForgePage--;
             SoundFX::PlayButtonClick();
         }
-        if (isNextHov && isMousePressed && weaponForgePage < totalWepPages - 1) {
-            weaponForgePage++;
+        if (isNextHov && isMousePressed) {
+            if (forgeTab == 0 && weaponForgePage < currentTabTotalPages - 1) weaponForgePage++;
+            else if (forgeTab == 2 && armorForgePage < currentTabTotalPages - 1) armorForgePage++;
             SoundFX::PlayButtonClick();
         }
 
-        DrawRectangleRounded(prevBtnRec, 0.2f, 4, (weaponForgePage > 0) ? (isPrevHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
-        DrawRectangleRoundedLines(prevBtnRec, 0.2f, 4, (weaponForgePage > 0) ? (isPrevHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
-        DrawText("< PREV PAGE", (int)prevBtnRec.x + 12, (int)prevBtnRec.y + 8, 11, (weaponForgePage > 0) ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
+        bool canGoPrev = (currentTabCurrentPage > 0);
+        bool canGoNext = (currentTabCurrentPage < currentTabTotalPages - 1);
 
-        std::string pageStr = "PAGE " + std::to_string(weaponForgePage + 1) + " / " + std::to_string(totalWepPages);
-        DrawText(pageStr.c_str(), (int)modalX + 144, (int)modalY + modalH - 38, 11, Color{ 255, 220, 100, 240 });
+        DrawRectangleRounded(prevBtnRec, 0.2f, 4, canGoPrev ? (isPrevHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
+        DrawRectangleRoundedLines(prevBtnRec, 0.2f, 4, canGoPrev ? (isPrevHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
+        FontManager::DrawGameTextShadow("< PREV [A]", (int)prevBtnRec.x + 14, (int)prevBtnRec.y + 8, 12, canGoPrev ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
 
-        DrawRectangleRounded(nextBtnRec, 0.2f, 4, (weaponForgePage < totalWepPages - 1) ? (isNextHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
-        DrawRectangleRoundedLines(nextBtnRec, 0.2f, 4, (weaponForgePage < totalWepPages - 1) ? (isNextHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
-        DrawText("NEXT PAGE >", (int)nextBtnRec.x + 12, (int)nextBtnRec.y + 8, 11, (weaponForgePage < totalWepPages - 1) ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
+        std::string pageStr = "PAGE " + std::to_string(currentTabCurrentPage + 1) + " / " + std::to_string(currentTabTotalPages);
+        FontManager::DrawGameTextShadow(pageStr, (int)modalX + 152, (int)modalY + modalH - 38, 13, Color{ 255, 220, 100, 240 });
+
+        DrawRectangleRounded(nextBtnRec, 0.2f, 4, canGoNext ? (isNextHov ? Color{ 50, 70, 105, 255 } : Color{ 30, 42, 65, 230 }) : Color{ 20, 24, 34, 180 });
+        DrawRectangleRoundedLines(nextBtnRec, 0.2f, 4, canGoNext ? (isNextHov ? Color{ 255, 225, 95, 255 } : Color{ 80, 120, 175, 200 }) : Color{ 45, 55, 75, 150 });
+        FontManager::DrawGameTextShadow("NEXT [D] >", (int)nextBtnRec.x + 14, (int)nextBtnRec.y + 8, 12, canGoNext ? Color{ 220, 235, 255, 255 } : Color{ 100, 115, 135, 180 });
     }
-    }
 
-    // Bottom Footer Buttons
-    // Shift Discuss Lore and Leave Forge to the right when pagination controls are active
-    bool hasPagination = (forgeTab == 0 || forgeTab == 2);
-    float loreBtnX = hasPagination ? (modalX + 345.0f) : (modalX + 32.0f);
-    float loreBtnW = hasPagination ? 210.0f : 240.0f;
-    Rectangle loreBtnRec = { loreBtnX, modalY + modalH - 46.0f, loreBtnW, 30.0f };
-
+    // 2. Lore Button (Center)
+    Rectangle loreBtnRec = { modalX + 372.0f, modalY + modalH - 46.0f, 245.0f, 32.0f };
     bool isLoreHov = CheckCollisionPointRec(mousePos, loreBtnRec);
-
     DrawRectangleRounded(loreBtnRec, 0.25f, 4, isLoreHov ? Color{ 40, 55, 85, 240 } : Color{ 24, 32, 50, 220 });
-
     DrawRectangleRoundedLines(loreBtnRec, 0.25f, 4, isLoreHov ? Color{ 255, 215, 80, 240 } : Color{ 60, 85, 120, 200 });
+    FontManager::DrawGameTextShadow("[T] Discuss Armorcraft Lore", (int)loreBtnRec.x + 18, (int)loreBtnRec.y + 8, 13, isLoreHov ? Color{ 255, 235, 120, 255 } : Color{ 180, 210, 245, 230 });
 
-    DrawText("[T] Discuss Armorcraft Lore", (int)loreBtnRec.x + 20, (int)loreBtnRec.y + 10, 12, isLoreHov ? Color{ 255, 235, 120, 255 } : Color{ 180, 210, 245, 230 });
-
-
-
-    if (isLoreHov && isMousePressed) {
-
+    if ((isLoreHov && isMousePressed) || IsKeyPressed(KEY_T)) {
         isForgeOpen = false;
-
         std::vector<std::string> pages = {
-
             "That iron on your back looks like it was scavenged from a ditch, wanderer. Don't take offense—I'm a smith, not a courtier. In the wildlands beyond our gates, beast-hide and rusted mail will get you cleft in two before you can draw breath.",
-
             "The Crusader Plate worn by Captain Lenon was folded a hundred times in wind-bellowed coals. If you want armor that will actually turn a demon's claw aside, you’ll have to earn it from him in the ring. Win or lose, respect the steel."
-
         };
-
         OpenDialogue("varek", "BLACKSMITH VAREK", pages, Color{ 255, 140, 50, 255 });
-
     }
 
-
-
-    // 2. Leave Forge (ESC) Button
-
-    Rectangle closeBtnRec = { modalX + modalW - 190.0f, modalY + modalH - 46.0f, 158.0f, 32.0f };
-
+    // 3. Leave Forge (ESC) Button (Right)
+    Rectangle closeBtnRec = { modalX + modalW - 200.0f, modalY + modalH - 46.0f, 168.0f, 32.0f };
     bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtnRec);
-
     DrawRectangleRounded(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 55, 30, 35, 240 } : Color{ 32, 20, 24, 220 });
-
     DrawRectangleRoundedLines(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 255, 100, 110, 240 } : Color{ 120, 55, 65, 200 });
-
-    DrawText("LEAVE FORGE [ESC]", (int)closeBtnRec.x + 18, (int)closeBtnRec.y + 10, 12, isCloseHov ? Color{ 255, 180, 180, 255 } : Color{ 220, 140, 145, 220 });
-
-
+    FontManager::DrawGameTextShadow("LEAVE FORGE [ESC]", (int)closeBtnRec.x + 16, (int)closeBtnRec.y + 8, 13, isCloseHov ? Color{ 255, 180, 180, 255 } : Color{ 220, 140, 145, 220 });
 
     if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
-
         isForgeOpen = false;
-
         SoundFX::PlayButtonClick();
-
     }
-
 }
-
-
 
 void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed) {
 

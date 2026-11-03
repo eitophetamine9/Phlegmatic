@@ -2132,9 +2132,20 @@ void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
 
     if (staggerImmunityTimer > 0.0f || HasInvulnerability() || isDashing) return;
 
-    if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp)) return; // Stoic poise hyper-armor & trance invulnerability
+    bool isHeavyWeaponWindup = isHeavyWindingUp && (
+        currentWeapon == WeaponType::SUN_CLAYMORE ||
+        currentWeapon == WeaponType::MACE ||
+        currentWeapon == WeaponType::HALBERD ||
+        currentWeapon == WeaponType::STORM_GLAIVE ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+    );
 
-
+    if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp) || isHeavyWeaponWindup) {
+        particles.SpawnFloatingText(position, "HYPER-ARMOR!", Color{ 255, 215, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 185, 60, 255 }, 12, 110.0f);
+        SoundFX::PlayParrySuccess();
+        return;
+    }
 
     float duration = CalculateStaggerDuration(baseStunDuration, GetWill(), true);
 
@@ -2280,6 +2291,25 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         particles.SpawnSparks(position, Color{ 230, 220, 210, 255 }, 15, 150.0f);
     }
 
+    // Hyper-armor on heavy weapon windups: reduce damage taken by 30% during startup
+    bool isHeavyWeaponWindup = isHeavyWindingUp && (
+        currentWeapon == WeaponType::SUN_CLAYMORE ||
+        currentWeapon == WeaponType::MACE ||
+        currentWeapon == WeaponType::HALBERD ||
+        currentWeapon == WeaponType::STORM_GLAIVE ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+    );
+    if (isHeavyWeaponWindup) {
+        finalAmount *= 0.70f;
+        particles.SpawnSparks(position, Color{ 255, 185, 60, 255 }, 8, 80.0f);
+    }
+
+    // Basalt Golem armor poise impact feedback
+    if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+        particles.SpawnSparks(position, Color{ 160, 140, 120, 240 }, 12, 90.0f);
+        particles.AddScreenShake(3.5f, 0.15f);
+    }
+
     health -= finalAmount;
 
     if (health < 0.0f) health = 0.0f;
@@ -2296,7 +2326,14 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
 
 
-    float knockbackSpeed = (HasStoicPoise() || (isHeavyWindingUp && HasFullArmorSet(ArmorSet::VANGUARD_BASTION))) ? 0.0f : (HasStoicPoise() ? 60.0f : 240.0f);
+    float knockbackSpeed = 240.0f;
+    if (HasStoicPoise() || (isHeavyWindingUp && (isHeavyWeaponWindup || HasFullArmorSet(ArmorSet::VANGUARD_BASTION)))) {
+        knockbackSpeed = 0.0f;
+    } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+        knockbackSpeed = 70.0f; // High density basalt poise absorbs 70% knockback
+    } else if (HasStoicPoise()) {
+        knockbackSpeed = 60.0f;
+    }
 
     velocity.x += knockbackDir.x * knockbackSpeed;
 

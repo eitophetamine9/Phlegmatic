@@ -153,6 +153,8 @@ private:
     int armorForgePage = 0;
     bool inRoyalKeep = false;
     float doorCooldown = 0.0f;
+    float forgeAnvilTimer = 0.0f;
+    float tavernHearthTimer = 0.0f;
     Vector2 tavernExitSpawnPos = { 635.0f, 885.0f };
     Vector2 forgeExitSpawnPos = { 430.0f, 680.0f };
 
