@@ -178,6 +178,33 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, combat f
     * Added Projectile::CheckCollisionWithCircle in Projectile.cpp with line-segment swept-circle testing for elongated directional projectiles (BOLT, BEAM_SHARD, HOLY_BEAM, GALE_ARROW).
     * Eliminates high-velocity tunneling through thin colliders and resolves ghost misses where visual projectile tips pierced targets before the center registered collision.
 
+* **Inventory & Armory Readability Overhaul**:
+  * Rescaled typography across headers, slots, stats, set bonuses, consumables, and drawer items from 8-11pt to 12-16pt with high-contrast palette values and clean line spacing.
+  * Replaced cramped text strings in Section 2 weapon slots with clean vector weapon icons for all 9 weapons (DrawWeaponSlotIcon), upgrade level badges (+1, +2), active equip pips, and floating hover tooltips showing weapon name, tier, and damage statistics.
+  * Streamlined weapon selection drawer cards by removing cramped multi-line description text blocks and adding dedicated 40x40 weapon icon boxes, large 14pt titles, and clean 12pt stats lines.
+
+* **Totem of Mist Companion Revamp**:
+  * Rebalanced TotemType::TOTEM_MIST: removed the damage output penalty, replaced with a -15% defense multiplier and a -25 Max Health penalty.
+  * Summons an orbiting Mist Fairy companion granting +20% Critical Chance and +35% Critical Damage.
+  * Mist Fairy periodically generates restorative healing orbs (+30 HP on contact) with floating bobbing visual effects and pickup radius collision.
+
+* **Windrunner's Recurve Bow Rebalance & Heavy Attack Stun**:
+  * Nerfed light attack speed (cooldown increased from 0.32s to 0.52s) and reduced damage output across all upgrade levels (16/20/24 light, 58/70/82 heavy).
+  * Light arrows no longer pierce infinitely (proj.SetPiercing(false)).
+  * Heavy attack fires Gale Piercer Drill Arrow with drawn bowstring charging visuals, concentric wind rings, 50% defense pierce, on-hit Armor Fracture (-40% enemy defense for 4s), and 1.2s stun/stagger.
+
+* **Armor Weapon Synergies & Shadowstrider Tuning**:
+  * Added tailored weapon synergies for each armor set:
+    * Commoner's Scrap: +20% Stamina Regen & +15% Loot Find; Sword synergy grants +15% light attack speed and -25% stamina cost.
+    * Crusader Plate: +20% Defense & +25 Will; Truth Seeker & Broadsword synergy grants +25% holy damage and +20% beam defense pierce.
+    * Vanguard Bastion: +40 Max HP & heavy hyper-armor; Halberd & Glaive synergy extends weapon reach +25px with +25% poise damage.
+    * Shadowstrider: +20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes; Daggers & Bow synergy grants +15% Crit Chance. Removed -50% dash cooldown reduction; tuned dash velocity multiplier to 1.10x; every 5th dash releases a lingering Mist Trail zone dealing periodic DoT and defense pierce.
+    * Forged Scrap Iron: +18 Defense, +20% Poise Damage; War Mace synergy inflicts -25% Armor Fracture and grants +50% extra composure on hit.
+    * Basalt Golem: +35 Defense, 70% knockback resistance; Sun Claymore synergy unleashes a secondary molten shockwave (+30 earth damage) with unbreakable hyper-armor.
+
+* **Loot Economy Tuning**:
+  * Increased Essence of Mist drop probability from Gale Bandits in the Restless Mist Forest from 20% to 38%.
+
 * **World & UI Quality-of-Life Fixes**:
   * Restless Mist Forest enemy spawners automatically re-initialize upon map entry, state reset, and player revive, ensuring consistent forest enemy population.
   * Rescaled Blacksmith Varek's Forge modal typography from cramped 9-11pt up to 12-16pt with high-contrast text and widened borders, preventing text clipping and footer button overlap.
@@ -1299,7 +1326,7 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 | **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360° whirlwind, and an explosive shadow decoy. |
 
-| **Windrunner's Recurve** | 24 dmg (Gale Arrow) | 82 dmg (Gale Piercer) | 0.60s | Ranged combat bow. Light attack fires high-velocity piercing arrows (520px range). Heavy channels a piercing drill arrow with 40% armor penetration. |
+| **Windrunner's Recurve** | 16 dmg (Gale Arrow) | 58 dmg (Gale Piercer Drill) | 0.65s | Ranged combat bow. Light attack fires direct non-piercing gale arrows (0.52s cd). Heavy channels a high-speed Gale Piercer Drill Arrow with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
 
 | **Sun-Forged Claymore** | 34 dmg (120° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
 
