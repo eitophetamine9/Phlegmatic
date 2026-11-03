@@ -351,6 +351,41 @@ void RestlessMistForestHandler::Render(
         }
     }
 
+    // Whispering Guardian Spirit hovering above the Altar of Whispers (Mist Realm)
+    if (!galeArcherActive) {
+        float spiritBob = sinf(time * 2.6f) * 6.0f;
+        Vector2 sPos = { altarPosition.x, altarPosition.y - 28.0f + spiritBob };
+
+        // Spectral aura
+        float sPulse = (sinf(time * 3.5f) + 1.0f) * 0.5f;
+        DrawCircleGradient(sPos, 34.0f + 6.0f * sPulse, Color{ 80, 240, 215, (unsigned char)(70 + 35 * sPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)sPos.x, (int)sPos.y, 22.0f + 4.0f * sPulse, Color{ 110, 255, 230, (unsigned char)(110 + 60 * sPulse) });
+
+        // Spectral hooded robe & torso
+        DrawCircleV(sPos, 9.5f, Color{ 40, 100, 90, 210 });
+        DrawCircleV({ sPos.x, sPos.y - 2.0f }, 7.5f, Color{ 60, 135, 120, 230 });
+
+        // Glowing spirit eyes
+        DrawCircleV({ sPos.x - 3.0f, sPos.y - 2.0f }, 2.0f, Color{ 160, 255, 240, 255 });
+        DrawCircleV({ sPos.x + 3.0f, sPos.y - 2.0f }, 2.0f, Color{ 160, 255, 240, 255 });
+
+        // Flowing ethereal wisps & lower cowl
+        Vector2 t1 = { sPos.x - 11.0f, sPos.y + 18.0f + sinf(time * 4.0f) * 3.0f };
+        Vector2 t2 = { sPos.x + 11.0f, sPos.y + 18.0f - sinf(time * 4.0f) * 3.0f };
+        Vector2 t3 = { sPos.x, sPos.y + 4.0f };
+        DrawTriangle(t1, t2, t3, Color{ 50, 120, 110, 175 });
+
+        // Spectral wings/wind tendrils
+        float wingFlap = sinf(time * 3.2f) * 7.0f;
+        DrawLineEx({ sPos.x - 6.0f, sPos.y }, { sPos.x - 18.0f, sPos.y - 10.0f + wingFlap }, 2.5f, Color{ 100, 245, 225, 160 });
+        DrawLineEx({ sPos.x + 6.0f, sPos.y }, { sPos.x + 18.0f, sPos.y - 10.0f - wingFlap }, 2.5f, Color{ 100, 245, 225, 160 });
+
+        // Floating spirit nameplate within 220px
+        if (distToAltar <= 220.0f) {
+            FontManager::DrawGameTextShadow("WHISPERING GUARDIAN SPIRIT", (int)sPos.x - 84, (int)sPos.y - 26, 11, Color{ 140, 255, 235, 230 });
+        }
+    }
+
     if (nearAltar) {
         float pulse = (sinf(time * 4.0f) + 1.0f) * 0.5f;
         Color runeColor = galeArcherActive ? Color{ 255, 110, 90, (unsigned char)(140 + 80 * pulse) }

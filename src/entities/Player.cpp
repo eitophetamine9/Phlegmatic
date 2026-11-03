@@ -414,14 +414,18 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
         }
         case ArmorSet::VANGUARD_BASTION: {
             pendingArmorSkillAoE = true;
-            pendingAoEDamage = 50.0f;
-            pendingAoERadius = 200.0f;
+            pendingAoEDamage = 65.0f;
+            pendingAoERadius = 220.0f;
             pendingAoEStun = 1.8f;
-            pendingAoEArmorShred = 0.25f;
+            pendingAoEArmorShred = 0.30f;
+            // Unstoppable phalanx forward rush
+            Vector2 forward = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+            position = Vector2Add(position, Vector2Scale(forward, 180.0f));
+            armorSkillShieldHp = 50.0f; // 4s Fortification barrier
             SoundFX::PlayParrySuccess();
             particles.AddScreenShake(10.0f, 0.35f);
-            particles.SpawnFloatingText(position, "SEISMIC QUAKE SLAM!", Color{ 255, 120, 60, 255 }, 26.0f);
-            particles.SpawnSparks(position, Color{ 200, 80, 50, 255 }, 40, 260.0f);
+            particles.SpawnFloatingText(position, "PHALANX VANGUARD CHARGE!", Color{ 255, 120, 60, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 245, 80, 50, 255 }, 40, 260.0f);
             break;
         }
         case ArmorSet::SHADOWSTRIDER: {
@@ -479,6 +483,10 @@ void Player::RelocateCompanionToPlayer() {
     Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
     companion.position = Vector2Add(position, offset);
     companion.attackCooldown = 0.0f;
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        mistFairy.active = true;
+        mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
+    }
 }
 
 void Player::SetTotem(TotemType newTotem) {
@@ -487,7 +495,7 @@ void Player::SetTotem(TotemType newTotem) {
     inventory.SetEquippedTotem(newTotem);
     if (newTotem == TotemType::TOTEM_MIST) {
         mistFairy.active = true;
-        mistFairy.healOrbTimer = 16.0f;
+        mistFairy.healOrbTimer = 14.0f; mistFairy.flutterTime = 0.0f;
         mistFairy.position = { position.x - 30.0f, position.y - 30.0f };
     } else {
         mistFairy.active = false;
@@ -511,7 +519,7 @@ float Player::GetMaxHealth() const {
                 + GetChestplateStats(equippedChestplate).maxHpBonus
                 + GetLeggingsStats(equippedLeggings).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
-        bonus += 40.0f;
+        bonus += 50.0f; // +50 Max HP
     }
     return Config::PLAYER_MAX_HEALTH + bonus;
 }
@@ -738,6 +746,87 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         }
     } else {
         companion.active = false;
+    }
+
+    // Totem of Mist & Mist Fairy Companion Update
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        if (!mistFairy.active) {
+            mistFairy.active = true;
+            mistFairy.healOrbTimer = 14.0f;
+            mistFairy.flutterTime = 0.0f;
+            mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
+        }
+
+        mistFairy.flutterTime += dt;
+
+        // Dynamic hovering anchor orbiting near player
+        float hoverAngle = mistFairy.flutterTime * 2.2f;
+        Vector2 targetFairyPos = {
+            position.x + cosf(hoverAngle) * 36.0f,
+            position.y - 22.0f + sinf(hoverAngle * 1.5f) * 12.0f
+        };
+
+        float distToPlayer = Vector2Distance(mistFairy.position, position);
+        if (distToPlayer > 260.0f || (mistFairy.position.x == 0.0f && mistFairy.position.y == 0.0f)) {
+            mistFairy.position = targetFairyPos;
+        } else {
+            mistFairy.position = Vector2Lerp(mistFairy.position, targetFairyPos, fminf(1.0f, 6.5f * dt));
+        }
+
+        if (fmodf(mistFairy.flutterTime, 0.22f) < dt) {
+            particles.SpawnSparks(mistFairy.position, Color{ 110, 245, 225, 150 }, 1, 15.0f);
+        }
+
+        mistFairy.healOrbTimer -= dt;
+        if (mistFairy.healOrbTimer <= 0.0f) {
+            mistFairy.healOrbTimer = 14.0f;
+            MistHealingOrb orb;
+            orb.position = mistFairy.position;
+            orb.lifetime = 20.0f;
+            orb.healAmount = 30.0f;
+            orb.active = true;
+            mistHealingOrbs.push_back(orb);
+            particles.SpawnSparks(orb.position, Color{ 90, 255, 200, 255 }, 18, 90.0f);
+            particles.SpawnFloatingText(orb.position, "MIST HEALING ORB!", Color{ 110, 255, 215, 255 }, 20.0f);
+        }
+    } else {
+        mistFairy.active = false;
+    }
+
+    // Active Mist Healing Orbs decay & pickup collision
+    for (auto it = mistHealingOrbs.begin(); it != mistHealingOrbs.end(); ) {
+        if (it->active) {
+            it->lifetime -= dt;
+            if (it->lifetime <= 0.0f) {
+                it->active = false;
+                it = mistHealingOrbs.erase(it);
+                continue;
+            }
+            float d = Vector2Distance(position, it->position);
+            if (d <= radius + 36.0f) {
+                Heal(it->healAmount);
+                particles.SpawnFloatingText(position, "+30 HP (Mist Orb)", Color{ 90, 255, 180, 255 }, 22.0f);
+                particles.SpawnSparks(it->position, Color{ 120, 255, 220, 255 }, 20, 140.0f);
+                SoundFX::PlayParrySuccess();
+                it->active = false;
+                it = mistHealingOrbs.erase(it);
+                continue;
+            }
+        }
+        ++it;
+    }
+
+    // Shadowstrider Smoke Mist Zones duration decay (7-second lifetime)
+    for (auto it = smokeMistZones.begin(); it != smokeMistZones.end(); ) {
+        if (it->active) {
+            it->duration -= dt;
+            if (it->duration <= 0.0f) {
+                it->active = false;
+                it = smokeMistZones.erase(it);
+                continue;
+            }
+        }
+        ++it;
     }
 
 
@@ -1634,9 +1723,6 @@ void Player::TriggerDash(ParticleSystem& particles) {
 
 
     dashCooldown = stats.dashCooldown;
-    if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-        dashCooldown *= 0.50f; // -50% Dash Cooldown!
-    }
 
     dashTimer = Config::DASH_DURATION;
 
@@ -1803,12 +1889,12 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 
 
-    // Windrunner's Recurve: Light Attack fires high-speed piercing wind arrow
+    // Windrunner's Recurve: Light Attack fires rapid wind arrow (windburst AoE on impact)
     if (currentWeapon == WeaponType::WINDRUNNER_RECURVE) {
         Vector2 spawnPos = { position.x + forwardDir.x * (radius + 16.0f), position.y + forwardDir.y * (radius + 16.0f) };
-        Vector2 projVel = { forwardDir.x * 750.0f, forwardDir.y * 750.0f };
-        Projectile proj(spawnPos, projVel, 8.0f, currentAttack.damage, ProjectileType::GALE_ARROW, true, 0.20f);
-        proj.SetPiercing(true);
+        Vector2 projVel = { forwardDir.x * 780.0f, forwardDir.y * 780.0f };
+        Projectile proj(spawnPos, projVel, 7.0f, currentAttack.damage, ProjectileType::GALE_ARROW, true, 0.20f);
+        proj.SetPiercing(false);
         spawnedProjectiles.push_back(proj);
         particles.SpawnSparks(spawnPos, Color{ 110, 245, 220, 255 }, 12, 140.0f);
         SoundFX::PlayLightAttack();
@@ -2441,13 +2527,41 @@ bool Player::UseHealthPotion(ParticleSystem& particles) {
 
 bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
 
-    // Invulnerable during Dash, Dagger Lunge, or Active I-Frames
+    // Evasion bonus when inside an active Smoke Mist zone
+    bool insideSmoke = false;
+    for (const auto& zone : smokeMistZones) {
+        if (zone.active && Vector2Distance(position, zone.position) <= zone.radius) {
+            insideSmoke = true;
+            break;
+        }
+    }
+    if (insideSmoke && (rand() % 100) < 40) {
+        ModifyComposure(10.0f);
+        particles.SpawnFloatingText(position, "MIST EVADED!", Color{ 180, 120, 255, 255 }, 20.0f);
+        particles.SpawnSparks(position, Color{ 160, 90, 240, 220 }, 14, 90.0f);
+        return false;
+    }
 
+    // Invulnerable during Dash, Dagger Lunge, or Active I-Frames
     if (isDashing || isDaggerLunging || HasInvulnerability()) {
 
         ModifyComposure(15.0f); // Evasive Dash through hitbox
 
         particles.SpawnFloatingText(position, "EVADED", Color{ 120, 240, 255, 255 }, 18.0f);
+
+        // Shadowstrider: 15% chance to spawn an AoE Smoke Mist on perfect evade
+        if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && (rand() % 100) < 15) {
+            SmokeMistZone smoke;
+            smoke.position = position;
+            smoke.radius = 95.0f;
+            smoke.duration = 7.0f;
+            smoke.tickTimer = 0.0f;
+            smoke.active = true;
+            smokeMistZones.push_back(smoke);
+            particles.SpawnSparks(position, Color{ 160, 90, 255, 255 }, 30, 180.0f);
+            particles.SpawnFloatingText(position, "SMOKE MIST BURST!", Color{ 180, 120, 255, 255 }, 24.0f);
+            SoundFX::PlayHitImpact();
+        }
 
         return false;
 

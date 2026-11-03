@@ -76,24 +76,22 @@ public:
     };
     std::vector<MistHealingOrb> mistHealingOrbs;
 
-    // Shadowstrider 5th Dash Mist Trail DoT
-    int shadowDashCounter = 0;
-    struct MistTrailZone {
+    // Shadowstrider Evasion Smoke Mist (15% chance on perfect evade)
+    struct SmokeMistZone {
         Vector2 position = { 0.0f, 0.0f };
-        float lifetime = 4.0f;
-        float damageTimer = 0.0f;
-        float radius = 32.0f;
+        float duration = 7.0f;
+        float tickTimer = 0.0f;
+        float radius = 95.0f;
         bool active = true;
     };
-    std::vector<MistTrailZone> mistTrailZones;
+    std::vector<SmokeMistZone> smokeMistZones;
 
     const MistFairy& GetMistFairy() const { return mistFairy; }
     MistFairy& GetMistFairy() { return mistFairy; }
     const std::vector<MistHealingOrb>& GetMistHealingOrbs() const { return mistHealingOrbs; }
     std::vector<MistHealingOrb>& GetMistHealingOrbs() { return mistHealingOrbs; }
-    const std::vector<MistTrailZone>& GetMistTrailZones() const { return mistTrailZones; }
-    std::vector<MistTrailZone>& GetMistTrailZones() { return mistTrailZones; }
-    int GetShadowDashCounter() const { return shadowDashCounter; }
+    const std::vector<SmokeMistZone>& GetSmokeMistZones() const { return smokeMistZones; }
+    std::vector<SmokeMistZone>& GetSmokeMistZones() { return smokeMistZones; }
 
     ArmorSet GetActiveArmorSet() const;
     bool HasFullArmorSet(ArmorSet set) const;
@@ -326,3 +324,4 @@ private:
 
     float walkCycle;
 };
+

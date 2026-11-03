@@ -52,28 +52,6 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
     }
 
-    // Shadowstrider 5th Dash Mist Trail DoT vs Enemies
-    for (auto& zone : player.GetMistTrailZones()) {
-        if (!zone.active || zone.damageTimer > 0.0f) continue;
-        for (auto& enemy : enemies) {
-            if (!enemy.IsAlive()) continue;
-            float d = Vector2Distance(zone.position, enemy.GetPosition());
-            if (d <= zone.radius + enemy.GetRadius()) {
-                zone.damageTimer = 0.35f;
-                Vector2 kDir = Vector2Normalize(Vector2Subtract(enemy.GetPosition(), zone.position));
-                if (kDir.x == 0.0f && kDir.y == 0.0f) kDir = { 0.0f, -1.0f };
-                if (enemy.TakeDamage(12.0f, kDir, particles, 0.20f)) {
-                    if (outLootDrops) {
-                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
-                    }
-                }
-                enemy.ApplyStagger(0.20f);
-                particles.SpawnSparks(enemy.GetPosition(), Color{ 80, 240, 210, 255 }, 6, 60.0f);
-                particles.SpawnFloatingText(enemy.GetPosition(), "MIST DoT -12", Color{ 100, 245, 215, 255 }, 16.0f);
-            }
-        }
-    }
-
     // 1. Player melee attack vs enemies
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
@@ -329,6 +307,17 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     // Dash / Dagger Lunge invulnerability frames: Evaded!
                     player.ModifyComposure(15.0f); // Evasive Dash through projectile hitbox
                     particles.SpawnFloatingText(playerPos, "EVADED", Color{ 120, 240, 180, 255 }, 20.0f);
+                    if (player.HasFullArmorSet(ArmorSet::SHADOWSTRIDER) && (rand() % 100) < 15) {
+                        Player::SmokeMistZone smoke;
+                        smoke.position = playerPos;
+                        smoke.radius = 95.0f;
+                        smoke.duration = 7.0f;
+                        smoke.tickTimer = 0.0f;
+                        smoke.active = true;
+                        player.GetSmokeMistZones().push_back(smoke);
+                        particles.SpawnSparks(playerPos, Color{ 160, 90, 255, 255 }, 30, 180.0f);
+                        particles.SpawnFloatingText(playerPos, "SMOKE MIST BURST!", Color{ 180, 120, 255, 255 }, 24.0f);
+                    }
                     proj.Destroy();
                 } else if (player.IsParrying()) {
                     // F Parry reflection!
@@ -384,6 +373,24 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                             enemy.ApplyStagger(1.2f);
                             particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR SHATTERED! STUNNED!", Color{ 100, 255, 230, 255 }, 22.0f);
                             particles.AddScreenShake(4.5f, 0.15f);
+                        } else if (proj.GetType() == ProjectileType::GALE_ARROW) {
+                            // Light attack windburst AoE (30% of weapon damage to nearby enemies)
+                            float burstRadius = 55.0f;
+                            float burstDamage = proj.GetDamage() * 0.30f;
+                            Vector2 impactPos = proj.GetPosition();
+                            particles.SpawnSparks(impactPos, Color{ 120, 255, 220, 255 }, 16, 130.0f);
+                            particles.SpawnFloatingText(impactPos, "WINDBURST! -" + std::to_string((int)burstDamage), Color{ 110, 245, 215, 240 }, 18.0f);
+                            for (size_t aoeIdx = 0; aoeIdx < enemies.size(); ++aoeIdx) {
+                                if (aoeIdx == eIdx) continue;
+                                auto& otherEnemy = enemies[aoeIdx];
+                                if (!otherEnemy.IsAlive()) continue;
+                                if (Vector2Distance(impactPos, otherEnemy.GetPosition()) <= burstRadius + otherEnemy.GetRadius()) {
+                                    Vector2 aoeKnock = Vector2Normalize(Vector2Subtract(otherEnemy.GetPosition(), impactPos));
+                                    if (otherEnemy.TakeDamage(burstDamage, aoeKnock, particles, proj.GetDefensePierce())) {
+                                        if (outLootDrops) LootDrop::SpawnFromEnemy(otherEnemy, *outLootDrops);
+                                    }
+                                }
+                            }
                         }
 
                         if (!proj.IsPiercing()) {
@@ -462,6 +469,27 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     particles.SpawnSparks(comp.position, Color{ 255, 140, 50, 255 }, 35, 200.0f);
                     SoundFX::PlayHitImpact();
                     break;
+                }
+            }
+        }
+    }
+
+    // Shadowstrider Smoke Mist Poison DoT against enemies
+    for (auto& smoke : player.GetSmokeMistZones()) {
+        if (!smoke.active) continue;
+        smoke.tickTimer -= dt;
+        if (smoke.tickTimer <= 0.0f) {
+            smoke.tickTimer = 0.45f;
+            for (auto& enemy : enemies) {
+                if (!enemy.IsAlive()) continue;
+                if (Vector2Distance(smoke.position, enemy.GetPosition()) <= smoke.radius + enemy.GetRadius()) {
+                    float poisonDmg = 14.0f;
+                    Vector2 zeroKnock = { 0.0f, 0.0f };
+                    if (enemy.TakeDamage(poisonDmg, zeroKnock, particles, 1.0f)) {
+                        if (outLootDrops) LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                    }
+                    particles.SpawnSparks(enemy.GetPosition(), Color{ 80, 230, 110, 220 }, 8, 45.0f);
+                    particles.SpawnFloatingText(enemy.GetPosition(), "-14 Poison", Color{ 90, 235, 120, 240 }, 16.0f);
                 }
             }
         }

@@ -1,4 +1,4 @@
-# PHLEGMATIC — Complete Game Documentation & Technical Reference
+# PHLEGMATIC â€” Complete Game Documentation & Technical Reference
 
 
 
@@ -44,7 +44,7 @@
 
   - [The Fracture & The Long Road](#the-fracture--the-long-road)
 
-  - [Lore Fragments Codex (I–X)](#lore-fragments-codex-ix)
+  - [Lore Fragments Codex (Iâ€“X)](#lore-fragments-codex-ix)
 
   - [Characters & Royal Court](#characters--royal-court)
 
@@ -183,24 +183,26 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, combat f
   * Replaced cramped text strings in Section 2 weapon slots with clean vector weapon icons for all 9 weapons (DrawWeaponSlotIcon), upgrade level badges (+1, +2), active equip pips, and floating hover tooltips showing weapon name, tier, and damage statistics.
   * Streamlined weapon selection drawer cards by removing cramped multi-line description text blocks and adding dedicated 40x40 weapon icon boxes, large 14pt titles, and clean 12pt stats lines.
 
-* **Totem of Mist Companion Revamp**:
+* **Totem of Mist Companion Revamp & Dynamic Tracking**:
   * Rebalanced TotemType::TOTEM_MIST: removed the damage output penalty, replaced with a -15% defense multiplier and a -25 Max Health penalty.
-  * Summons an orbiting Mist Fairy companion granting +20% Critical Chance and +35% Critical Damage.
-  * Mist Fairy periodically generates restorative healing orbs (+30 HP on contact) with floating bobbing visual effects and pickup radius collision.
+  * Summons an ethereal Mist Fairy companion that dynamically follows the player with smooth interpolation and leash snapping (>260px distance).
+  * Mist Fairy grants +20% Critical Chance and +35% Critical Damage, and periodically generates restorative healing orbs every 14 seconds (+30 HP on contact) with floating bobbing visual effects and pickup radius collision.
 
-* **Windrunner's Recurve Bow Rebalance & Heavy Attack Stun**:
-  * Nerfed light attack speed (cooldown increased from 0.32s to 0.52s) and reduced damage output across all upgrade levels (16/20/24 light, 58/70/82 heavy).
-  * Light arrows no longer pierce infinitely (proj.SetPiercing(false)).
+* **Windrunner's Recurve Bow Rebalance & Impact Windburst**:
+  * Light attack arrows no longer pierce enemies; instead, upon impact, arrows trigger a Windburst AoE (55px radius) dealing 30% of weapon damage to nearby surrounding enemies.
+  * Rebalanced damage and attack cadence: light damage adjusted to 12 / 15 / 18 (base / refined / masterwork) with high attack speed (0.28s cooldown, 8 stamina cost); heavy damage scaled to 46 / 56 / 68.
   * Heavy attack fires Gale Piercer Drill Arrow with drawn bowstring charging visuals, concentric wind rings, 50% defense pierce, on-hit Armor Fracture (-40% enemy defense for 4s), and 1.2s stun/stagger.
 
-* **Armor Weapon Synergies & Shadowstrider Tuning**:
+* **Armor Weapon Synergies & Shadowstrider / Vanguard Overhaul**:
   * Added tailored weapon synergies for each armor set:
     * Commoner's Scrap: +20% Stamina Regen & +15% Loot Find; Sword synergy grants +15% light attack speed and -25% stamina cost.
     * Crusader Plate: +20% Defense & +25 Will; Truth Seeker & Broadsword synergy grants +25% holy damage and +20% beam defense pierce.
-    * Vanguard Bastion: +40 Max HP & heavy hyper-armor; Halberd & Glaive synergy extends weapon reach +25px with +25% poise damage.
-    * Shadowstrider: +20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes; Daggers & Bow synergy grants +15% Crit Chance. Removed -50% dash cooldown reduction; tuned dash velocity multiplier to 1.10x; every 5th dash releases a lingering Mist Trail zone dealing periodic DoT and defense pierce.
+    * Vanguard Bastion: +50 Max HP & unbreakable hyper-armor during attacks; Halberd & Glaive synergy extends weapon reach +35px with +25% armor penetration and concussive shockwaves. Special skill [V]: Phalanx Vanguard Charge (rushes 180px, deals 65 damage, -30% armor shred for 5s, 1.8s stun, and 50 HP Fortification shield).
+    * Shadowstrider: +20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes; Daggers & Bow synergy grants +15% Crit Chance. Removed 5th dash trail; instead, every perfect evade rolls a 15% chance to summon an AoE Smoke Mist (95px radius, 7s duration with automatic cleanup) that grants the player 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
+    * Whispering Guardian Spirit: Added ethereal guardian spirit hovering above the Whispering Altar in the Restless Mist Forest whenever the Gale Archer boss is not active.
     * Forged Scrap Iron: +18 Defense, +20% Poise Damage; War Mace synergy inflicts -25% Armor Fracture and grants +50% extra composure on hit.
     * Basalt Golem: +35 Defense, 70% knockback resistance; Sun Claymore synergy unleashes a secondary molten shockwave (+30 earth damage) with unbreakable hyper-armor.
+  * Blacksmith Varek's Armor Forge expanded to 12 modular craft recipes across 3 paginated pages (2x2 grid), adding craftable Vanguard Greathelm, Vanguard Bastion Mail, and Vanguard Heavy Legguards.
 
 * **Loot Economy Tuning**:
   * Increased Essence of Mist drop probability from Gale Bandits in the Restless Mist Forest from 20% to 38%.
@@ -380,22 +382,22 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
   * Equipping all 3 matching pieces activates full set bonuses and an active signature skill triggered via the **[V]** key:
     1. **Commoner's Scrap Set**:
        * *Passive Bonus*: +15% Stamina Regen Rate, +15% Shingle & Ore drop chance.
-       * *Active Skill*: **Desperate Dust Burst** ([V], 30s Cooldown) â€” Unleashes a 180px dust vortex dealing 15 damage, stunning nearby enemies for 1.5s, and granting +35% movement speed for 4.0s.
+       * *Active Skill*: **Desperate Dust Burst** ([V], 30s Cooldown) Ã¢â‚¬â€ Unleashes a 180px dust vortex dealing 15 damage, stunning nearby enemies for 1.5s, and granting +35% movement speed for 4.0s.
     2. **Crusader Plate Set**:
        * *Passive Bonus*: +20% Total Defense, +25 Will stat.
-       * *Active Skill*: **Dawnfire Aegis** ([V], 35s Cooldown) â€” Summons a 60 HP holy light barrier for 6s that absorbs all incoming damage and bursts with radiant sparks upon expiration.
+       * *Active Skill*: **Dawnfire Aegis** ([V], 35s Cooldown) Ã¢â‚¬â€ Summons a 60 HP holy light barrier for 6s that absorbs all incoming damage and bursts with radiant sparks upon expiration.
     3. **Vanguard Bastion Set**:
-       * *Passive Bonus*: +40 Max Health, micro-stagger immunity (hyper-armor) during heavy attack windups.
-       * *Active Skill*: **Seismic Quake Slam** ([V], 22s Cooldown) â€” Slams the ground with a 200px shockwave dealing 50 damage, shredding enemy armor by 25% for 4s, and knocking enemies flat (1.8s stun).
+       * *Passive Bonus*: +50 Max HP & unbreakable hyper-armor during attacks. [Halberd & Glaive Synergy]: Reach extended +35px, +25% armor penetration, and cleaves unleash concussive shockwaves.
+       * *Active Skill*: **Phalanx Vanguard Charge** ([V], 22s Cooldown) - Rushes forward 180px, deals 65 damage, -30% armor shred for 5s, 1.8s stun, and grants a 50 HP Fortification shield for 4s.
     4. **Shadowstrider Set**:
-       * *Passive Bonus*: +15% Movement Speed, -35% Dash Cooldown, +25% Dash Distance.
-       * *Active Skill*: **Shadow Decoy & Vanish** ([V], 25s Cooldown) â€” Grants 0.5s i-frames, blinks the player forward 70px, and leaves behind an ethereal decoy that draws enemy aggro before detonating for 40 shadow damage.
+       * *Passive Bonus*: +20% Movement Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes. [Daggers & Bow Synergy]: +15% Critical Chance. Perfect evades roll a 15% chance to summon an AoE Smoke Mist (95px radius, 7s duration with automatic cleanup) that grants 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
+       * *Active Skill*: **Shadow Decoy & Vanish** ([V], 25s Cooldown) - Grants 0.5s i-frames, blinks the player forward 70px, and leaves behind an ethereal decoy that draws enemy aggro before detonating for 40 shadow damage.
     5. **Forged Scrap Iron Set**:
        * *Passive Bonus*: +18 Flat Defense, +15% Poise Stagger Damage.
-       * *Active Skill*: **Ironclad Spike Wall** ([V], 25s Cooldown) â€” Enters a 6s bristling iron stance with hyper-armor that reflects 40% of incoming melee strike damage back at attackers.
+       * *Active Skill*: **Ironclad Spike Wall** ([V], 25s Cooldown) Ã¢â‚¬â€ Enters a 6s bristling iron stance with hyper-armor that reflects 40% of incoming melee strike damage back at attackers.
     6. **Basalt Golem Set**:
        * *Passive Bonus*: +35 Flat Defense, -10% Movement Speed, *Melancholic Shell* (absorbs 1 heavy strike completely every 20s).
-       * *Active Skill*: **Basalt Spire Wall** ([V], 30s Cooldown) â€” Erects 3 indestructible basalt pillars in front of the player that block all enemy movement and projectiles, dealing 55 earth damage on eruption.
+       * *Active Skill*: **Basalt Spire Wall** ([V], 30s Cooldown) Ã¢â‚¬â€ Erects 3 indestructible basalt pillars in front of the player that block all enemy movement and projectiles, dealing 55 earth damage on eruption.
 
 * **Inventory HUD Overhaul & Illuminated Lore Grimoire Preservation**:
   * **Tab 0 (Equipped Gear)** completely redesigned to match the updated UI layout:
@@ -460,16 +462,16 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
     * Stage 3: *Vault Kick Disengage* (12 dmg, 100% poise stagger, backward leap impulse).
   * **War Mace** (24.0 light / 78.0 heavy combo):
     * Stage 1: *Overhead Skull Crusher* (42 dmg, hyper-armor, inflicts -20% Armor Fracture debuff for 4s).
-    * Stage 2: *Seismic Tremor* (36 dmg, 360Â° circular shockwave, 25% defense pierce, knocks foes flat).
+    * Stage 2: *Seismic Tremor* (36 dmg, 360Ã‚Â° circular shockwave, 25% defense pierce, knocks foes flat).
   * **Crusader Blade** (18.0 light / 88.0 heavy combo):
     * Stage 1: *Crescent Cleave* (30 dmg, restores +12 player Composure on hit).
     * Stage 2: *Shock Thrust* (24 dmg, linear thrust box interrupting enemy windups).
     * Stage 3: *Radiant Execution* (34 dmg, downward holy cleave dealing +50% bonus damage to staggered foes).
   * **Truth Seeker** (22.0 light / 72.0 heavy combo):
-    * Stage 1: *Dawnfire Ring* (34 dmg, 360Â° sweep applying Solar Burn & firing holy beam).
+    * Stage 1: *Dawnfire Ring* (34 dmg, 360Ã‚Â° sweep applying Solar Burn & firing holy beam).
     * Stage 2: *Sacred Judgment Pillar* (38 dmg, descending sunray beam with 100% defense pierce that cleanses player debuffs).
   * **Royal Halberd** (16.0 light / 28.0 heavy combo):
-    * Stage 1: *Long Lunge* (iframes, line box) -> Stage 2: *Sweeping Cleave* (220Â° arc) -> Stage 3: *Flurry* of 3 consecutive rapid stabs (30% weapon damage each).
+    * Stage 1: *Long Lunge* (iframes, line box) -> Stage 2: *Sweeping Cleave* (220Ã‚Â° arc) -> Stage 3: *Flurry* of 3 consecutive rapid stabs (30% weapon damage each).
 
 ---
 
@@ -484,9 +486,9 @@ A comprehensive breakdown of all systems, gameplay mechanics, visual overhauls, 
 * **Royal Halberd Rebalance & 3-Stage Heavy Attack Combo**:
   * Rebalanced weapon damage: adjusted base light damage from 24.0f to 16.0f and base heavy attack from 88.0f to 28.0f (+1: 20/34, +2: 24/40; defense pierce bonus +20% on tier 2).
   * Implemented 3-stage heavy combo progression:
-    * **Stage 1 — Long Lunge with i-frames**: Forward thrust surge (elocity += forwardDir * 320.0f) with active evasion invulnerability (iFrameTimer = 0.22f), linear LineBox collision, and motion blur trails.
-    * **Stage 2 — Wide Sweeping Cleave**: Wide 220-degree horizontal polearm cleave covering front and flanks with heavy poise stagger.
-    * **Stage 3 — Triple Consecutive Rapid Stabs**: Flurry of 3 rapid linear thrusts (0.09s interval), each dealing exactly 30% of base weapon damage with multi-hit spark particles.
+    * **Stage 1 â€” Long Lunge with i-frames**: Forward thrust surge (elocity += forwardDir * 320.0f) with active evasion invulnerability (iFrameTimer = 0.22f), linear LineBox collision, and motion blur trails.
+    * **Stage 2 â€” Wide Sweeping Cleave**: Wide 220-degree horizontal polearm cleave covering front and flanks with heavy poise stagger.
+    * **Stage 3 â€” Triple Consecutive Rapid Stabs**: Flurry of 3 rapid linear thrusts (0.09s interval), each dealing exactly 30% of base weapon damage with multi-hit spark particles.
 
 * **Tactical Gear & Inventory Screen Overhaul (Image 1 Reference)**:
   * Top navigation bar with horizontal tabs (QUESTS | GEAR | INVENTORY | ABILITIES) featuring active glowing coral underline.
@@ -499,15 +501,15 @@ A comprehensive breakdown of all systems, gameplay mechanics, visual overhauls, 
 
 * **Tactical Frosted Realm Map Screen Overhaul (Image 2 Reference)**:
   * Frosted dark teal glass canvas with subtle Cartesian isometric grid overlay and glowing corner brackets.
-  * Header with decorative wing lines (—o— Game Stage —o—), 3 golden stars, and chronicle subtitle.
-  * Five numbered diamond waypoints (<1>–<5>) representing Ruined Castle, Crossroads, Zyphden Keep, Quarry Mines, and Northern Marches.
+  * Header with decorative wing lines (â€”oâ€” Game Stage â€”oâ€”), 3 golden stars, and chronicle subtitle.
+  * Five numbered diamond waypoints (<1>â€“<5>) representing Ruined Castle, Crossroads, Zyphden Keep, Quarry Mines, and Northern Marches.
   * Real-time cyan radar beacon pulsing on the active player stage, connected by luminous leylines.
   * Floating left stage inspection card with STAGE #X title, ability badges, threat rating, fragment count, and [DISCOVER MORE].
   * Hexagonal bottom-right call-to-action button ([ RESUME JOURNEY ]).
 
 * **Royal Halberd Weapon Archetype**: Added the 5th martial weapon to the player's arsenal. Features extended linear piercing thrusts (line box collision) that impale multiple foes with innate armor penetration, and a 2-stage heavy cleave combining a wide 220-degree sweeping axe cleave with a high-velocity forward pole-vault thrust. Fully integrated into Blacksmith Varek's Forge craft recipes (10 Ore Scraps + 35 Silver Shingles) and upgrade paths (+1 Refined, +2 Vanguard Polearm).
 
-* **Procedural Acoustic Ambience Soundscapes**: Real-time algorithmic audio generation synthesizing continuous background soundscapes without external audio files—howling gale winds across mountain ramparts, resonant sub-bass drops and cavern reverberations in the subterranean Quarry, and crackling hearth embers inside the Tavern and Forge.
+* **Procedural Acoustic Ambience Soundscapes**: Real-time algorithmic audio generation synthesizing continuous background soundscapes without external audio filesâ€”howling gale winds across mountain ramparts, resonant sub-bass drops and cavern reverberations in the subterranean Quarry, and crackling hearth embers inside the Tavern and Forge.
 
 * **In-Game Audio Mixer (`[C]` -> `AUDIO MIXER`)**: Interactive volume control sliders inside the settings modal providing real-time gain balancing for Master Gain, Combat Sound Effects (SFX), and Environmental Ambience, complete with interactive test triggers.
 
@@ -599,15 +601,15 @@ For more than five centuries, the Land of Tydeshire was consumed by unrelenting 
 
 Crowned *Charlz the Liege of Kings*, he divided the continent into five sovereign realms to govern peace:
 
-1. **Zyphden** — Realm of the Gale Winds and high wind-spires.
+1. **Zyphden** â€” Realm of the Gale Winds and high wind-spires.
 
-2. **Azshden** — Iron cliffs and coastal bastions.
+2. **Azshden** â€” Iron cliffs and coastal bastions.
 
-3. **Fleurshden** — Fertile river valleys and blooming thorns.
+3. **Fleurshden** â€” Fertile river valleys and blooming thorns.
 
-4. **Noirden** — Shrouded obsidian peaks and mists.
+4. **Noirden** â€” Shrouded obsidian peaks and mists.
 
-5. **Solsden** — Radiant sun-plains, golden altars, and the High Sanctuary.
+5. **Solsden** â€” Radiant sun-plains, golden altars, and the High Sanctuary.
 
 
 
@@ -627,7 +629,7 @@ The player begins their pilgrimage amidst the cold ashes of the southern sanctua
 
 
 
-### Lore Fragments Codex (I–X)
+### Lore Fragments Codex (Iâ€“X)
 
 The game world contains ten discoverable historical fragments documented inside the in-game Journal (`[I]` or `[TAB]`):
 
@@ -667,7 +669,7 @@ The game world contains ten discoverable historical fragments documented inside 
 
 > [!IMPORTANT]
 
-> **REMINDER — Lore Journal Navigation**: You can inspect newly gathered fragments at any time during gameplay by pressing `[I]` or `[TAB]`. Reading lore steles grants immediate narrative context and sheds light on enemy weaknesses across Tydeshire's five realms.
+> **REMINDER â€” Lore Journal Navigation**: You can inspect newly gathered fragments at any time during gameplay by pressing `[I]` or `[TAB]`. Reading lore steles grants immediate narrative context and sheds light on enemy weaknesses across Tydeshire's five realms.
 
 
 
@@ -729,7 +731,7 @@ The player awakes unarmed in an overgrown cathedral courtyard:
 
 > [!IMPORTANT]
 
-> **REMINDER — Sanctuary Ward**: You cannot approach the high altar until the initial Ruin Sentinel is defeated. Slaying the sentinel unseals the stone staircase leading to Zil's altar.
+> **REMINDER â€” Sanctuary Ward**: You cannot approach the high altar until the initial Ruin Sentinel is defeated. Slaying the sentinel unseals the stone staircase leading to Zil's altar.
 
 
 
@@ -755,13 +757,13 @@ A ruined wilderness connecting the southern ruins to the northern fortress:
 
 > [!TIP]
 
-> **Telegraph Clarity**: Cultist Slashers and Chargers display directional red cones and linear paths. Deathseeker Archers show laser aim lines. Void Pyromancers project 3-way trajectory lasers with flaring ground landing tinges—step aside with `[Q]` or deflect projectiles back with `[F]`!
+> **Telegraph Clarity**: Cultist Slashers and Chargers display directional red cones and linear paths. Deathseeker Archers show laser aim lines. Void Pyromancers project 3-way trajectory lasers with flaring ground landing tingesâ€”step aside with `[Q]` or deflect projectiles back with `[F]`!
 
 
 
 > [!IMPORTANT]
 
-> **REMINDER — Totem of Sanity**: Do not miss the secluded shrine in the eastern clearing of the Crossroads. Claiming the Totem of Sanity grants a permanent **+15% Stamina Regeneration** and **+10 Will** bonus when equipped in your Journal inventory!
+> **REMINDER â€” Totem of Sanity**: Do not miss the secluded shrine in the eastern clearing of the Crossroads. Claiming the Totem of Sanity grants a permanent **+15% Stamina Regeneration** and **+10 Will** bonus when equipped in your Journal inventory!
 
 
 
@@ -825,7 +827,7 @@ Cozy indoor retreat with a roaring fireplace, timber bar, and warm acoustics:
 
 > [!IMPORTANT]
 
-> **REMINDER — Tavern Progress Trigger**: The inner courtyard of the Royal Keep is guarded by sovereign sentinels. Speak with Tavernkeep Eldon in the Hearthside Tavern first to prompt Knight Lenon's arrival and receive your formal audience summons.
+> **REMINDER â€” Tavern Progress Trigger**: The inner courtyard of the Royal Keep is guarded by sovereign sentinels. Speak with Tavernkeep Eldon in the Hearthside Tavern first to prompt Knight Lenon's arrival and receive your formal audience summons.
 
 
 
@@ -902,7 +904,7 @@ Unlocked permanently upon completing the Chapter 1 storyline:
 
 > [!IMPORTANT]
 
-> **REMINDER — Arena Checkpoints**: Completing all 5 waves of the Royal Combat Arena crowns you the Champion of Zyphden and permanently records your victory in the game state.
+> **REMINDER â€” Arena Checkpoints**: Completing all 5 waves of the Royal Combat Arena crowns you the Champion of Zyphden and permanently records your victory in the game state.
 
 
 
@@ -938,7 +940,7 @@ Mitigated Damage = Raw Damage * [ 100 / (100 + Defense * (1 - Pierce)) ]
 
 > [!IMPORTANT]
 
-> **REMINDER — Armor vs. Pierce**: Enemies with heavy plate (such as Iron Brutes) heavily mitigate light sword strikes. Switch to the War Mace or land timed parry ripostes to pierce their defenses.
+> **REMINDER â€” Armor vs. Pierce**: Enemies with heavy plate (such as Iron Brutes) heavily mitigate light sword strikes. Switch to the War Mace or land timed parry ripostes to pierce their defenses.
 
 
 
@@ -986,7 +988,7 @@ Stagger Duration = Base Stagger * 100 / (100 + Will * 1.25)
 
 > [!IMPORTANT]
 
-> **REMINDER — Will Stat Mechanics**: Will does not reduce incoming numeric damage—it accelerates your recovery from physical poise breaks. Higher Will lets you recover and raise your guard before enemies can chain attacks.
+> **REMINDER â€” Will Stat Mechanics**: Will does not reduce incoming numeric damageâ€”it accelerates your recovery from physical poise breaks. Higher Will lets you recover and raise your guard before enemies can chain attacks.
 
 
 
@@ -1022,7 +1024,7 @@ Activating **Dash (`[Q]`)** triggers a rapid 8-directional burst with **0.25 sec
 
 > [!IMPORTANT]
 
-> **REMINDER — Dash Recovery Window**: While Dash grants 0.25s of complete invulnerability (`EVADED`), it has a weapon-dependent recovery cooldown (0.50s - 1.25s). Timing your dashes deliberately is far more effective than spamming.
+> **REMINDER â€” Dash Recovery Window**: While Dash grants 0.25s of complete invulnerability (`EVADED`), it has a weapon-dependent recovery cooldown (0.50s - 1.25s). Timing your dashes deliberately is far more effective than spamming.
 
 
 
@@ -1044,7 +1046,7 @@ Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0
 
 > [!IMPORTANT]
 
-> **REMINDER — Parry Guard Timing**: The active parry window lasts for exactly 0.24 seconds. Activate it just as the enemy's attack swing begins forward motion for a guaranteed stagger and the +50% counter-damage boost.
+> **REMINDER â€” Parry Guard Timing**: The active parry window lasts for exactly 0.24 seconds. Activate it just as the enemy's attack swing begins forward motion for a guaranteed stagger and the +50% counter-damage boost.
 
 
 
@@ -1058,7 +1060,7 @@ Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0
 
 > [!IMPORTANT]
 
-> **REMINDER — Potion Cooldown**: Health potions carry an intentional 7.0-second cooldown to prevent flask-spamming during intense boss duels. Monitor your visual action bar icon to track the remaining recovery time.
+> **REMINDER â€” Potion Cooldown**: Health potions carry an intentional 7.0-second cooldown to prevent flask-spamming during intense boss duels. Monitor your visual action bar icon to track the remaining recovery time.
 
 
 
@@ -1106,13 +1108,13 @@ The **Phlegmatic Composure** system governs the player's mental resilience, deli
 
   * **+15% Stagger Duration Penalty**: Vulnerable to extended enemy stagger chains.
 
-* **Composed (30.0 – 79.9)**:
+* **Composed (30.0 â€“ 79.9)**:
 
   * Baseline state of mental equilibrium (`POISE: XX [COMPOSED]`).
 
   * Normal recovery and standard stamina regeneration.
 
-* **Stoic Poise (80.0 – 100.0)**:
+* **Stoic Poise (80.0 â€“ 100.0)**:
 
   * Indicated by a radiant gold badge (`POISE: MAX [STOIC POISE]`).
 
@@ -1122,7 +1124,7 @@ The **Phlegmatic Composure** system governs the player's mental resilience, deli
 
 
 
-#### Active Ability — Phlegmatic Trance (`[SPACE]`)
+#### Active Ability â€” Phlegmatic Trance (`[SPACE]`)
 
 When Composure reaches maximum capacity (**100.0**), the player can press `[SPACE]` to enter the mystical **Phlegmatic Trance** for **5.0 seconds**:
 
@@ -1234,13 +1236,13 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 
 > [!TIP]
 
-> **In-Game Controls Overlay**: In the heat of battle, you don't need to pause or exit—simply press `[C]` at any moment to summon a semi-transparent HUD overlay showing all keybindings and combat shortcuts.
+> **In-Game Controls Overlay**: In the heat of battle, you don't need to pause or exitâ€”simply press `[C]` at any moment to summon a semi-transparent HUD overlay showing all keybindings and combat shortcuts.
 
 
 
 > [!IMPORTANT]
 
-> **REMINDER — Objectives Tracker**: Press `[O]` to expand or collapse the active Chapter 1 quest tracker. It tracks your current primary task, whether claiming your initial weapon or seeking audience with King Kreptu.
+> **REMINDER â€” Objectives Tracker**: Press `[O]` to expand or collapse the active Chapter 1 quest tracker. It tracks your current primary task, whether claiming your initial weapon or seeking audience with King Kreptu.
 
 
 
@@ -1248,17 +1250,17 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 
 Located at the bottom center of the HUD, the visual action bar provides real-time ability tracking:
 
-* **Slot 1 (`[Q]`)**: Dash — Icon, active evasion pulse, and recovery sweep.
+* **Slot 1 (`[Q]`)**: Dash â€” Icon, active evasion pulse, and recovery sweep.
 
-* **Slot 2 (`[LMB]`)**: Light Attack — Cadence recovery wipe.
+* **Slot 2 (`[LMB]`)**: Light Attack â€” Cadence recovery wipe.
 
-* **Slot 3 (`[RMB]`)**: Heavy Attack — Multi-stage cooldown sweep with numeric timer (`2.1s`, `3.6s`).
+* **Slot 3 (`[RMB]`)**: Heavy Attack â€” Multi-stage cooldown sweep with numeric timer (`2.1s`, `3.6s`).
 
-* **Slot 4 (`[F]`)**: Parry — Radiant gold when ready, cyan flash on active guard, dark recovery wipe.
+* **Slot 4 (`[F]`)**: Parry â€” Radiant gold when ready, cyan flash on active guard, dark recovery wipe.
 
-* **Slot 5 (`[SPACE]`)**: Phlegmatic Trance — Cyan focus medallion glowing when ready (`TRANCE READY [SPACE]`), countdown sweep when active (`5.0s`).
+* **Slot 5 (`[SPACE]`)**: Phlegmatic Trance â€” Cyan focus medallion glowing when ready (`TRANCE READY [SPACE]`), countdown sweep when active (`5.0s`).
 
-* **Slot 6 (`[1]`)**: Health Flask — Emerald theme, stock badge (`xN`), and **7.0s countdown timer**.
+* **Slot 6 (`[1]`)**: Health Flask â€” Emerald theme, stock badge (`xN`), and **7.0s countdown timer**.
 
 
 
@@ -1314,23 +1316,23 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 | **Unarmed** | None | None | 0.75s | Starting state in cathedral awakening. |
 
-| **Crusader's Broadsword** | 18 dmg (110° arc) | 70 dmg (2-Stage cleave) | 0.85s | Balanced reach. Heavy cleave consists of Stage 1 wide 160° sweep (42 dmg) followed by Stage 2 upward line/box shockwave (28 dmg). |
+| **Crusader's Broadsword** | 18 dmg (110Â° arc) | 70 dmg (2-Stage cleave) | 0.85s | Balanced reach. Heavy cleave consists of Stage 1 wide 160Â° sweep (42 dmg) followed by Stage 2 upward line/box shockwave (28 dmg). |
 
-| **Truth Seeker (Partial)** | 26 / 24 dmg (2-Hit) | 78 dmg (Dual 360° + Beam) | 0.65s | Consecrated relic blade. Light attack chains a slash into an upward radiant slice. Heavy unleashes dual 360° sweeps (42 + 36 dmg) and fires a holy piercing beam (22 dmg, 10% pierce). |
+| **Truth Seeker (Partial)** | 26 / 24 dmg (2-Hit) | 78 dmg (Dual 360Â° + Beam) | 0.65s | Consecrated relic blade. Light attack chains a slash into an upward radiant slice. Heavy unleashes dual 360Â° sweeps (42 + 36 dmg) and fires a holy piercing beam (22 dmg, 10% pierce). |
 
-| **Dual Daggers** | 11 dmg (**0 Stamina**) | 60 dmg (Lunge + Spin) | 0.50s | Zero stamina light attacks. Heavy executes a high-velocity piercing lunge (**22 dmg + i-frames**) followed by a 360° whirlwind (**38 dmg**). |
+| **Dual Daggers** | 11 dmg (**0 Stamina**) | 60 dmg (Lunge + Spin) | 0.50s | Zero stamina light attacks. Heavy executes a high-velocity piercing lunge (**22 dmg + i-frames**) followed by a 360Â° whirlwind (**38 dmg**). |
 
-| **War Mace** | 28 dmg (Frontal Smack) | 96 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes an earth-shattering overhead smash followed by a 360° ground tremor that **ignores 20% of enemy defense**. |
+| **War Mace** | 28 dmg (Frontal Smack) | 96 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes an earth-shattering overhead smash followed by a 360Â° ground tremor that **ignores 20% of enemy defense**. |
 
-| **Royal Halberd** | 22 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.95s | Extended reach polearm. Heavy combo features Stage 1 invulnerable vault lunge (32 dmg), Stage 2 wide 220° sweep (44 dmg), and Stage 3 rapid multi-thrust flurry (58/72/88 dmg). |
+| **Royal Halberd** | 22 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.95s | Extended reach polearm. Heavy combo features Stage 1 invulnerable vault lunge (32 dmg), Stage 2 wide 220Â° sweep (44 dmg), and Stage 3 rapid multi-thrust flurry (58/72/88 dmg). |
 
-| **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360° whirlwind, and an explosive shadow decoy. |
+| **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360Â° whirlwind, and an explosive shadow decoy. |
 
-| **Windrunner's Recurve** | 16 dmg (Gale Arrow) | 58 dmg (Gale Piercer Drill) | 0.65s | Ranged combat bow. Light attack fires direct non-piercing gale arrows (0.52s cd). Heavy channels a high-speed Gale Piercer Drill Arrow with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
+| **Windrunner's Recurve** | 12 / 15 / 18 dmg (Gale Arrow) | 46 / 56 / 68 dmg (Gale Piercer Drill) | 0.28s | Acrobatic wind bow. Fires rapid non-piercing gale arrows (0.28s cd) with impact Windburst AoE (radius 55px, 30% weapon damage). Heavy channels Gale Piercer Drill with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
 
-| **Sun-Forged Claymore** | 34 dmg (120° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
+| **Sun-Forged Claymore** | 34 dmg (120Â° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
 
-| **Storm Glaive** | 28 dmg (Spear Thrust) | 78 dmg (Tempest Vortex) | 0.70s | Vanguard polearm. Light attack delivers an extended linear thrust. Heavy executes a 240° tempest cleave with heavy posture knockback. |
+| **Storm Glaive** | 28 dmg (Spear Thrust) | 78 dmg (Tempest Vortex) | 0.70s | Vanguard polearm. Light attack delivers an extended linear thrust. Heavy executes a 240Â° tempest cleave with heavy posture knockback. |
 
 
 
@@ -1386,7 +1388,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 | **Totem of Insanity** | Cathedral crypt reliquary | **+30% Overall Damage** | **-10% Armor Defense** | Arterial Crimson (`[255, 65, 80]`) |
 
-| **Totem of Mist** | East Crossroads shroud shrine | **+20% Stamina Regen, +5% Cooldown Speed, +5 Will** | **-5% Overall Damage** | Vapor Azure (`[140, 210, 255]`) |
+| **Totem of Mist** | East Crossroads shroud shrine | **+20% Crit Chance, +35% Crit Damage, Summons Mist Fairy companion with 14s Healing Orb spawns (+30 HP)** | **-15% Defense, -25 Max HP** | Vapor Azure (`[140, 210, 255]`) |
 
 | **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
 
@@ -1408,7 +1410,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 > [!IMPORTANT]
 
-> **REMINDER — Heavy Attack Commitment**: Heavy attacks (`[RMB]`) deliver massive burst damage but commit your character to the swing trajectory. Unleash heavy attacks when the target is reeling from a stagger or during recovery windows.
+> **REMINDER â€” Heavy Attack Commitment**: Heavy attacks (`[RMB]`) deliver massive burst damage but commit your character to the swing trajectory. Unleash heavy attacks when the target is reeling from a stagger or during recovery windows.
 
 
 
@@ -1434,7 +1436,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 | :--- | :--- | :--- | :--- | :--- | :--- |
 
-| **Cultist Slasher** | Melee Vanguard | 8 | 10 | Amber/Red Cone (95°, 115px) | Swift forward slash. Sidestep or parry right before impact to stagger for 1.95s. |
+| **Cultist Slasher** | Melee Vanguard | 8 | 10 | Amber/Red Cone (95Â°, 115px) | Swift forward slash. Sidestep or parry right before impact to stagger for 1.95s. |
 
 | **Deathseeker Archer** | Ranged Kiting | 6 | 15 | Red Laser Aim Line (360px) | Retreats when approached; fires piercing bolts. Parry reflects bolt directly back. |
 
@@ -1456,7 +1458,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 > [!IMPORTANT]
 
-> **REMINDER — Red Telegraphed Attacks**: Attacks displaying red ground telegraphs (cones, lines, circles) cannot be interrupted by light attacks. Either dodge out with `[Q]` or parry at the exact moment of impact.
+> **REMINDER â€” Red Telegraphed Attacks**: Attacks displaying red ground telegraphs (cones, lines, circles) cannot be interrupted by light attacks. Either dodge out with `[Q]` or parry at the exact moment of impact.
 
 
 
@@ -1470,7 +1472,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 * **Moveset**: Upward Radiant Box Slice, Dawnfire 360 Tremor Sweep, and Holy Beam piercing blast.
 
-* **Special Phase**: Features a telegraphed follow-up cleave preceded by a **0.42s blade gleam telegraph** (140° arc, 165px range).
+* **Special Phase**: Features a telegraphed follow-up cleave preceded by a **0.42s blade gleam telegraph** (140Â° arc, 165px range).
 
 * **Strategy**: Do not get greedy during his 3-hit combo. Parry his initial slice, evade the 360 sweep with `[Q]`, and punish during his beam recovery.
 
@@ -1516,7 +1518,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
   * **Phase 4 (Radial Nova Shockwave)**: Radiates an 8-directional elemental star burst, demanding precise timing on dash i-frames (`[Q]`) or parry reflections (`[F]`).
 
-* **Reward**: Drops the **Elemental Core Totem**, 12–18 Ore Scraps, 150–250 Silver Shingles, and 3 Health Elixirs.
+* **Reward**: Drops the **Elemental Core Totem**, 12â€“18 Ore Scraps, 150â€“250 Silver Shingles, and 3 Health Elixirs.
 
 * **Tactical Strategy**: With 55 Defense and 90 Will, the Elemental Golem is nearly impervious to light spam. Utilize the **War Mace** or the Crusader Broadsword's 2-stage heavy cleave to trigger **SHELL SHATTERED!** (-35% defense). Keep mobile during projectile salvos, parry incoming shards to deflect damage back into the titan, and trigger **Phlegmatic Trance (`[SPACE]`)** at 100 Composure for 5.0 seconds of invulnerability and automatic projectile reflection.
 
@@ -1524,7 +1526,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 > [!IMPORTANT]
 
-> **REMINDER — Boss Stagger Windows**: Bosses possess high Will (60–90) and recover from staggers quickly. Never commit to more than a 2-hit sequence while a boss is reeling.
+> **REMINDER â€” Boss Stagger Windows**: Bosses possess high Will (60â€“90) and recover from staggers quickly. Never commit to more than a 2-hit sequence while a boss is reeling.
 
 
 
@@ -1542,37 +1544,37 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 Phlegmatic/
 
-├── assets/                     # Custom drop directory for sprites & transition illustrations
+â”œâ”€â”€ assets/                     # Custom drop directory for sprites & transition illustrations
 
-│   └── README.md               # Asset specifications (dimensions & formats)
+â”‚   â””â”€â”€ README.md               # Asset specifications (dimensions & formats)
 
-├── bin/                        # Precompiled 64-bit Windows executable
+â”œâ”€â”€ bin/                        # Precompiled 64-bit Windows executable
 
-├── src/
+â”œâ”€â”€ src/
 
-│   ├── main.cpp                # Game entry point & window lifecycle
+â”‚   â”œâ”€â”€ main.cpp                # Game entry point & window lifecycle
 
-│   ├── core/                   # Engine config, procedural sound, particle emitter
+â”‚   â”œâ”€â”€ core/                   # Engine config, procedural sound, particle emitter
 
-│   ├── combat/                 # Weapons, armor, collision, math formulas, projectiles
+â”‚   â”œâ”€â”€ combat/                 # Weapons, armor, collision, math formulas, projectiles
 
-│   ├── world/                  # Level geometry, map environments, interactable monoliths
+â”‚   â”œâ”€â”€ world/                  # Level geometry, map environments, interactable monoliths
 
-│   ├── entities/               # Player, enemy AI, modular vector renderers
+â”‚   â”œâ”€â”€ entities/               # Player, enemy AI, modular vector renderers
 
-│   ├── rendering/              # Procedural vector silhouettes & asset loader
+â”‚   â”œâ”€â”€ rendering/              # Procedural vector silhouettes & asset loader
 
-│   └── states/                 # State coordinators, handlers, and modular HUD/UI
+â”‚   â””â”€â”€ states/                 # State coordinators, handlers, and modular HUD/UI
 
-├── vendor/raylib/              # Precompiled Raylib 6.2 headers & static libraries
+â”œâ”€â”€ vendor/raylib/              # Precompiled Raylib 6.2 headers & static libraries
 
-├── build.bat                   # Automated compilation batch script
+â”œâ”€â”€ build.bat                   # Automated compilation batch script
 
-├── run.bat                     # Launcher script
+â”œâ”€â”€ run.bat                     # Launcher script
 
-├── documentation.md            # Complete game design & technical manual
+â”œâ”€â”€ documentation.md            # Complete game design & technical manual
 
-└── CMakeLists.txt              # Cross-platform CMake configuration
+â””â”€â”€ CMakeLists.txt              # Cross-platform CMake configuration
 
 ```
 
@@ -1636,13 +1638,13 @@ Custom assets placed in `assets/` are automatically loaded at launch:
 
 > [!TIP]
 
-> **Custom Illustration Auto-Detection**: Drop any custom 16:9 illustration into `assets/zyphden_transition.png`. You do not need to recompile the project—the engine detects the file on next launch and replaces the blueprint placeholder automatically!
+> **Custom Illustration Auto-Detection**: Drop any custom 16:9 illustration into `assets/zyphden_transition.png`. You do not need to recompile the projectâ€”the engine detects the file on next launch and replaces the blueprint placeholder automatically!
 
 
 
 > [!IMPORTANT]
 
-> **REMINDER — Zero External Asset Dependencies**: By default, the engine generates all audio waveforms and vector character models algorithmically. The game can run fully standalone without requiring any external PNG or WAV files.
+> **REMINDER â€” Zero External Asset Dependencies**: By default, the engine generates all audio waveforms and vector character models algorithmically. The game can run fully standalone without requiring any external PNG or WAV files.
 
 
 
@@ -1702,7 +1704,7 @@ Standalone executables are bundled directly in the repository:
 
 > [!IMPORTANT]
 
-> **REMINDER — Clean Rebuilds**: If you modify core struct layouts or headers, run `build.bat` to trigger a clean GCC compilation. The script compiles all translation units with optimization level `-O2` in under 5 seconds.
+> **REMINDER â€” Clean Rebuilds**: If you modify core struct layouts or headers, run `build.bat` to trigger a clean GCC compilation. The script compiles all translation units with optimization level `-O2` in under 5 seconds.
 
 
 
