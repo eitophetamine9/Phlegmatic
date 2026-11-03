@@ -74,6 +74,7 @@ private:
     bool galeArcherSummoned = false;
     bool galeArcherDefeated = false;
     float ambientMistTimer = 0.0f;
+    float forestWindTimer = 0.0f;
     float entryBannerTimer = 0.0f;
     float gateCooldown = 0.0f;
     Vector2 altarPosition = { 1130.0f, 650.0f };

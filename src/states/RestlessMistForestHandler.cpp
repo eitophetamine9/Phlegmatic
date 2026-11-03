@@ -140,7 +140,7 @@ void RestlessMistForestHandler::Update(
         return d.IsCollected();
     }), lootDrops.end());
 
-    // Ambient floating mist particles
+    // Ambient floating mist particles and woodland audio
     ambientMistTimer += dt;
     if (ambientMistTimer >= 0.16f) {
         ambientMistTimer = 0.0f;
@@ -150,6 +150,15 @@ void RestlessMistForestHandler::Update(
         };
         particles.SpawnSparks(mistPos, Color{ 100, 240, 215, 60 }, 3, 35.0f);
     }
+
+    forestWindTimer += dt;
+    if (forestWindTimer >= 6.8f) {
+        forestWindTimer = 0.0f;
+        SoundFX::PlayDash();
+    }
+
+    // Dynamic boss audio ducking
+    SoundFX::SetBossCombatMode(galeArcherSummoned && !galeArcherDefeated);
 
     // Check dead enemies, boss defeat, and spawner cooldowns
     for (auto it = enemies.begin(); it != enemies.end(); ) {

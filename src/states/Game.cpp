@@ -3382,9 +3382,10 @@ void Game::Update(float dt) {
 
 
 
+    bool isArenaBossWave = (waveManager.GetCurrentWave() % 5 == 0);
+    SoundFX::SetBossCombatMode(isArenaBossWave);
+
     bool victory = false;
-
-
 
     if (waveManager.Update(dt, aliveCount, enemies, projectiles, particles, { 1200.0f, 900.0f }, victory)) {
 

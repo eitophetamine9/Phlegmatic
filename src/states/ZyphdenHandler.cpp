@@ -850,7 +850,32 @@ void ZyphdenHandler::Update(
 
     }
 
+    // Environmental Ambience Audio Logic
+    SoundFX::SetBossCombatMode(sparActive);
 
+    if (inForge || (!inTavern && !inRoyalKeep && Vector2Distance(player.GetPosition(), { 430.0f, 656.0f }) <= 320.0f)) {
+        forgeAnvilTimer += dt;
+        if (forgeAnvilTimer >= 4.2f) {
+            forgeAnvilTimer = 0.0f;
+            float distFactor = inForge ? 1.0f : (1.0f - Vector2Distance(player.GetPosition(), { 430.0f, 656.0f }) / 320.0f);
+            SoundFX::PlayAnvilStrike(0.55f * distFactor);
+            if (inForge) {
+                particles.SpawnSparks({ 750.0f, 530.0f }, Color{ 255, 215, 80, 255 }, 6, 45.0f);
+            }
+        }
+    } else {
+        forgeAnvilTimer = 0.0f;
+    }
+
+    if (inTavern) {
+        tavernHearthTimer += dt;
+        if (tavernHearthTimer >= 3.6f) {
+            tavernHearthTimer = 0.0f;
+            SoundFX::PlayHearthCrackle(0.42f);
+        }
+    } else {
+        tavernHearthTimer = 0.0f;
+    }
 
     if (!isDialogueOpen) {
 

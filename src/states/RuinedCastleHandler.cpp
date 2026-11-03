@@ -141,6 +141,9 @@ void RuinedCastleHandler::Update(
 
     Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 
+    // Dynamic boss audio ducking
+    SoundFX::SetBossCombatMode(zilEncounterActive);
+
     if (isZilDialogueOpen) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             isZilDialogueOpen = false;
