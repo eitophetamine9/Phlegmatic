@@ -2674,7 +2674,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 40, 56, 82, 255 } : (isT3Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (9)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (12)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     // Divider Line
     DrawLine((int)modalX + 28, (int)modalY + 112, (int)(modalX + modalW - 28), (int)modalY + 112, Color{ 70, 95, 135, 160 });
@@ -2699,7 +2699,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             int shadowCost;
         };
 
-        ArmorCraftRecipe armorRecipes[9] = {
+        ArmorCraftRecipe armorRecipes[12] = {
             { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw slag.", 0, 0 },
             { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap breastplate. Stout physical resilience.", 0, 0 },
             { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal greaves granting stable footwork.", 0, 0 },
@@ -2708,10 +2708,13 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense stone greaves that crush gravel with each step.", 0, 0 },
             { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Mist-woven cowl that sharpens wind reflexes.", 2, 1 },
             { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence.", 4, 2 },
-            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1 }
+            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1 },
+            { 0, (int)HelmetType::VANGUARD_GREATHELM, "Vanguard Greathelm", "HELMET", 12, 45, "+8 Def | +10 HP | +20 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Impenetrable full-face visor built for frontline assault.", 0, 0 },
+            { 1, (int)ChestplateType::VANGUARD_CHEST, "Vanguard Bastion Mail", "CHESTPLATE", 18, 65, "+16 Def | +30 HP | +12 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Heavy iron hauberk and pauldron plates for frontline sieges.", 0, 0 },
+            { 2, (int)LeggingsType::VANGUARD_GREAVES, "Vanguard Heavy Legguards", "LEGGINGS", 14, 50, "+8 Def | +10 HP | +8 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Massive banded greaves anchoring against concussive impacts.", 0, 0 }
         };
 
-        int totalRecipes = 9;
+        int totalRecipes = 12;
         int itemsPerPage = 4;
         int totalPages = (totalRecipes + itemsPerPage - 1) / itemsPerPage;
         if (armorForgePage < 0) armorForgePage = 0;

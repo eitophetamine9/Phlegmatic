@@ -276,9 +276,9 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 ArmorSet::VANGUARD_BASTION,
                 "Vanguard Bastion",
                 "Unstoppable Phalanx",
-                "+40 Max HP & hyper-armor during heavy windups. [Halberd & Glaive Synergy]: Reach extended +25px and heavy cleaves deal +25% poise damage.",
-                "Seismic Quake Slam",
-                "Heavy jump stomp dealing 50 AoE damage, shredding 25% armor, and knocking approaching enemies flat.",
+                "+50 Max HP & unbreakable hyper-armor during attacks. [Halberd & Glaive Synergy]: Reach extended +35px, +25% armor penetration, and cleaves unleash concussive shockwaves.",
+                "Phalanx Vanguard Charge",
+                "Unstoppable shield & polearm rush (180px) dealing 65 physical damage, crushing enemy armor (-30% for 5s), and granting 4s Fortification shield (+30% defense).",
                 22.0f
             };
         case ArmorSet::SHADOWSTRIDER:
@@ -286,7 +286,7 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 ArmorSet::SHADOWSTRIDER,
                 "Shadowstrider Garb",
                 "Veil of the Mist",
-                "+20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge i-frames. [Daggers & Bow Synergy]: +15% Crit Chance. Every 5th dash leaves a swirling Mist Trail that inflicts damage over time.",
+                "+20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge i-frames. [Daggers & Bow Synergy]: +15% Crit Chance. Perfect evades have a 15% chance to trigger an AoE Smoke Mist that increases evasion and poisons enemies inside.",
                 "Shadow Decoy & Vanish",
                 "Vaporizes into mist with 0.5s invulnerability. Leaves an illusion decoy drawing aggro before exploding for 40 dmg.",
                 25.0f

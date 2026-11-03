@@ -535,21 +535,21 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1f)
   * Replaced cramped weapon text labels in Section 2 with clean vector weapon icons for all 9 weapons (SWORD, DAGGERS, MACE, HALBERD, TRUTH_SEEKER, ZEPHYR_DAGGERS, WINDRUNNER_RECURVE, SUN_CLAYMORE, STORM_GLAIVE), upgrade badges (+1, +2), equipped pips, and floating hover tooltips.
   * Streamlined weapon drawer cards: removed cramped multi-line description paragraphs; added 40x40 icon boxes, 14pt titles, and clean 12pt stats lines.
 
-- Totem of Mist Companion Revamp:
+- Totem of Mist Companion Revamp & Dynamic Tracking:
   * Replaced damage reduction with -15% defense multiplier and -25 Max Health penalty.
-  * Summons an orbiting Mist Fairy companion granting +20% Critical Chance and +35% Critical Damage.
-  * Mist Fairy periodically generates restorative healing orbs (+30 HP on contact) with floating bobbing visual effects.
+  * Summons an ethereal Mist Fairy companion that dynamically follows the player with smooth interpolation and leash snapping (>260px distance).
+  * Grants +20% Critical Chance and +35% Critical Damage; periodically generates restorative healing orbs every 14 seconds (+30 HP on contact).
 
-- Windrunner's Recurve Bow Rebalance:
-  * Light attack cooldown nerfed from 0.32s to 0.52s; damage scaled to 16/20/24 light, 58/70/82 heavy.
-  * Light arrows no longer pierce infinitely (proj.SetPiercing(false)).
+- Windrunner's Recurve Bow Rebalance & Windburst AoE:
+  * Light arrows no longer pierce enemies; on impact, arrows trigger a Windburst AoE (55px radius) dealing 30% of weapon damage to nearby surrounding enemies.
+  * Fast attack speed (0.28s cooldown, 8 stamina cost); damage tuned to 12/15/18 light, 46/56/68 heavy.
   * Heavy attack fires Gale Piercer Drill Arrow with drawn bowstring visuals, concentric wind rings, 50% defense pierce, on-hit Armor Fracture (-40% enemy defense for 4s), and 1.2s stun/stagger.
 
-- Armor Weapon Synergies & Shadowstrider Tuning:
+- Armor Weapon Synergies & Shadowstrider / Vanguard Overhaul:
+  * Vanguard Bastion: Added craftable recipes at Blacksmith Varek's Armor Forge (12 recipes across 3 pages: Greathelm, Bastion Mail, Heavy Legguards). Set bonus grants +50 Max HP and unbreakable hyper-armor during attacks. Halberd & Glaive synergy: +35px reach, +25% armor penetration, and concussive shockwaves. Special skill [V]: Phalanx Vanguard Charge (180px rush, 65 damage, -30% armor shred for 5s, 1.8s stun, 50 HP Fortification shield).
+  * Shadowstrider: Daggers & Bow synergy (+15% crit chance). Removed 5th dash trail; perfect evades roll a 15% chance to spawn an AoE Smoke Mist (95px radius, 6s duration) that grants the player 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
   * Commoner's Scrap: Sword synergy (+15% attack speed, -25% stamina cost).
   * Crusader Plate: Truth Seeker synergy (+25% holy damage, +20% beam defense pierce).
-  * Vanguard Bastion: Halberd & Glaive synergy (+25px reach, +25% poise damage).
-  * Shadowstrider: Daggers & Bow synergy (+15% crit chance). Removed dash cd reduction; tuned dash velocity to 1.10x; every 5th dash leaves a lingering Mist Trail zone dealing periodic DoT and defense pierce.
   * Forged Scrap Iron: War Mace synergy (-25% Armor Fracture, +50% composure).
   * Basalt Golem: Sun Claymore synergy (secondary molten shockwave dealing +30 earth damage with unbreakable hyper-armor).
 

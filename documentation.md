@@ -183,24 +183,25 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, combat f
   * Replaced cramped text strings in Section 2 weapon slots with clean vector weapon icons for all 9 weapons (DrawWeaponSlotIcon), upgrade level badges (+1, +2), active equip pips, and floating hover tooltips showing weapon name, tier, and damage statistics.
   * Streamlined weapon selection drawer cards by removing cramped multi-line description text blocks and adding dedicated 40x40 weapon icon boxes, large 14pt titles, and clean 12pt stats lines.
 
-* **Totem of Mist Companion Revamp**:
+* **Totem of Mist Companion Revamp & Dynamic Tracking**:
   * Rebalanced TotemType::TOTEM_MIST: removed the damage output penalty, replaced with a -15% defense multiplier and a -25 Max Health penalty.
-  * Summons an orbiting Mist Fairy companion granting +20% Critical Chance and +35% Critical Damage.
-  * Mist Fairy periodically generates restorative healing orbs (+30 HP on contact) with floating bobbing visual effects and pickup radius collision.
+  * Summons an ethereal Mist Fairy companion that dynamically follows the player with smooth interpolation and leash snapping (>260px distance).
+  * Mist Fairy grants +20% Critical Chance and +35% Critical Damage, and periodically generates restorative healing orbs every 14 seconds (+30 HP on contact) with floating bobbing visual effects and pickup radius collision.
 
-* **Windrunner's Recurve Bow Rebalance & Heavy Attack Stun**:
-  * Nerfed light attack speed (cooldown increased from 0.32s to 0.52s) and reduced damage output across all upgrade levels (16/20/24 light, 58/70/82 heavy).
-  * Light arrows no longer pierce infinitely (proj.SetPiercing(false)).
+* **Windrunner's Recurve Bow Rebalance & Impact Windburst**:
+  * Light attack arrows no longer pierce enemies; instead, upon impact, arrows trigger a Windburst AoE (55px radius) dealing 30% of weapon damage to nearby surrounding enemies.
+  * Rebalanced damage and attack cadence: light damage adjusted to 12 / 15 / 18 (base / refined / masterwork) with high attack speed (0.28s cooldown, 8 stamina cost); heavy damage scaled to 46 / 56 / 68.
   * Heavy attack fires Gale Piercer Drill Arrow with drawn bowstring charging visuals, concentric wind rings, 50% defense pierce, on-hit Armor Fracture (-40% enemy defense for 4s), and 1.2s stun/stagger.
 
-* **Armor Weapon Synergies & Shadowstrider Tuning**:
+* **Armor Weapon Synergies & Shadowstrider / Vanguard Overhaul**:
   * Added tailored weapon synergies for each armor set:
     * Commoner's Scrap: +20% Stamina Regen & +15% Loot Find; Sword synergy grants +15% light attack speed and -25% stamina cost.
     * Crusader Plate: +20% Defense & +25 Will; Truth Seeker & Broadsword synergy grants +25% holy damage and +20% beam defense pierce.
-    * Vanguard Bastion: +40 Max HP & heavy hyper-armor; Halberd & Glaive synergy extends weapon reach +25px with +25% poise damage.
-    * Shadowstrider: +20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes; Daggers & Bow synergy grants +15% Crit Chance. Removed -50% dash cooldown reduction; tuned dash velocity multiplier to 1.10x; every 5th dash releases a lingering Mist Trail zone dealing periodic DoT and defense pierce.
+    * Vanguard Bastion: +50 Max HP & unbreakable hyper-armor during attacks; Halberd & Glaive synergy extends weapon reach +35px with +25% armor penetration and concussive shockwaves. Special skill [V]: Phalanx Vanguard Charge (rushes 180px, deals 65 damage, -30% armor shred for 5s, 1.8s stun, and 50 HP Fortification shield).
+    * Shadowstrider: +20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes; Daggers & Bow synergy grants +15% Crit Chance. Removed 5th dash trail; instead, every perfect evade rolls a 15% chance to summon an AoE Smoke Mist (95px radius, 6s duration) that grants the player 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
     * Forged Scrap Iron: +18 Defense, +20% Poise Damage; War Mace synergy inflicts -25% Armor Fracture and grants +50% extra composure on hit.
     * Basalt Golem: +35 Defense, 70% knockback resistance; Sun Claymore synergy unleashes a secondary molten shockwave (+30 earth damage) with unbreakable hyper-armor.
+  * Blacksmith Varek's Armor Forge expanded to 12 modular craft recipes across 3 paginated pages (2x2 grid), adding craftable Vanguard Greathelm, Vanguard Bastion Mail, and Vanguard Heavy Legguards.
 
 * **Loot Economy Tuning**:
   * Increased Essence of Mist drop probability from Gale Bandits in the Restless Mist Forest from 20% to 38%.
@@ -385,11 +386,11 @@ A comprehensive technical breakdown of all systems, gameplay mechanics, modular 
        * *Passive Bonus*: +20% Total Defense, +25 Will stat.
        * *Active Skill*: **Dawnfire Aegis** ([V], 35s Cooldown) â€” Summons a 60 HP holy light barrier for 6s that absorbs all incoming damage and bursts with radiant sparks upon expiration.
     3. **Vanguard Bastion Set**:
-       * *Passive Bonus*: +40 Max Health, micro-stagger immunity (hyper-armor) during heavy attack windups.
-       * *Active Skill*: **Seismic Quake Slam** ([V], 22s Cooldown) â€” Slams the ground with a 200px shockwave dealing 50 damage, shredding enemy armor by 25% for 4s, and knocking enemies flat (1.8s stun).
+       * *Passive Bonus*: +50 Max HP & unbreakable hyper-armor during attacks. [Halberd & Glaive Synergy]: Reach extended +35px, +25% armor penetration, and cleaves unleash concussive shockwaves.
+       * *Active Skill*: **Phalanx Vanguard Charge** ([V], 22s Cooldown) - Rushes forward 180px, deals 65 damage, -30% armor shred for 5s, 1.8s stun, and grants a 50 HP Fortification shield for 4s.
     4. **Shadowstrider Set**:
-       * *Passive Bonus*: +15% Movement Speed, -35% Dash Cooldown, +25% Dash Distance.
-       * *Active Skill*: **Shadow Decoy & Vanish** ([V], 25s Cooldown) â€” Grants 0.5s i-frames, blinks the player forward 70px, and leaves behind an ethereal decoy that draws enemy aggro before detonating for 40 shadow damage.
+       * *Passive Bonus*: +20% Movement Speed, -30% Dash Stamina Cost, +0.10s Dodge iframes. [Daggers & Bow Synergy]: +15% Critical Chance. Perfect evades roll a 15% chance to summon an AoE Smoke Mist (95px radius, 6s duration) that grants 40% evasion while inside and inflicts 14 poison DoT every 0.45s to trapped enemies.
+       * *Active Skill*: **Shadow Decoy & Vanish** ([V], 25s Cooldown) - Grants 0.5s i-frames, blinks the player forward 70px, and leaves behind an ethereal decoy that draws enemy aggro before detonating for 40 shadow damage.
     5. **Forged Scrap Iron Set**:
        * *Passive Bonus*: +18 Flat Defense, +15% Poise Stagger Damage.
        * *Active Skill*: **Ironclad Spike Wall** ([V], 25s Cooldown) â€” Enters a 6s bristling iron stance with hyper-armor that reflects 40% of incoming melee strike damage back at attackers.
@@ -1326,7 +1327,7 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 | **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360° whirlwind, and an explosive shadow decoy. |
 
-| **Windrunner's Recurve** | 16 dmg (Gale Arrow) | 58 dmg (Gale Piercer Drill) | 0.65s | Ranged combat bow. Light attack fires direct non-piercing gale arrows (0.52s cd). Heavy channels a high-speed Gale Piercer Drill Arrow with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
+| **Windrunner's Recurve** | 12 / 15 / 18 dmg (Gale Arrow) | 46 / 56 / 68 dmg (Gale Piercer Drill) | 0.28s | Acrobatic wind bow. Fires rapid non-piercing gale arrows (0.28s cd) with impact Windburst AoE (radius 55px, 30% weapon damage). Heavy channels Gale Piercer Drill with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
 
 | **Sun-Forged Claymore** | 34 dmg (120° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
 
@@ -1386,7 +1387,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 | **Totem of Insanity** | Cathedral crypt reliquary | **+30% Overall Damage** | **-10% Armor Defense** | Arterial Crimson (`[255, 65, 80]`) |
 
-| **Totem of Mist** | East Crossroads shroud shrine | **+20% Stamina Regen, +5% Cooldown Speed, +5 Will** | **-5% Overall Damage** | Vapor Azure (`[140, 210, 255]`) |
+| **Totem of Mist** | East Crossroads shroud shrine | **+20% Crit Chance, +35% Crit Damage, Summons Mist Fairy companion with 14s Healing Orb spawns (+30 HP)** | **-15% Defense, -25 Max HP** | Vapor Azure (`[140, 210, 255]`) |
 
 | **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
 

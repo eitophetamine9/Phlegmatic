@@ -873,13 +873,16 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawCircleLines((int)orb.position.x, (int)orb.position.y, 9.0f * pulse, Color{ 120, 255, 210, 220 });
     }
 
-    // Shadowstrider 5th Dash Mist Trail Zones
-    for (const auto& zone : player.GetMistTrailZones()) {
+    // Shadowstrider Evasion Smoke Mist Zones
+    for (const auto& zone : player.GetSmokeMistZones()) {
         if (!zone.active) continue;
-        float alpha = fminf(1.0f, zone.lifetime / 1.5f);
-        Color mCol = Color{ 70, 230, 200, (unsigned char)(80 * alpha) };
-        DrawCircleGradient(zone.position, zone.radius, mCol, Color{ 0, 0, 0, 0 });
-        DrawCircleLines((int)zone.position.x, (int)zone.position.y, zone.radius * 0.7f, Color{ 100, 245, 215, (unsigned char)(120 * alpha) });
+        float alpha = fminf(1.0f, zone.duration / 2.0f);
+        Color smokeCol = Color{ 70, 40, 110, (unsigned char)(110 * alpha) };
+        DrawCircleGradient(zone.position, zone.radius, smokeCol, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)zone.position.x, (int)zone.position.y, zone.radius * 0.85f, Color{ 140, 80, 220, (unsigned char)(130 * alpha) });
+        // Poisonous inner toxic mist ring
+        float pulse = 0.85f + 0.15f * sinf((float)GetTime() * 4.0f + zone.position.x);
+        DrawCircleLines((int)zone.position.x, (int)zone.position.y, zone.radius * 0.45f * pulse, Color{ 80, 230, 130, (unsigned char)(110 * alpha) });
     }
 }
 
