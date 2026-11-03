@@ -432,17 +432,23 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
 
     // Top Wave Status Banner
-    const float bannerW = 280.0f;
-    const float bannerH = 40.0f;
+    bool isMilestoneWave = (currentWave % 5 == 0);
+    const float bannerW = isMilestoneWave ? 380.0f : 300.0f;
+    const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 16, 20, 28, 210 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 55, 70, 95, 230 });
+    Color bannerBg = isMilestoneWave ? Color{ 36, 18, 24, 235 } : Color{ 16, 20, 28, 210 };
+    Color bannerBorder = isMilestoneWave ? Color{ 255, 100, 80, 255 } : Color{ 55, 70, 95, 230 };
 
-    std::string waveStr = "COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves);
-    int waveW = MeasureText(waveStr.c_str(), 14);
-    DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBg);
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBorder);
+
+    std::string waveStr = isMilestoneWave ?
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves) + " [BOSS MILESTONE]") :
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves));
+    int waveW = FontManager::MeasureGameText(waveStr, 13, GameFont::BODY);
+    FontManager::DrawGameTextShadow(waveStr, (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 12), 13, isMilestoneWave ? Color{ 255, 215, 80, 255 } : Color{ 255, 220, 100, 255 });
 
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
@@ -699,17 +705,23 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, float hp, float maxHp, f
     DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
 
     // Top Wave Status Banner
-    const float bannerW = 280.0f;
-    const float bannerH = 40.0f;
+    bool isMilestoneWave = (currentWave % 5 == 0);
+    const float bannerW = isMilestoneWave ? 380.0f : 300.0f;
+    const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
 
-    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 16, 20, 28, 210 });
-    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, Color{ 55, 70, 95, 230 });
+    Color bannerBg = isMilestoneWave ? Color{ 36, 18, 24, 235 } : Color{ 16, 20, 28, 210 };
+    Color bannerBorder = isMilestoneWave ? Color{ 255, 100, 80, 255 } : Color{ 55, 70, 95, 230 };
 
-    std::string waveStr = "COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves);
-    int waveW = MeasureText(waveStr.c_str(), 14);
-    DrawText(waveStr.c_str(), (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 13), 14, Color{ 255, 220, 100, 255 });
+    DrawRectangleRounded(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBg);
+    DrawRectangleRoundedLines(Rectangle{ bannerX, bannerY, bannerW, bannerH }, 0.25f, 6, bannerBorder);
+
+    std::string waveStr = isMilestoneWave ?
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves) + " [BOSS MILESTONE]") :
+        ("COMBAT ARENA - WAVE " + std::to_string(currentWave) + " / " + std::to_string(totalWaves));
+    int waveW = FontManager::MeasureGameText(waveStr, 13, GameFont::BODY);
+    FontManager::DrawGameTextShadow(waveStr, (int)(bannerX + (bannerW - waveW) * 0.5f), (int)(bannerY + 12), 13, isMilestoneWave ? Color{ 255, 215, 80, 255 } : Color{ 255, 220, 100, 255 });
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -999,7 +1011,8 @@ void HUD::DrawGameOver(int windowWidth, int windowHeight) {
 }
 
 void HUD::DrawVictory(int windowWidth, int windowHeight) {
-    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 210 });
-    FontManager::DrawTextTitleCentered("ARENA CLEARED", windowWidth / 2, windowHeight / 2 - 40, 42, Color{ 255, 225, 80, 255 });
-    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Lobby", windowWidth / 2, windowHeight / 2 + 18, 16, Color{ 210, 240, 225, 230 });
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 10, 24, 18, 220 });
+    FontManager::DrawTextTitleCentered("ROYAL ARENA CONQUERED", windowWidth / 2, windowHeight / 2 - 50, 42, Color{ 255, 225, 80, 255 });
+    FontManager::DrawTextCentered("Grand Champion Spoils & Victor's Crest Awarded!", windowWidth / 2, windowHeight / 2 + 6, 16, Color{ 140, 240, 200, 255 });
+    FontManager::DrawTextCentered("Press [R] to Replay  |  [L] Return to Realm Lobby", windowWidth / 2, windowHeight / 2 + 36, 14, Color{ 210, 240, 225, 220 });
 }

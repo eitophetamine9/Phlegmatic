@@ -3400,8 +3400,54 @@ void Game::Update(float dt) {
 
             particles.SpawnFloatingText(player.GetPosition(), "ARENA CLEARED!", Color{ 255, 230, 80, 255 }, 30.0f);
 
+            // Grand Victory Reward (Wave 20)
+            player.GetInventory().AddOreScraps(50);
+            player.GetInventory().AddShingles(150);
+            player.GetInventory().AddEssenceOfMist(5);
+            player.GetInventory().AddShadowEssence(4);
+            if (!player.GetInventory().HasQuestItem("item_arena_victor_crest")) {
+                player.GetInventory().AddQuestItem({
+                    "item_arena_victor_crest",
+                    "Royal Arena Victor's Crest",
+                    "A glorious gold-embossed vanguard seal awarded by Knight Lenon for clearing all 20 combat arena waves.",
+                    Color{ 255, 215, 80, 255 }
+                });
+            }
+            SoundFX::PlayCrusaderClash();
+            SoundFX::PlayCoinPickup();
 
-
+        } else {
+            int newWave = waveManager.GetCurrentWave();
+            if (newWave == 6) {
+                // Milestone 1 (Wave 5 Cleared)
+                player.GetInventory().AddOreScraps(10);
+                player.GetInventory().AddShingles(30);
+                player.GetInventory().AddEssenceOfMist(1);
+                SoundFX::PlayCoinPickup();
+                SoundFX::PlayParrySuccess();
+                particles.SpawnSparks(player.GetPosition(), Color{ 100, 235, 215, 255 }, 25, 180.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 1 (WAVE 5): +10 SCRAPS, +30 SHINGLES, +1 MIST ESSENCE!", Color{ 100, 235, 215, 255 }, 24.0f);
+            } else if (newWave == 11) {
+                // Milestone 2 (Wave 10 Cleared)
+                player.GetInventory().AddOreScraps(20);
+                player.GetInventory().AddShingles(60);
+                player.GetInventory().AddEssenceOfMist(2);
+                player.GetInventory().AddShadowEssence(1);
+                SoundFX::PlayCoinPickup();
+                SoundFX::PlayParrySuccess();
+                particles.SpawnSparks(player.GetPosition(), Color{ 190, 110, 255, 255 }, 28, 200.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 2 (WAVE 10): +20 SCRAPS, +60 SHINGLES, +1 SHADOW ESSENCE!", Color{ 190, 110, 255, 255 }, 24.0f);
+            } else if (newWave == 16) {
+                // Milestone 3 (Wave 15 Cleared)
+                player.GetInventory().AddOreScraps(30);
+                player.GetInventory().AddShingles(90);
+                player.GetInventory().AddEssenceOfMist(3);
+                player.GetInventory().AddShadowEssence(2);
+                SoundFX::PlayCoinPickup();
+                SoundFX::PlayParrySuccess();
+                particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 30, 220.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 3 (WAVE 15): +30 SCRAPS, +90 SHINGLES, +2 SHADOW ESSENCE!", Color{ 255, 215, 80, 255 }, 24.0f);
+            }
         }
 
 
