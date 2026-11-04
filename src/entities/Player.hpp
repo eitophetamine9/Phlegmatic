@@ -152,7 +152,10 @@ public:
     float GetStaggerTimer() const { return staggerTimer; }
 
     // Invulnerability / I-Frames
-    bool HasInvulnerability() const { return iFrameTimer > 0.0f; }
+    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f; }
+    bool HasWillOfAtlasActive() const { return willOfAtlasTimer > 0.0f; }
+    float GetWillOfAtlasTimer() const { return willOfAtlasTimer; }
+    float GetWillOfAtlasCooldown() const { return willOfAtlasCooldown; }
     float GetIFrameTimer() const { return iFrameTimer; }
 
     // Consumables: Potion
@@ -295,6 +298,8 @@ private:
     bool isDashing;
     Vector2 dashDir;
     float iFrameTimer;
+    float willOfAtlasTimer;
+    float willOfAtlasCooldown;
 
     // Daggers Lunge
     bool isDaggerLunging;
