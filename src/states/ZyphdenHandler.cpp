@@ -402,6 +402,7 @@ ZyphdenHandler::ZyphdenHandler() :
     lenonInTavern = false;
 
     lenonSpawnTimer = 0.0f;
+    lenonRematchCooldown = 0.0f;
 
     showObjectives = true;
 
@@ -676,6 +677,11 @@ void ZyphdenHandler::Update(
         }
     }
 
+    if (lenonRematchCooldown > 0.0f) {
+        lenonRematchCooldown -= dt;
+        if (lenonRematchCooldown < 0.0f) lenonRematchCooldown = 0.0f;
+    }
+
     if (doorCooldown > 0.0f) {
 
         doorCooldown -= dt;
@@ -747,8 +753,7 @@ void ZyphdenHandler::Update(
             sparPendingStart = false;
 
             if (questPhase == ZyphdenQuestPhase::SPARRING) {
-
-                questPhase = ZyphdenQuestPhase::CHALLENGE_READY;
+                questPhase = lenonDefeated ? ZyphdenQuestPhase::VICTORIOUS : ZyphdenQuestPhase::CHALLENGE_READY;
 
             }
 
@@ -784,7 +789,7 @@ void ZyphdenHandler::Update(
 
         hasSparredOnce = true;
 
-        questPhase = ZyphdenQuestPhase::SPARRING;
+        if (!lenonDefeated) { questPhase = ZyphdenQuestPhase::SPARRING; }
 
         enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
 
@@ -979,71 +984,77 @@ void ZyphdenHandler::Update(
 
 
         if (!lenonStillAlive && !lenonDefeated) {
-
-            // Player successfully defeated Knight Lenon in spar!
-
+            // First time victory over Knight Lenon in spar!
             sparActive = false;
-
             lenonDefeated = true;
-
+            lenonRematchCooldown = 30.0f;
             questPhase = ZyphdenQuestPhase::VICTORIOUS;
-
             enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
-
                 return e.GetType() == EnemyType::KNIGHT_LENON_BOSS;
-
             }), enemies.end());
 
-
-
-            // Reward Crusader Plate
-
             player.GetInventory().UnlockArmor(ArmorType::CRUSADER_PLATE);
-
             player.SetArmor(ArmorType::CRUSADER_PLATE);
+            player.Heal(player.GetMaxHealth());
+
+            // 25% drop rate roll for Crusader's Totem
+            int dropRoll = rand() % 100;
+            if (dropRoll < 25 && !player.GetInventory().HasTotem(TotemType::CRUSADER_TOTEM)) {
+                player.GetInventory().UnlockTotem(TotemType::CRUSADER_TOTEM);
+                particles.SpawnFloatingText(knightLenonNPC.position, "CRUSADER'S TOTEM ACQUIRED! (25% Drop)", Color{ 255, 215, 80, 255 }, 24.0f);
+                particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 40, 200.0f);
+            }
+
+            testArenaUnlocked = true;
+            if (onSaveArenaUnlock) {
+                onSaveArenaUnlock();
+            }
+
+            SoundFX::PlayParrySuccess();
+            SoundFX::PlayGateOpen();
+            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED CRUSADER PLATE (+24 DEF, +30 HP)!", Color{ 255, 215, 80, 255 }, 24.0f);
+            particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 45, 220.0f);
+            particles.AddScreenShake(6.0f, 0.25f);
+
+            std::vector<std::string> pages = {
+                "Magnificent bladecraft... A masterclass in balance and poise. You fought like one who has stared into the teeth of death and refused to flinch. The Crusader Plate is yours by every right of arms.",
+                "That plate was tempered in tempest-bellowed coals; with it, the freezing winds of the eastern passes will no longer tear you asunder. Wear it with pride, Champion of the Gale Winds.",
+                "Your martial mastery is recognized throughout our garrison. The Royal Combat Arena has been unsealed in your honor-you may enter its trials from the lobby portal whenever you seek to test your limits."
+            };
+            OpenDialogue("lenon_win", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
+        } else if (!lenonStillAlive && lenonDefeated) {
+            // Rematch victory!
+            sparActive = false;
+            lenonRematchCooldown = 30.0f;
+            enemies.erase(std::remove_if(enemies.begin(), enemies.end(), [](const Enemy& e) {
+                return e.GetType() == EnemyType::KNIGHT_LENON_BOSS;
+            }), enemies.end());
 
             player.Heal(player.GetMaxHealth());
 
-
-
-            // Current progress of storyline completed! Unlock the Combat Arena!
-
-            testArenaUnlocked = true;
-
-            if (onSaveArenaUnlock) {
-
-                onSaveArenaUnlock();
-
+            int dropRoll = rand() % 100;
+            if (dropRoll < 25 && !player.GetInventory().HasTotem(TotemType::CRUSADER_TOTEM)) {
+                player.GetInventory().UnlockTotem(TotemType::CRUSADER_TOTEM);
+                particles.SpawnFloatingText(knightLenonNPC.position, "CRUSADER'S TOTEM ACQUIRED! (25% Drop)", Color{ 255, 215, 80, 255 }, 24.0f);
+                particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 40, 200.0f);
+                SoundFX::PlayParrySuccess();
+            } else {
+                player.GetInventory().AddShingles(80);
+                player.GetInventory().AddOreScraps(4);
+                particles.SpawnFloatingText(knightLenonNPC.position, "REMATCH VICTORY! +80 SHINGLES, +4 ORE SCRAPS!", Color{ 255, 220, 90, 255 }, 22.0f);
+                particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 220, 90, 255 }, 30, 160.0f);
+                SoundFX::PlayCoinPickup();
             }
 
-
-
             SoundFX::PlayParrySuccess();
-
-            SoundFX::PlayGateOpen();
-
-            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED CRUSADER PLATE (+24 DEF, +30 HP)!", Color{ 255, 215, 80, 255 }, 24.0f);
-
-            particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 45, 220.0f);
-
-            particles.AddScreenShake(6.0f, 0.25f);
-
-
+            particles.AddScreenShake(4.0f, 0.2f);
 
             std::vector<std::string> pages = {
-
-                "Magnificent bladecraft... A masterclass in balance and poise. You fought like one who has stared into the teeth of death and refused to flinch. The Crusader Plate is yours by every right of arms.",
-
-                "That plate was tempered in tempest-bellowed coals; with it, the freezing winds of the eastern passes will no longer tear you asunder. Wear it with pride, Champion of the Gale Winds.",
-
-                "Your martial mastery is recognized throughout our garrison. The Royal Combat Arena has been unsealed in your honor—you may enter its trials from the lobby portal whenever you seek to test your limits."
-
+                "Well fought! Your blade remains sharp and your resolve unflinching.",
+                "Let us catch our breath and tend to our armor. My steel will be ready for another clash in 30 seconds."
             };
-
-            OpenDialogue("lenon_win", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
-
+            OpenDialogue("lenon_rematch_win", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
         }
-
     }
 
 
@@ -1773,13 +1784,19 @@ void ZyphdenHandler::Update(
             bool isNearLenon = (lenonSpawned && !sparActive && !lenonInTavern && knightLenonNPC.CheckInteraction(playerPos));
             bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
 
-            if (isNearLenon && isLenonBeaten && IsKeyPressed(KEY_S)) {
-                sparPendingStart = true;
-                SoundFX::PlayGateOpen();
-                SoundFX::PlayCrusaderClash();
-                particles.SpawnFloatingText(knightLenonNPC.position, "REMATCH SPAR COMMENCING!", Color{ 255, 215, 80, 255 }, 24.0f);
-                particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 30, 160.0f);
-                particles.AddScreenShake(4.0f, 0.2f);
+            if (isNearLenon && isLenonBeaten && (IsKeyPressed(KEY_G) || IsKeyPressed(KEY_X))) {
+                if (lenonRematchCooldown > 0.0f) {
+                    SoundFX::PlayButtonClick();
+                    std::string cdMsg = "Lenon is catching his breath (" + std::to_string((int)ceilf(lenonRematchCooldown)) + "s remaining)!";
+                    particles.SpawnFloatingText(knightLenonNPC.position, cdMsg, Color{ 255, 140, 100, 255 }, 20.0f);
+                } else {
+                    sparPendingStart = true;
+                    SoundFX::PlayGateOpen();
+                    SoundFX::PlayCrusaderClash();
+                    particles.SpawnFloatingText(knightLenonNPC.position, "REMATCH SPAR COMMENCING!", Color{ 255, 215, 80, 255 }, 24.0f);
+                    particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 30, 160.0f);
+                    particles.AddScreenShake(4.0f, 0.2f);
+                }
             }
 
             if (isNearLenon && isLenonBeaten && IsKeyPressed(KEY_R)) {
@@ -1935,7 +1952,8 @@ void ZyphdenHandler::Update(
                         std::vector<std::string> pages = {
                             "A well-earned triumph, friend. You move like a storm given human form. May that armor serve you well in the dark lands ahead.",
                             "If you seek to test your mettle to its absolute limits, our Royal Combat Arena stands ready. 20 waves of increasingly vicious adversaries and realm bosses await.",
-                            "Press [R] or click below to enter the 20-wave trial whenever you are prepared!"
+                            "If you wish to cross blades again in the yard, press [G] to initiate a rematch spar whenever my blade is ready (30s recovery cooldown).",
+                            "And if you seek to test your mettle against the realm's fiercest trials, our Royal Combat Arena stands open. Press [R] to enter the 20-wave trial!"
                         };
 
                         OpenDialogue("lenon_arena_prompt", "KNIGHT LENON - VANGUARD CAPTAIN", pages, Color{ 225, 185, 65, 255 });
@@ -2130,7 +2148,14 @@ void ZyphdenHandler::Render(
 
             if (knightLenonNPC.CheckInteraction(player.GetPosition())) {
                 bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
-                std::string prompt = isLenonBeaten ? "[E] Talk | [S] SPAR REMATCH | [R] ENTER ARENA" : "[E] Challenge Knight Lenon";
+                                std::string prompt;
+                if (!isLenonBeaten) {
+                    prompt = "[E] Challenge Knight Lenon";
+                } else if (lenonRematchCooldown > 0.0f) {
+                    prompt = "[E] Talk | [G] SPAR (" + std::to_string((int)ceilf(lenonRematchCooldown)) + "s CD) | [R] ENTER ARENA";
+                } else {
+                    prompt = "[E] Talk | [G] SPAR REMATCH | [R] ENTER ARENA";
+                }
                 int pw = FontManager::MeasureGameText(prompt, 13, GameFont::BODY);
                 int px = (int)knightLenonNPC.position.x - pw / 2;
                 int py = (int)knightLenonNPC.position.y - 48;

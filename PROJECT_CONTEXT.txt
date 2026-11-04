@@ -579,7 +579,7 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1g)
     4. Fallback Melee Punch (18 damage, 1.0s cooldown).
 
 - Knight Lenon Courtyard Rematch & Crusader Totem Drop:
-  * Added persistent `[S] SPAR REMATCH` interaction prompt beside Knight Lenon in the Zyphden Courtyard.
+  * Added persistent `[G] SPAR REMATCH (30s Cooldown)` interaction prompt beside Knight Lenon in the Zyphden Courtyard.
   * Maintained full access to the 20-wave Royal Combat Arena via `[R] ENTER ARENA`.
   * Knight Lenon rolls a 25% drop rate to award the Crusader's Totem upon defeat (on both initial duel and all courtyard rematches). Defeats award +80 Silver Shingles and +4 Ore Scraps bonus reward if already owned.
 
