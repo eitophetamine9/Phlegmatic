@@ -91,7 +91,7 @@ For comprehensive patch notes, combat tuning revisions, and version changelogs a
 * **Legible Totem Debuff Text**: Color-coded stat texts rendering positive buffs in emerald/cyan (`[+] ...`) and negative debuffs in bold crimson red (`[-] ...`).
 * **Crusader's Totem & Will of Atlas**: Rebalanced stats (+25% DEF, +35 HP, +18% DMG, -12% SPD, -20% ATK SPD, +15 Will) and added "Will of Atlas" crisis passive granting 4.0s full invulnerability below 20% health (60s CD).
 * **Mini Elemental Golem Companion Overhaul**: Boosted to 380 HP and 42 DEF, with 3 distinct tactical attack patterns (Heavy AoE Slam, Forward Knockback Bash, and Elemental Spike Throw).
-* **Knight Lenon Courtyard Rematches**: Courtyard sparring rematch prompt `[S]` with 25% drop rate for the Crusader's Totem.
+* **Knight Lenon Courtyard Rematches**: Courtyard sparring rematch prompt `[G]` (30s recovery cooldown) with 25% drop rate for the Crusader's Totem.
 * **Windrunner's Recurve Bow Rebalance**: Calibrated raw base damage to 9 / 11 / 13 light and 36 / 44 / 52 heavy while preserving fast draw speed, low stamina cost, and impact Windburst AoE.
 
 ---
@@ -991,7 +991,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 * **Moveset**: Rapid 0.48s lunge thrust, 0.55s whirlwind cleave, and 0.45s recovery cycle.
 
-* **Reward**: Besting him awards the consecrated **Crusader Plate (+24 Def, +30 HP, 65 Will)**, unseals the Royal Combat Arena, and rolls a **25% drop rate** for the **Crusader's Totem**. Knight Lenon can be freely rematched in the courtyard via **[S] SPAR REMATCH** for ongoing practice and additional drop opportunities (+80 Silver Shingles and +4 Ore Scraps bonus reward if already owned).
+* **Reward**: Besting him awards the consecrated **Crusader Plate (+24 Def, +30 HP, 65 Will)**, unseals the Royal Combat Arena, and rolls a **25% drop rate** for the **Crusader's Totem**. Knight Lenon can be freely rematched in the courtyard via **[G] SPAR REMATCH (30s Cooldown)** for ongoing practice and additional drop opportunities (+80 Silver Shingles and +4 Ore Scraps bonus reward if already owned).
 
 * **Strategy**: Lenon has 70 Will and recovers quickly from staggers. Break his posture with parries, unleash a quick 2-hit combo, and immediately prepare to dodge his follow-up lunge.
 

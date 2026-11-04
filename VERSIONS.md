@@ -59,8 +59,8 @@
 
 ### 4. Knight Lenon Courtyard Rematch & Crusader Totem Drop
 * **Repeatable Courtyard Sparring**:
-  * Added a persistent `[S] SPAR REMATCH` interaction prompt beside Knight Lenon in the Zyphden Courtyard.
-  * Preserves full access to the 20-wave Royal Combat Arena via `[R] ENTER ARENA` while allowing infinite sparring duels with Knight Lenon.
+  * Added a persistent `[G] SPAR REMATCH (30s Cooldown)` interaction prompt beside Knight Lenon in the Zyphden Courtyard.
+  * Preserves full access to the 20-wave Royal Combat Arena via `[R] ENTER ARENA` while allowing infinite sparring duels with Knight Lenon on a 30-second recovery cooldown. Fixed a despawn issue by ensuring Lenon remains persistently anchored in the courtyard after rematches.
 * **25% Totem Drop Probability**:
   * Knight Lenon now rolls a 25% drop rate to award the Crusader's Totem upon defeat (active on both initial story victory and all subsequent courtyard rematches).
   * If the player already owns the Crusader's Totem, rematch victories award an alternate bounty of +80 Silver Shingles and +4 Ore Scraps.
@@ -207,3 +207,4 @@
 ### 5. Phlegmatic Composure & Four Humors System
 * Composure gauge (0-100), passive composure tiers (Discomposed, Composed, Stoic Poise), and Phlegmatic Trance active invulnerability aura (`[SPACE]`).
 * Four Humoral alignments (Sanguine, Choleric, Melancholic, Phlegmatic) with Quenching and Shattering mechanics.
+

@@ -168,6 +168,7 @@ private:
     bool lenonSpawned = false;
     bool lenonInTavern = false;
     float lenonSpawnTimer = 0.0f;
+    float lenonRematchCooldown = 0.0f;
 
     // HUD & Banners
     mutable bool showObjectives = true;
