@@ -39,6 +39,10 @@ Projectile::Projectile(Vector2 pos, Vector2 vel, float radius, float damage, Pro
             maxLifetime = 1.5f;
             color = Color{ 210, 225, 245, 255 };
             break;
+        case ProjectileType::ELEMENTAL_SPIKE:
+            maxLifetime = 1.8f;
+            color = Color{ 255, 180, 50, 255 };
+            break;
     }
 }
 
@@ -61,6 +65,8 @@ void Projectile::Update(float dt, const GameMap& map, ParticleSystem& particles)
         particles.SpawnSparks(position, color, 1, 30.0f);
     } else if (type == ProjectileType::ELEMENTAL_BOLT && GetRandomValue(0, 2) == 0) {
         particles.SpawnSparks(position, Color{ 255, 170, 50, 220 }, 1, 35.0f);
+    } else if (type == ProjectileType::ELEMENTAL_SPIKE && GetRandomValue(0, 1) == 0) {
+        particles.SpawnSparks(position, Color{ 255, 195, 60, 240 }, 1, 35.0f);
     }
 
     // Check collision against map walls and pillars
@@ -216,6 +222,17 @@ void Projectile::Draw() const {
             DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
             DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
             DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+            break;
+        }
+
+        case ProjectileType::ELEMENTAL_SPIKE: {
+            // Crystalline amber/basalt spike shard
+            float ang = atan2f(velocity.y, velocity.x);
+            Vector2 p1 = { position.x + cosf(ang) * (radius * 2.2f), position.y + sinf(ang) * (radius * 2.2f) };
+            Vector2 p2 = { position.x - cosf(ang) * (radius * 1.5f), position.y - sinf(ang) * (radius * 1.5f) };
+            DrawLineEx(p2, p1, 4.0f, Color{ 255, 185, 60, 255 });
+            DrawCircleV(position, radius * 0.85f, Color{ 255, 230, 120, 255 });
+            DrawCircleLines((int)position.x, (int)position.y, radius * 1.35f, Color{ 255, 140, 40, 180 });
             break;
         }
 

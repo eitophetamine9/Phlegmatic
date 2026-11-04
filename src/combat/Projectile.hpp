@@ -11,7 +11,8 @@ enum class ProjectileType {
     HOLY_BEAM,      // Truth Seeker piercing holy beam
     ELEMENTAL_BOLT, // Elemental Golem & Elemental Core Totem projectile
     GALE_ARROW,     // Gale Archer high-speed wind piercing projectile
-    THROWING_DAGGER // Gale Bandit throwing knife
+    THROWING_DAGGER, // Gale Bandit throwing knife
+    ELEMENTAL_SPIKE  // Mini Golem companion piercing spike throw
 };
 
 class Projectile {
