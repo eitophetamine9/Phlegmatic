@@ -1773,6 +1773,15 @@ void ZyphdenHandler::Update(
             bool isNearLenon = (lenonSpawned && !sparActive && !lenonInTavern && knightLenonNPC.CheckInteraction(playerPos));
             bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
 
+            if (isNearLenon && isLenonBeaten && IsKeyPressed(KEY_S)) {
+                sparPendingStart = true;
+                SoundFX::PlayGateOpen();
+                SoundFX::PlayCrusaderClash();
+                particles.SpawnFloatingText(knightLenonNPC.position, "REMATCH SPAR COMMENCING!", Color{ 255, 215, 80, 255 }, 24.0f);
+                particles.SpawnSparks(knightLenonNPC.position, Color{ 255, 215, 80, 255 }, 30, 160.0f);
+                particles.AddScreenShake(4.0f, 0.2f);
+            }
+
             if (isNearLenon && isLenonBeaten && IsKeyPressed(KEY_R)) {
                 SoundFX::PlayParrySuccess();
                 if (onEnterArenaCallback) {
@@ -2121,7 +2130,7 @@ void ZyphdenHandler::Render(
 
             if (knightLenonNPC.CheckInteraction(player.GetPosition())) {
                 bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
-                std::string prompt = isLenonBeaten ? "[E] Talk | [R] ENTER ARENA (20 WAVES)" : "[E] Challenge Knight Lenon";
+                std::string prompt = isLenonBeaten ? "[E] Talk | [S] SPAR REMATCH | [R] ENTER ARENA" : "[E] Challenge Knight Lenon";
                 int pw = FontManager::MeasureGameText(prompt, 13, GameFont::BODY);
                 int px = (int)knightLenonNPC.position.x - pw / 2;
                 int py = (int)knightLenonNPC.position.y - 48;
