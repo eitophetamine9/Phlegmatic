@@ -2,8 +2,8 @@
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
 Generated: October 28, 2026
-Branch: ver.0.0.1f
-Release Version: 0.0.1f
+Branch: ver.0.0.1g
+Release Version: 0.0.1g
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -556,3 +556,35 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1f)
 
 - Loot Drop Buff:
   * Gale Bandit Essence of Mist drop probability increased from 20% to 38%.
+================================================================================
+LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1g)
+================================================================================
+- Equipment Matrix & Inventory Overhaul:
+  * Overhauled all armor slots (Helmet, Chestplate, Leggings) and Totem Relic into modular equipment bubbles styled with corner brackets, tier pips, and glowing state borders.
+  * Added custom vector-rendered icon art for all armor pieces across all six sets (Commoner, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt Golem) and all five sacred totems.
+  * Standardized drawer cards across all five inventory categories (Helmets, Chestplates, Leggings, Totems, Weapons) with dedicated 38x38 icon boxes and clean typography.
+  * Color-coded totem stat text: positive buffs rendered in cyan/green (`[+] ...`), neutral separators in silver (` | `), and negative debuffs rendered in bold crimson red (`[-] ...`).
+  * Added mini modular loadout badges on the player HUD card for Vanguard Chest, Vanguard Greaves, Commoner's Tunic, and Commoner's Breeches.
+
+- Crusader's Totem Overhaul & "Will of Atlas" Crisis Passive:
+  * Rebalanced stats: +25% Physical Defense, +35 Max Health, +18% Overall Damage, -12% Movement Speed, -20% Attack Speed, +15 Willpower.
+  * Implemented "Will of Atlas" crisis passive: auto-activates when health drops below 20% (or upon sustaining a burst strike that would be fatal), granting 4.0 seconds of complete invulnerability with rotating celestial runes and golden divine aegis shielding, on a 60-second cooldown timer.
+
+- Mini Elemental Golem Companion Combat Overhaul:
+  * Base stats boosted: Health increased from 105 HP to 380 HP, Defense increased from 11 DEF to 42 DEF.
+  * Implemented 3 distinct tactical attack patterns based on engagement distance:
+    1. Heavy AoE Slam (<85px, 3.5s cooldown, 36 damage, screen shake, radial earth shockwaves, and enemy stagger).
+    2. Forward Bash with Knockback (50-130px, 2.5s cooldown, 28 damage, and 320.0f knockback surge).
+    3. Elemental Spike Throw (110-280px, 2.8s cooldown, 26 damage, high-velocity piercing earthen shards).
+    4. Fallback Melee Punch (18 damage, 1.0s cooldown).
+
+- Knight Lenon Courtyard Rematch & Crusader Totem Drop:
+  * Added persistent `[S] SPAR REMATCH` interaction prompt beside Knight Lenon in the Zyphden Courtyard.
+  * Maintained full access to the 20-wave Royal Combat Arena via `[R] ENTER ARENA`.
+  * Knight Lenon rolls a 25% drop rate to award the Crusader's Totem upon defeat (on both initial duel and all courtyard rematches). Defeats award +80 Silver Shingles and +4 Ore Scraps bonus reward if already owned.
+
+- Windrunner's Recurve Bow Balance Tuning:
+  * Calibrated raw damage across upgrade tiers while preserving rapid draw cadence, low stamina consumption, and on-hit windburst AoE:
+    - Base (+0): Light 9.0 dmg, Heavy 36.0 dmg.
+    - Refined (+1): Light 11.0 dmg, Heavy 44.0 dmg.
+    - Masterwork (+2): Light 13.0 dmg, Heavy 52.0 dmg.

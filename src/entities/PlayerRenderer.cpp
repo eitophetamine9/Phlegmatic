@@ -91,6 +91,18 @@ void PlayerRenderer::Draw(const Player& player) {
 
     AssetManager::DrawPlayerSilhouette(player.position, player.facingAngle, bodyColor, player.isParrying, player.isDashing, armorStats.trimColor, armorStats.helmColor, armorStats.visorColor);
 
+    // Will of Atlas Invulnerability Divine Aegis
+    if (player.HasWillOfAtlasActive()) {
+        float pulse = 0.8f + 0.2f * sinf((float)GetTime() * 10.0f);
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 14.0f, Color{ 255, 235, 120, (unsigned char)(255 * pulse) });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 18.0f, Color{ 255, 205, 50, (unsigned char)(180 * pulse) });
+        for (int i = 0; i < 6; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 6.0f) + (float)GetTime() * 3.0f;
+            Vector2 runePos = { player.position.x + cosf(ang) * (player.radius + 16.0f), player.position.y + sinf(ang) * (player.radius + 16.0f) };
+            DrawCircleV(runePos, 2.5f, Color{ 255, 240, 150, 255 });
+        }
+    }
+
     // Crusader Plate Dawnfire Aegis Bubble
     if (player.armorSkillShieldHp > 0.0f) {
         float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);

@@ -106,6 +106,8 @@ Player::Player() {
     dashDir = { 0.0f, 0.0f };
 
     iFrameTimer = 0.0f;
+    willOfAtlasTimer = 0.0f;
+    willOfAtlasCooldown = 0.0f;
 
 
 
@@ -203,6 +205,8 @@ void Player::Init(Vector2 startPos) {
     bleedTickTimer = 0.0f;
 
     iFrameTimer = 0.0f;
+    willOfAtlasTimer = 0.0f;
+    willOfAtlasCooldown = 0.0f;
 
     comboStep = 1;
 
@@ -262,6 +266,8 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     bleedTickTimer = 0.0f;
 
     iFrameTimer = 0.0f;
+    willOfAtlasTimer = 0.0f;
+    willOfAtlasCooldown = 0.0f;
 
     comboStep = 1;
 
@@ -517,7 +523,8 @@ void Player::SetTotem(TotemType newTotem) {
 float Player::GetMaxHealth() const {
     float bonus = GetHelmetStats(equippedHelmet).maxHpBonus
                 + GetChestplateStats(equippedChestplate).maxHpBonus
-                + GetLeggingsStats(equippedLeggings).maxHpBonus;
+                + GetLeggingsStats(equippedLeggings).maxHpBonus
+                + GetTotemStats(currentTotem).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
         bonus += 50.0f; // +50 Max HP
     }
@@ -814,6 +821,25 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             }
         }
         ++it;
+    }
+
+    // Crusader's Totem & Will of Atlas Update
+    if (willOfAtlasCooldown > 0.0f) {
+        willOfAtlasCooldown -= dt;
+    }
+    if (willOfAtlasTimer > 0.0f) {
+        willOfAtlasTimer -= dt;
+        if (fmodf(willOfAtlasTimer, 0.16f) < dt) {
+            particles.SpawnSparks(position, Color{ 255, 220, 80, 220 }, 2, 45.0f);
+        }
+    } else if (currentTotem == TotemType::CRUSADER_TOTEM && health > 0.0f && health <= maxHealth * 0.20f && willOfAtlasCooldown <= 0.0f) {
+        willOfAtlasTimer = 4.0f;
+        willOfAtlasCooldown = 60.0f;
+        SoundFX::PlayParrySuccess();
+        SoundFX::PlayCrusaderClash();
+        particles.SpawnFloatingText(position, "WILL OF ATLAS! (4s INVULNERABLE)", Color{ 255, 220, 80, 255 }, 24.0f);
+        particles.SpawnSparks(position, Color{ 255, 230, 90, 255 }, 35, 180.0f);
+        particles.AddScreenShake(5.0f, 0.25f);
     }
 
     // Shadowstrider Smoke Mist Zones duration decay (7-second lifetime)
@@ -2540,6 +2566,21 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         particles.SpawnFloatingText(position, "MIST EVADED!", Color{ 180, 120, 255, 255 }, 20.0f);
         particles.SpawnSparks(position, Color{ 160, 90, 240, 220 }, 14, 90.0f);
         return false;
+    }
+
+    // Crusader's Totem: Will of Atlas emergency crisis trigger check
+    if (currentTotem == TotemType::CRUSADER_TOTEM && willOfAtlasCooldown <= 0.0f && willOfAtlasTimer <= 0.0f && health > 0.0f) {
+        float projectedHp = health - (amount * (100.0f / (100.0f + GetDefense())));
+        if (projectedHp <= maxHealth * 0.20f) {
+            willOfAtlasTimer = 4.0f;
+            willOfAtlasCooldown = 60.0f;
+            SoundFX::PlayParrySuccess();
+            SoundFX::PlayCrusaderClash();
+            particles.SpawnFloatingText(position, "WILL OF ATLAS! (4s INVULNERABLE)", Color{ 255, 220, 80, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 255, 230, 90, 255 }, 35, 180.0f);
+            particles.AddScreenShake(5.0f, 0.25f);
+            return false; // Prevent damage from reducing below threshold on trigger
+        }
     }
 
     // Invulnerable during Dash, Dagger Lunge, or Active I-Frames
