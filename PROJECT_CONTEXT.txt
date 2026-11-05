@@ -585,6 +585,26 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1g)
 
 - Windrunner's Recurve Bow Balance Tuning:
   * Calibrated raw damage across upgrade tiers while preserving rapid draw cadence, low stamina consumption, and on-hit windburst AoE:
-    - Base (+0): Light 9.0 dmg, Heavy 36.0 dmg.
-    - Refined (+1): Light 11.0 dmg, Heavy 44.0 dmg.
-    - Masterwork (+2): Light 13.0 dmg, Heavy 52.0 dmg.
+    - Base (+0): Light 9.0 dmg, Heavy Attack 36.0 dmg.
+    - Refined (+1): Light 11.0 dmg, Heavy Attack 44.0 dmg.
+    - Masterwork (+2): Light 13.0 dmg, Heavy Attack 52.0 dmg.
+
+- HUD Readability, Vitality Graduation Ticks & Screen Threat Vignette:
+  * Health, Stamina, and Poise resource bars now feature 25%, 50%, and 75% tactical graduation ticks with top specular glass highlights and dark metallic borders.
+  * Low-health threat vignette (<25% HP) pulses with a smooth crimson screen edge gradient to alert players of imminent danger and the "Will of Atlas" threshold.
+  * Boss health bars updated with humoral affiliation badges and dedicated posture and stagger resistance guard meters.
+
+- Active Combat Buff & Relic Status Tray:
+  * Real-time status pills positioned directly above the Action Bar tracking active states: Will of Atlas (`[WILL OF ATLAS: 3.4s]` / `[ATLAS CD: 45s]`), Aegis Shield (`[AEGIS SHIELD: 60 HP]`), Smoke Mist Evasion (`[SMOKE MIST: +40% EVA]`), Phlegmatic Trance (`[PHLEGMATIC TRANCE: 5.2s]`), Counter Buff (`[COUNTER BUFF: +50% DMG]`), and Bleed (`[BLEED: 2.5s]`).
+
+- Combat Juice & Thematic Damage Archetypes:
+  * Floating combat numbers color-coded by damage type: Standard Physical (Silver-White), Critical Strikes (Radiant Gold, 24px), Solar Burn (Solar Amber), Poison DoT (Toxic Emerald), and Bleed DoT (Arterial Crimson).
+  * Tactical combat feedback badges: `PERFECT PARRY!`, `HYPER-ARMOR DEFLECT!`, and `STAGGERED!`.
+
+- Armory Loadout Presets & Live Drawer Stat Deltas:
+  * Functional `[ I ] [ II ] [ III ]` loadout preset switching and `[SAVE]` snapshotting in the Equipment Matrix, instantly swapping weapons, helmets, chestplates, leggings, and totems.
+  * Live stat comparison deltas across all equipment in drawer inspection cards (defense, willpower, HP bonuses, weapon light/heavy damage, reach, and armor pierce) displaying real-time relative differences in emerald green and soft red.
+
+- Crucible Rematch Encounters & World Cooldown Timers:
+  * Floating world cooldown recovery banner (`[RESTING (Xs)]`) above Knight Lenon during his 30-second recovery period.
+  * High Altar Rematch Crucible in the Ruined Castle Awakening Cathedral, enabling repeatable rematches against Zil's Remnant on a 30-second cooldown for +75 Silver Shingle rewards.

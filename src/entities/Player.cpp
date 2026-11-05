@@ -2469,8 +2469,8 @@ void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
     );
 
     if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp) || isHeavyWeaponWindup) {
-        particles.SpawnFloatingText(position, "HYPER-ARMOR!", Color{ 255, 215, 80, 255 }, 22.0f);
-        particles.SpawnSparks(position, Color{ 255, 185, 60, 255 }, 12, 110.0f);
+        particles.SpawnFloatingText(position, "HYPER-ARMOR DEFLECT!", Color{ 255, 215, 80, 255 }, 24.0f);
+        particles.SpawnSparks(position, Color{ 255, 185, 60, 255 }, 14, 120.0f);
         SoundFX::PlayParrySuccess();
         return;
     }

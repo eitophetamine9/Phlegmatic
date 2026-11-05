@@ -73,6 +73,50 @@
     * Tier 2 (Masterwork): Light Attack 13.0 dmg, Heavy Attack 52.0 dmg.
   * Maintains on-hit 55px Windburst dealing 30% weapon damage and heavy Gale Piercer Drill with 50% defense pierce and armor fracture.
 
+### 6. HUD Readability, Vitality Graduation Ticks & Screen Threat Vignette
+* **Resource Bar Graduation Ticks & Metallic Glass Highlights**:
+  * Added 25%, 50%, and 75% tactical graduation ticks to the Health, Stamina, and Poise bars for quick combat calculations.
+  * Rendered sleek specular top-gradient shine highlights and dark metallic rounded borders.
+* **Low-Health Threat Vignette**:
+  * When player health falls below 25%, the screen dynamically pulses with a soft crimson edge vignette, warning the player and visually framing the impending "Will of Atlas" 20% threshold.
+* **Boss Health Bar Polish & Stagger Meters**:
+  * Added missing humoral affiliation badges for Gale Archer (`[PHLEGMATIC - WOODLAND GALE]`) and Elemental Golem (`[MELANCHOLIC - PRIMORDIAL BASALT]`).
+  * Added a dedicated posture and stagger resistance guard bar beneath boss health bars.
+
+### 7. Active Combat Buff & Relic Status Tray
+* **Status Tray Above Action Bar**:
+  * Positioned a row of illuminated status pills with real-time timers directly above action slots 1-6:
+    * **Will of Atlas**: Radiant gold pill displaying remaining invulnerability (`[WILL OF ATLAS: 3.4s]`) or recovery cooldown (`[ATLAS CD: 45s]`).
+    * **Aegis Shield**: Divine cyan pill tracking active barrier pool (`[AEGIS SHIELD: 60 HP]`).
+    * **Smoke Mist Evasion**: Emerald pill showing +40% evasion bonus while inside smoke clouds (`[SMOKE MIST: +40% EVA]`).
+    * **Phlegmatic Trance**: Vivid cyan glowing pill tracking active trance duration (`[PHLEGMATIC TRANCE: 5.2s]`).
+    * **Counter Buff**: Solar gold pill tracking amplified damage window (`[COUNTER BUFF: +50% DMG]`).
+    * **Bleeding**: Crimson pill displaying remaining debuff time (`[BLEEDING: 2.5s]`).
+
+### 8. Combat Juice & Specialized Floating Combat Text
+* **Thematic Damage Palettes**:
+  * Replaced monochrome floating damage text with specialized damage palettes:
+    * Standard Physical: Clean Silver-White (`Color{ 240, 245, 255, 255 }`).
+    * Critical Strikes: Radiant Gold (`Color{ 255, 220, 60, 255 }`, 24px scale).
+    * Solar Burn DoT: Solar Amber (`Color{ 255, 195, 50, 255 }`).
+    * Poison DoT: Toxic Emerald (`Color{ 90, 245, 140, 255 }`).
+    * Bleed DoT: Arterial Crimson (`Color{ 245, 60, 75, 255 }`).
+* **Tactical Deflection Popups**:
+  * Added distinct popups for `PERFECT PARRY!`, `HYPER-ARMOR DEFLECT!`, and `STAGGERED!`.
+
+### 9. Multi-Slot Equipment Loadout Presets & Live Drawer Stat Deltas
+* **Functional Loadouts [ I ] [ II ] [ III ]**:
+  * Enabled 3 quick-swap loadout presets in the Equipment Matrix, instantly equipping saved weapon, helmet, chestplate, leggings, and totem combinations.
+  * Added a dedicated `[SAVE]` snapshot button to manually update the active loadout preset.
+* **Drawer Stat Comparison Deltas**:
+  * Added live relative comparison deltas when inspecting unequipped helmets, chestplates, leggings, and weapons in the drawer, displaying differences in defense, willpower, max HP, attack damage, reach, and armor penetration in emerald green or soft red.
+
+### 10. Crucible Rematch Encounters & World Cooldown Timers
+* **Knight Lenon World Cooldown Banner**:
+  * Added a floating resting cooldown banner (`[RESTING (Xs)]`) above Knight Lenon in the Zyphden Courtyard during his 30-second recovery period.
+* **High Altar Rematch Crucible (Ruined Castle)**:
+  * Implemented an interactive prayer pedestal and sacred aura circle at the Cathedral High Altar, allowing players to spar with Zil's Remnant on a 30-second cooldown for +75 Silver Shingle rewards.
+
 ---
 
 ## Version 0.0.1f - Arena Milestones, Soundscapes & Combat Polish

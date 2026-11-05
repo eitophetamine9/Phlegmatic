@@ -4,6 +4,64 @@
 #include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
+#include <vector>
+#include <string>
+#include <algorithm>
+
+static void DrawResourceBar(Rectangle rec, float current, float max, Color fillColor, Color bgColor, Color borderColor, bool showTicks = true) {
+    DrawRectangleRounded(rec, 0.25f, 4, bgColor);
+
+    float pct = (max > 0.001f) ? fmaxf(0.0f, fminf(1.0f, current / max)) : 0.0f;
+    float fillW = rec.width * pct;
+
+    if (fillW > 0.0f) {
+        Rectangle fillRec = { rec.x, rec.y, fillW, rec.height };
+        DrawRectangleRounded(fillRec, 0.25f, 4, fillColor);
+
+        // Specular top shine gradient highlight
+        if (rec.height >= 8.0f) {
+            Rectangle shineRec = { rec.x + 1.0f, rec.y + 1.0f, fmaxf(0.0f, fillW - 2.0f), rec.height * 0.40f };
+            DrawRectangleRounded(shineRec, 0.2f, 4, Color{ 255, 255, 255, 45 });
+        }
+    }
+
+    // Graduation ticks at 25%, 50%, and 75%
+    if (showTicks && rec.width >= 60.0f) {
+        float t25 = rec.x + rec.width * 0.25f;
+        float t50 = rec.x + rec.width * 0.50f;
+        float t75 = rec.x + rec.width * 0.75f;
+
+        // 25% tick
+        DrawLineEx({ t25, rec.y }, { t25, rec.y + rec.height }, 1.0f, Color{ 0, 0, 0, 150 });
+        DrawLineEx({ t25 + 1.0f, rec.y }, { t25 + 1.0f, rec.y + rec.height }, 1.0f, Color{ 255, 255, 255, 35 });
+
+        // 50% tick (accentuated mid-marker)
+        DrawLineEx({ t50, rec.y }, { t50, rec.y + rec.height }, 1.5f, Color{ 0, 0, 0, 180 });
+        DrawLineEx({ t50 + 1.0f, rec.y }, { t50 + 1.0f, rec.y + rec.height }, 1.0f, Color{ 255, 255, 255, 60 });
+
+        // 75% tick
+        DrawLineEx({ t75, rec.y }, { t75, rec.y + rec.height }, 1.0f, Color{ 0, 0, 0, 150 });
+        DrawLineEx({ t75 + 1.0f, rec.y }, { t75 + 1.0f, rec.y + rec.height }, 1.0f, Color{ 255, 255, 255, 35 });
+    }
+
+    DrawRectangleRoundedLines(rec, 0.25f, 4, borderColor);
+}
+
+static void DrawLowHealthVignette(int windowWidth, int windowHeight, float currentHp, float maxHp) {
+    if (maxHp <= 0.001f || currentHp <= 0.0f) return;
+    float ratio = currentHp / maxHp;
+    if (ratio >= 0.25f) return;
+
+    float dangerFactor = 1.0f - (ratio / 0.25f);
+    float pulse = (sinf((float)GetTime() * 6.0f) + 1.0f) * 0.5f;
+    unsigned char alpha = (unsigned char)((45.0f + 55.0f * pulse) * dangerFactor);
+
+    int bandSize = 48;
+    DrawRectangleGradientV(0, 0, windowWidth, bandSize, Color{ 220, 25, 35, alpha }, Color{ 220, 25, 35, 0 });
+    DrawRectangleGradientV(0, windowHeight - bandSize, windowWidth, bandSize, Color{ 220, 25, 35, 0 }, Color{ 220, 25, 35, alpha });
+    DrawRectangleGradientH(0, 0, bandSize, windowHeight, Color{ 220, 25, 35, alpha }, Color{ 220, 25, 35, 0 });
+    DrawRectangleGradientH(windowWidth - bandSize, 0, bandSize, windowHeight, Color{ 220, 25, 35, 0 }, Color{ 220, 25, 35, alpha });
+}
 
 void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
     const Rectangle& r = slot.bounds;
@@ -90,6 +148,86 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     Rectangle plate = { barX - 10.0f, barY - 16.0f, totalW + 20.0f, slotH + 24.0f };
     DrawRectangleRounded(plate, 0.22f, 6, Color{ 12, 16, 24, 215 });
     DrawRectangleRoundedLines(plate, 0.22f, 6, Color{ 48, 62, 85, 200 });
+
+    // Active Combat Buff & Relic Status Tray (Positioned directly above Action Bar)
+    struct BuffPill {
+        std::string text;
+        Color borderCol;
+        Color textCol;
+        Color bgCol;
+        bool pulsing;
+    };
+    std::vector<BuffPill> activeBuffs;
+
+    if (player.HasWillOfAtlasActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "WILL OF ATLAS: %.1fs", player.GetWillOfAtlasTimer());
+        activeBuffs.push_back({ b, Color{ 255, 220, 75, 255 }, Color{ 255, 235, 130, 255 }, Color{ 50, 38, 12, 240 }, true });
+    } else if (player.GetWillOfAtlasCooldown() > 0.0f) {
+        char b[32];
+        snprintf(b, sizeof(b), "ATLAS CD: %.0fs", player.GetWillOfAtlasCooldown());
+        activeBuffs.push_back({ b, Color{ 160, 140, 95, 200 }, Color{ 200, 185, 145, 220 }, Color{ 24, 20, 16, 220 }, false });
+    }
+
+    if (player.GetArmorSkillShieldHp() > 0.0f) {
+        char b[32];
+        snprintf(b, sizeof(b), "AEGIS SHIELD: %d HP", (int)player.GetArmorSkillShieldHp());
+        activeBuffs.push_back({ b, Color{ 90, 225, 255, 255 }, Color{ 160, 245, 255, 255 }, Color{ 14, 36, 48, 240 }, true });
+    }
+
+    if (player.IsInsideSmokeMist()) {
+        activeBuffs.push_back({ "SMOKE MIST: +40% EVA", Color{ 75, 240, 180, 255 }, Color{ 140, 255, 210, 255 }, Color{ 12, 38, 28, 240 }, false });
+    }
+
+    if (player.IsInPhlegmaticTrance()) {
+        char b[32];
+        snprintf(b, sizeof(b), "PHLEGMATIC TRANCE: %.1fs", player.GetTranceTimer());
+        activeBuffs.push_back({ b, Color{ 120, 235, 255, 255 }, Color{ 200, 250, 255, 255 }, Color{ 16, 40, 54, 240 }, true });
+    }
+
+    if (player.HasCounterBuff()) {
+        activeBuffs.push_back({ "COUNTER BUFF: +50% DMG", Color{ 255, 215, 60, 255 }, Color{ 255, 235, 110, 255 }, Color{ 46, 36, 10, 240 }, true });
+    }
+
+    if (player.IsBleeding()) {
+        char b[32];
+        snprintf(b, sizeof(b), "BLEEDING: %.1fs", player.GetBleedTimer());
+        activeBuffs.push_back({ b, Color{ 255, 70, 85, 255 }, Color{ 255, 140, 150, 255 }, Color{ 48, 14, 18, 240 }, true });
+    }
+
+    if (!activeBuffs.empty()) {
+        float pillH = 18.0f;
+        float pillSpacing = 8.0f;
+        float pillY = plate.y - pillH - 6.0f;
+
+        float totalPillsW = 0.0f;
+        std::vector<float> pillWidths;
+        for (const auto& pill : activeBuffs) {
+            float pw = (float)MeasureText(pill.text.c_str(), 10) + 16.0f;
+            pillWidths.push_back(pw);
+            totalPillsW += pw;
+        }
+        totalPillsW += (float)(activeBuffs.size() - 1) * pillSpacing;
+
+        float curPillX = ((float)windowWidth - totalPillsW) * 0.5f;
+        for (size_t i = 0; i < activeBuffs.size(); ++i) {
+            const auto& pill = activeBuffs[i];
+            float pw = pillWidths[i];
+            Rectangle pRec = { curPillX, pillY, pw, pillH };
+
+            Color bCol = pill.borderCol;
+            if (pill.pulsing) {
+                float pulse = (sinf((float)GetTime() * 8.0f) + 1.0f) * 0.5f;
+                bCol.a = (unsigned char)(160 + 95 * pulse);
+            }
+
+            DrawRectangleRounded(pRec, 0.35f, 4, pill.bgCol);
+            DrawRectangleRoundedLines(pRec, 0.35f, 4, bCol);
+            DrawText(pill.text.c_str(), (int)pRec.x + 8, (int)pRec.y + 4, 10, pill.textCol);
+
+            curPillX += pw + pillSpacing;
+        }
+    }
 
     // Status / Mode Banner centered right above the slots
     if (player.HasCounterBuff()) {
@@ -191,6 +329,9 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
 }
 
 static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& player) {
+    // Low health threat pulse vignette across screen edges
+    DrawLowHealthVignette(windowWidth, windowHeight, player.GetHealth(), player.GetMaxHealth());
+
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 138.0f;
     const float hudWidth = 320.0f;
@@ -199,28 +340,23 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     DrawRectangleRounded(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 14, 18, 26, 215 });
     DrawRectangleRoundedLines(Rectangle{ hudX, hudY, hudWidth, hudHeight }, 0.2f, 6, Color{ 48, 62, 85, 220 });
 
-    // HEALTH BAR
-    float hpPercent = fmaxf(0.0f, fminf(1.0f, player.GetHealth() / player.GetMaxHealth()));
+    // HEALTH BAR (Refined with graduation ticks, glass highlight & metallic borders)
     DrawText("HP", (int)hudX + 14, (int)hudY + 12, 11, Color{ 235, 80, 90, 255 });
-    DrawRectangle((int)hudX + 68, (int)hudY + 12, 170, 12, Color{ 32, 20, 24, 220 });
-    DrawRectangle((int)hudX + 68, (int)hudY + 12, (int)(170 * hpPercent), 12, Color{ 235, 55, 75, 255 });
-    DrawRectangleLines((int)hudX + 68, (int)hudY + 12, 170, 12, Color{ 85, 40, 50, 220 });
+    Rectangle hpRec = { hudX + 68, hudY + 12, 170, 12 };
+    DrawResourceBar(hpRec, player.GetHealth(), player.GetMaxHealth(), Color{ 235, 55, 75, 255 }, Color{ 32, 20, 24, 220 }, Color{ 85, 40, 50, 220 }, true);
     char hpBuf[32];
     snprintf(hpBuf, sizeof(hpBuf), "%d/%d", (int)player.GetHealth(), (int)player.GetMaxHealth());
     DrawText(hpBuf, (int)hudX + 246, (int)hudY + 12, 10, Color{ 230, 205, 210, 225 });
 
     // STAMINA BAR
-    float stamPercent = fmaxf(0.0f, fminf(1.0f, player.GetStamina() / player.GetMaxStamina()));
     DrawText("STAM", (int)hudX + 14, (int)hudY + 32, 11, Color{ 255, 210, 80, 255 });
-    DrawRectangle((int)hudX + 68, (int)hudY + 32, 170, 12, Color{ 35, 30, 16, 220 });
-    DrawRectangle((int)hudX + 68, (int)hudY + 32, (int)(170 * stamPercent), 12, Color{ 255, 195, 45, 255 });
-    DrawRectangleLines((int)hudX + 68, (int)hudY + 32, 170, 12, Color{ 90, 75, 32, 220 });
+    Rectangle stamRec = { hudX + 68, hudY + 32, 170, 12 };
+    DrawResourceBar(stamRec, player.GetStamina(), player.GetMaxStamina(), Color{ 255, 195, 45, 255 }, Color{ 35, 30, 16, 220 }, Color{ 90, 75, 32, 220 }, true);
     char stamBuf[32];
     snprintf(stamBuf, sizeof(stamBuf), "%d/%d", (int)player.GetStamina(), (int)player.GetMaxStamina());
     DrawText(stamBuf, (int)hudX + 246, (int)hudY + 32, 10, Color{ 245, 230, 190, 225 });
 
     // POISE (COMPOSURE) BAR
-    float compPercent = fmaxf(0.0f, fminf(1.0f, player.GetComposure() / 100.0f));
     Color poiseLabelCol = Color{ 140, 210, 230, 255 };
     Color poiseFillCol = Color{ 70, 180, 210, 255 };
     if (player.IsInPhlegmaticTrance()) {
@@ -239,9 +375,8 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     }
 
     DrawText("POISE", (int)hudX + 14, (int)hudY + 52, 11, poiseLabelCol);
-    DrawRectangle((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 18, 28, 36, 220 });
-    DrawRectangle((int)hudX + 68, (int)hudY + 52, (int)(170 * compPercent), 12, poiseFillCol);
-    DrawRectangleLines((int)hudX + 68, (int)hudY + 52, 170, 12, Color{ 50, 80, 100, 220 });
+    Rectangle poiseRec = { hudX + 68, hudY + 52, 170, 12 };
+    DrawResourceBar(poiseRec, player.GetComposure(), 100.0f, poiseFillCol, Color{ 18, 28, 36, 220 }, Color{ 50, 80, 100, 220 }, true);
     char poiseBuf[32];
     if (player.IsInPhlegmaticTrance()) {
         snprintf(poiseBuf, sizeof(poiseBuf), "%.1fs", player.GetTranceTimer());
@@ -922,8 +1057,8 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
     float barY = 64.0f;
 
     // Outer backing plate
-    DrawRectangleRounded(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 38.0f }, 0.2f, 4, Color{ 16, 12, 20, 230 });
-    DrawRectangleRoundedLines(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 38.0f }, 0.2f, 4, Color{ 140, 90, 40, 240 });
+    DrawRectangleRounded(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 46.0f }, 0.2f, 4, Color{ 16, 12, 20, 230 });
+    DrawRectangleRoundedLines(Rectangle{ barX - 16.0f, barY - 26.0f, barW + 32.0f, barH + 46.0f }, 0.2f, 4, Color{ 140, 90, 40, 240 });
 
     // Boss Name & Crest
     int nameW = MeasureText(bossName.c_str(), 14);
@@ -941,6 +1076,12 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
     } else if (bossName.find("LENON") != std::string::npos) {
         humorBadge = "[SANGUINE - BLOOD]";
         humorCol = Color{ 255, 60, 80, 240 };
+    } else if (bossName.find("GALE") != std::string::npos || bossName.find("ARCHER") != std::string::npos) {
+        humorBadge = "[PHLEGMATIC - WOODLAND GALE]";
+        humorCol = Color{ 90, 220, 255, 240 };
+    } else if (bossName.find("GOLEM") != std::string::npos) {
+        humorBadge = "[MELANCHOLIC - PRIMORDIAL BASALT]";
+        humorCol = Color{ 255, 140, 40, 240 };
     }
 
     if (!humorBadge.empty()) {
@@ -948,20 +1089,22 @@ void HUD::DrawBossHealthBar(int windowWidth, const std::string& bossName, float 
         DrawText(humorBadge.c_str(), (int)(barX + barW - hw), (int)barY - 18, 10, humorCol);
     }
 
-    // Bar background
-    DrawRectangleRounded(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 35, 15, 22, 240 });
-
-    // Bar fill
-    float hpPercent = fmaxf(0.0f, fminf(1.0f, hp / maxHp));
-    DrawRectangleRounded(Rectangle{ barX, barY, barW * hpPercent, barH }, 0.2f, 4, Color{ 220, 45, 65, 255 });
-
-    // Golden frame
-    DrawRectangleRoundedLines(Rectangle{ barX, barY, barW, barH }, 0.2f, 4, Color{ 255, 200, 60, 220 });
+    // Health Bar with graduation ticks & specular shine
+    Rectangle bRec = { barX, barY, barW, barH };
+    DrawResourceBar(bRec, hp, maxHp, Color{ 220, 45, 65, 255 }, Color{ 35, 15, 22, 240 }, Color{ 255, 200, 60, 220 }, true);
 
     // HP textual value
     std::string valStr = std::to_string((int)hp) + " / " + std::to_string((int)maxHp);
     int valW = MeasureText(valStr.c_str(), 10);
     DrawText(valStr.c_str(), (int)(barX + (barW - valW) * 0.5f), (int)barY + 4, 10, Color{ 255, 255, 255, 240 });
+
+    // Stagger / Posture Resistance Meter
+    float stagY = barY + barH + 4.0f;
+    float stagH = 5.0f;
+    DrawRectangleRounded(Rectangle{ barX, stagY, barW, stagH }, 0.25f, 2, Color{ 20, 24, 34, 220 });
+    DrawRectangleRounded(Rectangle{ barX, stagY, barW, stagH }, 0.25f, 2, Color{ 90, 175, 225, 220 });
+    DrawRectangleRoundedLines(Rectangle{ barX, stagY, barW, stagH }, 0.25f, 2, Color{ 50, 75, 110, 180 });
+    DrawText("POSTURE & COMPOSURE GUARD", (int)barX + 2, (int)stagY + 6, 8, Color{ 140, 180, 215, 200 });
 }
 
 void HUD::DrawBossDialogueBanner(int windowWidth, int windowHeight, const std::string& speaker, const std::string& text, Color accentColor) {

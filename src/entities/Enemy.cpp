@@ -368,8 +368,8 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         if (bleedTickTimer <= 0.0f) {
             bleedTickTimer = 0.5f;
             health -= 4.0f;
-            particles.SpawnSparks(position, Color{ 230, 30, 40, 220 }, 3, 40.0f);
-            particles.SpawnFloatingText(position, "-4 BLEED", Color{ 255, 60, 60, 220 }, 14.0f);
+            particles.SpawnSparks(position, Color{ 230, 30, 40, 220 }, 4, 45.0f);
+            particles.SpawnFloatingText(position, "-4 BLEED", Color{ 245, 60, 75, 255 }, 15.0f);
             if (health <= 0.0f) {
                 health = 0.0f;
                 state = EnemyState::DEAD;
@@ -384,8 +384,8 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         if (solarBurnTickTimer <= 0.0f) {
             solarBurnTickTimer = 0.5f;
             health -= 5.0f;
-            particles.SpawnSparks(position, Color{ 255, 200, 40, 240 }, 4, 50.0f);
-            particles.SpawnFloatingText(position, "-5 SOLAR BURN", Color{ 255, 210, 40, 240 }, 14.0f);
+            particles.SpawnSparks(position, Color{ 255, 200, 40, 240 }, 5, 55.0f);
+            particles.SpawnFloatingText(position, "-5 SOLAR BURN", Color{ 255, 195, 50, 255 }, 15.0f);
             if (health <= 0.0f) {
                 health = 0.0f;
                 state = EnemyState::DEAD;
@@ -966,9 +966,9 @@ void Enemy::OnParried(ParticleSystem& particles) {
 bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
     if (state == EnemyState::DEAD) return false;
 
-    if (state == EnemyState::STUNNED) {
+    bool isCrit = (state == EnemyState::STUNNED);
+    if (isCrit) {
         amount *= 1.5f;
-        particles.SpawnFloatingText({ position.x, position.y - 30.0f }, "CRIT!", Color{ 255, 220, 0, 255 }, 20.0f);
     }
 
     // Apply Enemy Defense formula with defense pierce and Melancholic shell shatter
@@ -985,8 +985,14 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
 
     health -= finalAmount;
     SoundFX::PlayHitImpact();
-    particles.SpawnSparks(position, Color{ 255, 60, 60, 255 }, 12, 120.0f);
-    particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 255, 240, 240, 255 }, 20.0f);
+    particles.SpawnSparks(position, isCrit ? Color{ 255, 220, 60, 255 } : Color{ 255, 60, 60, 255 }, isCrit ? 22 : 12, isCrit ? 180.0f : 120.0f);
+    
+    // Thematic floating combat damage numbers
+    if (isCrit) {
+        particles.SpawnFloatingText(position, "CRITICAL! -" + std::to_string((int)finalAmount), Color{ 255, 220, 60, 255 }, 24.0f);
+    } else {
+        particles.SpawnFloatingText(position, "-" + std::to_string((int)finalAmount), Color{ 240, 245, 255, 255 }, 20.0f);
+    }
 
     float knockMult = (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM) ? 35.0f : ((type == EnemyType::BRUTE || type == EnemyType::ORE_GOLEM) ? 60.0f : 180.0f);
     velocity.x += knockbackDir.x * knockMult;

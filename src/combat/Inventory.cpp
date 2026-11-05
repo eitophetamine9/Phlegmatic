@@ -29,6 +29,14 @@ void Inventory::InitDefault() {
     equippedTotem = TotemType::NONE;
     unlockedTotems.push_back(TotemType::NONE);
 
+    // Initialize 3 loadout presets
+    for (int i = 0; i < 3; ++i) {
+        loadouts[i] = EquipmentPreset();
+    }
+    loadouts[0].weapon = WeaponType::SWORD;
+    loadouts[0].isConfigured = true;
+    activeLoadoutIdx = 0;
+
     // Default health potions & currency
     healthPotions = 1;
     shingles = 0;
