@@ -17,6 +17,7 @@ void RuinedCastleHandler::Reset() {
     zilSparedPlayer = false;
     hasUsedZilRetry = false;
     showZilDefeatModal = false;
+    zilRematchCooldown = 0.0f;
     pendingZilChoice = 0;
     zilDialogueTimer = 0.0f;
     zilDialogueSpeaker = "";
@@ -269,6 +270,24 @@ void RuinedCastleHandler::Update(
         }
     }
 
+    // Cooldown update for Zil Crucible Rematch
+    if (zilRematchCooldown > 0.0f) {
+        zilRematchCooldown -= dt;
+        if (zilRematchCooldown < 0.0f) zilRematchCooldown = 0.0f;
+    }
+
+    // High Altar Rematch Crucible Trigger (Requires Zil previously defeated or spared)
+    if ((zilDefeated || zilSparedPlayer) && !zilEncounterActive && zilRematchCooldown <= 0.0f) {
+        Vector2 altarPos = { 800.0f, 290.0f };
+        if (Vector2Distance(player.GetPosition(), altarPos) <= 120.0f && IsKeyPressed(KEY_G)) {
+            enemies.emplace_back(EnemyType::ZIL_BOSS, altarPos);
+            zilEncounterActive = true;
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(player.GetPosition(), "CRUCIBLE AWAKENED: ZIL REMATCH!", Color{ 255, 210, 70, 255 }, 24.0f);
+            particles.SpawnSparks(altarPos, Color{ 255, 200, 60, 255 }, 30, 200.0f);
+        }
+    }
+
     // Zil Boss Defeat Check
     if (zilEncounterActive) {
         bool zilAlive = false;
@@ -279,32 +298,39 @@ void RuinedCastleHandler::Update(
             }
         }
 
-        if (!zilAlive && !zilDefeated) {
-            zilDefeated = true;
+        if (!zilAlive) {
             zilEncounterActive = false;
-            overworldEnemiesSpawned = true;
+            zilRematchCooldown = 30.0f;
             enemies.clear();
             projectiles.clear();
 
-            // Award Truth Seeker (Partial)!
-            player.GetInventory().UnlockWeapon(WeaponType::TRUTH_SEEKER);
-            player.SetWeapon(WeaponType::TRUTH_SEEKER);
+            if (!zilDefeated) {
+                zilDefeated = true;
+                overworldEnemiesSpawned = true;
 
-            // Unlock Lore Fragment III: Zil's Holy Oath
-            player.GetInventory().UnlockFragment("frag_03");
+                // Award Truth Seeker (Partial)!
+                player.GetInventory().UnlockWeapon(WeaponType::TRUTH_SEEKER);
+                player.SetWeapon(WeaponType::TRUTH_SEEKER);
 
-            map.SetGateOpen(true);
+                // Unlock Lore Fragment III: Zil's Holy Oath
+                player.GetInventory().UnlockFragment("frag_03");
 
-            isZilDialogueOpen = true;
-            zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
-            zilDialogueColor = Color{ 255, 215, 60, 255 };
-            zilDialoguePages = {
-                "So... the blade recognizes you. Even a fractured remnant can tell true conviction from hollow bravado.",
-                "Take Truth Seeker. Carry it north across the high pass into Zyphden, where King Charlz's corruption falls darkest.",
-                "Seek King Kreptu and Captain Lenon in the mountain city. Tell them Zil fulfilled his holy oath until the very end."
-            };
-            zilDialoguePage = 0;
-            particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
+                map.SetGateOpen(true);
+
+                isZilDialogueOpen = true;
+                zilDialogueSpeaker = "ZIL'S REMNANT - SHADOW OF THE CRUSADER";
+                zilDialogueColor = Color{ 255, 215, 60, 255 };
+                zilDialoguePages = {
+                    "So... the blade recognizes you. Even a fractured remnant can tell true conviction from hollow bravado.",
+                    "Take Truth Seeker. Carry it north across the high pass into Zyphden, where King Charlz's corruption falls darkest.",
+                    "Seek King Kreptu and Captain Lenon in the mountain city. Tell them Zil fulfilled his holy oath until the very end."
+                };
+                zilDialoguePage = 0;
+                particles.SpawnFloatingText(player.GetPosition(), "VICTORY! CLAIMED TRUTH SEEKER (PARTIAL)!", Color{ 255, 215, 60, 255 }, 24.0f);
+            } else {
+                player.GetInventory().AddShingles(75);
+                particles.SpawnFloatingText(player.GetPosition(), "REMATCH VICTORY! +75 SHINGLES!", Color{ 255, 220, 80, 255 }, 24.0f);
+            }
             particles.AddScreenShake(7.0f, 0.3f);
             SoundFX::PlayParrySuccess();
         }
@@ -424,6 +450,27 @@ void RuinedCastleHandler::Render(
 
     particles.Draw();
     campfire.Draw(time, player);
+
+    // High Altar Rematch Crucible Visuals & Interaction
+    if ((zilDefeated || zilSparedPlayer) && !zilEncounterActive) {
+        Vector2 altarPos = { 800.0f, 290.0f };
+        float aPulse = 0.5f + 0.5f * sinf(time * 3.0f);
+        DrawCircleGradient(altarPos, 50.0f, Color{ 255, 200, 80, (unsigned char)(40 * aPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)altarPos.x, (int)altarPos.y, 42.0f, Color{ 255, 215, 80, (unsigned char)(140 + 60 * aPulse) });
+
+        if (zilRematchCooldown > 0.0f) {
+            std::string cdText = "CRUCIBLE DORMANT (" + std::to_string((int)ceilf(zilRematchCooldown)) + "s)";
+            int cw = MeasureText(cdText.c_str(), 10);
+            DrawText(cdText.c_str(), (int)altarPos.x - cw / 2, (int)altarPos.y - 40, 10, Color{ 220, 180, 100, 220 });
+        } else if (Vector2Distance(player.GetPosition(), altarPos) <= 120.0f) {
+            const char* prompt = "[G] PRAY AT HIGH ALTAR (ZIL REMATCH)";
+            int pw = MeasureText(prompt, 11);
+            DrawRectangleRounded(Rectangle{ altarPos.x - (float)pw * 0.5f - 8.0f, altarPos.y - 44.0f, (float)pw + 16.0f, 20.0f }, 0.25f, 4, Color{ 14, 18, 28, 220 });
+            DrawRectangleRoundedLines(Rectangle{ altarPos.x - (float)pw * 0.5f - 8.0f, altarPos.y - 44.0f, (float)pw + 16.0f, 20.0f }, 0.25f, 4, Color{ 255, 215, 80, 240 });
+            DrawText(prompt, (int)altarPos.x - pw / 2, (int)altarPos.y - 40, 11, Color{ 255, 230, 110, 255 });
+        }
+    }
+
     EndMode2D();
 
     Vector2 mousePos = GetMousePosition();

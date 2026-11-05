@@ -60,6 +60,7 @@ public:
     void SetZilDefeated(bool d) { zilDefeated = d; }
     bool HasUsedZilRetry() const { return hasUsedZilRetry; }
     bool ShowZilDefeatModal() const { return showZilDefeatModal; }
+    float GetZilRematchCooldown() const { return zilRematchCooldown; }
 
 private:
     Campfire campfire;
@@ -68,6 +69,7 @@ private:
     bool zilSparedPlayer;
     bool hasUsedZilRetry;
     bool showZilDefeatModal;
+    float zilRematchCooldown = 0.0f;
 
     int pendingZilChoice = 0;
     float zilDialogueTimer;

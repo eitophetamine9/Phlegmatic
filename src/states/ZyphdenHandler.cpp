@@ -2143,8 +2143,18 @@ void ZyphdenHandler::Render(
 
 
         if (lenonSpawned && !sparActive && !lenonInTavern) {
-
             knightLenonNPC.Draw(time, player.GetPosition());
+
+            // Floating cooldown indicator above Lenon's head when resting
+            if (lenonRematchCooldown > 0.0f) {
+                std::string cdText = "RESTING (" + std::to_string((int)ceilf(lenonRematchCooldown)) + "s)";
+                int cw = MeasureText(cdText.c_str(), 10);
+                float cx = knightLenonNPC.position.x - (float)cw * 0.5f;
+                float cy = knightLenonNPC.position.y - 74.0f;
+                DrawRectangleRounded(Rectangle{ cx - 6.0f, cy - 2.0f, (float)cw + 12.0f, 16.0f }, 0.3f, 3, Color{ 16, 20, 30, 220 });
+                DrawRectangleRoundedLines(Rectangle{ cx - 6.0f, cy - 2.0f, (float)cw + 12.0f, 16.0f }, 0.3f, 3, Color{ 180, 140, 80, 200 });
+                DrawText(cdText.c_str(), (int)cx, (int)cy + 2, 10, Color{ 255, 215, 90, 240 });
+            }
 
             if (knightLenonNPC.CheckInteraction(player.GetPosition())) {
                 bool isLenonBeaten = (lenonDefeated || questPhase >= ZyphdenQuestPhase::VICTORIOUS);
