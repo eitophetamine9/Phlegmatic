@@ -92,6 +92,15 @@ public:
     std::vector<MistHealingOrb>& GetMistHealingOrbs() { return mistHealingOrbs; }
     const std::vector<SmokeMistZone>& GetSmokeMistZones() const { return smokeMistZones; }
     std::vector<SmokeMistZone>& GetSmokeMistZones() { return smokeMistZones; }
+    bool IsInsideSmokeMist() const {
+        for (const auto& sm : smokeMistZones) {
+            if (!sm.active) continue;
+            float dx = position.x - sm.position.x;
+            float dy = position.y - sm.position.y;
+            if (dx * dx + dy * dy <= sm.radius * sm.radius) return true;
+        }
+        return false;
+    }
 
     ArmorSet GetActiveArmorSet() const;
     bool HasFullArmorSet(ArmorSet set) const;
