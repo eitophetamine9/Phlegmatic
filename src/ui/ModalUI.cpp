@@ -769,22 +769,45 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("EQUIPMENT MATRIX", (int)leftX + 16, (int)headerY + 2, 16, Color{ 255, 230, 140, 255 });
 
         // Loadout diamond badges: [ I ] [ II ] [ III ]
-        float loadoutX = leftX + 190.0f;
+        float loadoutX = leftX + 175.0f;
         DrawText("LOADOUTS:", (int)loadoutX, (int)headerY + 3, 12, Color{ 160, 180, 210, 200 });
         const char* loadoutLabels[3] = { "I", "II", "III" };
-        for (int lo = 0; lo < (int)std::size(loadoutLabels); ++lo) {
-            float loBtnX = loadoutX + 76.0f + (float)lo * 32.0f;
+        for (int lo = 0; lo < 3; ++lo) {
+            float loBtnX = loadoutX + 74.0f + (float)lo * 30.0f;
             Rectangle loRec = { loBtnX, headerY - 1.0f, 26.0f, 22.0f };
-            bool isLoActive = (s_activeLoadout == lo + 1);
+            bool isLoActive = (player.GetInventory().GetActiveLoadoutIndex() == lo);
             bool isLoHov = CheckCollisionPointRec(mousePos, loRec);
             if (isLoHov && isMousePressed) {
-                s_activeLoadout = lo + 1;
-                SoundFX::PlayButtonClick();
+                player.GetInventory().SetActiveLoadoutIndex(lo);
+                const auto& preset = player.GetInventory().GetLoadout(lo);
+                if (preset.isConfigured) {
+                    if (player.GetInventory().HasWeapon(preset.weapon)) player.SetWeapon(preset.weapon);
+                    if (player.GetInventory().HasHelmet(preset.helmet)) player.SetHelmet(preset.helmet);
+                    if (player.GetInventory().HasChestplate(preset.chestplate)) player.SetChestplate(preset.chestplate);
+                    if (player.GetInventory().HasLeggings(preset.leggings)) player.SetLeggings(preset.leggings);
+                    if (player.GetInventory().HasTotem(preset.totem)) player.SetTotem(preset.totem);
+                    SoundFX::PlayEquipWeapon();
+                } else {
+                    player.GetInventory().SaveCurrentToLoadout(lo, player.GetWeapon(), player.GetHelmet(), player.GetChestplate(), player.GetLeggings(), player.GetTotem());
+                    SoundFX::PlayButtonClick();
+                }
             }
             DrawRectangleRounded(loRec, 0.25f, 4, isLoActive ? Color{ 45, 70, 115, 255 } : (isLoHov ? Color{ 30, 42, 64, 220 } : Color{ 18, 24, 36, 200 }));
             DrawRectangleRoundedLines(loRec, 0.25f, 4, isLoActive ? Color{ 255, 215, 80, 255 } : Color{ 55, 75, 105, 200 });
             DrawText(loadoutLabels[lo], (int)loBtnX + 9, (int)headerY + 3, 12, isLoActive ? Color{ 255, 225, 100, 255 } : Color{ 175, 195, 220, 200 });
         }
+
+        // Snapshot Save Button: [SAVE]
+        Rectangle saveRec = { loadoutX + 74.0f + 3.0f * 30.0f + 4.0f, headerY - 1.0f, 46.0f, 22.0f };
+        bool isSaveHov = CheckCollisionPointRec(mousePos, saveRec);
+        if (isSaveHov && isMousePressed) {
+            int curLo = player.GetInventory().GetActiveLoadoutIndex();
+            player.GetInventory().SaveCurrentToLoadout(curLo, player.GetWeapon(), player.GetHelmet(), player.GetChestplate(), player.GetLeggings(), player.GetTotem());
+            SoundFX::PlayEquipWeapon();
+        }
+        DrawRectangleRounded(saveRec, 0.25f, 4, isSaveHov ? Color{ 40, 75, 60, 220 } : Color{ 20, 45, 36, 200 });
+        DrawRectangleRoundedLines(saveRec, 0.25f, 4, isSaveHov ? Color{ 120, 245, 180, 255 } : Color{ 60, 140, 100, 200 });
+        DrawText("SAVE", (int)saveRec.x + 8, (int)headerY + 4, 10, isSaveHov ? Color{ 160, 255, 210, 255 } : Color{ 120, 220, 170, 220 });
 
         // Apparel Hidden Toggle Pill
         Rectangle apparelPill = { leftX + leftW - 146.0f, headerY - 1.0f, 134.0f, 24.0f };
@@ -1323,8 +1346,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             // Stats
             DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
-            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            HelmetStats curSt = GetHelmetStats(player.GetHelmet());
+            int defDelta = (int)(st.defense - curSt.defense);
+            int willDelta = (int)(st.willBonus - curSt.willBonus);
+            int hpDelta = (int)(st.maxHpBonus - curSt.maxHpBonus);
+
+            std::string sLine1 = "Def: +" + std::to_string((int)st.defense);
+            if (!isInspEquipped && defDelta != 0) sLine1 += " (" + std::string(defDelta > 0 ? "+" : "") + std::to_string(defDelta) + ")";
+            sLine1 += " | Will: +" + std::to_string((int)st.willBonus);
+            if (!isInspEquipped && willDelta != 0) sLine1 += " (" + std::string(willDelta > 0 ? "+" : "") + std::to_string(willDelta) + ")";
+            if (st.maxHpBonus > 0.0f || curSt.maxHpBonus > 0.0f) {
+                sLine1 += " | HP: +" + std::to_string((int)st.maxHpBonus);
+                if (!isInspEquipped && hpDelta != 0) sLine1 += " (" + std::string(hpDelta > 0 ? "+" : "") + std::to_string(hpDelta) + ")";
+            }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
             if (st.setAffinity != ArmorSet::NONE) {
@@ -1445,8 +1479,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             // Stats
             DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
-            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            ChestplateStats curSt = GetChestplateStats(player.GetChestplate());
+            int defDelta = (int)(st.defense - curSt.defense);
+            int willDelta = (int)(st.willBonus - curSt.willBonus);
+            int hpDelta = (int)(st.maxHpBonus - curSt.maxHpBonus);
+
+            std::string sLine1 = "Def: +" + std::to_string((int)st.defense);
+            if (!isInspEquipped && defDelta != 0) sLine1 += " (" + std::string(defDelta > 0 ? "+" : "") + std::to_string(defDelta) + ")";
+            sLine1 += " | Will: +" + std::to_string((int)st.willBonus);
+            if (!isInspEquipped && willDelta != 0) sLine1 += " (" + std::string(willDelta > 0 ? "+" : "") + std::to_string(willDelta) + ")";
+            if (st.maxHpBonus > 0.0f || curSt.maxHpBonus > 0.0f) {
+                sLine1 += " | HP: +" + std::to_string((int)st.maxHpBonus);
+                if (!isInspEquipped && hpDelta != 0) sLine1 += " (" + std::string(hpDelta > 0 ? "+" : "") + std::to_string(hpDelta) + ")";
+            }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
             if (st.setAffinity != ArmorSet::NONE) {
@@ -1567,8 +1612,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             // Stats
             DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
-            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            LeggingsStats curSt = GetLeggingsStats(player.GetLeggings());
+            int defDelta = (int)(st.defense - curSt.defense);
+            int willDelta = (int)(st.willBonus - curSt.willBonus);
+            int hpDelta = (int)(st.maxHpBonus - curSt.maxHpBonus);
+
+            std::string sLine1 = "Def: +" + std::to_string((int)st.defense);
+            if (!isInspEquipped && defDelta != 0) sLine1 += " (" + std::string(defDelta > 0 ? "+" : "") + std::to_string(defDelta) + ")";
+            sLine1 += " | Will: +" + std::to_string((int)st.willBonus);
+            if (!isInspEquipped && willDelta != 0) sLine1 += " (" + std::string(willDelta > 0 ? "+" : "") + std::to_string(willDelta) + ")";
+            if (st.maxHpBonus > 0.0f || curSt.maxHpBonus > 0.0f) {
+                sLine1 += " | HP: +" + std::to_string((int)st.maxHpBonus);
+                if (!isInspEquipped && hpDelta != 0) sLine1 += " (" + std::string(hpDelta > 0 ? "+" : "") + std::to_string(hpDelta) + ")";
+            }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
             if (st.setAffinity != ArmorSet::NONE) {
@@ -1824,10 +1880,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             // Stats
             DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            std::string sLine1 = "Light Atk: " + std::to_string((int)st.lightDamage) + " Dmg | Heavy Atk: " + std::to_string((int)st.heavyDamage) + " Dmg";
+            int equippedUpg = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
+            WeaponStats curSt = GetWeaponStats(player.GetWeapon(), equippedUpg);
+            int lightDelta = (int)(st.lightDamage - curSt.lightDamage);
+            int heavyDelta = (int)(st.heavyDamage - curSt.heavyDamage);
+            int reachDelta = (int)(st.lightRange - curSt.lightRange);
+            int pierceDelta = (int)((st.defensePierceBonus - curSt.defensePierceBonus) * 100.0f);
+
+            std::string sLine1 = "Light: " + std::to_string((int)st.lightDamage);
+            if (!isInspEquipped && lightDelta != 0) sLine1 += " (" + std::string(lightDelta > 0 ? "+" : "") + std::to_string(lightDelta) + ")";
+            sLine1 += " | Heavy: " + std::to_string((int)st.heavyDamage);
+            if (!isInspEquipped && heavyDelta != 0) sLine1 += " (" + std::string(heavyDelta > 0 ? "+" : "") + std::to_string(heavyDelta) + ")";
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
-            std::string sLine2 = "Reach: " + std::to_string((int)st.lightRange) + "px | Armor Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
+            std::string sLine2 = "Reach: " + std::to_string((int)st.lightRange) + "px";
+            if (!isInspEquipped && reachDelta != 0) sLine2 += " (" + std::string(reachDelta > 0 ? "+" : "") + std::to_string(reachDelta) + ")";
+            sLine2 += " | Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
+            if (!isInspEquipped && pierceDelta != 0) sLine2 += " (" + std::string(pierceDelta > 0 ? "+" : "") + std::to_string(pierceDelta) + "%)";
             DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 118, 12, Color{ 140, 210, 255, 240 });
 
             // Special weapon archetype traits

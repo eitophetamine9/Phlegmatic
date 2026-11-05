@@ -25,6 +25,15 @@ struct QuestItem {
     Color rarityColor;
 };
 
+struct EquipmentPreset {
+    WeaponType weapon = WeaponType::SWORD;
+    HelmetType helmet = HelmetType::NONE;
+    ChestplateType chestplate = ChestplateType::NONE;
+    LeggingsType leggings = LeggingsType::NONE;
+    TotemType totem = TotemType::NONE;
+    bool isConfigured = false;
+};
+
 class Inventory {
 public:
     Inventory();
@@ -206,7 +215,24 @@ public:
         if (idx >= 0 && idx < GameLimits::BESTIARY_COUNT) enemyKillCounts[idx] = val;
     }
 
+    // Equipment Loadout Presets [ I ] [ II ] [ III ]
+    int GetActiveLoadoutIndex() const { return activeLoadoutIdx; }
+    void SetActiveLoadoutIndex(int idx) { if (idx >= 0 && idx < 3) activeLoadoutIdx = idx; }
+    const EquipmentPreset& GetLoadout(int idx) const { return loadouts[(idx >= 0 && idx < 3) ? idx : 0]; }
+    EquipmentPreset& GetLoadout(int idx) { return loadouts[(idx >= 0 && idx < 3) ? idx : 0]; }
+    void SaveCurrentToLoadout(int idx, WeaponType wep, HelmetType helm, ChestplateType chest, LeggingsType leg, TotemType tot) {
+        if (idx < 0 || idx >= 3) return;
+        loadouts[idx].weapon = wep;
+        loadouts[idx].helmet = helm;
+        loadouts[idx].chestplate = chest;
+        loadouts[idx].leggings = leg;
+        loadouts[idx].totem = tot;
+        loadouts[idx].isConfigured = true;
+    }
+
 private:
+    EquipmentPreset loadouts[3];
+    int activeLoadoutIdx = 0;
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;
     ArmorType equippedArmor = ArmorType::NONE;
