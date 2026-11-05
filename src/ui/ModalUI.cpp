@@ -509,33 +509,103 @@ static void DrawTotemBuffDebuffText(const std::string& buffText, const std::stri
     DrawText(nStr.c_str(), x + bw + sw, y, fontSize, Color{ 255, 90, 90, 255 });
 }
 
-static void DrawEquipmentSlotBubble(Rectangle rec, const char* categoryTag, bool isSelected, bool isHovered, bool isEquipped, int tierPips = 0) {
-    Color bgCol = isEquipped ? Color{ 28, 42, 68, 250 } : (isSelected ? Color{ 24, 36, 56, 240 } : (isHovered ? Color{ 20, 28, 44, 220 } : Color{ 14, 18, 28, 200 }));
-    Color borderCol = isEquipped ? Color{ 255, 215, 80, 255 } : (isSelected ? Color{ 140, 210, 255, 255 } : (isHovered ? Color{ 90, 150, 225, 220 } : Color{ 45, 62, 88, 180 }));
+static void DrawEquipmentBubble(Rectangle rec, bool isSelected, bool isHovered, bool isEquipped, bool isLocked, int tierPips = 0, bool showEye = false, bool eyeHidden = false) {
+    // Dark metallic slate background with subtle lighting
+    Color bgCol = isLocked ? Color{ 12, 14, 20, 240 } :
+                  (isEquipped ? Color{ 26, 38, 62, 252 } :
+                  (isSelected ? Color{ 22, 34, 54, 250 } :
+                  (isHovered ? Color{ 20, 30, 48, 235 } : Color{ 14, 18, 28, 220 })));
 
-    DrawRectangleRounded(rec, 0.14f, 4, bgCol);
-    DrawRectangleRoundedLines(rec, 0.14f, 4, borderCol);
+    Color borderCol = isLocked ? Color{ 40, 48, 64, 180 } :
+                      (isEquipped ? Color{ 255, 215, 80, 255 } :
+                      (isSelected ? Color{ 130, 210, 255, 255 } :
+                      (isHovered ? Color{ 90, 165, 240, 230 } : Color{ 52, 70, 100, 200 })));
 
-    // Decorative corner brackets (faithful to reference image media_1793764740497_02c0d6f7.jpg)
-    Color cornerBracketCol = isEquipped ? Color{ 255, 225, 100, 240 } : Color{ 80, 120, 175, 160 };
-    float cSize = 6.0f;
-    DrawLineEx({ rec.x + 2, rec.y + 2 }, { rec.x + 2 + cSize, rec.y + 2 }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + 2, rec.y + 2 }, { rec.x + 2, rec.y + 2 + cSize }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + rec.width - 2, rec.y + 2 }, { rec.x + rec.width - 2 - cSize, rec.y + 2 }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + rec.width - 2, rec.y + 2 }, { rec.x + rec.width - 2, rec.y + 2 + cSize }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + 2, rec.y + rec.height - 2 }, { rec.x + 2 + cSize, rec.y + rec.height - 2 }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + 2, rec.y + rec.height - 2 }, { rec.x + 2, rec.y + rec.height - 2 - cSize }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + rec.width - 2, rec.y + rec.height - 2 }, { rec.x + rec.width - 2 - cSize, rec.y + rec.height - 2 }, 1.5f, cornerBracketCol);
-    DrawLineEx({ rec.x + rec.width - 2, rec.y + rec.height - 2 }, { rec.x + rec.width - 2, rec.y + rec.height - 2 - cSize }, 1.5f, cornerBracketCol);
+    DrawRectangleRounded(rec, 0.16f, 4, bgCol);
+    DrawRectangleRoundedLines(rec, 0.16f, 4, borderCol);
 
-    if (categoryTag) {
-        DrawText(categoryTag, (int)rec.x + 8, (int)rec.y + 5, 10, Color{ 140, 165, 195, 200 });
+    // Inner inset border line (faithful to Assassin's Creed Valhalla style reference)
+    if (rec.width > 28.0f && rec.height > 28.0f) {
+        Rectangle innerRec = { rec.x + 3.0f, rec.y + 3.0f, rec.width - 6.0f, rec.height - 6.0f };
+        Color innerCol = isEquipped ? Color{ 190, 160, 65, 120 } :
+                         (isSelected ? Color{ 80, 140, 205, 120 } : Color{ 36, 48, 70, 100 });
+        DrawRectangleRoundedLines(innerRec, 0.12f, 4, innerCol);
     }
 
-    if (tierPips > 0) {
+    // Ornate corner brackets with diamond corner vertex terminals
+    Color bracketCol = isLocked ? Color{ 52, 62, 80, 140 } :
+                       (isEquipped ? Color{ 255, 225, 105, 250 } :
+                       (isSelected ? Color{ 150, 225, 255, 240 } :
+                       (isHovered ? Color{ 120, 190, 255, 220 } : Color{ 75, 105, 150, 180 })));
+
+    float arm = std::min(8.0f, rec.width * 0.22f);
+    float inset = 3.0f;
+
+    // Top-Left corner
+    DrawLineEx({ rec.x + inset, rec.y + inset }, { rec.x + inset + arm, rec.y + inset }, 1.8f, bracketCol);
+    DrawLineEx({ rec.x + inset, rec.y + inset }, { rec.x + inset, rec.y + inset + arm }, 1.8f, bracketCol);
+    DrawCircle((int)(rec.x + inset), (int)(rec.y + inset), 1.6f, bracketCol);
+
+    // Top-Right corner
+    DrawLineEx({ rec.x + rec.width - inset, rec.y + inset }, { rec.x + rec.width - inset - arm, rec.y + inset }, 1.8f, bracketCol);
+    DrawLineEx({ rec.x + rec.width - inset, rec.y + inset }, { rec.x + rec.width - inset, rec.y + inset + arm }, 1.8f, bracketCol);
+    DrawCircle((int)(rec.x + rec.width - inset), (int)(rec.y + inset), 1.6f, bracketCol);
+
+    // Bottom-Left corner
+    DrawLineEx({ rec.x + inset, rec.y + rec.height - inset }, { rec.x + inset + arm, rec.y + rec.height - inset }, 1.8f, bracketCol);
+    DrawLineEx({ rec.x + inset, rec.y + rec.height - inset }, { rec.x + inset, rec.y + rec.height - inset - arm }, 1.8f, bracketCol);
+    DrawCircle((int)(rec.x + inset), (int)(rec.y + rec.height - inset), 1.6f, bracketCol);
+
+    // Bottom-Right corner
+    DrawLineEx({ rec.x + rec.width - inset, rec.y + rec.height - inset }, { rec.x + rec.width - inset - arm, rec.y + rec.height - inset }, 1.8f, bracketCol);
+    DrawLineEx({ rec.x + rec.width - inset, rec.y + rec.height - inset }, { rec.x + rec.width - inset, rec.y + rec.height - inset - arm }, 1.8f, bracketCol);
+    DrawCircle((int)(rec.x + rec.width - inset), (int)(rec.y + rec.height - inset), 1.6f, bracketCol);
+
+    // Golden Equipped indicator (top-left diamond and bright dot)
+    if (isEquipped) {
+        Vector2 eqCenter = { rec.x + 8.0f, rec.y + 8.0f };
+        DrawPoly(eqCenter, 4, 3.8f, 45.0f, Color{ 255, 215, 80, 255 });
+        DrawCircle((int)eqCenter.x, (int)eqCenter.y, 1.5f, Color{ 255, 255, 220, 255 });
+    }
+
+    // Tier diamond pips along bottom edge
+    if (tierPips > 0 && !isLocked) {
+        float pipSpacing = 6.5f;
+        float totalPipsW = (float)(tierPips - 1) * pipSpacing;
+        float pipsStartX = rec.x + rec.width * 0.5f - totalPipsW * 0.5f;
+        float pipsY = rec.y + rec.height - 7.0f;
         for (int p = 0; p < tierPips; ++p) {
-            DrawCircle((int)(rec.x + rec.width - 8.0f - (float)p * 7.0f), (int)rec.y + 8, 2.0f, isEquipped ? Color{ 255, 215, 80, 255 } : Color{ 140, 200, 255, 220 });
+            Vector2 pPos = { pipsStartX + (float)p * pipSpacing, pipsY };
+            DrawPoly(pPos, 4, 2.4f, 45.0f, isEquipped ? Color{ 255, 220, 95, 240 } : Color{ 140, 205, 255, 220 });
         }
+    }
+
+    // Eye icon for apparel visibility
+    if (showEye) {
+        float eyeX = rec.x + 9.0f;
+        float eyeY = rec.y + rec.height - 8.0f;
+        Color eyeCol = eyeHidden ? Color{ 120, 140, 165, 180 } : Color{ 160, 225, 255, 230 };
+        DrawCircleLines((int)eyeX, (int)eyeY, 3.2f, eyeCol);
+        if (!eyeHidden) {
+            DrawCircle((int)eyeX, (int)eyeY, 1.4f, eyeCol);
+        } else {
+            DrawLineEx({ eyeX - 3.5f, eyeY + 3.5f }, { eyeX + 3.5f, eyeY - 3.5f }, 1.2f, eyeCol);
+        }
+    }
+
+    // Padlock symbol if locked
+    if (isLocked) {
+        float lockX = rec.x + rec.width - 9.0f;
+        float lockY = rec.y + rec.height - 8.0f;
+        DrawRectangle((int)lockX - 3, (int)lockY - 2, 6, 5, Color{ 185, 75, 75, 230 });
+        DrawCircleLines((int)lockX, (int)lockY - 3, 2.4f, Color{ 210, 95, 95, 230 });
+    }
+}
+
+static void DrawEquipmentSlotBubble(Rectangle rec, const char* categoryTag, bool isSelected, bool isHovered, bool isEquipped, int tierPips = 0) {
+    DrawEquipmentBubble(rec, isSelected, isHovered, isEquipped, false, tierPips);
+    if (categoryTag) {
+        DrawText(categoryTag, (int)rec.x + 8, (int)rec.y + 5, 10, Color{ 140, 165, 195, 200 });
     }
 }
 bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player, int& activeTab, int& selectedFragmentIndex) {
@@ -748,17 +818,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         HelmetStats hStats = GetHelmetStats(player.GetHelmet());
         bool isHelmSel = (s_selectedSlot == 0);
         bool hasHelmEquipped = (player.GetHelmet() != HelmetType::NONE);
-        DrawEquipmentSlotBubble(helmSlotRec, "HEAD / HELMET", isHelmSel, isHelmSlotHov, hasHelmEquipped, 2);
+        DrawRectangleRounded(helmSlotRec, 0.14f, 4, isHelmSel ? Color{ 28, 40, 64, 250 } : (isHelmSlotHov ? Color{ 22, 30, 48, 220 } : Color{ 14, 18, 28, 200 }));
+        DrawRectangleRoundedLines(helmSlotRec, 0.14f, 4, hasHelmEquipped ? Color{ 255, 215, 80, 240 } : (isHelmSel ? Color{ 130, 210, 255, 255 } : Color{ 48, 65, 92, 200 }));
 
-        Rectangle hIconBox = { helmSlotRec.x + 8.0f, helmSlotRec.y + (slotH - 44.0f) * 0.5f + 4.0f, 40.0f, 40.0f };
-        DrawRectangleRounded(hIconBox, 0.16f, 4, Color{ 18, 24, 38, 220 });
-        DrawRectangleRoundedLines(hIconBox, 0.16f, 4, isHelmSel ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
-        DrawHelmetSlotIcon({ hIconBox.x + hIconBox.width * 0.5f, hIconBox.y + hIconBox.height * 0.5f }, player.GetHelmet(), 0.95f, true, hasHelmEquipped);
+        float hBubbleSize = slotH - 12.0f;
+        Rectangle hIconBox = { helmSlotRec.x + 6.0f, helmSlotRec.y + 6.0f, hBubbleSize, hBubbleSize };
+        DrawEquipmentBubble(hIconBox, isHelmSel, isHelmSlotHov, hasHelmEquipped, false, 2, true, s_apparelHidden);
+        DrawHelmetSlotIcon({ hIconBox.x + hIconBox.width * 0.5f, hIconBox.y + hIconBox.height * 0.5f }, player.GetHelmet(), 1.05f, true, hasHelmEquipped);
 
         float hTextX = hIconBox.x + hIconBox.width + 10.0f;
-        DrawText(hStats.name.c_str(), (int)hTextX, (int)helmSlotRec.y + 19, 13, isHelmSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
+        DrawText("HEAD / HELMET", (int)hTextX, (int)helmSlotRec.y + 7, 10, Color{ 145, 170, 205, 200 });
+        DrawText(hStats.name.c_str(), (int)hTextX, (int)helmSlotRec.y + 22, 13, isHelmSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
         std::string hSub = "Def +" + std::to_string((int)hStats.defense) + " | Will +" + std::to_string((int)hStats.willBonus);
-        DrawText(hSub.c_str(), (int)hTextX, (int)helmSlotRec.y + 40, 11, Color{ 105, 240, 185, 230 });
+        DrawText(hSub.c_str(), (int)hTextX, (int)helmSlotRec.y + 44, 11, Color{ 105, 240, 185, 230 });
 
         // Slot 1: Chestplate Equipment Bubble
         Rectangle chestSlotRec = { leftX + 16.0f + slotW + 8.0f, secArmorY + 20.0f, slotW, slotH };
@@ -770,17 +842,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         ChestplateStats cStats = GetChestplateStats(player.GetChestplate());
         bool isChestSel = (s_selectedSlot == 1);
         bool hasChestEquipped = (player.GetChestplate() != ChestplateType::NONE);
-        DrawEquipmentSlotBubble(chestSlotRec, "CHEST / CUIRASS", isChestSel, isChestSlotHov, hasChestEquipped, 3);
+        DrawRectangleRounded(chestSlotRec, 0.14f, 4, isChestSel ? Color{ 28, 40, 64, 250 } : (isChestSlotHov ? Color{ 22, 30, 48, 220 } : Color{ 14, 18, 28, 200 }));
+        DrawRectangleRoundedLines(chestSlotRec, 0.14f, 4, hasChestEquipped ? Color{ 255, 215, 80, 240 } : (isChestSel ? Color{ 130, 210, 255, 255 } : Color{ 48, 65, 92, 200 }));
 
-        Rectangle cIconBox = { chestSlotRec.x + 8.0f, chestSlotRec.y + (slotH - 44.0f) * 0.5f + 4.0f, 40.0f, 40.0f };
-        DrawRectangleRounded(cIconBox, 0.16f, 4, Color{ 18, 24, 38, 220 });
-        DrawRectangleRoundedLines(cIconBox, 0.16f, 4, isChestSel ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
-        DrawChestplateSlotIcon({ cIconBox.x + cIconBox.width * 0.5f, cIconBox.y + cIconBox.height * 0.5f }, player.GetChestplate(), 0.95f, true, hasChestEquipped);
+        float cBubbleSize = slotH - 12.0f;
+        Rectangle cIconBox = { chestSlotRec.x + 6.0f, chestSlotRec.y + 6.0f, cBubbleSize, cBubbleSize };
+        DrawEquipmentBubble(cIconBox, isChestSel, isChestSlotHov, hasChestEquipped, false, 3, true, s_apparelHidden);
+        DrawChestplateSlotIcon({ cIconBox.x + cIconBox.width * 0.5f, cIconBox.y + cIconBox.height * 0.5f }, player.GetChestplate(), 1.05f, true, hasChestEquipped);
 
         float cTextX = cIconBox.x + cIconBox.width + 10.0f;
-        DrawText(cStats.name.c_str(), (int)cTextX, (int)chestSlotRec.y + 19, 13, isChestSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
+        DrawText("CHEST / CUIRASS", (int)cTextX, (int)chestSlotRec.y + 7, 10, Color{ 145, 170, 205, 200 });
+        DrawText(cStats.name.c_str(), (int)cTextX, (int)chestSlotRec.y + 22, 13, isChestSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
         std::string cSub = "Def +" + std::to_string((int)cStats.defense) + (cStats.maxHpBonus > 0.0f ? (" | HP +" + std::to_string((int)cStats.maxHpBonus)) : "");
-        DrawText(cSub.c_str(), (int)cTextX, (int)chestSlotRec.y + 40, 11, Color{ 105, 240, 185, 230 });
+        DrawText(cSub.c_str(), (int)cTextX, (int)chestSlotRec.y + 44, 11, Color{ 105, 240, 185, 230 });
 
         // Slot 2: Leggings Equipment Bubble
         Rectangle legsSlotRec = { leftX + 16.0f + (slotW + 8.0f) * 2.0f, secArmorY + 20.0f, slotW, slotH };
@@ -792,17 +866,19 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         LeggingsStats lStats = GetLeggingsStats(player.GetLeggings());
         bool isLegsSel = (s_selectedSlot == 2);
         bool hasLegsEquipped = (player.GetLeggings() != LeggingsType::NONE);
-        DrawEquipmentSlotBubble(legsSlotRec, "LEGS / GREAVES", isLegsSel, isLegsSlotHov, hasLegsEquipped, 2);
+        DrawRectangleRounded(legsSlotRec, 0.14f, 4, isLegsSel ? Color{ 28, 40, 64, 250 } : (isLegsSlotHov ? Color{ 22, 30, 48, 220 } : Color{ 14, 18, 28, 200 }));
+        DrawRectangleRoundedLines(legsSlotRec, 0.14f, 4, hasLegsEquipped ? Color{ 255, 215, 80, 240 } : (isLegsSel ? Color{ 130, 210, 255, 255 } : Color{ 48, 65, 92, 200 }));
 
-        Rectangle lIconBox = { legsSlotRec.x + 8.0f, legsSlotRec.y + (slotH - 44.0f) * 0.5f + 4.0f, 40.0f, 40.0f };
-        DrawRectangleRounded(lIconBox, 0.16f, 4, Color{ 18, 24, 38, 220 });
-        DrawRectangleRoundedLines(lIconBox, 0.16f, 4, isLegsSel ? Color{ 255, 215, 80, 240 } : Color{ 50, 70, 100, 200 });
-        DrawLeggingsSlotIcon({ lIconBox.x + lIconBox.width * 0.5f, lIconBox.y + lIconBox.height * 0.5f }, player.GetLeggings(), 0.95f, true, hasLegsEquipped);
+        float lBubbleSize = slotH - 12.0f;
+        Rectangle lIconBox = { legsSlotRec.x + 6.0f, legsSlotRec.y + 6.0f, lBubbleSize, lBubbleSize };
+        DrawEquipmentBubble(lIconBox, isLegsSel, isLegsSlotHov, hasLegsEquipped, false, 2, true, s_apparelHidden);
+        DrawLeggingsSlotIcon({ lIconBox.x + lIconBox.width * 0.5f, lIconBox.y + lIconBox.height * 0.5f }, player.GetLeggings(), 1.05f, true, hasLegsEquipped);
 
         float lTextX = lIconBox.x + lIconBox.width + 10.0f;
-        DrawText(lStats.name.c_str(), (int)lTextX, (int)legsSlotRec.y + 19, 13, isLegsSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
+        DrawText("LEGS / GREAVES", (int)lTextX, (int)legsSlotRec.y + 7, 10, Color{ 145, 170, 205, 200 });
+        DrawText(lStats.name.c_str(), (int)lTextX, (int)legsSlotRec.y + 22, 13, isLegsSel ? Color{ 255, 225, 100, 255 } : Color{ 230, 240, 255, 255 });
         std::string lSub = "Def +" + std::to_string((int)lStats.defense) + " | Will +" + std::to_string((int)lStats.willBonus);
-        DrawText(lSub.c_str(), (int)lTextX, (int)legsSlotRec.y + 40, 11, Color{ 105, 240, 185, 230 });
+        DrawText(lSub.c_str(), (int)lTextX, (int)legsSlotRec.y + 44, 11, Color{ 105, 240, 185, 230 });
 
         // -------------------------------------------------------------// SECTION 2: WEAPONS & ARSENAL (Vector Icons for all weapons)
         // -------------------------------------------------------------
@@ -843,29 +919,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 }
                 s_selectedSlot = 4;
             }
-            Color wBg = isWEquipped ? Color{ 42, 62, 98, 255 } : (isWHov && isWUnlocked ? Color{ 28, 40, 62, 230 } : Color{ 16, 20, 32, 210 });
-            Color wBorder = isWEquipped ? Color{ 255, 215, 80, 255 } : (isWUnlocked ? (isWHov ? Color{ 110, 175, 245, 230 } : Color{ 50, 70, 98, 200 }) : Color{ 32, 38, 50, 160 });
-            DrawRectangleRounded(wRec, 0.18f, 4, wBg);
-            DrawRectangleRoundedLines(wRec, 0.18f, 4, wBorder);
+            int wTierPips = (i < 2) ? 1 : ((i < 4) ? 2 : 3);
+            DrawEquipmentBubble(wRec, (isWEquipped && s_selectedSlot == 4), isWHov, isWEquipped, !isWUnlocked, wTierPips);
 
             // Vector Icon centered in slot - clean, visual, zero squished text!
             Vector2 iconCenter = { wRec.x + wRec.width * 0.5f, wRec.y + wRec.height * 0.5f };
-            DrawWeaponSlotIcon(iconCenter, wepBtns[i].type, (wRec.width < 50.0f) ? 0.82f : 0.95f, isWUnlocked, isWEquipped);
-
-            // Equipped golden dot indicator in top-left
-            if (isWEquipped) {
-                DrawCircle((int)(wRec.x + 6), (int)(wRec.y + 6), 3.0f, Color{ 255, 215, 80, 255 });
-            }
+            DrawWeaponSlotIcon(iconCenter, wepBtns[i].type, (wRec.width < 50.0f) ? 0.85f : 0.98f, isWUnlocked, isWEquipped);
 
             // Upgrade level badge in bottom-right corner (+1, +2, etc.)
-            int upgLvl = player.GetInventory().GetWeaponUpgrade(wepBtns[i].type);
-            if (isWUnlocked && upgLvl > 0) {
-                std::string badge = "+" + std::to_string(upgLvl);
-                DrawText(badge.c_str(), (int)(wRec.x + wRec.width - 15), (int)(wRec.y + wRec.height - 12), 10, Color{ 255, 220, 100, 255 });
-            }
-
-            if (!isWUnlocked) {
-                DrawRectangleRounded(wRec, 0.18f, 4, Color{ 8, 10, 16, 120 });
+            int curUpg = player.GetInventory().GetWeaponUpgrade(wepBtns[i].type);
+            if (isWUnlocked && curUpg > 0) {
+                std::string badge = "+" + std::to_string(curUpg);
+                DrawText(badge.c_str(), (int)(wRec.x + wRec.width - 16), (int)(wRec.y + wRec.height - 12), 10, Color{ 255, 220, 100, 255 });
             }
         }
 
@@ -901,12 +966,13 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         }
 
         // -------------------------------------------------------------
-        // SECTION 3: TOTEM RELIC (TALISMAN)
+        // SECTION 3: TOTEM RELIC (TALISMAN & QUICK-ATTUNE GRID)
         // -------------------------------------------------------------
-        float secTotemY = secWepY + wepBtnH + 26.0f;
+        float secTotemY = secWepY + wepBtnH + 24.0f;
         DrawLine((int)leftX + 16, (int)secTotemY, (int)(leftX + leftW - 16), (int)secTotemY, Color{ 45, 60, 85, 180 });
         DrawText("TOTEM RELIC (ATTUNED PRIMAL CORE)", (int)leftX + 16, (int)secTotemY + 6, 14, Color{ 255, 215, 90, 240 });
 
+        // Row 1: Attuned Totem Status Bubble Card
         Rectangle totemSlotRec = { leftX + 16.0f, secTotemY + 24.0f, leftW - 32.0f, 48.0f };
         bool isTotemSlotHov = CheckCollisionPointRec(mousePos, totemSlotRec);
         if (isTotemSlotHov && isMousePressed) {
@@ -916,16 +982,88 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         TotemStats tStats = GetTotemStats(player.GetTotem());
         bool hasTotem = (player.GetTotem() != TotemType::NONE);
         bool isTotemSel = (s_selectedSlot == 3);
-        DrawRectangleRounded(totemSlotRec, 0.12f, 4, isTotemSel ? Color{ 32, 48, 76, 250 } : (isTotemSlotHov ? Color{ 24, 34, 52, 220 } : Color{ 16, 21, 32, 200 }));
+        DrawRectangleRounded(totemSlotRec, 0.12f, 4, isTotemSel ? Color{ 28, 42, 68, 250 } : (isTotemSlotHov ? Color{ 22, 32, 50, 220 } : Color{ 15, 20, 30, 200 }));
         DrawRectangleRoundedLines(totemSlotRec, 0.12f, 4, hasTotem ? tStats.glowColor : (isTotemSel ? Color{ 255, 215, 80, 255 } : Color{ 48, 65, 92, 200 }));
-        DrawText(hasTotem ? tStats.name.c_str() : "No Totem Attuned (Click to Browse Repertoire)", (int)totemSlotRec.x + 12, (int)totemSlotRec.y + 6, 14, hasTotem ? tStats.glowColor : Color{ 145, 160, 180, 220 });
-        std::string totSummary = hasTotem ? ("[+] " + tStats.buffText + " | [-] " + tStats.nerfText) : "Attune a primal relic to awaken elemental resonances.";
-        DrawText(totSummary.c_str(), (int)totemSlotRec.x + 12, (int)totemSlotRec.y + 26, 12, hasTotem ? Color{ 160, 235, 205, 230 } : Color{ 130, 145, 165, 200 });
+
+        Rectangle tIconBox = { totemSlotRec.x + 4.0f, totemSlotRec.y + 4.0f, 40.0f, 40.0f };
+        DrawEquipmentBubble(tIconBox, isTotemSel, isTotemSlotHov, hasTotem, false, hasTotem ? 3 : 0);
+        DrawTotemSlotIcon({ tIconBox.x + tIconBox.width * 0.5f, tIconBox.y + tIconBox.height * 0.5f }, player.GetTotem(), 0.95f, true, hasTotem);
+
+        float tTextX = tIconBox.x + tIconBox.width + 10.0f;
+        DrawText(hasTotem ? tStats.name.c_str() : "No Totem Attuned (Quick-Attune Below or Open Drawer)", (int)tTextX, (int)totemSlotRec.y + 6, 13, hasTotem ? tStats.glowColor : Color{ 145, 160, 180, 220 });
+        if (hasTotem) {
+            DrawTotemBuffDebuffText(tStats.buffText, tStats.nerfText, (int)tTextX, (int)totemSlotRec.y + 26, 11);
+        } else {
+            DrawText("Attune a discovered primal relic to awaken elemental resonances.", (int)tTextX, (int)totemSlotRec.y + 26, 11, Color{ 130, 145, 165, 200 });
+        }
+
+        // Row 2: 1x5 Quick-Attune Grid for all 5 Totems!
+        float totGridY = totemSlotRec.y + totemSlotRec.height + 6.0f;
+        struct TotemBtnInfo { TotemType type; int tierPips; };
+        TotemBtnInfo totemBtns[5] = {
+            { TotemType::TOTEM_SANITY, 2 },
+            { TotemType::TOTEM_INSANITY, 2 },
+            { TotemType::TOTEM_MIST, 3 },
+            { TotemType::CRUSADER_TOTEM, 3 },
+            { TotemType::ELEMENTAL_CORE_TOTEM, 4 }
+        };
+        float tBtnW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float tBtnH = 38.0f;
+        int hoveredTotemIdx = -1;
+        Rectangle hoveredTotemRec = { 0, 0, 0, 0 };
+
+        for (int ti = 0; ti < 5; ++ti) {
+            Rectangle tbRec = { leftX + 16.0f + (float)ti * (tBtnW + 4.0f), totGridY, tBtnW, tBtnH };
+            bool isTUnlocked = player.GetInventory().HasTotem(totemBtns[ti].type);
+            bool isTEquipped = (player.GetTotem() == totemBtns[ti].type);
+            bool isTHov = CheckCollisionPointRec(mousePos, tbRec);
+            if (isTHov) {
+                hoveredTotemIdx = ti;
+                hoveredTotemRec = tbRec;
+            }
+            if (isTHov && isMousePressed) {
+                if (isTUnlocked) {
+                    player.SetTotem(isTEquipped ? TotemType::NONE : totemBtns[ti].type);
+                    SoundFX::PlayEquipWeapon();
+                }
+                s_selectedSlot = 3;
+            }
+
+            DrawEquipmentBubble(tbRec, (isTEquipped && s_selectedSlot == 3), isTHov, isTEquipped, !isTUnlocked, totemBtns[ti].tierPips);
+            DrawTotemSlotIcon({ tbRec.x + tbRec.width * 0.5f, tbRec.y + tbRec.height * 0.5f }, totemBtns[ti].type, 0.85f, isTUnlocked, isTEquipped);
+        }
+
+        // Floating tooltip for hovered totem quick-attune slot
+        if (hoveredTotemIdx >= 0) {
+            TotemType ht = totemBtns[hoveredTotemIdx].type;
+            bool htUnlocked = player.GetInventory().HasTotem(ht);
+            bool htEquipped = (player.GetTotem() == ht);
+            TotemStats htStats = GetTotemStats(ht);
+
+            std::string tipTitle = htStats.name + (htEquipped ? " [ATTUNED]" : (htUnlocked ? " [CLICK TO ATTUNE]" : " [LOCKED]"));
+            int tw1 = FontManager::MeasureGameText(tipTitle, 13, GameFont::BODY);
+            int tw2 = FontManager::MeasureGameText(htStats.buffText + " | " + htStats.nerfText, 11, GameFont::BODY);
+            float tipW = (float)std::max(tw1, tw2) + 28.0f;
+            float tipH = 48.0f;
+            float tipX = hoveredTotemRec.x + hoveredTotemRec.width * 0.5f - tipW * 0.5f;
+            if (tipX < leftX + 16.0f) tipX = leftX + 16.0f;
+            if (tipX + tipW > leftX + leftW - 16.0f) tipX = leftX + leftW - 16.0f - tipW;
+            float tipY = hoveredTotemRec.y - tipH - 8.0f;
+
+            DrawRectangleRounded(Rectangle{ tipX, tipY, tipW, tipH }, 0.16f, 4, Color{ 14, 18, 28, 250 });
+            DrawRectangleRoundedLines(Rectangle{ tipX, tipY, tipW, tipH }, 0.16f, 4, htEquipped ? htStats.glowColor : Color{ 70, 95, 135, 220 });
+            DrawText(tipTitle.c_str(), (int)tipX + 12, (int)tipY + 6, 13, htEquipped ? htStats.glowColor : Color{ 235, 245, 255, 255 });
+            if (htUnlocked) {
+                DrawTotemBuffDebuffText(htStats.buffText, htStats.nerfText, (int)tipX + 12, (int)tipY + 26, 11);
+            } else {
+                DrawText("Locked // Defeat realm boss or find crypt pedestal to attune", (int)tipX + 12, (int)tipY + 26, 11, Color{ 235, 100, 100, 220 });
+            }
+        }
 
         // -------------------------------------------------------------
         // SECTION 4: CONSUMABLES & ESSENCES (Horizontal Framed Slots)
         // -------------------------------------------------------------
-        float secMatY = secTotemY + 76.0f;
+        float secMatY = totGridY + tBtnH + 20.0f;
         DrawLine((int)leftX + 16, (int)secMatY, (int)(leftX + leftW - 16), (int)secMatY, Color{ 45, 60, 85, 180 });
         DrawText("CONSUMABLES & ESSENCES", (int)leftX + 16, (int)secMatY + 6, 14, Color{ 255, 215, 90, 240 });
 
@@ -1069,276 +1207,655 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         float drawerListY = drawerY + 36.0f;
         float drawerCardW = rightW - 32.0f;
+        float drawerH = contentY + rightH - drawerListY - 8.0f;
+        float gridW = 295.0f;
+        float gridH = drawerH;
+        float panelX = rightX + 16.0f + gridW + 14.0f;
+        float panelW = drawerCardW - gridW - 14.0f;
+        float panelH = drawerH;
+
+        static int s_inspectedHelm = 2;   // Default: Crusader Sallet
+        static int s_inspectedChest = 2;  // Default: Crusader Cuirass
+        static int s_inspectedLegs = 2;   // Default: Crusader Greaves
+        static int s_inspectedTotem = 0;  // Default: Totem of Sanity
+        static int s_inspectedWep = 0;    // Default: Sword
+
+        float bSize = 78.0f;
+        float bSpacingX = 18.0f;
+        float bSpacingY = 14.0f;
+        float gridStartX = rightX + 16.0f + 14.0f;
+        float gridStartY = drawerListY + 34.0f;
 
         if (s_selectedSlot == 0) {
-            // HELMETS LIST
-            struct HelmEntry { HelmetType type; const char* lockMsg; };
+            // =========================================================
+            // 1. HELMET ARMORY GRID & INSPECTION
+            // =========================================================
+            struct HelmEntry { HelmetType type; const char* lockMsg; int tierPips; };
             HelmEntry helms[7] = {
-                { HelmetType::NONE, "Unarmored default" },
-                { HelmetType::COMMONERS_HOOD, "Ruined Castle - Awakening Pedestal" },
-                { HelmetType::CRUSADER_HELM, "Zyphden - Defeat Knight Lenon in spar" },
-                { HelmetType::VANGUARD_GREATHELM, "Blacksmith Varek - Armor Forge" },
-                { HelmetType::SHADOW_COWL, "Varek's Forge - Craft with Mist Essence" },
-                { HelmetType::SCRAP_SALLET, "Blacksmith Varek - Armor Forge" },
-                { HelmetType::BASALT_GREATHELM, "Blacksmith Varek - Armor Forge" }
+                { HelmetType::NONE, "Unarmored default", 0 },
+                { HelmetType::COMMONERS_HOOD, "Ruined Castle - Awakening Pedestal", 1 },
+                { HelmetType::CRUSADER_HELM, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
+                { HelmetType::VANGUARD_GREATHELM, "Blacksmith Varek - Armor Forge", 2 },
+                { HelmetType::SHADOW_COWL, "Varek's Forge - Craft with Mist Essence", 3 },
+                { HelmetType::SCRAP_SALLET, "Blacksmith Varek - Armor Forge", 2 },
+                { HelmetType::BASALT_GREATHELM, "Blacksmith Varek - Armor Forge", 3 }
             };
-            float itemSpacing = (modalH > 780.0f) ? 62.0f : 52.0f;
-            float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < (int)std::size(helms); ++i) {
-                float iy = drawerListY + (float)i * itemSpacing;
-                if (iy + itemH > contentY + rightH) break;
-                Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
+
+            int unlockedCount = 0;
+            for (int i = 0; i < 7; ++i) {
+                if (player.GetInventory().HasHelmet(helms[i].type)) unlockedCount++;
+            }
+
+            // Left Grid Container
+            DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
+            DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
+            std::string gridTitle = "HELMETS & CRESTS (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
+            DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
+
+            if (s_inspectedHelm < 0 || s_inspectedHelm >= 7) s_inspectedHelm = 2;
+
+            for (int i = 0; i < 7; ++i) {
+                int col = i % 3;
+                int row = i / 3;
+                Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
                 bool isUnlocked = player.GetInventory().HasHelmet(helms[i].type);
                 bool isEquipped = (player.GetHelmet() == helms[i].type);
-                bool isHov = CheckCollisionPointRec(mousePos, iRec);
+                bool isSelected = (s_inspectedHelm == i);
+                bool isHov = CheckCollisionPointRec(mousePos, bRec);
 
-                HelmetStats st = GetHelmetStats(helms[i].type);
-                DrawRectangleRounded(iRec, 0.12f, 4, isEquipped ? Color{ 34, 50, 78, 255 } : (isHov && isUnlocked ? Color{ 26, 38, 58, 230 } : Color{ 16, 22, 34, 200 }));
-                DrawRectangleRoundedLines(iRec, 0.12f, 4, isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 240, 220 } : Color{ 48, 65, 95, 200 }) : Color{ 35, 42, 55, 160 }));
-
-                DrawText(st.name.c_str(), (int)iRec.x + 12, (int)iy + 5, 14, isUnlocked ? Color{ 235, 245, 255, 255 } : Color{ 120, 130, 145, 200 });
-                if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 86.0f, iy + 5.0f, 76.0f, 22.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
-                    DrawText("EQUIPPED", (int)(iRec.x + iRec.width - 78.0f), (int)iy + 9, 11, Color{ 14, 18, 26, 255 });
-                } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 72.0f, iy + 5.0f, 62.0f, 22.0f }, 0.25f, 4, isHov ? Color{ 60, 95, 145, 255 } : Color{ 30, 44, 66, 220 });
-                    DrawText("EQUIP", (int)(iRec.x + iRec.width - 62.0f), (int)iy + 9, 11, isHov ? Color{ 255, 255, 255, 255 } : Color{ 175, 200, 230, 220 });
+                if (isHov) s_inspectedHelm = i;
+                if (isHov && isMousePressed) {
+                    if (isUnlocked && !isEquipped) {
+                        player.SetHelmet(helms[i].type);
+                        SoundFX::PlayEquipWeapon();
+                    }
                 }
 
-                FontManager::DrawTextWrapped(st.description, (int)iRec.x + 12, (int)iy + 22, (int)iRec.width - 96, 11, 3, Color{ 170, 190, 215, 210 });
-                if (isUnlocked) {
-                    std::string sLine = "Defense: +" + std::to_string((int)st.defense) + " | Will: +" + std::to_string((int)st.willBonus);
-                    if (st.maxHpBonus > 0.0f) sLine += " | HP: +" + std::to_string((int)st.maxHpBonus);
-                    DrawText(sLine.c_str(), (int)iRec.x + 12, (int)iy + itemH - 16.0f, 12, Color{ 100, 245, 180, 240 });
-                } else {
-                    std::string lMsg = "Locked // " + std::string(helms[i].lockMsg);
-                    DrawText(lMsg.c_str(), (int)iRec.x + 12, (int)iy + itemH - 16.0f, 12, Color{ 235, 100, 100, 220 });
-                }
+                DrawEquipmentBubble(bRec, isSelected, isHov, isEquipped, !isUnlocked, helms[i].tierPips);
+                Vector2 iconCenter = { bRec.x + bSize * 0.5f, bRec.y + bSize * 0.5f };
+                DrawHelmetSlotIcon(iconCenter, helms[i].type, 1.25f, isUnlocked, isEquipped);
+            }
 
-                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
-                    player.SetHelmet(helms[i].type);
+            // Right Inspection Panel
+            HelmetStats st = GetHelmetStats(helms[s_inspectedHelm].type);
+            ArmorSetInfo setInfo = GetArmorSetInfo(st.setAffinity);
+            bool isInspUnlocked = player.GetInventory().HasHelmet(helms[s_inspectedHelm].type);
+            bool isInspEquipped = (player.GetHelmet() == helms[s_inspectedHelm].type);
+
+            DrawRectangleRounded(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, Color{ 16, 22, 34, 245 });
+            DrawRectangleRoundedLines(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, isInspEquipped ? Color{ 255, 215, 80, 220 } : Color{ 52, 72, 105, 200 });
+
+            // Preview bubble
+            Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, helms[s_inspectedHelm].tierPips);
+            DrawHelmetSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, helms[s_inspectedHelm].type, 1.35f, isInspUnlocked, isInspEquipped);
+
+            // Header titles
+            float titleX = panelX + 78.0f;
+            DrawText(st.name.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? Color{ 255, 225, 100, 255 } : Color{ 235, 245, 255, 255 });
+            DrawText("Royal Knight Headpiece", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
+            std::string affText = (st.setAffinity != ArmorSet::NONE) ? ("Set: " + setInfo.name) : "Standalone Helm";
+            DrawText(affText.c_str(), (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+
+            // Action button
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+            if (isInspEquipped) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 255, 215, 80, 230 });
+                DrawText("EQUIPPED", (int)btnRec.x + 14, (int)btnRec.y + 7, 11, Color{ 14, 18, 26, 255 });
+            } else if (isInspUnlocked) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, isBtnHov ? Color{ 60, 100, 160, 255 } : Color{ 36, 56, 88, 230 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, isBtnHov ? Color{ 140, 215, 255, 255 } : Color{ 70, 110, 175, 220 });
+                DrawText("EQUIP", (int)btnRec.x + 24, (int)btnRec.y + 7, 11, isBtnHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 225, 255, 240 });
+                if (isBtnHov && isMousePressed) {
+                    player.SetHelmet(helms[s_inspectedHelm].type);
                     SoundFX::PlayEquipWeapon();
                 }
+            } else {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 26, 30, 40, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, Color{ 60, 40, 45, 180 });
+                DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            // Stats
+            DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
+            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+
+            if (st.setAffinity != ArmorSet::NONE) {
+                std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+
+            // Lore
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+
+            // Source at bottom
+            float sourceY = drawerListY + panelH - 32.0f;
+            DrawLine((int)panelX + 14, (int)sourceY - 6.0f, (int)(panelX + panelW - 14), (int)sourceY - 6.0f, Color{ 45, 62, 90, 160 });
+            if (isInspUnlocked) {
+                DrawText("STATUS // Acquired and ready for battle", (int)panelX + 14, (int)sourceY, 11, Color{ 110, 240, 180, 240 });
+            } else {
+                std::string lMsg = "LOCKED // " + std::string(helms[s_inspectedHelm].lockMsg);
+                DrawText(lMsg.c_str(), (int)panelX + 14, (int)sourceY, 11, Color{ 255, 95, 95, 240 });
             }
         } else if (s_selectedSlot == 1) {
-            // CHESTPLATES LIST
-            struct ChestEntry { ChestplateType type; const char* lockMsg; };
+            // =========================================================
+            // 2. CHESTPLATE ARMORY GRID & INSPECTION
+            // =========================================================
+            struct ChestEntry { ChestplateType type; const char* lockMsg; int tierPips; };
             ChestEntry chests[7] = {
-                { ChestplateType::NONE, "Unarmored default" },
-                { ChestplateType::COMMONERS_TUNIC, "Ruined Castle - Awakening Pedestal" },
-                { ChestplateType::CRUSADER_CUIRASS, "Zyphden - Defeat Knight Lenon in spar" },
-                { ChestplateType::VANGUARD_CHEST, "Blacksmith Varek - Armor Forge" },
-                { ChestplateType::SHADOW_GARB, "Varek's Forge - Craft with Mist Essence" },
-                { ChestplateType::SCRAP_CUIRASS, "Blacksmith Varek - Armor Forge" },
-                { ChestplateType::BASALT_CUIRASS, "Blacksmith Varek - Armor Forge" }
+                { ChestplateType::NONE, "Unarmored default", 0 },
+                { ChestplateType::COMMONERS_TUNIC, "Ruined Castle - Awakening Pedestal", 1 },
+                { ChestplateType::CRUSADER_CUIRASS, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
+                { ChestplateType::VANGUARD_CHEST, "Blacksmith Varek - Armor Forge", 2 },
+                { ChestplateType::SHADOW_GARB, "Varek's Forge - Craft with Mist Essence", 3 },
+                { ChestplateType::SCRAP_CUIRASS, "Blacksmith Varek - Armor Forge", 2 },
+                { ChestplateType::BASALT_CUIRASS, "Blacksmith Varek - Armor Forge", 3 }
             };
-            float itemSpacing = (modalH > 780.0f) ? 62.0f : 52.0f;
-            float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < (int)std::size(chests); ++i) {
-                float iy = drawerListY + (float)i * itemSpacing;
-                if (iy + itemH > contentY + rightH) break;
-                Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
+
+            int unlockedCount = 0;
+            for (int i = 0; i < 7; ++i) {
+                if (player.GetInventory().HasChestplate(chests[i].type)) unlockedCount++;
+            }
+
+            // Left Grid Container
+            DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
+            DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
+            std::string gridTitle = "CHESTPLATES & CUIRASSES (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
+            DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
+
+            if (s_inspectedChest < 0 || s_inspectedChest >= 7) s_inspectedChest = 2;
+
+            for (int i = 0; i < 7; ++i) {
+                int col = i % 3;
+                int row = i / 3;
+                Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
                 bool isUnlocked = player.GetInventory().HasChestplate(chests[i].type);
                 bool isEquipped = (player.GetChestplate() == chests[i].type);
-                bool isHov = CheckCollisionPointRec(mousePos, iRec);
+                bool isSelected = (s_inspectedChest == i);
+                bool isHov = CheckCollisionPointRec(mousePos, bRec);
 
-                ChestplateStats st = GetChestplateStats(chests[i].type);
-                DrawRectangleRounded(iRec, 0.12f, 4, isEquipped ? Color{ 34, 50, 78, 255 } : (isHov && isUnlocked ? Color{ 26, 38, 58, 230 } : Color{ 16, 22, 34, 200 }));
-                DrawRectangleRoundedLines(iRec, 0.12f, 4, isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 240, 220 } : Color{ 48, 65, 95, 200 }) : Color{ 35, 42, 55, 160 }));
-
-                Rectangle iconBox = { iRec.x + 8.0f, iy + 6.0f, 38.0f, itemH - 12.0f };
-                DrawRectangleRounded(iconBox, 0.15f, 4, Color{ 20, 26, 40, 220 });
-                DrawRectangleRoundedLines(iconBox, 0.15f, 4, isEquipped ? Color{ 255, 215, 80, 220 } : (isUnlocked ? Color{ 60, 80, 115, 200 } : Color{ 38, 46, 60, 160 }));
-                DrawChestplateSlotIcon({ iconBox.x + iconBox.width * 0.5f, iconBox.y + iconBox.height * 0.5f }, chests[i].type, 0.95f, isUnlocked, isEquipped);
-
-                float textX = iconBox.x + iconBox.width + 12.0f;
-                DrawText(st.name.c_str(), (int)textX, (int)iy + 5, 14, isUnlocked ? Color{ 235, 245, 255, 255 } : Color{ 120, 130, 145, 200 });
-                if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 86.0f, iy + 5.0f, 76.0f, 22.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
-                    DrawText("EQUIPPED", (int)(iRec.x + iRec.width - 78.0f), (int)iy + 9, 11, Color{ 14, 18, 26, 255 });
-                } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 72.0f, iy + 5.0f, 62.0f, 22.0f }, 0.25f, 4, isHov ? Color{ 60, 95, 145, 255 } : Color{ 30, 44, 66, 220 });
-                    DrawText("EQUIP", (int)(iRec.x + iRec.width - 62.0f), (int)iy + 9, 11, isHov ? Color{ 255, 255, 255, 255 } : Color{ 175, 200, 230, 220 });
+                if (isHov) s_inspectedChest = i;
+                if (isHov && isMousePressed) {
+                    if (isUnlocked && !isEquipped) {
+                        player.SetChestplate(chests[i].type);
+                        SoundFX::PlayEquipWeapon();
+                    }
                 }
 
-                FontManager::DrawTextWrapped(st.description, (int)textX, (int)iy + 22, (int)iRec.width - 146, 11, 3, Color{ 170, 190, 215, 210 });
-                if (isUnlocked) {
-                    std::string sLine = "Defense: +" + std::to_string((int)st.defense) + " | HP: +" + std::to_string((int)st.maxHpBonus) + " | Will: +" + std::to_string((int)st.willBonus);
-                    DrawText(sLine.c_str(), (int)textX, (int)iy + itemH - 16.0f, 12, Color{ 100, 245, 180, 240 });
-                } else {
-                    std::string lMsg = "Locked // " + std::string(chests[i].lockMsg);
-                    DrawText(lMsg.c_str(), (int)textX, (int)iy + itemH - 16.0f, 12, Color{ 235, 100, 100, 220 });
-                }
+                DrawEquipmentBubble(bRec, isSelected, isHov, isEquipped, !isUnlocked, chests[i].tierPips);
+                Vector2 iconCenter = { bRec.x + bSize * 0.5f, bRec.y + bSize * 0.5f };
+                DrawChestplateSlotIcon(iconCenter, chests[i].type, 1.25f, isUnlocked, isEquipped);
+            }
 
-                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
-                    player.SetChestplate(chests[i].type);
+            // Right Inspection Panel
+            ChestplateStats st = GetChestplateStats(chests[s_inspectedChest].type);
+            ArmorSetInfo setInfo = GetArmorSetInfo(st.setAffinity);
+            bool isInspUnlocked = player.GetInventory().HasChestplate(chests[s_inspectedChest].type);
+            bool isInspEquipped = (player.GetChestplate() == chests[s_inspectedChest].type);
+
+            DrawRectangleRounded(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, Color{ 16, 22, 34, 245 });
+            DrawRectangleRoundedLines(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, isInspEquipped ? Color{ 255, 215, 80, 220 } : Color{ 52, 72, 105, 200 });
+
+            // Preview bubble
+            Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, chests[s_inspectedChest].tierPips);
+            DrawChestplateSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, chests[s_inspectedChest].type, 1.35f, isInspUnlocked, isInspEquipped);
+
+            // Header titles
+            float titleX = panelX + 78.0f;
+            DrawText(st.name.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? Color{ 255, 225, 100, 255 } : Color{ 235, 245, 255, 255 });
+            DrawText("Tempered Body Cuirass", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
+            std::string affText = (st.setAffinity != ArmorSet::NONE) ? ("Set: " + setInfo.name) : "Standalone Cuirass";
+            DrawText(affText.c_str(), (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+
+            // Action button
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+            if (isInspEquipped) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 255, 215, 80, 230 });
+                DrawText("EQUIPPED", (int)btnRec.x + 14, (int)btnRec.y + 7, 11, Color{ 14, 18, 26, 255 });
+            } else if (isInspUnlocked) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, isBtnHov ? Color{ 60, 100, 160, 255 } : Color{ 36, 56, 88, 230 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, isBtnHov ? Color{ 140, 215, 255, 255 } : Color{ 70, 110, 175, 220 });
+                DrawText("EQUIP", (int)btnRec.x + 24, (int)btnRec.y + 7, 11, isBtnHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 225, 255, 240 });
+                if (isBtnHov && isMousePressed) {
+                    player.SetChestplate(chests[s_inspectedChest].type);
                     SoundFX::PlayEquipWeapon();
                 }
-            }} else if (s_selectedSlot == 2) {
-            // LEGGINGS LIST
-            struct LegEntry { LeggingsType type; const char* lockMsg; };
+            } else {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 26, 30, 40, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, Color{ 60, 40, 45, 180 });
+                DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            // Stats
+            DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
+            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+
+            if (st.setAffinity != ArmorSet::NONE) {
+                std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+
+            // Lore
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+
+            // Source at bottom
+            float sourceY = drawerListY + panelH - 32.0f;
+            DrawLine((int)panelX + 14, (int)sourceY - 6.0f, (int)(panelX + panelW - 14), (int)sourceY - 6.0f, Color{ 45, 62, 90, 160 });
+            if (isInspUnlocked) {
+                DrawText("STATUS // Acquired and ready for battle", (int)panelX + 14, (int)sourceY, 11, Color{ 110, 240, 180, 240 });
+            } else {
+                std::string lMsg = "LOCKED // " + std::string(chests[s_inspectedChest].lockMsg);
+                DrawText(lMsg.c_str(), (int)panelX + 14, (int)sourceY, 11, Color{ 255, 95, 95, 240 });
+            }
+        } else if (s_selectedSlot == 2) {
+            // =========================================================
+            // 3. LEGGINGS ARMORY GRID & INSPECTION
+            // =========================================================
+            struct LegEntry { LeggingsType type; const char* lockMsg; int tierPips; };
             LegEntry legs[7] = {
-                { LeggingsType::NONE, "Unarmored default" },
-                { LeggingsType::COMMONERS_BREECHES, "Ruined Castle - Awakening Pedestal" },
-                { LeggingsType::CRUSADER_GREAVES, "Zyphden - Defeat Knight Lenon in spar" },
-                { LeggingsType::VANGUARD_GREAVES, "Blacksmith Varek - Armor Forge" },
-                { LeggingsType::SHADOW_LEGGINGS, "Varek's Forge - Craft with Mist Essence" },
-                { LeggingsType::SCRAP_GREAVES, "Blacksmith Varek - Armor Forge" },
-                { LeggingsType::BASALT_GREAVES, "Blacksmith Varek - Armor Forge" }
+                { LeggingsType::NONE, "Unarmored default", 0 },
+                { LeggingsType::COMMONERS_BREECHES, "Ruined Castle - Awakening Pedestal", 1 },
+                { LeggingsType::CRUSADER_GREAVES, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
+                { LeggingsType::VANGUARD_GREAVES, "Blacksmith Varek - Armor Forge", 2 },
+                { LeggingsType::SHADOW_LEGGINGS, "Varek's Forge - Craft with Mist Essence", 3 },
+                { LeggingsType::SCRAP_GREAVES, "Blacksmith Varek - Armor Forge", 2 },
+                { LeggingsType::BASALT_GREAVES, "Blacksmith Varek - Armor Forge", 3 }
             };
-            float itemSpacing = (modalH > 780.0f) ? 62.0f : 52.0f;
-            float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < (int)std::size(legs); ++i) {
-                float iy = drawerListY + (float)i * itemSpacing;
-                if (iy + itemH > contentY + rightH) break;
-                Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
+
+            int unlockedCount = 0;
+            for (int i = 0; i < 7; ++i) {
+                if (player.GetInventory().HasLeggings(legs[i].type)) unlockedCount++;
+            }
+
+            // Left Grid Container
+            DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
+            DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
+            std::string gridTitle = "LEGGINGS & GREAVES (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
+            DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
+
+            if (s_inspectedLegs < 0 || s_inspectedLegs >= 7) s_inspectedLegs = 2;
+
+            for (int i = 0; i < 7; ++i) {
+                int col = i % 3;
+                int row = i / 3;
+                Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
                 bool isUnlocked = player.GetInventory().HasLeggings(legs[i].type);
                 bool isEquipped = (player.GetLeggings() == legs[i].type);
-                bool isHov = CheckCollisionPointRec(mousePos, iRec);
+                bool isSelected = (s_inspectedLegs == i);
+                bool isHov = CheckCollisionPointRec(mousePos, bRec);
 
-                LeggingsStats st = GetLeggingsStats(legs[i].type);
-                DrawRectangleRounded(iRec, 0.12f, 4, isEquipped ? Color{ 34, 50, 78, 255 } : (isHov && isUnlocked ? Color{ 26, 38, 58, 230 } : Color{ 16, 22, 34, 200 }));
-                DrawRectangleRoundedLines(iRec, 0.12f, 4, isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 240, 220 } : Color{ 48, 65, 95, 200 }) : Color{ 35, 42, 55, 160 }));
-
-                Rectangle iconBox = { iRec.x + 8.0f, iy + 6.0f, 38.0f, itemH - 12.0f };
-                DrawRectangleRounded(iconBox, 0.15f, 4, Color{ 20, 26, 40, 220 });
-                DrawRectangleRoundedLines(iconBox, 0.15f, 4, isEquipped ? Color{ 255, 215, 80, 220 } : (isUnlocked ? Color{ 60, 80, 115, 200 } : Color{ 38, 46, 60, 160 }));
-                DrawLeggingsSlotIcon({ iconBox.x + iconBox.width * 0.5f, iconBox.y + iconBox.height * 0.5f }, legs[i].type, 0.95f, isUnlocked, isEquipped);
-
-                float textX = iconBox.x + iconBox.width + 12.0f;
-                DrawText(st.name.c_str(), (int)textX, (int)iy + 5, 14, isUnlocked ? Color{ 235, 245, 255, 255 } : Color{ 120, 130, 145, 200 });
-                if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 86.0f, iy + 5.0f, 76.0f, 22.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
-                    DrawText("EQUIPPED", (int)(iRec.x + iRec.width - 78.0f), (int)iy + 9, 11, Color{ 14, 18, 26, 255 });
-                } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 72.0f, iy + 5.0f, 62.0f, 22.0f }, 0.25f, 4, isHov ? Color{ 60, 95, 145, 255 } : Color{ 30, 44, 66, 220 });
-                    DrawText("EQUIP", (int)(iRec.x + iRec.width - 62.0f), (int)iy + 9, 11, isHov ? Color{ 255, 255, 255, 255 } : Color{ 175, 200, 230, 220 });
+                if (isHov) s_inspectedLegs = i;
+                if (isHov && isMousePressed) {
+                    if (isUnlocked && !isEquipped) {
+                        player.SetLeggings(legs[i].type);
+                        SoundFX::PlayEquipWeapon();
+                    }
                 }
 
-                FontManager::DrawTextWrapped(st.description, (int)textX, (int)iy + 22, (int)iRec.width - 146, 11, 3, Color{ 170, 190, 215, 210 });
-                if (isUnlocked) {
-                    std::string sLine = "Defense: +" + std::to_string((int)st.defense) + " | Will: +" + std::to_string((int)st.willBonus);
-                    DrawText(sLine.c_str(), (int)textX, (int)iy + itemH - 16.0f, 12, Color{ 100, 245, 180, 240 });
-                } else {
-                    std::string lMsg = "Locked // " + std::string(legs[i].lockMsg);
-                    DrawText(lMsg.c_str(), (int)textX, (int)iy + itemH - 16.0f, 12, Color{ 235, 100, 100, 220 });
-                }
+                DrawEquipmentBubble(bRec, isSelected, isHov, isEquipped, !isUnlocked, legs[i].tierPips);
+                Vector2 iconCenter = { bRec.x + bSize * 0.5f, bRec.y + bSize * 0.5f };
+                DrawLeggingsSlotIcon(iconCenter, legs[i].type, 1.25f, isUnlocked, isEquipped);
+            }
 
-                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
-                    player.SetLeggings(legs[i].type);
+            // Right Inspection Panel
+            LeggingsStats st = GetLeggingsStats(legs[s_inspectedLegs].type);
+            ArmorSetInfo setInfo = GetArmorSetInfo(st.setAffinity);
+            bool isInspUnlocked = player.GetInventory().HasLeggings(legs[s_inspectedLegs].type);
+            bool isInspEquipped = (player.GetLeggings() == legs[s_inspectedLegs].type);
+
+            DrawRectangleRounded(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, Color{ 16, 22, 34, 245 });
+            DrawRectangleRoundedLines(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, isInspEquipped ? Color{ 255, 215, 80, 220 } : Color{ 52, 72, 105, 200 });
+
+            // Preview bubble
+            Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, legs[s_inspectedLegs].tierPips);
+            DrawLeggingsSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, legs[s_inspectedLegs].type, 1.35f, isInspUnlocked, isInspEquipped);
+
+            // Header titles
+            float titleX = panelX + 78.0f;
+            DrawText(st.name.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? Color{ 255, 225, 100, 255 } : Color{ 235, 245, 255, 255 });
+            DrawText("Armored Greaves & Boots", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
+            std::string affText = (st.setAffinity != ArmorSet::NONE) ? ("Set: " + setInfo.name) : "Standalone Greaves";
+            DrawText(affText.c_str(), (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+
+            // Action button
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+            if (isInspEquipped) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 255, 215, 80, 230 });
+                DrawText("EQUIPPED", (int)btnRec.x + 14, (int)btnRec.y + 7, 11, Color{ 14, 18, 26, 255 });
+            } else if (isInspUnlocked) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, isBtnHov ? Color{ 60, 100, 160, 255 } : Color{ 36, 56, 88, 230 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, isBtnHov ? Color{ 140, 215, 255, 255 } : Color{ 70, 110, 175, 220 });
+                DrawText("EQUIP", (int)btnRec.x + 24, (int)btnRec.y + 7, 11, isBtnHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 225, 255, 240 });
+                if (isBtnHov && isMousePressed) {
+                    player.SetLeggings(legs[s_inspectedLegs].type);
                     SoundFX::PlayEquipWeapon();
                 }
-            }} else if (s_selectedSlot == 3) {
-            // TOTEMS LIST
-            struct TotemListEntry { TotemType type; const char* lockMsg; };
+            } else {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 26, 30, 40, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, Color{ 60, 40, 45, 180 });
+                DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            // Stats
+            DrawText("COMBAT ATTRIBUTES & BONUSES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            std::string sLine1 = "Defense: +" + std::to_string((int)st.defense) + " | Willpower: +" + std::to_string((int)st.willBonus);
+            if (st.maxHpBonus > 0.0f) sLine1 += " | Max HP: +" + std::to_string((int)st.maxHpBonus);
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+
+            if (st.setAffinity != ArmorSet::NONE) {
+                std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+
+            // Lore
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+
+            // Source at bottom
+            float sourceY = drawerListY + panelH - 32.0f;
+            DrawLine((int)panelX + 14, (int)sourceY - 6.0f, (int)(panelX + panelW - 14), (int)sourceY - 6.0f, Color{ 45, 62, 90, 160 });
+            if (isInspUnlocked) {
+                DrawText("STATUS // Acquired and ready for battle", (int)panelX + 14, (int)sourceY, 11, Color{ 110, 240, 180, 240 });
+            } else {
+                std::string lMsg = "LOCKED // " + std::string(legs[s_inspectedLegs].lockMsg);
+                DrawText(lMsg.c_str(), (int)panelX + 14, (int)sourceY, 11, Color{ 255, 95, 95, 240 });
+            }
+        } else if (s_selectedSlot == 3) {
+            // =========================================================
+            // 4. TOTEM RELIC CATALOG GRID & INSPECTION
+            // =========================================================
+            struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
             TotemListEntry totems[5] = {
-                { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal" },
-                { TotemType::TOTEM_INSANITY, "Ruined Castle - North Crypt Pedestal" },
-                { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)" },
-                { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon" },
-                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)" }
+                { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
+                { TotemType::TOTEM_INSANITY, "Ruined Castle - North Crypt Pedestal", 2 },
+                { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
+                { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }
             };
-            float itemSpacing = (modalH > 780.0f) ? 68.0f : 58.0f;
-            float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < (int)std::size(totems); ++i) {
-                float iy = drawerListY + (float)i * itemSpacing;
-                if (iy + itemH > contentY + rightH) break;
-                Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
+
+            int unlockedCount = 0;
+            for (int i = 0; i < 5; ++i) {
+                if (player.GetInventory().HasTotem(totems[i].type)) unlockedCount++;
+            }
+
+            // Left Grid Container
+            DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
+            DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
+            std::string gridTitle = "ATTUNED PRIMAL CORES (" + std::to_string(unlockedCount) + "/5 UNLOCKED)";
+            DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
+            DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
+
+            if (s_inspectedTotem < 0 || s_inspectedTotem >= 5) s_inspectedTotem = 0;
+
+            for (int i = 0; i < 5; ++i) {
+                int col = i % 3;
+                int row = i / 3;
+                Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
                 bool isUnlocked = player.GetInventory().HasTotem(totems[i].type);
                 bool isEquipped = (player.GetTotem() == totems[i].type);
-                bool isHov = CheckCollisionPointRec(mousePos, iRec);
+                bool isSelected = (s_inspectedTotem == i);
+                bool isHov = CheckCollisionPointRec(mousePos, bRec);
 
-                TotemStats st = GetTotemStats(totems[i].type);
-                DrawRectangleRounded(iRec, 0.12f, 4, isEquipped ? Color{ 34, 50, 78, 255 } : (isHov && isUnlocked ? Color{ 26, 38, 58, 230 } : Color{ 16, 22, 34, 200 }));
-                DrawRectangleRoundedLines(iRec, 0.12f, 4, isEquipped ? st.glowColor : (isUnlocked ? (isHov ? Color{ 100, 160, 240, 220 } : Color{ 48, 65, 95, 200 }) : Color{ 35, 42, 55, 160 }));
-
-                Rectangle iconBox = { iRec.x + 8.0f, iy + 6.0f, 38.0f, itemH - 12.0f };
-                DrawRectangleRounded(iconBox, 0.15f, 4, Color{ 20, 26, 40, 220 });
-                DrawRectangleRoundedLines(iconBox, 0.15f, 4, isEquipped ? st.glowColor : (isUnlocked ? Color{ 60, 80, 115, 200 } : Color{ 38, 46, 60, 160 }));
-                DrawTotemSlotIcon({ iconBox.x + iconBox.width * 0.5f, iconBox.y + iconBox.height * 0.5f }, totems[i].type, 0.95f, isUnlocked, isEquipped);
-
-                float textX = iconBox.x + iconBox.width + 12.0f;
-                DrawText(st.name.c_str(), (int)textX, (int)iy + 5, 14, isUnlocked ? st.glowColor : Color{ 120, 130, 145, 200 });
-                if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 86.0f, iy + 5.0f, 76.0f, 22.0f }, 0.25f, 4, st.glowColor);
-                    DrawText("ATTUNED", (int)(iRec.x + iRec.width - 78.0f), (int)iy + 9, 11, Color{ 14, 18, 26, 255 });
-                } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 72.0f, iy + 5.0f, 62.0f, 22.0f }, 0.25f, 4, isHov ? Color{ 60, 95, 145, 255 } : Color{ 30, 44, 66, 220 });
-                    DrawText("ATTUNE", (int)(iRec.x + iRec.width - 62.0f), (int)iy + 9, 11, isHov ? Color{ 255, 255, 255, 255 } : Color{ 175, 200, 230, 220 });
+                if (isHov) s_inspectedTotem = i;
+                if (isHov && isMousePressed) {
+                    if (isUnlocked) {
+                        player.SetTotem(isEquipped ? TotemType::NONE : totems[i].type);
+                        SoundFX::PlayEquipWeapon();
+                    }
                 }
 
-                FontManager::DrawTextWrapped(st.description, (int)textX, (int)iy + 22, (int)iRec.width - 146, 11, 3, Color{ 170, 190, 215, 210 });
-                if (isUnlocked) {
-                    DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)textX, (int)iy + itemH - 16.0f, 12);
-                } else {
-                    std::string lMsg = "Locked // " + std::string(totems[i].lockMsg);
-                    DrawText(lMsg.c_str(), (int)textX, (int)iy + itemH - 16.0f, 12, Color{ 235, 100, 100, 220 });
-                }
+                DrawEquipmentBubble(bRec, isSelected, isHov, isEquipped, !isUnlocked, totems[i].tierPips);
+                Vector2 iconCenter = { bRec.x + bSize * 0.5f, bRec.y + bSize * 0.5f };
+                DrawTotemSlotIcon(iconCenter, totems[i].type, 1.35f, isUnlocked, isEquipped);
+            }
 
-                if (isUnlocked && isHov && isMousePressed) {
-                    player.SetTotem(isEquipped ? TotemType::NONE : totems[i].type);
+            // Right Inspection Panel
+            TotemStats st = GetTotemStats(totems[s_inspectedTotem].type);
+            bool isInspUnlocked = player.GetInventory().HasTotem(totems[s_inspectedTotem].type);
+            bool isInspEquipped = (player.GetTotem() == totems[s_inspectedTotem].type);
+
+            DrawRectangleRounded(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, Color{ 16, 22, 34, 245 });
+            DrawRectangleRoundedLines(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, isInspEquipped ? st.glowColor : Color{ 52, 72, 105, 200 });
+
+            // Preview bubble
+            Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, totems[s_inspectedTotem].tierPips);
+            DrawTotemSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, totems[s_inspectedTotem].type, 1.4f, isInspUnlocked, isInspEquipped);
+
+            // Header titles
+            float titleX = panelX + 78.0f;
+            DrawText(st.name.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? st.glowColor : Color{ 235, 245, 255, 255 });
+            DrawText("Primal Humoral Relic", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
+            DrawText("Attunement: Core Soul Resonance", (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+
+            // Action button
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+            if (isInspEquipped) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, st.glowColor);
+                DrawText("ATTUNED", (int)btnRec.x + 16, (int)btnRec.y + 7, 11, Color{ 14, 18, 26, 255 });
+            } else if (isInspUnlocked) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, isBtnHov ? Color{ 60, 100, 160, 255 } : Color{ 36, 56, 88, 230 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, isBtnHov ? Color{ 140, 215, 255, 255 } : Color{ 70, 110, 175, 220 });
+                DrawText("ATTUNE", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, isBtnHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 225, 255, 240 });
+                if (isBtnHov && isMousePressed) {
+                    player.SetTotem(totems[s_inspectedTotem].type);
                     SoundFX::PlayEquipWeapon();
                 }
-            }} else if (s_selectedSlot == 4) {
-            // WEAPONS LIST
-            struct WepListEntry { WeaponType type; const char* lockMsg; };
+            } else {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 26, 30, 40, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, Color{ 60, 40, 45, 180 });
+                DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            // Totem Buff and RED Debuff Text
+            DrawText("RELIC RESONANCES & HARMONIES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)panelX + 14, (int)drawerListY + 100, 12);
+
+            // Special notes for totems
+            if (totems[s_inspectedTotem].type == TotemType::CRUSADER_TOTEM) {
+                DrawText("[Passive]: Will of Atlas", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
+                FontManager::DrawTextWrapped("When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
+                DrawText("[Companion]: Mini Elemental Golem (380 HP, 42 DEF)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
+                FontManager::DrawTextWrapped("Wields 3 new combat attack patterns: Heavy AoE Slam, Forward Bash Knockback, and Elemental Spike Throw.",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
+                DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
+                FontManager::DrawTextWrapped("A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 175, (int)(panelX + panelW - 14), (int)drawerListY + 175, Color{ 45, 62, 90, 180 });
+
+            // Lore
+            DrawText("RELIC LORE & CODEX", (int)panelX + 14, (int)drawerListY + 183, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 201, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+
+            // Source at bottom
+            float sourceY = drawerListY + panelH - 32.0f;
+            DrawLine((int)panelX + 14, (int)sourceY - 6.0f, (int)(panelX + panelW - 14), (int)sourceY - 6.0f, Color{ 45, 62, 90, 160 });
+            if (isInspUnlocked) {
+                DrawText("STATUS // Attuned and resonating with primal power", (int)panelX + 14, (int)sourceY, 11, Color{ 110, 240, 180, 240 });
+            } else {
+                std::string lMsg = "LOCKED // " + std::string(totems[s_inspectedTotem].lockMsg);
+                DrawText(lMsg.c_str(), (int)panelX + 14, (int)sourceY, 11, Color{ 255, 95, 95, 240 });
+            }
+        } else if (s_selectedSlot == 4) {
+            // =========================================================
+            // 5. WEAPON ARSENAL GRID & INSPECTION
+            // =========================================================
+            struct WepListEntry { WeaponType type; const char* lockMsg; int tierPips; };
             WepListEntry weps[9] = {
-                { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal" },
-                { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal" },
-                { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal" },
-                { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal" },
-                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal" },
-                { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences" },
-                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies" },
-                { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag" },
-                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel" }
+                { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal", 1 },
+                { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal", 1 },
+                { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal", 2 },
+                { WeaponType::HALBERD, "Zyphden - Royal Guard Armory Pedestal", 2 },
+                { WeaponType::TRUTH_SEEKER, "Royal Arsenal - High Sanctum Pedestal", 3 },
+                { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences", 3 },
+                { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies", 3 },
+                { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag", 3 },
+                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 }
             };
-            float itemSpacing = (modalH > 780.0f) ? 58.0f : 50.0f;
-            float itemH = itemSpacing - 4.0f;
-            for (int i = 0; i < (int)std::size(weps); ++i) {
-                float iy = drawerListY + (float)i * itemSpacing;
-                if (iy + itemH > contentY + rightH) break;
-                Rectangle iRec = { rightX + 16.0f, iy, drawerCardW, itemH };
+
+            int unlockedCount = 0;
+            for (int i = 0; i < 9; ++i) {
+                if (player.GetInventory().HasWeapon(weps[i].type)) unlockedCount++;
+            }
+
+            // Left Grid Container
+            DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
+            DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
+            std::string gridTitle = "ROYAL WEAPON ARSENAL (" + std::to_string(unlockedCount) + "/9 UNLOCKED)";
+            DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
+            DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
+
+            if (s_inspectedWep < 0 || s_inspectedWep >= 9) s_inspectedWep = 0;
+
+            for (int i = 0; i < 9; ++i) {
+                int col = i % 3;
+                int row = i / 3;
+                Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
                 bool isUnlocked = player.GetInventory().HasWeapon(weps[i].type);
                 bool isEquipped = (player.GetWeapon() == weps[i].type);
-                bool isHov = CheckCollisionPointRec(mousePos, iRec);
-
-                WeaponStats st = GetWeaponStats(weps[i].type);
+                bool isSelected = (s_inspectedWep == i);
+                bool isHov = CheckCollisionPointRec(mousePos, bRec);
                 int upgLvl = player.GetInventory().GetWeaponUpgrade(weps[i].type);
-                DrawRectangleRounded(iRec, 0.12f, 4, isEquipped ? Color{ 34, 50, 78, 255 } : (isHov && isUnlocked ? Color{ 26, 38, 58, 230 } : Color{ 16, 22, 34, 200 }));
-                DrawRectangleRoundedLines(iRec, 0.12f, 4, isEquipped ? Color{ 255, 215, 80, 255 } : (isUnlocked ? (isHov ? Color{ 100, 160, 240, 220 } : Color{ 48, 65, 95, 200 }) : Color{ 35, 42, 55, 160 }));
 
-                // Weapon icon frame on left
-                Rectangle iconBox = { iRec.x + 6.0f, iy + 4.0f, itemH - 8.0f, itemH - 8.0f };
-                DrawRectangleRounded(iconBox, 0.15f, 4, Color{ 20, 26, 40, 220 });
-                DrawRectangleRoundedLines(iconBox, 0.15f, 4, isEquipped ? Color{ 255, 215, 80, 220 } : (isUnlocked ? Color{ 60, 80, 115, 200 } : Color{ 38, 46, 60, 160 }));
-                DrawWeaponSlotIcon({ iconBox.x + iconBox.width * 0.5f, iconBox.y + iconBox.height * 0.5f }, weps[i].type, 0.95f, isUnlocked, isEquipped);
-
-                float textX = iconBox.x + iconBox.width + 12.0f;
-                std::string wTitle = st.name + (upgLvl > 0 ? (" +" + std::to_string(upgLvl)) : "");
-                DrawText(wTitle.c_str(), (int)textX, (int)iy + 6, 14, isUnlocked ? Color{ 255, 225, 100, 255 } : Color{ 130, 140, 155, 200 });
-
-                if (isEquipped) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 86.0f, iy + 6.0f, 76.0f, 22.0f }, 0.25f, 4, Color{ 255, 215, 80, 230 });
-                    DrawText("EQUIPPED", (int)(iRec.x + iRec.width - 78.0f), (int)iy + 10, 11, Color{ 14, 18, 26, 255 });
-                } else if (isUnlocked) {
-                    DrawRectangleRounded(Rectangle{ iRec.x + iRec.width - 72.0f, iy + 6.0f, 62.0f, 22.0f }, 0.25f, 4, isHov ? Color{ 60, 95, 145, 255 } : Color{ 30, 44, 66, 220 });
-                    DrawText("EQUIP", (int)(iRec.x + iRec.width - 62.0f), (int)iy + 10, 11, isHov ? Color{ 255, 255, 255, 255 } : Color{ 175, 200, 230, 220 });
+                if (isHov) s_inspectedWep = i;
+                if (isHov && isMousePressed) {
+                    if (isUnlocked && !isEquipped) {
+                        player.SetWeapon(weps[i].type);
+                        SoundFX::PlayEquipWeapon();
+                    }
                 }
 
-                // Clean, prominent stats line (removed cluttered description paragraph)
-                if (isUnlocked) {
-                    std::string sLine = "Light: " + std::to_string((int)st.lightDamage) + " Dmg | Heavy: " + std::to_string((int)st.heavyDamage) + " Dmg | Range: " + std::to_string((int)st.lightRange) + " | Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
-                    DrawText(sLine.c_str(), (int)textX, (int)iy + 26, 12, Color{ 110, 245, 185, 240 });
-                } else {
-                    std::string lMsg = "Locked // " + std::string(weps[i].lockMsg);
-                    DrawText(lMsg.c_str(), (int)textX, (int)iy + 26, 12, Color{ 235, 100, 100, 220 });
-                }
+                DrawEquipmentBubble(bRec, isSelected, isHov, isEquipped, !isUnlocked, weps[i].tierPips);
+                Vector2 iconCenter = { bRec.x + bSize * 0.5f, bRec.y + bSize * 0.5f };
+                DrawWeaponSlotIcon(iconCenter, weps[i].type, 1.2f, isUnlocked, isEquipped);
 
-                if (isUnlocked && !isEquipped && isHov && isMousePressed) {
-                    player.SetWeapon(weps[i].type);
+                if (isUnlocked && upgLvl > 0) {
+                    std::string badge = "+" + std::to_string(upgLvl);
+                    DrawText(badge.c_str(), (int)(bRec.x + bRec.width - 18), (int)(bRec.y + bRec.height - 13), 10, Color{ 255, 220, 100, 255 });
+                }
+            }
+
+            // Right Inspection Panel
+            int curUpg = player.GetInventory().GetWeaponUpgrade(weps[s_inspectedWep].type);
+            WeaponStats st = GetWeaponStats(weps[s_inspectedWep].type, curUpg);
+            bool isInspUnlocked = player.GetInventory().HasWeapon(weps[s_inspectedWep].type);
+            bool isInspEquipped = (player.GetWeapon() == weps[s_inspectedWep].type);
+
+            DrawRectangleRounded(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, Color{ 16, 22, 34, 245 });
+            DrawRectangleRoundedLines(Rectangle{ panelX, drawerListY, panelW, panelH }, 0.04f, 4, isInspEquipped ? Color{ 255, 215, 80, 220 } : Color{ 52, 72, 105, 200 });
+
+            // Preview bubble
+            Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, weps[s_inspectedWep].tierPips);
+            DrawWeaponSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, weps[s_inspectedWep].type, 1.35f, isInspUnlocked, isInspEquipped);
+
+            // Header titles
+            float titleX = panelX + 78.0f;
+            std::string wTitle = st.name + (curUpg > 0 ? (" +" + std::to_string(curUpg)) : "");
+            DrawText(wTitle.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? Color{ 255, 225, 100, 255 } : Color{ 235, 245, 255, 255 });
+            DrawText("Royal Armory Weapon", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
+            std::string upgText = (curUpg > 0) ? ("Tempered + " + std::to_string(curUpg) + " at Varek's Forge") : "Standard Tier Armament";
+            DrawText(upgText.c_str(), (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+
+            // Action button
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+            if (isInspEquipped) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 255, 215, 80, 230 });
+                DrawText("EQUIPPED", (int)btnRec.x + 14, (int)btnRec.y + 7, 11, Color{ 14, 18, 26, 255 });
+            } else if (isInspUnlocked) {
+                DrawRectangleRounded(btnRec, 0.25f, 4, isBtnHov ? Color{ 60, 100, 160, 255 } : Color{ 36, 56, 88, 230 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, isBtnHov ? Color{ 140, 215, 255, 255 } : Color{ 70, 110, 175, 220 });
+                DrawText("EQUIP", (int)btnRec.x + 24, (int)btnRec.y + 7, 11, isBtnHov ? Color{ 255, 255, 255, 255 } : Color{ 200, 225, 255, 240 });
+                if (isBtnHov && isMousePressed) {
+                    player.SetWeapon(weps[s_inspectedWep].type);
                     SoundFX::PlayEquipWeapon();
                 }
+            } else {
+                DrawRectangleRounded(btnRec, 0.25f, 4, Color{ 26, 30, 40, 200 });
+                DrawRectangleRoundedLines(btnRec, 0.25f, 4, Color{ 60, 40, 45, 180 });
+                DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            // Stats
+            DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            std::string sLine1 = "Light Atk: " + std::to_string((int)st.lightDamage) + " Dmg | Heavy Atk: " + std::to_string((int)st.heavyDamage) + " Dmg";
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+
+            std::string sLine2 = "Reach: " + std::to_string((int)st.lightRange) + "px | Armor Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
+            DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 118, 12, Color{ 140, 210, 255, 240 });
+
+            // Special weapon archetype traits
+            if (weps[s_inspectedWep].type == WeaponType::WINDRUNNER_RECURVE) {
+                DrawText("[Archetype]: Charged shots break enemy guard & stun. Rapid pierce velocity.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 220, 95, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::ZEPHYR_DAGGERS) {
+                DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 110, 245, 225, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::SUN_CLAYMORE) {
+                DrawText("[Archetype]: Devastating heavy cleaves with unbreakable hyper-armor posture.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 160, 60, 240 });
+            } else {
+                DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 160, 185, 215, 220 });
+            }
+
+            // Divider
+            DrawLine((int)panelX + 14, (int)drawerListY + 158, (int)(panelX + panelW - 14), (int)drawerListY + 158, Color{ 45, 62, 90, 180 });
+
+            // Lore
+            DrawText("WEAPON HISTORY & CODEX", (int)panelX + 14, (int)drawerListY + 166, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 186, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+
+            // Source at bottom
+            float sourceY = drawerListY + panelH - 32.0f;
+            DrawLine((int)panelX + 14, (int)sourceY - 6.0f, (int)(panelX + panelW - 14), (int)sourceY - 6.0f, Color{ 45, 62, 90, 160 });
+            if (isInspUnlocked) {
+                DrawText("STATUS // Unlocked and ready for battle", (int)panelX + 14, (int)sourceY, 11, Color{ 110, 240, 180, 240 });
+            } else {
+                std::string lMsg = "LOCKED // " + std::string(weps[s_inspectedWep].lockMsg);
+                DrawText(lMsg.c_str(), (int)panelX + 14, (int)sourceY, 11, Color{ 255, 95, 95, 240 });
             }
         }
     } else if (activeTab == 2) {
