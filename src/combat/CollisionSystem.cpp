@@ -489,7 +489,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         if (outLootDrops) LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
                     }
                     particles.SpawnSparks(enemy.GetPosition(), Color{ 80, 230, 110, 220 }, 8, 45.0f);
-                    particles.SpawnFloatingText(enemy.GetPosition(), "-14 Poison", Color{ 90, 235, 120, 240 }, 16.0f);
+                    particles.SpawnFloatingText(enemy.GetPosition(), "-14 POISON", Color{ 90, 245, 140, 255 }, 17.0f);
                 }
             }
         }
