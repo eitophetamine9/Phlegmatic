@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: October 28, 2026
-Branch: ver.0.0.1g
-Release Version: 0.0.1g
+Generated: November 6, 2026
+Branch: ver.0.0.1h
+Release Version: 0.0.1h
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -608,3 +608,33 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1g)
 - Crucible Rematch Encounters & World Cooldown Timers:
   * Floating world cooldown recovery banner (`[RESTING (Xs)]`) above Knight Lenon during his 30-second recovery period.
   * High Altar Rematch Crucible in the Ruined Castle Awakening Cathedral, enabling repeatable rematches against Zil's Remnant on a 30-second cooldown for +75 Silver Shingle rewards.
+
+================================================================================
+LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1h)
+================================================================================
+- Fast Travel & Tutorial Inventory Retention:
+  * Fixed inventory wiping when fast traveling or returning to the Ruined Castle tutorial area.
+  * Preserved full player arsenal, modular armor loadouts, totems, materials, and stats across re-entries. Missed lore collectibles (frag_01 to frag_04, frag_09) remain permanently discoverable.
+
+- ModalUI Layout & Dynamic Text Typography:
+  * Resolved text overlapping between armor set bonus descriptions and set skill headers in ModalUI.
+  * Added FontManager::MeasureTextWrappedHeight() for dynamic vertical flow across all equipment inspection drawers and banners.
+
+- Totem of Insanity Rework & Low-Health Blood Frenzy:
+  * Baseline stats: +65% overall damage, +35% movement speed, +25% attack speed (0.75x cooldown), -50% defense, and x1.50 incoming damage multiplier from enemies.
+  * Blood Frenzy passive: when health drops below 40%, damage multiplier surges from +65% to +135% (+2.35x total damage), applied dynamically across all light, heavy, combo, and special attacks.
+
+- Northern Crags of Zyphden Realm Expansion:
+  * Added expansive northern realm (GameState::NORTH_ZYPHDEN, MapEnvironment::NORTH_ZYPHDEN) with 2400 x 1500 bounds matching Zyphden's grand scale.
+  * Connected via northern mountain pass in Zyphden (at { 1380, 120 }) to southern return pass (at { 1200, 1450 }) with seamless realm fade transitions.
+  * Features snow-dusted stone bluffs, frost pines, monolithic pillars, and Stage #6 Highland Crags Bonfire fast travel waypoint.
+
+- Highland Mobs & Berserker Troll Boss Encounter:
+  * Introduced Frost Troll highland packs with heavy spiked war clubs and frostbite cleaves.
+  * Added Berserker Troll boss encounter with massive spiked war club smashes, ground-pound shockwaves, and rage sweeps.
+  * Guaranteed Totem of Insanity drop upon defeat.
+  * Repeatable Blood Altar 30-second boss rematch system with real-time countdown timer.
+
+- Expanded Lore Fragments (XI - XIV):
+  * Increased GameLimits::LORE_FRAGMENT_COUNT to 14.
+  * Added four highland lore steles: frag_11 (The Frigid Highland War), frag_12 (Curse of the Berserker), frag_13 (The Shattered Totem of Blood), and frag_14 (Watch of the Northern Vanguard).
