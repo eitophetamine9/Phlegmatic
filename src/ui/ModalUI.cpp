@@ -4059,14 +4059,15 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
     bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_M);
 
-    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <5>) & LEYLINE MAP
+    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <6>) & LEYLINE MAP
     struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
-    MapStage stages[5] = {
+    MapStage stages[6] = {
         { 1, "STAGE #1: RUINED CASTLE", { modalX + 310.0f, modalY + 510.0f }, "Normal", "Min Level: 1", "At the beginning, run the foundations for playing via the newest patches. Dangerous foes are available and relevant leylines will lead all." },
         { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
         { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
         { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
-        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." }
+        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." },
+        { 6, "STAGE #6: NORTHERN CRAGS", { modalX + 720.0f, modalY + 120.0f }, "Cataclysmic", "Min Level: 30", "Frostbound highland crags north of Zyphden. Savage Frost Trolls prowl the jagged peaks under the dominion of the Berserker Troll." }
     };
 
     static int s_selectedStage = 1;
@@ -4078,6 +4079,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     else if ((currentState == GameState::ZYPHDEN_REALM || currentState == GameState::ZYPHDEN_TRANSITION)) activeStageId = 3;
     else if (currentState == GameState::QUARRY_DEPTHS) activeStageId = 4;
     else if (currentState == GameState::RESTLESS_MIST_FOREST) activeStageId = 5;
+    else if (currentState == GameState::NORTH_ZYPHDEN) activeStageId = 6;
 
     // Draw connecting leylines between diamond waypoints (Image 2)
     Color leylineCol = Color{ 40, 140, 160, 180 };
@@ -4085,6 +4087,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx(stages[1].pos, stages[2].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[4].pos, 2.5f, Color{ 40, 140, 160, 180 });
+    DrawLineEx(stages[2].pos, stages[5].pos, 2.5f, Color{ 40, 140, 160, 180 });
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
@@ -4155,7 +4158,8 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawText(curStage.minLvl, (int)cardX + 22, (int)cardY + 54, 11, Color{ 160, 200, 225, 200 });
     std::string thStr = "Threat: " + std::string(curStage.threat);
     DrawText(thStr.c_str(), (int)cardX + 22, (int)cardY + 72, 11, Color{ 160, 200, 225, 200 });
-    DrawText("Fragments: 4/10 Uncovered", (int)cardX + 22, (int)cardY + 90, 11, Color{ 160, 200, 225, 200 });
+    std::string frText = "Fragments: " + std::to_string(player.GetInventory().GetDiscoveredFragmentCount()) + " / " + std::to_string(GameLimits::LORE_FRAGMENT_COUNT) + " Uncovered";
+    DrawText(frText.c_str(), (int)cardX + 22, (int)cardY + 90, 11, Color{ 160, 200, 225, 200 });
 
     // Lore Description
     DrawLine((int)cardX + 22, (int)cardY + 116, (int)(cardX + cardW - 22), (int)cardY + 116, Color{ 30, 75, 95, 180 });
@@ -4174,11 +4178,11 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     Rectangle leftArrow = { cardX - 28.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     Rectangle rightArrow = { cardX + cardW + 4.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     if (CheckCollisionPointRec(mousePos, leftArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage <= 1) ? 5 : (s_selectedStage - 1);
+        s_selectedStage = (s_selectedStage <= 1) ? 6 : (s_selectedStage - 1);
         SoundFX::PlayButtonClick();
     }
     if (CheckCollisionPointRec(mousePos, rightArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage >= 5) ? 1 : (s_selectedStage + 1);
+        s_selectedStage = (s_selectedStage >= 6) ? 1 : (s_selectedStage + 1);
         SoundFX::PlayButtonClick();
     }
     DrawText("<", (int)leftArrow.x + 8, (int)leftArrow.y + 8, 20, Color{ 80, 220, 245, 220 });

@@ -20,7 +20,9 @@ enum class EnemyType {
     ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
     MINI_ELEMENTAL_GOLEM, // Compact Elemental Golem minion summoned by Titan or player totem
     GALE_BANDIT,          // Agile skirmisher rogue in Restless Mist Forest (drops Mist Essence, NO ore)
-    GALE_ARCHER_BOSS      // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
+    GALE_ARCHER_BOSS,     // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
+    FROST_TROLL,          // Northern Crags melee brute: fast dual club strikes
+    BERSERKER_TROLL       // Northern Boss: Berserker Troll, drops Totem of Insanity
 };
 
 enum class EnemyState {

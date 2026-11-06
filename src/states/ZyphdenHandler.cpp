@@ -649,10 +649,12 @@ void ZyphdenHandler::Update(
 
     const std::function<void()>& onEnterLobby,
     const std::function<void()>& onEnterArena,
-    const std::function<void()>& onEnterRestlessMistForest
+    const std::function<void()>& onEnterRestlessMistForest,
+    const std::function<void()>& onEnterNorthZyphden
 ) {
     onEnterArenaCallback = onEnterArena;
     onEnterMistForestCallback = onEnterRestlessMistForest;
+    onEnterNorthZyphdenCallback = onEnterNorthZyphden;
 
     Vector2 mouseScreen = GetMousePosition();
 
@@ -673,6 +675,17 @@ void ZyphdenHandler::Update(
         if (IsKeyPressed(KEY_E) && onEnterMistForestCallback) {
             doorCooldown = 0.5f;
             onEnterMistForestCallback();
+            return;
+        }
+    }
+
+    // Northern Mountain Pass: Northern Crags of Zyphden
+    Vector2 northPassGate = { 1380.0f, 120.0f };
+    float distToNorthGate = Vector2Distance(player.GetPosition(), northPassGate);
+    if (distToNorthGate <= 110.0f && doorCooldown <= 0.0f) {
+        if (IsKeyPressed(KEY_E) && onEnterNorthZyphdenCallback) {
+            doorCooldown = 0.5f;
+            onEnterNorthZyphdenCallback();
             return;
         }
     }
@@ -2218,6 +2231,12 @@ void ZyphdenHandler::Render(
         Vector2 westForestGate = { 160.0f, 730.0f };
         if (Vector2Distance(player.GetPosition(), westForestGate) <= 150.0f) {
             FontManager::DrawGameTextShadow("[E] ENTER RESTLESS MIST FOREST", 110, 680, 12, Color{ 110, 245, 220, 255 });
+        }
+
+        // Northern Mountain Pass Gate prompt outside
+        Vector2 northPassGate = { 1380.0f, 120.0f };
+        if (Vector2Distance(player.GetPosition(), northPassGate) <= 150.0f) {
+            FontManager::DrawGameTextShadow("[E] ENTER NORTHERN CRAGS", 1310, 80, 12, Color{ 140, 220, 255, 255 });
         }
 
         // Eastern Quarry Archway Gate prompt outside

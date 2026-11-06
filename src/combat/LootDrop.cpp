@@ -220,6 +220,19 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
         outDrops.emplace_back(LootType::SHADOW_ESSENCE, Vector2{ pos.x - 14.0f, pos.y }, 1);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
+    } else if (type == EnemyType::BERSERKER_TROLL) {
+        // Berserker Troll Boss: 40-60 Shingles + 2 Elixir Flasks
+        int shingleCount = 40 + (rand() % 21);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 14.0f, pos.y }, 1);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
+    } else if (type == EnemyType::FROST_TROLL) {
+        // Frost Troll: 4-8 Shingles + 25% Elixir
+        int shingleCount = 4 + (rand() % 5);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        if ((rand() % 100) < 25) {
+            outDrops.emplace_back(LootType::ELIXIR_FLASK, pos, 1);
+        }
     } else if (type == EnemyType::BRUTE || type == EnemyType::CHARGER || type == EnemyType::PYROMANCER) {
         // Elite / Heavy Mobs: 4-8 Shingles + 20% Elixir
         int shingleCount = 4 + (rand() % 5);

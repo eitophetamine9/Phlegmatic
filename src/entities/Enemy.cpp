@@ -276,6 +276,45 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.warningColor = Color{ 100, 245, 220, 220 };
             isPerformingMeleeSmite = false;
             break;
+
+        case EnemyType::FROST_TROLL:
+            humor = HumorType::MELANCHOLIC;
+            radius = 24.0f;
+            maxHealth = 280.0f;
+            defense = 24.0f;
+            will = 45.0f;
+            moveSpeed = 155.0f;
+            attackRange = 85.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.55f;
+            strikeDuration = 0.18f;
+            recoveryDuration = 0.55f;
+            stunDuration = 1.2f;
+            telegraph.shape = TelegraphShape::CONE;
+            telegraph.radius = 95.0f;
+            telegraph.arcAngle = 110.0f;
+            telegraph.warningColor = Color{ 120, 200, 255, 180 };
+            isPerformingMeleeSmite = true;
+            break;
+
+        case EnemyType::BERSERKER_TROLL:
+            humor = HumorType::CHOLERIC; // Burning berserk bloodlust
+            radius = 36.0f;
+            maxHealth = 2000.0f;
+            defense = 32.0f;
+            will = 95.0f;
+            moveSpeed = 175.0f;
+            attackRange = 140.0f;
+            kitingRange = 0.0f;
+            windupDuration = 0.65f;
+            strikeDuration = 0.22f;
+            recoveryDuration = 0.60f;
+            stunDuration = 0.70f;
+            telegraph.shape = TelegraphShape::CIRCLE;
+            telegraph.radius = 140.0f;
+            telegraph.warningColor = Color{ 255, 45, 60, 200 };
+            isPerformingMeleeSmite = true;
+            break;
     }
 
     health = maxHealth;
@@ -296,6 +335,8 @@ std::string Enemy::GetName() const {
         case EnemyType::MINI_ELEMENTAL_GOLEM: return "MINI ELEMENTAL GOLEM";
         case EnemyType::GALE_BANDIT: return "GALE BANDIT";
         case EnemyType::GALE_ARCHER_BOSS: return "GALE ARCHER (MIST WARDEN)";
+        case EnemyType::FROST_TROLL: return "FROST TROLL";
+        case EnemyType::BERSERKER_TROLL: return "BERSERKER TROLL (CRAG WARLORD)";
     }
     return "UNKNOWN";
 }
