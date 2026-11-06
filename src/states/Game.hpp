@@ -21,6 +21,7 @@
 #include "ZyphdenHandler.hpp"
 #include "QuarryHandler.hpp"
 #include "RestlessMistForestHandler.hpp"
+#include "NorthZyphdenHandler.hpp"
 #include <functional>
 #include <string>
 
@@ -60,12 +61,14 @@ private:
     void RenderScene();
     void ToggleGameFullscreen();
 
-    void EnterRuinedCastle();
+    void EnterRuinedCastle(bool isInitialNewGame = false);
     void EnterCrossroads();
     void EnterZyphden();
     void EnterQuarryDepths();
     void EnterRestlessMistForest();
     void ReturnFromRestlessMistForest();
+    void EnterNorthZyphden();
+    void ReturnFromNorthZyphden();
     void EnterLobby();
     void EnterArena();
     void ReturnFromArena();
@@ -108,6 +111,7 @@ private:
     ZyphdenHandler zyphdenHandler;
     QuarryHandler quarryHandler;
     RestlessMistForestHandler restlessMistForestHandler;
+    NorthZyphdenHandler northZyphdenHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 

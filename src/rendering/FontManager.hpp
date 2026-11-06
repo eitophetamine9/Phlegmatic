@@ -65,8 +65,9 @@ public:
         return MeasureGameText(text, fontSize, fontType);
     }
 
-    // Word-wrapped text drawing
+    // Word-wrapped text drawing & measurement
     static void DrawTextWrapped(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color, GameFont fontType = GameFont::BODY, int maxChars = -1);
+    static int MeasureTextWrappedHeight(const std::string& text, int maxLineWidth, int fontSize, int lineSpacing, GameFont fontType = GameFont::BODY);
 
     // UTF-8 string sanitizer ensuring no unrendered '?' replacement glyphs
     static std::string SanitizeText(const std::string& input);

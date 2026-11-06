@@ -1113,10 +1113,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // -------------------------------------------------------------
         // SECTION 5: FULL ARMOR SET BONUS BANNER
         // -------------------------------------------------------------
-        float bannerY = secMatY + matH + 24.0f;
-        float bannerH = leftH - (bannerY - contentY) - 12.0f;
-        if (bannerH < 90.0f) bannerH = 90.0f;
-        Rectangle bannerRec = { leftX + 14.0f, bannerY, leftW - 28.0f, bannerH };
+        float bannerY = secMatY + matH + 18.0f;
+        float bannerMaxH = leftH - (bannerY - contentY) - 8.0f;
+        if (bannerMaxH < 100.0f) bannerMaxH = 100.0f;
+        Rectangle bannerRec = { leftX + 14.0f, bannerY, leftW - 28.0f, bannerMaxH };
         ArmorSet curSet = player.GetActiveArmorSet();
         ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
         bool hasFullSet = (curSet != ArmorSet::NONE);
@@ -1127,7 +1127,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             std::string setTitle = "FULL SET BONUS: " + setInfo.name + " (3/3 ACTIVE)";
             DrawText(setTitle.c_str(), (int)bannerRec.x + 12, (int)bannerRec.y + 8, 14, Color{ 255, 225, 100, 255 });
             std::string passStr = "[Passive]: " + setInfo.passiveName + " - " + setInfo.passiveDescription;
-            FontManager::DrawTextWrapped(passStr, (int)bannerRec.x + 12, (int)bannerRec.y + 28, (int)bannerRec.width - 24, 12, 4, Color{ 120, 245, 180, 240 });
+            int passH = FontManager::MeasureTextWrappedHeight(passStr, (int)bannerRec.width - 24, 12, 4);
+            FontManager::DrawTextWrapped(passStr, (int)bannerRec.x + 12, (int)bannerRec.y + 26, (int)bannerRec.width - 24, 12, 4, Color{ 120, 245, 180, 240 });
 
             float cd = player.GetArmorSkillCooldown();
             std::string skillTitle = "[Special Skill [V]]: " + setInfo.skillName + " (" + std::to_string((int)setInfo.skillCooldown) + "s CD)";
@@ -1136,14 +1137,14 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             } else {
                 skillTitle += " [READY]";
             }
-            float skillY = bannerRec.y + ((bannerH > 105.0f) ? 58.0f : 48.0f);
+            float skillY = bannerRec.y + 26.0f + (float)passH + 6.0f;
             DrawText(skillTitle.c_str(), (int)bannerRec.x + 12, (int)skillY, 12, (cd <= 0.0f) ? Color{ 255, 210, 80, 255 } : Color{ 240, 120, 80, 240 });
-            FontManager::DrawTextWrapped(setInfo.skillDescription, (int)bannerRec.x + 12, (int)skillY + 18, (int)bannerRec.width - 24, 11, 3, Color{ 180, 205, 235, 220 });
+            FontManager::DrawTextWrapped(setInfo.skillDescription, (int)bannerRec.x + 12, (int)skillY + 16, (int)bannerRec.width - 24, 11, 3, Color{ 180, 205, 235, 220 });
         } else {
-            DrawText("ARMOR SET STATUS: MISMATCHED PIECES", (int)bannerRec.x + 12, (int)bannerRec.y + 10, 14, Color{ 190, 205, 225, 230 });
+            DrawText("ARMOR SET STATUS: MISMATCHED PIECES", (int)bannerRec.x + 12, (int)bannerRec.y + 8, 14, Color{ 190, 205, 225, 230 });
             FontManager::DrawTextWrapped("Equip 3 matching set pieces (Helmet + Chest + Leggings) to awaken powerful humoral bonuses and the activated special skill via [V].",
-                (int)bannerRec.x + 12, (int)bannerRec.y + 32, (int)bannerRec.width - 24, 12, 4, Color{ 150, 170, 195, 210 });
-            DrawText("Sets: Commoner's, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt.", (int)bannerRec.x + 12, (int)bannerRec.y + bannerH - 22.0f, 11, Color{ 255, 205, 100, 230 });
+                (int)bannerRec.x + 12, (int)bannerRec.y + 28, (int)bannerRec.width - 24, 12, 4, Color{ 150, 170, 195, 210 });
+            DrawText("Sets: Commoner's, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt.", (int)bannerRec.x + 12, (int)bannerRec.y + bannerMaxH - 20.0f, 11, Color{ 255, 205, 100, 230 });
         }
 
         // =========================================================================
@@ -1361,17 +1362,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1494,17 +1501,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1627,17 +1640,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1655,7 +1674,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
             TotemListEntry totems[5] = {
                 { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
-                { TotemType::TOTEM_INSANITY, "Ruined Castle - North Crypt Pedestal", 2 },
+                { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss Drop", 4 },
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
                 { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }
@@ -1756,6 +1775,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
                 FontManager::DrawTextWrapped("A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
+                DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
+                FontManager::DrawTextWrapped("Bestows +65% overall damage, +35% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
             }
 
             // Divider
@@ -4036,14 +4059,15 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
     bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_M);
 
-    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <5>) & LEYLINE MAP
+    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <6>) & LEYLINE MAP
     struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
-    MapStage stages[5] = {
+    MapStage stages[6] = {
         { 1, "STAGE #1: RUINED CASTLE", { modalX + 310.0f, modalY + 510.0f }, "Normal", "Min Level: 1", "At the beginning, run the foundations for playing via the newest patches. Dangerous foes are available and relevant leylines will lead all." },
         { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
         { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
         { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
-        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." }
+        { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." },
+        { 6, "STAGE #6: NORTHERN CRAGS", { modalX + 720.0f, modalY + 120.0f }, "Cataclysmic", "Min Level: 30", "Frostbound highland crags north of Zyphden. Savage Frost Trolls prowl the jagged peaks under the dominion of the Berserker Troll." }
     };
 
     static int s_selectedStage = 1;
@@ -4055,6 +4079,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     else if ((currentState == GameState::ZYPHDEN_REALM || currentState == GameState::ZYPHDEN_TRANSITION)) activeStageId = 3;
     else if (currentState == GameState::QUARRY_DEPTHS) activeStageId = 4;
     else if (currentState == GameState::RESTLESS_MIST_FOREST) activeStageId = 5;
+    else if (currentState == GameState::NORTH_ZYPHDEN) activeStageId = 6;
 
     // Draw connecting leylines between diamond waypoints (Image 2)
     Color leylineCol = Color{ 40, 140, 160, 180 };
@@ -4062,6 +4087,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx(stages[1].pos, stages[2].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[4].pos, 2.5f, Color{ 40, 140, 160, 180 });
+    DrawLineEx(stages[2].pos, stages[5].pos, 2.5f, Color{ 40, 140, 160, 180 });
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
@@ -4132,7 +4158,8 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawText(curStage.minLvl, (int)cardX + 22, (int)cardY + 54, 11, Color{ 160, 200, 225, 200 });
     std::string thStr = "Threat: " + std::string(curStage.threat);
     DrawText(thStr.c_str(), (int)cardX + 22, (int)cardY + 72, 11, Color{ 160, 200, 225, 200 });
-    DrawText("Fragments: 4/10 Uncovered", (int)cardX + 22, (int)cardY + 90, 11, Color{ 160, 200, 225, 200 });
+    std::string frText = "Fragments: " + std::to_string(player.GetInventory().GetDiscoveredFragmentCount()) + " / " + std::to_string(GameLimits::LORE_FRAGMENT_COUNT) + " Uncovered";
+    DrawText(frText.c_str(), (int)cardX + 22, (int)cardY + 90, 11, Color{ 160, 200, 225, 200 });
 
     // Lore Description
     DrawLine((int)cardX + 22, (int)cardY + 116, (int)(cardX + cardW - 22), (int)cardY + 116, Color{ 30, 75, 95, 180 });
@@ -4151,11 +4178,11 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     Rectangle leftArrow = { cardX - 28.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     Rectangle rightArrow = { cardX + cardW + 4.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     if (CheckCollisionPointRec(mousePos, leftArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage <= 1) ? 5 : (s_selectedStage - 1);
+        s_selectedStage = (s_selectedStage <= 1) ? 6 : (s_selectedStage - 1);
         SoundFX::PlayButtonClick();
     }
     if (CheckCollisionPointRec(mousePos, rightArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage >= 5) ? 1 : (s_selectedStage + 1);
+        s_selectedStage = (s_selectedStage >= 6) ? 1 : (s_selectedStage + 1);
         SoundFX::PlayButtonClick();
     }
     DrawText("<", (int)leftArrow.x + 8, (int)leftArrow.y + 8, 20, Color{ 80, 220, 245, 220 });

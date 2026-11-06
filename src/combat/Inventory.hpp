@@ -186,8 +186,8 @@ public:
         if (idx >= 0 && idx < GameLimits::WEAPON_COUNT) weaponUpgradeLevel[idx]++;
     }
 
-    // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest)
-    bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false };
+    // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden)
+    bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false };
     bool IsCampfireUnlocked(int id) const {
         if (id >= 1 && id <= GameLimits::CAMPFIRE_COUNT) return unlockedCampfires[id - 1];
         return false;

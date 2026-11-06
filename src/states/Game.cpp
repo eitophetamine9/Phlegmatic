@@ -382,84 +382,34 @@ bool Game::LoadArenaUnlock() {
 
 
 
-void Game::EnterRuinedCastle() {
-
-
-
+void Game::EnterRuinedCastle(bool isInitialNewGame) {
     map.Init(MapEnvironment::RUINED_CASTLE);
-
-
-
-    player.Init({ 800.0f, 1180.0f });
-
-
-
-    player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
-
-
-
-    player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
-
-
-
-    player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
-
-
-
-    player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
-
-
-
-    player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
-
-
-
-    player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
-
-
+    if (isInitialNewGame) {
+        player.Init({ 800.0f, 1180.0f });
+        player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
+        player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
+        player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
+        player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
+        player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
+        player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
+        tutorial.Init();
+    } else {
+        player.SetPosition({ 780.0f, 650.0f });
+        tutorial.EnterExplorationMode(player);
+    }
 
     camera.target = player.GetPosition();
-
-
-
     currentState = GameState::RUINED_CASTLE;
-
-
-
     showControlsModal = false;
-
-
-
     showInventoryModal = false;
-
-
-
+    showMapModal = false;
     ruinedCastleHandler.Reset();
-
-
-
     enemies.clear();
-
-
-
     projectiles.clear();
-
-
-
     lootDrops.clear();
-
-
-
     particles.Clear();
 
-
-
-    tutorial.Init();
-
-
-
     SaveActiveGame();
-
 }
 
 void Game::EnterRestlessMistForest() {
@@ -473,12 +423,23 @@ void Game::EnterRestlessMistForest() {
     SaveActiveGame();
 }
 
+void Game::EnterNorthZyphden() {
+    northZyphdenHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::NORTH_ZYPHDEN;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
 void Game::ExecuteFastTravel(int stageId) {
     switch (stageId) {
         case 1: // Ruined Castle
             StartRealmTransition(
                 [this]() {
-                    EnterRuinedCastle();
+                    EnterRuinedCastle(false);
                     player.SetPosition({ 780.0f, 650.0f });
                     camera.target = player.GetPosition();
                 },
@@ -530,6 +491,17 @@ void Game::ExecuteFastTravel(int stageId) {
                 "Haunt of the Gale Bandits & The Whispering Altar"
             );
             break;
+        case 6: // Northern Crags
+            StartRealmTransition(
+                [this]() {
+                    EnterNorthZyphden();
+                    player.SetPosition({ 1200.0f, 1380.0f });
+                    camera.target = player.GetPosition();
+                },
+                "NORTHERN CRAGS OF ZYPHDEN",
+                "Frostbound Highlands of the Berserker Troll Clan"
+            );
+            break;
         default:
             break;
     }
@@ -539,6 +511,17 @@ void Game::ReturnFromRestlessMistForest() {
     currentState = GameState::ZYPHDEN_REALM;
     map.Init(MapEnvironment::ZYPHDEN_REALM);
     player.SetPosition({ 260.0f, 730.0f });
+    camera.target = player.GetPosition();
+    projectiles.clear();
+    enemies.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
+void Game::ReturnFromNorthZyphden() {
+    currentState = GameState::ZYPHDEN_REALM;
+    map.Init(MapEnvironment::ZYPHDEN_REALM);
+    player.SetPosition({ 1380.0f, 220.0f });
     camera.target = player.GetPosition();
     projectiles.clear();
     enemies.clear();
@@ -1313,6 +1296,14 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
+    } else if (targetState == GameState::NORTH_ZYPHDEN) {
+
+
+
+        EnterNorthZyphden();
+
+
+
     } else if (targetState == GameState::LOBBY) {
 
 
@@ -1330,25 +1321,12 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     } else {
-
-
-
-        EnterRuinedCastle();
-
-
+        bool isNew = (data.equippedWeapon == 0 && !data.bossZilDefeated);
+        EnterRuinedCastle(isNew);
 
         if (data.bossZilDefeated || data.equippedWeapon != 0) {
-
-
-
-            tutorial.SkipToBoss(map);
-
-
-
+            tutorial.EnterExplorationMode(player);
         }
-
-
-
     }
 
 
@@ -2240,13 +2218,7 @@ void Game::Update(float dt) {
 
 
         if (cutscene.Update(dt)) {
-
-
-
-            EnterRuinedCastle();
-
-
-
+            EnterRuinedCastle(true);
         }
 
 
@@ -2319,7 +2291,7 @@ void Game::Update(float dt) {
 
 
 
-            [this]() { EnterRuinedCastle(); }
+            [this]() { EnterRuinedCastle(false); }
 
 
 
@@ -2653,6 +2625,13 @@ void Game::Update(float dt) {
                     "RESTLESS MIST FOREST",
                     "Haunt of the Gale Bandits & The Whispering Altar"
                 );
+            },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterNorthZyphden(); },
+                    "NORTHERN CRAGS OF ZYPHDEN",
+                    "Frostbound Highlands of the Berserker Troll Clan"
+                );
             }
         );
 
@@ -2747,6 +2726,25 @@ void Game::Update(float dt) {
             [this]() {
                 StartRealmTransition(
                     [this]() { ReturnFromRestlessMistForest(); },
+                    "FORTIFIED REALM OF ZYPHDEN",
+                    "Seat of King Kreptu & The Vanguard"
+                );
+            },
+            [this]() { EnterLobby(); }
+        );
+        return;
+    }
+
+    if (currentState == GameState::NORTH_ZYPHDEN) {
+        if (map.GetEnvironment() != MapEnvironment::NORTH_ZYPHDEN) {
+            map.Init(MapEnvironment::NORTH_ZYPHDEN);
+        }
+
+        northZyphdenHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                StartRealmTransition(
+                    [this]() { ReturnFromNorthZyphden(); },
                     "FORTIFIED REALM OF ZYPHDEN",
                     "Seat of King Kreptu & The Vanguard"
                 );
@@ -3945,6 +3943,11 @@ void Game::RenderScene() {
         );
     } else if (currentState == GameState::RESTLESS_MIST_FOREST) {
         restlessMistForestHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
+    } else if (currentState == GameState::NORTH_ZYPHDEN) {
+        northZyphdenHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, false, false, 0, 0
         );

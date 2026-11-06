@@ -293,6 +293,35 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 1280.0f, 600.0f });
         torches.push_back({ 700.0f, 1050.0f });
         torches.push_back({ 1200.0f, 1050.0f });
+    } else if (env == MapEnvironment::NORTH_ZYPHDEN) {
+        bounds = { 100.0f, 100.0f, 2400.0f, 1500.0f };
+
+        // Central North Blood Altar & Berserker Troll Arena (x: 1000 to 1400, y: 250 to 650)
+        pillars.push_back({ { 1020.0f, 320.0f }, 30.0f });
+        pillars.push_back({ { 1380.0f, 320.0f }, 30.0f });
+        pillars.push_back({ { 960.0f, 560.0f }, 28.0f });
+        pillars.push_back({ { 1440.0f, 560.0f }, 28.0f });
+        pillars.push_back({ { 1200.0f, 240.0f }, 36.0f }); // Grand Skull Monolith
+
+        // Highland Boulders and Frozen Crags
+        obstacles.push_back({ { 320.0f, 380.0f, 180.0f, 100.0f } });  // Northwest outpost crags
+        obstacles.push_back({ { 450.0f, 800.0f, 220.0f, 90.0f } });   // Southwest frost ridge
+        obstacles.push_back({ { 780.0f, 1050.0f, 250.0f, 60.0f } });  // South gate west palisade
+        obstacles.push_back({ { 1370.0f, 1050.0f, 250.0f, 60.0f } }); // South gate east palisade
+        obstacles.push_back({ { 1900.0f, 380.0f, 210.0f, 110.0f } }); // Northeast troll mound crags
+        obstacles.push_back({ { 1820.0f, 820.0f, 220.0f, 90.0f } });  // Southeast watch crags
+        obstacles.push_back({ { 1650.0f, 1200.0f, 180.0f, 80.0f } }); // Southeast border crags
+        obstacles.push_back({ { 550.0f, 1200.0f, 180.0f, 80.0f } });  // Southwest border crags
+
+        // Torches and Campfire Braziers
+        torches.push_back({ 1200.0f, 270.0f }); // Blood Altar central skull brazier
+        torches.push_back({ 1020.0f, 320.0f });
+        torches.push_back({ 1380.0f, 320.0f });
+        torches.push_back({ 960.0f, 560.0f });
+        torches.push_back({ 1440.0f, 560.0f });
+        torches.push_back({ 450.0f, 400.0f });  // West outpost campfire
+        torches.push_back({ 1850.0f, 420.0f }); // East mound campfire
+        torches.push_back({ 1200.0f, 1380.0f });// South return gate lantern
     }
 }
 
@@ -357,6 +386,8 @@ void GameMap::DrawFloor(Vector2 playerPos) const {
         DrawQuarryDepthsFloor();
     } else if (currentEnv == MapEnvironment::RESTLESS_MIST_FOREST) {
         DrawRestlessMistForestFloor();
+    } else if (currentEnv == MapEnvironment::NORTH_ZYPHDEN) {
+        DrawNorthZyphdenFloor(playerPos);
     }
 
     float time = (float)GetTime();
@@ -484,6 +515,8 @@ void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
         DrawQuarryDepthsWalls(playerPos);
     } else if (currentEnv == MapEnvironment::RESTLESS_MIST_FOREST) {
         DrawRestlessMistForestWalls(playerPos);
+    } else if (currentEnv == MapEnvironment::NORTH_ZYPHDEN) {
+        DrawNorthZyphdenWalls(playerPos);
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -929,6 +962,18 @@ void GameMap::DrawZyphdenWalls() const {
     DrawRectangle(1676, 742, 12, 12, Color{ 75, 60, 42, 255 });
     DrawLineEx({ 1682.0f, 650.0f }, { 1682.0f, 750.0f }, 1.5f, Color{ 220, 160, 50, 140 });
     DrawText("EASTERN QUARRY", 1700, 690, 12, Color{ 245, 195, 65, 220 });
+
+    // Northern Mountain Pass Gate Archway (Exit to Northern Crags of Zyphden at { 1380.0f, 100.0f })
+    DrawRectangle(1320, 100, 24, 28, Color{ 48, 56, 72, 255 });
+    DrawRectangle(1440, 100, 24, 28, Color{ 48, 56, 72, 255 });
+    DrawRectangleLines(1320, 100, 24, 28, Color{ 90, 140, 185, 240 });
+    DrawRectangleLines(1440, 100, 24, 28, Color{ 90, 140, 185, 240 });
+    float frostPulse = 0.5f + 0.5f * sinf(time * 3.2f);
+    DrawCircleGradient(Vector2{ 1392.0f, 114.0f }, 46.0f + 6.0f * frostPulse, Color{ 95, 180, 255, 85 }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines(1392, 114, 38.0f, Color{ 120, 210, 255, (unsigned char)(140 + 70 * frostPulse) });
+    DrawRectangle(1322, 136, 140, 22, Color{ 20, 28, 42, 230 });
+    DrawRectangleLines(1322, 136, 140, 22, Color{ 95, 180, 255, 220 });
+    DrawText("NORTHERN CRAGS", 1332, 142, 11, Color{ 150, 225, 255, 255 });
 
     // Courtyard Weapon Racks
     DrawRectangle(1330, 510, 60, 18, Color{ 50, 42, 32, 255 });
@@ -1493,4 +1538,104 @@ void GameMap::DrawRestlessMistForestWalls(Vector2 playerPos) const {
         // Moss top
         DrawLine((int)r.x + 10, (int)r.y + 6, (int)(r.x + r.width - 10), (int)r.y + 6, Color{ 60, 110, 85, 220 });
     }
+}
+
+void GameMap::DrawNorthZyphdenFloor(Vector2 playerPos) const {
+    (void)playerPos;
+    float time = (float)GetTime();
+
+    // 1. Base Tundra Slate Ground
+    DrawRectangleRec(bounds, Color{ 22, 28, 38, 255 });
+
+    // 2. Cold Snow-Dusted Flagstones & Icy Crag Patches
+    int tileSize = 96;
+    int cols = (int)(bounds.width / tileSize) + 1;
+    int rows = (int)(bounds.height / tileSize) + 1;
+    for (int r = 0; r < rows; r++) {
+        for (int c = 0; c < cols; c++) {
+            float tx = bounds.x + (float)c * tileSize;
+            float ty = bounds.y + (float)r * tileSize;
+            if (tx < bounds.x || tx >= bounds.x + bounds.width || ty < bounds.y || ty >= bounds.y + bounds.height) continue;
+
+            // Subtle frost grid
+            DrawRectangleLines((int)tx, (int)ty, tileSize, tileSize, Color{ 36, 46, 62, 110 });
+
+            // Natural frost crag patches
+            int seed = (c * 17 + r * 31);
+            if (seed % 4 == 0) {
+                DrawRectangle((int)tx + 8, (int)ty + 8, tileSize - 16, tileSize - 16, Color{ 28, 38, 52, 160 });
+                DrawRectangleLines((int)tx + 8, (int)ty + 8, tileSize - 16, tileSize - 16, Color{ 48, 64, 88, 140 });
+            } else if (seed % 7 == 0) {
+                // Snow dusting patch
+                DrawRectangleRounded(Rectangle{ tx + 12.0f, ty + 12.0f, (float)tileSize - 24.0f, (float)tileSize - 24.0f }, 0.4f, 4, Color{ 160, 195, 235, 45 });
+            }
+        }
+    }
+
+    // 3. Central North Blood Altar Ritual Dais (x: 1200, y: 440, radius: 240)
+    Vector2 altarCenter = { 1200.0f, 440.0f };
+    float ritualPulse = 0.5f + 0.5f * sinf(time * 3.5f);
+    DrawCircleGradient(altarCenter, 240.0f, Color{ 120, 20, 30, (unsigned char)(60 + 35 * ritualPulse) }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 220.0f, Color{ 180, 45, 60, (unsigned char)(140 + 70 * ritualPulse) });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 180.0f, Color{ 220, 65, 80, 120 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 110.0f, Color{ 255, 90, 110, 150 });
+
+    // Blood-carved runic star on the arena dais
+    for (int i = 0; i < 8; i++) {
+        float angle = (float)i * (PI / 4.0f) + time * 0.15f;
+        Vector2 p1 = { altarCenter.x + cosf(angle) * 35.0f, altarCenter.y + sinf(angle) * 35.0f };
+        Vector2 p2 = { altarCenter.x + cosf(angle) * 190.0f, altarCenter.y + sinf(angle) * 190.0f };
+        DrawLineEx(p1, p2, 2.0f, Color{ 200, 40, 55, (unsigned char)(120 + 60 * ritualPulse) });
+    }
+
+    // 4. North Main Stone Pathway from South Gate ({1200, 1400}) to Blood Altar ({1200, 600})
+    for (float py = 650.0f; py < 1450.0f; py += 32.0f) {
+        DrawRectangle((int)(1200.0f - 40.0f), (int)py, 80, 24, Color{ 32, 42, 58, 220 });
+        DrawRectangleLines((int)(1200.0f - 40.0f), (int)py, 80, 24, Color{ 55, 75, 105, 180 });
+    }
+}
+
+void GameMap::DrawNorthZyphdenWalls(Vector2 playerPos) const {
+    (void)playerPos;
+    float time = (float)GetTime();
+
+    // 1. Highland Crags and Troll Stone Boulders (Obstacles)
+    for (const auto& obs : obstacles) {
+        // Natural jagged basalt rock
+        DrawRectangleRounded(obs.rect, 0.25f, 4, Color{ 32, 38, 50, 255 });
+        DrawRectangleRoundedLines(obs.rect, 0.25f, 4, Color{ 68, 82, 105, 230 });
+
+        // Snow / Frost crust on top edge of crags
+        DrawLineEx({ obs.rect.x + 8.0f, obs.rect.y + 4.0f }, { obs.rect.x + obs.rect.width - 8.0f, obs.rect.y + 4.0f }, 3.0f, Color{ 185, 215, 245, 220 });
+    }
+
+    // 2. Runic Pillars and Ancient Obelisks
+    for (const auto& pillar : pillars) {
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.45f), pillar.radius * 1.2f, Color{ 10, 14, 20, 140 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 36, 44, 58, 255 });
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 78, 98, 128, 255 });
+
+        // Runic glow core
+        float pGlow = 0.5f + 0.5f * sinf(time * 4.0f + pillar.position.x);
+        DrawCircleGradient(pillar.position, pillar.radius * 0.7f, Color{ 255, 60, 75, (unsigned char)(100 + 80 * pGlow) }, Color{ 0, 0, 0, 0 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, 4.0f, Color{ 255, 180, 180, 240 });
+    }
+
+    // 3. Grand Skull Monolith at Altar North ({ 1200.0f, 240.0f })
+    Vector2 skullMono = { 1200.0f, 240.0f };
+    DrawRectangle((int)skullMono.x - 55, (int)skullMono.y - 30, 110, 60, Color{ 48, 56, 72, 255 });
+    DrawRectangleLinesEx(Rectangle{ skullMono.x - 55.0f, skullMono.y - 30.0f, 110.0f, 60.0f }, 2.5f, Color{ 255, 80, 95, 240 });
+    DrawText("CRAG OF INSANITY", (int)skullMono.x - 50, (int)skullMono.y - 44, 11, Color{ 255, 120, 130, 240 });
+
+    // 4. Southern Return Mountain Pass Gate ({ 1200.0f, 1450.0f })
+    Rectangle returnGate = { 1100.0f, 1430.0f, 200.0f, 30.0f };
+    DrawRectangleRounded(returnGate, 0.2f, 4, Color{ 28, 36, 50, 240 });
+    DrawRectangleRoundedLines(returnGate, 0.2f, 4, Color{ 100, 175, 255, 220 });
+    DrawText("SOUTHERN PASS // RETURN TO ZYPHDEN", (int)returnGate.x + 8, (int)returnGate.y + 8, 10, Color{ 160, 215, 255, 240 });
+
+    // Flanking gate lanterns
+    DrawCircle(1085, 1445, 8.0f, Color{ 40, 52, 70, 255 });
+    DrawCircle(1315, 1445, 8.0f, Color{ 40, 52, 70, 255 });
+    DrawCircleGradient(Vector2{ 1085.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
+    DrawCircleGradient(Vector2{ 1315.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
 }

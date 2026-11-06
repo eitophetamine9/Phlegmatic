@@ -163,6 +163,50 @@ void Inventory::InitDefault() {
         false,
         false
     });
+
+    fragments.push_back({
+        "frag_11",
+        "Fragment XI: The Frigid Highland War",
+        "Frostbound Crags of North Zyphden",
+        "In the cold north, the Berserker Clan refused the peaceful covenants of the Lord Liege...",
+        "Before the five crowns united, the frost-hewn highlands north of Zyphden were home to the primordial troll clans. Fierce and untamed, they fought with stone clubs and blood pacts. When King Charlz sought to subdue their mountain passes, they retreated into the permafrost, nursing ancient hatreds.",
+        "Northern Crags — Inscribed upon the Ancient Outpost Monolith in the western frosty pines.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_12",
+        "Fragment XII: Curse of the Berserker",
+        "Clan of the Blood-Stained Trolls",
+        "The Berserkers drank deep from dark subterranean veins, warping their flesh into towering stone...",
+        "The Berserker Trolls did not fall to Charlz's vanguard; they succumbed to the corrupted blood seeping from the earth. Their bodies hardened into jagged granite, their eyes burned with crimson madness, and their clubs gained the strength to shatter castle walls. They know neither fear nor mercy.",
+        "Northern Crags — Unearthed at the Troll Burial Mound in the northeastern barrows.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_13",
+        "Fragment XIII: The Shattered Totem of Blood",
+        "Altar of Insanity",
+        "A dark relic forged in sacrifice, trading flesh and composure for ferocious speed and devastation...",
+        "The Totem of Insanity was carved from the heart of a primordial titan. It whispers relentless slaughter to whoever wields it. While it strips away the wearer's defensive poise and leaves them exposed to brutal enemy strikes, it unleashes terrifying speed and slaughterous power. When death looms closest, the totem surges with blood frenzy, multiplying force beyond mortal limits.",
+        "Northern Crags — Deciphered from the ancient Blood Altar Dais north of the central gorge.",
+        false,
+        false
+    });
+
+    fragments.push_back({
+        "frag_14",
+        "Fragment XIV: Watch of the Northern Vanguard",
+        "The Desolate Border Rampart",
+        "A solitary sentry's final warning of the beasts lurking in the highland blizzards...",
+        "Sentinel's entry: The blizzard howls louder every night, carrying the guttural roars of the Berserker. We cannot hold the northern passes if the king does not send reinforcements. If the troll breaks through our barricades, Zyphden's northern courtyards will run red.",
+        "Northern Crags — Preserved inside the Vanguard Lookout Cairn overlooking the southern cliffs.",
+        false,
+        false
+    });
 }
 
 bool Inventory::HasWeapon(WeaponType type) const {

@@ -6,12 +6,66 @@
 
 ## Table of Versions
 
+- [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
 - [Version 0.0.1f - Arena Milestones, Soundscapes & Combat Polish](#version-001f---arena-milestones-soundscapes--combat-polish)
 - [Version 0.0.1e - Master Forge, Heavy Arsenal & Subterranean Depths](#version-001e---master-forge-heavy-arsenal--subterranean-depths)
 - [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
 - [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
 - [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity
+
+### 1. Fix Tutorial Area Fast Travel Inventory Retention
+* **Preserved Arsenal & Stats on Re-entry**:
+  * Fixed an issue where fast traveling to Stage #1 (Ruined Castle) wiped out collected player armaments, armors, materials, and character stats.
+  * Refactored `Game::EnterRuinedCastle(bool isInitialNewGame = false)` to distinguish initial game startup from subsequent fast travel, death revivals, and game loads.
+  * Preserved active weapons, modular armor loadouts, attunable totems, shingles, and upgrade levels.
+  * Made the tutorial castle accessible anytime so players can return to explore missed lore steles without penalty. Missed lore fragments (`frag_01` to `frag_04`, `frag_09`) remain interactable and unlockable upon re-entry.
+
+### 2. Fix ModalUI Equipment Text Overlapping
+* **Dynamic Set Bonus & Armor Description Flow**:
+  * Fixed typography collisions in `ModalUI.cpp` where switching armor loadouts caused set bonus descriptions to overlap with set skill headers.
+  * Implemented `FontManager::MeasureTextWrappedHeight()` to dynamically compute wrapped multi-line text height for descriptions.
+  * Dynamically calculated vertical positioning for full armor set banners and right-hand inspection drawers across Helmets, Chestplates, and Leggings, preventing visual overlap across all screen resolutions.
+
+### 3. Totem of Insanity Rework & Low-Health Blood Frenzy
+* **High-Risk High-Reward Stat Matrix**:
+  * Baseline +65% overall damage amplification across light, heavy, combo, and special attacks.
+  * +35% movement speed bonus and +25% attack speed (cooldown reduction).
+  * -50% defense penalty and x1.50 incoming damage multiplier from all enemy attacks.
+* **Low-Health Blood Frenzy Surge**:
+  * When player health drops below 40%, the Totem of Insanity unleashes Blood Frenzy, escalating the damage multiplier from +65% to +135% (+2.35x total damage).
+  * Implemented dynamic `Player::GetTotemDamageMultiplier()` across all attack chains, heavy strikes, combo finishers, and weapon skills.
+  * Enhanced visual and UI feedback with custom red-bordered trait descriptions in the equipment drawer.
+
+### 4. Northern Crags Expansion Map & Troll Den
+* **Grand Northern Overworld Expansion**:
+  * Added a major new realm towards the north of Zyphden (`GameState::NORTH_ZYPHDEN` and `MapEnvironment::NORTH_ZYPHDEN`) matching Zyphden's massive scale (`2400 x 1500` bounds).
+  * Features snow-dusted stone bluffs, frost pines, frozen highland crags, monolith pillars, and a dedicated campfire waypoint (`Highland Crags Bonfire`, Stage #6 on the Fast Travel Map).
+  * Added seamless northern border transition connecting Zyphden's northern mountain pass (`{ 1380.0f, 120.0f }`) to the southern exit pass of the Northern Crags (`{ 1200.0f, 1450.0f }`) using the unified realm fade transition.
+* **New Highland Mobs & Frost Troll Clan**:
+  * Added Frost Troll enemies with heavy spiked war clubs, frostbite cleaves, and high composure resistance.
+  * Strategic patrol packs combining Frost Trolls, Iron Brutes, and Corrupted Slashers across highland ridges.
+
+### 5. Berserker Troll Boss Encounter & Rematch System
+* **Berserker Troll Boss**:
+  * Giant horned highland boss wielding a massive spiked war club with devastating overhead smashes, ground-pound shockwaves, and rage sweeps.
+  * Guaranteed drop of the Totem of Insanity upon defeat, accompanied by radiant loot beacons and screen shake.
+* **Courtyard-Grade 30-Second Rematch System**:
+  * After defeating the Berserker Troll, players can re-engage the boss at the Blood Altar Dais (`{ 1200.0f, 240.0f }`) with a 30-second rematch cooldown timer.
+  * Persistent altar prompt with real-time countdown timer ensures infinite rematch opportunities without despawning issues.
+
+### 6. Four New Highland Lore Fragments & Codex Expansion
+* **Expanded Lore Chronicles (Fragments XI - XIV)**:
+  * Increased `GameLimits::LORE_FRAGMENT_COUNT` from 10 to 14.
+  * `frag_11`: Fragment XI: The Frigid Highland War (Ancient Outpost Monolith).
+  * `frag_12`: Fragment XII: Curse of the Berserker (Troll Burial Mound).
+  * `frag_13`: Fragment XIII: The Shattered Totem of Blood (Blood Altar Inscription).
+  * `frag_14`: Fragment XIV: Watch of the Northern Vanguard (Vanguard Lookout Cairn).
+  * Fully integrated into the Grimoire Lore Journal and Fast Travel stage overview.
 
 ---
 

@@ -150,6 +150,10 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 38, 78, 68, 255 }; // Misty woodland hunter
     } else if (enemy.type == EnemyType::GALE_ARCHER_BOSS) {
         bodyColor = Color{ 26, 62, 55, 255 }; // Gale Archer feathered mantle
+    } else if (enemy.type == EnemyType::FROST_TROLL) {
+        bodyColor = Color{ 48, 65, 85, 255 }; // Frost highland troll blue-gray
+    } else if (enemy.type == EnemyType::BERSERKER_TROLL) {
+        bodyColor = Color{ 74, 32, 36, 255 }; // Crimson enraged berserker hide
     }
 
     // Humoral Alignment Visual Auras
@@ -212,6 +216,28 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Vector2 leftHand = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f, enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f };
         DrawLineEx(rightHand, { rightHand.x + dir.x * 14.0f, rightHand.y + dir.y * 14.0f }, 2.0f, Color{ 200, 220, 240, 255 });
         DrawLineEx(leftHand, { leftHand.x + dir.x * 14.0f, leftHand.y + dir.y * 14.0f }, 2.0f, Color{ 200, 220, 240, 255 });
+    } else if (enemy.type == EnemyType::BERSERKER_TROLL) {
+        // Spiked colossal war club & raging blood aura
+        float bPulse = (sinf((float)GetTime() * 6.0f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius + 18.0f + 6.0f * bPulse, Color{ 255, 30, 45, 90 }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 5.0f + 3.0f * bPulse, Color{ 255, 55, 70, 220 });
+
+        // Troll tusks / horns
+        Vector2 hornL = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * (enemy.radius * 0.5f), enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * (enemy.radius * 0.5f) };
+        Vector2 hornR = { enemy.position.x + normal.x * (enemy.radius * 0.75f) + dir.x * (enemy.radius * 0.5f), enemy.position.y + normal.y * (enemy.radius * 0.75f) + dir.y * (enemy.radius * 0.5f) };
+        DrawLineEx(hornL, { hornL.x + dir.x * 16.0f - normal.x * 6.0f, hornL.y + dir.y * 16.0f - normal.y * 6.0f }, 3.5f, Color{ 230, 220, 200, 255 });
+        DrawLineEx(hornR, { hornR.x + dir.x * 16.0f + normal.x * 6.0f, hornR.y + dir.y * 16.0f + normal.y * 6.0f }, 3.5f, Color{ 230, 220, 200, 255 });
+
+        // Heavy Spiked Greatclub in right hand
+        Vector2 clubEnd = { rightHand.x + dir.x * 34.0f, rightHand.y + dir.y * 34.0f };
+        DrawLineEx(rightHand, clubEnd, 5.0f, Color{ 65, 48, 38, 255 });
+        DrawCircleV(clubEnd, 9.5f, Color{ 48, 55, 65, 255 });
+        DrawCircleLines((int)clubEnd.x, (int)clubEnd.y, 9.5f, Color{ 255, 60, 60, 220 });
+    } else if (enemy.type == EnemyType::FROST_TROLL) {
+        // Dual frost-crag clubs
+        Vector2 leftHand = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f, enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f };
+        DrawLineEx(rightHand, { rightHand.x + dir.x * 20.0f, rightHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
+        DrawLineEx(leftHand, { leftHand.x + dir.x * 20.0f, leftHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
     }
 
     // Enemy Attack Visuals & Weapon Animations

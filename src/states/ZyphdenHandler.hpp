@@ -87,7 +87,8 @@ public:
         const std::function<void()>& onSaveArenaUnlock,
         const std::function<void()>& onEnterLobby,
         const std::function<void()>& onEnterArena = nullptr,
-        const std::function<void()>& onEnterRestlessMistForest = nullptr
+        const std::function<void()>& onEnterRestlessMistForest = nullptr,
+        const std::function<void()>& onEnterNorthZyphden = nullptr
     );
 
     void Render(
@@ -117,6 +118,7 @@ private:
     Campfire campfire;
     std::function<void()> onEnterArenaCallback = nullptr;
     std::function<void()> onEnterMistForestCallback = nullptr;
+    std::function<void()> onEnterNorthZyphdenCallback = nullptr;
     // Core NPCs
     ZyphdenNPC eldon;
     ZyphdenNPC noticeboard;
