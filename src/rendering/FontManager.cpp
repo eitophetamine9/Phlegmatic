@@ -329,3 +329,43 @@ void FontManager::DrawTextWrapped(const std::string& text, int posX, int posY, i
         }
     }
 }
+
+int FontManager::MeasureTextWrappedHeight(const std::string& text, int maxLineWidth, int fontSize, int lineSpacing, GameFont fontType) {
+    Font font = GetFont(fontType);
+    std::string sanitized = SanitizeText(text);
+    float spacing = (fontSize >= 20) ? 1.0f : 0.5f;
+
+    std::istringstream stream(sanitized);
+    std::string paragraph;
+    int lineCount = 0;
+
+    while (std::getline(stream, paragraph)) {
+        if (paragraph.empty()) {
+            lineCount++;
+            continue;
+        }
+
+        std::istringstream wordStream(paragraph);
+        std::string word;
+        std::string currentLine;
+
+        while (wordStream >> word) {
+            std::string testLine = currentLine.empty() ? word : currentLine + " " + word;
+            Vector2 sz = ::MeasureTextEx(font, testLine.c_str(), (float)fontSize, spacing);
+
+            if ((int)sz.x > maxLineWidth && !currentLine.empty()) {
+                lineCount++;
+                currentLine = word;
+            } else {
+                currentLine = testLine;
+            }
+        }
+
+        if (!currentLine.empty()) {
+            lineCount++;
+        }
+    }
+
+    if (lineCount == 0) return 0;
+    return lineCount * (fontSize + lineSpacing);
+}

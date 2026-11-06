@@ -1113,10 +1113,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // -------------------------------------------------------------
         // SECTION 5: FULL ARMOR SET BONUS BANNER
         // -------------------------------------------------------------
-        float bannerY = secMatY + matH + 24.0f;
-        float bannerH = leftH - (bannerY - contentY) - 12.0f;
-        if (bannerH < 90.0f) bannerH = 90.0f;
-        Rectangle bannerRec = { leftX + 14.0f, bannerY, leftW - 28.0f, bannerH };
+        float bannerY = secMatY + matH + 18.0f;
+        float bannerMaxH = leftH - (bannerY - contentY) - 8.0f;
+        if (bannerMaxH < 100.0f) bannerMaxH = 100.0f;
+        Rectangle bannerRec = { leftX + 14.0f, bannerY, leftW - 28.0f, bannerMaxH };
         ArmorSet curSet = player.GetActiveArmorSet();
         ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
         bool hasFullSet = (curSet != ArmorSet::NONE);
@@ -1127,7 +1127,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             std::string setTitle = "FULL SET BONUS: " + setInfo.name + " (3/3 ACTIVE)";
             DrawText(setTitle.c_str(), (int)bannerRec.x + 12, (int)bannerRec.y + 8, 14, Color{ 255, 225, 100, 255 });
             std::string passStr = "[Passive]: " + setInfo.passiveName + " - " + setInfo.passiveDescription;
-            FontManager::DrawTextWrapped(passStr, (int)bannerRec.x + 12, (int)bannerRec.y + 28, (int)bannerRec.width - 24, 12, 4, Color{ 120, 245, 180, 240 });
+            int passH = FontManager::MeasureTextWrappedHeight(passStr, (int)bannerRec.width - 24, 12, 4);
+            FontManager::DrawTextWrapped(passStr, (int)bannerRec.x + 12, (int)bannerRec.y + 26, (int)bannerRec.width - 24, 12, 4, Color{ 120, 245, 180, 240 });
 
             float cd = player.GetArmorSkillCooldown();
             std::string skillTitle = "[Special Skill [V]]: " + setInfo.skillName + " (" + std::to_string((int)setInfo.skillCooldown) + "s CD)";
@@ -1136,14 +1137,14 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             } else {
                 skillTitle += " [READY]";
             }
-            float skillY = bannerRec.y + ((bannerH > 105.0f) ? 58.0f : 48.0f);
+            float skillY = bannerRec.y + 26.0f + (float)passH + 6.0f;
             DrawText(skillTitle.c_str(), (int)bannerRec.x + 12, (int)skillY, 12, (cd <= 0.0f) ? Color{ 255, 210, 80, 255 } : Color{ 240, 120, 80, 240 });
-            FontManager::DrawTextWrapped(setInfo.skillDescription, (int)bannerRec.x + 12, (int)skillY + 18, (int)bannerRec.width - 24, 11, 3, Color{ 180, 205, 235, 220 });
+            FontManager::DrawTextWrapped(setInfo.skillDescription, (int)bannerRec.x + 12, (int)skillY + 16, (int)bannerRec.width - 24, 11, 3, Color{ 180, 205, 235, 220 });
         } else {
-            DrawText("ARMOR SET STATUS: MISMATCHED PIECES", (int)bannerRec.x + 12, (int)bannerRec.y + 10, 14, Color{ 190, 205, 225, 230 });
+            DrawText("ARMOR SET STATUS: MISMATCHED PIECES", (int)bannerRec.x + 12, (int)bannerRec.y + 8, 14, Color{ 190, 205, 225, 230 });
             FontManager::DrawTextWrapped("Equip 3 matching set pieces (Helmet + Chest + Leggings) to awaken powerful humoral bonuses and the activated special skill via [V].",
-                (int)bannerRec.x + 12, (int)bannerRec.y + 32, (int)bannerRec.width - 24, 12, 4, Color{ 150, 170, 195, 210 });
-            DrawText("Sets: Commoner's, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt.", (int)bannerRec.x + 12, (int)bannerRec.y + bannerH - 22.0f, 11, Color{ 255, 205, 100, 230 });
+                (int)bannerRec.x + 12, (int)bannerRec.y + 28, (int)bannerRec.width - 24, 12, 4, Color{ 150, 170, 195, 210 });
+            DrawText("Sets: Commoner's, Crusader, Vanguard, Shadowstrider, Scrap Iron, Basalt.", (int)bannerRec.x + 12, (int)bannerRec.y + bannerMaxH - 20.0f, 11, Color{ 255, 205, 100, 230 });
         }
 
         // =========================================================================
@@ -1361,17 +1362,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1494,17 +1501,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1627,17 +1640,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
             DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
 
+            float curY = drawerListY + 118.0f;
             if (st.setAffinity != ArmorSet::NONE) {
                 std::string synLine = "[Synergy]: " + setInfo.passiveName + " (" + (player.GetActiveArmorSet() == st.setAffinity ? "3/3 Active" : "1/3 Inactive") + ")";
-                DrawText(synLine.c_str(), (int)panelX + 14, (int)drawerListY + 120, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                DrawText(synLine.c_str(), (int)panelX + 14, (int)curY, 11, (player.GetActiveArmorSet() == st.setAffinity) ? Color{ 255, 220, 95, 240 } : Color{ 150, 170, 195, 200 });
+                curY += 20.0f;
+            } else {
+                curY += 4.0f;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 148, (int)(panelX + panelW - 14), (int)drawerListY + 148, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)curY, (int)(panelX + panelW - 14), (int)curY, Color{ 45, 62, 90, 180 });
+            curY += 8.0f;
 
             // Lore
-            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)drawerListY + 156, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 176, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("ARMAMENT LORE & HISTORY", (int)panelX + 14, (int)curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 18.0f;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)curY, (int)panelW - 28, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
