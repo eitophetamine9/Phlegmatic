@@ -382,84 +382,34 @@ bool Game::LoadArenaUnlock() {
 
 
 
-void Game::EnterRuinedCastle() {
-
-
-
+void Game::EnterRuinedCastle(bool isInitialNewGame) {
     map.Init(MapEnvironment::RUINED_CASTLE);
-
-
-
-    player.Init({ 800.0f, 1180.0f });
-
-
-
-    player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
-
-
-
-    player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
-
-
-
-    player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
-
-
-
-    player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
-
-
-
-    player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
-
-
-
-    player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
-
-
+    if (isInitialNewGame) {
+        player.Init({ 800.0f, 1180.0f });
+        player.SetWeapon(WeaponType::NONE); // Start unarmed in tutorial!
+        player.SetArmor(ArmorType::NONE);   // Start unarmored in tutorial!
+        player.SetTotem(TotemType::NONE);   // Start with no totem in tutorial!
+        player.GetInventory().ClearWeapons(); // No starting weapons in tutorial!
+        player.GetInventory().ClearArmors();  // Only NONE available until plinth pickup!
+        player.GetInventory().ClearTotems();  // Only NONE available until Crossroads chest!
+        tutorial.Init();
+    } else {
+        player.SetPosition({ 780.0f, 650.0f });
+        tutorial.EnterExplorationMode(player);
+    }
 
     camera.target = player.GetPosition();
-
-
-
     currentState = GameState::RUINED_CASTLE;
-
-
-
     showControlsModal = false;
-
-
-
     showInventoryModal = false;
-
-
-
+    showMapModal = false;
     ruinedCastleHandler.Reset();
-
-
-
     enemies.clear();
-
-
-
     projectiles.clear();
-
-
-
     lootDrops.clear();
-
-
-
     particles.Clear();
 
-
-
-    tutorial.Init();
-
-
-
     SaveActiveGame();
-
 }
 
 void Game::EnterRestlessMistForest() {
@@ -478,7 +428,7 @@ void Game::ExecuteFastTravel(int stageId) {
         case 1: // Ruined Castle
             StartRealmTransition(
                 [this]() {
-                    EnterRuinedCastle();
+                    EnterRuinedCastle(false);
                     player.SetPosition({ 780.0f, 650.0f });
                     camera.target = player.GetPosition();
                 },
@@ -1330,25 +1280,12 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     } else {
-
-
-
-        EnterRuinedCastle();
-
-
+        bool isNew = (data.equippedWeapon == 0 && !data.bossZilDefeated);
+        EnterRuinedCastle(isNew);
 
         if (data.bossZilDefeated || data.equippedWeapon != 0) {
-
-
-
-            tutorial.SkipToBoss(map);
-
-
-
+            tutorial.EnterExplorationMode(player);
         }
-
-
-
     }
 
 
@@ -2240,13 +2177,7 @@ void Game::Update(float dt) {
 
 
         if (cutscene.Update(dt)) {
-
-
-
-            EnterRuinedCastle();
-
-
-
+            EnterRuinedCastle(true);
         }
 
 
@@ -2319,7 +2250,7 @@ void Game::Update(float dt) {
 
 
 
-            [this]() { EnterRuinedCastle(); }
+            [this]() { EnterRuinedCastle(false); }
 
 
 

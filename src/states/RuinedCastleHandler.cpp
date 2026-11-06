@@ -180,10 +180,6 @@ void RuinedCastleHandler::Update(
         if (onEnterLobby) onEnterLobby();
         return;
     }
-    if (IsKeyPressed(KEY_R)) {
-        if (onEnterRuinedCastle) onEnterRuinedCastle();
-        return;
-    }
 
     // When dialogue with Zil is open, completely pause game physics, enemy AI, and damage!
     if (!isZilDialogueOpen) {
@@ -339,6 +335,12 @@ void RuinedCastleHandler::Update(
     // Dialogue timer
     if (zilDialogueTimer > 0.0f) {
         zilDialogueTimer -= dt;
+    }
+
+    // Sync Monolith discovery state with inventory
+    const auto* frag09 = player.GetInventory().GetFragment("frag_09");
+    if (frag09 && frag09->discovered) {
+        castlePillar.read = true;
     }
 
     // Inscribed Castle Monolith Interaction

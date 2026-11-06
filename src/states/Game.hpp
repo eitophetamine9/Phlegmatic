@@ -60,7 +60,7 @@ private:
     void RenderScene();
     void ToggleGameFullscreen();
 
-    void EnterRuinedCastle();
+    void EnterRuinedCastle(bool isInitialNewGame = false);
     void EnterCrossroads();
     void EnterZyphden();
     void EnterQuarryDepths();
