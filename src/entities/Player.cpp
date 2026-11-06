@@ -520,6 +520,17 @@ void Player::SetTotem(TotemType newTotem) {
     SoundFX::PlayEquipWeapon();
 }
 
+float Player::GetTotemDamageMultiplier() const {
+    if (currentTotem == TotemType::TOTEM_INSANITY) {
+        float maxHp = GetMaxHealth();
+        if (maxHp > 0.0f && (health / maxHp) <= 0.40f) {
+            return 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+        }
+        return 1.65f; // Baseline: +65% overall damage
+    }
+    return GetTotemStats(currentTotem).damageMultiplier;
+}
+
 float Player::GetMaxHealth() const {
     float bonus = GetHelmetStats(equippedHelmet).maxHpBonus
                 + GetChestplateStats(equippedChestplate).maxHpBonus
@@ -1119,7 +1130,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
             float spinBase = (dStats.upgradeLevel >= 2) ? 54.0f : ((dStats.upgradeLevel >= 1) ? 46.0f : 38.0f);
 
-            currentAttack.damage = (counterBuffTimer > 0.0f ? (spinBase * 1.5f) : spinBase) * GetTotemStats(currentTotem).damageMultiplier;
+            currentAttack.damage = (counterBuffTimer > 0.0f ? (spinBase * 1.5f) : spinBase) * GetTotemDamageMultiplier();
 
             currentAttack.knockback = 280.0f;
 
@@ -1219,7 +1230,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 float baseDmg = (stats.upgradeLevel >= 2) ? 58.0f : ((stats.upgradeLevel >= 1) ? 50.0f : 42.0f);
 
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
 
                 currentAttack.knockback = 380.0f;
 
@@ -1245,7 +1256,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 float baseDmg = (stats.upgradeLevel >= 2) ? 40.0f : ((stats.upgradeLevel >= 1) ? 35.0f : 30.0f);
 
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
 
                 currentAttack.knockback = 240.0f * stats.poiseMultiplier;
 
@@ -1275,7 +1286,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.arcAngle = 0.0f;
 
                 float baseDmg = (stats.upgradeLevel >= 2) ? 36.0f : ((stats.upgradeLevel >= 1) ? 32.0f : 28.0f);
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                 currentAttack.knockback = 340.0f * stats.poiseMultiplier;
                 currentAttack.defensePierce = 0.15f + stats.defensePierceBonus;
                 currentAttack.duration = 0.20f;
@@ -1299,7 +1310,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 float baseDmg = (stats.upgradeLevel >= 1) ? 42.0f : 34.0f;
 
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
 
                 currentAttack.knockback = 360.0f;
 
@@ -1332,7 +1343,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.range = stats.heavyRange;
                 currentAttack.arcAngle = stats.heavyArc;
                 float baseDmg = stats.heavyDamage;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                 currentAttack.knockback = 420.0f * stats.poiseMultiplier;
                 currentAttack.defensePierce = stats.defensePierceBonus;
                 currentAttack.duration = stats.heavyDuration;
@@ -1359,7 +1370,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 Vector2 spawnPos = { position.x + forwardDir.x * (radius + 18.0f), position.y + forwardDir.y * (radius + 18.0f) };
                 Vector2 projVel = { forwardDir.x * 850.0f, forwardDir.y * 850.0f };
                 float baseDmg = stats.heavyDamage;
-                float finalDmg = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                float finalDmg = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
 
                 Projectile proj(spawnPos, projVel, 13.0f, finalDmg, ProjectileType::GALE_ARROW, true, 0.50f);
                 proj.SetPiercing(true);
@@ -1377,7 +1388,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 currentAttack.range = stats.heavyRange;
                 currentAttack.arcAngle = stats.heavyArc;
                 float baseDmg = stats.heavyDamage;
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                 currentAttack.knockback = 300.0f * stats.poiseMultiplier;
                 currentAttack.defensePierce = stats.defensePierceBonus;
                 currentAttack.duration = stats.heavyDuration;
@@ -1396,7 +1407,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                 currentAttack.arcAngle = stats.heavyArc;
 
-                currentAttack.damage = (counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage) * GetTotemStats(currentTotem).damageMultiplier;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (stats.heavyDamage * 1.5f) : stats.heavyDamage) * GetTotemDamageMultiplier();
 
                 currentAttack.knockback = 260.0f;
 
@@ -1445,7 +1456,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.range = 150.0f;
                     currentAttack.arcAngle = 360.0f;
                     float baseDmg = (stats.upgradeLevel >= 2) ? 50.0f : ((stats.upgradeLevel >= 1) ? 42.0f : 36.0f);
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 460.0f;
                     currentAttack.duration = 0.22f;
                     currentAttack.timer = 0.22f;
@@ -1472,7 +1483,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.isLineBox = true;
                     currentAttack.arcAngle = 0.0f;
                     float baseDmg = (stats.upgradeLevel >= 2) ? 32.0f : ((stats.upgradeLevel >= 1) ? 28.0f : 24.0f);
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 300.0f * stats.poiseMultiplier;
                     currentAttack.duration = 0.18f;
                     currentAttack.timer = 0.18f;
@@ -1493,7 +1504,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.range = 155.0f;
                     currentAttack.arcAngle = 220.0f;
                     float baseDmg = (stats.upgradeLevel >= 2) ? 38.0f : ((stats.upgradeLevel >= 1) ? 33.0f : 28.0f);
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 320.0f * stats.poiseMultiplier;
                     currentAttack.defensePierce = 0.10f + stats.defensePierceBonus;
                     currentAttack.duration = 0.20f;
@@ -1518,7 +1529,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.arcAngle = 0.0f;
                     currentAttack.isLineBox = false;
                     float baseDmg = (stats.upgradeLevel >= 1) ? 46.0f : 38.0f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 380.0f;
                     currentAttack.defensePierce = 1.0f; // 100% DEFENSE PIERCE!
                     currentAttack.duration = 0.22f;
@@ -1548,7 +1559,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 46.0f;
                     currentAttack.arcAngle = 0.0f;
                     float kickBase = (stats.upgradeLevel >= 2) ? 16.0f : ((stats.upgradeLevel >= 1) ? 14.0f : 12.0f);
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (kickBase * 1.5f) : kickBase) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (kickBase * 1.5f) : kickBase) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 200.0f;
                     currentAttack.duration = 0.14f;
                     currentAttack.timer = 0.14f;
@@ -1570,7 +1581,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 56.0f;
                     currentAttack.arcAngle = 0.0f;
                     float execBase = (stats.upgradeLevel >= 2) ? 46.0f : ((stats.upgradeLevel >= 1) ? 39.0f : 34.0f);
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (execBase * 1.5f) : execBase) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (execBase * 1.5f) : execBase) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 360.0f * stats.poiseMultiplier;
                     currentAttack.duration = 0.22f;
                     currentAttack.timer = 0.22f;
@@ -1598,7 +1609,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.width = 46.0f;
                     currentAttack.arcAngle = 0.0f;
                     float baseDmg = stats.lightDamage * 0.30f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 180.0f;
                     currentAttack.defensePierce = 0.20f + stats.defensePierceBonus;
                     currentAttack.duration = 0.09f;
@@ -1627,7 +1638,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     currentAttack.arcAngle = 0.0f;
 
                     float baseDmg = stats.lightDamage * 0.30f;
-                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
                     currentAttack.knockback = 180.0f;
                     currentAttack.defensePierce = 0.20f + stats.defensePierceBonus;
                     currentAttack.duration = 0.09f;
@@ -1903,7 +1914,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
 
     currentAttack.comboStep = comboStep;
 
@@ -1980,7 +1991,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
 
         currentAttack.range = 105.0f;
 
@@ -2036,7 +2047,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
 
         currentAttack.knockback = 220.0f;
 
@@ -2112,7 +2123,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
 
             currentAttack.knockback = 200.0f;
 
@@ -2158,7 +2169,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
         currentAttack.knockback = 260.0f;
         currentAttack.defensePierce = stats.defensePierceBonus;
         SoundFX::PlayLightAttack();
@@ -2201,7 +2212,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         currentAttack.range += 25.0f;
     }
 
-    currentAttack.damage = baseLightDmg * GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
         currentAttack.knockback = 210.0f;
         currentAttack.defensePierce = stats.defensePierceBonus;
         SoundFX::PlayLightAttack();
@@ -2220,7 +2231,7 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 
 
-    currentAttack.damage *= GetTotemStats(currentTotem).damageMultiplier;
+    currentAttack.damage *= GetTotemDamageMultiplier();
 
 
 
@@ -2322,7 +2333,7 @@ void Player::TriggerHeavyAttack(ParticleSystem& particles, Vector2 targetPos) {
 
         float baseDmg = (stats.upgradeLevel >= 2) ? (30.0f * stats.critMultiplier) : ((stats.upgradeLevel >= 1) ? 26.0f : 22.0f);
 
-        currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemStats(currentTotem).damageMultiplier;
+        currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
 
         currentAttack.knockback = 180.0f;
 
@@ -2636,6 +2647,11 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
     float damageFactor = 100.0f / (100.0f + effDef);
 
     float finalAmount = amount * damageFactor;
+
+    // Totem of Insanity: suffers x1.5 incoming damage penalty from all enemy strikes
+    if (currentTotem == TotemType::TOTEM_INSANITY) {
+        finalAmount *= 1.50f;
+    }
 
     // Crusader Plate Dawnfire Aegis Shield
     if (armorSkillShieldHp > 0.0f) {

@@ -111,6 +111,7 @@ public:
 
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }
+    float GetTotemDamageMultiplier() const;
 
     // Position
     Vector2 GetPosition() const { return position; }

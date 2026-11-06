@@ -34,11 +34,11 @@ inline TotemStats GetTotemStats(TotemType type) {
         case TotemType::TOTEM_INSANITY:
             return {
                 "Totem of Insanity",
-                "A pulsating crimson effigy whispering mad battle hymns. Amplifies strike ferocity at the cost of defensive guard.",
-                "+30% Overall Damage",
-                "-10% Armor Defense",
-                1.30f, 0.90f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f,
-                Color{ 255, 65, 80, 255 }
+                "A feral crimson relic carved from the skull horn of the Berserker Troll. Awakens unstoppable berserker bloodlust, surging overall damage and speed, but leaving the bearer terribly vulnerable and reckless to all hostile strikes. When health falls below 40%, blood frenzy awakens, surging overall damage from +65% to +135%.",
+                "+65% DMG (+135% DMG below 40% HP), +35% Move Speed, +25% Attack Speed",
+                "-50% Armor Defense, Takes x1.5 Extra Damage from all enemy attacks",
+                1.65f, 0.50f, 1.35f, 1.30f, 0.75f, 0.0f, 0.0f,
+                Color{ 255, 45, 60, 255 }
             };
         case TotemType::TOTEM_MIST:
             return {
