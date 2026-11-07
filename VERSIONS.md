@@ -99,6 +99,18 @@
 * **Crimson Aura Particle Feedback**:
   * Player sprite renders a pulsing crimson aura gradient and warning rings during active Blood Frenzy.
 
+### 11. Lore Journal Crash Fix & Dynamic Bookmark Layout
+* **Out-of-Bounds Crash Resolution**:
+  * Fixed a fatal crash (`SIGSEGV`) occurring upon opening the Grimoire Lore Journal (`Tab 1` / `[I]` key).
+  * Root cause: fixed-size stack array `const char* romanNumerals[10]` in `ModalUI.cpp` was dereferenced out of bounds when `GameLimits::LORE_FRAGMENT_COUNT` was increased from 10 to 14.
+  * Implemented `ToRomanNumeral(int value)` to dynamically convert fragment numbers into Roman numeral labels without fixed buffer limitations or hardcoded array bounds.
+* **Dynamic Bookmark Layout & Flow Resizing**:
+  * Replaced the hardcoded 2-row x 5-column grid with dynamic row and column calculations adapting cleanly to any fragment count (e.g. 5 columns for $\le 10$ fragments, 7 columns for 11-21 fragments).
+  * Dynamically calculated bookmark tab widths (`tabW`), tab heights (`tabH`), and vertical spacing.
+  * Dynamically positioned the active chapter summary header (`sumY`), recovery clue parchment plaque (`clueRec`), status badge (`badgeY`), and page turn buttons (`navBtnY`), eliminating visual overlap between bookmarks and parchment content regardless of fragment count.
+  * Added defensive guards against empty fragment collections.
+  * Updated lore progress counter in the Chapter Complete summary screen to dynamically query the inventory size rather than a hardcoded `/ 4`.
+
 ---
 
 ## Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy

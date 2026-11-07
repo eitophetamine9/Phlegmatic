@@ -656,3 +656,10 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1h)
 - Blood Frenzy Visual Feedback:
   * Added [BLOOD FRENZY: +135% DMG] active status pill in the action bar buff tray when health is below 40% with Totem of Insanity equipped.
   * Added pulsing crimson aura and warning rings around the player sprite during active Blood Frenzy.
+
+- Lore Journal Out-of-Bounds Crash Fix & Dynamic Bookmark Layout:
+  * Resolved segmentation fault crash upon opening the Lore Journal (Tab 1 / [I] key) caused by out-of-bounds dereference of fixed-size stack array const char* romanNumerals[10] when fragment count was increased to 14.
+  * Implemented ToRomanNumeral() dynamic converter for arbitrary fragment indices without fixed buffer limitations or hardcoded array bounds.
+  * Overhauled bookmark grid with dynamic column, row, and spacing calculations, seamlessly scaling for 10, 14, or more fragments.
+  * Dynamically anchored active chapter summary, recovery compass plaque, status badge, and navigation buttons, completely eliminating visual overlap across the parchment spread.
+  * Updated Chapter Complete lore tracker to dynamically query player fragment count rather than hardcoded / 4.

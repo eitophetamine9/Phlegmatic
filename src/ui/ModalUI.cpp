@@ -23,9 +23,28 @@
 
 
 static void DrawJournalWrappedText(const std::string& text, int posX, int posY, int maxLineWidth, int fontSize, int lineSpacing, Color color) {
-
     FontManager::DrawTextWrapped(text, posX, posY, maxLineWidth, fontSize, lineSpacing, color, GameFont::BODY);
+}
 
+static std::string ToRomanNumeral(int value) {
+    if (value <= 0) return std::to_string(value);
+    static const struct {
+        int val;
+        const char* sym;
+    } romanTable[] = {
+        { 1000, "M" }, { 900, "CM" }, { 500, "D" }, { 400, "CD" },
+        { 100, "C" },  { 90, "XC" },  { 50, "L" },  { 40, "XL" },
+        { 10, "X" },   { 9, "IX" },   { 5, "V" },   { 4, "IV" },
+        { 1, "I" }
+    };
+    std::string result;
+    for (const auto& item : romanTable) {
+        while (value >= item.val) {
+            result += item.sym;
+            value -= item.val;
+        }
+    }
+    return result;
 }
 
 
@@ -2260,9 +2279,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
         // Clamp selected index
-
+        if (totalFrags <= 0) {
+            return false;
+        }
         if (selectedFragmentIndex < 0) selectedFragmentIndex = 0;
-
         if (selectedFragmentIndex >= totalFrags) selectedFragmentIndex = totalFrags - 1;
 
 
@@ -2423,166 +2443,99 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
 
 
-        // Bookmark Page Selector (10 clickable tabs across 2 rows)
-
+        // Bookmark Page Selector (dynamic clickable tabs across dynamic rows)
         FontManager::DrawText("PAGE BOOKMARKS (CLICK TO TURN PAGE):", (int)lPad, (int)pageY + 58, 10, Color{ 110, 80, 45, 240 }, GameFont::TITLE);
 
-        const char* romanNumerals[10] = { "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X" };
+        int cols = 5;
+        if (totalFrags > 10 && totalFrags <= 21) {
+            cols = 7;
+        } else if (totalFrags > 21) {
+            cols = 8;
+        }
+        int rows = (totalFrags > 0) ? ((totalFrags + cols - 1) / cols) : 1;
+        float tabSpacing = 4.0f;
+        float tabW = (lW - (float)(cols - 1) * tabSpacing) / (float)cols;
+        float tabH = (rows <= 2) ? 24.0f : (rows == 3 ? 20.0f : 18.0f);
+        float bookmarkStartY = pageY + 74.0f;
 
-        float tabW = (lW - 16.0f) / 5.0f;
-
-        float tabH = 26.0f;
-
-
-
-        for (int i = 0; i < GameLimits::LORE_FRAGMENT_COUNT && i < totalFrags; i++) {
-
-            int row = i / 5;
-
-            int col = i % 5;
-
-            float tx = lPad + (float)col * (tabW + 4.0f);
-
-            float ty = pageY + 76.0f + (float)row * (tabH + 4.0f);
-
+        for (int i = 0; i < totalFrags; i++) {
+            int row = i / cols;
+            int col = i % cols;
+            float tx = lPad + (float)col * (tabW + tabSpacing);
+            float ty = bookmarkStartY + (float)row * (tabH + tabSpacing);
             Rectangle tabRec = { tx, ty, tabW, tabH };
-
             bool isTabHov = CheckCollisionPointRec(mousePos, tabRec);
-
             bool isTabSel = (selectedFragmentIndex == i);
 
-
-
             Color tBg = isTabSel ? Color{ 215, 175, 90, 255 } : (isTabHov ? Color{ 232, 218, 186, 255 } : Color{ 238, 228, 205, 230 });
-
             Color tBorder = isTabSel ? Color{ 120, 75, 25, 255 } : (frags[i].discovered ? Color{ 160, 130, 85, 220 } : Color{ 190, 175, 150, 180 });
 
-
-
             DrawRectangleRounded(tabRec, 0.2f, 4, tBg);
-
             DrawRectangleRoundedLines(tabRec, 0.2f, 4, tBorder);
 
-
-
-            std::string label = std::string(romanNumerals[i]);
-
+            std::string label = ToRomanNumeral(i + 1);
             int lbw = FontManager::MeasureText(label, 11, GameFont::TITLE);
-
             Color textCol = isTabSel ? Color{ 35, 20, 10, 255 } : (frags[i].discovered ? Color{ 70, 45, 25, 240 } : Color{ 145, 130, 110, 200 });
-
-            FontManager::DrawText(label, (int)(tx + (tabW - lbw) * 0.5f), (int)ty + 6, 11, textCol, GameFont::TITLE);
-
-
+            FontManager::DrawText(label, (int)(tx + (tabW - lbw) * 0.5f), (int)ty + (int)((tabH - 12.0f) * 0.5f), 11, textCol, GameFont::TITLE);
 
             // Red unread notification dot
-
             if (frags[i].discovered && !frags[i].isRead) {
-
                 DrawCircle((int)tx + (int)tabW - 5, (int)ty + 5, 3.5f, Color{ 210, 45, 45, 255 });
-
             }
-
-
 
             if (isTabHov && isMousePressed && s_flipProgress >= 1.0f && selectedFragmentIndex != i) {
-
                 s_targetFragIndex = i;
-
                 s_flipDir = (i > selectedFragmentIndex) ? 1 : -1;
-
                 s_flipProgress = 0.0f;
-
                 SoundFX::PlayButtonClick();
-
             }
-
         }
 
-
-
         // Active Chapter Summary
-
-        float sumY = pageY + 144.0f;
-
+        float bookmarksBottom = bookmarkStartY + (float)rows * tabH + (float)(rows > 0 ? (rows - 1) : 0) * tabSpacing;
+        float sumY = bookmarksBottom + 8.0f;
         DrawLine((int)lPad, (int)sumY, (int)(lPad + lW), (int)sumY, Color{ 180, 150, 105, 180 });
 
-
-
         std::string chapHeader = "SELECTED: " + curFrag.title;
-
-        FontManager::DrawText(chapHeader.c_str(), (int)lPad, (int)sumY + 8, 11, Color{ 45, 30, 18, 255 }, GameFont::TITLE);
-
+        FontManager::DrawText(chapHeader.c_str(), (int)lPad, (int)sumY + 6, 11, Color{ 45, 30, 18, 255 }, GameFont::TITLE);
         std::string realmStr = "Origin Realm: " + curFrag.realm;
-
-        FontManager::DrawText(realmStr.c_str(), (int)lPad, (int)sumY + 24, 10, Color{ 85, 60, 35, 220 }, GameFont::BODY);
-
-
+        FontManager::DrawText(realmStr.c_str(), (int)lPad, (int)sumY + 22, 10, Color{ 85, 60, 35, 220 }, GameFont::BODY);
 
         // DEDICATED LOCATION CLUE & COMPASS PARCHMENT PLAQUE
-
-        float clueBoxY = sumY + 44.0f;
-
-        float clueBoxH = 200.0f;
-
+        float clueBoxY = sumY + 38.0f;
+        float navBtnY = pageY + pageH - 42.0f;
+        float clueBoxH = std::max(120.0f, (navBtnY - 8.0f) - clueBoxY);
         Rectangle clueRec = { lPad, clueBoxY, lW, clueBoxH };
 
-
-
         DrawRectangleRounded(clueRec, 0.08f, 6, Color{ 238, 228, 204, 255 });
-
         DrawRectangleRoundedLines(clueRec, 0.08f, 6, Color{ 165, 130, 80, 220 });
-
         DrawRectangleRoundedLines(Rectangle{ lPad + 3.0f, clueBoxY + 3.0f, lW - 6.0f, clueBoxH - 6.0f }, 0.07f, 6, Color{ 215, 195, 160, 180 });
 
-
-
         // Compass Rose Header
-
-        FontManager::DrawText("LOCATION CLUE & RECOVERY COMPASS", (int)lPad + 14, (int)clueBoxY + 12, 11, Color{ 160, 38, 28, 255 }, GameFont::TITLE);
-
-        DrawLine((int)lPad + 14, (int)clueBoxY + 28, (int)(lPad + lW - 14), (int)clueBoxY + 28, Color{ 180, 140, 95, 180 });
-
-
+        FontManager::DrawText("LOCATION CLUE & RECOVERY COMPASS", (int)lPad + 14, (int)clueBoxY + 10, 11, Color{ 160, 38, 28, 255 }, GameFont::TITLE);
+        DrawLine((int)lPad + 14, (int)clueBoxY + 24, (int)(lPad + lW - 14), (int)clueBoxY + 24, Color{ 180, 140, 95, 180 });
 
         // Recovery Clue Body
-
         std::string clueBody = curFrag.clue.empty() ? "Seek forgotten altars and guarded chests throughout Tydeshire." : curFrag.clue;
-
-        FontManager::DrawTextWrapped(clueBody, (int)lPad + 14, (int)clueBoxY + 38, (int)lW - 28, 12, 5, Color{ 48, 34, 22, 255 }, GameFont::BODY);
-
-
+        FontManager::DrawTextWrapped(clueBody, (int)lPad + 14, (int)clueBoxY + 32, (int)lW - 28, 12, 5, Color{ 48, 34, 22, 255 }, GameFont::BODY);
 
         // Discovery Status Badge inside plaque
-
-        float badgeY = clueBoxY + clueBoxH - 36.0f;
-
+        float badgeH = 24.0f;
+        float badgeY = clueBoxY + clueBoxH - badgeH - 10.0f;
         if (curFrag.discovered) {
-
-            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 215, 240, 215, 255 });
-
-            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 40, 140, 60, 220 });
-
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, badgeH }, 0.25f, 4, Color{ 215, 240, 215, 255 });
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, badgeH }, 0.25f, 4, Color{ 40, 140, 60, 220 });
             FontManager::DrawText("RECOVERED & CHRONICLED", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 20, 110, 45, 255 }, GameFont::TITLE);
-
         } else {
-
-            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 245, 220, 215, 255 });
-
-            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, 24.0f }, 0.25f, 4, Color{ 180, 50, 40, 220 });
-
+            DrawRectangleRounded(Rectangle{ lPad + 14, badgeY, lW - 28, badgeH }, 0.25f, 4, Color{ 245, 220, 215, 255 });
+            DrawRectangleRoundedLines(Rectangle{ lPad + 14, badgeY, lW - 28, badgeH }, 0.25f, 4, Color{ 180, 50, 40, 220 });
             FontManager::DrawText("SHROUDED - SEARCH THIS LOCATION", (int)lPad + 24, (int)badgeY + 6, 10, Color{ 160, 35, 25, 255 }, GameFont::TITLE);
-
         }
 
 
 
         // Bottom Left Page Navigation: Previous Page Button
-
-        float navBtnY = pageY + pageH - 42.0f;
-
         float navBtnW = 160.0f;
-
         float navBtnH = 30.0f;
 
         Rectangle prevBtnRec = { lPad, navBtnY, navBtnW, navBtnH };
@@ -3293,7 +3246,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
     DrawText("CHRONICLES OF TYDESHIRE // LORE PROGRESS", (int)col2X + 20, (int)sec2Y + 36, 12, Color{ 255, 205, 80, 255 });
 
-    std::string fragScoreStr = "Discovered Fragments: " + std::to_string(discoveredCount) + " / 4";
+    std::string fragScoreStr = "Discovered Fragments: " + std::to_string(discoveredCount) + " / " + std::to_string(player.GetInventory().GetFragments().size());
 
     DrawText(fragScoreStr.c_str(), (int)col2X + 20, (int)sec2Y + 58, 18, Color{ 140, 220, 255, 255 });
 
