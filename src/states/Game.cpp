@@ -3538,8 +3538,23 @@ void Game::Update(float dt) {
 
 
         if (enemyAliveBefore[i] && !enemies[i].IsAlive()) {
-
-
+            int kIdx = -1;
+            switch (enemies[i].GetType()) {
+                case EnemyType::SLASHER: kIdx = 0; break;
+                case EnemyType::ARCHER: kIdx = 1; break;
+                case EnemyType::PYROMANCER: kIdx = 2; break;
+                case EnemyType::BRUTE: kIdx = 3; break;
+                case EnemyType::INQUISITOR_BOSS: kIdx = 4; break;
+                case EnemyType::ORE_GOLEM:
+                case EnemyType::MINI_ELEMENTAL_GOLEM: kIdx = 5; break;
+                case EnemyType::ELEMENTAL_GOLEM: kIdx = 6; break;
+                case EnemyType::GALE_BANDIT: kIdx = 7; break;
+                case EnemyType::GALE_ARCHER_BOSS: kIdx = 8; break;
+                case EnemyType::FROST_TROLL: kIdx = 9; break;
+                case EnemyType::BERSERKER_TROLL: kIdx = 10; break;
+                default: break;
+            }
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
 
             if (arenaBandages.size() < 4 && (rand() % 100) < 35) {
 

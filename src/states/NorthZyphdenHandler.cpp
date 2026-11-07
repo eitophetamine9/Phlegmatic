@@ -289,6 +289,14 @@ void NorthZyphdenHandler::Update(
                 }
             }
 
+            // Record bestiary kill
+            int kIdx = -1;
+            if (it->GetType() == EnemyType::FROST_TROLL) kIdx = 9;
+            else if (it->GetType() == EnemyType::BERSERKER_TROLL) kIdx = 10;
+            else if (it->GetType() == EnemyType::BRUTE) kIdx = 3;
+            else if (it->GetType() == EnemyType::SLASHER) kIdx = 0;
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
+
             LootDrop::SpawnFromEnemy(*it, lootDrops);
             it = enemies.erase(it);
         } else {
