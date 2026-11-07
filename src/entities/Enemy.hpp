@@ -96,6 +96,9 @@ public:
     void Quench(ParticleSystem& particles);
     void ShatterShell(ParticleSystem& particles);
 
+    void SetLeashed(bool leashed) { isLeashed = leashed; }
+    bool IsLeashed() const { return isLeashed; }
+
     friend class EnemyRenderer;
 
 private:
@@ -135,6 +138,7 @@ private:
     float stateTimer;
     bool hasDamagedPlayer;
     bool warnedSound;
+    bool isLeashed = false;
 
     // Boss & Ranged mechanics
     int bossAttackPhase;

@@ -1674,7 +1674,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
             TotemListEntry totems[5] = {
                 { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
-                { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss Drop", 4 },
+                { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss (25% drop)", 4 },
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
                 { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }
@@ -1971,7 +1971,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             const char* lore15;// 15 kills
         };
 
-        static const BestiaryEntry s_entries[9] = {
+        static const BestiaryEntry s_entries[GameLimits::BESTIARY_COUNT] = {
             {
                 "Corrupted Slasher", "Sanguis Corruptus", "SANGUINE (Blood)", Color{ 240, 80, 70, 255 }, 0,
                 "Swarms in agile packs. Erratic curved-blade lunges.",
@@ -2052,10 +2052,28 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 "Guardian spirit of the Whispering Altar, testing mastery of wind and shadow.",
                 "Her bow was carved from the roots of the world pine before the mist arrived.",
                 "Her sacred Shadow Essence can forge the Shadowstrider set and Zephyr armaments."
+            },
+            {
+                "Frost Troll", "Trollus Glacialis", "MELANCHOLIC (Frost)", Color{ 140, 205, 255, 255 }, 9,
+                "Towering glacial brutes swinging spiked war clubs with frostbite cleaves.",
+                "Parrying the heavy swing leaves their posture completely shattered for 2.5 seconds.",
+                "Silver Shingles (15-30), Ore Scraps (30%), Elixir Flasks (25%)",
+                "Ancient highland guardians dwelling in the snow-dusted crags north of Zyphden.",
+                "Their flesh has absorbed decades of mountain permafrost, rendering them resilient to slashing strikes.",
+                "Highland legends speak of their eternal feud against the vanguard knights of old."
+            },
+            {
+                "Berserker Troll Warlord", "Trollus Furens", "SANGUINE (Blood Boss)", Color{ 255, 45, 60, 255 }, 10,
+                "Devastating overhead ground smashes, shockwave tremors, and frenzied rage sweeps.",
+                "Dodging behind his ground smite creates a massive opening for high-damage combo punish.",
+                "Totem of Insanity (25% Drop Rate), High Shingle Stashes, Ore Scraps",
+                "Chieftain of the northern highland troll clan who drank from the corrupted subterranean blood veins.",
+                "When death nears, his blood surges with ferocious fury, shattering enemy armor and poise.",
+                "Guards the ancient Blood Altar in the highest crags, waiting for a champion to challenge his throne."
             }
         };
 
-        // Layout: Left column (list of 9 cards), Right column (illuminated codex page)
+        // Layout: Left column (list of cards), Right column (illuminated codex page)
         float bLeftX = modalX + 28.0f;
         float bLeftW = 420.0f;
         float bLeftH = modalH - 146.0f;
@@ -2069,7 +2087,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawRectangleRounded(listRec, 0.04f, 6, Color{ 12, 16, 24, 240 });
         DrawRectangleRoundedLines(listRec, 0.04f, 6, Color{ 45, 65, 95, 200 });
 
-        float itemH = (bLeftH - 24.0f) / 9.0f;
+        float itemH = (bLeftH - 24.0f) / (float)std::size(s_entries);
         for (int i = 0; i < (int)std::size(s_entries); ++i) {
             float itemY = contentY + 12.0f + (float)i * itemH;
             Rectangle itemRec = { bLeftX + 12.0f, itemY, bLeftW - 24.0f, itemH - 4.0f };

@@ -2616,7 +2616,7 @@ void Game::Update(float dt) {
                 StartRealmTransition(
                     [this]() { EnterArena(); },
                     "THE ROYAL COMBAT ARENA",
-                    "20 Waves of Humoral Trials & Boss Encounters"
+                    "25 Waves of Humoral Trials & Boss Encounters"
                 );
             },
             [this]() {
@@ -3397,18 +3397,18 @@ void Game::Update(float dt) {
 
 
 
-            particles.SpawnFloatingText(player.GetPosition(), "ARENA CLEARED!", Color{ 255, 230, 80, 255 }, 30.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! (25/25)", Color{ 255, 230, 80, 255 }, 30.0f);
 
-            // Grand Victory Reward (Wave 20)
-            player.GetInventory().AddOreScraps(50);
-            player.GetInventory().AddShingles(150);
-            player.GetInventory().AddEssenceOfMist(5);
-            player.GetInventory().AddShadowEssence(4);
-            if (!player.GetInventory().HasQuestItem("item_arena_victor_crest")) {
+            // Grand Apex Victory Reward (Wave 25)
+            player.GetInventory().AddOreScraps(60);
+            player.GetInventory().AddShingles(200);
+            player.GetInventory().AddEssenceOfMist(6);
+            player.GetInventory().AddShadowEssence(5);
+            if (!player.GetInventory().HasQuestItem("item_arena_apex_crest")) {
                 player.GetInventory().AddQuestItem({
-                    "item_arena_victor_crest",
-                    "Royal Arena Victor's Crest",
-                    "A glorious gold-embossed vanguard seal awarded by Knight Lenon for clearing all 20 combat arena waves.",
+                    "item_arena_apex_crest",
+                    "Grand Apex Victor's Crest",
+                    "A glorious gold-and-crimson vanguard seal awarded by Knight Lenon for conquering all 25 waves of the expanded Royal Combat Arena.",
                     Color{ 255, 215, 80, 255 }
                 });
             }
@@ -3446,6 +3446,16 @@ void Game::Update(float dt) {
                 SoundFX::PlayParrySuccess();
                 particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 30, 220.0f);
                 particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 3 (WAVE 15): +30 SCRAPS, +90 SHINGLES, +2 SHADOW ESSENCE!", Color{ 255, 215, 80, 255 }, 24.0f);
+            } else if (newWave == 21) {
+                // Milestone 4 (Wave 20 Cleared - Primordial Titan Defeated)
+                player.GetInventory().AddOreScraps(40);
+                player.GetInventory().AddShingles(120);
+                player.GetInventory().AddEssenceOfMist(4);
+                player.GetInventory().AddShadowEssence(3);
+                SoundFX::PlayCoinPickup();
+                SoundFX::PlayParrySuccess();
+                particles.SpawnSparks(player.GetPosition(), Color{ 255, 160, 40, 255 }, 32, 240.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 4 (WAVE 20): +40 SCRAPS, +120 SHINGLES, +4 MIST, +3 SHADOW ESSENCE!", Color{ 255, 160, 40, 255 }, 24.0f);
             }
         }
 
@@ -3528,8 +3538,23 @@ void Game::Update(float dt) {
 
 
         if (enemyAliveBefore[i] && !enemies[i].IsAlive()) {
-
-
+            int kIdx = -1;
+            switch (enemies[i].GetType()) {
+                case EnemyType::SLASHER: kIdx = 0; break;
+                case EnemyType::ARCHER: kIdx = 1; break;
+                case EnemyType::PYROMANCER: kIdx = 2; break;
+                case EnemyType::BRUTE: kIdx = 3; break;
+                case EnemyType::INQUISITOR_BOSS: kIdx = 4; break;
+                case EnemyType::ORE_GOLEM:
+                case EnemyType::MINI_ELEMENTAL_GOLEM: kIdx = 5; break;
+                case EnemyType::ELEMENTAL_GOLEM: kIdx = 6; break;
+                case EnemyType::GALE_BANDIT: kIdx = 7; break;
+                case EnemyType::GALE_ARCHER_BOSS: kIdx = 8; break;
+                case EnemyType::FROST_TROLL: kIdx = 9; break;
+                case EnemyType::BERSERKER_TROLL: kIdx = 10; break;
+                default: break;
+            }
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
 
             if (arenaBandages.size() < 4 && (rand() % 100) < 35) {
 

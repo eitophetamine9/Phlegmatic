@@ -261,12 +261,20 @@ void NorthZyphdenHandler::Update(
                 berserkerTrollSummoned = false;
                 bossRematchCooldown = 30.0f;
 
-                // Guaranteed Totem of Insanity drop unlock
-                if (!player.GetInventory().HasTotem(TotemType::TOTEM_INSANITY)) {
+                // 25% drop chance for Totem of Insanity
+                int roll = rand() % 100;
+                if (roll < 25 && !player.GetInventory().HasTotem(TotemType::TOTEM_INSANITY)) {
                     player.GetInventory().UnlockTotem(TotemType::TOTEM_INSANITY);
-                    particles.SpawnFloatingText(it->GetPosition(), "CLAIMED: TOTEM OF INSANITY!", Color{ 255, 45, 60, 255 }, 26.0f);
+                    SoundFX::PlayGateOpen();
+                    SoundFX::PlayCoinPickup();
+                    particles.AddScreenShake(12.0f, 0.45f);
+                    particles.SpawnSparks(it->GetPosition(), Color{ 255, 45, 60, 255 }, 50, 260.0f);
+                    particles.SpawnFloatingText(player.GetPosition(), "RARE DROP: TOTEM OF INSANITY! (25%)", Color{ 255, 45, 60, 255 }, 26.0f);
                 } else {
-                    particles.SpawnFloatingText(it->GetPosition(), "BERSERKER TROLL VANQUISHED!", Color{ 255, 90, 90, 255 }, 24.0f);
+                    player.GetInventory().AddShingles(100);
+                    player.GetInventory().AddOreScraps(5);
+                    SoundFX::PlayCoinPickup();
+                    particles.SpawnFloatingText(player.GetPosition(), "BERSERKER TROLL SLAIN! (+100 SHINGLES, +5 SCRAPS)", Color{ 255, 90, 90, 255 }, 24.0f);
                 }
                 SoundFX::PlayParrySuccess();
                 particles.AddScreenShake(7.0f, 0.4f);
@@ -280,6 +288,14 @@ void NorthZyphdenHandler::Update(
                     break;
                 }
             }
+
+            // Record bestiary kill
+            int kIdx = -1;
+            if (it->GetType() == EnemyType::FROST_TROLL) kIdx = 9;
+            else if (it->GetType() == EnemyType::BERSERKER_TROLL) kIdx = 10;
+            else if (it->GetType() == EnemyType::BRUTE) kIdx = 3;
+            else if (it->GetType() == EnemyType::SLASHER) kIdx = 0;
+            if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
 
             LootDrop::SpawnFromEnemy(*it, lootDrops);
             it = enemies.erase(it);
@@ -355,6 +371,19 @@ void NorthZyphdenHandler::Render(
     // Rematch Altar Inscription prompt
     Vector2 altarPos = { 1200.0f, 240.0f };
     float distToAltar = Vector2Distance(playerPos, altarPos);
+
+    // Floating recovery cooldown banner above Blood Altar
+    if (berserkerTrollDefeated && bossRematchCooldown > 0.0f) {
+        float pillW = 160.0f;
+        float pillH = 22.0f;
+        Rectangle cdRec = { altarPos.x - pillW * 0.5f, altarPos.y - 70.0f, pillW, pillH };
+        DrawRectangleRounded(cdRec, 0.4f, 4, Color{ 25, 20, 28, 220 });
+        DrawRectangleRoundedLines(cdRec, 0.4f, 4, Color{ 220, 80, 80, 200 });
+        std::string cdMsg = "ALTAR REMATCH: " + std::to_string((int)ceilf(bossRematchCooldown)) + "s";
+        int tw = FontManager::MeasureText(cdMsg, 10);
+        FontManager::DrawGameTextShadow(cdMsg, (int)(altarPos.x - tw * 0.5f), (int)cdRec.y + 5, 10, Color{ 255, 140, 140, 240 });
+    }
+
     if (distToAltar <= 120.0f && berserkerTrollDefeated) {
         bool bossAlive = false;
         for (const auto& en : enemies) {
@@ -363,9 +392,6 @@ void NorthZyphdenHandler::Render(
         if (!bossAlive) {
             if (bossRematchCooldown <= 0.0f) {
                 FontManager::DrawGameTextShadow("[E] CHALLENGE BERSERKER TROLL REMATCH", (int)altarPos.x - 130, (int)altarPos.y - 46, 11, Color{ 255, 80, 95, 255 });
-            } else {
-                std::string cdMsg = "CRAG COOLDOWN: " + std::to_string((int)ceilf(bossRematchCooldown)) + "s";
-                FontManager::DrawGameTextShadow(cdMsg, (int)altarPos.x - 65, (int)altarPos.y - 46, 11, Color{ 180, 190, 205, 200 });
             }
         }
     }

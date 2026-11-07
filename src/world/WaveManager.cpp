@@ -232,14 +232,73 @@ void WaveManager::SpawnWave(int waveNumber, std::vector<Enemy>& enemies, std::ve
             break;
 
         case 20:
-        default:
-            // Wave 20: FINAL BOSS ROUND 4 - The Primordial Elemental Golem Titan (Titan + 2 Mini Golems + 2 Pyromancers)
+            // Wave 20: BOSS ROUND 4 - The Primordial Elemental Golem Titan (Titan + 2 Mini Golems + 2 Pyromancers)
             enemies.emplace_back(EnemyType::ELEMENTAL_GOLEM, Vector2{ center.x, center.y - 220.0f });
             enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 240.0f, center.y + 140.0f });
             enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 240.0f, center.y + 140.0f });
             enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 320.0f, center.y });
             enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 320.0f, center.y });
-            particles.SpawnFloatingText(center, "FINAL WAVE 20: PRIMORDIAL TITAN", Color{ 255, 180, 40, 255 }, 30.0f);
+            particles.SpawnFloatingText(center, "BOSS ROUND 4: PRIMORDIAL TITAN", Color{ 255, 180, 40, 255 }, 30.0f);
+            break;
+
+        // -------------------------------------------------------------
+        // TIER 5: FROSTBOUND HIGHLAND TRIALS (WAVES 21 - 25)
+        // -------------------------------------------------------------
+        case 21:
+            // Wave 21: Highland Glacial Recon (2 Frost Trolls, 2 Slashers, 2 Gale Bandits)
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y - 120.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y - 120.0f });
+            enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x - 320.0f, center.y + 150.0f });
+            enemies.emplace_back(EnemyType::SLASHER, Vector2{ center.x + 320.0f, center.y + 150.0f });
+            enemies.emplace_back(EnemyType::GALE_BANDIT, Vector2{ center.x, center.y + 220.0f });
+            enemies.emplace_back(EnemyType::GALE_BANDIT, Vector2{ center.x, center.y - 240.0f });
+            particles.SpawnFloatingText(center, "WAVE 21: HIGHLAND GLACIAL RECON", Color{ 140, 215, 255, 255 }, 26.0f);
+            break;
+
+        case 22:
+            // Wave 22: Basalt & Crags Crush (2 Frost Trolls, 2 Unleashed Ore Golems, 2 Deathseeker Archers)
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 220.0f, center.y });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 220.0f, center.y });
+            enemies.emplace_back(EnemyType::ORE_GOLEM, Vector2{ center.x - 260.0f, center.y - 160.0f });
+            enemies.emplace_back(EnemyType::ORE_GOLEM, Vector2{ center.x + 260.0f, center.y - 160.0f });
+            enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x - 300.0f, center.y + 200.0f });
+            enemies.emplace_back(EnemyType::ARCHER, Vector2{ center.x + 300.0f, center.y + 200.0f });
+            particles.SpawnFloatingText(center, "WAVE 22: CRAGS & BASALT CRUSH", Color{ 160, 220, 245, 255 }, 26.0f);
+            break;
+
+        case 23:
+            // Wave 23: Frostfire Mayhem (3 Frost Trolls, 2 Void Pyromancers, 2 Chargers)
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y - 100.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y - 100.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x, center.y + 200.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 320.0f, center.y + 140.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 320.0f, center.y + 140.0f });
+            enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x - 280.0f, center.y - 200.0f });
+            enemies.emplace_back(EnemyType::CHARGER, Vector2{ center.x + 280.0f, center.y - 200.0f });
+            particles.SpawnFloatingText(center, "WAVE 23: FROSTFIRE MAYHEM", Color{ 255, 110, 80, 255 }, 28.0f);
+            break;
+
+        case 24:
+            // Wave 24: Crag Warlord Vanguard (3 Frost Trolls, 2 Mini Elemental Golems, 2 Iron Brutes)
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 260.0f, center.y });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 260.0f, center.y });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x, center.y - 220.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 200.0f, center.y + 160.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 200.0f, center.y + 160.0f });
+            enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x - 340.0f, center.y - 140.0f });
+            enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x + 340.0f, center.y - 140.0f });
+            particles.SpawnFloatingText(center, "WAVE 24: WRATH OF THE HIGHLANDS", Color{ 220, 140, 255, 255 }, 28.0f);
+            break;
+
+        case 25:
+        default:
+            // Wave 25: APEX FINAL BOSS ROUND 5 - The Berserker Troll Warlord (+ 2 Frost Trolls + 2 Pyromancers)
+            enemies.emplace_back(EnemyType::BERSERKER_TROLL, Vector2{ center.x, center.y - 220.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y + 140.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y + 140.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 320.0f, center.y });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 320.0f, center.y });
+            particles.SpawnFloatingText(center, "APEX FINAL WAVE 25: CRAG BERSERKER WARLORD", Color{ 255, 45, 60, 255 }, 30.0f);
             break;
     }
 }

@@ -50,13 +50,14 @@
   * Added Frost Troll enemies with heavy spiked war clubs, frostbite cleaves, and high composure resistance.
   * Strategic patrol packs combining Frost Trolls, Iron Brutes, and Corrupted Slashers across highland ridges.
 
-### 5. Berserker Troll Boss Encounter & Rematch System
+### 5. Berserker Troll Boss Encounter, 25% Totem Drop Rate & Rematch System
 * **Berserker Troll Boss**:
   * Giant horned highland boss wielding a massive spiked war club with devastating overhead smashes, ground-pound shockwaves, and rage sweeps.
-  * Guaranteed drop of the Totem of Insanity upon defeat, accompanied by radiant loot beacons and screen shake.
-* **Courtyard-Grade 30-Second Rematch System**:
-  * After defeating the Berserker Troll, players can re-engage the boss at the Blood Altar Dais (`{ 1200.0f, 240.0f }`) with a 30-second rematch cooldown timer.
-  * Persistent altar prompt with real-time countdown timer ensures infinite rematch opportunities without despawning issues.
+  * Rebalanced Totem of Insanity to roll on an exact 25% drop chance upon defeat, accompanied by radiant loot sparks and sound effects.
+  * If already owned or roll fails, awards an alternate trophy bounty (+100 Silver Shingles and +5 Ore Scraps).
+* **Courtyard-Grade 30-Second Rematch System & Altar Cooldown UI**:
+  * After defeating the Berserker Troll, players can re-engage the boss at the Blood Altar Dais (`{ 1200.0f, 240.0f }`) on a 30-second rematch cooldown timer.
+  * Added persistent in-world floating recovery banner (`[ALTAR REMATCH: 24s]`) directly above the Blood Altar with real-time countdown updates.
 
 ### 6. Four New Highland Lore Fragments & Codex Expansion
 * **Expanded Lore Chronicles (Fragments XI - XIV)**:
@@ -66,6 +67,37 @@
   * `frag_13`: Fragment XIII: The Shattered Totem of Blood (Blood Altar Inscription).
   * `frag_14`: Fragment XIV: Watch of the Northern Vanguard (Vanguard Lookout Cairn).
   * Fully integrated into the Grimoire Lore Journal and Fast Travel stage overview.
+
+### 7. Ore Golem Unbounded Pursuit in Royal Combat Arena
+* **Arena AI Leash Removal**:
+  * Added `isLeashed` property to `Enemy` entity structure.
+  * Overworld Quarry Golems remain territorial and tethered to their ore veins, while Arena Ore Golems are completely unbound, relentlessly pursuing the player across the full arena floor without tethering, de-aggroing, or returning to spawn points.
+
+### 8. Royal Combat Arena Expansion (Tier 5: Waves 21 - 25 & Apex Boss)
+* **Tier 5: Frostbound Highland Trials**:
+  * Expanded `WaveManager` total waves from 20 to 25.
+  * Wave 21: Highland Glacial Recon (2 Frost Trolls, 2 Slashers, 2 Gale Bandits).
+  * Wave 22: Basalt & Crags Crush (2 Frost Trolls, 2 Unleashed Ore Golems, 2 Archers).
+  * Wave 23: Frostfire Mayhem (3 Frost Trolls, 2 Void Pyromancers, 2 Chargers).
+  * Wave 24: Crag Warlord Vanguard (3 Frost Trolls, 2 Mini Elemental Golems, 2 Iron Brutes).
+  * Wave 25: APEX FINAL BOSS ROUND 5 - The Berserker Troll Warlord (+2 Frost Trolls, +2 Pyromancers).
+* **Milestone Rewards & Apex Victory**:
+  * Milestone 4 (Wave 20 Cleared): +40 Ore Scraps, +120 Shingles, +4 Mist Essence, +3 Shadow Essence.
+  * Grand Apex Victory (Wave 25 Cleared): +60 Ore Scraps, +200 Shingles, +6 Mist Essence, +5 Shadow Essence, and the Grand Apex Victor's Crest quest seal.
+
+### 9. Humoral Bestiary Codex Expansion (Entries 10 & 11)
+* **New Bestiary Cards**:
+  * Increased `GameLimits::BESTIARY_COUNT` from 9 to 11.
+  * Entry 10: **Frost Troll** (*Trollus Glacialis* - Melancholic Frost).
+  * Entry 11: **Berserker Troll Warlord** (*Trollus Furens* - Sanguine Blood Boss).
+  * Included complete Latin binomials, drops, combat styles, tactical weaknesses, and 3-tier unlockable lore seals (1, 5, and 15 kills).
+  * Wired kill tracking across North Zyphden and Royal Combat Arena encounters.
+
+### 10. Blood Frenzy Visual Feedback & Active Status Pill
+* **Active Status Tray Indicator**:
+  * Added `[BLOOD FRENZY: +135% DMG]` status pill in the action bar buff tray when health is below 40% with Totem of Insanity equipped.
+* **Crimson Aura Particle Feedback**:
+  * Player sprite renders a pulsing crimson aura gradient and warning rings during active Blood Frenzy.
 
 ---
 
