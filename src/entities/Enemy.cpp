@@ -639,7 +639,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     }
                 }
             } else {
-                if (type == EnemyType::ORE_GOLEM) {
+                if (type == EnemyType::ORE_GOLEM && isLeashed) {
                     float distFromSpawn = Vector2Distance(position, spawnPoint);
                     if (distToPlayer <= 320.0f && distFromSpawn <= 420.0f) {
                         // Aggroed! Move towards player

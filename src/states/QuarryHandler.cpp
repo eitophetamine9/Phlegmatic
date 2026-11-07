@@ -40,6 +40,7 @@ void QuarryHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enemi
 
     for (const auto& spawner : golemSpawners) {
         enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
+        enemies.back().SetLeashed(true);
     }
 }
 
@@ -82,6 +83,7 @@ void QuarryHandler::Update(
                 spawner.isAlive = true;
                 spawner.respawnTimer = 0.0f;
                 enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
+                enemies.back().SetLeashed(true);
             }
             return;
         }
@@ -202,6 +204,7 @@ void QuarryHandler::Update(
                 spawner.respawnTimer = 0.0f;
                 spawner.isAlive = true;
                 enemies.emplace_back(EnemyType::ORE_GOLEM, spawner.spawnPos);
+                enemies.back().SetLeashed(true);
 
                 SoundFX::PlayHitImpact();
                 particles.SpawnSparks(spawner.spawnPos, Color{ 255, 190, 50, 255 }, 25, 160.0f);
