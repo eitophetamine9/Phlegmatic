@@ -632,9 +632,27 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1h)
 - Highland Mobs & Berserker Troll Boss Encounter:
   * Introduced Frost Troll highland packs with heavy spiked war clubs and frostbite cleaves.
   * Added Berserker Troll boss encounter with massive spiked war club smashes, ground-pound shockwaves, and rage sweeps.
-  * Guaranteed Totem of Insanity drop upon defeat.
-  * Repeatable Blood Altar 30-second boss rematch system with real-time countdown timer.
+  * Rebalanced Totem of Insanity to a 25% drop chance upon defeat with fallback trophy rewards (+100 Silver Shingles, +5 Ore Scraps).
+  * Repeatable Blood Altar 30-second boss rematch system with real-time in-world floating cooldown timer banner.
 
 - Expanded Lore Fragments (XI - XIV):
   * Increased GameLimits::LORE_FRAGMENT_COUNT to 14.
   * Added four highland lore steles: frag_11 (The Frigid Highland War), frag_12 (Curse of the Berserker), frag_13 (The Shattered Totem of Blood), and frag_14 (Watch of the Northern Vanguard).
+
+- Ore Golem Arena Unbounded Pursuit:
+  * Added isLeashed property to Enemy entity class.
+  * Overworld Quarry Golems remain territorial guardians tethered to their ore veins, while Arena Ore Golems are completely unbound, relentlessly pursuing the player across the full arena floor without range limits or returning to spawn.
+
+- Royal Combat Arena Expansion (Waves 21 - 25 & Apex Boss):
+  * Expanded WaveManager total waves from 20 to 25 with Tier 5: Frostbound Highland Trials.
+  * Introduced Frost Trolls into waves 21-24 and Apex Berserker Troll Warlord Boss Wave 25.
+  * Added Milestone 4 rewards for Wave 20 clear (+40 Scraps, +120 Shingles, +4 Mist, +3 Shadow Essence) and Grand Apex Victory rewards for Wave 25 clear (+60 Scraps, +200 Shingles, +6 Mist, +5 Shadow Essence, Grand Apex Victor's Crest).
+
+- Humoral Bestiary Codex Expansion (Entries 10 & 11):
+  * Increased GameLimits::BESTIARY_COUNT from 9 to 11.
+  * Added Bestiary cards for Frost Troll (Trollus Glacialis - Melancholic Frost) and Berserker Troll Warlord (Trollus Furens - Sanguine Blood Boss) with 3-tier kill seals.
+  * Connected kill tracking across Northern Crags and Royal Combat Arena.
+
+- Blood Frenzy Visual Feedback:
+  * Added [BLOOD FRENZY: +135% DMG] active status pill in the action bar buff tray when health is below 40% with Totem of Insanity equipped.
+  * Added pulsing crimson aura and warning rings around the player sprite during active Blood Frenzy.
