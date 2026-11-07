@@ -1674,7 +1674,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
             TotemListEntry totems[5] = {
                 { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
-                { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss Drop", 4 },
+                { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss (25% drop)", 4 },
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
                 { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }

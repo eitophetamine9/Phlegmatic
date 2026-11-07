@@ -195,6 +195,10 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         activeBuffs.push_back({ b, Color{ 255, 70, 85, 255 }, Color{ 255, 140, 150, 255 }, Color{ 48, 14, 18, 240 }, true });
     }
 
+    if (player.GetTotem() == TotemType::TOTEM_INSANITY && (player.GetHealth() / player.GetMaxHealth() <= 0.40f)) {
+        activeBuffs.push_back({ "BLOOD FRENZY: +135% DMG", Color{ 255, 45, 60, 255 }, Color{ 255, 150, 160, 255 }, Color{ 52, 14, 18, 240 }, true });
+    }
+
     if (!activeBuffs.empty()) {
         float pillH = 18.0f;
         float pillSpacing = 8.0f;

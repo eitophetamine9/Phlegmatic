@@ -103,6 +103,13 @@ void PlayerRenderer::Draw(const Player& player) {
         }
     }
 
+    // Totem of Insanity Blood Frenzy Crimson Aura
+    if (player.GetTotem() == TotemType::TOTEM_INSANITY && (player.GetHealth() / player.GetMaxHealth() <= 0.40f)) {
+        float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 8.0f);
+        DrawCircleGradient(player.position, player.radius + 16.0f + 4.0f * pulse, Color{ 255, 30, 45, (unsigned char)(110 * pulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f + 2.0f * pulse, Color{ 255, 50, 70, (unsigned char)(180 * pulse) });
+    }
+
     // Crusader Plate Dawnfire Aegis Bubble
     if (player.armorSkillShieldHp > 0.0f) {
         float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);
