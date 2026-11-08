@@ -231,6 +231,7 @@ public:
     void ThawFrostbite(float amount);
     void ResetFrostbite();
     void UpdateSnowFootsteps(float dt, ParticleSystem& particles);
+    void QuickSwapWeapon(ParticleSystem& particles);
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }

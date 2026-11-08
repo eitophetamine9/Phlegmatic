@@ -650,11 +650,13 @@ void ZyphdenHandler::Update(
     const std::function<void()>& onEnterLobby,
     const std::function<void()>& onEnterArena,
     const std::function<void()>& onEnterRestlessMistForest,
-    const std::function<void()>& onEnterNorthZyphden
+    const std::function<void()>& onEnterNorthZyphden,
+    const std::function<void()>& onEnterBossGauntlet
 ) {
     onEnterArenaCallback = onEnterArena;
     onEnterMistForestCallback = onEnterRestlessMistForest;
     onEnterNorthZyphdenCallback = onEnterNorthZyphden;
+    onEnterBossGauntletCallback = onEnterBossGauntlet;
 
     Vector2 mouseScreen = GetMousePosition();
 
@@ -727,11 +729,20 @@ void ZyphdenHandler::Update(
 
     if (isDialogueOpen) {
 
-        if (currentDialogueNPCId == "lenon_arena_prompt" && IsKeyPressed(KEY_R)) {
-            CloseDialogue();
-            if (onEnterArenaCallback) {
-                onEnterArenaCallback();
-                return;
+        if (currentDialogueNPCId == "lenon_arena_prompt") {
+            if (IsKeyPressed(KEY_R)) {
+                CloseDialogue();
+                if (onEnterArenaCallback) {
+                    onEnterArenaCallback();
+                    return;
+                }
+            }
+            if (IsKeyPressed(KEY_G)) {
+                CloseDialogue();
+                if (onEnterBossGauntletCallback) {
+                    onEnterBossGauntletCallback();
+                    return;
+                }
             }
         }
 
@@ -853,6 +864,12 @@ void ZyphdenHandler::Update(
         if (IsKeyPressed(KEY_F)) {
 
             player.TriggerParry(particles);
+
+        }
+
+        if (IsKeyPressed(KEY_TAB)) {
+
+            player.QuickSwapWeapon(particles);
 
         }
 
@@ -2584,17 +2601,35 @@ void ZyphdenHandler::Render(
             const float btnY = boxY + boxH - 44.0f;
             const float btnH = 30.0f;
 
-            Rectangle arenaBtn = { boxX + (boxW - 350.0f) * 0.5f, btnY, 350.0f, btnH };
+            float totalBtnsW = 660.0f;
+            float singleBtnW = 315.0f;
+            float startX = boxX + (boxW - totalBtnsW) * 0.5f;
+
+            Rectangle arenaBtn = { startX, btnY, singleBtnW, btnH };
             bool isArenaHov = CheckCollisionPointRec(mousePos, arenaBtn);
             DrawRectangleRounded(arenaBtn, 0.25f, 4, isArenaHov ? Color{ 160, 40, 50, 255 } : Color{ 90, 25, 35, 240 });
             DrawRectangleRoundedLines(arenaBtn, 0.25f, 4, isArenaHov ? Color{ 255, 230, 120, 255 } : Color{ 225, 185, 65, 220 });
-            int abw = FontManager::MeasureGameText("[R] ENTER COMBAT ARENA (20 WAVES)", 12, GameFont::BODY);
-            FontManager::DrawGameTextShadow("[R] ENTER COMBAT ARENA (20 WAVES)", (int)(arenaBtn.x + (arenaBtn.width - abw) * 0.5f), (int)arenaBtn.y + 7, 12, Color{ 255, 235, 140, 255 });
+            int abw = FontManager::MeasureGameText("[R] COMBAT ARENA (25 WAVES)", 11, GameFont::BODY);
+            FontManager::DrawGameTextShadow("[R] COMBAT ARENA (25 WAVES)", (int)(arenaBtn.x + (arenaBtn.width - abw) * 0.5f), (int)arenaBtn.y + 7, 11, Color{ 255, 235, 140, 255 });
+
+            Rectangle gauntletBtn = { startX + singleBtnW + 30.0f, btnY, singleBtnW, btnH };
+            bool isGauntletHov = CheckCollisionPointRec(mousePos, gauntletBtn);
+            DrawRectangleRounded(gauntletBtn, 0.25f, 4, isGauntletHov ? Color{ 175, 45, 60, 255 } : Color{ 110, 25, 40, 240 });
+            DrawRectangleRoundedLines(gauntletBtn, 0.25f, 4, isGauntletHov ? Color{ 255, 220, 90, 255 } : Color{ 255, 80, 95, 220 });
+            int gbw = FontManager::MeasureGameText("[G] APEX BOSS GAUNTLET", 11, GameFont::BODY);
+            FontManager::DrawGameTextShadow("[G] APEX BOSS GAUNTLET", (int)(gauntletBtn.x + (gauntletBtn.width - gbw) * 0.5f), (int)gauntletBtn.y + 7, 11, Color{ 255, 220, 120, 255 });
 
             if (isArenaHov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 CloseDialogue();
                 if (onEnterArenaCallback) {
                     onEnterArenaCallback();
+                    return;
+                }
+            }
+            if (isGauntletHov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                CloseDialogue();
+                if (onEnterBossGauntletCallback) {
+                    onEnterBossGauntletCallback();
                     return;
                 }
             }

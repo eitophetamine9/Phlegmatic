@@ -109,8 +109,10 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
             { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
             { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
-            { "E Key",         "Interact", "Equip weapon at pedestals or enter Arena Portal.", Color{ 200, 150, 255, 255 } },
-            { "C / TAB Key",   "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
+            { "E Key",         "Interact", "Equip weapon at pedestals, NPCs, or enter Area Portals.", Color{ 200, 150, 255, 255 } },
+            { "TAB Key",       "Quick Swap","Instantly cycle through unlocked weapons during combat.", Color{ 255, 215, 80, 255 } },
+            { "I Key",         "Inventory", "Open Equipment Matrix, Chronicles Grimoire & Bestiary.", Color{ 140, 210, 255, 255 } },
+            { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
             { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
         };
 

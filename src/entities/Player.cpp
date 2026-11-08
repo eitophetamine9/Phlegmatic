@@ -741,6 +741,46 @@ void Player::UpdateSnowFootsteps(float dt, ParticleSystem& particles) {
     }
 }
 
+void Player::QuickSwapWeapon(ParticleSystem& particles) {
+    std::vector<WeaponType> unlocked;
+    const WeaponType candidateWeapons[] = {
+        WeaponType::SWORD,
+        WeaponType::DAGGERS,
+        WeaponType::MACE,
+        WeaponType::HALBERD,
+        WeaponType::ZEPHYR_DAGGERS,
+        WeaponType::WINDRUNNER_RECURVE,
+        WeaponType::SUN_CLAYMORE,
+        WeaponType::STORM_GLAIVE,
+        WeaponType::GLACIAL_CLEAVER,
+        WeaponType::TRUTH_SEEKER
+    };
+
+    for (WeaponType wt : candidateWeapons) {
+        if (inventory.HasWeapon(wt)) {
+            unlocked.push_back(wt);
+        }
+    }
+
+    if (unlocked.empty()) return;
+
+    int currentIdx = -1;
+    for (size_t i = 0; i < unlocked.size(); ++i) {
+        if (unlocked[i] == currentWeapon) {
+            currentIdx = (int)i;
+            break;
+        }
+    }
+
+    int nextIdx = (currentIdx + 1) % (int)unlocked.size();
+    SetWeapon(unlocked[nextIdx]);
+    SoundFX::PlayEquipWeapon();
+
+    WeaponStats stats = GetEquippedWeaponStats();
+    particles.SpawnFloatingText(position, "SWAPPED: " + stats.name, Color{ 255, 220, 90, 255 }, 22.0f);
+    particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 14, 80.0f);
+}
+
 
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
