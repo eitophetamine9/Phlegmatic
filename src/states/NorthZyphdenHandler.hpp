@@ -47,6 +47,18 @@ struct BlizzardSnowflake {
     float alpha;
 };
 
+struct HighlandBounty {
+    std::string id;
+    std::string title;
+    std::string targetDesc;
+    int progress = 0;
+    int target = 0;
+    int oreReward = 0;
+    int shingleReward = 0;
+    bool completed = false;
+    bool claimed = false;
+};
+
 class NorthZyphdenHandler {
 public:
     NorthZyphdenHandler();
@@ -89,6 +101,10 @@ public:
     void InitSpawners();
     void InitFrostCrystals();
     void InitBlizzardParticles();
+    void InitBounties();
+    void OpenTorvaldDialogue(const Player& player);
+    void CloseDialogue(Player& player, ParticleSystem& particles);
+    void DrawTorvald(float time, Vector2 playerPos) const;
     void Reset() {
         berserkerTrollSummoned = false;
         berserkerTrollDefeated = false;
@@ -101,6 +117,16 @@ private:
     std::vector<NorthLoreStele> loreSteles;
     std::vector<FrostCrystalNode> frostCrystals;
     std::vector<BlizzardSnowflake> blizzardSnowflakes;
+    std::vector<HighlandBounty> bounties;
+
+    Vector2 torvaldPos;
+    float torvaldRadius;
+
+    bool isDialogueOpen;
+    std::string dialogueSpeaker;
+    std::vector<std::string> dialoguePages;
+    int currentDialoguePage;
+    Color dialogueColor;
 
     bool berserkerTrollSummoned;
     bool berserkerTrollDefeated;

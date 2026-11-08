@@ -13,9 +13,160 @@ NorthZyphdenHandler::NorthZyphdenHandler() {
     entryBannerTimer = 0.0f;
     exitCooldown = 0.0f;
     highlandCampfire = { 6, "Highland Crags Bonfire", { 1200.0f, 1300.0f } };
+    torvaldPos = { 1115.0f, 1295.0f };
+    torvaldRadius = 24.0f;
+    isDialogueOpen = false;
+    currentDialoguePage = 0;
+    dialogueSpeaker = "";
+    dialogueColor = Color{ 140, 220, 160, 255 };
     InitSpawners();
     InitFrostCrystals();
     InitBlizzardParticles();
+    InitBounties();
+}
+
+void NorthZyphdenHandler::InitBounties() {
+    bounties.clear();
+    bounties.push_back({
+        "bounty_trolls",
+        "Frostfang Cull",
+        "Slay 5 Highland Frost Trolls",
+        0, 5, 8, 250, false, false
+    });
+    bounties.push_back({
+        "bounty_crystals",
+        "Glacial Shard Harvest",
+        "Mine 3 Highland Frost Crystals",
+        0, 3, 12, 350, false, false
+    });
+    bounties.push_back({
+        "bounty_berserker",
+        "Highland Slayer",
+        "Vanquish the Berserker Troll Warlord",
+        0, 1, 25, 800, false, false
+    });
+}
+
+void NorthZyphdenHandler::OpenTorvaldDialogue(const Player& player) {
+    (void)player;
+    isDialogueOpen = true;
+    dialogueSpeaker = "OUTCAST RANGER TORVALD";
+    dialogueColor = Color{ 130, 215, 170, 255 };
+    currentDialoguePage = 0;
+    dialoguePages.clear();
+
+    int claimableCount = 0;
+    for (const auto& b : bounties) {
+        if (b.completed && !b.claimed) claimableCount++;
+    }
+
+    if (claimableCount > 0) {
+        std::string claimPage = "You've weathered the frost and brought low the beasts of the crags, traveler! By the old Vanguard oath, take your share of our salvaged stores:\n\n";
+        for (const auto& b : bounties) {
+            if (b.completed && !b.claimed) {
+                claimPage += "- " + b.title + ": +" + std::to_string(b.oreReward) + " Ore Scraps, +" + std::to_string(b.shingleReward) + " Shingles (READY)\n";
+            }
+        }
+        claimPage += "\nPress [SPACE] or Click to claim your rewards and continue.";
+        dialoguePages.push_back(claimPage);
+    } else if (bounties[0].claimed && bounties[1].claimed && bounties[2].claimed) {
+        dialoguePages.push_back(
+            "The Berserker Troll is slain, and the highland wind blows still for the first time in an age.\n\n"
+            "You possess the unbroken poise of the ancient Gale Monks, friend. When the way further north beyond the crags clears, you will be the one to challenge whatever lies in the deep permafrost."
+        );
+    } else {
+        dialoguePages.push_back(
+            "Greetings, traveler. Stand close to the blaze... few brave these northern crags without heavy armor and a stubborn heart. I am Torvald, once a scout under King Charlz's vanguard, now an exile.\n\n"
+            "The permafrost breeds vicious beasts. The Frost Trolls hunt in brutal packs, led by a blood-maddened Berserker Troll upon the northern ritual dais."
+        );
+
+        std::string statusPage = "Here are the hunting contracts I can reward you for:\n\n";
+        for (size_t i = 0; i < bounties.size(); ++i) {
+            const auto& b = bounties[i];
+            statusPage += std::to_string(i + 1) + ". " + b.title + " (" + b.targetDesc + ")\n";
+            statusPage += "   Progress: [" + std::to_string(b.progress) + "/" + std::to_string(b.target) + "]";
+            if (b.claimed) {
+                statusPage += " - [COMPLETED & CLAIMED]\n";
+            } else if (b.completed) {
+                statusPage += " - [READY TO CLAIM!]\n";
+            } else {
+                statusPage += " - Reward: " + std::to_string(b.oreReward) + " Ore, " + std::to_string(b.shingleReward) + " Shingles\n";
+            }
+        }
+        dialoguePages.push_back(statusPage);
+    }
+}
+
+void NorthZyphdenHandler::CloseDialogue(Player& player, ParticleSystem& particles) {
+    isDialogueOpen = false;
+    dialoguePages.clear();
+    currentDialoguePage = 0;
+
+    int totalOre = 0;
+    int totalShingles = 0;
+    for (auto& b : bounties) {
+        if (b.completed && !b.claimed) {
+            b.claimed = true;
+            totalOre += b.oreReward;
+            totalShingles += b.shingleReward;
+        }
+    }
+    if (totalOre > 0 || totalShingles > 0) {
+        player.GetInventory().AddOreScraps(totalOre);
+        player.GetInventory().AddShingles(totalShingles);
+        SoundFX::PlayCoinPickup();
+        particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 35, 170.0f);
+        char rewBuf[64];
+        snprintf(rewBuf, sizeof(rewBuf), "REWARDS: +%d ORE SCRAPS, +%d SHINGLES!", totalOre, totalShingles);
+        particles.SpawnFloatingText(player.GetPosition(), rewBuf, Color{ 255, 225, 90, 255 }, 24.0f);
+    }
+}
+
+void NorthZyphdenHandler::DrawTorvald(float time, Vector2 playerPos) const {
+    (void)time;
+    Vector2 pos = torvaldPos;
+
+    // Drop shadow
+    DrawEllipse((int)pos.x, (int)(pos.y + 12), torvaldRadius * 1.05f, torvaldRadius * 0.45f, Color{ 10, 16, 24, 130 });
+
+    // Weathered hunter cloak & torso
+    DrawRectangleRounded(Rectangle{ pos.x - 13, pos.y - 12, 26, 28 }, 0.4f, 4, Color{ 34, 56, 42, 255 });
+    DrawRectangleRoundedLines(Rectangle{ pos.x - 13, pos.y - 12, 26, 28 }, 0.4f, 4, Color{ 48, 76, 58, 255 });
+
+    // Fur mantle trim
+    DrawCircle((int)pos.x, (int)(pos.y - 8), 15.0f, Color{ 82, 68, 54, 255 });
+
+    // Hooded cowl
+    DrawCircle((int)pos.x, (int)(pos.y - 14), 11.0f, Color{ 42, 66, 50, 255 });
+    DrawRectangle((int)(pos.x - 5), (int)(pos.y - 15), 10, 4, Color{ 20, 26, 22, 255 });
+    DrawCircle((int)(pos.x + 2), (int)(pos.y - 13), 1.5f, Color{ 140, 230, 190, 255 });
+
+    // Recurve hunting bow strapped to back
+    DrawLineEx(Vector2{ pos.x + 10.0f, pos.y - 24.0f }, Vector2{ pos.x + 14.0f, pos.y + 12.0f }, 3.0f, Color{ 115, 80, 48, 255 });
+    DrawLineEx(Vector2{ pos.x + 10.0f, pos.y - 24.0f }, Vector2{ pos.x + 14.0f, pos.y + 12.0f }, 1.0f, Color{ 220, 220, 205, 200 });
+
+    // Leather quiver with fletched arrows
+    DrawRectangle((int)(pos.x - 15), (int)(pos.y - 8), 5, 16, Color{ 65, 45, 30, 255 });
+    DrawLine((int)(pos.x - 13), (int)(pos.y - 14), (int)(pos.x - 13), (int)(pos.y - 8), Color{ 215, 215, 200, 255 });
+
+    // Overhead status badge
+    bool anyClaimable = false;
+    for (const auto& b : bounties) {
+        if (b.completed && !b.claimed) { anyClaimable = true; break; }
+    }
+
+    if (anyClaimable) {
+        float pulse = 0.5f + 0.5f * sinf(time * 4.0f);
+        Color badgeCol = Color{ 255, 215, 70, (unsigned char)(180 + 75 * pulse) };
+        FontManager::DrawGameTextShadow("[!] BOUNTY CLAIMABLE", (int)pos.x - 60, (int)pos.y - 36, 10, badgeCol);
+    } else {
+        FontManager::DrawGameTextShadow("RANGER TORVALD", (int)pos.x - 44, (int)pos.y - 32, 9, Color{ 175, 225, 185, 220 });
+    }
+
+    // Interaction prompt when near
+    if (Vector2Distance(playerPos, pos) <= 65.0f) {
+        FontManager::DrawGameTextShadow("[E] SPEAK WITH TORVALD", (int)pos.x - 64, (int)pos.y - 48, 10, Color{ 255, 235, 120, 240 });
+    }
 }
 
 void NorthZyphdenHandler::InitFrostCrystals() {
@@ -154,6 +305,21 @@ void NorthZyphdenHandler::Update(
     Vector2 mouseScreen = GetMousePosition();
     Vector2 mouseWorld = GetScreenToWorld2D(mouseScreen, camera);
 
+    if (isDialogueOpen) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            CloseDialogue(player, particles);
+            return;
+        }
+        if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+            currentDialoguePage++;
+            if (currentDialoguePage >= (int)dialoguePages.size()) {
+                CloseDialogue(player, particles);
+                return;
+            }
+        }
+        return;
+    }
+
     // Player Combat Inputs
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         player.TriggerLightAttack(particles);
@@ -191,6 +357,15 @@ void NorthZyphdenHandler::Update(
         player.AddFrostbite(5.0f * dt, &particles);
     }
     player.UpdateSnowFootsteps(dt, particles);
+
+    // Ranger Torvald interaction
+    if (Vector2Distance(playerPos, torvaldPos) <= 65.0f) {
+        if (IsKeyPressed(KEY_E)) {
+            OpenTorvaldDialogue(player);
+            SoundFX::PlayButtonClick();
+            return;
+        }
+    }
 
     // Update Blizzard Snowflakes (wrap around camera view)
     float camLeft = camera.target.x - 900.0f;
@@ -254,6 +429,15 @@ void NorthZyphdenHandler::Update(
                         int shinglesGained = rand() % 16 + 15; // 15-30 Shingles
                         player.GetInventory().AddOreScraps(oreGained);
                         player.GetInventory().AddShingles(shinglesGained);
+
+                        if (bounties.size() > 1 && bounties[1].progress < bounties[1].target) {
+                            bounties[1].progress++;
+                            if (bounties[1].progress >= bounties[1].target) {
+                                bounties[1].completed = true;
+                                particles.SpawnFloatingText(playerPos, "BOUNTY COMPLETE: Glacial Shard Harvest!", Color{ 255, 215, 80, 255 }, 22.0f);
+                                SoundFX::PlayLoreDiscovery();
+                            }
+                        }
 
                         char rewardBuf[64];
                         snprintf(rewardBuf, sizeof(rewardBuf), "+%d ORE SCRAP, +%d SHINGLES", oreGained, shinglesGained);
@@ -382,6 +566,22 @@ void NorthZyphdenHandler::Update(
                 }
                 SoundFX::PlayParrySuccess();
                 particles.AddScreenShake(7.0f, 0.4f);
+
+                if (bounties.size() > 2 && !bounties[2].completed) {
+                    bounties[2].progress = 1;
+                    bounties[2].completed = true;
+                    particles.SpawnFloatingText(player.GetPosition(), "BOUNTY COMPLETE: Highland Slayer!", Color{ 255, 215, 80, 255 }, 24.0f);
+                    SoundFX::PlayLoreDiscovery();
+                }
+            } else if (it->GetType() == EnemyType::FROST_TROLL) {
+                if (!bounties.empty() && bounties[0].progress < bounties[0].target) {
+                    bounties[0].progress++;
+                    if (bounties[0].progress >= bounties[0].target) {
+                        bounties[0].completed = true;
+                        particles.SpawnFloatingText(player.GetPosition(), "BOUNTY COMPLETE: Frostfang Cull!", Color{ 255, 215, 80, 255 }, 22.0f);
+                        SoundFX::PlayLoreDiscovery();
+                    }
+                }
             }
 
             // Sync with spawner tracking
@@ -452,6 +652,7 @@ void NorthZyphdenHandler::Render(
 
     // Highland Campfire Waypoint Rest
     highlandCampfire.Draw(time, player);
+    DrawTorvald(time, playerPos);
     for (const auto& stele : loreSteles) {
         // Drop shadow
         DrawEllipse((int)stele.position.x, (int)(stele.position.y + 12), stele.radius * 1.15f, stele.radius * 0.55f, Color{ 10, 14, 20, 140 });
@@ -628,6 +829,19 @@ void NorthZyphdenHandler::Render(
             DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 235, 45, 60, 255 });
             DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 255, 120, 130, 220 });
             break;
+        }
+    }
+
+    // Interactive Paginated NPC Dialogue Box
+    if (isDialogueOpen) {
+        bool stillOpen = GameUI::DrawNPCDialogueBox(
+            screenWidth, screenHeight, mousePos,
+            IsMouseButtonPressed(MOUSE_BUTTON_LEFT),
+            dialogueSpeaker, dialoguePages, currentDialoguePage,
+            dialogueColor
+        );
+        if (!stillOpen) {
+            CloseDialogue(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles));
         }
     }
 }
