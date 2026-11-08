@@ -311,6 +311,11 @@ static void DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float scale, b
                 isUnlocked ? Color{ 140, 255, 235, 255 } : baseCol,
                 isUnlocked ? Color{ 60, 210, 190, 200 } : glowCol);
             break;
+        case WeaponType::GLACIAL_CLEAVER:
+            AssetManager::DrawCleaver({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
+                isUnlocked ? Color{ 160, 225, 255, 255 } : baseCol,
+                isUnlocked ? Color{ 80, 190, 240, 200 } : glowCol);
+            break;
         default:
             break;
     }
@@ -361,6 +366,13 @@ static void DrawHelmetSlotIcon(Vector2 center, HelmetType helmet, float scale, b
             DrawLineEx({ center.x - 7.0f * scale, center.y - 1.0f * scale }, { center.x + 7.0f * scale, center.y - 1.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 255, 140, 35, 255 } : glowCol);
             break;
         }
+        case HelmetType::FROSTWARDEN_HOOD: {
+            Color cowlCol = isUnlocked ? Color{ 45, 68, 88, 255 } : baseCol;
+            DrawTriangle({ center.x, center.y - 12.0f * scale }, { center.x - 10.0f * scale, center.y + 6.0f * scale }, { center.x + 10.0f * scale, center.y + 6.0f * scale }, cowlCol);
+            DrawCircleV({ center.x, center.y + 1.0f * scale }, 4.5f * scale, Color{ 180, 230, 250, 255 });
+            DrawLineEx({ center.x - 10.0f * scale, center.y + 6.0f * scale }, { center.x + 10.0f * scale, center.y + 6.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 235, 248, 255, 255 } : glowCol);
+            break;
+        }
         case HelmetType::NONE:
         default:
             DrawCircleLines((int)center.x, (int)center.y, 8.0f * scale, Color{ 70, 85, 105, 160 });
@@ -408,6 +420,13 @@ static void DrawChestplateSlotIcon(Vector2 center, ChestplateType chest, float s
             Color basaltCol = isUnlocked ? Color{ 58, 48, 46, 255 } : baseCol;
             DrawRectangleRounded(Rectangle{ center.x - 11.0f * scale, center.y - 10.0f * scale, 22.0f * scale, 22.0f * scale }, 0.15f, 4, basaltCol);
             DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 255, 140, 40, 255 } : glowCol);
+            break;
+        }
+        case ChestplateType::FROSTWARDEN_HAUBERK: {
+            Color cuirassCol = isUnlocked ? Color{ 36, 54, 72, 255 } : baseCol;
+            DrawRectangleRounded(Rectangle{ center.x - 11.0f * scale, center.y - 10.0f * scale, 22.0f * scale, 22.0f * scale }, 0.15f, 4, cuirassCol);
+            DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 140, 225, 255, 255 } : glowCol);
+            DrawLineEx({ center.x - 9.0f * scale, center.y - 8.0f * scale }, { center.x + 9.0f * scale, center.y - 8.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 235, 248, 255, 255 } : glowCol);
             break;
         }
         case ChestplateType::NONE:
@@ -464,6 +483,14 @@ static void DrawLeggingsSlotIcon(Vector2 center, LeggingsType legs, float scale,
             DrawRectangleRounded(Rectangle{ center.x + 1.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, stoneCol);
             DrawCircle((int)(center.x - 4.5f * scale), (int)(center.y + 5.0f * scale), 2.0f * scale, isUnlocked ? Color{ 255, 140, 40, 255 } : glowCol);
             DrawCircle((int)(center.x + 4.5f * scale), (int)(center.y + 5.0f * scale), 2.0f * scale, isUnlocked ? Color{ 255, 140, 40, 255 } : glowCol);
+            break;
+        }
+        case LeggingsType::FROSTWARDEN_GREAVES: {
+            Color greaveCol = isUnlocked ? Color{ 48, 62, 80, 255 } : baseCol;
+            DrawRectangleRounded(Rectangle{ center.x - 8.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, greaveCol);
+            DrawRectangleRounded(Rectangle{ center.x + 1.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, greaveCol);
+            DrawLineEx({ center.x - 8.0f * scale, center.y + 5.0f * scale }, { center.x - 1.0f * scale, center.y + 5.0f * scale }, 2.0f * scale, isUnlocked ? Color{ 160, 230, 255, 255 } : glowCol);
+            DrawLineEx({ center.x + 1.0f * scale, center.y + 5.0f * scale }, { center.x + 8.0f * scale, center.y + 5.0f * scale }, 2.0f * scale, isUnlocked ? Color{ 160, 230, 255, 255 } : glowCol);
             break;
         }
         case LeggingsType::NONE:
@@ -929,7 +956,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 14, Color{ 255, 215, 90, 240 });
 
         struct WepBtnInfo { WeaponType type; };
-        WepBtnInfo wepBtns[9] = {
+        WepBtnInfo wepBtns[10] = {
             { WeaponType::SWORD },
             { WeaponType::DAGGERS },
             { WeaponType::MACE },
@@ -938,9 +965,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             { WeaponType::ZEPHYR_DAGGERS },
             { WeaponType::WINDRUNNER_RECURVE },
             { WeaponType::SUN_CLAYMORE },
-            { WeaponType::STORM_GLAIVE }
+            { WeaponType::STORM_GLAIVE },
+            { WeaponType::GLACIAL_CLEAVER }
         };
-        float wepBtnW = (leftW - 32.0f - 32.0f) / 9.0f;
+        float wepBtnW = (leftW - 32.0f - (float)(std::size(wepBtns) - 1) * 4.0f) / (float)std::size(wepBtns);
         float wepBtnH = 42.0f;
         int hoveredWepIdx = -1;
         Rectangle hoveredWepRec = { 0, 0, 0, 0 };
@@ -1274,31 +1302,32 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 1. HELMET ARMORY GRID & INSPECTION
             // =========================================================
             struct HelmEntry { HelmetType type; const char* lockMsg; int tierPips; };
-            HelmEntry helms[7] = {
+            HelmEntry helms[8] = {
                 { HelmetType::NONE, "Unarmored default", 0 },
                 { HelmetType::COMMONERS_HOOD, "Ruined Castle - Awakening Pedestal", 1 },
                 { HelmetType::CRUSADER_HELM, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
                 { HelmetType::VANGUARD_GREATHELM, "Blacksmith Varek - Armor Forge", 2 },
                 { HelmetType::SHADOW_COWL, "Varek's Forge - Craft with Mist Essence", 3 },
                 { HelmetType::SCRAP_SALLET, "Blacksmith Varek - Armor Forge", 2 },
-                { HelmetType::BASALT_GREATHELM, "Blacksmith Varek - Armor Forge", 3 }
+                { HelmetType::BASALT_GREATHELM, "Blacksmith Varek - Armor Forge", 3 },
+                { HelmetType::FROSTWARDEN_HOOD, "Blacksmith Varek - Highland Troll Crafting", 3 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(helms); ++i) {
                 if (player.GetInventory().HasHelmet(helms[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "HELMETS & CRESTS (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            std::string gridTitle = "HELMETS & CRESTS (" + std::to_string(unlockedCount) + "/" + std::to_string(std::size(helms)) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedHelm < 0 || s_inspectedHelm >= 7) s_inspectedHelm = 2;
+            if (s_inspectedHelm < 0 || s_inspectedHelm >= (int)std::size(helms)) s_inspectedHelm = 2;
 
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(helms); ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
@@ -1413,31 +1442,32 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 2. CHESTPLATE ARMORY GRID & INSPECTION
             // =========================================================
             struct ChestEntry { ChestplateType type; const char* lockMsg; int tierPips; };
-            ChestEntry chests[7] = {
+            ChestEntry chests[8] = {
                 { ChestplateType::NONE, "Unarmored default", 0 },
                 { ChestplateType::COMMONERS_TUNIC, "Ruined Castle - Awakening Pedestal", 1 },
                 { ChestplateType::CRUSADER_CUIRASS, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
                 { ChestplateType::VANGUARD_CHEST, "Blacksmith Varek - Armor Forge", 2 },
                 { ChestplateType::SHADOW_GARB, "Varek's Forge - Craft with Mist Essence", 3 },
                 { ChestplateType::SCRAP_CUIRASS, "Blacksmith Varek - Armor Forge", 2 },
-                { ChestplateType::BASALT_CUIRASS, "Blacksmith Varek - Armor Forge", 3 }
+                { ChestplateType::BASALT_CUIRASS, "Blacksmith Varek - Armor Forge", 3 },
+                { ChestplateType::FROSTWARDEN_HAUBERK, "Blacksmith Varek - Highland Troll Crafting", 3 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(chests); ++i) {
                 if (player.GetInventory().HasChestplate(chests[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "CHESTPLATES & CUIRASSES (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            std::string gridTitle = "CHESTPLATES & CUIRASSES (" + std::to_string(unlockedCount) + "/" + std::to_string(std::size(chests)) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedChest < 0 || s_inspectedChest >= 7) s_inspectedChest = 2;
+            if (s_inspectedChest < 0 || s_inspectedChest >= (int)std::size(chests)) s_inspectedChest = 2;
 
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(chests); ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
@@ -1552,31 +1582,32 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 3. LEGGINGS ARMORY GRID & INSPECTION
             // =========================================================
             struct LegEntry { LeggingsType type; const char* lockMsg; int tierPips; };
-            LegEntry legs[7] = {
+            LegEntry legs[8] = {
                 { LeggingsType::NONE, "Unarmored default", 0 },
                 { LeggingsType::COMMONERS_BREECHES, "Ruined Castle - Awakening Pedestal", 1 },
                 { LeggingsType::CRUSADER_GREAVES, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
                 { LeggingsType::VANGUARD_GREAVES, "Blacksmith Varek - Armor Forge", 2 },
                 { LeggingsType::SHADOW_LEGGINGS, "Varek's Forge - Craft with Mist Essence", 3 },
                 { LeggingsType::SCRAP_GREAVES, "Blacksmith Varek - Armor Forge", 2 },
-                { LeggingsType::BASALT_GREAVES, "Blacksmith Varek - Armor Forge", 3 }
+                { LeggingsType::BASALT_GREAVES, "Blacksmith Varek - Armor Forge", 3 },
+                { LeggingsType::FROSTWARDEN_GREAVES, "Blacksmith Varek - Highland Troll Crafting", 3 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(legs); ++i) {
                 if (player.GetInventory().HasLeggings(legs[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "LEGGINGS & GREAVES (" + std::to_string(unlockedCount) + "/7 UNLOCKED)";
+            std::string gridTitle = "LEGGINGS & GREAVES (" + std::to_string(unlockedCount) + "/" + std::to_string(std::size(legs)) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedLegs < 0 || s_inspectedLegs >= 7) s_inspectedLegs = 2;
+            if (s_inspectedLegs < 0 || s_inspectedLegs >= (int)std::size(legs)) s_inspectedLegs = 2;
 
-            for (int i = 0; i < 7; ++i) {
+            for (int i = 0; i < (int)std::size(legs); ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
@@ -1821,7 +1852,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 5. WEAPON ARSENAL GRID & INSPECTION
             // =========================================================
             struct WepListEntry { WeaponType type; const char* lockMsg; int tierPips; };
-            WepListEntry weps[9] = {
+            WepListEntry weps[10] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal", 1 },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal", 1 },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal", 2 },
@@ -1830,24 +1861,25 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { WeaponType::ZEPHYR_DAGGERS, "Varek's Forge - Crafted from Shadow & Mist Essences", 3 },
                 { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies", 3 },
                 { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag", 3 },
-                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 }
+                { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 },
+                { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 9; ++i) {
+            for (int i = 0; i < (int)std::size(weps); ++i) {
                 if (player.GetInventory().HasWeapon(weps[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "ROYAL WEAPON ARSENAL (" + std::to_string(unlockedCount) + "/9 UNLOCKED)";
+            std::string gridTitle = "ROYAL WEAPON ARSENAL (" + std::to_string(unlockedCount) + "/" + std::to_string(std::size(weps)) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedWep < 0 || s_inspectedWep >= 9) s_inspectedWep = 0;
+            if (s_inspectedWep < 0 || s_inspectedWep >= (int)std::size(weps)) s_inspectedWep = 0;
 
-            for (int i = 0; i < 9; ++i) {
+            for (int i = 0; i < (int)std::size(weps); ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };

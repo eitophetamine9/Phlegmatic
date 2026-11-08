@@ -2729,7 +2729,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (8)", (int)tab1Rec.x + 12, (int)tab1Rec.y + 7, 13, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (9)", (int)tab1Rec.x + 12, (int)tab1Rec.y + 7, 13, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
@@ -2737,7 +2737,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 40, 56, 82, 255 } : (isT3Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (12)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (15)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     // Divider Line
     DrawLine((int)modalX + 28, (int)modalY + 112, (int)(modalX + modalW - 28), (int)modalY + 112, Color{ 70, 95, 135, 160 });
@@ -2746,7 +2746,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     int currentTabCurrentPage = 0;
 
     if (forgeTab == 2) {
-        // TAB 3: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT & SHADOWSTRIDER)
+        // TAB 3: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT, SHADOWSTRIDER, VANGUARD, FROSTWARDEN)
         struct ArmorCraftRecipe {
             int category; // 0 = Helm, 1 = Chest, 2 = Legs
             int id;
@@ -2762,7 +2762,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             int shadowCost;
         };
 
-        ArmorCraftRecipe armorRecipes[12] = {
+        ArmorCraftRecipe armorRecipes[15] = {
             { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw slag.", 0, 0 },
             { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap breastplate. Stout physical resilience.", 0, 0 },
             { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal greaves granting stable footwork.", 0, 0 },
@@ -2774,10 +2774,13 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1 },
             { 0, (int)HelmetType::VANGUARD_GREATHELM, "Vanguard Greathelm", "HELMET", 12, 45, "+8 Def | +10 HP | +20 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Impenetrable full-face visor built for frontline assault.", 0, 0 },
             { 1, (int)ChestplateType::VANGUARD_CHEST, "Vanguard Bastion Mail", "CHESTPLATE", 18, 65, "+16 Def | +30 HP | +12 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Heavy iron hauberk and pauldron plates for frontline sieges.", 0, 0 },
-            { 2, (int)LeggingsType::VANGUARD_GREAVES, "Vanguard Heavy Legguards", "LEGGINGS", 14, 50, "+8 Def | +10 HP | +8 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Massive banded greaves anchoring against concussive impacts.", 0, 0 }
+            { 2, (int)LeggingsType::VANGUARD_GREAVES, "Vanguard Heavy Legguards", "LEGGINGS", 14, 50, "+8 Def | +10 HP | +8 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Massive banded greaves anchoring against concussive impacts.", 0, 0 },
+            { 0, (int)HelmetType::FROSTWARDEN_HOOD, "Frostwarden Fur Cowl", "HELMET", 14, 60, "+7 Def | +15 HP | +20 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Polar bear and troll fur-trimmed cowl. Cold immunity.", 1, 2 },
+            { 1, (int)ChestplateType::FROSTWARDEN_HAUBERK, "Frostwarden Pelt Hauberk", "CHESTPLATE", 22, 90, "+15 Def | +25 HP | +18 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Heavy iron breastplate draped with thick white beast fur.", 2, 3 },
+            { 2, (int)LeggingsType::FROSTWARDEN_GREAVES, "Frostwarden Spiked Greaves", "LEGGINGS", 14, 60, "+7 Def | +10 HP | +12 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Spiked steel boots granting sure footing on sheer icy scree.", 1, 2 }
         };
 
-        int totalRecipes = 12;
+        int totalRecipes = 15;
         int itemsPerPage = 4;
         int totalPages = (totalRecipes + itemsPerPage - 1) / itemsPerPage;
         if (armorForgePage < 0) armorForgePage = 0;
@@ -2998,6 +3001,18 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     10, 50,
                     "Aerodynamic wind polearm. Piercing line thrusts and tempest vortex.",
                     3, 1
+                },
+                {
+                    WeaponType::GLACIAL_CLEAVER,
+                    "Glacial Spiked Cleaver",
+                    "HIGHLAND TROLL CLEAVER",
+                    2, 85, 160,
+                    "+6 Damage (36 Light / 112 Heavy)",
+                    "+14 Damage (44 Light / 132 Heavy), +30% Defense Pierce, +65% Poise",
+                    Color{ 140, 220, 255, 255 },
+                    18, 75,
+                    "Forged from Berserker Troll horn and volcanic slag. Overhead cleaves erupt frost tremors.",
+                    2, 3
                 }
             };
         } else {

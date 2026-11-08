@@ -479,6 +479,19 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
             particles.SpawnSparks(centerPillar, Color{ 245, 140, 40, 255 }, 40, 220.0f);
             break;
         }
+        case ArmorSet::FROSTWARDEN: {
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 60.0f;
+            pendingAoERadius = 160.0f;
+            pendingAoEStun = 2.0f;
+            pendingAoEArmorShred = 0.20f;
+
+            SoundFX::PlayParrySuccess();
+            particles.AddScreenShake(8.5f, 0.3f);
+            particles.SpawnFloatingText(position, "GLACIAL FROST NOVA!", Color{ 160, 230, 255, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 180, 240, 255, 255 }, 40, 240.0f);
+            break;
+        }
         default:
             break;
     }
@@ -1401,6 +1414,33 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 velocity.x += forwardDir.x * 240.0f;
                 velocity.y += forwardDir.y * 240.0f;
 
+            } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+
+                currentAttack.range = stats.heavyRange;
+                currentAttack.arcAngle = stats.heavyArc;
+                float baseDmg = stats.heavyDamage;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                currentAttack.knockback = 480.0f * stats.poiseMultiplier;
+                currentAttack.defensePierce = stats.defensePierceBonus;
+                currentAttack.duration = stats.heavyDuration;
+                currentAttack.timer = stats.heavyDuration;
+                currentAttack.hasShockwave = true;
+                currentAttack.shockwavePos = { position.x + forwardDir.x * 65.0f, position.y + forwardDir.y * 65.0f };
+                currentAttack.shockwaveRadius = 135.0f;
+
+                SoundFX::PlayHeavyAttack();
+                SoundFX::PlayCrusaderClash();
+                particles.AddScreenShake(8.5f, 0.25f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
+                particles.SpawnSparks(position, Color{ 180, 240, 255, 255 }, 32, 220.0f);
+                if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+                    currentAttack.shockwaveRadius = 165.0f;
+                    currentAttack.damage += 35.0f;
+                    particles.SpawnFloatingText(position, "FROST TREMOR +35", Color{ 140, 230, 255, 255 }, 22.0f);
+                }
+                velocity.x += forwardDir.x * 140.0f;
+                velocity.y += forwardDir.y * 140.0f;
+
             } else {
 
                 currentAttack.range = stats.heavyRange;
@@ -2219,6 +2259,36 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 245, 230, 255 });
         particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 60.0f, position.y + forwardDir.y * 60.0f }, Color{ 140, 255, 240, 255 }, 10, 110.0f);
 
+    } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+
+        currentAttack.range = stats.lightRange;
+        currentAttack.arcAngle = stats.lightArc;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+        float critChance = 0.05f;
+        float critMult = stats.critMultiplier;
+        if (currentTotem == TotemType::TOTEM_MIST) {
+            critChance += 0.20f;
+            critMult += 0.35f;
+        }
+        if ((rand() % 100) < (int)(critChance * 100.0f)) {
+            baseLightDmg *= critMult;
+            particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+            particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+        }
+
+        if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+            baseLightDmg *= 1.20f;
+            currentAttack.range += 15.0f;
+        }
+
+        currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
+        currentAttack.knockback = 280.0f;
+        currentAttack.defensePierce = stats.defensePierceBonus;
+        SoundFX::PlayLightAttack();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 180, 235, 255, 255 }, 12, 130.0f);
+
     } else {
 
         currentAttack.knockback = 130.0f;
@@ -2476,7 +2546,9 @@ void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
         currentWeapon == WeaponType::MACE ||
         currentWeapon == WeaponType::HALBERD ||
         currentWeapon == WeaponType::STORM_GLAIVE ||
-        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+        currentWeapon == WeaponType::GLACIAL_CLEAVER ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION) ||
+        HasFullArmorSet(ArmorSet::FROSTWARDEN)
     );
 
     if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp) || isHeavyWeaponWindup) {
@@ -2684,7 +2756,9 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         currentWeapon == WeaponType::MACE ||
         currentWeapon == WeaponType::HALBERD ||
         currentWeapon == WeaponType::STORM_GLAIVE ||
-        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+        currentWeapon == WeaponType::GLACIAL_CLEAVER ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION) ||
+        HasFullArmorSet(ArmorSet::FROSTWARDEN)
     );
     if (isHeavyWeaponWindup) {
         finalAmount *= 0.70f;

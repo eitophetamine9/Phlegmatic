@@ -406,6 +406,7 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     else if (player.GetHelmet() == HelmetType::SHADOW_COWL) { hStr = "H:Shadow"; hCol = Color{ 110, 245, 220, 255 }; }
     else if (player.GetHelmet() == HelmetType::CRUSADER_HELM) { hStr = "H:Crusader"; hCol = Color{ 255, 215, 80, 255 }; }
     else if (player.GetHelmet() == HelmetType::VANGUARD_GREATHELM) { hStr = "H:Vanguard"; hCol = Color{ 140, 215, 255, 255 }; }
+    else if (player.GetHelmet() == HelmetType::FROSTWARDEN_HOOD) { hStr = "H:Frost"; hCol = Color{ 140, 220, 245, 255 }; }
     else if (player.GetHelmet() == HelmetType::COMMONERS_HOOD) { hStr = "H:Common"; hCol = Color{ 180, 200, 225, 255 }; }
 
     const char* cStr = "C:-";
@@ -415,6 +416,7 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     else if (player.GetChestplate() == ChestplateType::SHADOW_GARB) { cStr = "C:Shadow"; cCol = Color{ 110, 245, 220, 255 }; }
     else if (player.GetChestplate() == ChestplateType::CRUSADER_CUIRASS) { cStr = "C:Crusader"; cCol = Color{ 255, 215, 80, 255 }; }
     else if (player.GetChestplate() == ChestplateType::VANGUARD_CHEST) { cStr = "C:Vanguard"; cCol = Color{ 140, 215, 255, 255 }; }
+    else if (player.GetChestplate() == ChestplateType::FROSTWARDEN_HAUBERK) { cStr = "C:Frost"; cCol = Color{ 140, 220, 245, 255 }; }
     else if (player.GetChestplate() == ChestplateType::COMMONERS_TUNIC) { cStr = "C:Common"; cCol = Color{ 180, 200, 225, 255 }; }
 
     const char* lStr = "L:-";
@@ -424,6 +426,7 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     else if (player.GetLeggings() == LeggingsType::SHADOW_LEGGINGS) { lStr = "L:Shadow"; lCol = Color{ 110, 245, 220, 255 }; }
     else if (player.GetLeggings() == LeggingsType::CRUSADER_GREAVES) { lStr = "L:Crusader"; lCol = Color{ 255, 215, 80, 255 }; }
     else if (player.GetLeggings() == LeggingsType::VANGUARD_GREAVES) { lStr = "L:Vanguard"; lCol = Color{ 140, 215, 255, 255 }; }
+    else if (player.GetLeggings() == LeggingsType::FROSTWARDEN_GREAVES) { lStr = "L:Frost"; lCol = Color{ 140, 220, 245, 255 }; }
     else if (player.GetLeggings() == LeggingsType::COMMONERS_BREECHES) { lStr = "L:Common"; lCol = Color{ 180, 200, 225, 255 }; }
 
     DrawText(hStr, (int)hudX + 154, (int)hudY + 76, 10, hCol);
