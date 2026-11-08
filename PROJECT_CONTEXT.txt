@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 6, 2026
-Branch: ver.0.0.1h
-Release Version: 0.0.1h
+Generated: November 8, 2026
+Branch: ver.0.0.1i
+Release Version: 0.0.1i (in-development)
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -663,3 +663,52 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1h)
   * Overhauled bookmark grid with dynamic column, row, and spacing calculations, seamlessly scaling for 10, 14, or more fragments.
   * Dynamically anchored active chapter summary, recovery compass plaque, status badge, and navigation buttons, completely eliminating visual overlap across the parchment spread.
   * Updated Chapter Complete lore tracker to dynamically query player fragment count rather than hardcoded / 4.
+
+================================================================================
+LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
+================================================================================
+- Northern Arsenal & Glacial Cleaver (Weapon #10):
+  * Added Glacial Cleaver colossal two-handed great-axe forged from permafrost steel with ice rune etchings and frost vapor trails.
+  * Attack Profile: Light 18/22/26 dmg, Heavy 72/88/104 dmg, Reach 92.0px, Cooldown 0.65s (slow, concussive swings).
+  * Signature Heavy Effect: Heavy strikes unleash a Frost Tremor shockwave forward with ice erupting particles, dealing 55 damage and staggering enemies.
+  * Master Forge craftable at Blacksmith Varek (Weapons Page 2): 80 Silver Shingles, 6 Ore Scraps, 4 Mist Essence, 4 Frost Shards.
+
+- Frostwarden Modular Armor Set (Set #7):
+  * Complete 3-piece modular armor set: Frostwarden Hood (Helmet #7), Frostwarden Hauberk (Chestplate #7), Frostwarden Greaves (Leggings #7).
+  * Master Forge craftable at Blacksmith Varek under Tab 3 Armor Forge (Page 3): Hood (40 Shingles, 3 Scraps, 3 Frost Shards), Hauberk (65 Shingles, 5 Scraps, 5 Frost Shards), Greaves (50 Shingles, 4 Scraps, 4 Frost Shards).
+  * Set Bonus "Glacial Tenacity": +30% Physical Defense, +40 Max Health, and complete environmental immunity to Highland Frostbite penalties.
+  * Active Signature Skill "Glacial Frost Nova" ([V] key, 22s cooldown): Releases a radial blizzard blast dealing 60 frost damage and freezing/slowing all nearby targets within a 140px radius for 3.5s with expanding ring particles.
+
+- Highland Atmosphere, Weather & Procedural Audio:
+  * Added procedural howling blizzard ambience (`SoundFX::GenerateAmbienceBlizzard`) with dynamic howling pitch shifts, gust layers, and smooth volume modulation.
+  * Added procedural snow crunch footstep synthesizer (`SoundFX::GenerateSnowCrunch`) dynamically triggered when walking on snow in the Northern Crags.
+  * Added drifting blizzard particle streams and subtle icy vignette screen edge overlay in the Northern Crags realm.
+
+- Frostbite Environmental Chill System:
+  * Dynamic chill accumulation meter building up while traversing the freezing Northern Crags.
+  * Upon reaching 100% chill, inflicts Frostbite status: -25% movement speed and -40% stamina regeneration rate.
+  * Resting near the Highland Crags Bonfire rapidly thaws chill at 35%/s and removes the Frostbite affliction.
+  * Real-time HUD indicators: `[FROSTBITE]` and `[CHILL: X%]` status pills in the action bar buff tray.
+  * Breakable Frost Crystal mineral nodes scattered across the crags yielding Frost Shards upon mining or weapon impacts.
+
+- Outcast Ranger Torvald NPC & Highland Hunting Bounties:
+  * Stationed Outcast Ranger Torvald near the Highland Crags Bonfire with full vector rendering (hunter cloak, fur cowl, recurve bow, hip quiver).
+  * Interactive dialogue system with 3 hunting bounty contracts:
+    1. Frostfang Cull: Slay 6 Frost Trolls (+80 Silver Shingles, +4 Ore Scraps).
+    2. Glacial Shard Harvest: Mine 4 Frost Crystal deposits (+60 Silver Shingles, +4 Frost Shards).
+    3. Highland Slayer: Defeat the Berserker Troll Boss (+120 Silver Shingles, +8 Ore Scraps, +3 Mist Essence).
+  * Real-time objective tracking and turn-in claim rewards.
+
+- Combat Flow & Quick Weapon Swap Hotkey:
+  * Implemented instant weapon swap hotkey (`[TAB]`) cycling sequentially through all unlocked weapons mid-combat.
+  * Triggers radial energy burst particles, floating weapon name banner, and weapon equip audio cue.
+  * Documented in the Controls modal table.
+
+- Apex Boss Gauntlet Rush Mode:
+  * Added boss rush gauntlet accessible from Knight Lenon in Zyphden Courtyard via `[G] APEX BOSS GAUNTLET (3 STAGES)`.
+  * Consecutive boss gauntlet featuring 3 formidable encounters:
+    - Stage 1: Zil's Remnant (Awakened Champion).
+    - Stage 2: Primordial Elemental Golem Titan.
+    - Stage 3: Berserker Troll Warlord.
+  * Gauntlet completion rewards: +300 Silver Shingles, +15 Ore Scraps, +8 Essence of Mist, +6 Shadow Essence, and Apex Champion Crest.
+
