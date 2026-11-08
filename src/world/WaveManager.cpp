@@ -3,12 +3,14 @@
 #include "../combat/Projectile.hpp"
 #include "../core/Particles.hpp"
 
-WaveManager::WaveManager() : currentWave(1), waveTimer(0.0f) {
+WaveManager::WaveManager() : currentWave(1), waveTimer(0.0f), isBossGauntletMode(false), gauntletStage(0) {
 }
 
 void WaveManager::Reset() {
     currentWave = 1;
     waveTimer = 0.0f;
+    isBossGauntletMode = false;
+    gauntletStage = 0;
 }
 
 void WaveManager::SpawnWave(int waveNumber, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Vector2 center) {
@@ -303,8 +305,70 @@ void WaveManager::SpawnWave(int waveNumber, std::vector<Enemy>& enemies, std::ve
     }
 }
 
+void WaveManager::StartBossGauntlet(std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Vector2 center) {
+    isBossGauntletMode = true;
+    gauntletStage = 1;
+    waveTimer = 0.0f;
+    SpawnGauntletStage(1, enemies, projectiles, particles, center);
+}
+
+void WaveManager::SpawnGauntletStage(int stage, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Vector2 center) {
+    enemies.clear();
+    projectiles.clear();
+    gauntletStage = stage;
+    waveTimer = 0.0f;
+
+    switch (stage) {
+        case 1:
+            // Stage 1: Remnant Zil (Holy Champion) + 2 Iron Brutes
+            enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ center.x, center.y - 180.0f });
+            enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x - 240.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x + 240.0f, center.y + 120.0f });
+            particles.SpawnFloatingText(center, "APEX STAGE I: REMNANT ZIL (CHAMPION)", Color{ 255, 220, 80, 255 }, 28.0f);
+            particles.AddScreenShake(6.0f, 0.3f);
+            break;
+
+        case 2:
+            // Stage 2: Primordial Elemental Golem Titan + 2 Mini Elemental Golems
+            enemies.emplace_back(EnemyType::ELEMENTAL_GOLEM, Vector2{ center.x, center.y - 180.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 220.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 220.0f, center.y + 120.0f });
+            particles.SpawnFloatingText(center, "APEX STAGE II: PRIMORDIAL GOLEM TITAN", Color{ 255, 175, 50, 255 }, 28.0f);
+            particles.AddScreenShake(7.0f, 0.35f);
+            break;
+
+        case 3:
+        default:
+            // Stage 3: The Berserker Troll Warlord + 2 Frost Trolls
+            enemies.emplace_back(EnemyType::BERSERKER_TROLL, Vector2{ center.x, center.y - 180.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y + 130.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y + 130.0f });
+            particles.SpawnFloatingText(center, "APEX FINAL STAGE: CRAG BERSERKER WARLORD", Color{ 255, 45, 60, 255 }, 30.0f);
+            particles.AddScreenShake(8.0f, 0.4f);
+            break;
+    }
+}
+
 bool WaveManager::Update(float dt, int aliveCount, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Vector2 center, bool& outVictory) {
     outVictory = false;
+
+    if (isBossGauntletMode) {
+        if (aliveCount == 0) {
+            waveTimer += dt;
+            if (waveTimer >= 2.0f) {
+                waveTimer = 0.0f;
+                gauntletStage++;
+                if (gauntletStage <= totalGauntletStages) {
+                    SpawnGauntletStage(gauntletStage, enemies, projectiles, particles, center);
+                    return true;
+                } else {
+                    outVictory = true;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     if (aliveCount == 0) {
         waveTimer += dt;

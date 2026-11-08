@@ -360,6 +360,14 @@ void AssetManager::DrawCharacterDoll(Vector2 center, float scale, WeaponType wea
         DrawLineEx(collar, tip, 5.0f * scale, Color{ 100, 245, 230, 255 });
         DrawLineEx(collar, { collar.x + 14.0f * scale, collar.y - 4.0f * scale }, 3.5f * scale, Color{ 160, 255, 240, 255 });
     }
+    else if (weapon == WeaponType::GLACIAL_CLEAVER) {
+        Vector2 hilt = { handR.x + 2.0f * scale, handR.y + 12.0f * scale };
+        Vector2 tip = { hilt.x + 8.0f * scale, hilt.y - 74.0f * scale };
+        DrawLineEx(hilt, tip, 5.0f * scale, Color{ 48, 56, 68, 255 });
+        Vector2 head = { tip.x - 2.0f * scale, tip.y + 16.0f * scale };
+        DrawTriangle(head, { head.x + 24.0f * scale, head.y - 18.0f * scale }, { head.x + 20.0f * scale, head.y + 16.0f * scale }, Color{ 160, 225, 255, 255 });
+        DrawTriangleLines(head, { head.x + 24.0f * scale, head.y - 18.0f * scale }, { head.x + 20.0f * scale, head.y + 16.0f * scale }, Color{ 30, 45, 65, 255 });
+    }
 }
 
 void AssetManager::DrawEnemySilhouette(Vector2 position, float rotationAngle, Color bodyColor, float radius, bool isStunned) {
@@ -540,6 +548,13 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
             int w = MeasureText(name, 11);
             DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
         }
+    } else if (weapon == WeaponType::GLACIAL_CLEAVER) {
+        DrawCleaver({ weaponAnchor.x - 14.0f, weaponAnchor.y + 14.0f }, -45.0f, 48.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
+        if (isSelected || isHovered) {
+            const char* name = "GLACIAL SPIKED CLEAVER";
+            int w = MeasureText(name, 11);
+            DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
+        }
     }
 
     if (isSelected) {
@@ -643,4 +658,36 @@ void AssetManager::DrawGlaive(Vector2 origin, float angle, float length, Color h
 
     // Shaft butt cap
     DrawCircleV(origin, 3.5f, Color{ 180, 210, 230, 255 });
+}
+
+void AssetManager::DrawCleaver(Vector2 origin, float angle, float length, Color headColor, Color glowColor) {
+    float rad = angle * DEG2RAD;
+    Vector2 dir = { cosf(rad), sinf(rad) };
+    Vector2 normal = { -dir.y, dir.x };
+    Vector2 tip = { origin.x + dir.x * length, origin.y + dir.y * length };
+
+    // Heavy iron-banded haft
+    DrawLineEx(origin, tip, 5.0f, Color{ 48, 56, 68, 255 });
+    DrawLineEx(origin, tip, 2.5f, Color{ 140, 160, 185, 255 });
+
+    // Colossal spiked axe head
+    Vector2 headAnchor = { origin.x + dir.x * (length - 18.0f), origin.y + dir.y * (length - 18.0f) };
+    Vector2 axeTop = { headAnchor.x + normal.x * 20.0f + dir.x * 16.0f, headAnchor.y + normal.y * 20.0f + dir.y * 16.0f };
+    Vector2 axeBeard = { headAnchor.x + normal.x * 22.0f - dir.x * 12.0f, headAnchor.y + normal.y * 22.0f - dir.y * 12.0f };
+    Vector2 backSpike = { headAnchor.x - normal.x * 14.0f, headAnchor.y - normal.y * 14.0f };
+
+    DrawTriangle(headAnchor, axeTop, axeBeard, glowColor);
+    DrawTriangle(headAnchor, axeTop, axeBeard, headColor);
+    DrawTriangleLines(headAnchor, axeTop, axeBeard, Color{ 25, 38, 54, 255 });
+
+    // Back breaker spike
+    DrawTriangle(headAnchor, backSpike, { headAnchor.x - normal.x * 6.0f + dir.x * 4.0f, headAnchor.y - normal.y * 6.0f + dir.y * 4.0f }, glowColor);
+    DrawTriangle(headAnchor, backSpike, { headAnchor.x - normal.x * 6.0f + dir.x * 4.0f, headAnchor.y - normal.y * 6.0f + dir.y * 4.0f }, headColor);
+
+    // Frost runes along cutting edge
+    DrawLineEx(axeBeard, axeTop, 2.0f, Color{ 210, 245, 255, 255 });
+    DrawCircleV(headAnchor, 4.0f, Color{ 160, 230, 255, 240 });
+
+    // Spiked pommel butt
+    DrawCircleV(origin, 4.0f, Color{ 90, 115, 140, 255 });
 }

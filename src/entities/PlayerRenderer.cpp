@@ -839,6 +839,26 @@ void PlayerRenderer::Draw(const Player& player) {
         } else {
             AssetManager::DrawGlaive(rightHand, glaiveAngle, 48.0f, Color{ 120, 230, 215, 255 }, Color{ 60, 180, 165, 180 });
         }
+    } else if (player.currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+        float cleaverAngle = player.facingAngle + 35.0f;
+        if (player.currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            cleaverAngle = player.facingAngle - 60.0f + progress * 120.0f;
+            AssetManager::DrawCleaver(rightHand, cleaverAngle, 56.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 230 });
+        } else if (player.currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            cleaverAngle = player.facingAngle - 100.0f + progress * 200.0f;
+            AssetManager::DrawCleaver(rightHand, cleaverAngle, 64.0f, Color{ 190, 240, 255, 255 }, Color{ 110, 215, 255, 255 });
+            float startAngle = player.facingAngle - 100.0f;
+            float sweepAngle = progress * 200.0f;
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 100, 210, 255, 70 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 180, 240, 255, 220 });
+        } else if (player.isHeavyWindingUp) {
+            cleaverAngle = player.facingAngle - 100.0f;
+            AssetManager::DrawCleaver(rightHand, cleaverAngle, 54.0f, Color{ 140, 210, 245, 255 }, Color{ 70, 180, 230, 200 });
+        } else {
+            AssetManager::DrawCleaver(rightHand, cleaverAngle, 48.0f, Color{ 130, 200, 235, 255 }, Color{ 60, 160, 215, 180 });
+        }
     }
 
     // Friendly Mini Elemental Golem Companion

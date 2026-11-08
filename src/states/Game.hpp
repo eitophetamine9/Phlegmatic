@@ -70,7 +70,7 @@ private:
     void EnterNorthZyphden();
     void ReturnFromNorthZyphden();
     void EnterLobby();
-    void EnterArena();
+    void EnterArena(bool isBossGauntlet = false);
     void ReturnFromArena();
     void SaveActiveGame();
     void ExecuteFastTravel(int stageId);

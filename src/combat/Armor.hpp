@@ -112,6 +112,13 @@ inline HelmetStats GetHelmetStats(HelmetType type) {
                 10.0f, 15.0f, 0.97f, 0.95f, 25.0f,
                 Color{ 45, 50, 58, 255 }, Color{ 255, 150, 40, 255 }, ArmorSet::BASALT_GOLEM
             };
+        case HelmetType::FROSTWARDEN_HOOD:
+            return {
+                "Frostwarden Fur Cowl",
+                "Polar bear and troll fur-trimmed iron cowl providing supreme warmth and concussion resistance.",
+                7.0f, 15.0f, 1.02f, 1.04f, 20.0f,
+                Color{ 38, 56, 72, 255 }, Color{ 140, 220, 245, 255 }, ArmorSet::FROSTWARDEN
+            };
         case HelmetType::NONE:
         default:
             return {
@@ -166,6 +173,13 @@ inline ChestplateStats GetChestplateStats(ChestplateType type) {
                 "Dense slabs of volcanic basalt bound with tempered iron bands.",
                 18.0f, 30.0f, 0.95f, 0.92f, 15.0f,
                 Color{ 40, 44, 52, 255 }, Color{ 210, 110, 30, 255 }, ArmorSet::BASALT_GOLEM
+            };
+        case ChestplateType::FROSTWARDEN_HAUBERK:
+            return {
+                "Frostwarden Pelt Hauberk",
+                "Heavy riveted iron breastplate draped with thick white beast fur and jagged bone studs.",
+                15.0f, 25.0f, 0.98f, 1.02f, 18.0f,
+                Color{ 32, 48, 64, 255 }, Color{ 210, 235, 250, 255 }, ArmorSet::FROSTWARDEN
             };
         case ChestplateType::NONE:
         default:
@@ -222,6 +236,13 @@ inline LeggingsStats GetLeggingsStats(LeggingsType type) {
                 8.0f, 10.0f, 0.97f, 0.95f, 10.0f,
                 Color{ 35, 38, 45, 255 }, Color{ 180, 95, 25, 255 }, ArmorSet::BASALT_GOLEM
             };
+        case LeggingsType::FROSTWARDEN_GREAVES:
+            return {
+                "Frostwarden Spiked Greaves",
+                "Spiked steel-plated boots lined with fur, granting sure footing on sheer icy scree.",
+                7.0f, 10.0f, 1.0f, 1.0f, 12.0f,
+                Color{ 42, 54, 70, 255 }, Color{ 160, 205, 230, 255 }, ArmorSet::FROSTWARDEN
+            };
         case LeggingsType::NONE:
         default:
             return {
@@ -246,6 +267,8 @@ inline ArmorSet GetMatchingArmorSet(HelmetType h, ChestplateType c, LeggingsType
         return ArmorSet::FORGED_SCRAP_IRON;
     if (h == HelmetType::BASALT_GREATHELM && c == ChestplateType::BASALT_CUIRASS && l == LeggingsType::BASALT_GREAVES)
         return ArmorSet::BASALT_GOLEM;
+    if (h == HelmetType::FROSTWARDEN_HOOD && c == ChestplateType::FROSTWARDEN_HAUBERK && l == LeggingsType::FROSTWARDEN_GREAVES)
+        return ArmorSet::FROSTWARDEN;
     return ArmorSet::NONE;
 }
 
@@ -310,6 +333,16 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 "Basalt Spire Wall",
                 "Slams ground erecting 3 jagged basalt pillars blocking pathing and enemy projectiles while dealing 55 dmg.",
                 30.0f
+            };
+        case ArmorSet::FROSTWARDEN:
+            return {
+                ArmorSet::FROSTWARDEN,
+                "Frostwarden Attire",
+                "Glacial Tenacity",
+                "+30% Cold Resistance & immunity to Frostbite chill/slow. Heavy attacks deal +20% poise damage. [Glacial Cleaver Synergy]: Heavy slams unleash a radial Frost Tremor (+35 frost damage, 3s enemy chill).",
+                "Glacial Frost Nova",
+                "Slams weapon into the frozen earth, unleashing a 140px radial ring of razor-sharp ice spires dealing 60 damage and freezing targets for 2.0s.",
+                28.0f
             };
         case ArmorSet::NONE:
         default:

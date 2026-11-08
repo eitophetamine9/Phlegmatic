@@ -54,10 +54,10 @@ struct GameSaveData {
     int equippedLeggings = 0;
     int equippedTotem = 0;
     int weaponUpgrades[GameLimits::WEAPON_COUNT] = { 0 };
-    bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false, false, false };
-    bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false };
-    bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false };
-    bool unlockedLeggings[GameLimits::LEGGINGS_COUNT] = { true, false, false, false, false, false, false };
+    bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false, false, false, false };
+    bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false, false };
+    bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false, false };
+    bool unlockedLeggings[GameLimits::LEGGINGS_COUNT] = { true, false, false, false, false, false, false, false };
     bool unlockedTotems[GameLimits::TOTEM_COUNT] = { true, false, false, false, false, false };
     bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false };
     int bestiaryKills[GameLimits::BESTIARY_COUNT] = { 0 };

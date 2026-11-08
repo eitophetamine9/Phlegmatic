@@ -88,7 +88,8 @@ public:
         const std::function<void()>& onEnterLobby,
         const std::function<void()>& onEnterArena = nullptr,
         const std::function<void()>& onEnterRestlessMistForest = nullptr,
-        const std::function<void()>& onEnterNorthZyphden = nullptr
+        const std::function<void()>& onEnterNorthZyphden = nullptr,
+        const std::function<void()>& onEnterBossGauntlet = nullptr
     );
 
     void Render(
@@ -119,6 +120,7 @@ private:
     std::function<void()> onEnterArenaCallback = nullptr;
     std::function<void()> onEnterMistForestCallback = nullptr;
     std::function<void()> onEnterNorthZyphdenCallback = nullptr;
+    std::function<void()> onEnterBossGauntletCallback = nullptr;
     // Core NPCs
     ZyphdenNPC eldon;
     ZyphdenNPC noticeboard;

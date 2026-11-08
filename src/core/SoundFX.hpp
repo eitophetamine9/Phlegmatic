@@ -28,6 +28,7 @@ public:
     static void PlayTranceActivate();
     static void PlayAnvilStrike(float volume = 0.5f);
     static void PlayHearthCrackle(float volume = 0.4f);
+    static void PlaySnowFootstep(float volume = 0.35f);
     static void SetBossCombatMode(bool active);
     static bool IsBossCombatActive() { return bossCombatActive; }
 
@@ -64,6 +65,8 @@ private:
     static Sound sndAmbienceWind;
     static Sound sndAmbienceCavern;
     static Sound sndAmbienceFire;
+    static Sound sndAmbienceBlizzard;
+    static Sound sndSnowFootstep;
     static Sound sndAnvilStrike;
     static Sound sndHearthCrackle;
 

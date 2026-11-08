@@ -855,7 +855,7 @@ void Game::ReturnFromArena() {
     SaveActiveGame();
 }
 
-void Game::EnterArena() {
+void Game::EnterArena(bool isBossGauntlet) {
 
 
 
@@ -908,7 +908,12 @@ void Game::EnterArena() {
 
 
 
-    waveManager.SpawnWave(1, enemies, projectiles, particles);
+    if (isBossGauntlet) {
+        waveManager.StartBossGauntlet(enemies, projectiles, particles);
+    } else {
+        waveManager.Reset();
+        waveManager.SpawnWave(1, enemies, projectiles, particles);
+    }
 
 
 
@@ -1620,7 +1625,7 @@ void Game::Update(float dt) {
 
 
 
-    bool pressI = IsKeyPressed(KEY_I) || (IsKeyPressed(KEY_TAB) && !showControlsModal);
+    bool pressI = IsKeyPressed(KEY_I);
 
 
 
@@ -1967,6 +1972,10 @@ void Game::Update(float dt) {
 
 
 
+
+    if (IsKeyPressed(KEY_TAB) && !showControlsModal && !showInventoryModal && !showMapModal && player.IsAlive()) {
+        player.QuickSwapWeapon(particles);
+    }
 
     // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
 
@@ -2631,6 +2640,13 @@ void Game::Update(float dt) {
                     [this]() { EnterNorthZyphden(); },
                     "NORTHERN CRAGS OF ZYPHDEN",
                     "Frostbound Highlands of the Berserker Troll Clan"
+                );
+            },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterArena(true); },
+                    "THE APEX BOSS GAUNTLET",
+                    "Consecutive Realm Champions: Zil, Primordial Titan, Berserker Troll"
                 );
             }
         );
@@ -3380,7 +3396,7 @@ void Game::Update(float dt) {
 
 
 
-    bool isArenaBossWave = (waveManager.GetCurrentWave() % 5 == 0);
+    bool isArenaBossWave = waveManager.IsBossGauntlet() || (waveManager.GetCurrentWave() % 5 == 0);
     SoundFX::SetBossCombatMode(isArenaBossWave);
 
     bool victory = false;
@@ -3395,22 +3411,36 @@ void Game::Update(float dt) {
 
             currentState = GameState::VICTORY;
 
+            if (waveManager.IsBossGauntlet()) {
+                particles.SpawnFloatingText(player.GetPosition(), "APEX BOSS GAUNTLET CONQUERED!", Color{ 255, 230, 80, 255 }, 30.0f);
+                player.GetInventory().AddOreScraps(40);
+                player.GetInventory().AddShingles(1200);
+                player.GetInventory().AddEssenceOfMist(4);
+                player.GetInventory().AddShadowEssence(4);
+                if (!player.GetInventory().HasQuestItem("item_boss_gauntlet_trophy")) {
+                    player.GetInventory().AddQuestItem({
+                        "item_boss_gauntlet_trophy",
+                        "Apex Gauntlet Warlord Trophy",
+                        "A pristine triumphal standard bearing the sigils of Remnant Zil, the Primordial Titan, and the Berserker Troll, earned by defeating all three in consecutive battle.",
+                        Color{ 255, 220, 90, 255 }
+                    });
+                }
+            } else {
+                particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! (25/25)", Color{ 255, 230, 80, 255 }, 30.0f);
 
-
-            particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! (25/25)", Color{ 255, 230, 80, 255 }, 30.0f);
-
-            // Grand Apex Victory Reward (Wave 25)
-            player.GetInventory().AddOreScraps(60);
-            player.GetInventory().AddShingles(200);
-            player.GetInventory().AddEssenceOfMist(6);
-            player.GetInventory().AddShadowEssence(5);
-            if (!player.GetInventory().HasQuestItem("item_arena_apex_crest")) {
-                player.GetInventory().AddQuestItem({
-                    "item_arena_apex_crest",
-                    "Grand Apex Victor's Crest",
-                    "A glorious gold-and-crimson vanguard seal awarded by Knight Lenon for conquering all 25 waves of the expanded Royal Combat Arena.",
-                    Color{ 255, 215, 80, 255 }
-                });
+                // Grand Apex Victory Reward (Wave 25)
+                player.GetInventory().AddOreScraps(60);
+                player.GetInventory().AddShingles(200);
+                player.GetInventory().AddEssenceOfMist(6);
+                player.GetInventory().AddShadowEssence(5);
+                if (!player.GetInventory().HasQuestItem("item_arena_apex_crest")) {
+                    player.GetInventory().AddQuestItem({
+                        "item_arena_apex_crest",
+                        "Grand Apex Victor's Crest",
+                        "A glorious gold-and-crimson vanguard seal awarded by Knight Lenon for conquering all 25 waves of the expanded Royal Combat Arena.",
+                        Color{ 255, 215, 80, 255 }
+                    });
+                }
             }
             SoundFX::PlayCrusaderClash();
             SoundFX::PlayCoinPickup();
@@ -4285,7 +4315,11 @@ void Game::RenderScene() {
 
 
 
-        GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+        if (waveManager.IsBossGauntlet()) {
+            GameUI::DrawCombatHUD(w, h, player, waveManager.GetGauntletStage(), waveManager.GetTotalGauntletStages(), hasUnread);
+        } else {
+            GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
+        }
         DrawText("[T] RETURN TO REALM", 24, h - 36, 16, Color{ 160, 210, 255, 200 });
 
 

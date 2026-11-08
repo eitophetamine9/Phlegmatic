@@ -77,7 +77,7 @@ public:
     void ApplySolarBurn(float duration) { solarBurnTimer = duration; }
     bool HasSolarBurn() const { return solarBurnTimer > 0.0f; }
 
-    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM; }
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::BERSERKER_TROLL || type == EnemyType::GALE_ARCHER_BOSS; }
     bool HasMeleeHitbox() const {
         if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
         if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM) {

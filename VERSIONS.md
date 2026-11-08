@@ -6,6 +6,7 @@
 
 ## Table of Versions
 
+- [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
 - [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
 - [Version 0.0.1f - Arena Milestones, Soundscapes & Combat Polish](#version-001f---arena-milestones-soundscapes--combat-polish)
@@ -13,6 +14,79 @@
 - [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
 - [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
 - [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet
+
+### 1. Northern Arsenal: Glacial Cleaver & Frostwarden Armor Set
+* **Glacial Spiked Cleaver Colossal Weapon**:
+  * Added `WeaponType::GLACIAL_CLEAVER` colossal two-handed great-axe (+0 Base, +1 Forged, +2 Masterwork tiers).
+  * High-tier base damage (52 light / 88 heavy base, scaling up to 72 light / 120 heavy at tier +2).
+  * Unique heavy attack mechanic: Unleashes wide-arc seismic Frost Tremor shockwaves (+45 physical & cold damage) that stagger approaching enemies.
+  * Innate unbreakable hyper-armor during attack windups, preventing poise interruption when trading blows with heavy foes.
+  * Custom procedural vector renderer in `AssetManager::DrawCleaver` with detailed rune-engraved broadhead blade, ice crystal core, and spiked counterweight pommel.
+* **Frostwarden Highland Armor Set**:
+  * Added `ArmorSet::FROSTWARDEN` with three modular pieces:
+    * `HelmetType::FROSTWARDEN_HOOD` (+12 Defense, +10 Max HP, +5% Stamina Regen).
+    * `ChestplateType::FROSTWARDEN_HAUBERK` (+28 Defense, +25 Max HP, 0.95x Speed).
+    * `LeggingsType::FROSTWARDEN_GREAVES` (+18 Defense, +15 Max HP, 0.95x Speed).
+  * **Glacial Tenacity Set Bonus (Passive)**:
+    * Full 3-piece set grants +40 Max HP, unbreakable hyper-armor across all weapon attacks, and total Frostbite cold immunity in northern sub-zero climates.
+  * **Glacial Frost Nova (Active Set Skill - [V] Key)**:
+    * Triggers a devastating 160px frost shockwave dealing 55 cold damage, 1.8s freeze stun, and 15 composure break on a 30s cooldown.
+* **Blacksmith Varek Master Forge Expansion**:
+  * Integrated all 4 new northern equipment pieces into Blacksmith Varek's Forge Crafting Matrix in Zyphden with authentic material costs (Ore Scraps and Silver Shingles).
+
+### 2. Highland Atmosphere, Procedural Audio & Frostbite System
+* **Procedural Acoustic Audio Generation (SoundFX)**:
+  * Implemented procedural howling glacial blizzard ambience in `SoundFX::GenerateAmbienceBlizzard()`, synthesizing sub-bass wind buffeting (70-120Hz) and swept resonant whistling gusts (1200-2200Hz).
+  * Integrated dedicated ambient track loop for `GameState::NORTH_ZYPHDEN` with dynamic boss ducking interpolation.
+  * Implemented procedural snow crunch footstep sound effects in `SoundFX::GenerateSnowCrunch()` triggered periodically while moving through snowy highland terrain, paired with soft snow dust puffs.
+* **Dynamic Blizzard Particle System**:
+  * Added drifting blizzard snowfall stream in `NorthZyphdenHandler`, featuring 160 snowflakes sweeping across the camera view with wind velocity and dynamic view-boundary wrapping.
+* **Frostbite Status Effect & Bonfire Warmth Thawing**:
+  * Moving through the sub-zero highland winds gradually accumulates a Frostbite chill meter (+5% per second outdoors).
+  * Resting or standing near the Highland Crags Bonfire ({ 1200.0f, 1300.0f }) rapidly warms and thaws the player (-25% per second; full rest cleanses instantly).
+  * Equipping the full Frostwarden armor set grants complete cold immunity, preventing chill accumulation.
+  * Upon reaching 100%, the player contracts **Frostbite**: movement speed is reduced by 20% and stamina regeneration is slowed by 25%.
+  * Added `[FROSTBITE: -20% SPD, -25% STAM REGEN]` and `[CHILL: X%]` status pills in the action bar buff tray.
+  * Added a dynamic frostbite screen-edge vignette that pulses with icy blue borders when exposed to extreme cold.
+* **Breakable Frost Crystal Mineral Nodes**:
+  * Placed 4 breakable frost crystal deposit spires across northern ridges ({ 480, 750 }, { 1920, 750 }, { 800, 520 }, { 1600, 520 }).
+  * Striking deposits with melee attacks damages and shatters the crystals, rewarding 1-2 Ore Scraps and 15-30 Silver Shingles with 45s respawn timers.
+
+### 3. Outcast Ranger Torvald NPC & Highland Hunting Bounties
+* **Ranger Torvald NPC**:
+  * Positioned near the Highland Crags Bonfire ({ 1115.0f, 1295.0f }) with custom vector rendering (hunter cloak, fur-lined cowl, recurve hunting bow, and hip quiver).
+  * Overhead status badges reflecting contract status: `[!] BOUNTY CLAIMABLE`, `[?] HIGHLAND BOUNTIES`, and `RANGER TORVALD`.
+* **Three Tiered Hunting Bounties**:
+  * **Bounty I: Frostfang Cull**: Slay 5 Highland Frost Trolls (Reward: 8 Ore Scraps, 250 Silver Shingles).
+  * **Bounty II: Glacial Shard Harvest**: Mine 3 Highland Frost Crystals (Reward: 12 Ore Scraps, 350 Silver Shingles).
+  * **Bounty III: Highland Slayer**: Vanquish the Berserker Troll Warlord (Reward: 25 Ore Scraps, 800 Silver Shingles).
+* **Bounty Tracking & Paginated Dialogue**:
+  * Real-time in-game progress tracking with celebratory completion banners and chime audio upon achieving contract milestones.
+  * Integrated multi-page dialogue system in `GameUI::DrawNPCDialogueBox` enabling contract review and claiming rewards directly from Torvald.
+
+### 4. Combat Polish & Quick Weapon Swap Hotkey
+* **Quick Weapon Swap Hotkey ([TAB] Key)**:
+  * Implemented instant mid-combat weapon swapping via `[TAB]` hotkey, seamlessly cycling through all unlocked weapons in canonical progression without pausing or opening the inventory modal.
+  * Triggers scabbard draw audio effects, golden weapon swap text banners, and spark particles.
+  * Updated modal controls guides in `ModalUI.cpp`: dedicated `[TAB]` quick swap and `[I]` inventory mapping.
+
+### 5. Knight Lenon Apex Boss Gauntlet Mode
+* **Consecutive Boss Rush Gauntlet**:
+  * Knight Lenon now offers an optional "Apex Boss Gauntlet" mode in the Royal Courtyard of Zyphden.
+  * Challenges the player with three consecutive boss encounters with no breaks or resting between rounds:
+    * **Stage I**: Remnant Zil (Holy Champion) supported by 2 Iron Brutes.
+    * **Stage II**: Primordial Elemental Golem Titan supported by 2 Mini Elemental Golems.
+    * **Stage III**: The Berserker Troll Warlord supported by 2 Frost Trolls.
+* **Dual-Choice Dialogue Interface**:
+  * Lenon's arena prompt features side-by-side interactive buttons: `[R] COMBAT ARENA (25 WAVES)` and `[G] APEX BOSS GAUNTLET (3 STAGES)` with keyboard shortcuts and mouse clicks.
+* **Apex Gauntlet Triumph Rewards**:
+  * Conquering all 3 stages awards 40 Ore Scraps, 1200 Silver Shingles, 4 Essence of Mist, 4 Shadow Essence, and the prestigious `item_boss_gauntlet_trophy` (Apex Gauntlet Warlord Trophy).
+
+---
 
 ---
 

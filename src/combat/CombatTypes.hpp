@@ -11,7 +11,8 @@ enum class WeaponType {
     ZEPHYR_DAGGERS,
     WINDRUNNER_RECURVE,
     SUN_CLAYMORE,
-    STORM_GLAIVE
+    STORM_GLAIVE,
+    GLACIAL_CLEAVER
 };
 
 enum class ArmorType {
@@ -29,7 +30,8 @@ enum class HelmetType {
     VANGUARD_GREATHELM,
     SHADOW_COWL,
     SCRAP_SALLET,
-    BASALT_GREATHELM
+    BASALT_GREATHELM,
+    FROSTWARDEN_HOOD
 };
 
 enum class ChestplateType {
@@ -39,7 +41,8 @@ enum class ChestplateType {
     VANGUARD_CHEST,
     SHADOW_GARB,
     SCRAP_CUIRASS,
-    BASALT_CUIRASS
+    BASALT_CUIRASS,
+    FROSTWARDEN_HAUBERK
 };
 
 enum class LeggingsType {
@@ -49,7 +52,8 @@ enum class LeggingsType {
     VANGUARD_GREAVES,
     SHADOW_LEGGINGS,
     SCRAP_GREAVES,
-    BASALT_GREAVES
+    BASALT_GREAVES,
+    FROSTWARDEN_GREAVES
 };
 
 enum class ArmorSet {
@@ -59,7 +63,8 @@ enum class ArmorSet {
     VANGUARD_BASTION,
     SHADOWSTRIDER,
     FORGED_SCRAP_IRON,
-    BASALT_GOLEM
+    BASALT_GOLEM,
+    FROSTWARDEN
 };
 
 enum class TotemType {

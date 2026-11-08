@@ -218,7 +218,20 @@ public:
             particles.SpawnFloatingText(position, "CLEANSED!", Color{ 255, 255, 160, 255 }, 22.0f);
             particles.SpawnSparks(position, Color{ 255, 240, 140, 255 }, 20, 160.0f);
         }
+        if (isFrostbitten || frostbiteMeter > 0.0f) {
+            ResetFrostbite();
+            particles.SpawnFloatingText(position, "THAWED!", Color{ 140, 240, 255, 255 }, 22.0f);
+        }
     }
+
+    // Frostbite System (Highland Cold)
+    float GetFrostbiteMeter() const { return frostbiteMeter; }
+    bool IsFrostbitten() const { return isFrostbitten; }
+    void AddFrostbite(float amount, ParticleSystem* particles = nullptr);
+    void ThawFrostbite(float amount);
+    void ResetFrostbite();
+    void UpdateSnowFootsteps(float dt, ParticleSystem& particles);
+    void QuickSwapWeapon(ParticleSystem& particles);
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
@@ -301,6 +314,9 @@ private:
     float staggerImmunityTimer;
     float bleedTimer;
     float bleedTickTimer;
+    float frostbiteMeter;
+    bool isFrostbitten;
+    float snowFootstepTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;

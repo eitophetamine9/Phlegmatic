@@ -230,6 +230,31 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             }
             return stats;
 
+        case WeaponType::GLACIAL_CLEAVER:
+            stats = {
+                "Glacial Spiked Cleaver",
+                "Colossal great-axe forged from Berserker Troll horns and tempered slag. Light attacks execute staggering cleaves. Heavy attack unleashes an overhead hyper-armored skull cleave that erupts into a chilling frost tremor shockwave.",
+                30.0f, 105.0f, 115.0f, 0.28f, 0.48f, 24.0f,
+                94.0f, 160.0f, 260.0f, 0.40f, 0.38f, 2.80f, 36.0f,
+                24.0f, 1.10f,
+                0, 1.40f, 0.20f, 1.10f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Glacial Spiked Cleaver +1";
+                stats.lightDamage = 36.0f;
+                stats.heavyDamage = 112.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Glacial Spiked Cleaver +2";
+                stats.lightDamage = 44.0f;
+                stats.heavyDamage = 132.0f;
+                stats.defensePierceBonus = 0.30f;
+                stats.poiseMultiplier = 1.65f;
+            }
+            return stats;
+
         case WeaponType::SWORD:
         default:
             stats = {

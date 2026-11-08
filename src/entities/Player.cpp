@@ -95,6 +95,12 @@ Player::Player() {
 
     bleedTickTimer = 0.0f;
 
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
+
 
 
     dashCooldown = 0.0f;
@@ -204,6 +210,12 @@ void Player::Init(Vector2 startPos) {
 
     bleedTickTimer = 0.0f;
 
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
+
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
     willOfAtlasCooldown = 0.0f;
@@ -264,6 +276,12 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     bleedTimer = 0.0f;
 
     bleedTickTimer = 0.0f;
+
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -479,6 +497,19 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
             particles.SpawnSparks(centerPillar, Color{ 245, 140, 40, 255 }, 40, 220.0f);
             break;
         }
+        case ArmorSet::FROSTWARDEN: {
+            pendingArmorSkillAoE = true;
+            pendingAoEDamage = 60.0f;
+            pendingAoERadius = 160.0f;
+            pendingAoEStun = 2.0f;
+            pendingAoEArmorShred = 0.20f;
+
+            SoundFX::PlayParrySuccess();
+            particles.AddScreenShake(8.5f, 0.3f);
+            particles.SpawnFloatingText(position, "GLACIAL FROST NOVA!", Color{ 160, 230, 255, 255 }, 26.0f);
+            particles.SpawnSparks(position, Color{ 180, 240, 255, 255 }, 40, 240.0f);
+            break;
+        }
         default:
             break;
     }
@@ -586,6 +617,9 @@ float Player::GetSpeed() const {
     if (speedBuffTimer > 0.0f) {
         base *= (1.0f + speedBuffAmount);
     }
+    if (isFrostbitten) {
+        base *= 0.80f; // -20% Move Speed when Frostbitten
+    }
     return base;
 }
 
@@ -602,6 +636,9 @@ float Player::GetStaminaRegenRate() const {
         rate *= 0.80f;
     } else if (HasStoicPoise()) {
         rate *= 1.20f;
+    }
+    if (isFrostbitten) {
+        rate *= 0.75f; // -25% Stamina Regen when Frostbitten
     }
     return rate;
 }
@@ -658,6 +695,90 @@ void Player::ApplyBleed(float duration, ParticleSystem& particles) {
 
     particles.SpawnSparks(position, Color{ 220, 30, 45, 255 }, 14, 100.0f);
 
+}
+
+void Player::AddFrostbite(float amount, ParticleSystem* particles) {
+    if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+        frostbiteMeter = 0.0f;
+        isFrostbitten = false;
+        return;
+    }
+    bool wasFrostbitten = isFrostbitten;
+    frostbiteMeter = fminf(100.0f, frostbiteMeter + amount);
+    if (frostbiteMeter >= 100.0f) {
+        isFrostbitten = true;
+        if (!wasFrostbitten && particles != nullptr) {
+            particles->SpawnFloatingText(position, "FROSTBITTEN! (-20% SPD, -25% STAM)", Color{ 140, 220, 255, 255 }, 22.0f);
+            particles->SpawnSparks(position, Color{ 160, 230, 255, 255 }, 20, 130.0f);
+        }
+    }
+}
+
+void Player::ThawFrostbite(float amount) {
+    frostbiteMeter = fmaxf(0.0f, frostbiteMeter - amount);
+    if (frostbiteMeter < 100.0f) {
+        isFrostbitten = false;
+    }
+}
+
+void Player::ResetFrostbite() {
+    frostbiteMeter = 0.0f;
+    isFrostbitten = false;
+}
+
+void Player::UpdateSnowFootsteps(float dt, ParticleSystem& particles) {
+    float moveSpeed = Vector2Length(velocity);
+    if (moveSpeed > 25.0f) {
+        snowFootstepTimer -= dt;
+        if (snowFootstepTimer <= 0.0f) {
+            SoundFX::PlaySnowFootstep(0.35f);
+            snowFootstepTimer = 0.34f;
+            Vector2 puffPos = { position.x + (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 6.0f, position.y + radius * 0.7f };
+            particles.SpawnSparks(puffPos, Color{ 230, 245, 255, 180 }, 4, 35.0f);
+        }
+    } else {
+        snowFootstepTimer = 0.05f;
+    }
+}
+
+void Player::QuickSwapWeapon(ParticleSystem& particles) {
+    std::vector<WeaponType> unlocked;
+    const WeaponType candidateWeapons[] = {
+        WeaponType::SWORD,
+        WeaponType::DAGGERS,
+        WeaponType::MACE,
+        WeaponType::HALBERD,
+        WeaponType::ZEPHYR_DAGGERS,
+        WeaponType::WINDRUNNER_RECURVE,
+        WeaponType::SUN_CLAYMORE,
+        WeaponType::STORM_GLAIVE,
+        WeaponType::GLACIAL_CLEAVER,
+        WeaponType::TRUTH_SEEKER
+    };
+
+    for (WeaponType wt : candidateWeapons) {
+        if (inventory.HasWeapon(wt)) {
+            unlocked.push_back(wt);
+        }
+    }
+
+    if (unlocked.empty()) return;
+
+    int currentIdx = -1;
+    for (size_t i = 0; i < unlocked.size(); ++i) {
+        if (unlocked[i] == currentWeapon) {
+            currentIdx = (int)i;
+            break;
+        }
+    }
+
+    int nextIdx = (currentIdx + 1) % (int)unlocked.size();
+    SetWeapon(unlocked[nextIdx]);
+    SoundFX::PlayEquipWeapon();
+
+    WeaponStats stats = GetEquippedWeaponStats();
+    particles.SpawnFloatingText(position, "SWAPPED: " + stats.name, Color{ 255, 220, 90, 255 }, 22.0f);
+    particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 14, 80.0f);
 }
 
 
@@ -1400,6 +1521,33 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 particles.SpawnSparks(position, Color{ 140, 255, 240, 255 }, 24, 180.0f);
                 velocity.x += forwardDir.x * 240.0f;
                 velocity.y += forwardDir.y * 240.0f;
+
+            } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+
+                currentAttack.range = stats.heavyRange;
+                currentAttack.arcAngle = stats.heavyArc;
+                float baseDmg = stats.heavyDamage;
+                currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                currentAttack.knockback = 480.0f * stats.poiseMultiplier;
+                currentAttack.defensePierce = stats.defensePierceBonus;
+                currentAttack.duration = stats.heavyDuration;
+                currentAttack.timer = stats.heavyDuration;
+                currentAttack.hasShockwave = true;
+                currentAttack.shockwavePos = { position.x + forwardDir.x * 65.0f, position.y + forwardDir.y * 65.0f };
+                currentAttack.shockwaveRadius = 135.0f;
+
+                SoundFX::PlayHeavyAttack();
+                SoundFX::PlayCrusaderClash();
+                particles.AddScreenShake(8.5f, 0.25f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
+                particles.SpawnSparks(position, Color{ 180, 240, 255, 255 }, 32, 220.0f);
+                if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+                    currentAttack.shockwaveRadius = 165.0f;
+                    currentAttack.damage += 35.0f;
+                    particles.SpawnFloatingText(position, "FROST TREMOR +35", Color{ 140, 230, 255, 255 }, 22.0f);
+                }
+                velocity.x += forwardDir.x * 140.0f;
+                velocity.y += forwardDir.y * 140.0f;
 
             } else {
 
@@ -2219,6 +2367,36 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 245, 230, 255 });
         particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 60.0f, position.y + forwardDir.y * 60.0f }, Color{ 140, 255, 240, 255 }, 10, 110.0f);
 
+    } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+
+        currentAttack.range = stats.lightRange;
+        currentAttack.arcAngle = stats.lightArc;
+        float baseLightDmg = counterBuffTimer > 0.0f ? (stats.lightDamage * 1.5f) : stats.lightDamage;
+
+        float critChance = 0.05f;
+        float critMult = stats.critMultiplier;
+        if (currentTotem == TotemType::TOTEM_MIST) {
+            critChance += 0.20f;
+            critMult += 0.35f;
+        }
+        if ((rand() % 100) < (int)(critChance * 100.0f)) {
+            baseLightDmg *= critMult;
+            particles.SpawnFloatingText(position, "CRITICAL HIT!", Color{ 255, 230, 80, 255 }, 22.0f);
+            particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 14, 130.0f);
+        }
+
+        if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+            baseLightDmg *= 1.20f;
+            currentAttack.range += 15.0f;
+        }
+
+        currentAttack.damage = baseLightDmg * GetTotemDamageMultiplier();
+        currentAttack.knockback = 280.0f;
+        currentAttack.defensePierce = stats.defensePierceBonus;
+        SoundFX::PlayLightAttack();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 180, 235, 255, 255 }, 12, 130.0f);
+
     } else {
 
         currentAttack.knockback = 130.0f;
@@ -2476,7 +2654,9 @@ void Player::ApplyStagger(float baseStunDuration, ParticleSystem& particles) {
         currentWeapon == WeaponType::MACE ||
         currentWeapon == WeaponType::HALBERD ||
         currentWeapon == WeaponType::STORM_GLAIVE ||
-        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+        currentWeapon == WeaponType::GLACIAL_CLEAVER ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION) ||
+        HasFullArmorSet(ArmorSet::FROSTWARDEN)
     );
 
     if (isInPhlegmaticTrance || (HasStoicPoise() && isHeavyWindingUp) || isHeavyWeaponWindup) {
@@ -2684,7 +2864,9 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         currentWeapon == WeaponType::MACE ||
         currentWeapon == WeaponType::HALBERD ||
         currentWeapon == WeaponType::STORM_GLAIVE ||
-        HasFullArmorSet(ArmorSet::VANGUARD_BASTION)
+        currentWeapon == WeaponType::GLACIAL_CLEAVER ||
+        HasFullArmorSet(ArmorSet::VANGUARD_BASTION) ||
+        HasFullArmorSet(ArmorSet::FROSTWARDEN)
     );
     if (isHeavyWeaponWindup) {
         finalAmount *= 0.70f;
