@@ -30,6 +30,23 @@ struct NorthLoreStele {
     bool collected;
 };
 
+struct FrostCrystalNode {
+    Vector2 position;
+    float health = 35.0f;
+    float maxHealth = 35.0f;
+    bool broken = false;
+    float respawnTimer = 0.0f;
+    float shakeTimer = 0.0f;
+    float radius = 24.0f;
+};
+
+struct BlizzardSnowflake {
+    Vector2 position;
+    Vector2 velocity;
+    float size;
+    float alpha;
+};
+
 class NorthZyphdenHandler {
 public:
     NorthZyphdenHandler();
@@ -70,6 +87,8 @@ public:
     bool IsBossDefeated() const { return berserkerTrollDefeated; }
     void SetBossDefeated(bool defeated) { berserkerTrollDefeated = defeated; }
     void InitSpawners();
+    void InitFrostCrystals();
+    void InitBlizzardParticles();
     void Reset() {
         berserkerTrollSummoned = false;
         berserkerTrollDefeated = false;
@@ -80,6 +99,8 @@ private:
     Campfire highlandCampfire;
     std::vector<NorthMobSpawner> spawners;
     std::vector<NorthLoreStele> loreSteles;
+    std::vector<FrostCrystalNode> frostCrystals;
+    std::vector<BlizzardSnowflake> blizzardSnowflakes;
 
     bool berserkerTrollSummoned;
     bool berserkerTrollDefeated;

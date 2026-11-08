@@ -199,6 +199,14 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         activeBuffs.push_back({ "BLOOD FRENZY: +135% DMG", Color{ 255, 45, 60, 255 }, Color{ 255, 150, 160, 255 }, Color{ 52, 14, 18, 240 }, true });
     }
 
+    if (player.IsFrostbitten()) {
+        activeBuffs.push_back({ "FROSTBITE: -20% SPD, -25% STAM REGEN", Color{ 120, 225, 255, 255 }, Color{ 200, 245, 255, 255 }, Color{ 14, 30, 48, 240 }, true });
+    } else if (player.GetFrostbiteMeter() > 5.0f) {
+        char fb[32];
+        snprintf(fb, sizeof(fb), "CHILL: %d%%", (int)player.GetFrostbiteMeter());
+        activeBuffs.push_back({ fb, Color{ 150, 215, 250, 255 }, Color{ 210, 240, 255, 255 }, Color{ 18, 35, 52, 220 }, false });
+    }
+
     if (!activeBuffs.empty()) {
         float pillH = 18.0f;
         float pillSpacing = 8.0f;

@@ -29,6 +29,8 @@ Sound SoundFX::sndTranceActivate = { 0 };
 Sound SoundFX::sndAmbienceWind = { 0 };
 Sound SoundFX::sndAmbienceCavern = { 0 };
 Sound SoundFX::sndAmbienceFire = { 0 };
+Sound SoundFX::sndAmbienceBlizzard = { 0 };
+Sound SoundFX::sndSnowFootstep = { 0 };
 Sound SoundFX::sndAnvilStrike = { 0 };
 Sound SoundFX::sndHearthCrackle = { 0 };
 
@@ -507,6 +509,74 @@ static Sound GenerateHearthCrackle(float duration = 0.40f, float volume = 0.45f)
     return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
 }
 
+// 13. Procedural Ambience: Glacial howling blizzard with sub-bass buffeting and icy whistling gusts
+static Sound GenerateAmbienceBlizzard(float duration = 4.0f, float volume = 0.44f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float lowBuffet = 0.0f;
+    float bandWhistle = 0.0f;
+    float frostHiss = 0.0f;
+    float whistlePhase = 0.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)sampleRate;
+        float n = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+
+        // Sub-bass gust buffeting (70-120Hz dynamic rumble)
+        float buffetMod = 0.025f + 0.018f * sinf(t * 1.4f) + 0.012f * cosf(t * 2.8f);
+        lowBuffet += (n - lowBuffet) * buffetMod;
+
+        // Resonant whistling glacial wind (swept 1200Hz - 2200Hz)
+        float whistleFreq = 1350.0f + 700.0f * sinf(t * 2.1f) + 250.0f * sinf(t * 4.3f);
+        whistlePhase += whistleFreq / (float)sampleRate;
+        if (whistlePhase >= 1.0f) whistlePhase -= 1.0f;
+        float whistleTone = sinf((float)(whistlePhase * 2.0 * M_PI));
+
+        // High frequency icy flutter
+        frostHiss += (n - frostHiss) * 0.22f;
+
+        float envelope = sinf((float)i / (float)totalSamples * (float)M_PI);
+        float mixed = (lowBuffet * 1.8f) + (whistleTone * 0.35f * (0.4f + 0.6f * fabsf(lowBuffet))) + (frostHiss * 0.18f);
+        float sampleVal = SoftClip(mixed) * envelope;
+        samples[i] = (short)(sampleVal * volume * 32767.0f);
+    }
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
+// 14. Footsteps: Crisp snow crunch under heavy medieval greaves
+static Sound GenerateSnowCrunch(float duration = 0.13f, float volume = 0.40f) {
+    const int sampleRate = 44100;
+    int totalSamples = (int)(sampleRate * duration);
+    if (totalSamples <= 0) totalSamples = 1;
+
+    short* samples = (short*)malloc(totalSamples * sizeof(short));
+    if (!samples) return Sound{ 0 };
+
+    float lowFilter = 0.0f;
+    float highFilter = 0.0f;
+
+    for (int i = 0; i < totalSamples; i++) {
+        float t = (float)i / (float)totalSamples;
+        float n = ((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f;
+
+        // Low ground thump
+        lowFilter += (n - lowFilter) * 0.15f;
+        // High granular ice crush
+        highFilter += (n - highFilter) * 0.45f;
+        float iceCrackle = (rand() % 6 == 0) ? (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 1.5f : 0.0f;
+
+        float env = expf(-14.0f * t);
+        float mixed = (lowFilter * 0.45f) + ((highFilter + iceCrackle) * 0.75f);
+        samples[i] = (short)(SoftClip(mixed * env) * volume * 32767.0f);
+    }
+    return CreateSoundFromBuffer(samples, totalSamples, sampleRate);
+}
+
 void SoundFX::Init() {
     if (initialized) return;
     InitAudioDevice();
@@ -552,6 +622,8 @@ void SoundFX::Init() {
     sndAmbienceWind = GenerateAmbienceWind(3.6f, 0.38f);
     sndAmbienceCavern = GenerateAmbienceCavern(4.0f, 0.42f);
     sndAmbienceFire = GenerateAmbienceFire(3.2f, 0.32f);
+    sndAmbienceBlizzard = GenerateAmbienceBlizzard(4.0f, 0.44f);
+    sndSnowFootstep = GenerateSnowCrunch(0.12f, 0.40f);
     sndAnvilStrike = GenerateAnvilClink(0.32f, 0.55f);
     sndHearthCrackle = GenerateHearthCrackle(0.40f, 0.45f);
 
@@ -588,6 +660,8 @@ void SoundFX::Close() {
     UnloadSound(sndAmbienceWind);
     UnloadSound(sndAmbienceCavern);
     UnloadSound(sndAmbienceFire);
+    UnloadSound(sndAmbienceBlizzard);
+    UnloadSound(sndSnowFootstep);
     UnloadSound(sndAnvilStrike);
     UnloadSound(sndHearthCrackle);
 
@@ -630,6 +704,13 @@ void SoundFX::PlayHearthCrackle(float volume) {
     }
 }
 
+void SoundFX::PlaySnowFootstep(float volume) {
+    if (initialized) {
+        SetSoundVolume(sndSnowFootstep, volume * sfxVolume);
+        PlaySound(sndSnowFootstep);
+    }
+}
+
 void SoundFX::SetBossCombatMode(bool active) {
     bossCombatActive = active;
 }
@@ -658,6 +739,7 @@ void SoundFX::SetSFXVolume(float vol) {
     SetSoundVolume(sndLoreDiscovery, 0.60f * sfxVolume);
     SetSoundVolume(sndAnvilStrike, 0.55f * sfxVolume);
     SetSoundVolume(sndHearthCrackle, 0.45f * sfxVolume);
+    SetSoundVolume(sndSnowFootstep, 0.35f * sfxVolume);
 }
 
 void SoundFX::SetAmbienceVolume(float vol) {
@@ -668,6 +750,7 @@ void SoundFX::SetAmbienceVolume(float vol) {
     SetSoundVolume(sndAmbienceWind, 0.38f * ambienceVolume * bossDuckFactor);
     SetSoundVolume(sndAmbienceCavern, 0.42f * ambienceVolume * bossDuckFactor);
     SetSoundVolume(sndAmbienceFire, 0.32f * ambienceVolume * bossDuckFactor);
+    SetSoundVolume(sndAmbienceBlizzard, 0.44f * ambienceVolume * bossDuckFactor);
 }
 
 void SoundFX::UpdateAmbience(float dt, int stateOrEnv) {
@@ -676,6 +759,7 @@ void SoundFX::UpdateAmbience(float dt, int stateOrEnv) {
             if (IsSoundPlaying(sndAmbienceWind)) StopSound(sndAmbienceWind);
             if (IsSoundPlaying(sndAmbienceCavern)) StopSound(sndAmbienceCavern);
             if (IsSoundPlaying(sndAmbienceFire)) StopSound(sndAmbienceFire);
+            if (IsSoundPlaying(sndAmbienceBlizzard)) StopSound(sndAmbienceBlizzard);
         }
         return;
     }
@@ -686,23 +770,28 @@ void SoundFX::UpdateAmbience(float dt, int stateOrEnv) {
     SetSoundVolume(sndAmbienceWind, 0.38f * ambienceVolume * bossDuckFactor);
     SetSoundVolume(sndAmbienceCavern, 0.42f * ambienceVolume * bossDuckFactor);
     SetSoundVolume(sndAmbienceFire, 0.32f * ambienceVolume * bossDuckFactor);
+    SetSoundVolume(sndAmbienceBlizzard, 0.44f * ambienceVolume * bossDuckFactor);
 
     // Determine target track:
     // 1: Wind (Ruined Castle, Crossroads, Zyphden Courtyard, Forest, Arena, Title)
     // 2: Cavern (Quarry Depths)
     // 3: Fire (Tavern Interior, Forge Interior)
+    // 4: Blizzard (North Zyphden Highland Crags)
     int targetTrack = 1;
-    // GameState enum: 7 = QUARRY_DEPTHS, 13 = RESTLESS_MIST_FOREST
+    // GameState enum: 7 = QUARRY_DEPTHS, 13 = RESTLESS_MIST_FOREST, 14 = NORTH_ZYPHDEN
     if (stateOrEnv == 7 || stateOrEnv == 11) { // Quarry Depths
         targetTrack = 2;
     } else if (stateOrEnv == 6 || stateOrEnv == 12) { // Tavern / Forge
         targetTrack = 3;
+    } else if (stateOrEnv == 14) { // North Zyphden Highland Blizzard
+        targetTrack = 4;
     }
 
     if (currentAmbienceTrack != targetTrack) {
         if (IsSoundPlaying(sndAmbienceWind)) StopSound(sndAmbienceWind);
         if (IsSoundPlaying(sndAmbienceCavern)) StopSound(sndAmbienceCavern);
         if (IsSoundPlaying(sndAmbienceFire)) StopSound(sndAmbienceFire);
+        if (IsSoundPlaying(sndAmbienceBlizzard)) StopSound(sndAmbienceBlizzard);
         currentAmbienceTrack = targetTrack;
         ambienceLoopTimer = 0.0f;
     }
@@ -718,6 +807,9 @@ void SoundFX::UpdateAmbience(float dt, int stateOrEnv) {
         } else if (currentAmbienceTrack == 3) {
             PlaySound(sndAmbienceFire);
             ambienceLoopTimer = 3.1f;
+        } else if (currentAmbienceTrack == 4) {
+            PlaySound(sndAmbienceBlizzard);
+            ambienceLoopTimer = 3.9f;
         }
     }
 }

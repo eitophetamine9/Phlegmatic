@@ -95,6 +95,12 @@ Player::Player() {
 
     bleedTickTimer = 0.0f;
 
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
+
 
 
     dashCooldown = 0.0f;
@@ -204,6 +210,12 @@ void Player::Init(Vector2 startPos) {
 
     bleedTickTimer = 0.0f;
 
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
+
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
     willOfAtlasCooldown = 0.0f;
@@ -264,6 +276,12 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     bleedTimer = 0.0f;
 
     bleedTickTimer = 0.0f;
+
+    frostbiteMeter = 0.0f;
+
+    isFrostbitten = false;
+
+    snowFootstepTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -599,6 +617,9 @@ float Player::GetSpeed() const {
     if (speedBuffTimer > 0.0f) {
         base *= (1.0f + speedBuffAmount);
     }
+    if (isFrostbitten) {
+        base *= 0.80f; // -20% Move Speed when Frostbitten
+    }
     return base;
 }
 
@@ -615,6 +636,9 @@ float Player::GetStaminaRegenRate() const {
         rate *= 0.80f;
     } else if (HasStoicPoise()) {
         rate *= 1.20f;
+    }
+    if (isFrostbitten) {
+        rate *= 0.75f; // -25% Stamina Regen when Frostbitten
     }
     return rate;
 }
@@ -671,6 +695,50 @@ void Player::ApplyBleed(float duration, ParticleSystem& particles) {
 
     particles.SpawnSparks(position, Color{ 220, 30, 45, 255 }, 14, 100.0f);
 
+}
+
+void Player::AddFrostbite(float amount, ParticleSystem* particles) {
+    if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+        frostbiteMeter = 0.0f;
+        isFrostbitten = false;
+        return;
+    }
+    bool wasFrostbitten = isFrostbitten;
+    frostbiteMeter = fminf(100.0f, frostbiteMeter + amount);
+    if (frostbiteMeter >= 100.0f) {
+        isFrostbitten = true;
+        if (!wasFrostbitten && particles != nullptr) {
+            particles->SpawnFloatingText(position, "FROSTBITTEN! (-20% SPD, -25% STAM)", Color{ 140, 220, 255, 255 }, 22.0f);
+            particles->SpawnSparks(position, Color{ 160, 230, 255, 255 }, 20, 130.0f);
+        }
+    }
+}
+
+void Player::ThawFrostbite(float amount) {
+    frostbiteMeter = fmaxf(0.0f, frostbiteMeter - amount);
+    if (frostbiteMeter < 100.0f) {
+        isFrostbitten = false;
+    }
+}
+
+void Player::ResetFrostbite() {
+    frostbiteMeter = 0.0f;
+    isFrostbitten = false;
+}
+
+void Player::UpdateSnowFootsteps(float dt, ParticleSystem& particles) {
+    float moveSpeed = Vector2Length(velocity);
+    if (moveSpeed > 25.0f) {
+        snowFootstepTimer -= dt;
+        if (snowFootstepTimer <= 0.0f) {
+            SoundFX::PlaySnowFootstep(0.35f);
+            snowFootstepTimer = 0.34f;
+            Vector2 puffPos = { position.x + (((float)rand() / (float)RAND_MAX) * 2.0f - 1.0f) * 6.0f, position.y + radius * 0.7f };
+            particles.SpawnSparks(puffPos, Color{ 230, 245, 255, 180 }, 4, 35.0f);
+        }
+    } else {
+        snowFootstepTimer = 0.05f;
+    }
 }
 
 
