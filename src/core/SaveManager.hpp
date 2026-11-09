@@ -12,8 +12,12 @@ struct SaveSlotSummary {
     float playerMaxHealth = 100.0f;
     int shingles = 0;
     int oreScraps = 0;
+    int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
     bool galeArcherDefeated = false;
     bool elementalGolemDefeated = false;
     int arenaHighestWave = 0;
@@ -43,8 +47,12 @@ struct GameSaveData {
     int potionCount = 1;
     int shingles = 0;
     int oreScraps = 0;
+    int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
     bool galeArcherDefeated = false;
     bool elementalGolemDefeated = false;
     int equippedWeapon = 1;

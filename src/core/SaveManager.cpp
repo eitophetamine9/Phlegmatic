@@ -138,10 +138,18 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.shingles = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"oreScraps\"") != std::string::npos) {
             outData.oreScraps = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"frostShards\"") != std::string::npos) {
+            outData.frostShards = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"essenceOfMist\"") != std::string::npos) {
             outData.essenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"shadowEssence\"") != std::string::npos) {
             outData.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stoneskinTonics\"") != std::string::npos) {
+            outData.stoneskinTonics = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"glacialDraughts\"") != std::string::npos) {
+            outData.glacialDraughts = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"berserkerDraughts\"") != std::string::npos) {
+            outData.berserkerDraughts = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
             outData.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"elementalGolemDefeated\"") != std::string::npos) {
@@ -244,8 +252,12 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"potionCount\": " << data.potionCount << ",\n";
     file << "  \"shingles\": " << data.shingles << ",\n";
     file << "  \"oreScraps\": " << data.oreScraps << ",\n";
+    file << "  \"frostShards\": " << data.frostShards << ",\n";
     file << "  \"essenceOfMist\": " << data.essenceOfMist << ",\n";
     file << "  \"shadowEssence\": " << data.shadowEssence << ",\n";
+    file << "  \"stoneskinTonics\": " << data.stoneskinTonics << ",\n";
+    file << "  \"glacialDraughts\": " << data.glacialDraughts << ",\n";
+    file << "  \"berserkerDraughts\": " << data.berserkerDraughts << ",\n";
     file << "  \"galeArcherDefeated\": " << (data.galeArcherDefeated ? "true" : "false") << ",\n";
     file << "  \"elementalGolemDefeated\": " << (data.elementalGolemDefeated ? "true" : "false") << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";

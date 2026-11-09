@@ -112,6 +112,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
             { "TAB Key",       "Quick Swap","Instantly cycle through unlocked weapons during combat.", Color{ 255, 215, 80, 255 } },
             { "I Key",         "Inventory", "Open Equipment Matrix, Chronicles Grimoire & Bestiary.", Color{ 140, 210, 255, 255 } },
+            { "1 - 4 Keys",     "Quick Belt", "Drink Health Potion [1], Stoneskin [2], Glacial Thaw [3], Berserk [4].", Color{ 140, 240, 180, 255 } },
             { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
             { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
         };

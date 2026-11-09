@@ -142,6 +142,52 @@ public:
     void SetOreScraps(int count) { oreScraps = count >= 0 ? count : 0; }
     void AddOreScraps(int count) { oreScraps += count; }
 
+    // Material: Frost Shards
+    int GetFrostShards() const { return frostShards; }
+    void SetFrostShards(int count) { frostShards = count >= 0 ? count : 0; }
+    void AddFrostShards(int count) { frostShards += count; }
+    bool SpendFrostShards(int count) {
+        if (frostShards >= count) {
+            frostShards -= count;
+            return true;
+        }
+        return false;
+    }
+
+    // Elixirs
+    int GetStoneskinTonicCount() const { return stoneskinTonics; }
+    void SetStoneskinTonicCount(int c) { stoneskinTonics = c >= 0 ? c : 0; }
+    void AddStoneskinTonics(int c) { stoneskinTonics += c; }
+    bool ConsumeStoneskinTonic() {
+        if (stoneskinTonics > 0) {
+            stoneskinTonics--;
+            return true;
+        }
+        return false;
+    }
+
+    int GetGlacialDraughtCount() const { return glacialDraughts; }
+    void SetGlacialDraughtCount(int c) { glacialDraughts = c >= 0 ? c : 0; }
+    void AddGlacialDraughts(int c) { glacialDraughts += c; }
+    bool ConsumeGlacialDraught() {
+        if (glacialDraughts > 0) {
+            glacialDraughts--;
+            return true;
+        }
+        return false;
+    }
+
+    int GetBerserkerDraughtCount() const { return berserkerDraughts; }
+    void SetBerserkerDraughtCount(int c) { berserkerDraughts = c >= 0 ? c : 0; }
+    void AddBerserkerDraughts(int c) { berserkerDraughts += c; }
+    bool ConsumeBerserkerDraught() {
+        if (berserkerDraughts > 0) {
+            berserkerDraughts--;
+            return true;
+        }
+        return false;
+    }
+
     int GetEssenceOfMist() const { return essenceOfMist; }
     void SetEssenceOfMist(int count) { essenceOfMist = count >= 0 ? count : 0; }
     void AddEssenceOfMist(int count) { essenceOfMist += count; }
@@ -255,7 +301,11 @@ private:
     int healthPotions = 1; // Default starting health potions
     int shingles = 0;      // Currency: Shingles
     int oreScraps = 0;     // Material: Ore Scraps (from Quarry Ore Golems)
+    int frostShards = 0;   // Material: Frost Shards (from Highland Frost Crystals)
     int essenceOfMist = 0; // Material: Essence of Mist (from Gale Bandits)
     int shadowEssence = 0; // Material: Shadow Essence (from Gale Archer Boss)
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
     int weaponUpgradeLevel[GameLimits::WEAPON_COUNT] = { 0 };
 };

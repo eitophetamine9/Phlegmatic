@@ -105,6 +105,9 @@ Player::Player() {
     executionTimer = 0.0f;
     executionTargetPos = { 0.0f, 0.0f };
     adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
 
 
 
@@ -225,6 +228,9 @@ void Player::Init(Vector2 startPos) {
     executionTimer = 0.0f;
     executionTargetPos = { 0.0f, 0.0f };
     adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -297,6 +303,9 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     executionTimer = 0.0f;
     executionTargetPos = { 0.0f, 0.0f };
     adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -581,6 +590,9 @@ float Player::GetTotemDamageMultiplier() const {
     if (adrenalineTimer > 0.0f) {
         mult *= 1.15f; // +15% Damage during Adrenaline rush from Visceral Execution
     }
+    if (berserkerTimer > 0.0f) {
+        mult *= 1.30f; // +30% Damage while Berserker Draught active
+    }
     return mult;
 }
 
@@ -610,7 +622,11 @@ float Player::GetDefense() const {
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
         raw += 25.0f;
     }
-    return raw * GetTotemStats(currentTotem).defenseMultiplier;
+    float total = raw * GetTotemStats(currentTotem).defenseMultiplier;
+    if (stoneskinTimer > 0.0f) {
+        total *= 1.40f; // +40% Physical Defense while Stoneskin Tonic active
+    }
+    return total;
 }
 
 float Player::GetWill() const {
@@ -723,7 +739,7 @@ void Player::ApplyBleed(float duration, ParticleSystem& particles) {
 }
 
 void Player::AddFrostbite(float amount, ParticleSystem* particles) {
-    if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+    if (HasFullArmorSet(ArmorSet::FROSTWARDEN) || glacialImmunityTimer > 0.0f) {
         frostbiteMeter = 0.0f;
         isFrostbitten = false;
         return;
@@ -836,6 +852,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     if (iFrameTimer > 0.0f) iFrameTimer -= dt;
     if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
     if (adrenalineTimer > 0.0f) adrenalineTimer -= dt;
+    if (stoneskinTimer > 0.0f) stoneskinTimer -= dt;
+    if (glacialImmunityTimer > 0.0f) {
+        glacialImmunityTimer -= dt;
+        ResetFrostbite();
+    }
+    if (berserkerTimer > 0.0f) berserkerTimer -= dt;
 
     // Visceral Execution update
     if (isExecuting) {
@@ -1024,11 +1046,17 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
     // Health Potion consumption via [1] or [H] (7-second cooldown)
-
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_H)) {
-
         UseHealthPotion(particles);
-
+    }
+    if (IsKeyPressed(KEY_TWO)) {
+        UseStoneskinTonic(particles);
+    }
+    if (IsKeyPressed(KEY_THREE)) {
+        UseGlacialDraught(particles);
+    }
+    if (IsKeyPressed(KEY_FOUR)) {
+        UseBerserkerDraught(particles);
     }
 
 
@@ -2761,17 +2789,57 @@ bool Player::UseHealthPotion(ParticleSystem& particles) {
         Heal(45.0f);
 
         SoundFX::PlayHeal();
-
         particles.SpawnSparks(position, Color{ 80, 255, 140, 255 }, 25, 140.0f);
-
         particles.SpawnFloatingText(position, "+45 HP", Color{ 80, 255, 140, 255 }, 24.0f);
-
         return true;
-
     }
-
     return false;
+}
 
+bool Player::UseStoneskinTonic(ParticleSystem& particles) {
+    if (inventory.GetStoneskinTonicCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO STONESKIN TONICS", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeStoneskinTonic()) {
+        stoneskinTimer = 15.0f;
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(position, "+STONESKIN (+40% DEF, POISE)", Color{ 255, 215, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 245, 195, 50, 255 }, 22, 140.0f);
+        return true;
+    }
+    return false;
+}
+
+bool Player::UseGlacialDraught(ParticleSystem& particles) {
+    if (inventory.GetGlacialDraughtCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO GLACIAL DRAUGHTS", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeGlacialDraught()) {
+        glacialImmunityTimer = 90.0f;
+        ResetFrostbite();
+        SoundFX::PlayCrusaderClash();
+        particles.SpawnFloatingText(position, "+GLACIAL THAW & WARMTH (90s)", Color{ 140, 230, 255, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 120, 220, 255, 255 }, 22, 140.0f);
+        return true;
+    }
+    return false;
+}
+
+bool Player::UseBerserkerDraught(ParticleSystem& particles) {
+    if (inventory.GetBerserkerDraughtCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO BERSERKER BREW", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeBerserkerDraught()) {
+        berserkerTimer = 12.0f;
+        SoundFX::PlayHeavyAttack();
+        particles.SpawnFloatingText(position, "+BERSERKER FRENZY (+30% DMG)", Color{ 255, 60, 60, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 50, 50, 255 }, 26, 160.0f);
+        return true;
+    }
+    return false;
 }
 
 
@@ -2865,6 +2933,10 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
     // Totem of Insanity: suffers x1.5 incoming damage penalty from all enemy strikes
     if (currentTotem == TotemType::TOTEM_INSANITY) {
         finalAmount *= 1.50f;
+    }
+
+    if (berserkerTimer > 0.0f) {
+        finalAmount *= 1.20f; // +20% incoming damage while Berserk
     }
 
     // Crusader Plate Dawnfire Aegis Shield

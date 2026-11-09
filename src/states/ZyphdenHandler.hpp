@@ -131,6 +131,7 @@ private:
     ZyphdenNPC cedric; // Scholar Cedric - History of Zyphden & the Gale Winds
     ZyphdenNPC varek;  // Blacksmith Varek - Crusader Plate & Armorcraft Lore
     ZyphdenNPC maeve;  // Elder Maeve - Lore of the Border Refugees & Madness
+    ZyphdenNPC brena;  // Alchemist Brena - Humoral Elixirs & Transmutation
 
     // 5 Throne Room NPCs in Expanded Royal Keep
     ZyphdenNPC malakor;   // Chancellor Malakor - Kingdom governance & lord liege lore
@@ -186,9 +187,10 @@ private:
     int currentDialoguePage = 0;
     Color dialogueColor = WHITE;
 
-    // Forge & Provisions Modal State
+    // Forge, Provisions & Alchemy Modal State
     bool isForgeOpen = false;
     bool isProvisionsOpen = false;
+    bool isAlchemyOpen = false;
 
     // Eastern Quarry Ore Golem Spawners (7.0s Respawn Loop)
     std::vector<GolemSpawner> golemSpawners;
@@ -197,4 +199,5 @@ private:
     void CloseDialogue();
     void DrawForgeModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
     void DrawProvisionsModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
+    void DrawAlchemyModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed);
 };

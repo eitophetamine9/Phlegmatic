@@ -430,8 +430,11 @@ void NorthZyphdenHandler::Update(
 
                         int oreGained = rand() % 2 + 1; // 1-2 Ore Scraps
                         int shinglesGained = rand() % 16 + 15; // 15-30 Shingles
+                        int frostShardsGained = rand() % 2 + 2; // 2-3 Frost Shards
                         player.GetInventory().AddOreScraps(oreGained);
                         player.GetInventory().AddShingles(shinglesGained);
+                        player.GetInventory().AddFrostShards(frostShardsGained);
+                        particles.SpawnFloatingText(crystal.position, "+" + std::to_string(frostShardsGained) + " Frost Shards", Color{ 140, 235, 255, 255 }, 20.0f);
 
                         if (bounties.size() > 1 && bounties[1].progress < bounties[1].target) {
                             bounties[1].progress++;

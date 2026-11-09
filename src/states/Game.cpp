@@ -1010,8 +1010,12 @@ void Game::SaveActiveGame() {
 
 
     data.oreScraps = player.GetInventory().GetOreScraps();
+    data.frostShards = player.GetInventory().GetFrostShards();
     data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
     data.shadowEssence = player.GetInventory().GetShadowEssence();
+    data.stoneskinTonics = player.GetInventory().GetStoneskinTonicCount();
+    data.glacialDraughts = player.GetInventory().GetGlacialDraughtCount();
+    data.berserkerDraughts = player.GetInventory().GetBerserkerDraughtCount();
     data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
     data.elementalGolemDefeated = quarryHandler.IsBossDefeated();
 
@@ -1168,8 +1172,12 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.GetInventory().SetOreScraps(data.oreScraps);
+    player.GetInventory().SetFrostShards(data.frostShards);
     player.GetInventory().SetEssenceOfMist(data.essenceOfMist);
     player.GetInventory().SetShadowEssence(data.shadowEssence);
+    player.GetInventory().SetStoneskinTonicCount(data.stoneskinTonics);
+    player.GetInventory().SetGlacialDraughtCount(data.glacialDraughts);
+    player.GetInventory().SetBerserkerDraughtCount(data.berserkerDraughts);
     restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
 
 

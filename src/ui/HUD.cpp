@@ -136,10 +136,10 @@ void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
 }
 
 void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player) {
-    const int numSlots = 6;
-    const float slotW = 50.0f;
-    const float slotH = 50.0f;
-    const float slotSpacing = 8.0f;
+    const int numSlots = 9;
+    const float slotW = 46.0f;
+    const float slotH = 46.0f;
+    const float slotSpacing = 6.0f;
     const float totalW = numSlots * slotW + (numSlots - 1) * slotSpacing;
     const float barX = ((float)windowWidth - totalW) * 0.5f;
     const float barY = (float)windowHeight - slotH - 18.0f;
@@ -203,6 +203,24 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         char b[32];
         snprintf(b, sizeof(b), "ADRENALINE: %.1fs", player.GetAdrenalineTimer());
         activeBuffs.push_back({ b, Color{ 255, 120, 40, 255 }, Color{ 255, 195, 110, 255 }, Color{ 52, 22, 10, 240 }, true });
+    }
+
+    if (player.HasStoneskinActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "STONESKIN: %.1fs", player.GetStoneskinTimer());
+        activeBuffs.push_back({ b, Color{ 255, 205, 60, 255 }, Color{ 255, 235, 120, 255 }, Color{ 48, 38, 12, 240 }, true });
+    }
+
+    if (player.HasGlacialImmunityActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "GLACIAL WARMTH: %.1fs", player.GetGlacialImmunityTimer());
+        activeBuffs.push_back({ b, Color{ 120, 230, 255, 255 }, Color{ 200, 245, 255, 255 }, Color{ 14, 38, 52, 240 }, true });
+    }
+
+    if (player.HasBerserkerActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "BERSERKER BREW: %.1fs", player.GetBerserkerTimer());
+        activeBuffs.push_back({ b, Color{ 255, 50, 60, 255 }, Color{ 255, 140, 150, 255 }, Color{ 52, 14, 18, 240 }, true });
     }
 
     if (player.IsFrostbitten()) {
@@ -322,7 +340,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     // Slot 5: Health Potion [1]
     ActionSlotInfo potSlot;
     potSlot.bounds = { barX + 4 * (slotW + slotSpacing), barY, slotW, slotH };
-    potSlot.actionName = "POTION";
+    potSlot.actionName = "HEAL";
     potSlot.keybind = "[1]";
     potSlot.currentCooldown = player.GetPotionCooldown();
     potSlot.maxCooldown = 7.0f;
@@ -331,11 +349,47 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     potSlot.stockCount = player.GetInventory().GetHealthPotionCount();
     DrawActionSlot(potSlot);
 
-    // Slot 6: Armor Skill [V]
+    // Slot 6: Stoneskin Tonic [2]
+    ActionSlotInfo stoneSlot;
+    stoneSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
+    stoneSlot.actionName = "STONE";
+    stoneSlot.keybind = "[2]";
+    stoneSlot.currentCooldown = player.GetStoneskinTimer();
+    stoneSlot.maxCooldown = 15.0f;
+    stoneSlot.themeColor = Color{ 245, 195, 50, 255 };
+    stoneSlot.isActive = player.HasStoneskinActive();
+    stoneSlot.stockCount = player.GetInventory().GetStoneskinTonicCount();
+    DrawActionSlot(stoneSlot);
+
+    // Slot 7: Glacial Draught [3]
+    ActionSlotInfo thawSlot;
+    thawSlot.bounds = { barX + 6 * (slotW + slotSpacing), barY, slotW, slotH };
+    thawSlot.actionName = "THAW";
+    thawSlot.keybind = "[3]";
+    thawSlot.currentCooldown = player.GetGlacialImmunityTimer();
+    thawSlot.maxCooldown = 90.0f;
+    thawSlot.themeColor = Color{ 110, 225, 255, 255 };
+    thawSlot.isActive = player.HasGlacialImmunityActive();
+    thawSlot.stockCount = player.GetInventory().GetGlacialDraughtCount();
+    DrawActionSlot(thawSlot);
+
+    // Slot 8: Berserker Brew [4]
+    ActionSlotInfo berserkSlot;
+    berserkSlot.bounds = { barX + 7 * (slotW + slotSpacing), barY, slotW, slotH };
+    berserkSlot.actionName = "BERSERK";
+    berserkSlot.keybind = "[4]";
+    berserkSlot.currentCooldown = player.GetBerserkerTimer();
+    berserkSlot.maxCooldown = 12.0f;
+    berserkSlot.themeColor = Color{ 255, 55, 65, 255 };
+    berserkSlot.isActive = player.HasBerserkerActive();
+    berserkSlot.stockCount = player.GetInventory().GetBerserkerDraughtCount();
+    DrawActionSlot(berserkSlot);
+
+    // Slot 9: Armor Skill [V]
     ArmorSet curSet = player.GetActiveArmorSet();
     ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
     ActionSlotInfo armorSkillSlot;
-    armorSkillSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
+    armorSkillSlot.bounds = { barX + 8 * (slotW + slotSpacing), barY, slotW, slotH };
     armorSkillSlot.actionName = (curSet != ArmorSet::NONE) ? setInfo.skillName.c_str() : "NO SET";
     armorSkillSlot.keybind = "[V]";
     armorSkillSlot.currentCooldown = player.GetArmorSkillCooldown();

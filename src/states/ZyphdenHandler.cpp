@@ -146,6 +146,14 @@ void ZyphdenNPC::Draw(float time, Vector2 playerPos) const {
 
         DrawLineEx({ position.x + 12.0f, position.y - 12.0f }, { position.x + 12.0f, position.y + 16.0f }, 2.5f, Color{ 110, 80, 50, 255 });
 
+    } else if (id == "brena") {
+        // Alchemist Brena: Deep emerald apothecary robe, copper hair, brass vial belt
+        DrawCircle((int)position.x, (int)position.y, radius, Color{ 32, 70, 52, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 8), radius * 0.6f, Color{ 230, 195, 160, 255 });
+        DrawCircle((int)position.x, (int)(position.y - 13), radius * 0.5f, Color{ 175, 95, 45, 255 });
+        // Glass vial with glowing emerald vapor
+        DrawCircle((int)(position.x + 12), (int)(position.y - 2), 5.0f, Color{ 60, 180, 120, 240 });
+        DrawCircle((int)(position.x + 12), (int)(position.y - 7), 3.0f, Color{ 140, 245, 190, 220 });
     } else if (id == "malakor") {
 
         // Chancellor Malakor: Royal purple robes, golden torque, holding an imperial decree scroll
@@ -375,6 +383,8 @@ ZyphdenHandler::ZyphdenHandler() :
 
     maeve = { "maeve", "Elder Maeve", { 920.0f, 880.0f }, 22.0f, Color{ 160, 230, 160, 255 } };
 
+    brena = { "brena", "Alchemist Brena", { 860.0f, 665.0f }, 24.0f, Color{ 140, 240, 180, 255 } };
+
 
 
     windLectern = { "frag_06", "Ancient Wind Lectern", { 720.0f, 480.0f }, 24.0f, false };
@@ -550,6 +560,8 @@ void ZyphdenHandler::Init(Player& player, GameMap& map, std::vector<Enemy>& enem
     varek = { "varek", "Blacksmith Varek", { 750.0f, 530.0f }, 24.0f, Color{ 255, 140, 50, 255 } };
 
     maeve = { "maeve", "Elder Maeve", { 920.0f, 880.0f }, 22.0f, Color{ 160, 230, 160, 255 } };
+
+    brena = { "brena", "Alchemist Brena", { 860.0f, 665.0f }, 24.0f, Color{ 140, 240, 180, 255 } };
 
 
 
@@ -1169,13 +1181,15 @@ void ZyphdenHandler::Update(
 
 
 
-    if (isForgeOpen || isProvisionsOpen) {
+    if (isForgeOpen || isProvisionsOpen || isAlchemyOpen) {
 
         if (IsKeyPressed(KEY_ESCAPE)) {
 
             isForgeOpen = false;
 
             isProvisionsOpen = false;
+
+            isAlchemyOpen = false;
 
             SoundFX::PlayButtonClick();
 
@@ -1261,6 +1275,16 @@ void ZyphdenHandler::Update(
 
                 }
 
+            }
+
+            // 2b. Alchemist Brena in the apothecary corner
+            bool brenaInRange = Vector2Distance(playerPos, brena.position) <= 110.0f;
+            if (brenaInRange && interactKey) {
+                isAlchemyOpen = true;
+                isProvisionsOpen = false;
+                isForgeOpen = false;
+                SoundFX::PlayButtonClick();
+                return;
             }
 
             // 3. Knight Lenon if inside tavern
@@ -2082,6 +2106,11 @@ void ZyphdenHandler::Render(
 
         }
 
+        brena.Draw(time, player.GetPosition());
+        if (brena.CheckInteraction(player.GetPosition())) {
+            DrawText("[E] Alchemy Workshop", (int)brena.position.x - 70, (int)brena.position.y - 36, 11, Color{ 140, 240, 180, 245 });
+        }
+
         if (lenonInTavern) {
 
             knightLenonNPC.Draw(time, player.GetPosition());
@@ -2648,6 +2677,10 @@ void ZyphdenHandler::Render(
     } else if (isProvisionsOpen) {
 
         DrawProvisionsModal(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles), screenWidth, screenHeight, mousePos, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
+
+    } else if (isAlchemyOpen) {
+
+        DrawAlchemyModal(const_cast<Player&>(player), const_cast<ParticleSystem&>(particles), screenWidth, screenHeight, mousePos, IsMouseButtonPressed(MOUSE_BUTTON_LEFT));
 
     }
 
@@ -3634,13 +3667,177 @@ void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particl
 
 
     if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
-
         isProvisionsOpen = false;
-
         SoundFX::PlayButtonClick();
+    }
+}
 
+void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles, int screenWidth, int screenHeight, Vector2 mousePos, bool isMousePressed) {
+    DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 6, 10, 14, 220 });
+
+    const float modalW = 820.0f;
+    const float modalH = 540.0f;
+    const float modalX = ((float)screenWidth - modalW) * 0.5f;
+    const float modalY = ((float)screenHeight - modalH) * 0.5f;
+
+    Rectangle modalRec = { modalX, modalY, modalW, modalH };
+    DrawRectangleRounded(modalRec, 0.05f, 8, Color{ 14, 22, 24, 252 });
+    DrawRectangleRoundedLines(modalRec, 0.05f, 8, Color{ 100, 225, 170, 255 });
+    DrawRectangleLinesEx(Rectangle{ modalX + 4.0f, modalY + 4.0f, modalW - 8.0f, modalH - 8.0f }, 1.5f, Color{ 45, 90, 75, 180 });
+
+    // Header
+    FontManager::DrawText("BRENA'S ALCHEMY WORKSHOP", (int)modalX + 32, (int)modalY + 20, 22, Color{ 130, 245, 180, 255 }, GameFont::TITLE);
+    FontManager::DrawText("Transmute wild harvested flora, mineral crystals, and essences into potent humoral battle draughts.", (int)modalX + 32, (int)modalY + 46, 12, Color{ 180, 225, 205, 210 }, GameFont::BODY);
+
+    // Live Materials Bar at top right
+    auto& inv = player.GetInventory();
+    int shingles = inv.GetShingles();
+    int scraps = inv.GetOreScraps();
+    int frostShards = inv.GetFrostShards();
+    int mistEss = inv.GetEssenceOfMist();
+
+    char matBuf[128];
+    snprintf(matBuf, sizeof(matBuf), "Shingles: %d  |  Scraps: %d  |  Frost: %d  |  Mist: %d", shingles, scraps, frostShards, mistEss);
+    int matW = MeasureText(matBuf, 11);
+    DrawRectangleRounded(Rectangle{ modalX + modalW - matW - 44.0f, modalY + 20.0f, (float)matW + 24.0f, 28.0f }, 0.25f, 4, Color{ 20, 36, 32, 230 });
+    DrawRectangleRoundedLines(Rectangle{ modalX + modalW - matW - 44.0f, modalY + 20.0f, (float)matW + 24.0f, 28.0f }, 0.25f, 4, Color{ 80, 185, 140, 200 });
+    DrawText(matBuf, (int)(modalX + modalW - matW - 32.0f), (int)modalY + 28, 11, Color{ 220, 255, 235, 255 });
+
+    DrawLine((int)modalX + 30, (int)modalY + 72, (int)(modalX + modalW - 30), (int)modalY + 72, Color{ 50, 105, 85, 160 });
+
+    struct AlchemyRecipe {
+        std::string name;
+        std::string desc;
+        std::string keyPrompt;
+        std::string costText;
+        int ownedCount;
+        Color themeCol;
+        bool canBrew;
+        std::function<void()> onBrew;
+    };
+
+    std::vector<AlchemyRecipe> recipes = {
+        {
+            "STONESKIN TONIC",
+            "+40% Physical Defense and complete stagger poise immunity for 15s. Heavy armor composure.",
+            "Quick Belt Slot [2]",
+            "Cost: 2 Ore Scraps + 20 Shingles",
+            inv.GetStoneskinTonicCount(),
+            Color{ 245, 195, 50, 255 },
+            scraps >= 2 && shingles >= 20,
+            [&]() {
+                if (inv.SpendOreScraps(2) && inv.SpendShingles(20)) {
+                    inv.AddStoneskinTonics(1);
+                    SoundFX::PlayParrySuccess();
+                    particles.SpawnFloatingText(player.GetPosition(), "+1 STONESKIN TONIC", Color{ 255, 215, 80, 255 }, 22.0f);
+                }
+            }
+        },
+        {
+            "GLACIAL THAW DRAUGHT",
+            "Instantly cleanses Frostbite and grants 90s complete cold immunity in Northern Crags.",
+            "Quick Belt Slot [3]",
+            "Cost: 2 Frost Shards + 15 Shingles",
+            inv.GetGlacialDraughtCount(),
+            Color{ 110, 225, 255, 255 },
+            frostShards >= 2 && shingles >= 15,
+            [&]() {
+                if (inv.SpendFrostShards(2) && inv.SpendShingles(15)) {
+                    inv.AddGlacialDraughts(1);
+                    SoundFX::PlayCrusaderClash();
+                    particles.SpawnFloatingText(player.GetPosition(), "+1 GLACIAL DRAUGHT", Color{ 140, 230, 255, 255 }, 22.0f);
+                }
+            }
+        },
+        {
+            "BERSERKER BREW",
+            "+35% Attack Speed and +30% Damage for 12s (+20% incoming damage penalty). High-risk fury.",
+            "Quick Belt Slot [4]",
+            "Cost: 1 Mist Essence + 25 Shingles",
+            inv.GetBerserkerDraughtCount(),
+            Color{ 255, 60, 60, 255 },
+            mistEss >= 1 && shingles >= 25,
+            [&]() {
+                if (inv.SpendEssenceOfMist(1) && inv.SpendShingles(25)) {
+                    inv.AddBerserkerDraughts(1);
+                    SoundFX::PlayHeavyAttack();
+                    particles.SpawnFloatingText(player.GetPosition(), "+1 BERSERKER BREW", Color{ 255, 60, 60, 255 }, 22.0f);
+                }
+            }
+        },
+        {
+            "CONSECRATED HEALTH FLASK",
+            "Restores +45 Vitality upon consumption (7.0s cooldown). Max capacity 5 flasks.",
+            "Quick Belt Slot [1]",
+            "Cost: 15 Shingles",
+            inv.GetHealthPotionCount(),
+            Color{ 80, 255, 140, 255 },
+            shingles >= 15 && inv.GetHealthPotionCount() < 5,
+            [&]() {
+                if (inv.SpendShingles(15)) {
+                    inv.AddHealthPotions(1);
+                    SoundFX::PlayHeal();
+                    particles.SpawnFloatingText(player.GetPosition(), "+1 HEALTH FLASK", Color{ 80, 255, 140, 255 }, 22.0f);
+                }
+            }
+        }
+    };
+
+    float cardW = (modalW - 76.0f) * 0.5f;
+    float cardH = 190.0f;
+
+    for (int i = 0; i < (int)recipes.size(); ++i) {
+        int col = i % 2;
+        int row = i / 2;
+        float cx = modalX + 30.0f + (float)col * (cardW + 16.0f);
+        float cy = modalY + 86.0f + (float)row * (cardH + 16.0f);
+
+        Rectangle cRec = { cx, cy, cardW, cardH };
+        DrawRectangleRounded(cRec, 0.08f, 6, Color{ 18, 30, 32, 230 });
+        DrawRectangleRoundedLines(cRec, 0.08f, 6, recipes[i].canBrew ? ColorAlpha(recipes[i].themeCol, 0.7f) : Color{ 50, 75, 70, 180 });
+
+        // Title & Stock
+        FontManager::DrawText(recipes[i].name, (int)cx + 18, (int)cy + 16, 15, recipes[i].themeCol, GameFont::TITLE);
+        char stockBuf[32];
+        snprintf(stockBuf, sizeof(stockBuf), "Carried: %d", recipes[i].ownedCount);
+        DrawText(stockBuf, (int)(cx + cardW - 90.0f), (int)cy + 18, 11, Color{ 200, 225, 215, 220 });
+
+        // Desc
+        FontManager::DrawTextWrapped(recipes[i].desc, (int)cx + 18, (int)cy + 42, (int)cardW - 36, 11, 2, Color{ 180, 210, 200, 220 });
+
+        // Key prompt & Cost
+        DrawText(recipes[i].keyPrompt.c_str(), (int)cx + 18, (int)cy + 104, 10, Color{ 130, 180, 160, 220 });
+        DrawText(recipes[i].costText.c_str(), (int)cx + 18, (int)cy + 122, 11, recipes[i].canBrew ? Color{ 255, 230, 120, 240 } : Color{ 220, 100, 100, 220 });
+
+        // Brew Button
+        Rectangle btnRec = { cx + 18.0f, cy + 144.0f, cardW - 36.0f, 32.0f };
+        bool isHov = CheckCollisionPointRec(mousePos, btnRec);
+        Color btnBg = recipes[i].canBrew ? (isHov ? Color{ 40, 95, 70, 255 } : Color{ 25, 65, 48, 240 }) : Color{ 28, 36, 36, 200 };
+        Color btnLine = recipes[i].canBrew ? (isHov ? Color{ 120, 255, 190, 255 } : Color{ 70, 190, 130, 220 }) : Color{ 55, 70, 68, 160 };
+
+        DrawRectangleRounded(btnRec, 0.25f, 4, btnBg);
+        DrawRectangleRoundedLines(btnRec, 0.25f, 4, btnLine);
+
+        const char* bText = recipes[i].canBrew ? "BREW ELIXIR" : "INSUFFICIENT REAGENTS";
+        int bw = MeasureText(bText, 11);
+        DrawText(bText, (int)(btnRec.x + (btnRec.width - bw) * 0.5f), (int)btnRec.y + 10, 11, recipes[i].canBrew ? Color{ 230, 255, 240, 255 } : Color{ 140, 150, 150, 180 });
+
+        if (recipes[i].canBrew && isHov && isMousePressed) {
+            recipes[i].onBrew();
+        }
     }
 
+    // Leave Workshop (ESC) Button
+    Rectangle closeBtnRec = { modalX + (modalW - 190.0f) * 0.5f, modalY + modalH - 42.0f, 190.0f, 30.0f };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtnRec);
+    DrawRectangleRounded(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 50, 30, 35, 240 } : Color{ 30, 22, 24, 220 });
+    DrawRectangleRoundedLines(closeBtnRec, 0.25f, 4, isCloseHov ? Color{ 255, 100, 110, 240 } : Color{ 130, 55, 65, 200 });
+    DrawText("LEAVE WORKSHOP [ESC]", (int)closeBtnRec.x + 22, (int)closeBtnRec.y + 9, 11, isCloseHov ? Color{ 255, 180, 180, 255 } : Color{ 220, 140, 145, 220 });
+
+    if ((isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE)) {
+        isAlchemyOpen = false;
+        SoundFX::PlayButtonClick();
+    }
 }
 
 

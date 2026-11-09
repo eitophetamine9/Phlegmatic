@@ -165,7 +165,7 @@ public:
 
     // Stagger & Posture
     bool IsStaggered() const { return staggerTimer > 0.0f; }
-    bool HasStaggerImmunity() const { return staggerImmunityTimer > 0.0f; }
+    bool HasStaggerImmunity() const { return staggerImmunityTimer > 0.0f || stoneskinTimer > 0.0f; }
     void ApplyStagger(float baseStunDuration, ParticleSystem& particles);
     float GetStaggerTimer() const { return staggerTimer; }
 
@@ -176,10 +176,20 @@ public:
     float GetWillOfAtlasCooldown() const { return willOfAtlasCooldown; }
     float GetIFrameTimer() const { return iFrameTimer; }
 
-    // Consumables: Potion
+    // Consumables: Potions & Elixirs
     bool UseHealthPotion(ParticleSystem& particles);
+    bool UseStoneskinTonic(ParticleSystem& particles);
+    bool UseGlacialDraught(ParticleSystem& particles);
+    bool UseBerserkerDraught(ParticleSystem& particles);
     float GetPotionCooldown() const { return potionCooldown; }
     float GetMaxPotionCooldown() const { return 7.0f; }
+
+    bool HasStoneskinActive() const { return stoneskinTimer > 0.0f; }
+    float GetStoneskinTimer() const { return stoneskinTimer; }
+    bool HasGlacialImmunityActive() const { return glacialImmunityTimer > 0.0f; }
+    float GetGlacialImmunityTimer() const { return glacialImmunityTimer; }
+    bool HasBerserkerActive() const { return berserkerTimer > 0.0f; }
+    float GetBerserkerTimer() const { return berserkerTimer; }
 
     // Cooldown accessors for UI
     float GetLightCooldown() const { return lightCooldown; }
@@ -331,6 +341,11 @@ private:
     float executionTimer;
     Vector2 executionTargetPos;
     float adrenalineTimer;
+
+    // Consumable Elixir Buff Timers
+    float stoneskinTimer;
+    float glacialImmunityTimer;
+    float berserkerTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;
