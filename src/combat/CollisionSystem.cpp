@@ -9,6 +9,81 @@
 #include <cmath>
 
 void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera, std::vector<LootDrop>* outLootDrops) {
+    // Visceral Execution on stunned/staggered enemies ([E] key)
+    if (IsKeyPressed(KEY_E) && !player.IsExecuting() && !player.IsDashing() && player.IsAlive()) {
+        float closestDistSq = 999999.0f;
+        int targetEnemyIdx = -1;
+        Vector2 pPos = player.GetPosition();
+
+        for (size_t i = 0; i < enemies.size(); ++i) {
+            if (!enemies[i].IsAlive() || !enemies[i].IsVulnerableToExecution()) continue;
+            float dx = enemies[i].GetPosition().x - pPos.x;
+            float dy = enemies[i].GetPosition().y - pPos.y;
+            float distSq = dx * dx + dy * dy;
+            float maxExecDist = player.GetRadius() + enemies[i].GetRadius() + 55.0f;
+            if (distSq <= maxExecDist * maxExecDist && distSq < closestDistSq) {
+                closestDistSq = distSq;
+                targetEnemyIdx = (int)i;
+            }
+        }
+
+        if (targetEnemyIdx >= 0) {
+            Enemy& target = enemies[targetEnemyIdx];
+            player.StartExecution(target.GetPosition());
+
+            WeaponType wType = player.GetEquippedWeapon();
+            WeaponStats wStats = player.GetEquippedWeaponStats();
+            float baseExecDmg = wStats.heavyDamage;
+
+            float damageMultiplier = 3.2f;
+            if (wType == WeaponType::GLACIAL_CLEAVER || wType == WeaponType::SUN_CLAYMORE || wType == WeaponType::MACE) {
+                damageMultiplier = 3.8f; // Colossal crushing blow
+            } else if (wType == WeaponType::TRUTH_SEEKER || wType == WeaponType::SWORD || wType == WeaponType::HALBERD || wType == WeaponType::STORM_GLAIVE) {
+                damageMultiplier = 3.2f; // Blade/Reach impale
+            } else if (wType == WeaponType::DAGGERS || wType == WeaponType::ZEPHYR_DAGGERS) {
+                damageMultiplier = 2.9f; // Throat flurry
+                target.ApplyBleed(5.0f);
+            } else if (wType == WeaponType::WINDRUNNER_RECURVE) {
+                damageMultiplier = 3.0f; // Point-blank blast
+            }
+
+            float finalDamage = baseExecDmg * damageMultiplier * player.GetTotemDamageMultiplier();
+            Vector2 toTarget = { target.GetPosition().x - pPos.x, target.GetPosition().y - pPos.y };
+            Vector2 knockbackDir = Vector2Normalize(toTarget);
+            if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 1.0f, 0.0f };
+
+            // Apply 100% defense pierce execution strike
+            bool wasKilled = target.TakeDamage(finalDamage, { knockbackDir.x * 320.0f, knockbackDir.y * 320.0f }, particles, 1.0f);
+
+            // Audio & Screen Juice
+            SoundFX::PlayCrusaderClash();
+            SoundFX::PlayHeavyAttack();
+            particles.AddScreenShake(9.0f, 0.35f);
+            particles.SpawnSparks(target.GetPosition(), Color{ 255, 30, 30, 255 }, 40, 250.0f);
+            particles.SpawnSparks(target.GetPosition(), Color{ 255, 230, 80, 255 }, 30, 220.0f);
+            particles.SpawnFloatingText(target.GetPosition(), "VISCERAL EXECUTION!", Color{ 255, 45, 45, 255 }, 28.0f);
+            particles.SpawnFloatingText({ pPos.x, pPos.y - 30.0f }, "+35 COMPOSURE", Color{ 110, 225, 255, 255 }, 20.0f);
+
+            player.ModifyComposure(35.0f);
+            player.TriggerAdrenalineBuff(6.0f);
+
+            // Troll Slayer Tier 3 Perk: Executing trolls grants immediate 25 HP heal
+            if (player.HasTrollSlayerT3() && (target.GetType() == EnemyType::FROST_TROLL || target.GetType() == EnemyType::BERSERKER_TROLL)) {
+                player.Heal(25.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 22.0f);
+                particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 25, 150.0f);
+            }
+
+            if (wasKilled && outLootDrops) {
+                LootDrop::SpawnFromEnemy(target, *outLootDrops);
+                int bonusShingles = 25 + (int)(target.GetMaxHealth() * 0.15f);
+                outLootDrops->emplace_back(LootType::SHINGLES, target.GetPosition(), bonusShingles);
+                outLootDrops->emplace_back(LootType::ORE_SCRAP, target.GetPosition(), 2);
+                particles.SpawnFloatingText(target.GetPosition(), "+EXECUTION BOUNTY!", Color{ 255, 215, 60, 255 }, 18.0f);
+            }
+        }
+    }
+
     // 0. Armor skill pending AoE resolution
     if (player.pendingArmorSkillAoE) {
         player.pendingArmorSkillAoE = false;
@@ -74,6 +149,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             if (hit) {
+                // Totem of the Phlegmatic Core on-hit resonance: recover Gray Health & apply chill
+                if (player.GetTotem() == TotemType::TOTEM_PHLEGMATIC_CORE) {
+                    player.RecoverGrayHealth(14.0f, particles);
+                    enemy.ApplyStagger(0.35f);
+                    particles.SpawnSparks(enemy.GetPosition(), Color{ 140, 220, 255, 200 }, 8, 80.0f);
+                }
+
                 // Melancholic shell shatter: War Mace or Heavy attacks shatter brittle black-bile shells
                 if (enemy.GetHumor() == HumorType::MELANCHOLIC && !enemy.IsShattered()) {
                     if (attack.weapon == WeaponType::MACE || attack.type == AttackType::HEAVY) {
@@ -151,7 +233,12 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, attack.defensePierce)) {
+
+                // Apply Bestiary Hunting Perk bonuses
+                attackDamage *= player.GetBestiaryDamageMultiplier(enemy.GetType());
+                float finalPierce = fminf(1.0f, attack.defensePierce + player.GetBestiaryDefensePierce(enemy.GetType()));
+
+                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, finalPierce)) {
                     if (outLootDrops) {
                         LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
                     }
@@ -249,6 +336,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 34.0f;
             else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDamage = 28.0f;
             else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
+            else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
@@ -263,6 +351,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (enemy.GetHumor() == HumorType::SANGUINE) {
                     player.ApplyBleed(3.0f, particles);
                 }
+                if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
+                    player.AddFrostbite(18.0f);
+                }
 
                 // Heavy and crushing boss attacks apply stagger to player if unparried
                 bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
@@ -271,7 +362,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                                       enemy.GetType() == EnemyType::ZIL_BOSS ||
                                       enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
                                       enemy.GetType() == EnemyType::FROST_TROLL ||
-                                      enemy.GetType() == EnemyType::BERSERKER_TROLL);
+                                      enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                      enemy.GetType() == EnemyType::FROST_REVENANT);
                 if (isHeavyAttack) {
                     player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
                     particles.TriggerHitStop(0.04f);
@@ -464,6 +556,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
                 else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDmg = 28.0f;
                 else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDmg = 46.0f;
+                else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
                 float dmg = baseDmg * (100.0f / (100.0f + effDef));
                 comp.health -= dmg;
                 particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);

@@ -38,7 +38,7 @@
 
 
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showStashModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
 
 
 
@@ -529,6 +529,28 @@ void Game::ReturnFromNorthZyphden() {
     SaveActiveGame();
 }
 
+void Game::EnterFrostCaverns() {
+    frostCavernsHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::FROST_CAVERNS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
+void Game::ReturnFromFrostCaverns() {
+    currentState = GameState::NORTH_ZYPHDEN;
+    map.Init(MapEnvironment::NORTH_ZYPHDEN);
+    player.SetPosition({ 2160.0f, 280.0f });
+    camera.target = player.GetPosition();
+    projectiles.clear();
+    enemies.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
 void Game::StartRealmTransition(const std::function<void()>& onSwitch, const std::string& title, const std::string& subtitle, float fadeOut, float hold, float fadeIn) {
     if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
         screenTransition.onMidpointSwitch = onSwitch;
@@ -633,11 +655,48 @@ void Game::RenderScreenTransition() {
     }
 }
 
+void Game::UpdateNightfallIncursions(float dt) {
+    if (currentState == GameState::TITLE_SCREEN || currentState == GameState::PROLOGUE_CUTSCENE) return;
 
+    bool isNight = map.GetTimeOfDay().IsNight();
+    if (isNight && !nightfallAlertTriggered) {
+        nightfallAlertTriggered = true;
+        SoundFX::PlayHitImpact();
+        particles.AddScreenShake(6.0f, 0.4f);
+        particles.SpawnFloatingText(player.GetPosition(), "NIGHTFALL DESCENDS - VOID PROWLERS EMERGE!", Color{ 190, 110, 255, 255 }, 26.0f);
+    } else if (!isNight) {
+        nightfallAlertTriggered = false;
+    }
 
+    bool canSpawnIncursion = (currentState == GameState::CROSSROADS ||
+                              currentState == GameState::NORTH_ZYPHDEN ||
+                              currentState == GameState::RESTLESS_MIST_FOREST ||
+                              currentState == GameState::RUINED_CASTLE ||
+                              currentState == GameState::QUARRY_DEPTHS);
 
+    if (isNight && canSpawnIncursion) {
+        nightfallSpawnTimer += dt;
+        if (nightfallSpawnTimer >= 22.0f) {
+            nightfallSpawnTimer = 0.0f;
+            if (enemies.size() < 12) {
+                float angle = ((float)rand() / (float)RAND_MAX) * 6.28318f;
+                float dist = 360.0f + ((float)rand() / (float)RAND_MAX) * 120.0f;
+                Vector2 spawnPos = { player.GetPosition().x + cosf(angle) * dist, player.GetPosition().y + sinf(angle) * dist };
+                spawnPos = map.ResolveCollision(spawnPos, spawnPos, 20.0f);
 
+                EnemyType eType = (rand() % 2 == 0) ? EnemyType::SLASHER : EnemyType::BRUTE;
+                Enemy elite(eType, spawnPos);
+                elite.SetNightfallElite(true);
+                enemies.push_back(elite);
 
+                particles.SpawnSparks(spawnPos, Color{ 160, 60, 255, 255 }, 30, 140.0f);
+                particles.SpawnFloatingText(spawnPos, "NIGHTFALL VOID STALKER SPAWNED!", Color{ 200, 120, 255, 255 }, 22.0f);
+            }
+        }
+    } else {
+        nightfallSpawnTimer = 0.0f;
+    }
+}
 
 void Game::EnterCrossroads() {
 
@@ -1010,8 +1069,22 @@ void Game::SaveActiveGame() {
 
 
     data.oreScraps = player.GetInventory().GetOreScraps();
+    data.frostShards = player.GetInventory().GetFrostShards();
     data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
     data.shadowEssence = player.GetInventory().GetShadowEssence();
+    data.stoneskinTonics = player.GetInventory().GetStoneskinTonicCount();
+    data.glacialDraughts = player.GetInventory().GetGlacialDraughtCount();
+    data.berserkerDraughts = player.GetInventory().GetBerserkerDraughtCount();
+    const auto& stash = player.GetInventory().GetStash();
+    data.stashShingles = stash.shingles;
+    data.stashOreScraps = stash.oreScraps;
+    data.stashFrostShards = stash.frostShards;
+    data.stashEssenceOfMist = stash.essenceOfMist;
+    data.stashShadowEssence = stash.shadowEssence;
+    data.stashPotions = stash.healthPotions;
+    data.stashStoneskinTonics = stash.stoneskinTonics;
+    data.stashGlacialDraughts = stash.glacialDraughts;
+    data.stashBerserkerDraughts = stash.berserkerDraughts;
     data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
     data.elementalGolemDefeated = quarryHandler.IsBossDefeated();
 
@@ -1168,8 +1241,22 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.GetInventory().SetOreScraps(data.oreScraps);
+    player.GetInventory().SetFrostShards(data.frostShards);
     player.GetInventory().SetEssenceOfMist(data.essenceOfMist);
     player.GetInventory().SetShadowEssence(data.shadowEssence);
+    player.GetInventory().SetStoneskinTonicCount(data.stoneskinTonics);
+    player.GetInventory().SetGlacialDraughtCount(data.glacialDraughts);
+    player.GetInventory().SetBerserkerDraughtCount(data.berserkerDraughts);
+    auto& stash = player.GetInventory().GetStash();
+    stash.shingles = data.stashShingles;
+    stash.oreScraps = data.stashOreScraps;
+    stash.frostShards = data.stashFrostShards;
+    stash.essenceOfMist = data.stashEssenceOfMist;
+    stash.shadowEssence = data.stashShadowEssence;
+    stash.healthPotions = data.stashPotions;
+    stash.stoneskinTonics = data.stashStoneskinTonics;
+    stash.glacialDraughts = data.stashGlacialDraughts;
+    stash.berserkerDraughts = data.stashBerserkerDraughts;
     restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
 
 
@@ -1306,6 +1393,14 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
         EnterNorthZyphden();
+
+
+
+    } else if (targetState == GameState::FROST_CAVERNS) {
+
+
+
+        EnterFrostCaverns();
 
 
 
@@ -1446,12 +1541,9 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 void Game::Update(float dt) {
-
-
-
     particles.Update(dt);
-
-
+    map.Update(dt);
+    UpdateNightfallIncursions(dt);
 
     camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
 
@@ -1883,15 +1975,18 @@ void Game::Update(float dt) {
 
     }
 
-
-
-
+    if (showStashModal) {
+        if (pressEsc || IsKeyPressed(KEY_T)) {
+            showStashModal = false;
+            SoundFX::PlayButtonClick();
+            return;
+        }
+        return;
+    }
 
 
 
     // Open modals from gameplay
-
-
 
     if (pressC) {
 
@@ -1967,9 +2062,11 @@ void Game::Update(float dt) {
 
     }
 
-
-
-
+    if (IsKeyPressed(KEY_T) && !showControlsModal && !showInventoryModal && !showMapModal && player.IsAlive()) {
+        showStashModal = true;
+        SoundFX::PlayButtonClick();
+        return;
+    }
 
 
 
@@ -2763,6 +2860,32 @@ void Game::Update(float dt) {
                     [this]() { ReturnFromNorthZyphden(); },
                     "FORTIFIED REALM OF ZYPHDEN",
                     "Seat of King Kreptu & The Vanguard"
+                );
+            },
+            [this]() { EnterLobby(); },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterFrostCaverns(); },
+                    "THE PERMAFROST CRYPTS",
+                    "Subterranean Chasm of the Ancient Wardens"
+                );
+            }
+        );
+        return;
+    }
+
+    if (currentState == GameState::FROST_CAVERNS) {
+        if (map.GetEnvironment() != MapEnvironment::FROST_CAVERNS) {
+            map.Init(MapEnvironment::FROST_CAVERNS);
+        }
+
+        frostCavernsHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                StartRealmTransition(
+                    [this]() { ReturnFromFrostCaverns(); },
+                    "NORTH ZYPHDEN HIGHLANDS",
+                    "The Frigid Bluffs of Brena"
                 );
             },
             [this]() { EnterLobby(); }
@@ -4006,6 +4129,11 @@ void Game::RenderScene() {
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, false, false, 0, 0
         );
+    } else if (currentState == GameState::FROST_CAVERNS) {
+        frostCavernsHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
     } else if (currentState == GameState::LOBBY) {
 
 
@@ -4490,8 +4618,11 @@ void Game::RenderScene() {
 
         }
 
-
-
+    } else if (showStashModal) {
+        bool close = GameUI::DrawStorageStashModal(w, h, mousePos, isMousePressed, player);
+        if (close) {
+            showStashModal = false;
+        }
     }
 
 

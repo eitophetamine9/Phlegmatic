@@ -12,8 +12,22 @@ struct SaveSlotSummary {
     float playerMaxHealth = 100.0f;
     int shingles = 0;
     int oreScraps = 0;
+    int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
+    // Storage Stash Trunk
+    int stashShingles = 0;
+    int stashOreScraps = 0;
+    int stashFrostShards = 0;
+    int stashEssenceOfMist = 0;
+    int stashShadowEssence = 0;
+    int stashPotions = 0;
+    int stashStoneskinTonics = 0;
+    int stashGlacialDraughts = 0;
+    int stashBerserkerDraughts = 0;
     bool galeArcherDefeated = false;
     bool elementalGolemDefeated = false;
     int arenaHighestWave = 0;
@@ -43,8 +57,22 @@ struct GameSaveData {
     int potionCount = 1;
     int shingles = 0;
     int oreScraps = 0;
+    int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
+    // Storage Stash Trunk
+    int stashShingles = 0;
+    int stashOreScraps = 0;
+    int stashFrostShards = 0;
+    int stashEssenceOfMist = 0;
+    int stashShadowEssence = 0;
+    int stashPotions = 0;
+    int stashStoneskinTonics = 0;
+    int stashGlacialDraughts = 0;
+    int stashBerserkerDraughts = 0;
     bool galeArcherDefeated = false;
     bool elementalGolemDefeated = false;
     int equippedWeapon = 1;

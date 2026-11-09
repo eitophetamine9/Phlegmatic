@@ -6,6 +6,7 @@
 
 ## Table of Versions
 
+- [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns-in-development)
 - [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
 - [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
@@ -14,6 +15,78 @@
 - [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
 - [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
 - [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)
+
+### Major Features Implemented
+
+#### 1. Visceral Execution & Stagger Deathblow System
+* **Poise-Break Vulnerability**: When enemy poise is shattered and enemy is stunned, an animated diamond reticle signals visceral deathblow readiness.
+* **Visceral Lunge & Deathblow**: Pressing `[F]` within 120px lunges into the staggered target with full i-frame invulnerability, executing a fatal critical strike scaled to equipped weapon tier.
+* **Adrenaline Surge Buff**: Successful execution grants 4.0s of +25% attack speed and +15% movement speed with golden haste trails.
+
+#### 2. Alchemy Workshop & Quick-Item Belt
+* **Tavern Keeper Brena Brewing Station**: Interactive alchemy cauldron at Hearthside Tavern in Zyphden.
+* **Combat Tonics**:
+  * Stoneskin Tonic: +18 Defense, -10% speed for 12.0s.
+  * Glacial Draught: Complete frostbite immunity and cold aura for 15.0s.
+  * Berserker Draught: +30% attack damage, -15% defense for 10.0s.
+* **Quick-Item Belt**: Number keys `[1]`, `[2]`, `[3]` allow instantaneous combat consumption during encounters.
+
+#### 3. Totem of the Phlegmatic Core (7th Sacred Relic)
+* **Phlegmatic Apathy**: Decreases incoming knockback by 80%, providing stoic stance against heavy impacts.
+* **Gray Health Regeneration**: 50% of incoming damage converts to recoverable gray health, restored upon landing counter-attacks within 3.5 seconds.
+* **Chill Counter**: Successful parries emit a freezing shockwave that inflicts frostbite and slows nearby enemies.
+* **Shrine of Cold Solitude**: Altar located at `{ 1400.0f, 320.0f }` in North Zyphden, claimable after Torvald bounties.
+
+#### 4. Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
+* **Celestial Clock**: 24-hour day cycle with Dawn, Day, Dusk, and Night phases interpolated smoothly across all outdoor realms.
+* **Point-Light Sources**: Player hip lantern, campfires, torches, altars, and glowing braziers cut through darkness with soft radial lighting.
+* **Nightfall Incursions**: Nocturnal elite monsters spawn with purple void auras, boosted stats, and doubled essence and loot yields.
+* **Celestial Clock Dial**: Integrated into location banner with sun/moon glyphs and formatted time (`HH:MM`).
+
+#### 5. Tactical Corner Mini-Map Radar & Compass HUD
+* **360-Degree Sweep Radar**: Mini-radar HUD displaying player heading, POIs (campfires as golden diamonds, NPCs as emerald circles, altars as cyan diamonds, regular enemies as red dots, bosses as pulsing crimson rings, elites as purple pips).
+* **8-Way Cardinal Compass Tape**: Heading ribbon showing cardinal directions (`[N] NW 315'`), toggleable with `[N]`.
+
+#### 6. Bestiary Mastery Hunting Perks & Codex Seals
+* **Hunting Mastery Codex Seals**: Bestiary entries award Tier 1 (`5 Kills`), Tier 2 (`15 Kills`), and Tier 3 (`35 Kills`) mastery seals.
+* **Active Combat Perks**:
+  * Troll Slayer: +25% frostbite resistance, +20% damage to trolls, and +25 HP restored on troll execution.
+  * Golem Breaker: +25% armor pierce and +1 bonus scrap yield from mining nodes.
+  * Gale Hunter: +15% stamina regeneration rate and +20% damage against mist rogues.
+  * Cultist Purifier: +15% damage and +25% critical strike multiplier against cathedral cultists.
+
+#### 7. Subterranean Highland Caverns (The Permafrost Crypts)
+* **The Permafrost Crypts Realm**: New subterranean dungeon realm (`GameState::FROST_CAVERNS`, `MapEnvironment::FROST_CAVERNS`) accessed through the highland chasm cavern mouth at `{ 2200.0f, 260.0f }`.
+* **Icy Floor Inertia & Gliding**: Low friction black ice floor mechanics with smooth momentum acceleration and frosty drift trails.
+* **Breakable Stalagmites**: 7 crystalline stalagmites shattered by weapon attacks to yield iron scrap, silver shingles, and essence.
+* **The Frost Revenant Boss**: Ethereal chasm phantom wielding a frost scythe with radial ice novas, piercing glacial lances, and teleport flurries.
+* **Lore Fragment XV**: "Fragment XV: The Wailing Depths of the Phlegmatic Chasm" preserved on the inner crypt sarcophagus dais.
+
+#### 8. Storage Stash Chest & Multi-Bonfire Persistence
+* **Ancient Vanguard Stash Trunk**: Dedicated persistent storage trunk in Zyphden Town Square and accessible at all realm campfires via `[T]`.
+* **Dual-Pane Stash Modal**: Side-by-side Carried Pouch and Vault Stash interface with single-item and bulk deposit/withdraw actions.
+* **Full Persistence**: Stash quantities for shingles, iron scraps, frost shards, mist essence, shadow essence, and all elixirs serialized to save slots.
+
+#### 9. File Architecture Restructuring & Subsystem Decoupling
+* **Decoupled Realm Subsystem (`src/states/realms/`)**: Migrated all 7 realm environment coordinators (`RuinedCastleHandler`, `CrossroadsHandler`, `ZyphdenHandler`, `QuarryHandler`, `RestlessMistForestHandler`, `NorthZyphdenHandler`, `FrostCavernsHandler`) into an isolated `realms/` subsystem directory.
+* **Compilation & Build Automation**: Synchronized `build.bat` MinGW GCC compilation flags with `-Isrc/states/realms` and mapped source paths.
+* **CMake Configuration**: Updated `CMakeLists.txt` to automatically discover and compile all headers and source files under `src/states/realms/`.
+* **Header Inclusions**: Refactored `Game.hpp` includes to utilize standardized `realms/` relative imports, decoupling core state management from environmental encounter logic.
+
+### In-Development Roadmap
+1. [COMPLETED] Visceral Execution & Stagger Deathblow System
+2. [COMPLETED] Alchemy Workshop & Quick-Item Belt
+3. [COMPLETED] Totem of the Phlegmatic Core
+4. [COMPLETED] Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
+5. [COMPLETED] Tactical Corner Mini-Map Radar & Compass HUD
+6. [COMPLETED] Bestiary Mastery Hunting Perks
+7. [COMPLETED] Permafrost Crypts Subterranean Caverns
+8. [COMPLETED] Storage Stash Chest & Persistence
+9. [COMPLETED] File Architecture Restructuring & Subsystem Decoupling: Decoupled realm handlers into src/states/realms/ and synchronized build configurations.
 
 ---
 

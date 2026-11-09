@@ -207,6 +207,17 @@ void Inventory::InitDefault() {
         false,
         false
     });
+
+    fragments.push_back({
+        "frag_15",
+        "Fragment XV: The Wailing Depths of the Phlegmatic Chasm",
+        "The Permafrost Crypts",
+        "Far below the highland ice sheets sleep the ancient dead of the northern crusades...",
+        "Deep beneath the glacial ridges of Zyphden lie the Permafrost Crypts. In these sub-zero catacombs, the fallen wardens were sealed alongside frozen relics of the first age. Wandering souls, driven mad by the subterranean cold, coalesce into the Frost Revenant - an ethereal phantom that glides effortlessly across the black ice, summoning biting rime storms to freeze the blood of all intruders.",
+        "The Permafrost Crypts — Carved into the Glacial Sarcophagus Dais in the inner sanctuary.",
+        false,
+        false
+    });
 }
 
 bool Inventory::HasWeapon(WeaponType type) const {
@@ -403,4 +414,106 @@ bool Inventory::HasQuestItem(const std::string& id) const {
         if (item.id == id) return true;
     }
     return false;
+}
+
+void Inventory::DepositItem(int itemId, int count) {
+    if (count <= 0) return;
+    switch (itemId) {
+        case 0: // Shingles
+            count = (count > shingles) ? shingles : count;
+            shingles -= count;
+            stash.shingles += count;
+            break;
+        case 1: // Ore Scraps
+            count = (count > oreScraps) ? oreScraps : count;
+            oreScraps -= count;
+            stash.oreScraps += count;
+            break;
+        case 2: // Frost Shards
+            count = (count > frostShards) ? frostShards : count;
+            frostShards -= count;
+            stash.frostShards += count;
+            break;
+        case 3: // Essence of Mist
+            count = (count > essenceOfMist) ? essenceOfMist : count;
+            essenceOfMist -= count;
+            stash.essenceOfMist += count;
+            break;
+        case 4: // Shadow Essence
+            count = (count > shadowEssence) ? shadowEssence : count;
+            shadowEssence -= count;
+            stash.shadowEssence += count;
+            break;
+        case 5: // Health Potions
+            count = (count > healthPotions) ? healthPotions : count;
+            healthPotions -= count;
+            stash.healthPotions += count;
+            break;
+        case 6: // Stoneskin Tonics
+            count = (count > stoneskinTonics) ? stoneskinTonics : count;
+            stoneskinTonics -= count;
+            stash.stoneskinTonics += count;
+            break;
+        case 7: // Glacial Draughts
+            count = (count > glacialDraughts) ? glacialDraughts : count;
+            glacialDraughts -= count;
+            stash.glacialDraughts += count;
+            break;
+        case 8: // Berserker Draughts
+            count = (count > berserkerDraughts) ? berserkerDraughts : count;
+            berserkerDraughts -= count;
+            stash.berserkerDraughts += count;
+            break;
+    }
+}
+
+void Inventory::WithdrawItem(int itemId, int count) {
+    if (count <= 0) return;
+    switch (itemId) {
+        case 0: // Shingles
+            count = (count > stash.shingles) ? stash.shingles : count;
+            stash.shingles -= count;
+            shingles += count;
+            break;
+        case 1: // Ore Scraps
+            count = (count > stash.oreScraps) ? stash.oreScraps : count;
+            stash.oreScraps -= count;
+            oreScraps += count;
+            break;
+        case 2: // Frost Shards
+            count = (count > stash.frostShards) ? stash.frostShards : count;
+            stash.frostShards -= count;
+            frostShards += count;
+            break;
+        case 3: // Essence of Mist
+            count = (count > stash.essenceOfMist) ? stash.essenceOfMist : count;
+            stash.essenceOfMist -= count;
+            essenceOfMist += count;
+            break;
+        case 4: // Shadow Essence
+            count = (count > stash.shadowEssence) ? stash.shadowEssence : count;
+            stash.shadowEssence -= count;
+            shadowEssence += count;
+            break;
+        case 5: // Health Potions
+            count = (count > stash.healthPotions) ? stash.healthPotions : count;
+            stash.healthPotions -= count;
+            healthPotions += count;
+            break;
+        case 6: // Stoneskin Tonics
+            count = (count > stash.stoneskinTonics) ? stash.stoneskinTonics : count;
+            stash.stoneskinTonics -= count;
+            stoneskinTonics += count;
+            break;
+        case 7: // Glacial Draughts
+            count = (count > stash.glacialDraughts) ? stash.glacialDraughts : count;
+            stash.glacialDraughts -= count;
+            glacialDraughts += count;
+            break;
+        case 8: // Berserker Draughts
+            count = (count > stash.berserkerDraughts) ? stash.berserkerDraughts : count;
+            stash.berserkerDraughts -= count;
+            berserkerDraughts += count;
+            break;
+    }
 }

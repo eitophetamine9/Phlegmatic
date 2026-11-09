@@ -64,8 +64,8 @@ struct Campfire {
 
         // Floating Prompt
         if (dist <= 130.0f) {
-            std::string prompt = isUnlocked ? "[E] REST AT CAMPFIRE (HEALTH & POTIONS RESTORED) / [M] FAST TRAVEL"
-                                            : "[E] ATTUNE & REST AT CAMPFIRE (UNLOCKS FAST TRAVEL)";
+            std::string prompt = isUnlocked ? "[E] REST / [T] STORAGE STASH / [M] FAST TRAVEL"
+                                            : "[E] ATTUNE & REST / [T] STORAGE STASH";
             FontManager::DrawGameTextShadow(prompt, (int)position.x - 170, (int)position.y - 45, 11, Color{ 255, 225, 120, 240 });
         }
     }

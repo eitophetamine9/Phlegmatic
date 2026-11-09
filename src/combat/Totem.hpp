@@ -67,6 +67,15 @@ inline TotemStats GetTotemStats(TotemType type) {
                 1.0f, 1.25f, 0.90f, 1.0f, 1.0f, 25.0f, 0.0f,
                 Color{ 255, 140, 45, 255 }
             };
+        case TotemType::TOTEM_PHLEGMATIC_CORE:
+            return {
+                "Totem of the Phlegmatic Core",
+                "The sacred humoral core of Tydeshire's stoic protectors. Imbues the bearer with unyielding cold resolve: -80% knockback received, +30 Max Health, +25 Will, and Phlegmatic Apathy: 25% of all sustained damage becomes recoverable Gray Health by landing counter-attacks. Striking foes chills and slows them.",
+                "+30 Max HP, +25 Will, -80% Knockback, Gray Health Recovery on Melee, Chill Frost Counter",
+                "-8% Move Speed, -10% Stamina Regen",
+                1.0f, 1.20f, 0.92f, 0.90f, 1.0f, 25.0f, 30.0f,
+                Color{ 140, 220, 255, 255 }
+            };
         case TotemType::NONE:
         default:
             return {

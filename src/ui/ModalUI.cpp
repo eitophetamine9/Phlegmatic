@@ -109,9 +109,10 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
             { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
             { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
-            { "E Key",         "Interact", "Equip weapon at pedestals, NPCs, or enter Area Portals.", Color{ 200, 150, 255, 255 } },
+            { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
             { "TAB Key",       "Quick Swap","Instantly cycle through unlocked weapons during combat.", Color{ 255, 215, 80, 255 } },
             { "I Key",         "Inventory", "Open Equipment Matrix, Chronicles Grimoire & Bestiary.", Color{ 140, 210, 255, 255 } },
+            { "1 - 4 Keys",     "Quick Belt", "Drink Health Potion [1], Stoneskin [2], Glacial Thaw [3], Berserk [4].", Color{ 140, 240, 180, 255 } },
             { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
             { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
         };
@@ -537,6 +538,12 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
             DrawCircleV({ center.x - 3.0f * scale, center.y - 2.0f * scale }, 4.0f * scale, isUnlocked ? Color{ 255, 140, 45, 255 } : baseCol);
             DrawCircleV({ center.x + 3.0f * scale, center.y - 2.0f * scale }, 4.0f * scale, isUnlocked ? Color{ 80, 220, 255, 255 } : glowCol);
             DrawCircleV({ center.x, center.y + 3.5f * scale }, 3.5f * scale, isUnlocked ? Color{ 120, 245, 160, 255 } : baseCol);
+            break;
+        }
+        case TotemType::TOTEM_PHLEGMATIC_CORE: {
+            DrawPoly(center, 6, 11.5f * scale, 30.0f, isUnlocked ? Color{ 110, 215, 255, 255 } : baseCol);
+            DrawPolyLines(center, 6, 11.5f * scale, 30.0f, isUnlocked ? Color{ 200, 245, 255, 255 } : glowCol);
+            DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 240, 250, 255, 255 } : glowCol);
             break;
         }
         case TotemType::NONE:
@@ -1069,22 +1076,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             DrawText("Attune a discovered primal relic to awaken elemental resonances.", (int)tTextX, (int)totemSlotRec.y + 26, 11, Color{ 130, 145, 165, 200 });
         }
 
-        // Row 2: 1x5 Quick-Attune Grid for all 5 Totems!
+        // Row 2: 1x6 Quick-Attune Grid for all 6 Totems!
         float totGridY = totemSlotRec.y + totemSlotRec.height + 6.0f;
         struct TotemBtnInfo { TotemType type; int tierPips; };
-        TotemBtnInfo totemBtns[5] = {
+        TotemBtnInfo totemBtns[6] = {
             { TotemType::TOTEM_SANITY, 2 },
             { TotemType::TOTEM_INSANITY, 2 },
             { TotemType::TOTEM_MIST, 3 },
             { TotemType::CRUSADER_TOTEM, 3 },
-            { TotemType::ELEMENTAL_CORE_TOTEM, 4 }
+            { TotemType::ELEMENTAL_CORE_TOTEM, 4 },
+            { TotemType::TOTEM_PHLEGMATIC_CORE, 4 }
         };
-        float tBtnW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float tBtnW = (leftW - 32.0f - 20.0f) / 6.0f;
         float tBtnH = 38.0f;
         int hoveredTotemIdx = -1;
         Rectangle hoveredTotemRec = { 0, 0, 0, 0 };
 
-        for (int ti = 0; ti < 5; ++ti) {
+        for (int ti = 0; ti < 6; ++ti) {
             Rectangle tbRec = { leftX + 16.0f + (float)ti * (tBtnW + 4.0f), totGridY, tBtnW, tBtnH };
             bool isTUnlocked = player.GetInventory().HasTotem(totemBtns[ti].type);
             bool isTEquipped = (player.GetTotem() == totemBtns[ti].type);
@@ -1724,29 +1732,30 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 4. TOTEM RELIC CATALOG GRID & INSPECTION
             // =========================================================
             struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
-            TotemListEntry totems[5] = {
+            TotemListEntry totems[GameLimits::ATTUNABLE_TOTEM_COUNT] = {
                 { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
                 { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss (25% drop)", 4 },
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
-                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 },
+                { TotemType::TOTEM_PHLEGMATIC_CORE, "Northern Crags - Altar of Cold Solitude / Torvald Bounty", 4 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < GameLimits::ATTUNABLE_TOTEM_COUNT; ++i) {
                 if (player.GetInventory().HasTotem(totems[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "ATTUNED PRIMAL CORES (" + std::to_string(unlockedCount) + "/5 UNLOCKED)";
+            std::string gridTitle = "ATTUNED PRIMAL CORES (" + std::to_string(unlockedCount) + "/" + std::to_string(GameLimits::ATTUNABLE_TOTEM_COUNT) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedTotem < 0 || s_inspectedTotem >= 5) s_inspectedTotem = 0;
+            if (s_inspectedTotem < 0 || s_inspectedTotem >= GameLimits::ATTUNABLE_TOTEM_COUNT) s_inspectedTotem = 0;
 
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < GameLimits::ATTUNABLE_TOTEM_COUNT; ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
@@ -1831,6 +1840,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
                 FontManager::DrawTextWrapped("Bestows +65% overall damage, +35% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
+                DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
+                FontManager::DrawTextWrapped("Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 200, 240, 255, 220 });
             }
 
             // Divider
@@ -2160,9 +2173,12 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             FontManager::DrawText(s_entries[i].name, (int)itemRec.x + 12, (int)itemRec.y + 6, 12, isSel ? Color{ 255, 235, 130, 255 } : Color{ 225, 235, 250, 240 }, GameFont::TITLE);
             // Humor badge
             FontManager::DrawGameTextShadow(s_entries[i].humorName, (int)itemRec.x + 12, (int)itemRec.y + 22, 9, s_entries[i].humorColor);
-            // Kills pill
+            // Seal Tier badge & Kills pill
+            std::string tierTag = (kills >= 15) ? "[SEAL III]" : ((kills >= 5) ? "[SEAL II]" : ((kills >= 1) ? "[SEAL I]" : "[-]"));
+            Color tierTagCol = (kills >= 15) ? Color{ 255, 215, 80, 255 } : ((kills >= 5) ? Color{ 100, 220, 255, 240 } : ((kills >= 1) ? Color{ 120, 255, 180, 220 } : Color{ 120, 130, 145, 160 }));
+            FontManager::DrawGameTextShadow(tierTag, (int)(itemRec.x + itemRec.width - 66), (int)itemRec.y + 5, 9, tierTagCol);
             std::string killStr = "KILLS: " + std::to_string(kills);
-            FontManager::DrawGameTextShadow(killStr, (int)(itemRec.x + itemRec.width - 70), (int)itemRec.y + 14, 10, (kills > 0) ? Color{ 120, 255, 180, 220 } : Color{ 140, 150, 165, 180 });
+            FontManager::DrawGameTextShadow(killStr, (int)(itemRec.x + itemRec.width - 66), (int)itemRec.y + 20, 9, (kills > 0) ? Color{ 120, 255, 180, 220 } : Color{ 140, 150, 165, 180 });
         }
 
         // Draw Right Codex Card Container (Illuminated Grimoire Parchment)
@@ -2195,26 +2211,65 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         FontManager::DrawGameTextShadow(cur.drops, (int)bRightX + 135, (int)secY + 58, 11, Color{ 255, 225, 120, 255 });
 
         // Divider
-        DrawLineEx({ bRightX + 32.0f, secY + 82.0f }, { bRightX + bRightW - 32.0f, secY + 82.0f }, 1.0f, Color{ 85, 60, 40, 180 });
+        DrawLineEx({ bRightX + 32.0f, secY + 80.0f }, { bRightX + bRightW - 32.0f, secY + 80.0f }, 1.0f, Color{ 85, 60, 40, 180 });
 
-        // Progressive Lore Seals
-        float loreY = secY + 94.0f;
-        FontManager::DrawText("CODEX EXCERPTS & REALM LORE ARCHIVES", (int)bRightX + 32, (int)loreY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
+        // Progressive Lore Seals & Active Hunting Perks
+        float loreY = secY + 90.0f;
+        FontManager::DrawText("CODEX EXCERPTS & HUNTING MASTERY PERKS", (int)bRightX + 32, (int)loreY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
 
         // Seal 1: 1 Kill
         bool u1 = (curKills >= 1);
-        FontManager::DrawGameTextShadow(u1 ? "[SEAL I - INITIATE (1 KILL)]" : "[SEAL I - LOCKED (REQUIRES 1 KILL)]", (int)bRightX + 32, (int)loreY + 24, 11, u1 ? Color{ 120, 255, 180, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u1 ? cur.lore1 : "Defeat this enemy once to unlock initial reconnaissance notes.", (int)bRightX + 48, (int)loreY + 42, 11, u1 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u1 ? "[SEAL I - INITIATE (1 KILL)]" : "[SEAL I - LOCKED (REQUIRES 1 KILL)]", (int)bRightX + 32, (int)loreY + 20, 11, u1 ? Color{ 120, 255, 180, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u1 ? cur.lore1 : "Defeat this enemy once to unlock initial reconnaissance notes.", (int)bRightX + 48, (int)loreY + 36, 10, u1 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
 
         // Seal 2: 5 Kills
         bool u5 = (curKills >= 5);
-        FontManager::DrawGameTextShadow(u5 ? "[SEAL II - ADEPT (5 KILLS)]" : "[SEAL II - LOCKED (REQUIRES 5 KILLS)]", (int)bRightX + 32, (int)loreY + 70, 11, u5 ? Color{ 100, 220, 255, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u5 ? cur.lore5 : "Achieve 5 victories to decipher deeper humoral vulnerabilities.", (int)bRightX + 48, (int)loreY + 88, 11, u5 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u5 ? "[SEAL II - ADEPT (5 KILLS)]" : "[SEAL II - LOCKED (REQUIRES 5 KILLS)]", (int)bRightX + 32, (int)loreY + 54, 11, u5 ? Color{ 100, 220, 255, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u5 ? cur.lore5 : "Achieve 5 victories to decipher deeper humoral vulnerabilities.", (int)bRightX + 48, (int)loreY + 70, 10, u5 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
 
         // Seal 3: 15 Kills
         bool u15 = (curKills >= 15);
-        FontManager::DrawGameTextShadow(u15 ? "[SEAL III - MASTER (15 KILLS)]" : "[SEAL III - LOCKED (REQUIRES 15 KILLS)]", (int)bRightX + 32, (int)loreY + 116, 11, u15 ? Color{ 255, 215, 80, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u15 ? cur.lore15 : "Achieve 15 victories to unveil ancient grimoire archives.", (int)bRightX + 48, (int)loreY + 134, 11, u15 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u15 ? "[SEAL III - MASTER (15 KILLS)]" : "[SEAL III - LOCKED (REQUIRES 15 KILLS)]", (int)bRightX + 32, (int)loreY + 88, 11, u15 ? Color{ 255, 215, 80, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u15 ? cur.lore15 : "Achieve 15 victories to unveil ancient grimoire archives.", (int)bRightX + 48, (int)loreY + 104, 10, u15 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+
+        // Active Combat Perk Card
+        float perkY = loreY + 124.0f;
+        Rectangle perkRec = { bRightX + 32.0f, perkY, bRightW - 64.0f, 54.0f };
+        DrawRectangleRounded(perkRec, 0.15f, 4, Color{ 16, 22, 34, 230 });
+        DrawRectangleRoundedLines(perkRec, 0.15f, 4, u5 ? Color{ 120, 215, 255, 220 } : Color{ 55, 70, 95, 180 });
+
+        const char* perkTitle = "COMBAT MASTERY PERK";
+        const char* perkDesc = "Accumulate kills to unlock family-wide hunting traits.";
+        Color perkBadgeCol = Color{ 150, 165, 185, 200 };
+
+        if (cur.killIdx == 9 || cur.killIdx == 10) {
+            perkTitle = "HUNTING PERK: TROLL SLAYER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Poise Dmg, Executions Heal 25 HP, +15% Base Dmg, +25 Frost Resist." :
+                       (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :
+                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Poise & Heal on Execute.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else if (cur.killIdx == 5 || cur.killIdx == 6) {
+            perkTitle = "HUNTING PERK: GOLEM BREAKER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: 25% Armor Pierce, Heavies Break Melancholic Shells, +20% Poise Dmg, +1 Scrap Mining." :
+                       (u5 ? "ACTIVE [TIER II]: +20% Poise Dmg vs Golems, +1 Bonus Scrap from mining nodes." :
+                             "LOCKED: 5 kills grants +20% Poise Dmg & +1 Scrap Mining; 15 kills grants 25% Armor Pierce.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else if (cur.killIdx == 7 || cur.killIdx == 8) {
+            perkTitle = "HUNTING PERK: GALE HUNTER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +20% Damage vs Gale Entities, Parries Reflect Poise Dmg, +15% Stamina Regen." :
+                       (u5 ? "ACTIVE [TIER II]: +15% Stamina Regen Rate, +10% Movement Speed in Mists." :
+                             "LOCKED: 5 kills grants +15% Stamina Regen; 15 kills grants +20% Dmg & Poise Reflect.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else {
+            perkTitle = "HUNTING PERK: CULTIST PURIFIER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore 15 Stamina and Extend Adrenaline Buff." :
+                       (u5 ? "ACTIVE [TIER II]: +10% Melee Damage vs Cultists, +10 Max Composure." :
+                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Adrenaline on kill.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        }
+
+        FontManager::DrawText(perkTitle, (int)perkRec.x + 12, (int)perkRec.y + 7, 11, perkBadgeCol, GameFont::TITLE);
+        FontManager::DrawTextWrapped(perkDesc, (int)perkRec.x + 12, (int)perkRec.y + 22, (int)perkRec.width - 24, 10, 2, Color{ 220, 235, 250, 230 });
 
     } else {
 
@@ -4237,5 +4292,205 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     }
 
     return false;
+}
+
+bool ModalUI::DrawStorageStash(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player) {
+    // Semi-transparent backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 0, 0, 0, 195 });
+
+    float modalW = 900.0f;
+    float modalH = 580.0f;
+    float modalX = ((float)windowWidth - modalW) * 0.5f;
+    float modalY = ((float)windowHeight - modalH) * 0.5f;
+
+    // Window frame
+    Rectangle modalRec = { modalX, modalY, modalW, modalH };
+    DrawRectangleRounded(modalRec, 0.04f, 6, Color{ 16, 20, 28, 252 });
+    DrawRectangleRoundedLines(modalRec, 0.04f, 6, Color{ 205, 160, 70, 240 });
+
+    // Header banner
+    Rectangle headerRec = { modalX, modalY, modalW, 56.0f };
+    DrawRectangleRounded(headerRec, 0.04f, 6, Color{ 24, 30, 44, 255 });
+    DrawLineEx({ modalX, modalY + 56.0f }, { modalX + modalW, modalY + 56.0f }, 2.0f, Color{ 180, 140, 60, 220 });
+
+    FontManager::DrawTextTitleCentered("ANCIENT VANGUARD STORAGE STASH", windowWidth / 2, (int)modalY + 12, 18, Color{ 255, 220, 110, 255 });
+    FontManager::DrawTextTitleCentered("Persistent Vault Trunk Synchronized Across All Sanctuaries and Bonfires", windowWidth / 2, (int)modalY + 36, 11, Color{ 170, 190, 215, 220 });
+
+    // Close Button [X]
+    Rectangle closeBtn = { modalX + modalW - 44.0f, modalY + 12.0f, 32.0f, 32.0f };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtn);
+    DrawRectangleRounded(closeBtn, 0.2f, 4, isCloseHov ? Color{ 180, 40, 50, 255 } : Color{ 40, 24, 28, 220 });
+    DrawRectangleRoundedLines(closeBtn, 0.2f, 4, Color{ 240, 90, 100, 230 });
+    DrawText("X", (int)closeBtn.x + 11, (int)closeBtn.y + 8, 16, Color{ 255, 255, 255, 255 });
+
+    bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE);
+
+    Inventory& inv = player.GetInventory();
+    PlayerStash& stash = inv.GetStash();
+
+    struct StashEntry {
+        int id;
+        std::string name;
+        int carried;
+        int stored;
+        Color color;
+    };
+
+    std::vector<StashEntry> entries = {
+        { 0, "Royal Shingles", inv.GetShingles(), stash.shingles, Color{ 255, 215, 80, 255 } },
+        { 1, "Ore Scraps", inv.GetOreScraps(), stash.oreScraps, Color{ 180, 190, 205, 255 } },
+        { 2, "Frost Shards", inv.GetFrostShards(), stash.frostShards, Color{ 130, 220, 255, 255 } },
+        { 3, "Essence of Mist", inv.GetEssenceOfMist(), stash.essenceOfMist, Color{ 120, 240, 200, 255 } },
+        { 4, "Shadow Essence", inv.GetShadowEssence(), stash.shadowEssence, Color{ 190, 120, 255, 255 } },
+        { 5, "Health Potions", inv.GetHealthPotionCount(), stash.healthPotions, Color{ 255, 80, 95, 255 } },
+        { 6, "Stoneskin Tonics", inv.GetStoneskinTonicCount(), stash.stoneskinTonics, Color{ 230, 160, 60, 255 } },
+        { 7, "Glacial Draughts", inv.GetGlacialDraughtCount(), stash.glacialDraughts, Color{ 100, 200, 255, 255 } },
+        { 8, "Berserker Draughts", inv.GetBerserkerDraughtCount(), stash.berserkerDraughts, Color{ 255, 60, 75, 255 } }
+    };
+
+    float paneW = (modalW - 60.0f) * 0.5f;
+    float paneH = 430.0f;
+    float leftX = modalX + 22.0f;
+    float rightX = modalX + modalW - paneW - 22.0f;
+    float paneY = modalY + 70.0f;
+
+    // Left Pane (Carried)
+    DrawRectangleRounded(Rectangle{ leftX, paneY, paneW, paneH }, 0.03f, 4, Color{ 12, 16, 24, 230 });
+    DrawRectangleRoundedLines(Rectangle{ leftX, paneY, paneW, paneH }, 0.03f, 4, Color{ 60, 80, 110, 200 });
+    FontManager::DrawGameTextShadow("CARRIED POUCH (INVENTORY)", (int)leftX + 16, (int)paneY + 12, 12, Color{ 220, 230, 245, 255 });
+
+    // Right Pane (Vault Stash)
+    DrawRectangleRounded(Rectangle{ rightX, paneY, paneW, paneH }, 0.03f, 4, Color{ 12, 16, 24, 230 });
+    DrawRectangleRoundedLines(Rectangle{ rightX, paneY, paneW, paneH }, 0.03f, 4, Color{ 190, 150, 60, 200 });
+    FontManager::DrawGameTextShadow("VAULT STASH TRUNK (STORED)", (int)rightX + 16, (int)paneY + 12, 12, Color{ 255, 220, 110, 255 });
+
+    float rowH = 40.0f;
+    float rowStartY = paneY + 36.0f;
+
+    for (size_t i = 0; i < entries.size(); ++i) {
+        float ry = rowStartY + (float)i * rowH;
+        const auto& e = entries[i];
+
+        // Left Pane Row (Deposit)
+        Rectangle leftRow = { leftX + 8.0f, ry, paneW - 16.0f, rowH - 4.0f };
+        DrawRectangleRounded(leftRow, 0.15f, 4, (i % 2 == 0) ? Color{ 20, 26, 38, 220 } : Color{ 16, 22, 32, 220 });
+
+        DrawCircle((int)leftRow.x + 12, (int)(leftRow.y + leftRow.height * 0.5f), 4.5f, e.color);
+        DrawText(e.name.c_str(), (int)leftRow.x + 24, (int)leftRow.y + 11, 11, Color{ 215, 225, 240, 240 });
+
+        char cCountBuf[32];
+        snprintf(cCountBuf, sizeof(cCountBuf), "x%d", e.carried);
+        DrawText(cCountBuf, (int)leftRow.x + 175, (int)leftRow.y + 11, 11, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 120, 130, 145, 200 });
+
+        // Deposit 1 (or 50 for shingles)
+        Rectangle btnDep1 = { leftRow.x + leftRow.width - 120.0f, leftRow.y + 5.0f, 52.0f, leftRow.height - 10.0f };
+        bool hovDep1 = CheckCollisionPointRec(mousePos, btnDep1) && e.carried > 0;
+        DrawRectangleRounded(btnDep1, 0.2f, 4, hovDep1 ? Color{ 50, 100, 160, 255 } : Color{ 28, 44, 70, 220 });
+        DrawRectangleRoundedLines(btnDep1, 0.2f, 4, e.carried > 0 ? Color{ 90, 160, 240, 220 } : Color{ 50, 65, 85, 180 });
+        const char* d1Label = (e.id == 0) ? "-> 50" : "-> 1";
+        DrawText(d1Label, (int)btnDep1.x + 8, (int)btnDep1.y + 6, 10, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 110, 120, 135, 180 });
+
+        if (hovDep1 && isMousePressed) {
+            int amt = (e.id == 0) ? 50 : 1;
+            inv.DepositItem(e.id, amt);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Deposit All
+        Rectangle btnDepAll = { leftRow.x + leftRow.width - 62.0f, leftRow.y + 5.0f, 54.0f, leftRow.height - 10.0f };
+        bool hovDepAll = CheckCollisionPointRec(mousePos, btnDepAll) && e.carried > 0;
+        DrawRectangleRounded(btnDepAll, 0.2f, 4, hovDepAll ? Color{ 60, 120, 180, 255 } : Color{ 32, 52, 80, 220 });
+        DrawRectangleRoundedLines(btnDepAll, 0.2f, 4, e.carried > 0 ? Color{ 110, 185, 255, 220 } : Color{ 50, 65, 85, 180 });
+        DrawText("-> ALL", (int)btnDepAll.x + 6, (int)btnDepAll.y + 6, 10, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 110, 120, 135, 180 });
+
+        if (hovDepAll && isMousePressed) {
+            inv.DepositItem(e.id, e.carried);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Right Pane Row (Withdraw)
+        Rectangle rightRow = { rightX + 8.0f, ry, paneW - 16.0f, rowH - 4.0f };
+        DrawRectangleRounded(rightRow, 0.15f, 4, (i % 2 == 0) ? Color{ 22, 28, 38, 220 } : Color{ 18, 22, 32, 220 });
+
+        DrawCircle((int)rightRow.x + 12, (int)(rightRow.y + rightRow.height * 0.5f), 4.5f, e.color);
+        DrawText(e.name.c_str(), (int)rightRow.x + 24, (int)rightRow.y + 11, 11, Color{ 235, 215, 160, 240 });
+
+        char sCountBuf[32];
+        snprintf(sCountBuf, sizeof(sCountBuf), "x%d", e.stored);
+        DrawText(sCountBuf, (int)rightRow.x + 175, (int)rightRow.y + 11, 11, e.stored > 0 ? Color{ 255, 225, 120, 255 } : Color{ 120, 130, 145, 200 });
+
+        // Withdraw 1 (or 50 for shingles)
+        Rectangle btnWd1 = { rightRow.x + rightRow.width - 120.0f, rightRow.y + 5.0f, 52.0f, rightRow.height - 10.0f };
+        bool hovWd1 = CheckCollisionPointRec(mousePos, btnWd1) && e.stored > 0;
+        DrawRectangleRounded(btnWd1, 0.2f, 4, hovWd1 ? Color{ 140, 105, 45, 255 } : Color{ 65, 48, 24, 220 });
+        DrawRectangleRoundedLines(btnWd1, 0.2f, 4, e.stored > 0 ? Color{ 240, 185, 75, 220 } : Color{ 75, 60, 40, 180 });
+        const char* w1Label = (e.id == 0) ? "50 <-" : "1 <-";
+        DrawText(w1Label, (int)btnWd1.x + 8, (int)btnWd1.y + 6, 10, e.stored > 0 ? Color{ 255, 255, 255, 255 } : Color{ 135, 120, 100, 180 });
+
+        if (hovWd1 && isMousePressed) {
+            int amt = (e.id == 0) ? 50 : 1;
+            inv.WithdrawItem(e.id, amt);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Withdraw All
+        Rectangle btnWdAll = { rightRow.x + rightRow.width - 62.0f, rightRow.y + 5.0f, 54.0f, rightRow.height - 10.0f };
+        bool hovWdAll = CheckCollisionPointRec(mousePos, btnWdAll) && e.stored > 0;
+        DrawRectangleRounded(btnWdAll, 0.2f, 4, hovWdAll ? Color{ 160, 120, 50, 255 } : Color{ 75, 55, 28, 220 });
+        DrawRectangleRoundedLines(btnWdAll, 0.2f, 4, e.stored > 0 ? Color{ 255, 205, 90, 220 } : Color{ 75, 60, 40, 180 });
+        DrawText("ALL <-", (int)btnWdAll.x + 6, (int)btnWdAll.y + 6, 10, e.stored > 0 ? Color{ 255, 255, 255, 255 } : Color{ 135, 120, 100, 180 });
+
+        if (hovWdAll && isMousePressed) {
+            inv.WithdrawItem(e.id, e.stored);
+            SoundFX::PlayButtonClick();
+        }
+    }
+
+    // Bottom Action Bar
+    float bottomY = modalY + modalH - 56.0f;
+
+    // Deposit All Crafting Materials Button
+    Rectangle btnDepMat = { leftX, bottomY, 240.0f, 36.0f };
+    bool hovDepMat = CheckCollisionPointRec(mousePos, btnDepMat);
+    DrawRectangleRounded(btnDepMat, 0.2f, 4, hovDepMat ? Color{ 40, 80, 120, 255 } : Color{ 24, 45, 75, 220 });
+    DrawRectangleRoundedLines(btnDepMat, 0.2f, 4, Color{ 80, 150, 225, 220 });
+    DrawText("STORE ALL CRAFTING MATERIALS", (int)btnDepMat.x + 12, (int)btnDepMat.y + 11, 10, Color{ 210, 235, 255, 255 });
+
+    if (hovDepMat && isMousePressed) {
+        inv.DepositItem(1, inv.GetOreScraps());
+        inv.DepositItem(2, inv.GetFrostShards());
+        inv.DepositItem(3, inv.GetEssenceOfMist());
+        inv.DepositItem(4, inv.GetShadowEssence());
+        SoundFX::PlayButtonClick();
+    }
+
+    // Withdraw All Elixirs Button
+    Rectangle btnWdElix = { leftX + 252.0f, bottomY, 230.0f, 36.0f };
+    bool hovWdElix = CheckCollisionPointRec(mousePos, btnWdElix);
+    DrawRectangleRounded(btnWdElix, 0.2f, 4, hovWdElix ? Color{ 120, 85, 35, 255 } : Color{ 65, 45, 22, 220 });
+    DrawRectangleRoundedLines(btnWdElix, 0.2f, 4, Color{ 220, 165, 65, 220 });
+    DrawText("RETRIEVE ALL ELIXIRS & POTIONS", (int)btnWdElix.x + 10, (int)btnWdElix.y + 11, 10, Color{ 255, 230, 160, 255 });
+
+    if (hovWdElix && isMousePressed) {
+        inv.WithdrawItem(5, stash.healthPotions);
+        inv.WithdrawItem(6, stash.stoneskinTonics);
+        inv.WithdrawItem(7, stash.glacialDraughts);
+        inv.WithdrawItem(8, stash.berserkerDraughts);
+        SoundFX::PlayButtonClick();
+    }
+
+    // Close Vault Button
+    Rectangle btnClose = { modalX + modalW - 170.0f, bottomY, 148.0f, 36.0f };
+    bool hovClose = CheckCollisionPointRec(mousePos, btnClose);
+    DrawRectangleRounded(btnClose, 0.2f, 4, hovClose ? Color{ 70, 35, 40, 255 } : Color{ 45, 25, 30, 220 });
+    DrawRectangleRoundedLines(btnClose, 0.2f, 4, Color{ 200, 90, 100, 220 });
+    DrawText("CLOSE VAULT [ESC]", (int)btnClose.x + 14, (int)btnClose.y + 11, 11, Color{ 255, 220, 225, 255 });
+
+    if (hovClose && isMousePressed) {
+        SoundFX::PlayButtonClick();
+        shouldClose = true;
+    }
+
+    return shouldClose;
 }
 

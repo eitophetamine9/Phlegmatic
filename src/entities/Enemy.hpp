@@ -22,7 +22,8 @@ enum class EnemyType {
     GALE_BANDIT,          // Agile skirmisher rogue in Restless Mist Forest (drops Mist Essence, NO ore)
     GALE_ARCHER_BOSS,     // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
     FROST_TROLL,          // Northern Crags melee brute: fast dual club strikes
-    BERSERKER_TROLL       // Northern Boss: Berserker Troll, drops Totem of Insanity
+    BERSERKER_TROLL,      // Northern Boss: Berserker Troll, drops Totem of Insanity
+    FROST_REVENANT        // Permafrost Crypts Boss: Ethereal frost phantom, ice spikes, teleport flurry
 };
 
 enum class EnemyState {
@@ -55,6 +56,10 @@ public:
     void ApplyStagger(float duration) {
         state = EnemyState::STUNNED;
         stunDuration = duration;
+        stateTimer = duration;
+    }
+    bool IsVulnerableToExecution() const {
+        return state == EnemyState::STUNNED && stateTimer > 0.05f && health > 0.0f;
     }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
@@ -77,7 +82,7 @@ public:
     void ApplySolarBurn(float duration) { solarBurnTimer = duration; }
     bool HasSolarBurn() const { return solarBurnTimer > 0.0f; }
 
-    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::BERSERKER_TROLL || type == EnemyType::GALE_ARCHER_BOSS; }
+    bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::BERSERKER_TROLL || type == EnemyType::GALE_ARCHER_BOSS || type == EnemyType::FROST_REVENANT; }
     bool HasMeleeHitbox() const {
         if (type == EnemyType::ARCHER || type == EnemyType::PYROMANCER) return false;
         if (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM) {
@@ -99,6 +104,9 @@ public:
     void SetLeashed(bool leashed) { isLeashed = leashed; }
     bool IsLeashed() const { return isLeashed; }
 
+    bool IsNightfallElite() const { return isNightfallElite; }
+    void SetNightfallElite(bool elite);
+
     friend class EnemyRenderer;
 
 private:
@@ -106,6 +114,7 @@ private:
     HumorType humor;
     EnemyState state;
     bool isPerformingMeleeSmite;
+    bool isNightfallElite = false;
     float quenchedTimer;
     float shatteredTimer;
 

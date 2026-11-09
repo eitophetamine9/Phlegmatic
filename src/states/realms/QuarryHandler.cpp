@@ -375,6 +375,8 @@ void QuarryHandler::Render(
         }
     }
 
+    map.DrawLighting(camera, player.GetPosition());
+
     EndMode2D();
 
     // Mouse Reticle
@@ -384,7 +386,10 @@ void QuarryHandler::Render(
 
     // Campaign HUD
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "QUARRY DEPTHS", hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "QUARRY DEPTHS", hasUnread, &map.GetTimeOfDay());
+
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 600.0f, 900.0f } }, {}, { { 1000.0f, 300.0f } });
 
     // Boss Health Bar if Elemental Golem is summoned & alive
     for (const auto& enemy : enemies) {

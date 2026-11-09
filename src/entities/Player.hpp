@@ -9,6 +9,8 @@
 #include <vector>
 #include <cmath>
 
+enum class EnemyType;
+
 class Player {
 public:
     Player();
@@ -31,6 +33,14 @@ public:
     // Weapon & Equipment
     void SetWeapon(WeaponType newWeapon);
     WeaponType GetWeapon() const { return currentWeapon; }
+    WeaponType GetEquippedWeapon() const { return currentWeapon; }
+
+    // Visceral Execution & Adrenaline Buff
+    bool IsExecuting() const { return isExecuting; }
+    void StartExecution(Vector2 targetPos);
+    bool HasAdrenalineBuff() const { return adrenalineTimer > 0.0f; }
+    float GetAdrenalineTimer() const { return adrenalineTimer; }
+    void TriggerAdrenalineBuff(float duration) { adrenalineTimer = duration; }
 
     void SetArmor(ArmorType newArmor);
     ArmorType GetArmor() const { return currentArmor; }
@@ -157,21 +167,31 @@ public:
 
     // Stagger & Posture
     bool IsStaggered() const { return staggerTimer > 0.0f; }
-    bool HasStaggerImmunity() const { return staggerImmunityTimer > 0.0f; }
+    bool HasStaggerImmunity() const { return staggerImmunityTimer > 0.0f || stoneskinTimer > 0.0f; }
     void ApplyStagger(float baseStunDuration, ParticleSystem& particles);
     float GetStaggerTimer() const { return staggerTimer; }
 
     // Invulnerability / I-Frames
-    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f; }
+    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f || isExecuting; }
     bool HasWillOfAtlasActive() const { return willOfAtlasTimer > 0.0f; }
     float GetWillOfAtlasTimer() const { return willOfAtlasTimer; }
     float GetWillOfAtlasCooldown() const { return willOfAtlasCooldown; }
     float GetIFrameTimer() const { return iFrameTimer; }
 
-    // Consumables: Potion
+    // Consumables: Potions & Elixirs
     bool UseHealthPotion(ParticleSystem& particles);
+    bool UseStoneskinTonic(ParticleSystem& particles);
+    bool UseGlacialDraught(ParticleSystem& particles);
+    bool UseBerserkerDraught(ParticleSystem& particles);
     float GetPotionCooldown() const { return potionCooldown; }
     float GetMaxPotionCooldown() const { return 7.0f; }
+
+    bool HasStoneskinActive() const { return stoneskinTimer > 0.0f; }
+    float GetStoneskinTimer() const { return stoneskinTimer; }
+    bool HasGlacialImmunityActive() const { return glacialImmunityTimer > 0.0f; }
+    float GetGlacialImmunityTimer() const { return glacialImmunityTimer; }
+    bool HasBerserkerActive() const { return berserkerTimer > 0.0f; }
+    float GetBerserkerTimer() const { return berserkerTimer; }
 
     // Cooldown accessors for UI
     float GetLightCooldown() const { return lightCooldown; }
@@ -205,6 +225,11 @@ public:
     bool IsDiscomposed() const { return !isInPhlegmaticTrance && composure < 25.0f; }
     bool IsComposed() const { return !isInPhlegmaticTrance && composure >= 25.0f && composure < 80.0f; }
     bool HasStoicPoise() const { return isInPhlegmaticTrance || (composure >= 80.0f); }
+
+    // Gray Health Mechanics (Totem of the Phlegmatic Core)
+    float GetGrayHealth() const { return grayHealth; }
+    float GetGrayHealthTimer() const { return grayHealthTimer; }
+    void RecoverGrayHealth(float amount, ParticleSystem& particles);
     bool IsTranceReady() const { return !isInPhlegmaticTrance && composure >= 100.0f; }
 
     // Humoral Alignment & Bleed Status
@@ -232,6 +257,18 @@ public:
     void ResetFrostbite();
     void UpdateSnowFootsteps(float dt, ParticleSystem& particles);
     void QuickSwapWeapon(ParticleSystem& particles);
+
+    // Bestiary Mastery Hunting Perks
+    bool HasTrollSlayerT2() const;
+    bool HasTrollSlayerT3() const;
+    bool HasGolemBreakerT2() const;
+    bool HasGolemBreakerT3() const;
+    bool HasGaleHunterT2() const;
+    bool HasGaleHunterT3() const;
+    bool HasCultistPurifierT2() const;
+    bool HasCultistPurifierT3() const;
+    float GetBestiaryDamageMultiplier(EnemyType type) const;
+    float GetBestiaryDefensePierce(EnemyType type) const;
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }
@@ -317,6 +354,21 @@ private:
     float frostbiteMeter;
     bool isFrostbitten;
     float snowFootstepTimer;
+
+    // Visceral Execution state
+    bool isExecuting;
+    float executionTimer;
+    Vector2 executionTargetPos;
+    float adrenalineTimer;
+
+    // Consumable Elixir Buff Timers
+    float stoneskinTimer;
+    float glacialImmunityTimer;
+    float berserkerTimer;
+
+    // Phlegmatic Core Gray Health
+    float grayHealth;
+    float grayHealthTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;

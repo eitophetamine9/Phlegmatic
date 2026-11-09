@@ -415,6 +415,8 @@ void RestlessMistForestHandler::Render(
         FontManager::DrawGameTextShadow("[E] / [T] RETURN TO ZYPHDEN REALM (EAST)", (int)eastGatePos.x - 30, (int)eastGatePos.y - 45, 11, Color{ 255, 225, 120, 240 });
     }
 
+    map.DrawLighting(camera, player.GetPosition());
+
     EndMode2D();
 
     // Screen-space reticle
@@ -424,7 +426,10 @@ void RestlessMistForestHandler::Render(
 
     // Campaign HUD
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RESTLESS MIST FOREST", hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RESTLESS MIST FOREST", hasUnread, &map.GetTimeOfDay());
+
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 800.0f, 850.0f } }, {}, { { 800.0f, 350.0f } });
 
     // Boss Health Bar if Gale Archer Boss is active
     for (const auto& enemy : enemies) {

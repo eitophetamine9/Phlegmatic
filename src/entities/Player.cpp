@@ -1,5 +1,5 @@
 #include "Player.hpp"
-
+#include "Enemy.hpp"
 #include "PlayerRenderer.hpp"
 
 #include "../core/Config.hpp"
@@ -100,6 +100,16 @@ Player::Player() {
     isFrostbitten = false;
 
     snowFootstepTimer = 0.0f;
+
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
 
 
 
@@ -216,6 +226,16 @@ void Player::Init(Vector2 startPos) {
 
     snowFootstepTimer = 0.0f;
 
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
+
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
     willOfAtlasCooldown = 0.0f;
@@ -282,6 +302,16 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     isFrostbitten = false;
 
     snowFootstepTimer = 0.0f;
+
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
+    stoneskinTimer = 0.0f;
+    glacialImmunityTimer = 0.0f;
+    berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -552,14 +582,24 @@ void Player::SetTotem(TotemType newTotem) {
 }
 
 float Player::GetTotemDamageMultiplier() const {
+    float mult = 1.0f;
     if (currentTotem == TotemType::TOTEM_INSANITY) {
         float maxHp = GetMaxHealth();
         if (maxHp > 0.0f && (health / maxHp) <= 0.40f) {
-            return 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+            mult = 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+        } else {
+            mult = 1.65f; // Baseline: +65% overall damage
         }
-        return 1.65f; // Baseline: +65% overall damage
+    } else {
+        mult = GetTotemStats(currentTotem).damageMultiplier;
     }
-    return GetTotemStats(currentTotem).damageMultiplier;
+    if (adrenalineTimer > 0.0f) {
+        mult *= 1.15f; // +15% Damage during Adrenaline rush from Visceral Execution
+    }
+    if (berserkerTimer > 0.0f) {
+        mult *= 1.30f; // +30% Damage while Berserker Draught active
+    }
+    return mult;
 }
 
 float Player::GetMaxHealth() const {
@@ -588,7 +628,11 @@ float Player::GetDefense() const {
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
         raw += 25.0f;
     }
-    return raw * GetTotemStats(currentTotem).defenseMultiplier;
+    float total = raw * GetTotemStats(currentTotem).defenseMultiplier;
+    if (stoneskinTimer > 0.0f) {
+        total *= 1.40f; // +40% Physical Defense while Stoneskin Tonic active
+    }
+    return total;
 }
 
 float Player::GetWill() const {
@@ -620,6 +664,9 @@ float Player::GetSpeed() const {
     if (isFrostbitten) {
         base *= 0.80f; // -20% Move Speed when Frostbitten
     }
+    if (adrenalineTimer > 0.0f) {
+        base *= 1.20f; // +20% Move Speed during Adrenaline rush from Visceral Execution
+    }
     return base;
 }
 
@@ -639,6 +686,9 @@ float Player::GetStaminaRegenRate() const {
     }
     if (isFrostbitten) {
         rate *= 0.75f; // -25% Stamina Regen when Frostbitten
+    }
+    if (HasGaleHunterT2()) {
+        rate *= 1.15f; // +15% Stamina Regen from Gale Hunter Tier 2
     }
     return rate;
 }
@@ -698,10 +748,13 @@ void Player::ApplyBleed(float duration, ParticleSystem& particles) {
 }
 
 void Player::AddFrostbite(float amount, ParticleSystem* particles) {
-    if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+    if (HasFullArmorSet(ArmorSet::FROSTWARDEN) || glacialImmunityTimer > 0.0f) {
         frostbiteMeter = 0.0f;
         isFrostbitten = false;
         return;
+    }
+    if (HasTrollSlayerT2()) {
+        amount *= 0.75f; // 25% Frostbite resistance from Troll Slayer perk
     }
     bool wasFrostbitten = isFrostbitten;
     frostbiteMeter = fminf(100.0f, frostbiteMeter + amount);
@@ -781,45 +834,66 @@ void Player::QuickSwapWeapon(ParticleSystem& particles) {
     particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 14, 80.0f);
 }
 
-
+void Player::StartExecution(Vector2 targetPos) {
+    isExecuting = true;
+    executionTimer = 0.45f;
+    executionTargetPos = targetPos;
+    float dx = targetPos.x - position.x;
+    float dy = targetPos.y - position.y;
+    facingAngle = atan2f(dy, dx) * RAD2DEG;
+    velocity = { 0.0f, 0.0f };
+}
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
-
     if (!IsAlive()) return;
 
-
-
-    // Face towards mouse unless locked in dash
-
-    if (!isDashing) {
-
+    // Face towards mouse unless locked in dash or execution
+    if (!isDashing && !isExecuting) {
         float dx = mouseWorldPos.x - position.x;
-
         float dy = mouseWorldPos.y - position.y;
-
         facingAngle = atan2f(dy, dx) * RAD2DEG;
-
     }
 
-
-
     // Cooldown and buff updates
-
     if (lightCooldown > 0.0f) lightCooldown -= dt;
-
     if (heavyCooldown > 0.0f) heavyCooldown -= dt;
-
     if (parryCooldown > 0.0f) parryCooldown -= dt;
-
     if (dashCooldown > 0.0f) dashCooldown -= dt;
-
     if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
-
     if (potionCooldown > 0.0f) potionCooldown -= dt;
-
     if (iFrameTimer > 0.0f) iFrameTimer -= dt;
-
     if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
+    if (adrenalineTimer > 0.0f) adrenalineTimer -= dt;
+    if (stoneskinTimer > 0.0f) stoneskinTimer -= dt;
+    if (glacialImmunityTimer > 0.0f) {
+        glacialImmunityTimer -= dt;
+        ResetFrostbite();
+    }
+    if (berserkerTimer > 0.0f) berserkerTimer -= dt;
+    if (grayHealthTimer > 0.0f) {
+        grayHealthTimer -= dt;
+        if (grayHealthTimer <= 0.0f) {
+            grayHealth = 0.0f;
+        }
+    }
+
+    // Visceral Execution update
+    if (isExecuting) {
+        executionTimer -= dt;
+        iFrameTimer = 0.25f;
+        Vector2 toTarget = { executionTargetPos.x - position.x, executionTargetPos.y - position.y };
+        float dist = sqrtf(toTarget.x * toTarget.x + toTarget.y * toTarget.y);
+        if (dist > 12.0f) {
+            velocity.x = (toTarget.x / dist) * 220.0f;
+            velocity.y = (toTarget.y / dist) * 220.0f;
+        } else {
+            velocity = { 0.0f, 0.0f };
+        }
+        if (executionTimer <= 0.0f) {
+            isExecuting = false;
+            velocity = { 0.0f, 0.0f };
+        }
+    }
 
 
 
@@ -990,11 +1064,17 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
     // Health Potion consumption via [1] or [H] (7-second cooldown)
-
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_H)) {
-
         UseHealthPotion(particles);
-
+    }
+    if (IsKeyPressed(KEY_TWO)) {
+        UseStoneskinTonic(particles);
+    }
+    if (IsKeyPressed(KEY_THREE)) {
+        UseGlacialDraught(particles);
+    }
+    if (IsKeyPressed(KEY_FOUR)) {
+        UseBerserkerDraught(particles);
     }
 
 
@@ -1824,7 +1904,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         velocity.y *= 0.70f;
 
-    } else if (!isDashing && !isDaggerLunging) {
+    } else if (!isDashing && !isDaggerLunging && !isExecuting) {
 
         Vector2 moveDir = { 0.0f, 0.0f };
 
@@ -1849,21 +1929,30 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
         if (moveDir.x != 0.0f || moveDir.y != 0.0f) {
-
             moveDir = Vector2Normalize(moveDir);
 
-            velocity.x = moveDir.x * currentSpeed;
-
-            velocity.y = moveDir.y * currentSpeed;
+            if (map.GetEnvironment() == MapEnvironment::FROST_CAVERNS) {
+                // Icy floor inertia: smooth gradual acceleration with momentum
+                velocity.x = velocity.x * 0.88f + (moveDir.x * currentSpeed) * 0.12f;
+                velocity.y = velocity.y * 0.88f + (moveDir.y * currentSpeed) * 0.12f;
+            } else {
+                velocity.x = moveDir.x * currentSpeed;
+                velocity.y = moveDir.y * currentSpeed;
+            }
 
             walkCycle += dt * 10.0f;
-
         } else {
-
-            velocity.x *= 0.80f;
-
-            velocity.y *= 0.80f;
-
+            if (map.GetEnvironment() == MapEnvironment::FROST_CAVERNS) {
+                // Icy floor inertia: low friction glide
+                velocity.x *= 0.96f;
+                velocity.y *= 0.96f;
+                if (fabsf(velocity.x) > 25.0f || fabsf(velocity.y) > 25.0f) {
+                    particles.SpawnSparks(position, Color{ 140, 220, 255, 120 }, 1, 15.0f);
+                }
+            } else {
+                velocity.x *= 0.80f;
+                velocity.y *= 0.80f;
+            }
         }
 
     }
@@ -2727,17 +2816,66 @@ bool Player::UseHealthPotion(ParticleSystem& particles) {
         Heal(45.0f);
 
         SoundFX::PlayHeal();
-
         particles.SpawnSparks(position, Color{ 80, 255, 140, 255 }, 25, 140.0f);
-
         particles.SpawnFloatingText(position, "+45 HP", Color{ 80, 255, 140, 255 }, 24.0f);
-
         return true;
-
     }
-
     return false;
+}
 
+bool Player::UseStoneskinTonic(ParticleSystem& particles) {
+    if (inventory.GetStoneskinTonicCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO STONESKIN TONICS", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeStoneskinTonic()) {
+        stoneskinTimer = 15.0f;
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(position, "+STONESKIN (+40% DEF, POISE)", Color{ 255, 215, 80, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 245, 195, 50, 255 }, 22, 140.0f);
+        return true;
+    }
+    return false;
+}
+
+bool Player::UseGlacialDraught(ParticleSystem& particles) {
+    if (inventory.GetGlacialDraughtCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO GLACIAL DRAUGHTS", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeGlacialDraught()) {
+        glacialImmunityTimer = 90.0f;
+        ResetFrostbite();
+        SoundFX::PlayCrusaderClash();
+        particles.SpawnFloatingText(position, "+GLACIAL THAW & WARMTH (90s)", Color{ 140, 230, 255, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 120, 220, 255, 255 }, 22, 140.0f);
+        return true;
+    }
+    return false;
+}
+
+bool Player::UseBerserkerDraught(ParticleSystem& particles) {
+    if (inventory.GetBerserkerDraughtCount() <= 0) {
+        particles.SpawnFloatingText(position, "NO BERSERKER BREW", Color{ 240, 100, 100, 220 }, 16.0f);
+        return false;
+    }
+    if (inventory.ConsumeBerserkerDraught()) {
+        berserkerTimer = 12.0f;
+        SoundFX::PlayHeavyAttack();
+        particles.SpawnFloatingText(position, "+BERSERKER FRENZY (+30% DMG)", Color{ 255, 60, 60, 255 }, 22.0f);
+        particles.SpawnSparks(position, Color{ 255, 50, 50, 255 }, 26, 160.0f);
+        return true;
+    }
+    return false;
+}
+
+void Player::RecoverGrayHealth(float amount, ParticleSystem& particles) {
+    if (grayHealth <= 0.0f) return;
+    float recovered = fminf(grayHealth, amount);
+    grayHealth -= recovered;
+    health = fminf(GetMaxHealth(), health + recovered);
+    particles.SpawnFloatingText(position, "+" + std::to_string((int)recovered) + " GRAY HP", Color{ 140, 230, 255, 255 }, 18.0f);
+    particles.SpawnSparks(position, Color{ 120, 215, 255, 200 }, 8, 50.0f);
 }
 
 
@@ -2833,6 +2971,20 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
         finalAmount *= 1.50f;
     }
 
+    if (berserkerTimer > 0.0f) {
+        finalAmount *= 1.20f; // +20% incoming damage while Berserk
+    }
+
+    // Totem of the Phlegmatic Core: 80% knockback reduction + 25% damage converted to Gray Health
+    if (currentTotem == TotemType::TOTEM_PHLEGMATIC_CORE) {
+        knockbackDir.x *= 0.20f;
+        knockbackDir.y *= 0.20f;
+        float grayAdd = finalAmount * 0.25f;
+        grayHealth = fminf(GetMaxHealth() - (health - finalAmount), grayHealth + grayAdd);
+        grayHealthTimer = 6.0f;
+        particles.SpawnSparks(position, Color{ 140, 220, 255, 200 }, 6, 40.0f);
+    }
+
     // Crusader Plate Dawnfire Aegis Shield
     if (armorSkillShieldHp > 0.0f) {
         float absorbed = fminf(armorSkillShieldHp, finalAmount);
@@ -2923,10 +3075,68 @@ void Player::Heal(float amount) {
 
 
 void Player::Draw() const {
-
     PlayerRenderer::Draw(*this);
-
 }
+
+bool Player::HasTrollSlayerT2() const {
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 5;
+}
+
+bool Player::HasTrollSlayerT3() const {
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 15;
+}
+
+bool Player::HasGolemBreakerT2() const {
+    return (inventory.GetEnemyKills(5) + inventory.GetEnemyKills(6)) >= 5;
+}
+
+bool Player::HasGolemBreakerT3() const {
+    return (inventory.GetEnemyKills(5) + inventory.GetEnemyKills(6)) >= 12;
+}
+
+bool Player::HasGaleHunterT2() const {
+    return (inventory.GetEnemyKills(7) + inventory.GetEnemyKills(8)) >= 5;
+}
+
+bool Player::HasGaleHunterT3() const {
+    return (inventory.GetEnemyKills(7) + inventory.GetEnemyKills(8)) >= 15;
+}
+
+bool Player::HasCultistPurifierT2() const {
+    int total = inventory.GetEnemyKills(0) + inventory.GetEnemyKills(1) + inventory.GetEnemyKills(2) + inventory.GetEnemyKills(3);
+    return total >= 10;
+}
+
+bool Player::HasCultistPurifierT3() const {
+    int total = inventory.GetEnemyKills(0) + inventory.GetEnemyKills(1) + inventory.GetEnemyKills(2) + inventory.GetEnemyKills(3);
+    return total >= 25;
+}
+
+float Player::GetBestiaryDamageMultiplier(EnemyType type) const {
+    float mult = 1.0f;
+    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL) {
+        if (HasTrollSlayerT3()) mult *= 1.25f;
+        else if (HasTrollSlayerT2()) mult *= 1.15f;
+    } else if (type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+        if (HasGolemBreakerT3()) mult *= 1.20f;
+        else if (HasGolemBreakerT2()) mult *= 1.10f;
+    } else if (type == EnemyType::GALE_BANDIT || type == EnemyType::GALE_ARCHER_BOSS) {
+        if (HasGaleHunterT3()) mult *= 1.20f;
+        else if (HasGaleHunterT2()) mult *= 1.10f;
+    } else if (type == EnemyType::SLASHER || type == EnemyType::ARCHER || type == EnemyType::BRUTE || type == EnemyType::PYROMANCER) {
+        if (HasCultistPurifierT3()) mult *= 1.15f;
+        else if (HasCultistPurifierT2()) mult *= 1.10f;
+    }
+    return mult;
+}
+
+float Player::GetBestiaryDefensePierce(EnemyType type) const {
+    if ((type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) && HasGolemBreakerT3()) {
+        return 0.25f;
+    }
+    return 0.0f;
+}
+
 
 
 

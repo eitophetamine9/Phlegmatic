@@ -601,28 +601,23 @@ void CrossroadsHandler::Render(
 
 
         map.DrawWallsAndPillars(player.GetPosition());
-
+        map.DrawLighting(camera, player.GetPosition());
     }
 
     EndMode2D();
 
-
-
     // Location Header: "CROSSROADS"
-
     GameUI::DrawCampaignHUD(
-
         screenWidth,
-
         screenHeight,
-
         player,
-
         "CROSSROADS",
-
-        player.GetInventory().HasUnreadFragments()
-
+        player.GetInventory().HasUnreadFragments(),
+        &map.GetTimeOfDay()
     );
+
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 1200.0f, 900.0f } }, {}, { { 1200.0f, 400.0f } });
 
 
 

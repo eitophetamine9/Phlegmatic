@@ -154,6 +154,14 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 48, 65, 85, 255 }; // Frost highland troll blue-gray
     } else if (enemy.type == EnemyType::BERSERKER_TROLL) {
         bodyColor = Color{ 74, 32, 36, 255 }; // Crimson enraged berserker hide
+    } else if (enemy.type == EnemyType::FROST_REVENANT) {
+        bodyColor = Color{ 16, 36, 56, 230 }; // Spectral chasm frost robe
+    }
+
+    if (enemy.isNightfallElite) {
+        float nPulse = (sinf((float)GetTime() * 4.5f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius * 2.2f, Color{ 120, 35, 210, (unsigned char)(65 + 35 * nPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 2.0f * nPulse, Color{ 180, 80, 255, 210 });
     }
 
     // Humoral Alignment Visual Auras
@@ -238,6 +246,24 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Vector2 leftHand = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f, enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f };
         DrawLineEx(rightHand, { rightHand.x + dir.x * 20.0f, rightHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
         DrawLineEx(leftHand, { leftHand.x + dir.x * 20.0f, leftHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
+    } else if (enemy.type == EnemyType::FROST_REVENANT) {
+        // Ethereal frost phantom shroud and icy mist
+        float fPulse = (sinf((float)GetTime() * 5.0f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius + 16.0f + 6.0f * fPulse, Color{ 60, 190, 255, 90 }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 3.0f * fPulse, Color{ 100, 220, 255, 200 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 12.0f, Color{ 140, 235, 255, 120 });
+
+        // Crown of frost crystal horns
+        Vector2 hornL = { enemy.position.x - normal.x * (enemy.radius * 0.7f) + dir.x * (enemy.radius * 0.4f), enemy.position.y - normal.y * (enemy.radius * 0.7f) + dir.y * (enemy.radius * 0.4f) };
+        Vector2 hornR = { enemy.position.x + normal.x * (enemy.radius * 0.7f) + dir.x * (enemy.radius * 0.4f), enemy.position.y + normal.y * (enemy.radius * 0.7f) + dir.y * (enemy.radius * 0.4f) };
+        DrawLineEx(hornL, { hornL.x + dir.x * 14.0f - normal.x * 5.0f, hornL.y + dir.y * 14.0f - normal.y * 5.0f }, 2.5f, Color{ 160, 230, 255, 240 });
+        DrawLineEx(hornR, { hornR.x + dir.x * 14.0f + normal.x * 5.0f, hornR.y + dir.y * 14.0f + normal.y * 5.0f }, 2.5f, Color{ 160, 230, 255, 240 });
+
+        // Frost Scythe in right hand
+        Vector2 scytheEnd = { rightHand.x + dir.x * 28.0f, rightHand.y + dir.y * 28.0f };
+        DrawLineEx(rightHand, scytheEnd, 3.5f, Color{ 40, 80, 110, 255 });
+        Vector2 bladeTip = { scytheEnd.x - normal.x * 18.0f + dir.x * 6.0f, scytheEnd.y - normal.y * 18.0f + dir.y * 6.0f };
+        DrawLineEx(scytheEnd, bladeTip, 3.0f, Color{ 140, 235, 255, 240 });
     }
 
     // Enemy Attack Visuals & Weapon Animations
@@ -572,10 +598,37 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawRectangleLines((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 40, 45, 60, 200 });
 
         // Overhead Humor / Status tag
-        if (enemy.IsQuenched()) {
+        if (enemy.IsNightfallElite()) {
+            DrawText("NIGHTFALL ELITE", (int)(enemy.position.x - 36.0f), (int)(barY - 9.0f), 8, Color{ 205, 130, 255, 240 });
+        } else if (enemy.IsQuenched()) {
             DrawText("QUENCHED", (int)(enemy.position.x - 22.0f), (int)(barY - 9.0f), 8, Color{ 140, 230, 255, 230 });
         } else if (enemy.IsShattered()) {
             DrawText("SHATTERED", (int)(enemy.position.x - 24.0f), (int)(barY - 9.0f), 8, Color{ 210, 140, 255, 230 });
         }
+    }
+
+    // Visceral Execution Reticle indicator when stunned
+    if (enemy.IsVulnerableToExecution()) {
+        float pulse = sinf((float)GetTime() * 8.0f) * 0.5f + 0.5f;
+        float reticleY = enemy.position.y - enemy.radius - 28.0f;
+        Color reticleCol = Color{ 255, (unsigned char)(70 + 130 * pulse), 40, 255 };
+
+        // Glowing animated execution diamond
+        Vector2 dTop = { enemy.position.x, reticleY - 9.0f - 2.0f * pulse };
+        Vector2 dRight = { enemy.position.x + 8.0f + 2.0f * pulse, reticleY };
+        Vector2 dBottom = { enemy.position.x, reticleY + 9.0f + 2.0f * pulse };
+        Vector2 dLeft = { enemy.position.x - 8.0f - 2.0f * pulse, reticleY };
+        DrawLineEx(dTop, dRight, 2.5f, reticleCol);
+        DrawLineEx(dRight, dBottom, 2.5f, reticleCol);
+        DrawLineEx(dBottom, dLeft, 2.5f, reticleCol);
+        DrawLineEx(dLeft, dTop, 2.5f, reticleCol);
+        DrawCircleV({ enemy.position.x, reticleY }, 3.0f, Color{ 255, 245, 180, 255 });
+
+        // Tactical execute badge
+        const char* promptTxt = "[E] EXECUTE";
+        int txtW = MeasureText(promptTxt, 10);
+        DrawRectangle((int)(enemy.position.x - txtW * 0.5f - 4), (int)(reticleY - 24.0f), txtW + 8, 14, Color{ 20, 15, 22, 230 });
+        DrawRectangleLines((int)(enemy.position.x - txtW * 0.5f - 4), (int)(reticleY - 24.0f), txtW + 8, 14, reticleCol);
+        DrawText(promptTxt, (int)(enemy.position.x - txtW * 0.5f), (int)(reticleY - 22.0f), 10, Color{ 255, 235, 120, 255 });
     }
 }

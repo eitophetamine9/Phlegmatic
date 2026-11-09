@@ -104,7 +104,9 @@ void NorthZyphdenHandler::CloseDialogue(Player& player, ParticleSystem& particle
 
     int totalOre = 0;
     int totalShingles = 0;
+    bool allCompleted = true;
     for (auto& b : bounties) {
+        if (!b.completed) allCompleted = false;
         if (b.completed && !b.claimed) {
             b.claimed = true;
             totalOre += b.oreReward;
@@ -119,6 +121,13 @@ void NorthZyphdenHandler::CloseDialogue(Player& player, ParticleSystem& particle
         char rewBuf[64];
         snprintf(rewBuf, sizeof(rewBuf), "REWARDS: +%d ORE SCRAPS, +%d SHINGLES!", totalOre, totalShingles);
         particles.SpawnFloatingText(player.GetPosition(), rewBuf, Color{ 255, 225, 90, 255 }, 24.0f);
+    }
+    if (allCompleted && !player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE)) {
+        player.GetInventory().UnlockTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(player.GetPosition(), "RELIC UNLOCKED: TOTEM OF THE PHLEGMATIC CORE!", Color{ 140, 215, 255, 255 }, 24.0f);
+        particles.SpawnSparks(player.GetPosition(), Color{ 120, 210, 255, 255 }, 45, 200.0f);
+        particles.AddScreenShake(6.0f, 0.35f);
     }
 }
 
@@ -276,7 +285,8 @@ void NorthZyphdenHandler::Update(
     Camera2D& camera,
     GameState& currentState,
     const std::function<void()>& onReturnToZyphden,
-    const std::function<void()>& onEnterLobby
+    const std::function<void()>& onEnterLobby,
+    const std::function<void()>& onEnterFrostCaverns
 ) {
     if (entryBannerTimer > 0.0f) entryBannerTimer -= dt;
     if (exitCooldown > 0.0f) exitCooldown -= dt;
@@ -430,8 +440,16 @@ void NorthZyphdenHandler::Update(
 
                         int oreGained = rand() % 2 + 1; // 1-2 Ore Scraps
                         int shinglesGained = rand() % 16 + 15; // 15-30 Shingles
+                        int frostShardsGained = rand() % 2 + 2; // 2-3 Frost Shards
+                        if (player.HasGolemBreakerT2()) {
+                            oreGained += 1;
+                            frostShardsGained += 1;
+                            particles.SpawnFloatingText(Vector2{ crystal.position.x, crystal.position.y - 20.0f }, "GOLEM BREAKER: +1 BONUS SCRAP!", Color{ 255, 215, 80, 255 }, 18.0f);
+                        }
                         player.GetInventory().AddOreScraps(oreGained);
                         player.GetInventory().AddShingles(shinglesGained);
+                        player.GetInventory().AddFrostShards(frostShardsGained);
+                        particles.SpawnFloatingText(crystal.position, "+" + std::to_string(frostShardsGained) + " Frost Shards", Color{ 140, 235, 255, 255 }, 20.0f);
 
                         if (bounties.size() > 1 && bounties[1].progress < bounties[1].target) {
                             bounties[1].progress++;
@@ -462,6 +480,17 @@ void NorthZyphdenHandler::Update(
         }
     }
 
+    // Descent into Permafrost Crypts Interaction
+    Vector2 cavernsEntrancePos = { 2200.0f, 260.0f };
+    float distToCaverns = Vector2Distance(playerPos, cavernsEntrancePos);
+    if (distToCaverns <= 95.0f && exitCooldown <= 0.0f) {
+        if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T)) {
+            exitCooldown = 1.0f;
+            if (onEnterFrostCaverns) onEnterFrostCaverns();
+            return;
+        }
+    }
+
     // Lore Steles Interaction
     for (auto& stele : loreSteles) {
         const auto* frag = player.GetInventory().GetFragment(stele.fragmentId);
@@ -476,6 +505,18 @@ void NorthZyphdenHandler::Update(
                 particles.SpawnSparks(stele.position, Color{ 255, 220, 90, 255 }, 25, 140.0f);
                 particles.AddScreenShake(4.0f, 0.2f);
             }
+        }
+    }
+
+    // Altar of Cold Solitude Interaction (Totem of the Phlegmatic Core)
+    Vector2 phlegmaticAltarPos = { 1400.0f, 320.0f };
+    if (!player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE) && Vector2Distance(playerPos, phlegmaticAltarPos) <= 48.0f) {
+        if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+            player.GetInventory().UnlockTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(phlegmaticAltarPos, "RELIC UNLOCKED: TOTEM OF THE PHLEGMATIC CORE!", Color{ 140, 215, 255, 255 }, 24.0f);
+            particles.SpawnSparks(phlegmaticAltarPos, Color{ 120, 210, 255, 255 }, 50, 220.0f);
+            particles.AddScreenShake(6.0f, 0.35f);
         }
     }
 
@@ -656,6 +697,28 @@ void NorthZyphdenHandler::Render(
     // Highland Campfire Waypoint Rest
     highlandCampfire.Draw(time, player);
     DrawTorvald(time, playerPos);
+
+    // Altar of Cold Solitude (Totem of the Phlegmatic Core Shrine)
+    Vector2 phlegmaticAltarPos = { 1400.0f, 320.0f };
+    DrawEllipse((int)phlegmaticAltarPos.x, (int)(phlegmaticAltarPos.y + 14), 32.0f, 16.0f, Color{ 8, 14, 22, 140 });
+    DrawRectangleRounded(Rectangle{ phlegmaticAltarPos.x - 24, phlegmaticAltarPos.y - 12, 48, 26 }, 0.25f, 4, Color{ 36, 48, 66, 255 });
+    DrawRectangleRoundedLines(Rectangle{ phlegmaticAltarPos.x - 24, phlegmaticAltarPos.y - 12, 48, 26 }, 0.25f, 4, Color{ 68, 92, 124, 255 });
+    DrawRectangleRounded(Rectangle{ phlegmaticAltarPos.x - 16, phlegmaticAltarPos.y - 20, 32, 14 }, 0.25f, 4, Color{ 48, 64, 86, 255 });
+
+    float altarBob = sinf(time * 2.8f) * 4.0f;
+    Vector2 corePos = { phlegmaticAltarPos.x, phlegmaticAltarPos.y - 32.0f + altarBob };
+    bool hasRelic = player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+    Color coreGlow = hasRelic ? Color{ 80, 120, 160, 160 } : Color{ 140, 220, 255, 255 };
+    DrawCircleGradient(corePos, 18.0f, Color{ coreGlow.r, coreGlow.g, coreGlow.b, 80 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(corePos, 4, 10.0f, 45.0f, coreGlow);
+    DrawPoly(corePos, 4, 6.0f, 45.0f, Color{ 230, 250, 255, 255 });
+
+    if (!hasRelic && Vector2Distance(playerPos, phlegmaticAltarPos) <= 52.0f) {
+        std::string prompt = "[E] Commune with Altar of Cold Solitude";
+        int pw = FontManager::MeasureText(prompt, 10);
+        FontManager::DrawGameTextShadow(prompt, (int)phlegmaticAltarPos.x - pw / 2, (int)phlegmaticAltarPos.y - 56, 10, Color{ 180, 235, 255, 255 });
+    }
+
     for (const auto& stele : loreSteles) {
         // Drop shadow
         DrawEllipse((int)stele.position.x, (int)(stele.position.y + 12), stele.radius * 1.15f, stele.radius * 0.55f, Color{ 10, 14, 20, 140 });
@@ -759,6 +822,17 @@ void NorthZyphdenHandler::Render(
         FontManager::DrawGameTextShadow("[E] RETURN TO ZYPHDEN OVERWORLD", (int)returnGatePos.x - 100, (int)returnGatePos.y - 40, 11, Color{ 160, 220, 255, 240 });
     }
 
+    // Permafrost Crypts Cavern Mouth
+    Vector2 cavernsEntrancePos = { 2200.0f, 260.0f };
+    DrawCircle((int)cavernsEntrancePos.x, (int)cavernsEntrancePos.y, 35.0f, Color{ 14, 22, 36, 255 });
+    DrawCircleLines((int)cavernsEntrancePos.x, (int)cavernsEntrancePos.y, 35.0f, Color{ 80, 190, 255, 230 });
+    float cPulse = 0.5f + 0.5f * sinf(time * 3.0f);
+    DrawCircleGradient(cavernsEntrancePos, 50.0f, Color{ 60, 180, 255, (unsigned char)(60 + 50 * cPulse) }, Color{ 0, 0, 0, 0 });
+    DrawText("PERMAFROST CRYPTS", (int)cavernsEntrancePos.x - 52, (int)cavernsEntrancePos.y - 48, 10, Color{ 150, 225, 255, 240 });
+    if (Vector2Distance(playerPos, cavernsEntrancePos) <= 110.0f) {
+        FontManager::DrawGameTextShadow("[E] DESCEND INTO THE PERMAFROST CRYPTS", (int)cavernsEntrancePos.x - 120, (int)cavernsEntrancePos.y - 28, 11, Color{ 140, 225, 255, 255 });
+    }
+
     for (const auto& drop : lootDrops) {
         drop.Draw(time);
     }
@@ -784,6 +858,8 @@ void NorthZyphdenHandler::Render(
         DrawLineEx(flake.position, p2, flake.size * 0.75f, Color{ 230, 245, 255, (unsigned char)(flake.alpha * 240) });
     }
 
+    map.DrawLighting(camera, player.GetPosition());
+
     EndMode2D();
 
     // Frostbite Screen Edge Vignette
@@ -807,7 +883,10 @@ void NorthZyphdenHandler::Render(
 
     // Campaign HUD
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread, &map.GetTimeOfDay());
+
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { highlandCampfire.position }, { torvaldPos }, { { 1200.0f, 240.0f }, phlegmaticAltarPos, { 2200.0f, 260.0f } });
 
     // Boss Health Bar for Berserker Troll
     for (const auto& enemy : enemies) {

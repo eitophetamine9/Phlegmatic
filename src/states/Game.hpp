@@ -16,12 +16,13 @@
 
 #include "../combat/CollisionSystem.hpp"
 #include "../world/WaveManager.hpp"
-#include "RuinedCastleHandler.hpp"
-#include "CrossroadsHandler.hpp"
-#include "ZyphdenHandler.hpp"
-#include "QuarryHandler.hpp"
-#include "RestlessMistForestHandler.hpp"
-#include "NorthZyphdenHandler.hpp"
+#include "realms/RuinedCastleHandler.hpp"
+#include "realms/CrossroadsHandler.hpp"
+#include "realms/ZyphdenHandler.hpp"
+#include "realms/QuarryHandler.hpp"
+#include "realms/RestlessMistForestHandler.hpp"
+#include "realms/NorthZyphdenHandler.hpp"
+#include "realms/FrostCavernsHandler.hpp"
 #include <functional>
 #include <string>
 
@@ -69,6 +70,8 @@ private:
     void ReturnFromRestlessMistForest();
     void EnterNorthZyphden();
     void ReturnFromNorthZyphden();
+    void EnterFrostCaverns();
+    void ReturnFromFrostCaverns();
     void EnterLobby();
     void EnterArena(bool isBossGauntlet = false);
     void ReturnFromArena();
@@ -80,6 +83,7 @@ private:
     bool showControlsModal;
     bool showInventoryModal;
     bool showMapModal;
+    bool showStashModal;
     bool showSlotModal;
     int deletingSlotIndex;
     bool isRestoringSave;
@@ -112,6 +116,7 @@ private:
     QuarryHandler quarryHandler;
     RestlessMistForestHandler restlessMistForestHandler;
     NorthZyphdenHandler northZyphdenHandler;
+    FrostCavernsHandler frostCavernsHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 
@@ -128,4 +133,9 @@ private:
     RealmTransition screenTransition;
     void UpdateScreenTransition(float dt);
     void RenderScreenTransition();
+
+    // Dynamic Time-of-Day & Nightfall Incursions
+    float nightfallSpawnTimer = 0.0f;
+    bool nightfallAlertTriggered = false;
+    void UpdateNightfallIncursions(float dt);
 };

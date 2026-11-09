@@ -322,6 +322,34 @@ void GameMap::Init(MapEnvironment env) {
         torches.push_back({ 450.0f, 400.0f });  // West outpost campfire
         torches.push_back({ 1850.0f, 420.0f }); // East mound campfire
         torches.push_back({ 1200.0f, 1380.0f });// South return gate lantern
+    } else if (env == MapEnvironment::FROST_CAVERNS) {
+        bounds = { 100.0f, 100.0f, 1800.0f, 1400.0f };
+
+        // Subterranean Crypt Monolith Pillars
+        pillars.push_back({ { 600.0f, 500.0f }, 32.0f });
+        pillars.push_back({ { 1200.0f, 500.0f }, 32.0f });
+        pillars.push_back({ { 600.0f, 950.0f }, 32.0f });
+        pillars.push_back({ { 1200.0f, 950.0f }, 32.0f });
+
+        // Sarcophagus Dais Pillars
+        pillars.push_back({ { 740.0f, 320.0f }, 24.0f });
+        pillars.push_back({ { 1060.0f, 320.0f }, 24.0f });
+
+        // Glacial Ice Stalagmite Formations / Natural Walls
+        obstacles.push_back({ { 350.0f, 650.0f, 140.0f, 80.0f } });
+        obstacles.push_back({ { 1310.0f, 650.0f, 140.0f, 80.0f } });
+        obstacles.push_back({ { 820.0f, 750.0f, 160.0f, 70.0f } });
+        obstacles.push_back({ { 400.0f, 300.0f, 120.0f, 90.0f } });
+        obstacles.push_back({ { 1280.0f, 300.0f, 120.0f, 90.0f } });
+
+        // Pale soulfire braziers (cold cyan/blue flame)
+        torches.push_back({ 740.0f, 320.0f });
+        torches.push_back({ 1060.0f, 320.0f });
+        torches.push_back({ 600.0f, 500.0f });
+        torches.push_back({ 1200.0f, 500.0f });
+        torches.push_back({ 600.0f, 950.0f });
+        torches.push_back({ 1200.0f, 950.0f });
+        torches.push_back({ 300.0f, 1200.0f }); // Entrance campfire brazier
     }
 }
 
@@ -388,6 +416,8 @@ void GameMap::DrawFloor(Vector2 playerPos) const {
         DrawRestlessMistForestFloor();
     } else if (currentEnv == MapEnvironment::NORTH_ZYPHDEN) {
         DrawNorthZyphdenFloor(playerPos);
+    } else if (currentEnv == MapEnvironment::FROST_CAVERNS) {
+        DrawFrostCavernsFloor(playerPos);
     }
 
     float time = (float)GetTime();
@@ -517,6 +547,8 @@ void GameMap::DrawWallsAndPillars(Vector2 playerPos) const {
         DrawRestlessMistForestWalls(playerPos);
     } else if (currentEnv == MapEnvironment::NORTH_ZYPHDEN) {
         DrawNorthZyphdenWalls(playerPos);
+    } else if (currentEnv == MapEnvironment::FROST_CAVERNS) {
+        DrawFrostCavernsWalls(playerPos);
     } else {
         // Standard Pillars
         for (const auto& pillar : pillars) {
@@ -1639,3 +1671,89 @@ void GameMap::DrawNorthZyphdenWalls(Vector2 playerPos) const {
     DrawCircleGradient(Vector2{ 1085.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
     DrawCircleGradient(Vector2{ 1315.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
 }
+
+void GameMap::DrawFrostCavernsFloor(Vector2 playerPos) const {
+    (void)playerPos;
+    float time = (float)GetTime();
+
+    // 1. Deep Subterranean Glacial Abyssal Floor Base
+    DrawRectangleRec(bounds, Color{ 10, 15, 24, 255 });
+
+    // 2. Glacial Blue Tile Slabs with Specular Ice Sheen
+    const int tileSize = 60;
+    int startX = (int)bounds.x;
+    int endX = (int)(bounds.x + bounds.width);
+    int startY = (int)bounds.y;
+    int endY = (int)(bounds.y + bounds.height);
+
+    for (int y = startY; y < endY; y += tileSize) {
+        for (int x = startX; x < endX; x += tileSize) {
+            bool alt = ((x / tileSize) + (y / tileSize)) % 2 == 0;
+            Color slabColor = alt ? Color{ 16, 24, 38, 255 } : Color{ 12, 19, 30, 255 };
+            DrawRectangle(x, y, tileSize, tileSize, slabColor);
+            DrawRectangleLines(x, y, tileSize, tileSize, Color{ 28, 44, 68, 140 });
+
+            // Glacial crystalline veins
+            if (((x * 7 + y * 13) % 19) == 0) {
+                DrawLine(x + 10, y + 10, x + tileSize - 10, y + tileSize - 10, Color{ 70, 140, 210, 80 });
+            }
+        }
+    }
+
+    // 3. Central Sarcophagus Dais Frost Glyph Rings ({ 900.0f, 350.0f })
+    Vector2 altarCenter = { 900.0f, 350.0f };
+    float pulse = 0.5f + 0.5f * sinf(time * 2.5f);
+    DrawCircleGradient(altarCenter, 220.0f, Color{ 40, 140, 220, (unsigned char)(45 + 30 * pulse) }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 160.0f, Color{ 60, 160, 240, 160 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 120.0f, Color{ 90, 200, 255, 190 });
+    DrawCircleLines((int)altarCenter.x, (int)altarCenter.y, 80.0f, Color{ 140, 225, 255, 220 });
+
+    // 4. Entrance Chamber Glacial Rune Circle ({ 300.0f, 1200.0f })
+    Vector2 entranceCenter = { 300.0f, 1200.0f };
+    DrawCircleGradient(entranceCenter, 140.0f, Color{ 30, 100, 180, 50 }, Color{ 0, 0, 0, 0 });
+    DrawCircleLines((int)entranceCenter.x, (int)entranceCenter.y, 90.0f, Color{ 50, 130, 210, 140 });
+}
+
+void GameMap::DrawFrostCavernsWalls(Vector2 playerPos) const {
+    (void)playerPos;
+    float time = (float)GetTime();
+
+    // 1. Glacial Crags & Frozen Stalagmite Obstacles
+    for (const auto& obs : obstacles) {
+        DrawRectangleRounded(obs.rect, 0.35f, 4, Color{ 20, 32, 50, 255 });
+        DrawRectangleRoundedLines(obs.rect, 0.35f, 4, Color{ 80, 160, 235, 200 });
+
+        // Frost crystal ridge rim
+        DrawLineEx({ obs.rect.x + 6.0f, obs.rect.y + 4.0f }, { obs.rect.x + obs.rect.width - 6.0f, obs.rect.y + 4.0f }, 3.0f, Color{ 160, 225, 255, 220 });
+    }
+
+    // 2. Subterranean Monolith Pillars
+    for (const auto& pillar : pillars) {
+        DrawCircle((int)pillar.position.x, (int)(pillar.position.y + pillar.radius * 0.4f), pillar.radius * 1.2f, Color{ 6, 10, 18, 160 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 24, 36, 56, 255 });
+        DrawCircleLines((int)pillar.position.x, (int)pillar.position.y, pillar.radius, Color{ 70, 145, 215, 255 });
+
+        // Cold cyan soulfire runic band
+        float pGlow = 0.5f + 0.5f * sinf(time * 3.5f + pillar.position.x);
+        DrawCircleGradient(pillar.position, pillar.radius * 0.65f, Color{ 60, 180, 255, (unsigned char)(90 + 70 * pGlow) }, Color{ 0, 0, 0, 0 });
+        DrawCircle((int)pillar.position.x, (int)pillar.position.y, 4.0f, Color{ 180, 240, 255, 240 });
+    }
+
+    // 3. Glacial Sarcophagus at Inner Crypt ({ 900.0f, 350.0f })
+    Vector2 sarcCenter = { 900.0f, 350.0f };
+    Rectangle sarcRect = { sarcCenter.x - 60.0f, sarcCenter.y - 35.0f, 120.0f, 70.0f };
+    DrawRectangleRounded(sarcRect, 0.25f, 4, Color{ 30, 48, 72, 255 });
+    DrawRectangleRoundedLines(sarcRect, 0.25f, 4, Color{ 110, 215, 255, 240 });
+    DrawText("GLACIAL SARCOPHAGUS", (int)sarcRect.x + 4, (int)sarcRect.y - 18, 10, Color{ 140, 220, 255, 220 });
+
+    // 4. Ascension Archway (Return to Highland Surface at { 240.0f, 1250.0f })
+    Rectangle returnArch = { 180.0f, 1225.0f, 120.0f, 50.0f };
+    DrawRectangleRounded(returnArch, 0.3f, 4, Color{ 22, 34, 52, 240 });
+    DrawRectangleRoundedLines(returnArch, 0.3f, 4, Color{ 90, 190, 255, 230 });
+    DrawText("ASCENT TO HIGHLANDS", (int)returnArch.x + 6, (int)returnArch.y + 18, 9, Color{ 170, 230, 255, 255 });
+}
+
+void GameMap::DrawLighting(Camera2D camera, Vector2 playerPos) const {
+    timeOfDay.DrawLighting(camera, playerPos, bounds, torches, IsInterior());
+}
+

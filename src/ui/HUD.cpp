@@ -1,6 +1,8 @@
 #include "HUD.hpp"
 #include "../combat/Weapon.hpp"
 #include "../entities/Player.hpp"
+#include "../entities/Enemy.hpp"
+#include "../world/TimeOfDay.hpp"
 #include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
@@ -136,10 +138,10 @@ void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
 }
 
 void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player) {
-    const int numSlots = 6;
-    const float slotW = 50.0f;
-    const float slotH = 50.0f;
-    const float slotSpacing = 8.0f;
+    const int numSlots = 9;
+    const float slotW = 46.0f;
+    const float slotH = 46.0f;
+    const float slotSpacing = 6.0f;
     const float totalW = numSlots * slotW + (numSlots - 1) * slotSpacing;
     const float barX = ((float)windowWidth - totalW) * 0.5f;
     const float barY = (float)windowHeight - slotH - 18.0f;
@@ -197,6 +199,39 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
 
     if (player.GetTotem() == TotemType::TOTEM_INSANITY && (player.GetHealth() / player.GetMaxHealth() <= 0.40f)) {
         activeBuffs.push_back({ "BLOOD FRENZY: +135% DMG", Color{ 255, 45, 60, 255 }, Color{ 255, 150, 160, 255 }, Color{ 52, 14, 18, 240 }, true });
+    }
+
+    if (player.GetTotem() == TotemType::TOTEM_PHLEGMATIC_CORE) {
+        if (player.GetGrayHealth() > 0.0f) {
+            char ghBuf[40];
+            snprintf(ghBuf, sizeof(ghBuf), "GRAY HEALTH: %d HP", (int)player.GetGrayHealth());
+            activeBuffs.push_back({ ghBuf, Color{ 185, 215, 240, 255 }, Color{ 230, 245, 255, 255 }, Color{ 30, 44, 60, 240 }, true });
+        }
+        activeBuffs.push_back({ "PHLEGMATIC APATHY: -80% KB", Color{ 140, 215, 255, 255 }, Color{ 200, 240, 255, 255 }, Color{ 20, 38, 55, 240 }, false });
+    }
+
+    if (player.HasAdrenalineBuff()) {
+        char b[32];
+        snprintf(b, sizeof(b), "ADRENALINE: %.1fs", player.GetAdrenalineTimer());
+        activeBuffs.push_back({ b, Color{ 255, 120, 40, 255 }, Color{ 255, 195, 110, 255 }, Color{ 52, 22, 10, 240 }, true });
+    }
+
+    if (player.HasStoneskinActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "STONESKIN: %.1fs", player.GetStoneskinTimer());
+        activeBuffs.push_back({ b, Color{ 255, 205, 60, 255 }, Color{ 255, 235, 120, 255 }, Color{ 48, 38, 12, 240 }, true });
+    }
+
+    if (player.HasGlacialImmunityActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "GLACIAL WARMTH: %.1fs", player.GetGlacialImmunityTimer());
+        activeBuffs.push_back({ b, Color{ 120, 230, 255, 255 }, Color{ 200, 245, 255, 255 }, Color{ 14, 38, 52, 240 }, true });
+    }
+
+    if (player.HasBerserkerActive()) {
+        char b[32];
+        snprintf(b, sizeof(b), "BERSERKER BREW: %.1fs", player.GetBerserkerTimer());
+        activeBuffs.push_back({ b, Color{ 255, 50, 60, 255 }, Color{ 255, 140, 150, 255 }, Color{ 52, 14, 18, 240 }, true });
     }
 
     if (player.IsFrostbitten()) {
@@ -316,7 +351,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     // Slot 5: Health Potion [1]
     ActionSlotInfo potSlot;
     potSlot.bounds = { barX + 4 * (slotW + slotSpacing), barY, slotW, slotH };
-    potSlot.actionName = "POTION";
+    potSlot.actionName = "HEAL";
     potSlot.keybind = "[1]";
     potSlot.currentCooldown = player.GetPotionCooldown();
     potSlot.maxCooldown = 7.0f;
@@ -325,11 +360,47 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     potSlot.stockCount = player.GetInventory().GetHealthPotionCount();
     DrawActionSlot(potSlot);
 
-    // Slot 6: Armor Skill [V]
+    // Slot 6: Stoneskin Tonic [2]
+    ActionSlotInfo stoneSlot;
+    stoneSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
+    stoneSlot.actionName = "STONE";
+    stoneSlot.keybind = "[2]";
+    stoneSlot.currentCooldown = player.GetStoneskinTimer();
+    stoneSlot.maxCooldown = 15.0f;
+    stoneSlot.themeColor = Color{ 245, 195, 50, 255 };
+    stoneSlot.isActive = player.HasStoneskinActive();
+    stoneSlot.stockCount = player.GetInventory().GetStoneskinTonicCount();
+    DrawActionSlot(stoneSlot);
+
+    // Slot 7: Glacial Draught [3]
+    ActionSlotInfo thawSlot;
+    thawSlot.bounds = { barX + 6 * (slotW + slotSpacing), barY, slotW, slotH };
+    thawSlot.actionName = "THAW";
+    thawSlot.keybind = "[3]";
+    thawSlot.currentCooldown = player.GetGlacialImmunityTimer();
+    thawSlot.maxCooldown = 90.0f;
+    thawSlot.themeColor = Color{ 110, 225, 255, 255 };
+    thawSlot.isActive = player.HasGlacialImmunityActive();
+    thawSlot.stockCount = player.GetInventory().GetGlacialDraughtCount();
+    DrawActionSlot(thawSlot);
+
+    // Slot 8: Berserker Brew [4]
+    ActionSlotInfo berserkSlot;
+    berserkSlot.bounds = { barX + 7 * (slotW + slotSpacing), barY, slotW, slotH };
+    berserkSlot.actionName = "BERSERK";
+    berserkSlot.keybind = "[4]";
+    berserkSlot.currentCooldown = player.GetBerserkerTimer();
+    berserkSlot.maxCooldown = 12.0f;
+    berserkSlot.themeColor = Color{ 255, 55, 65, 255 };
+    berserkSlot.isActive = player.HasBerserkerActive();
+    berserkSlot.stockCount = player.GetInventory().GetBerserkerDraughtCount();
+    DrawActionSlot(berserkSlot);
+
+    // Slot 9: Armor Skill [V]
     ArmorSet curSet = player.GetActiveArmorSet();
     ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
     ActionSlotInfo armorSkillSlot;
-    armorSkillSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
+    armorSkillSlot.bounds = { barX + 8 * (slotW + slotSpacing), barY, slotW, slotH };
     armorSkillSlot.actionName = (curSet != ArmorSet::NONE) ? setInfo.skillName.c_str() : "NO SET";
     armorSkillSlot.keybind = "[V]";
     armorSkillSlot.currentCooldown = player.GetArmorSkillCooldown();
@@ -356,6 +427,18 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     DrawText("HP", (int)hudX + 14, (int)hudY + 12, 11, Color{ 235, 80, 90, 255 });
     Rectangle hpRec = { hudX + 68, hudY + 12, 170, 12 };
     DrawResourceBar(hpRec, player.GetHealth(), player.GetMaxHealth(), Color{ 235, 55, 75, 255 }, Color{ 32, 20, 24, 220 }, Color{ 85, 40, 50, 220 }, true);
+    if (player.GetGrayHealth() > 0.0f && player.GetMaxHealth() > 0.001f) {
+        float maxH = player.GetMaxHealth();
+        float hpPct = fmaxf(0.0f, fminf(1.0f, player.GetHealth() / maxH));
+        float grayPct = fmaxf(0.0f, fminf(1.0f - hpPct, player.GetGrayHealth() / maxH));
+        float startX = hpRec.x + hpRec.width * hpPct;
+        float grayW = hpRec.width * grayPct;
+        if (grayW > 0.0f) {
+            float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 8.0f);
+            Color grayCol = Color{ (unsigned char)(180 + 30 * pulse), (unsigned char)(195 + 25 * pulse), (unsigned char)(215 + 20 * pulse), 190 };
+            DrawRectangleRounded(Rectangle{ startX, hpRec.y + 1, grayW, hpRec.height - 2 }, 0.2f, 4, grayCol);
+        }
+    }
     char hpBuf[32];
     snprintf(hpBuf, sizeof(hpBuf), "%d/%d", (int)player.GetHealth(), (int)player.GetMaxHealth());
     DrawText(hpBuf, (int)hudX + 246, (int)hudY + 12, 10, Color{ 230, 205, 210, 225 });
@@ -729,7 +812,7 @@ void HUD::DrawCurrencyBadge(int windowWidth, int shingles, int oreScraps) {
     FontManager::DrawText(scrapText, (int)(scrapBadgeX + 34), (int)(badgeY + 8), 12, Color{ 255, 225, 130, 245 }, GameFont::BODY);
 }
 
-void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
+void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
     // Player HUD Panel (Bottom Left)
@@ -761,8 +844,8 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
     DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
 
-    // Top Location Header Banner (NO wave counter in campaign!)
-    DrawLocationHeader(windowWidth, locationName);
+    // Top Location Header Banner with Time-of-Day Clock Dial
+    DrawLocationHeader(windowWidth, locationName, tod);
 
     // Map button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -781,6 +864,153 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
     DrawText("[C] Controls", windowWidth - 120, 25, 12, Color{ 120, 220, 255, 240 });
+}
+
+void HUD::DrawTacticalRadar(
+    int windowWidth,
+    int windowHeight,
+    const Player& player,
+    const std::vector<Enemy>& enemies,
+    const std::vector<Vector2>& campfires,
+    const std::vector<Vector2>& npcs,
+    const std::vector<Vector2>& altars
+) {
+    (void)windowWidth;
+    (void)windowHeight;
+
+    static bool s_showRadar = true;
+    if (IsKeyPressed(KEY_N)) {
+        s_showRadar = !s_showRadar;
+    }
+
+    const float radarCX = 80.0f;
+    const float radarCY = 80.0f;
+    const float radarR = 56.0f;
+    const float radarRange = 600.0f;
+
+    Vector2 mousePos = GetMousePosition();
+
+    if (!s_showRadar) {
+        Rectangle pillRec = { 24.0f, 16.0f, 84.0f, 26.0f };
+        bool hov = CheckCollisionPointRec(mousePos, pillRec);
+        if (hov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            s_showRadar = true;
+        }
+        DrawRectangleRounded(pillRec, 0.35f, 4, Color{ 14, 18, 28, 220 });
+        DrawRectangleRoundedLines(pillRec, 0.35f, 4, hov ? Color{ 140, 215, 255, 255 } : Color{ 55, 80, 115, 220 });
+        DrawText("[N] RADAR", (int)pillRec.x + 12, (int)pillRec.y + 7, 10, hov ? Color{ 200, 240, 255, 255 } : Color{ 140, 205, 245, 220 });
+        return;
+    }
+
+    // Drop shadow
+    DrawCircle((int)radarCX, (int)radarCY + 2, radarR + 2.0f, Color{ 6, 8, 14, 150 });
+
+    // Dark glass radar lens
+    DrawCircle((int)radarCX, (int)radarCY, radarR, Color{ 10, 16, 26, 230 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR, Color{ 65, 90, 125, 230 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR - 2.0f, Color{ 36, 50, 75, 180 });
+
+    // Concentric range rings
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR * 0.35f, Color{ 40, 60, 92, 75 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR * 0.70f, Color{ 40, 60, 92, 75 });
+
+    // Crosshair axis
+    DrawLine((int)(radarCX - radarR + 4.0f), (int)radarCY, (int)(radarCX + radarR - 4.0f), (int)radarCY, Color{ 40, 60, 92, 60 });
+    DrawLine((int)radarCX, (int)(radarCY - radarR + 4.0f), (int)radarCX, (int)(radarCY + radarR - 4.0f), Color{ 40, 60, 92, 60 });
+
+    // 360-degree radar beam sweep
+    float sweepRad = fmodf((float)GetTime() * 160.0f, 360.0f) * DEG2RAD;
+    Vector2 sweepVec = { radarCX + cosf(sweepRad) * (radarR - 4.0f), radarCY + sinf(sweepRad) * (radarR - 4.0f) };
+    DrawLineEx({ radarCX, radarCY }, sweepVec, 1.5f, Color{ 90, 220, 255, 130 });
+    DrawCircleGradient(Vector2{ radarCX, radarCY }, radarR * 0.9f, Color{ 50, 150, 230, 24 }, Color{ 0, 0, 0, 0 });
+
+    // Compass cardinal markers
+    DrawText("N", (int)radarCX - 3, (int)(radarCY - radarR + 3.0f), 8, Color{ 255, 215, 80, 240 });
+    DrawText("S", (int)radarCX - 3, (int)(radarCY + radarR - 11.0f), 8, Color{ 140, 175, 215, 180 });
+    DrawText("E", (int)(radarCX + radarR - 9.0f), (int)radarCY - 4, 8, Color{ 140, 175, 215, 180 });
+    DrawText("W", (int)(radarCX - radarR + 3.0f), (int)radarCY - 4, 8, Color{ 140, 175, 215, 180 });
+
+    Vector2 playerPos = player.GetPosition();
+
+    // Helper lambda for projecting world position onto circular radar
+    auto ProjectToRadar = [&](Vector2 worldPos, float maxDist) -> Vector2 {
+        float dx = worldPos.x - playerPos.x;
+        float dy = worldPos.y - playerPos.y;
+        float dist = sqrtf(dx * dx + dy * dy);
+        float ratio = fminf(1.0f, dist / maxDist);
+        float normX = (dist > 0.001f) ? (dx / dist) : 0.0f;
+        float normY = (dist > 0.001f) ? (dy / dist) : 0.0f;
+        return Vector2{
+            radarCX + normX * (ratio * (radarR - 6.0f)),
+            radarCY + normY * (ratio * (radarR - 6.0f))
+        };
+    };
+
+    // 1. Waypoint Altars
+    for (const auto& altar : altars) {
+        Vector2 pip = ProjectToRadar(altar, radarRange);
+        DrawPoly(pip, 4, 3.5f, 45.0f, Color{ 120, 225, 255, 240 });
+        DrawCircle((int)pip.x, (int)pip.y, 1.0f, Color{ 255, 255, 255, 255 });
+    }
+
+    // 2. Bonfires / Campfires
+    for (const auto& cp : campfires) {
+        Vector2 pip = ProjectToRadar(cp, radarRange);
+        float p = 0.5f + 0.5f * sinf((float)GetTime() * 6.0f);
+        DrawPoly(pip, 4, 4.0f + 0.5f * p, 45.0f, Color{ 255, 185, 45, 245 });
+        DrawCircle((int)pip.x, (int)pip.y, 1.5f, Color{ 255, 245, 180, 255 });
+    }
+
+    // 3. Friendly NPCs
+    for (const auto& npc : npcs) {
+        Vector2 pip = ProjectToRadar(npc, radarRange);
+        DrawCircle((int)pip.x, (int)pip.y, 3.0f, Color{ 80, 240, 150, 245 });
+        DrawCircleLines((int)pip.x, (int)pip.y, 4.0f, Color{ 140, 255, 190, 180 });
+    }
+
+    // 4. Enemy Threat Pips
+    for (const auto& enemy : enemies) {
+        if (!enemy.IsAlive()) continue;
+
+        Vector2 pip = ProjectToRadar(enemy.GetPosition(), radarRange);
+        if (enemy.IsBoss()) {
+            float p = 0.5f + 0.5f * sinf((float)GetTime() * 8.0f);
+            DrawCircle((int)pip.x, (int)pip.y, 4.5f, Color{ 255, 30, 45, 255 });
+            DrawCircleLines((int)pip.x, (int)pip.y, 5.5f + 2.0f * p, Color{ 255, 80, 95, 210 });
+        } else if (enemy.IsNightfallElite()) {
+            DrawCircle((int)pip.x, (int)pip.y, 3.8f, Color{ 185, 75, 255, 255 });
+            DrawCircleLines((int)pip.x, (int)pip.y, 4.8f, Color{ 220, 140, 255, 220 });
+        } else {
+            DrawCircle((int)pip.x, (int)pip.y, 2.5f, Color{ 240, 60, 75, 225 });
+        }
+    }
+
+    // 5. Player Marker in Center with Heading Arrow
+    float facingRad = player.GetFacingAngle() * DEG2RAD;
+    Vector2 tip = { radarCX + cosf(facingRad) * 8.0f, radarCY + sinf(facingRad) * 8.0f };
+    Vector2 left = { radarCX + cosf(facingRad + 2.45f) * 5.5f, radarCY + sinf(facingRad + 2.45f) * 5.5f };
+    Vector2 right = { radarCX + cosf(facingRad - 2.45f) * 5.5f, radarCY + sinf(facingRad - 2.45f) * 5.5f };
+    DrawTriangle(tip, left, right, Color{ 0, 240, 255, 255 });
+    DrawCircle((int)radarCX, (int)radarCY, 2.0f, Color{ 255, 255, 255, 255 });
+
+    // 6. Compass Heading Pill below radar
+    Rectangle hRec = { radarCX - 40.0f, radarCY + radarR + 4.0f, 80.0f, 16.0f };
+    DrawRectangleRounded(hRec, 0.35f, 3, Color{ 12, 16, 24, 220 });
+    DrawRectangleRoundedLines(hRec, 0.35f, 3, Color{ 48, 68, 98, 200 });
+
+    float deg = fmodf(player.GetFacingAngle() + 360.0f, 360.0f);
+    const char* dirStr = (deg >= 337.5f || deg < 22.5f) ? "E" :
+                         (deg < 67.5f ? "SE" :
+                         (deg < 112.5f ? "S" :
+                         (deg < 157.5f ? "SW" :
+                         (deg < 202.5f ? "W" :
+                         (deg < 247.5f ? "NW" :
+                         (deg < 292.5f ? "N" : "NE"))))));
+
+    char compBuf[32];
+    snprintf(compBuf, sizeof(compBuf), "[N] %s %d'", dirStr, (int)deg);
+    int cw = MeasureText(compBuf, 9);
+    DrawText(compBuf, (int)(hRec.x + (hRec.width - cw) * 0.5f), (int)hRec.y + 3, 9, Color{ 175, 215, 255, 240 });
 }
 
 // Legacy float-based overloads
@@ -969,8 +1199,8 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, float hp, float maxHp, f
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
-void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName) {
-    const float bannerW = 340.0f;
+void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName, const TimeOfDaySystem* tod) {
+    const float bannerW = (tod != nullptr) ? 460.0f : 340.0f;
     const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
@@ -987,12 +1217,55 @@ void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName) {
     DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 22, bannerY + 8 }, 1.5f, cornerCol);
     DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 8, bannerY + 22 }, 1.5f, cornerCol);
 
-    // Map Name centered in Gold
-    int nameW = MeasureText(locationName.c_str(), 16);
-    DrawText(locationName.c_str(), (int)(bannerX + (bannerW - nameW) * 0.5f), (int)bannerY + 13, 16, Color{ 255, 225, 95, 255 });
+    if (tod != nullptr) {
+        // Location text on the left
+        DrawText(locationName.c_str(), (int)bannerX + 22, (int)bannerY + 13, 14, Color{ 255, 225, 95, 255 });
+
+        // Celestial Clock Badge on right
+        float dialW = 126.0f;
+        float dialH = bannerH - 12.0f;
+        float dialX = bannerX + bannerW - dialW - 10.0f;
+        float dialY = bannerY + 6.0f;
+
+        bool isNight = tod->IsNight();
+        Color dialBorder = isNight ? Color{ 100, 160, 240, 200 } : Color{ 210, 175, 70, 200 };
+        DrawRectangleRounded(Rectangle{ dialX, dialY, dialW, dialH }, 0.35f, 4, Color{ 10, 14, 22, 230 });
+        DrawRectangleRoundedLines(Rectangle{ dialX, dialY, dialW, dialH }, 0.35f, 4, dialBorder);
+
+        // Celestial Orb Icon
+        float cx = dialX + 16.0f;
+        float cy = dialY + dialH * 0.5f;
+        if (tod->GetPhase() == TimePhase::DAY || tod->GetPhase() == TimePhase::DAWN) {
+            // Radiant Golden Sun
+            DrawCircle((int)cx, (int)cy, 5.0f, Color{ 255, 215, 70, 255 });
+            DrawLineEx({ cx - 8.0f, cy }, { cx + 8.0f, cy }, 1.0f, Color{ 255, 235, 120, 220 });
+            DrawLineEx({ cx, cy - 8.0f }, { cx, cy + 8.0f }, 1.0f, Color{ 255, 235, 120, 220 });
+        } else {
+            // Silver Crescent Moon
+            DrawCircle((int)cx, (int)cy, 5.5f, Color{ 200, 225, 255, 255 });
+            DrawCircle((int)cx + 2, (int)cy - 1, 4.5f, Color{ 10, 14, 22, 255 });
+            DrawCircle((int)cx + 6, (int)cy - 4, 1.0f, Color{ 230, 245, 255, 255 });
+        }
+
+        // Formatted Time
+        std::string timeStr = tod->GetFormattedTime();
+        DrawText(timeStr.c_str(), (int)dialX + 30, (int)dialY + 8, 12, Color{ 240, 245, 255, 255 });
+
+        // Phase Tag
+        const char* phaseName = tod->GetPhaseName();
+        Color phaseCol = isNight ? Color{ 130, 200, 255, 255 } :
+                         (tod->GetPhase() == TimePhase::DUSK ? Color{ 235, 140, 180, 255 } :
+                         (tod->GetPhase() == TimePhase::DAWN ? Color{ 255, 190, 110, 255 } : Color{ 255, 225, 110, 255 }));
+        int pw = MeasureText(phaseName, 9);
+        DrawText(phaseName, (int)(dialX + dialW - pw - 8), (int)dialY + 10, 9, phaseCol);
+    } else {
+        // Map Name centered in Gold
+        int nameW = MeasureText(locationName.c_str(), 16);
+        DrawText(locationName.c_str(), (int)(bannerX + (bannerW - nameW) * 0.5f), (int)bannerY + 13, 16, Color{ 255, 225, 95, 255 });
+    }
 }
 
-void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
+void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 110.0f;
     const float hudWidth = 310.0f;
@@ -1049,7 +1322,7 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float max
     DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
 
     // Top Location Header Banner (NO wave counter in campaign!)
-    DrawLocationHeader(windowWidth, locationName);
+    DrawLocationHeader(windowWidth, locationName, tod);
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
