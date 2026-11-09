@@ -43,6 +43,7 @@ g++ -std=c++17 -O2 -static ^
     src\states\QuarryHandler.cpp ^
     src\states\RestlessMistForestHandler.cpp ^
     src\states\NorthZyphdenHandler.cpp ^
+    src\states\FrostCavernsHandler.cpp ^
     src\states\Game.cpp ^
     -Isrc ^
     -Isrc\core ^

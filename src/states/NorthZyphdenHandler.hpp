@@ -76,7 +76,8 @@ public:
         Camera2D& camera,
         GameState& currentState,
         const std::function<void()>& onReturnToZyphden,
-        const std::function<void()>& onEnterLobby
+        const std::function<void()>& onEnterLobby,
+        const std::function<void()>& onEnterFrostCaverns = nullptr
     );
 
     void Render(

@@ -1929,21 +1929,30 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
         if (moveDir.x != 0.0f || moveDir.y != 0.0f) {
-
             moveDir = Vector2Normalize(moveDir);
 
-            velocity.x = moveDir.x * currentSpeed;
-
-            velocity.y = moveDir.y * currentSpeed;
+            if (map.GetEnvironment() == MapEnvironment::FROST_CAVERNS) {
+                // Icy floor inertia: smooth gradual acceleration with momentum
+                velocity.x = velocity.x * 0.88f + (moveDir.x * currentSpeed) * 0.12f;
+                velocity.y = velocity.y * 0.88f + (moveDir.y * currentSpeed) * 0.12f;
+            } else {
+                velocity.x = moveDir.x * currentSpeed;
+                velocity.y = moveDir.y * currentSpeed;
+            }
 
             walkCycle += dt * 10.0f;
-
         } else {
-
-            velocity.x *= 0.80f;
-
-            velocity.y *= 0.80f;
-
+            if (map.GetEnvironment() == MapEnvironment::FROST_CAVERNS) {
+                // Icy floor inertia: low friction glide
+                velocity.x *= 0.96f;
+                velocity.y *= 0.96f;
+                if (fabsf(velocity.x) > 25.0f || fabsf(velocity.y) > 25.0f) {
+                    particles.SpawnSparks(position, Color{ 140, 220, 255, 120 }, 1, 15.0f);
+                }
+            } else {
+                velocity.x *= 0.80f;
+                velocity.y *= 0.80f;
+            }
         }
 
     }

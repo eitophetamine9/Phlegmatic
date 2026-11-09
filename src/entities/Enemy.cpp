@@ -315,6 +315,25 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
             telegraph.warningColor = Color{ 255, 45, 60, 200 };
             isPerformingMeleeSmite = true;
             break;
+
+        case EnemyType::FROST_REVENANT:
+            humor = HumorType::PHLEGMATIC;
+            radius = 28.0f;
+            maxHealth = 1650.0f;
+            defense = 28.0f;
+            will = 85.0f;
+            moveSpeed = 165.0f;
+            attackRange = 160.0f;
+            kitingRange = 80.0f;
+            windupDuration = 0.60f;
+            strikeDuration = 0.20f;
+            recoveryDuration = 0.50f;
+            stunDuration = 0.75f;
+            telegraph.shape = TelegraphShape::CIRCLE;
+            telegraph.radius = 160.0f;
+            telegraph.warningColor = Color{ 80, 200, 255, 200 };
+            isPerformingMeleeSmite = false;
+            break;
     }
 
     health = maxHealth;
@@ -348,6 +367,7 @@ std::string Enemy::GetName() const {
         case EnemyType::GALE_ARCHER_BOSS: baseName = "GALE ARCHER (MIST WARDEN)"; break;
         case EnemyType::FROST_TROLL: baseName = "FROST TROLL"; break;
         case EnemyType::BERSERKER_TROLL: baseName = "BERSERKER TROLL (CRAG WARLORD)"; break;
+        case EnemyType::FROST_REVENANT: baseName = "FROST REVENANT (CHASM PHANTOM)"; break;
     }
     if (isNightfallElite) {
         return "NIGHTFALL " + baseName;
@@ -649,6 +669,35 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.radius = 220.0f;
                         telegraph.width = 56.0f;
                         telegraph.warningColor = Color{ 190, 110, 255, 220 };
+                        isPerformingMeleeSmite = true;
+                    }
+                } else if (type == EnemyType::FROST_REVENANT) {
+                    // 3-Phase Frost Revenant Cycle
+                    if (bossAttackPhase == 0) {
+                        // Radial Frost Nova (360 Ice Shards)
+                        windupDuration = 0.65f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 175.0f;
+                        telegraph.warningColor = Color{ 70, 200, 255, 210 };
+                        isPerformingMeleeSmite = false;
+                    } else if (bossAttackPhase == 1) {
+                        // Glacial Ice Lance (Piercing beam)
+                        windupDuration = 0.60f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::LINE;
+                        telegraph.radius = 420.0f;
+                        telegraph.width = 30.0f;
+                        telegraph.warningColor = Color{ 120, 225, 255, 230 };
+                        isPerformingMeleeSmite = false;
+                    } else {
+                        // Frost Shift / Melee Frost Cleave
+                        windupDuration = 0.50f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CONE;
+                        telegraph.radius = 135.0f;
+                        telegraph.arcAngle = 140.0f;
+                        telegraph.warningColor = Color{ 140, 240, 255, 230 };
                         isPerformingMeleeSmite = true;
                     }
                 }
@@ -954,6 +1003,41 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         particles.SpawnSparks(position, Color{ 240, 150, 50, 255 }, 12, 110.0f);
                         SoundFX::PlayLightAttack();
                     }
+                } else if (type == EnemyType::FROST_REVENANT) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+                    if (bossAttackPhase == 0) {
+                        // 6-way Frost Nova
+                        for (int i = 0; i < 6; ++i) {
+                            float ang = ((float)i * 60.0f) * DEG2RAD;
+                            Vector2 sDir = { cosf(ang), sinf(ang) };
+                            Vector2 spawn = { position.x + sDir.x * (radius + 12.0f), position.y + sDir.y * (radius + 12.0f) };
+                            Vector2 vel = { sDir.x * 380.0f, sDir.y * 380.0f };
+                            outProjectiles.emplace_back(spawn, vel, 8.0f, 24.0f, ProjectileType::NOVA_STAR, false);
+                        }
+                        SoundFX::PlayProjectileShoot();
+                        particles.SpawnSparks(position, Color{ 100, 220, 255, 255 }, 24, 180.0f);
+                    } else if (bossAttackPhase == 1) {
+                        // Glacial Ice Lance
+                        Vector2 spawn = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
+                        Vector2 vel = { forwardDir.x * 540.0f, forwardDir.y * 540.0f };
+                        outProjectiles.emplace_back(spawn, vel, 10.0f, 34.0f, ProjectileType::BEAM_SHARD, false);
+                        SoundFX::PlayCrusaderClash();
+                        particles.SpawnSparks(position, Color{ 120, 235, 255, 255 }, 25, 200.0f);
+                    } else {
+                        // Frost Shift / Cleave: teleport flash towards player!
+                        Vector2 toPlayer = { playerPos.x - position.x, playerPos.y - position.y };
+                        float pDist = sqrtf(toPlayer.x * toPlayer.x + toPlayer.y * toPlayer.y);
+                        if (pDist > 60.0f) {
+                            particles.SpawnSparks(position, Color{ 80, 200, 255, 220 }, 20, 150.0f);
+                            position.x += (toPlayer.x / pDist) * (pDist - 50.0f);
+                            position.y += (toPlayer.y / pDist) * (pDist - 50.0f);
+                        }
+                        particles.AddScreenShake(6.0f, 0.20f);
+                        particles.SpawnSparks(position, Color{ 140, 240, 255, 255 }, 28, 200.0f);
+                        SoundFX::PlayHeavyAttack();
+                    }
+                    bossAttackPhase = (bossAttackPhase + 1) % 3;
                 }
             }
             break;
@@ -1059,7 +1143,7 @@ bool Enemy::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& parti
         SoundFX::PlayEnemyDeath();
         particles.SpawnSparks(position, Color{ 200, 40, 40, 255 }, 25, 220.0f);
         particles.SpawnFloatingText({ position.x, position.y - 10.0f }, 
-            (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::GALE_ARCHER_BOSS) ? "BOSS SLAIN" : "DEFEATED", 
+            (type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::GALE_ARCHER_BOSS || type == EnemyType::BERSERKER_TROLL || type == EnemyType::FROST_REVENANT) ? "BOSS SLAIN" : "DEFEATED", 
             Color{ 255, 100, 100, 255 }, 24.0f);
         return true;
     }

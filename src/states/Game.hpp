@@ -22,6 +22,7 @@
 #include "QuarryHandler.hpp"
 #include "RestlessMistForestHandler.hpp"
 #include "NorthZyphdenHandler.hpp"
+#include "FrostCavernsHandler.hpp"
 #include <functional>
 #include <string>
 
@@ -69,6 +70,8 @@ private:
     void ReturnFromRestlessMistForest();
     void EnterNorthZyphden();
     void ReturnFromNorthZyphden();
+    void EnterFrostCaverns();
+    void ReturnFromFrostCaverns();
     void EnterLobby();
     void EnterArena(bool isBossGauntlet = false);
     void ReturnFromArena();
@@ -112,6 +115,7 @@ private:
     QuarryHandler quarryHandler;
     RestlessMistForestHandler restlessMistForestHandler;
     NorthZyphdenHandler northZyphdenHandler;
+    FrostCavernsHandler frostCavernsHandler;
     std::vector<AdhesiveBandage> arenaBandages;
     float bandageSpawnTimer;
 

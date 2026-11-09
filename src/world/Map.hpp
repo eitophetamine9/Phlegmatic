@@ -15,7 +15,8 @@ enum class MapEnvironment {
     ROYAL_KEEP,
     QUARRY_DEPTHS,
     RESTLESS_MIST_FOREST,
-    NORTH_ZYPHDEN
+    NORTH_ZYPHDEN,
+    FROST_CAVERNS
 };
 
 struct Pillar {
@@ -52,7 +53,8 @@ public:
     bool IsInterior() const {
         return currentEnv == MapEnvironment::TAVERN_INTERIOR ||
                currentEnv == MapEnvironment::FORGE_INTERIOR ||
-               currentEnv == MapEnvironment::ROYAL_KEEP;
+               currentEnv == MapEnvironment::ROYAL_KEEP ||
+               currentEnv == MapEnvironment::FROST_CAVERNS;
     }
 
 private:
@@ -82,4 +84,6 @@ private:
     void DrawRestlessMistForestWalls(Vector2 playerPos) const;
     void DrawNorthZyphdenFloor(Vector2 playerPos) const;
     void DrawNorthZyphdenWalls(Vector2 playerPos) const;
+    void DrawFrostCavernsFloor(Vector2 playerPos) const;
+    void DrawFrostCavernsWalls(Vector2 playerPos) const;
 };

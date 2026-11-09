@@ -529,6 +529,28 @@ void Game::ReturnFromNorthZyphden() {
     SaveActiveGame();
 }
 
+void Game::EnterFrostCaverns() {
+    frostCavernsHandler.Init(player, map, enemies, projectiles, camera);
+    currentState = GameState::FROST_CAVERNS;
+    showControlsModal = false;
+    showInventoryModal = false;
+    showMapModal = false;
+    lootDrops.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
+void Game::ReturnFromFrostCaverns() {
+    currentState = GameState::NORTH_ZYPHDEN;
+    map.Init(MapEnvironment::NORTH_ZYPHDEN);
+    player.SetPosition({ 2160.0f, 280.0f });
+    camera.target = player.GetPosition();
+    projectiles.clear();
+    enemies.clear();
+    particles.Clear();
+    SaveActiveGame();
+}
+
 void Game::StartRealmTransition(const std::function<void()>& onSwitch, const std::string& title, const std::string& subtitle, float fadeOut, float hold, float fadeIn) {
     if (screenTransition.mode == ScreenFadeMode::FADE_OUT) {
         screenTransition.onMidpointSwitch = onSwitch;
@@ -1351,6 +1373,14 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
         EnterNorthZyphden();
+
+
+
+    } else if (targetState == GameState::FROST_CAVERNS) {
+
+
+
+        EnterFrostCaverns();
 
 
 
@@ -2807,6 +2837,32 @@ void Game::Update(float dt) {
                     "Seat of King Kreptu & The Vanguard"
                 );
             },
+            [this]() { EnterLobby(); },
+            [this]() {
+                StartRealmTransition(
+                    [this]() { EnterFrostCaverns(); },
+                    "THE PERMAFROST CRYPTS",
+                    "Subterranean Chasm of the Ancient Wardens"
+                );
+            }
+        );
+        return;
+    }
+
+    if (currentState == GameState::FROST_CAVERNS) {
+        if (map.GetEnvironment() != MapEnvironment::FROST_CAVERNS) {
+            map.Init(MapEnvironment::FROST_CAVERNS);
+        }
+
+        frostCavernsHandler.Update(
+            dt, player, map, particles, enemies, projectiles, lootDrops, camera, currentState,
+            [this]() {
+                StartRealmTransition(
+                    [this]() { ReturnFromFrostCaverns(); },
+                    "NORTH ZYPHDEN HIGHLANDS",
+                    "The Frigid Bluffs of Brena"
+                );
+            },
             [this]() { EnterLobby(); }
         );
         return;
@@ -4045,6 +4101,11 @@ void Game::RenderScene() {
         );
     } else if (currentState == GameState::NORTH_ZYPHDEN) {
         northZyphdenHandler.Render(
+            camera, map, enemies, projectiles, lootDrops, player, particles,
+            w, h, false, false, 0, 0
+        );
+    } else if (currentState == GameState::FROST_CAVERNS) {
+        frostCavernsHandler.Render(
             camera, map, enemies, projectiles, lootDrops, player, particles,
             w, h, false, false, 0, 0
         );

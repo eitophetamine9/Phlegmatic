@@ -336,6 +336,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 34.0f;
             else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDamage = 28.0f;
             else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
+            else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
 
             bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
             if (!tookDamage && player.IsParrying()) {
@@ -350,6 +351,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (enemy.GetHumor() == HumorType::SANGUINE) {
                     player.ApplyBleed(3.0f, particles);
                 }
+                if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
+                    player.AddFrostbite(18.0f);
+                }
 
                 // Heavy and crushing boss attacks apply stagger to player if unparried
                 bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
@@ -358,7 +362,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                                       enemy.GetType() == EnemyType::ZIL_BOSS ||
                                       enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
                                       enemy.GetType() == EnemyType::FROST_TROLL ||
-                                      enemy.GetType() == EnemyType::BERSERKER_TROLL);
+                                      enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                      enemy.GetType() == EnemyType::FROST_REVENANT);
                 if (isHeavyAttack) {
                     player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
                     particles.TriggerHitStop(0.04f);
@@ -551,6 +556,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
                 else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDmg = 28.0f;
                 else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDmg = 46.0f;
+                else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
                 float dmg = baseDmg * (100.0f / (100.0f + effDef));
                 comp.health -= dmg;
                 particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);

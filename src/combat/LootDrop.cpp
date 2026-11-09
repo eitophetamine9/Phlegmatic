@@ -239,6 +239,13 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
         outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 14.0f, pos.y }, 1);
         outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
+    } else if (type == EnemyType::FROST_REVENANT) {
+        // Frost Revenant Boss: 50-75 Shingles + 2 Elixirs + 2 Shadow Essence
+        int shingleCount = 50 + (rand() % 26);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x - 14.0f, pos.y }, 1);
+        outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x + 14.0f, pos.y }, 1);
+        outDrops.emplace_back(LootType::SHADOW_ESSENCE, Vector2{ pos.x, pos.y - 14.0f }, 2);
     } else if (type == EnemyType::FROST_TROLL) {
         // Frost Troll: 4-8 Shingles + 25% Elixir
         int shingleCount = 4 + (rand() % 5);

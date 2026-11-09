@@ -285,7 +285,8 @@ void NorthZyphdenHandler::Update(
     Camera2D& camera,
     GameState& currentState,
     const std::function<void()>& onReturnToZyphden,
-    const std::function<void()>& onEnterLobby
+    const std::function<void()>& onEnterLobby,
+    const std::function<void()>& onEnterFrostCaverns
 ) {
     if (entryBannerTimer > 0.0f) entryBannerTimer -= dt;
     if (exitCooldown > 0.0f) exitCooldown -= dt;
@@ -475,6 +476,17 @@ void NorthZyphdenHandler::Update(
         if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T)) {
             exitCooldown = 1.0f;
             if (onReturnToZyphden) onReturnToZyphden();
+            return;
+        }
+    }
+
+    // Descent into Permafrost Crypts Interaction
+    Vector2 cavernsEntrancePos = { 2200.0f, 260.0f };
+    float distToCaverns = Vector2Distance(playerPos, cavernsEntrancePos);
+    if (distToCaverns <= 95.0f && exitCooldown <= 0.0f) {
+        if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_T)) {
+            exitCooldown = 1.0f;
+            if (onEnterFrostCaverns) onEnterFrostCaverns();
             return;
         }
     }
@@ -810,6 +822,17 @@ void NorthZyphdenHandler::Render(
         FontManager::DrawGameTextShadow("[E] RETURN TO ZYPHDEN OVERWORLD", (int)returnGatePos.x - 100, (int)returnGatePos.y - 40, 11, Color{ 160, 220, 255, 240 });
     }
 
+    // Permafrost Crypts Cavern Mouth
+    Vector2 cavernsEntrancePos = { 2200.0f, 260.0f };
+    DrawCircle((int)cavernsEntrancePos.x, (int)cavernsEntrancePos.y, 35.0f, Color{ 14, 22, 36, 255 });
+    DrawCircleLines((int)cavernsEntrancePos.x, (int)cavernsEntrancePos.y, 35.0f, Color{ 80, 190, 255, 230 });
+    float cPulse = 0.5f + 0.5f * sinf(time * 3.0f);
+    DrawCircleGradient(cavernsEntrancePos, 50.0f, Color{ 60, 180, 255, (unsigned char)(60 + 50 * cPulse) }, Color{ 0, 0, 0, 0 });
+    DrawText("PERMAFROST CRYPTS", (int)cavernsEntrancePos.x - 52, (int)cavernsEntrancePos.y - 48, 10, Color{ 150, 225, 255, 240 });
+    if (Vector2Distance(playerPos, cavernsEntrancePos) <= 110.0f) {
+        FontManager::DrawGameTextShadow("[E] DESCEND INTO THE PERMAFROST CRYPTS", (int)cavernsEntrancePos.x - 120, (int)cavernsEntrancePos.y - 28, 11, Color{ 140, 225, 255, 255 });
+    }
+
     for (const auto& drop : lootDrops) {
         drop.Draw(time);
     }
@@ -863,7 +886,7 @@ void NorthZyphdenHandler::Render(
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread, &map.GetTimeOfDay());
 
     // Tactical Corner Mini-Map Radar & Compass HUD
-    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { highlandCampfire.position }, { torvaldPos }, { { 1200.0f, 240.0f }, phlegmaticAltarPos });
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { highlandCampfire.position }, { torvaldPos }, { { 1200.0f, 240.0f }, phlegmaticAltarPos, { 2200.0f, 260.0f } });
 
     // Boss Health Bar for Berserker Troll
     for (const auto& enemy : enemies) {

@@ -154,6 +154,8 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 48, 65, 85, 255 }; // Frost highland troll blue-gray
     } else if (enemy.type == EnemyType::BERSERKER_TROLL) {
         bodyColor = Color{ 74, 32, 36, 255 }; // Crimson enraged berserker hide
+    } else if (enemy.type == EnemyType::FROST_REVENANT) {
+        bodyColor = Color{ 16, 36, 56, 230 }; // Spectral chasm frost robe
     }
 
     if (enemy.isNightfallElite) {
@@ -244,6 +246,24 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         Vector2 leftHand = { enemy.position.x - normal.x * (enemy.radius * 0.75f) + dir.x * 4.0f, enemy.position.y - normal.y * (enemy.radius * 0.75f) + dir.y * 4.0f };
         DrawLineEx(rightHand, { rightHand.x + dir.x * 20.0f, rightHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
         DrawLineEx(leftHand, { leftHand.x + dir.x * 20.0f, leftHand.y + dir.y * 20.0f }, 3.5f, Color{ 70, 85, 105, 255 });
+    } else if (enemy.type == EnemyType::FROST_REVENANT) {
+        // Ethereal frost phantom shroud and icy mist
+        float fPulse = (sinf((float)GetTime() * 5.0f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius + 16.0f + 6.0f * fPulse, Color{ 60, 190, 255, 90 }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 3.0f * fPulse, Color{ 100, 220, 255, 200 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 12.0f, Color{ 140, 235, 255, 120 });
+
+        // Crown of frost crystal horns
+        Vector2 hornL = { enemy.position.x - normal.x * (enemy.radius * 0.7f) + dir.x * (enemy.radius * 0.4f), enemy.position.y - normal.y * (enemy.radius * 0.7f) + dir.y * (enemy.radius * 0.4f) };
+        Vector2 hornR = { enemy.position.x + normal.x * (enemy.radius * 0.7f) + dir.x * (enemy.radius * 0.4f), enemy.position.y + normal.y * (enemy.radius * 0.7f) + dir.y * (enemy.radius * 0.4f) };
+        DrawLineEx(hornL, { hornL.x + dir.x * 14.0f - normal.x * 5.0f, hornL.y + dir.y * 14.0f - normal.y * 5.0f }, 2.5f, Color{ 160, 230, 255, 240 });
+        DrawLineEx(hornR, { hornR.x + dir.x * 14.0f + normal.x * 5.0f, hornR.y + dir.y * 14.0f + normal.y * 5.0f }, 2.5f, Color{ 160, 230, 255, 240 });
+
+        // Frost Scythe in right hand
+        Vector2 scytheEnd = { rightHand.x + dir.x * 28.0f, rightHand.y + dir.y * 28.0f };
+        DrawLineEx(rightHand, scytheEnd, 3.5f, Color{ 40, 80, 110, 255 });
+        Vector2 bladeTip = { scytheEnd.x - normal.x * 18.0f + dir.x * 6.0f, scytheEnd.y - normal.y * 18.0f + dir.y * 6.0f };
+        DrawLineEx(scytheEnd, bladeTip, 3.0f, Color{ 140, 235, 255, 240 });
     }
 
     // Enemy Attack Visuals & Weapon Animations

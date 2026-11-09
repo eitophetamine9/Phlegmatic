@@ -34,6 +34,7 @@ set(SOURCES
     src/states/QuarryHandler.cpp
     src/states/RestlessMistForestHandler.cpp
     src/states/NorthZyphdenHandler.cpp
+    src/states/FrostCavernsHandler.cpp
     src/states/Game.cpp
 )
 

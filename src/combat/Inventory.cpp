@@ -207,6 +207,17 @@ void Inventory::InitDefault() {
         false,
         false
     });
+
+    fragments.push_back({
+        "frag_15",
+        "Fragment XV: The Wailing Depths of the Phlegmatic Chasm",
+        "The Permafrost Crypts",
+        "Far below the highland ice sheets sleep the ancient dead of the northern crusades...",
+        "Deep beneath the glacial ridges of Zyphden lie the Permafrost Crypts. In these sub-zero catacombs, the fallen wardens were sealed alongside frozen relics of the first age. Wandering souls, driven mad by the subterranean cold, coalesce into the Frost Revenant - an ethereal phantom that glides effortlessly across the black ice, summoning biting rime storms to freeze the blood of all intruders.",
+        "The Permafrost Crypts — Carved into the Glacial Sarcophagus Dais in the inner sanctuary.",
+        false,
+        false
+    });
 }
 
 bool Inventory::HasWeapon(WeaponType type) const {
