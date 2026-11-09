@@ -440,6 +440,11 @@ void NorthZyphdenHandler::Update(
                         int oreGained = rand() % 2 + 1; // 1-2 Ore Scraps
                         int shinglesGained = rand() % 16 + 15; // 15-30 Shingles
                         int frostShardsGained = rand() % 2 + 2; // 2-3 Frost Shards
+                        if (player.HasGolemBreakerT2()) {
+                            oreGained += 1;
+                            frostShardsGained += 1;
+                            particles.SpawnFloatingText(Vector2{ crystal.position.x, crystal.position.y - 20.0f }, "GOLEM BREAKER: +1 BONUS SCRAP!", Color{ 255, 215, 80, 255 }, 18.0f);
+                        }
                         player.GetInventory().AddOreScraps(oreGained);
                         player.GetInventory().AddShingles(shinglesGained);
                         player.GetInventory().AddFrostShards(frostShardsGained);

@@ -67,6 +67,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             player.ModifyComposure(35.0f);
             player.TriggerAdrenalineBuff(6.0f);
 
+            // Troll Slayer Tier 3 Perk: Executing trolls grants immediate 25 HP heal
+            if (player.HasTrollSlayerT3() && (target.GetType() == EnemyType::FROST_TROLL || target.GetType() == EnemyType::BERSERKER_TROLL)) {
+                player.Heal(25.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 22.0f);
+                particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 25, 150.0f);
+            }
+
             if (wasKilled && outLootDrops) {
                 LootDrop::SpawnFromEnemy(target, *outLootDrops);
                 int bonusShingles = 25 + (int)(target.GetMaxHealth() * 0.15f);
@@ -226,7 +233,12 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     enemy.GetPosition().y - knockOrigin.y
                 });
                 if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 0.0f, -1.0f };
-                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, attack.defensePierce)) {
+
+                // Apply Bestiary Hunting Perk bonuses
+                attackDamage *= player.GetBestiaryDamageMultiplier(enemy.GetType());
+                float finalPierce = fminf(1.0f, attack.defensePierce + player.GetBestiaryDefensePierce(enemy.GetType()));
+
+                if (enemy.TakeDamage(attackDamage, knockbackDir, particles, finalPierce)) {
                     if (outLootDrops) {
                         LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
                     }

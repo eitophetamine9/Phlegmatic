@@ -1,5 +1,5 @@
 #include "Player.hpp"
-
+#include "Enemy.hpp"
 #include "PlayerRenderer.hpp"
 
 #include "../core/Config.hpp"
@@ -687,6 +687,9 @@ float Player::GetStaminaRegenRate() const {
     if (isFrostbitten) {
         rate *= 0.75f; // -25% Stamina Regen when Frostbitten
     }
+    if (HasGaleHunterT2()) {
+        rate *= 1.15f; // +15% Stamina Regen from Gale Hunter Tier 2
+    }
     return rate;
 }
 
@@ -749,6 +752,9 @@ void Player::AddFrostbite(float amount, ParticleSystem* particles) {
         frostbiteMeter = 0.0f;
         isFrostbitten = false;
         return;
+    }
+    if (HasTrollSlayerT2()) {
+        amount *= 0.75f; // 25% Frostbite resistance from Troll Slayer perk
     }
     bool wasFrostbitten = isFrostbitten;
     frostbiteMeter = fminf(100.0f, frostbiteMeter + amount);
@@ -3060,10 +3066,68 @@ void Player::Heal(float amount) {
 
 
 void Player::Draw() const {
-
     PlayerRenderer::Draw(*this);
-
 }
+
+bool Player::HasTrollSlayerT2() const {
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 5;
+}
+
+bool Player::HasTrollSlayerT3() const {
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 15;
+}
+
+bool Player::HasGolemBreakerT2() const {
+    return (inventory.GetEnemyKills(5) + inventory.GetEnemyKills(6)) >= 5;
+}
+
+bool Player::HasGolemBreakerT3() const {
+    return (inventory.GetEnemyKills(5) + inventory.GetEnemyKills(6)) >= 12;
+}
+
+bool Player::HasGaleHunterT2() const {
+    return (inventory.GetEnemyKills(7) + inventory.GetEnemyKills(8)) >= 5;
+}
+
+bool Player::HasGaleHunterT3() const {
+    return (inventory.GetEnemyKills(7) + inventory.GetEnemyKills(8)) >= 15;
+}
+
+bool Player::HasCultistPurifierT2() const {
+    int total = inventory.GetEnemyKills(0) + inventory.GetEnemyKills(1) + inventory.GetEnemyKills(2) + inventory.GetEnemyKills(3);
+    return total >= 10;
+}
+
+bool Player::HasCultistPurifierT3() const {
+    int total = inventory.GetEnemyKills(0) + inventory.GetEnemyKills(1) + inventory.GetEnemyKills(2) + inventory.GetEnemyKills(3);
+    return total >= 25;
+}
+
+float Player::GetBestiaryDamageMultiplier(EnemyType type) const {
+    float mult = 1.0f;
+    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL) {
+        if (HasTrollSlayerT3()) mult *= 1.25f;
+        else if (HasTrollSlayerT2()) mult *= 1.15f;
+    } else if (type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) {
+        if (HasGolemBreakerT3()) mult *= 1.20f;
+        else if (HasGolemBreakerT2()) mult *= 1.10f;
+    } else if (type == EnemyType::GALE_BANDIT || type == EnemyType::GALE_ARCHER_BOSS) {
+        if (HasGaleHunterT3()) mult *= 1.20f;
+        else if (HasGaleHunterT2()) mult *= 1.10f;
+    } else if (type == EnemyType::SLASHER || type == EnemyType::ARCHER || type == EnemyType::BRUTE || type == EnemyType::PYROMANCER) {
+        if (HasCultistPurifierT3()) mult *= 1.15f;
+        else if (HasCultistPurifierT2()) mult *= 1.10f;
+    }
+    return mult;
+}
+
+float Player::GetBestiaryDefensePierce(EnemyType type) const {
+    if ((type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) && HasGolemBreakerT3()) {
+        return 0.25f;
+    }
+    return 0.0f;
+}
+
 
 
 

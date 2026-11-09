@@ -9,6 +9,8 @@
 #include <vector>
 #include <cmath>
 
+enum class EnemyType;
+
 class Player {
 public:
     Player();
@@ -255,6 +257,18 @@ public:
     void ResetFrostbite();
     void UpdateSnowFootsteps(float dt, ParticleSystem& particles);
     void QuickSwapWeapon(ParticleSystem& particles);
+
+    // Bestiary Mastery Hunting Perks
+    bool HasTrollSlayerT2() const;
+    bool HasTrollSlayerT3() const;
+    bool HasGolemBreakerT2() const;
+    bool HasGolemBreakerT3() const;
+    bool HasGaleHunterT2() const;
+    bool HasGaleHunterT3() const;
+    bool HasCultistPurifierT2() const;
+    bool HasCultistPurifierT3() const;
+    float GetBestiaryDamageMultiplier(EnemyType type) const;
+    float GetBestiaryDefensePierce(EnemyType type) const;
 
     // Inventory & Lore
     Inventory& GetInventory() { return inventory; }

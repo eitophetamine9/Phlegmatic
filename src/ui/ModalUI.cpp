@@ -2173,9 +2173,12 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             FontManager::DrawText(s_entries[i].name, (int)itemRec.x + 12, (int)itemRec.y + 6, 12, isSel ? Color{ 255, 235, 130, 255 } : Color{ 225, 235, 250, 240 }, GameFont::TITLE);
             // Humor badge
             FontManager::DrawGameTextShadow(s_entries[i].humorName, (int)itemRec.x + 12, (int)itemRec.y + 22, 9, s_entries[i].humorColor);
-            // Kills pill
+            // Seal Tier badge & Kills pill
+            std::string tierTag = (kills >= 15) ? "[SEAL III]" : ((kills >= 5) ? "[SEAL II]" : ((kills >= 1) ? "[SEAL I]" : "[-]"));
+            Color tierTagCol = (kills >= 15) ? Color{ 255, 215, 80, 255 } : ((kills >= 5) ? Color{ 100, 220, 255, 240 } : ((kills >= 1) ? Color{ 120, 255, 180, 220 } : Color{ 120, 130, 145, 160 }));
+            FontManager::DrawGameTextShadow(tierTag, (int)(itemRec.x + itemRec.width - 66), (int)itemRec.y + 5, 9, tierTagCol);
             std::string killStr = "KILLS: " + std::to_string(kills);
-            FontManager::DrawGameTextShadow(killStr, (int)(itemRec.x + itemRec.width - 70), (int)itemRec.y + 14, 10, (kills > 0) ? Color{ 120, 255, 180, 220 } : Color{ 140, 150, 165, 180 });
+            FontManager::DrawGameTextShadow(killStr, (int)(itemRec.x + itemRec.width - 66), (int)itemRec.y + 20, 9, (kills > 0) ? Color{ 120, 255, 180, 220 } : Color{ 140, 150, 165, 180 });
         }
 
         // Draw Right Codex Card Container (Illuminated Grimoire Parchment)
@@ -2208,26 +2211,65 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         FontManager::DrawGameTextShadow(cur.drops, (int)bRightX + 135, (int)secY + 58, 11, Color{ 255, 225, 120, 255 });
 
         // Divider
-        DrawLineEx({ bRightX + 32.0f, secY + 82.0f }, { bRightX + bRightW - 32.0f, secY + 82.0f }, 1.0f, Color{ 85, 60, 40, 180 });
+        DrawLineEx({ bRightX + 32.0f, secY + 80.0f }, { bRightX + bRightW - 32.0f, secY + 80.0f }, 1.0f, Color{ 85, 60, 40, 180 });
 
-        // Progressive Lore Seals
-        float loreY = secY + 94.0f;
-        FontManager::DrawText("CODEX EXCERPTS & REALM LORE ARCHIVES", (int)bRightX + 32, (int)loreY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
+        // Progressive Lore Seals & Active Hunting Perks
+        float loreY = secY + 90.0f;
+        FontManager::DrawText("CODEX EXCERPTS & HUNTING MASTERY PERKS", (int)bRightX + 32, (int)loreY, 13, Color{ 230, 195, 100, 255 }, GameFont::TITLE);
 
         // Seal 1: 1 Kill
         bool u1 = (curKills >= 1);
-        FontManager::DrawGameTextShadow(u1 ? "[SEAL I - INITIATE (1 KILL)]" : "[SEAL I - LOCKED (REQUIRES 1 KILL)]", (int)bRightX + 32, (int)loreY + 24, 11, u1 ? Color{ 120, 255, 180, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u1 ? cur.lore1 : "Defeat this enemy once to unlock initial reconnaissance notes.", (int)bRightX + 48, (int)loreY + 42, 11, u1 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u1 ? "[SEAL I - INITIATE (1 KILL)]" : "[SEAL I - LOCKED (REQUIRES 1 KILL)]", (int)bRightX + 32, (int)loreY + 20, 11, u1 ? Color{ 120, 255, 180, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u1 ? cur.lore1 : "Defeat this enemy once to unlock initial reconnaissance notes.", (int)bRightX + 48, (int)loreY + 36, 10, u1 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
 
         // Seal 2: 5 Kills
         bool u5 = (curKills >= 5);
-        FontManager::DrawGameTextShadow(u5 ? "[SEAL II - ADEPT (5 KILLS)]" : "[SEAL II - LOCKED (REQUIRES 5 KILLS)]", (int)bRightX + 32, (int)loreY + 70, 11, u5 ? Color{ 100, 220, 255, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u5 ? cur.lore5 : "Achieve 5 victories to decipher deeper humoral vulnerabilities.", (int)bRightX + 48, (int)loreY + 88, 11, u5 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u5 ? "[SEAL II - ADEPT (5 KILLS)]" : "[SEAL II - LOCKED (REQUIRES 5 KILLS)]", (int)bRightX + 32, (int)loreY + 54, 11, u5 ? Color{ 100, 220, 255, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u5 ? cur.lore5 : "Achieve 5 victories to decipher deeper humoral vulnerabilities.", (int)bRightX + 48, (int)loreY + 70, 10, u5 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
 
         // Seal 3: 15 Kills
         bool u15 = (curKills >= 15);
-        FontManager::DrawGameTextShadow(u15 ? "[SEAL III - MASTER (15 KILLS)]" : "[SEAL III - LOCKED (REQUIRES 15 KILLS)]", (int)bRightX + 32, (int)loreY + 116, 11, u15 ? Color{ 255, 215, 80, 240 } : Color{ 150, 150, 160, 180 });
-        FontManager::DrawGameTextShadow(u15 ? cur.lore15 : "Achieve 15 victories to unveil ancient grimoire archives.", (int)bRightX + 48, (int)loreY + 134, 11, u15 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+        FontManager::DrawGameTextShadow(u15 ? "[SEAL III - MASTER (15 KILLS)]" : "[SEAL III - LOCKED (REQUIRES 15 KILLS)]", (int)bRightX + 32, (int)loreY + 88, 11, u15 ? Color{ 255, 215, 80, 240 } : Color{ 150, 150, 160, 180 });
+        FontManager::DrawGameTextShadow(u15 ? cur.lore15 : "Achieve 15 victories to unveil ancient grimoire archives.", (int)bRightX + 48, (int)loreY + 104, 10, u15 ? Color{ 230, 220, 200, 240 } : Color{ 120, 120, 130, 160 });
+
+        // Active Combat Perk Card
+        float perkY = loreY + 124.0f;
+        Rectangle perkRec = { bRightX + 32.0f, perkY, bRightW - 64.0f, 54.0f };
+        DrawRectangleRounded(perkRec, 0.15f, 4, Color{ 16, 22, 34, 230 });
+        DrawRectangleRoundedLines(perkRec, 0.15f, 4, u5 ? Color{ 120, 215, 255, 220 } : Color{ 55, 70, 95, 180 });
+
+        const char* perkTitle = "COMBAT MASTERY PERK";
+        const char* perkDesc = "Accumulate kills to unlock family-wide hunting traits.";
+        Color perkBadgeCol = Color{ 150, 165, 185, 200 };
+
+        if (cur.killIdx == 9 || cur.killIdx == 10) {
+            perkTitle = "HUNTING PERK: TROLL SLAYER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Poise Dmg, Executions Heal 25 HP, +15% Base Dmg, +25 Frost Resist." :
+                       (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :
+                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Poise & Heal on Execute.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else if (cur.killIdx == 5 || cur.killIdx == 6) {
+            perkTitle = "HUNTING PERK: GOLEM BREAKER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: 25% Armor Pierce, Heavies Break Melancholic Shells, +20% Poise Dmg, +1 Scrap Mining." :
+                       (u5 ? "ACTIVE [TIER II]: +20% Poise Dmg vs Golems, +1 Bonus Scrap from mining nodes." :
+                             "LOCKED: 5 kills grants +20% Poise Dmg & +1 Scrap Mining; 15 kills grants 25% Armor Pierce.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else if (cur.killIdx == 7 || cur.killIdx == 8) {
+            perkTitle = "HUNTING PERK: GALE HUNTER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +20% Damage vs Gale Entities, Parries Reflect Poise Dmg, +15% Stamina Regen." :
+                       (u5 ? "ACTIVE [TIER II]: +15% Stamina Regen Rate, +10% Movement Speed in Mists." :
+                             "LOCKED: 5 kills grants +15% Stamina Regen; 15 kills grants +20% Dmg & Poise Reflect.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        } else {
+            perkTitle = "HUNTING PERK: CULTIST PURIFIER";
+            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore 15 Stamina and Extend Adrenaline Buff." :
+                       (u5 ? "ACTIVE [TIER II]: +10% Melee Damage vs Cultists, +10 Max Composure." :
+                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Adrenaline on kill.");
+            perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
+        }
+
+        FontManager::DrawText(perkTitle, (int)perkRec.x + 12, (int)perkRec.y + 7, 11, perkBadgeCol, GameFont::TITLE);
+        FontManager::DrawTextWrapped(perkDesc, (int)perkRec.x + 12, (int)perkRec.y + 22, (int)perkRec.width - 24, 10, 2, Color{ 220, 235, 250, 230 });
 
     } else {
 
