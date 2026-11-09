@@ -487,6 +487,9 @@ void RuinedCastleHandler::Render(
     bool hasUnread = player.GetInventory().HasUnreadFragments();
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RUINED CASTLE", hasUnread, &map.GetTimeOfDay());
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 800.0f, 650.0f } }, {}, { { 800.0f, 430.0f } });
+
     // Zil Boss Health Bar
     for (const auto& enemy : enemies) {
         if (enemy.GetType() == EnemyType::ZIL_BOSS && enemy.IsAlive()) {

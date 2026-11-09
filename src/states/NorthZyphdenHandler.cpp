@@ -857,6 +857,9 @@ void NorthZyphdenHandler::Render(
     bool hasUnread = player.GetInventory().HasUnreadFragments();
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread, &map.GetTimeOfDay());
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { highlandCampfire.position }, { torvaldPos }, { { 1200.0f, 240.0f }, phlegmaticAltarPos });
+
     // Boss Health Bar for Berserker Troll
     for (const auto& enemy : enemies) {
         if (enemy.GetType() == EnemyType::BERSERKER_TROLL && enemy.IsAlive()) {

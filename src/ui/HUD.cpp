@@ -1,6 +1,7 @@
 #include "HUD.hpp"
 #include "../combat/Weapon.hpp"
 #include "../entities/Player.hpp"
+#include "../entities/Enemy.hpp"
 #include "../world/TimeOfDay.hpp"
 #include "../rendering/FontManager.hpp"
 #include <cmath>
@@ -863,6 +864,153 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
     DrawRectangleRoundedLines(Rectangle{ (float)(windowWidth - 130), 16.0f, 110.0f, 32.0f }, 0.3f, 4, Color{ 60, 85, 120, 220 });
     DrawText("[C] Controls", windowWidth - 120, 25, 12, Color{ 120, 220, 255, 240 });
+}
+
+void HUD::DrawTacticalRadar(
+    int windowWidth,
+    int windowHeight,
+    const Player& player,
+    const std::vector<Enemy>& enemies,
+    const std::vector<Vector2>& campfires,
+    const std::vector<Vector2>& npcs,
+    const std::vector<Vector2>& altars
+) {
+    (void)windowWidth;
+    (void)windowHeight;
+
+    static bool s_showRadar = true;
+    if (IsKeyPressed(KEY_N)) {
+        s_showRadar = !s_showRadar;
+    }
+
+    const float radarCX = 80.0f;
+    const float radarCY = 80.0f;
+    const float radarR = 56.0f;
+    const float radarRange = 600.0f;
+
+    Vector2 mousePos = GetMousePosition();
+
+    if (!s_showRadar) {
+        Rectangle pillRec = { 24.0f, 16.0f, 84.0f, 26.0f };
+        bool hov = CheckCollisionPointRec(mousePos, pillRec);
+        if (hov && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            s_showRadar = true;
+        }
+        DrawRectangleRounded(pillRec, 0.35f, 4, Color{ 14, 18, 28, 220 });
+        DrawRectangleRoundedLines(pillRec, 0.35f, 4, hov ? Color{ 140, 215, 255, 255 } : Color{ 55, 80, 115, 220 });
+        DrawText("[N] RADAR", (int)pillRec.x + 12, (int)pillRec.y + 7, 10, hov ? Color{ 200, 240, 255, 255 } : Color{ 140, 205, 245, 220 });
+        return;
+    }
+
+    // Drop shadow
+    DrawCircle((int)radarCX, (int)radarCY + 2, radarR + 2.0f, Color{ 6, 8, 14, 150 });
+
+    // Dark glass radar lens
+    DrawCircle((int)radarCX, (int)radarCY, radarR, Color{ 10, 16, 26, 230 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR, Color{ 65, 90, 125, 230 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR - 2.0f, Color{ 36, 50, 75, 180 });
+
+    // Concentric range rings
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR * 0.35f, Color{ 40, 60, 92, 75 });
+    DrawCircleLines((int)radarCX, (int)radarCY, radarR * 0.70f, Color{ 40, 60, 92, 75 });
+
+    // Crosshair axis
+    DrawLine((int)(radarCX - radarR + 4.0f), (int)radarCY, (int)(radarCX + radarR - 4.0f), (int)radarCY, Color{ 40, 60, 92, 60 });
+    DrawLine((int)radarCX, (int)(radarCY - radarR + 4.0f), (int)radarCX, (int)(radarCY + radarR - 4.0f), Color{ 40, 60, 92, 60 });
+
+    // 360-degree radar beam sweep
+    float sweepRad = fmodf((float)GetTime() * 160.0f, 360.0f) * DEG2RAD;
+    Vector2 sweepVec = { radarCX + cosf(sweepRad) * (radarR - 4.0f), radarCY + sinf(sweepRad) * (radarR - 4.0f) };
+    DrawLineEx({ radarCX, radarCY }, sweepVec, 1.5f, Color{ 90, 220, 255, 130 });
+    DrawCircleGradient(Vector2{ radarCX, radarCY }, radarR * 0.9f, Color{ 50, 150, 230, 24 }, Color{ 0, 0, 0, 0 });
+
+    // Compass cardinal markers
+    DrawText("N", (int)radarCX - 3, (int)(radarCY - radarR + 3.0f), 8, Color{ 255, 215, 80, 240 });
+    DrawText("S", (int)radarCX - 3, (int)(radarCY + radarR - 11.0f), 8, Color{ 140, 175, 215, 180 });
+    DrawText("E", (int)(radarCX + radarR - 9.0f), (int)radarCY - 4, 8, Color{ 140, 175, 215, 180 });
+    DrawText("W", (int)(radarCX - radarR + 3.0f), (int)radarCY - 4, 8, Color{ 140, 175, 215, 180 });
+
+    Vector2 playerPos = player.GetPosition();
+
+    // Helper lambda for projecting world position onto circular radar
+    auto ProjectToRadar = [&](Vector2 worldPos, float maxDist) -> Vector2 {
+        float dx = worldPos.x - playerPos.x;
+        float dy = worldPos.y - playerPos.y;
+        float dist = sqrtf(dx * dx + dy * dy);
+        float ratio = fminf(1.0f, dist / maxDist);
+        float normX = (dist > 0.001f) ? (dx / dist) : 0.0f;
+        float normY = (dist > 0.001f) ? (dy / dist) : 0.0f;
+        return Vector2{
+            radarCX + normX * (ratio * (radarR - 6.0f)),
+            radarCY + normY * (ratio * (radarR - 6.0f))
+        };
+    };
+
+    // 1. Waypoint Altars
+    for (const auto& altar : altars) {
+        Vector2 pip = ProjectToRadar(altar, radarRange);
+        DrawPoly(pip, 4, 3.5f, 45.0f, Color{ 120, 225, 255, 240 });
+        DrawCircle((int)pip.x, (int)pip.y, 1.0f, Color{ 255, 255, 255, 255 });
+    }
+
+    // 2. Bonfires / Campfires
+    for (const auto& cp : campfires) {
+        Vector2 pip = ProjectToRadar(cp, radarRange);
+        float p = 0.5f + 0.5f * sinf((float)GetTime() * 6.0f);
+        DrawPoly(pip, 4, 4.0f + 0.5f * p, 45.0f, Color{ 255, 185, 45, 245 });
+        DrawCircle((int)pip.x, (int)pip.y, 1.5f, Color{ 255, 245, 180, 255 });
+    }
+
+    // 3. Friendly NPCs
+    for (const auto& npc : npcs) {
+        Vector2 pip = ProjectToRadar(npc, radarRange);
+        DrawCircle((int)pip.x, (int)pip.y, 3.0f, Color{ 80, 240, 150, 245 });
+        DrawCircleLines((int)pip.x, (int)pip.y, 4.0f, Color{ 140, 255, 190, 180 });
+    }
+
+    // 4. Enemy Threat Pips
+    for (const auto& enemy : enemies) {
+        if (!enemy.IsAlive()) continue;
+
+        Vector2 pip = ProjectToRadar(enemy.GetPosition(), radarRange);
+        if (enemy.IsBoss()) {
+            float p = 0.5f + 0.5f * sinf((float)GetTime() * 8.0f);
+            DrawCircle((int)pip.x, (int)pip.y, 4.5f, Color{ 255, 30, 45, 255 });
+            DrawCircleLines((int)pip.x, (int)pip.y, 5.5f + 2.0f * p, Color{ 255, 80, 95, 210 });
+        } else if (enemy.IsNightfallElite()) {
+            DrawCircle((int)pip.x, (int)pip.y, 3.8f, Color{ 185, 75, 255, 255 });
+            DrawCircleLines((int)pip.x, (int)pip.y, 4.8f, Color{ 220, 140, 255, 220 });
+        } else {
+            DrawCircle((int)pip.x, (int)pip.y, 2.5f, Color{ 240, 60, 75, 225 });
+        }
+    }
+
+    // 5. Player Marker in Center with Heading Arrow
+    float facingRad = player.GetFacingAngle() * DEG2RAD;
+    Vector2 tip = { radarCX + cosf(facingRad) * 8.0f, radarCY + sinf(facingRad) * 8.0f };
+    Vector2 left = { radarCX + cosf(facingRad + 2.45f) * 5.5f, radarCY + sinf(facingRad + 2.45f) * 5.5f };
+    Vector2 right = { radarCX + cosf(facingRad - 2.45f) * 5.5f, radarCY + sinf(facingRad - 2.45f) * 5.5f };
+    DrawTriangle(tip, left, right, Color{ 0, 240, 255, 255 });
+    DrawCircle((int)radarCX, (int)radarCY, 2.0f, Color{ 255, 255, 255, 255 });
+
+    // 6. Compass Heading Pill below radar
+    Rectangle hRec = { radarCX - 40.0f, radarCY + radarR + 4.0f, 80.0f, 16.0f };
+    DrawRectangleRounded(hRec, 0.35f, 3, Color{ 12, 16, 24, 220 });
+    DrawRectangleRoundedLines(hRec, 0.35f, 3, Color{ 48, 68, 98, 200 });
+
+    float deg = fmodf(player.GetFacingAngle() + 360.0f, 360.0f);
+    const char* dirStr = (deg >= 337.5f || deg < 22.5f) ? "E" :
+                         (deg < 67.5f ? "SE" :
+                         (deg < 112.5f ? "S" :
+                         (deg < 157.5f ? "SW" :
+                         (deg < 202.5f ? "W" :
+                         (deg < 247.5f ? "NW" :
+                         (deg < 292.5f ? "N" : "NE"))))));
+
+    char compBuf[32];
+    snprintf(compBuf, sizeof(compBuf), "[N] %s %d'", dirStr, (int)deg);
+    int cw = MeasureText(compBuf, 9);
+    DrawText(compBuf, (int)(hRec.x + (hRec.width - cw) * 0.5f), (int)hRec.y + 3, 9, Color{ 175, 215, 255, 240 });
 }
 
 // Legacy float-based overloads

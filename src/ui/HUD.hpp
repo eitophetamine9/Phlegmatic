@@ -5,6 +5,7 @@
 #include <vector>
 
 class Player;
+class Enemy;
 class TimeOfDaySystem;
 
 struct ActionSlotInfo {
@@ -29,6 +30,7 @@ public:
     static void DrawCombat(int windowWidth, int windowHeight, const Player& player, int currentWave, int totalWaves, bool hasUnreadLore = false);
     static void DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore = false, const TimeOfDaySystem* tod = nullptr);
     static void DrawCurrencyBadge(int windowWidth, int shingles, int oreScraps = 0);
+    static void DrawTacticalRadar(int windowWidth, int windowHeight, const Player& player, const std::vector<Enemy>& enemies, const std::vector<Vector2>& campfires = {}, const std::vector<Vector2>& npcs = {}, const std::vector<Vector2>& altars = {});
 
     // Backward-compatible float-based Draw Methods
     static void DrawLobby(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore = false);

@@ -31,6 +31,10 @@ void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& pl
     HUD::DrawCampaignHUD(windowWidth, windowHeight, player, locationName, hasUnreadLore, tod);
 }
 
+void GameUI::DrawTacticalRadar(int windowWidth, int windowHeight, const Player& player, const std::vector<Enemy>& enemies, const std::vector<Vector2>& campfires, const std::vector<Vector2>& npcs, const std::vector<Vector2>& altars) {
+    HUD::DrawTacticalRadar(windowWidth, windowHeight, player, enemies, campfires, npcs, altars);
+}
+
 void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
     HUD::DrawLobby(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isNearPedestal, nearWeaponName, hasUnreadLore);
 }

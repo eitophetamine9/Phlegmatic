@@ -388,6 +388,9 @@ void QuarryHandler::Render(
     bool hasUnread = player.GetInventory().HasUnreadFragments();
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "QUARRY DEPTHS", hasUnread, &map.GetTimeOfDay());
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 600.0f, 900.0f } }, {}, { { 1000.0f, 300.0f } });
+
     // Boss Health Bar if Elemental Golem is summoned & alive
     for (const auto& enemy : enemies) {
         if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM && enemy.IsAlive()) {

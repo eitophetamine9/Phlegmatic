@@ -2375,6 +2375,10 @@ void ZyphdenHandler::Render(
 
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, locationTitle, hasUnread, &map.GetTimeOfDay());
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    std::vector<Vector2> zyphdenNpcs = { knightLenonNPC.position, brena.position, varek.position, kingKreptu.position };
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { campfire.position }, zyphdenNpcs);
+
 
 
     // Boss Health Bar during Courtyard Spar

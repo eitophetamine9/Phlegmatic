@@ -616,6 +616,9 @@ void CrossroadsHandler::Render(
         &map.GetTimeOfDay()
     );
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 1200.0f, 900.0f } }, {}, { { 1200.0f, 400.0f } });
+
 
 
     // Objectives Tracker on Middle-Left (toggleable with [O])

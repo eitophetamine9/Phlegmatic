@@ -428,6 +428,9 @@ void RestlessMistForestHandler::Render(
     bool hasUnread = player.GetInventory().HasUnreadFragments();
     GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RESTLESS MIST FOREST", hasUnread, &map.GetTimeOfDay());
 
+    // Tactical Corner Mini-Map Radar & Compass HUD
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { { 800.0f, 850.0f } }, {}, { { 800.0f, 350.0f } });
+
     // Boss Health Bar if Gale Archer Boss is active
     for (const auto& enemy : enemies) {
         if (enemy.GetType() == EnemyType::GALE_ARCHER_BOSS && enemy.IsAlive()) {
