@@ -101,6 +101,11 @@ Player::Player() {
 
     snowFootstepTimer = 0.0f;
 
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
+
 
 
     dashCooldown = 0.0f;
@@ -216,6 +221,11 @@ void Player::Init(Vector2 startPos) {
 
     snowFootstepTimer = 0.0f;
 
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
+
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
     willOfAtlasCooldown = 0.0f;
@@ -282,6 +292,11 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     isFrostbitten = false;
 
     snowFootstepTimer = 0.0f;
+
+    isExecuting = false;
+    executionTimer = 0.0f;
+    executionTargetPos = { 0.0f, 0.0f };
+    adrenalineTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -552,14 +567,21 @@ void Player::SetTotem(TotemType newTotem) {
 }
 
 float Player::GetTotemDamageMultiplier() const {
+    float mult = 1.0f;
     if (currentTotem == TotemType::TOTEM_INSANITY) {
         float maxHp = GetMaxHealth();
         if (maxHp > 0.0f && (health / maxHp) <= 0.40f) {
-            return 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+            mult = 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+        } else {
+            mult = 1.65f; // Baseline: +65% overall damage
         }
-        return 1.65f; // Baseline: +65% overall damage
+    } else {
+        mult = GetTotemStats(currentTotem).damageMultiplier;
     }
-    return GetTotemStats(currentTotem).damageMultiplier;
+    if (adrenalineTimer > 0.0f) {
+        mult *= 1.15f; // +15% Damage during Adrenaline rush from Visceral Execution
+    }
+    return mult;
 }
 
 float Player::GetMaxHealth() const {
@@ -619,6 +641,9 @@ float Player::GetSpeed() const {
     }
     if (isFrostbitten) {
         base *= 0.80f; // -20% Move Speed when Frostbitten
+    }
+    if (adrenalineTimer > 0.0f) {
+        base *= 1.20f; // +20% Move Speed during Adrenaline rush from Visceral Execution
     }
     return base;
 }
@@ -781,45 +806,54 @@ void Player::QuickSwapWeapon(ParticleSystem& particles) {
     particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 14, 80.0f);
 }
 
-
+void Player::StartExecution(Vector2 targetPos) {
+    isExecuting = true;
+    executionTimer = 0.45f;
+    executionTargetPos = targetPos;
+    float dx = targetPos.x - position.x;
+    float dy = targetPos.y - position.y;
+    facingAngle = atan2f(dy, dx) * RAD2DEG;
+    velocity = { 0.0f, 0.0f };
+}
 
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
-
     if (!IsAlive()) return;
 
-
-
-    // Face towards mouse unless locked in dash
-
-    if (!isDashing) {
-
+    // Face towards mouse unless locked in dash or execution
+    if (!isDashing && !isExecuting) {
         float dx = mouseWorldPos.x - position.x;
-
         float dy = mouseWorldPos.y - position.y;
-
         facingAngle = atan2f(dy, dx) * RAD2DEG;
-
     }
 
-
-
     // Cooldown and buff updates
-
     if (lightCooldown > 0.0f) lightCooldown -= dt;
-
     if (heavyCooldown > 0.0f) heavyCooldown -= dt;
-
     if (parryCooldown > 0.0f) parryCooldown -= dt;
-
     if (dashCooldown > 0.0f) dashCooldown -= dt;
-
     if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
-
     if (potionCooldown > 0.0f) potionCooldown -= dt;
-
     if (iFrameTimer > 0.0f) iFrameTimer -= dt;
-
     if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
+    if (adrenalineTimer > 0.0f) adrenalineTimer -= dt;
+
+    // Visceral Execution update
+    if (isExecuting) {
+        executionTimer -= dt;
+        iFrameTimer = 0.25f;
+        Vector2 toTarget = { executionTargetPos.x - position.x, executionTargetPos.y - position.y };
+        float dist = sqrtf(toTarget.x * toTarget.x + toTarget.y * toTarget.y);
+        if (dist > 12.0f) {
+            velocity.x = (toTarget.x / dist) * 220.0f;
+            velocity.y = (toTarget.y / dist) * 220.0f;
+        } else {
+            velocity = { 0.0f, 0.0f };
+        }
+        if (executionTimer <= 0.0f) {
+            isExecuting = false;
+            velocity = { 0.0f, 0.0f };
+        }
+    }
 
 
 
@@ -1824,7 +1858,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         velocity.y *= 0.70f;
 
-    } else if (!isDashing && !isDaggerLunging) {
+    } else if (!isDashing && !isDaggerLunging && !isExecuting) {
 
         Vector2 moveDir = { 0.0f, 0.0f };
 

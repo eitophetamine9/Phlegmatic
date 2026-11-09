@@ -55,6 +55,10 @@ public:
     void ApplyStagger(float duration) {
         state = EnemyState::STUNNED;
         stunDuration = duration;
+        stateTimer = duration;
+    }
+    bool IsVulnerableToExecution() const {
+        return state == EnemyState::STUNNED && stateTimer > 0.05f && health > 0.0f;
     }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
