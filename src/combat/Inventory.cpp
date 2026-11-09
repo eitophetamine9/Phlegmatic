@@ -415,3 +415,105 @@ bool Inventory::HasQuestItem(const std::string& id) const {
     }
     return false;
 }
+
+void Inventory::DepositItem(int itemId, int count) {
+    if (count <= 0) return;
+    switch (itemId) {
+        case 0: // Shingles
+            count = (count > shingles) ? shingles : count;
+            shingles -= count;
+            stash.shingles += count;
+            break;
+        case 1: // Ore Scraps
+            count = (count > oreScraps) ? oreScraps : count;
+            oreScraps -= count;
+            stash.oreScraps += count;
+            break;
+        case 2: // Frost Shards
+            count = (count > frostShards) ? frostShards : count;
+            frostShards -= count;
+            stash.frostShards += count;
+            break;
+        case 3: // Essence of Mist
+            count = (count > essenceOfMist) ? essenceOfMist : count;
+            essenceOfMist -= count;
+            stash.essenceOfMist += count;
+            break;
+        case 4: // Shadow Essence
+            count = (count > shadowEssence) ? shadowEssence : count;
+            shadowEssence -= count;
+            stash.shadowEssence += count;
+            break;
+        case 5: // Health Potions
+            count = (count > healthPotions) ? healthPotions : count;
+            healthPotions -= count;
+            stash.healthPotions += count;
+            break;
+        case 6: // Stoneskin Tonics
+            count = (count > stoneskinTonics) ? stoneskinTonics : count;
+            stoneskinTonics -= count;
+            stash.stoneskinTonics += count;
+            break;
+        case 7: // Glacial Draughts
+            count = (count > glacialDraughts) ? glacialDraughts : count;
+            glacialDraughts -= count;
+            stash.glacialDraughts += count;
+            break;
+        case 8: // Berserker Draughts
+            count = (count > berserkerDraughts) ? berserkerDraughts : count;
+            berserkerDraughts -= count;
+            stash.berserkerDraughts += count;
+            break;
+    }
+}
+
+void Inventory::WithdrawItem(int itemId, int count) {
+    if (count <= 0) return;
+    switch (itemId) {
+        case 0: // Shingles
+            count = (count > stash.shingles) ? stash.shingles : count;
+            stash.shingles -= count;
+            shingles += count;
+            break;
+        case 1: // Ore Scraps
+            count = (count > stash.oreScraps) ? stash.oreScraps : count;
+            stash.oreScraps -= count;
+            oreScraps += count;
+            break;
+        case 2: // Frost Shards
+            count = (count > stash.frostShards) ? stash.frostShards : count;
+            stash.frostShards -= count;
+            frostShards += count;
+            break;
+        case 3: // Essence of Mist
+            count = (count > stash.essenceOfMist) ? stash.essenceOfMist : count;
+            stash.essenceOfMist -= count;
+            essenceOfMist += count;
+            break;
+        case 4: // Shadow Essence
+            count = (count > stash.shadowEssence) ? stash.shadowEssence : count;
+            stash.shadowEssence -= count;
+            shadowEssence += count;
+            break;
+        case 5: // Health Potions
+            count = (count > stash.healthPotions) ? stash.healthPotions : count;
+            stash.healthPotions -= count;
+            healthPotions += count;
+            break;
+        case 6: // Stoneskin Tonics
+            count = (count > stash.stoneskinTonics) ? stash.stoneskinTonics : count;
+            stash.stoneskinTonics -= count;
+            stoneskinTonics += count;
+            break;
+        case 7: // Glacial Draughts
+            count = (count > stash.glacialDraughts) ? stash.glacialDraughts : count;
+            stash.glacialDraughts -= count;
+            glacialDraughts += count;
+            break;
+        case 8: // Berserker Draughts
+            count = (count > stash.berserkerDraughts) ? stash.berserkerDraughts : count;
+            stash.berserkerDraughts -= count;
+            berserkerDraughts += count;
+            break;
+    }
+}

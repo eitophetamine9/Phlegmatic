@@ -2359,6 +2359,20 @@ void ZyphdenHandler::Render(
 
     particles.Draw();
     campfire.Draw((float)GetTime(), player);
+
+    // Town Square Ironbound Storage Stash Trunk
+    Vector2 stashTrunkPos = { 940.0f, 680.0f };
+    Rectangle trunkRect = { stashTrunkPos.x - 20.0f, stashTrunkPos.y - 14.0f, 40.0f, 28.0f };
+    DrawRectangleRounded(trunkRect, 0.25f, 4, Color{ 48, 32, 22, 255 });
+    DrawRectangleRoundedLines(trunkRect, 0.25f, 4, Color{ 205, 160, 70, 240 });
+    DrawLineEx({ trunkRect.x + 10.0f, trunkRect.y }, { trunkRect.x + 10.0f, trunkRect.y + trunkRect.height }, 2.0f, Color{ 140, 100, 45, 255 });
+    DrawLineEx({ trunkRect.x + trunkRect.width - 10.0f, trunkRect.y }, { trunkRect.x + trunkRect.width - 10.0f, trunkRect.y + trunkRect.height }, 2.0f, Color{ 140, 100, 45, 255 });
+    DrawCircle((int)stashTrunkPos.x, (int)stashTrunkPos.y + 2, 3.5f, Color{ 255, 215, 80, 255 });
+
+    if (Vector2Distance(player.GetPosition(), stashTrunkPos) <= 80.0f) {
+        FontManager::DrawGameTextShadow("[T] OPEN STORAGE STASH TRUNK", (int)stashTrunkPos.x - 90, (int)stashTrunkPos.y - 30, 11, Color{ 255, 225, 120, 255 });
+    }
+
     map.DrawLighting(camera, player.GetPosition());
 
     EndMode2D();
@@ -2377,7 +2391,7 @@ void ZyphdenHandler::Render(
 
     // Tactical Corner Mini-Map Radar & Compass HUD
     std::vector<Vector2> zyphdenNpcs = { knightLenonNPC.position, brena.position, varek.position, kingKreptu.position };
-    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { campfire.position }, zyphdenNpcs);
+    GameUI::DrawTacticalRadar(screenWidth, screenHeight, player, enemies, { campfire.position }, zyphdenNpcs, { stashTrunkPos });
 
 
 

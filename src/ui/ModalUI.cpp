@@ -4294,3 +4294,203 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     return false;
 }
 
+bool ModalUI::DrawStorageStash(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player) {
+    // Semi-transparent backdrop
+    DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 0, 0, 0, 195 });
+
+    float modalW = 900.0f;
+    float modalH = 580.0f;
+    float modalX = ((float)windowWidth - modalW) * 0.5f;
+    float modalY = ((float)windowHeight - modalH) * 0.5f;
+
+    // Window frame
+    Rectangle modalRec = { modalX, modalY, modalW, modalH };
+    DrawRectangleRounded(modalRec, 0.04f, 6, Color{ 16, 20, 28, 252 });
+    DrawRectangleRoundedLines(modalRec, 0.04f, 6, Color{ 205, 160, 70, 240 });
+
+    // Header banner
+    Rectangle headerRec = { modalX, modalY, modalW, 56.0f };
+    DrawRectangleRounded(headerRec, 0.04f, 6, Color{ 24, 30, 44, 255 });
+    DrawLineEx({ modalX, modalY + 56.0f }, { modalX + modalW, modalY + 56.0f }, 2.0f, Color{ 180, 140, 60, 220 });
+
+    FontManager::DrawTextTitleCentered("ANCIENT VANGUARD STORAGE STASH", windowWidth / 2, (int)modalY + 12, 18, Color{ 255, 220, 110, 255 });
+    FontManager::DrawTextTitleCentered("Persistent Vault Trunk Synchronized Across All Sanctuaries and Bonfires", windowWidth / 2, (int)modalY + 36, 11, Color{ 170, 190, 215, 220 });
+
+    // Close Button [X]
+    Rectangle closeBtn = { modalX + modalW - 44.0f, modalY + 12.0f, 32.0f, 32.0f };
+    bool isCloseHov = CheckCollisionPointRec(mousePos, closeBtn);
+    DrawRectangleRounded(closeBtn, 0.2f, 4, isCloseHov ? Color{ 180, 40, 50, 255 } : Color{ 40, 24, 28, 220 });
+    DrawRectangleRoundedLines(closeBtn, 0.2f, 4, Color{ 240, 90, 100, 230 });
+    DrawText("X", (int)closeBtn.x + 11, (int)closeBtn.y + 8, 16, Color{ 255, 255, 255, 255 });
+
+    bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE);
+
+    Inventory& inv = player.GetInventory();
+    PlayerStash& stash = inv.GetStash();
+
+    struct StashEntry {
+        int id;
+        std::string name;
+        int carried;
+        int stored;
+        Color color;
+    };
+
+    std::vector<StashEntry> entries = {
+        { 0, "Royal Shingles", inv.GetShingles(), stash.shingles, Color{ 255, 215, 80, 255 } },
+        { 1, "Ore Scraps", inv.GetOreScraps(), stash.oreScraps, Color{ 180, 190, 205, 255 } },
+        { 2, "Frost Shards", inv.GetFrostShards(), stash.frostShards, Color{ 130, 220, 255, 255 } },
+        { 3, "Essence of Mist", inv.GetEssenceOfMist(), stash.essenceOfMist, Color{ 120, 240, 200, 255 } },
+        { 4, "Shadow Essence", inv.GetShadowEssence(), stash.shadowEssence, Color{ 190, 120, 255, 255 } },
+        { 5, "Health Potions", inv.GetHealthPotionCount(), stash.healthPotions, Color{ 255, 80, 95, 255 } },
+        { 6, "Stoneskin Tonics", inv.GetStoneskinTonicCount(), stash.stoneskinTonics, Color{ 230, 160, 60, 255 } },
+        { 7, "Glacial Draughts", inv.GetGlacialDraughtCount(), stash.glacialDraughts, Color{ 100, 200, 255, 255 } },
+        { 8, "Berserker Draughts", inv.GetBerserkerDraughtCount(), stash.berserkerDraughts, Color{ 255, 60, 75, 255 } }
+    };
+
+    float paneW = (modalW - 60.0f) * 0.5f;
+    float paneH = 430.0f;
+    float leftX = modalX + 22.0f;
+    float rightX = modalX + modalW - paneW - 22.0f;
+    float paneY = modalY + 70.0f;
+
+    // Left Pane (Carried)
+    DrawRectangleRounded(Rectangle{ leftX, paneY, paneW, paneH }, 0.03f, 4, Color{ 12, 16, 24, 230 });
+    DrawRectangleRoundedLines(Rectangle{ leftX, paneY, paneW, paneH }, 0.03f, 4, Color{ 60, 80, 110, 200 });
+    FontManager::DrawGameTextShadow("CARRIED POUCH (INVENTORY)", (int)leftX + 16, (int)paneY + 12, 12, Color{ 220, 230, 245, 255 });
+
+    // Right Pane (Vault Stash)
+    DrawRectangleRounded(Rectangle{ rightX, paneY, paneW, paneH }, 0.03f, 4, Color{ 12, 16, 24, 230 });
+    DrawRectangleRoundedLines(Rectangle{ rightX, paneY, paneW, paneH }, 0.03f, 4, Color{ 190, 150, 60, 200 });
+    FontManager::DrawGameTextShadow("VAULT STASH TRUNK (STORED)", (int)rightX + 16, (int)paneY + 12, 12, Color{ 255, 220, 110, 255 });
+
+    float rowH = 40.0f;
+    float rowStartY = paneY + 36.0f;
+
+    for (size_t i = 0; i < entries.size(); ++i) {
+        float ry = rowStartY + (float)i * rowH;
+        const auto& e = entries[i];
+
+        // Left Pane Row (Deposit)
+        Rectangle leftRow = { leftX + 8.0f, ry, paneW - 16.0f, rowH - 4.0f };
+        DrawRectangleRounded(leftRow, 0.15f, 4, (i % 2 == 0) ? Color{ 20, 26, 38, 220 } : Color{ 16, 22, 32, 220 });
+
+        DrawCircle((int)leftRow.x + 12, (int)(leftRow.y + leftRow.height * 0.5f), 4.5f, e.color);
+        DrawText(e.name.c_str(), (int)leftRow.x + 24, (int)leftRow.y + 11, 11, Color{ 215, 225, 240, 240 });
+
+        char cCountBuf[32];
+        snprintf(cCountBuf, sizeof(cCountBuf), "x%d", e.carried);
+        DrawText(cCountBuf, (int)leftRow.x + 175, (int)leftRow.y + 11, 11, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 120, 130, 145, 200 });
+
+        // Deposit 1 (or 50 for shingles)
+        Rectangle btnDep1 = { leftRow.x + leftRow.width - 120.0f, leftRow.y + 5.0f, 52.0f, leftRow.height - 10.0f };
+        bool hovDep1 = CheckCollisionPointRec(mousePos, btnDep1) && e.carried > 0;
+        DrawRectangleRounded(btnDep1, 0.2f, 4, hovDep1 ? Color{ 50, 100, 160, 255 } : Color{ 28, 44, 70, 220 });
+        DrawRectangleRoundedLines(btnDep1, 0.2f, 4, e.carried > 0 ? Color{ 90, 160, 240, 220 } : Color{ 50, 65, 85, 180 });
+        const char* d1Label = (e.id == 0) ? "-> 50" : "-> 1";
+        DrawText(d1Label, (int)btnDep1.x + 8, (int)btnDep1.y + 6, 10, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 110, 120, 135, 180 });
+
+        if (hovDep1 && isMousePressed) {
+            int amt = (e.id == 0) ? 50 : 1;
+            inv.DepositItem(e.id, amt);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Deposit All
+        Rectangle btnDepAll = { leftRow.x + leftRow.width - 62.0f, leftRow.y + 5.0f, 54.0f, leftRow.height - 10.0f };
+        bool hovDepAll = CheckCollisionPointRec(mousePos, btnDepAll) && e.carried > 0;
+        DrawRectangleRounded(btnDepAll, 0.2f, 4, hovDepAll ? Color{ 60, 120, 180, 255 } : Color{ 32, 52, 80, 220 });
+        DrawRectangleRoundedLines(btnDepAll, 0.2f, 4, e.carried > 0 ? Color{ 110, 185, 255, 220 } : Color{ 50, 65, 85, 180 });
+        DrawText("-> ALL", (int)btnDepAll.x + 6, (int)btnDepAll.y + 6, 10, e.carried > 0 ? Color{ 255, 255, 255, 255 } : Color{ 110, 120, 135, 180 });
+
+        if (hovDepAll && isMousePressed) {
+            inv.DepositItem(e.id, e.carried);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Right Pane Row (Withdraw)
+        Rectangle rightRow = { rightX + 8.0f, ry, paneW - 16.0f, rowH - 4.0f };
+        DrawRectangleRounded(rightRow, 0.15f, 4, (i % 2 == 0) ? Color{ 22, 28, 38, 220 } : Color{ 18, 22, 32, 220 });
+
+        DrawCircle((int)rightRow.x + 12, (int)(rightRow.y + rightRow.height * 0.5f), 4.5f, e.color);
+        DrawText(e.name.c_str(), (int)rightRow.x + 24, (int)rightRow.y + 11, 11, Color{ 235, 215, 160, 240 });
+
+        char sCountBuf[32];
+        snprintf(sCountBuf, sizeof(sCountBuf), "x%d", e.stored);
+        DrawText(sCountBuf, (int)rightRow.x + 175, (int)rightRow.y + 11, 11, e.stored > 0 ? Color{ 255, 225, 120, 255 } : Color{ 120, 130, 145, 200 });
+
+        // Withdraw 1 (or 50 for shingles)
+        Rectangle btnWd1 = { rightRow.x + rightRow.width - 120.0f, rightRow.y + 5.0f, 52.0f, rightRow.height - 10.0f };
+        bool hovWd1 = CheckCollisionPointRec(mousePos, btnWd1) && e.stored > 0;
+        DrawRectangleRounded(btnWd1, 0.2f, 4, hovWd1 ? Color{ 140, 105, 45, 255 } : Color{ 65, 48, 24, 220 });
+        DrawRectangleRoundedLines(btnWd1, 0.2f, 4, e.stored > 0 ? Color{ 240, 185, 75, 220 } : Color{ 75, 60, 40, 180 });
+        const char* w1Label = (e.id == 0) ? "50 <-" : "1 <-";
+        DrawText(w1Label, (int)btnWd1.x + 8, (int)btnWd1.y + 6, 10, e.stored > 0 ? Color{ 255, 255, 255, 255 } : Color{ 135, 120, 100, 180 });
+
+        if (hovWd1 && isMousePressed) {
+            int amt = (e.id == 0) ? 50 : 1;
+            inv.WithdrawItem(e.id, amt);
+            SoundFX::PlayButtonClick();
+        }
+
+        // Withdraw All
+        Rectangle btnWdAll = { rightRow.x + rightRow.width - 62.0f, rightRow.y + 5.0f, 54.0f, rightRow.height - 10.0f };
+        bool hovWdAll = CheckCollisionPointRec(mousePos, btnWdAll) && e.stored > 0;
+        DrawRectangleRounded(btnWdAll, 0.2f, 4, hovWdAll ? Color{ 160, 120, 50, 255 } : Color{ 75, 55, 28, 220 });
+        DrawRectangleRoundedLines(btnWdAll, 0.2f, 4, e.stored > 0 ? Color{ 255, 205, 90, 220 } : Color{ 75, 60, 40, 180 });
+        DrawText("ALL <-", (int)btnWdAll.x + 6, (int)btnWdAll.y + 6, 10, e.stored > 0 ? Color{ 255, 255, 255, 255 } : Color{ 135, 120, 100, 180 });
+
+        if (hovWdAll && isMousePressed) {
+            inv.WithdrawItem(e.id, e.stored);
+            SoundFX::PlayButtonClick();
+        }
+    }
+
+    // Bottom Action Bar
+    float bottomY = modalY + modalH - 56.0f;
+
+    // Deposit All Crafting Materials Button
+    Rectangle btnDepMat = { leftX, bottomY, 240.0f, 36.0f };
+    bool hovDepMat = CheckCollisionPointRec(mousePos, btnDepMat);
+    DrawRectangleRounded(btnDepMat, 0.2f, 4, hovDepMat ? Color{ 40, 80, 120, 255 } : Color{ 24, 45, 75, 220 });
+    DrawRectangleRoundedLines(btnDepMat, 0.2f, 4, Color{ 80, 150, 225, 220 });
+    DrawText("STORE ALL CRAFTING MATERIALS", (int)btnDepMat.x + 12, (int)btnDepMat.y + 11, 10, Color{ 210, 235, 255, 255 });
+
+    if (hovDepMat && isMousePressed) {
+        inv.DepositItem(1, inv.GetOreScraps());
+        inv.DepositItem(2, inv.GetFrostShards());
+        inv.DepositItem(3, inv.GetEssenceOfMist());
+        inv.DepositItem(4, inv.GetShadowEssence());
+        SoundFX::PlayButtonClick();
+    }
+
+    // Withdraw All Elixirs Button
+    Rectangle btnWdElix = { leftX + 252.0f, bottomY, 230.0f, 36.0f };
+    bool hovWdElix = CheckCollisionPointRec(mousePos, btnWdElix);
+    DrawRectangleRounded(btnWdElix, 0.2f, 4, hovWdElix ? Color{ 120, 85, 35, 255 } : Color{ 65, 45, 22, 220 });
+    DrawRectangleRoundedLines(btnWdElix, 0.2f, 4, Color{ 220, 165, 65, 220 });
+    DrawText("RETRIEVE ALL ELIXIRS & POTIONS", (int)btnWdElix.x + 10, (int)btnWdElix.y + 11, 10, Color{ 255, 230, 160, 255 });
+
+    if (hovWdElix && isMousePressed) {
+        inv.WithdrawItem(5, stash.healthPotions);
+        inv.WithdrawItem(6, stash.stoneskinTonics);
+        inv.WithdrawItem(7, stash.glacialDraughts);
+        inv.WithdrawItem(8, stash.berserkerDraughts);
+        SoundFX::PlayButtonClick();
+    }
+
+    // Close Vault Button
+    Rectangle btnClose = { modalX + modalW - 170.0f, bottomY, 148.0f, 36.0f };
+    bool hovClose = CheckCollisionPointRec(mousePos, btnClose);
+    DrawRectangleRounded(btnClose, 0.2f, 4, hovClose ? Color{ 70, 35, 40, 255 } : Color{ 45, 25, 30, 220 });
+    DrawRectangleRoundedLines(btnClose, 0.2f, 4, Color{ 200, 90, 100, 220 });
+    DrawText("CLOSE VAULT [ESC]", (int)btnClose.x + 14, (int)btnClose.y + 11, 11, Color{ 255, 220, 225, 255 });
+
+    if (hovClose && isMousePressed) {
+        SoundFX::PlayButtonClick();
+        shouldClose = true;
+    }
+
+    return shouldClose;
+}
+

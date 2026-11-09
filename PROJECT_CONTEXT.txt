@@ -712,3 +712,40 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
     - Stage 3: Berserker Troll Warlord.
   * Gauntlet completion rewards: +300 Silver Shingles, +15 Ore Scraps, +8 Essence of Mist, +6 Shadow Essence, and Apex Champion Crest.
 
+================================================================================
+14. VERSION 0.0.1j MILESTONES (PHASES 1 - 8)
+================================================================================
+- Visceral Execution & Stagger Deathblow System:
+  * Shattering enemy posture opens an execution window signaled by an animated diamond target reticle.
+  * Pressing [F] triggers an invulnerable visceral lunge deathblow dealing critical burst damage scaled to equipped weapon tier.
+  * Awards Adrenaline Surge buff (+25% attack speed, +15% move speed for 4.0s).
+
+- Alchemy Workshop & Combat Quick Belt:
+  * Tavern Keeper Brena operates an interactive cauldron brewing station at Hearthside Tavern in Zyphden.
+  * Three combat tonics: Stoneskin (+18 Def), Glacial (Frostbite immunity), Berserker (+30% Dmg).
+  * Quick-belt slots [1], [2], [3] for rapid hotkey consumption in battle.
+
+- Totem of the Phlegmatic Core:
+  * 7th Sacred Relic featuring Phlegmatic Apathy (-80% knockback received), 50% gray health recovery on counter-attacks, and parry freeze shockwaves.
+  * Altar of Cold Solitude shrine at { 1400.0f, 320.0f } in North Zyphden.
+
+- Dynamic Day/Night Lighting & Nightfall Incursions:
+  * Continuous 24-hour celestial cycle across outdoor realms with soft radial light sources.
+  * Nocturnal Incursion events with purple-aura Nightfall Elites dropping doubled loot.
+  * Astronomical clock dial integrated into the HUD header.
+
+- Tactical Radar & 8-Way Compass HUD:
+  * 360-degree corner mini-radar tracking player heading, POIs, campfires, NPCs, and hostile entities.
+  * Cardinal compass tape ribbon ([N] NW 315') toggleable with [N].
+
+- Bestiary Mastery Hunting Perks:
+  * Tier 2 and Tier 3 kill seals grant permanent passive combat bonuses (Troll Slayer, Golem Breaker, Gale Hunter, Cultist Purifier).
+
+- Subterranean Highland Caverns (The Permafrost Crypts):
+  * Underground dungeon realm (GameState::FROST_CAVERNS) featuring icy floor inertia, breakable stalagmites, the Frost Revenant boss, and Lore Fragment XV.
+
+- Ancient Vanguard Storage Stash Trunk:
+  * Persistent storage vault located at Zyphden Town Square and accessible at all bonfires via [T].
+  * Dual-pane Carried Pouch vs Vault Stash interface with full save serialization.
+
+

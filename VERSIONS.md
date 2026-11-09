@@ -20,15 +20,66 @@
 
 ## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)
 
+### Major Features Implemented
+
+#### 1. Visceral Execution & Stagger Deathblow System
+* **Poise-Break Vulnerability**: When enemy poise is shattered and enemy is stunned, an animated diamond reticle signals visceral deathblow readiness.
+* **Visceral Lunge & Deathblow**: Pressing `[F]` within 120px lunges into the staggered target with full i-frame invulnerability, executing a fatal critical strike scaled to equipped weapon tier.
+* **Adrenaline Surge Buff**: Successful execution grants 4.0s of +25% attack speed and +15% movement speed with golden haste trails.
+
+#### 2. Alchemy Workshop & Quick-Item Belt
+* **Tavern Keeper Brena Brewing Station**: Interactive alchemy cauldron at Hearthside Tavern in Zyphden.
+* **Combat Tonics**:
+  * Stoneskin Tonic: +18 Defense, -10% speed for 12.0s.
+  * Glacial Draught: Complete frostbite immunity and cold aura for 15.0s.
+  * Berserker Draught: +30% attack damage, -15% defense for 10.0s.
+* **Quick-Item Belt**: Number keys `[1]`, `[2]`, `[3]` allow instantaneous combat consumption during encounters.
+
+#### 3. Totem of the Phlegmatic Core (7th Sacred Relic)
+* **Phlegmatic Apathy**: Decreases incoming knockback by 80%, providing stoic stance against heavy impacts.
+* **Gray Health Regeneration**: 50% of incoming damage converts to recoverable gray health, restored upon landing counter-attacks within 3.5 seconds.
+* **Chill Counter**: Successful parries emit a freezing shockwave that inflicts frostbite and slows nearby enemies.
+* **Shrine of Cold Solitude**: Altar located at `{ 1400.0f, 320.0f }` in North Zyphden, claimable after Torvald bounties.
+
+#### 4. Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
+* **Celestial Clock**: 24-hour day cycle with Dawn, Day, Dusk, and Night phases interpolated smoothly across all outdoor realms.
+* **Point-Light Sources**: Player hip lantern, campfires, torches, altars, and glowing braziers cut through darkness with soft radial lighting.
+* **Nightfall Incursions**: Nocturnal elite monsters spawn with purple void auras, boosted stats, and doubled essence and loot yields.
+* **Celestial Clock Dial**: Integrated into location banner with sun/moon glyphs and formatted time (`HH:MM`).
+
+#### 5. Tactical Corner Mini-Map Radar & Compass HUD
+* **360-Degree Sweep Radar**: Mini-radar HUD displaying player heading, POIs (campfires as golden diamonds, NPCs as emerald circles, altars as cyan diamonds, regular enemies as red dots, bosses as pulsing crimson rings, elites as purple pips).
+* **8-Way Cardinal Compass Tape**: Heading ribbon showing cardinal directions (`[N] NW 315'`), toggleable with `[N]`.
+
+#### 6. Bestiary Mastery Hunting Perks & Codex Seals
+* **Hunting Mastery Codex Seals**: Bestiary entries award Tier 1 (`5 Kills`), Tier 2 (`15 Kills`), and Tier 3 (`35 Kills`) mastery seals.
+* **Active Combat Perks**:
+  * Troll Slayer: +25% frostbite resistance, +20% damage to trolls, and +25 HP restored on troll execution.
+  * Golem Breaker: +25% armor pierce and +1 bonus scrap yield from mining nodes.
+  * Gale Hunter: +15% stamina regeneration rate and +20% damage against mist rogues.
+  * Cultist Purifier: +15% damage and +25% critical strike multiplier against cathedral cultists.
+
+#### 7. Subterranean Highland Caverns (The Permafrost Crypts)
+* **The Permafrost Crypts Realm**: New subterranean dungeon realm (`GameState::FROST_CAVERNS`, `MapEnvironment::FROST_CAVERNS`) accessed through the highland chasm cavern mouth at `{ 2200.0f, 260.0f }`.
+* **Icy Floor Inertia & Gliding**: Low friction black ice floor mechanics with smooth momentum acceleration and frosty drift trails.
+* **Breakable Stalagmites**: 7 crystalline stalagmites shattered by weapon attacks to yield iron scrap, silver shingles, and essence.
+* **The Frost Revenant Boss**: Ethereal chasm phantom wielding a frost scythe with radial ice novas, piercing glacial lances, and teleport flurries.
+* **Lore Fragment XV**: "Fragment XV: The Wailing Depths of the Phlegmatic Chasm" preserved on the inner crypt sarcophagus dais.
+
+#### 8. Storage Stash Chest & Multi-Bonfire Persistence
+* **Ancient Vanguard Stash Trunk**: Dedicated persistent storage trunk in Zyphden Town Square and accessible at all realm campfires via `[T]`.
+* **Dual-Pane Stash Modal**: Side-by-side Carried Pouch and Vault Stash interface with single-item and bulk deposit/withdraw actions.
+* **Full Persistence**: Stash quantities for shingles, iron scraps, frost shards, mist essence, shadow essence, and all elixirs serialized to save slots.
+
 ### In-Development Roadmap
-1. **Visceral Execution & Stagger Deathblow System**: Poise-break vulnerability, execution reticles, melee visceral deathblows with i-frames and weapon-scaled critical burst.
-2. **Alchemy Workshop & Quick-Item Belt**: Tavern Keeper Brena brewing station, combat tonics (Stoneskin, Glacial, Berserker, Swiftfoot), and 1-3 quick belt hotkeys.
-3. **Totem of the Phlegmatic Core**: 7th sacred relic with Phlegmatic Apathy, gray health recovery, and counter-freeze aura.
-4. **Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions**: Day/Dusk/Night ambient transitions, point-light radiuses, and nocturnal elite spawns.
-5. **Tactical Corner Mini-Map Radar & Compass HUD**: Top-right mini-radar with player heading, POIs, NPC markers, and enemy pips.
-6. **Bestiary Mastery Hunting Perks**: Passive combat traits unlocked by Tier 2 and Tier 3 kill seals in the Bestiary Codex.
-7. **Permafrost Crypts Subterranean Caverns**: Highland cave dungeon with icy platforms, breakable stalagmites, Frost Revenant boss, and Lore Fragment XV.
-8. **Storage Stash Chest & Persistence**: Campfire and town stash chest for materials and loadouts with save serialization.
+1. [COMPLETED] Visceral Execution & Stagger Deathblow System
+2. [COMPLETED] Alchemy Workshop & Quick-Item Belt
+3. [COMPLETED] Totem of the Phlegmatic Core
+4. [COMPLETED] Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
+5. [COMPLETED] Tactical Corner Mini-Map Radar & Compass HUD
+6. [COMPLETED] Bestiary Mastery Hunting Perks
+7. [COMPLETED] Permafrost Crypts Subterranean Caverns
+8. [COMPLETED] Storage Stash Chest & Persistence
 9. **File Architecture Restructuring & Subsystem Decoupling**: Extracting realm handlers into `src/states/realms/` and item systems into `src/items/`.
 
 ---

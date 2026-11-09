@@ -38,7 +38,7 @@
 
 
 
-Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
+Game::Game() : currentState(GameState::TITLE_SCREEN), showControlsModal(false), showInventoryModal(false), showMapModal(false), showStashModal(false), showSlotModal(false), deletingSlotIndex(0), isRestoringSave(false), inventoryActiveTab(0), inventorySelectedFragment(0), isFullscreen(false) {
 
 
 
@@ -1075,6 +1075,16 @@ void Game::SaveActiveGame() {
     data.stoneskinTonics = player.GetInventory().GetStoneskinTonicCount();
     data.glacialDraughts = player.GetInventory().GetGlacialDraughtCount();
     data.berserkerDraughts = player.GetInventory().GetBerserkerDraughtCount();
+    const auto& stash = player.GetInventory().GetStash();
+    data.stashShingles = stash.shingles;
+    data.stashOreScraps = stash.oreScraps;
+    data.stashFrostShards = stash.frostShards;
+    data.stashEssenceOfMist = stash.essenceOfMist;
+    data.stashShadowEssence = stash.shadowEssence;
+    data.stashPotions = stash.healthPotions;
+    data.stashStoneskinTonics = stash.stoneskinTonics;
+    data.stashGlacialDraughts = stash.glacialDraughts;
+    data.stashBerserkerDraughts = stash.berserkerDraughts;
     data.galeArcherDefeated = restlessMistForestHandler.IsBossDefeated();
     data.elementalGolemDefeated = quarryHandler.IsBossDefeated();
 
@@ -1237,6 +1247,16 @@ void Game::LoadActiveGame(int slotIndex) {
     player.GetInventory().SetStoneskinTonicCount(data.stoneskinTonics);
     player.GetInventory().SetGlacialDraughtCount(data.glacialDraughts);
     player.GetInventory().SetBerserkerDraughtCount(data.berserkerDraughts);
+    auto& stash = player.GetInventory().GetStash();
+    stash.shingles = data.stashShingles;
+    stash.oreScraps = data.stashOreScraps;
+    stash.frostShards = data.stashFrostShards;
+    stash.essenceOfMist = data.stashEssenceOfMist;
+    stash.shadowEssence = data.stashShadowEssence;
+    stash.healthPotions = data.stashPotions;
+    stash.stoneskinTonics = data.stashStoneskinTonics;
+    stash.glacialDraughts = data.stashGlacialDraughts;
+    stash.berserkerDraughts = data.stashBerserkerDraughts;
     restlessMistForestHandler.SetBossDefeated(data.galeArcherDefeated);
 
 
@@ -1955,15 +1975,18 @@ void Game::Update(float dt) {
 
     }
 
-
-
-
+    if (showStashModal) {
+        if (pressEsc || IsKeyPressed(KEY_T)) {
+            showStashModal = false;
+            SoundFX::PlayButtonClick();
+            return;
+        }
+        return;
+    }
 
 
 
     // Open modals from gameplay
-
-
 
     if (pressC) {
 
@@ -2039,9 +2062,11 @@ void Game::Update(float dt) {
 
     }
 
-
-
-
+    if (IsKeyPressed(KEY_T) && !showControlsModal && !showInventoryModal && !showMapModal && player.IsAlive()) {
+        showStashModal = true;
+        SoundFX::PlayButtonClick();
+        return;
+    }
 
 
 
@@ -4593,8 +4618,11 @@ void Game::RenderScene() {
 
         }
 
-
-
+    } else if (showStashModal) {
+        bool close = GameUI::DrawStorageStashModal(w, h, mousePos, isMousePressed, player);
+        if (close) {
+            showStashModal = false;
+        }
     }
 
 

@@ -150,6 +150,24 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.glacialDraughts = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"berserkerDraughts\"") != std::string::npos) {
             outData.berserkerDraughts = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashShingles\"") != std::string::npos) {
+            outData.stashShingles = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashOreScraps\"") != std::string::npos) {
+            outData.stashOreScraps = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashFrostShards\"") != std::string::npos) {
+            outData.stashFrostShards = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashEssenceOfMist\"") != std::string::npos) {
+            outData.stashEssenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashShadowEssence\"") != std::string::npos) {
+            outData.stashShadowEssence = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashPotions\"") != std::string::npos) {
+            outData.stashPotions = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashStoneskinTonics\"") != std::string::npos) {
+            outData.stashStoneskinTonics = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashGlacialDraughts\"") != std::string::npos) {
+            outData.stashGlacialDraughts = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashBerserkerDraughts\"") != std::string::npos) {
+            outData.stashBerserkerDraughts = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
             outData.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"elementalGolemDefeated\"") != std::string::npos) {
@@ -258,6 +276,15 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"stoneskinTonics\": " << data.stoneskinTonics << ",\n";
     file << "  \"glacialDraughts\": " << data.glacialDraughts << ",\n";
     file << "  \"berserkerDraughts\": " << data.berserkerDraughts << ",\n";
+    file << "  \"stashShingles\": " << data.stashShingles << ",\n";
+    file << "  \"stashOreScraps\": " << data.stashOreScraps << ",\n";
+    file << "  \"stashFrostShards\": " << data.stashFrostShards << ",\n";
+    file << "  \"stashEssenceOfMist\": " << data.stashEssenceOfMist << ",\n";
+    file << "  \"stashShadowEssence\": " << data.stashShadowEssence << ",\n";
+    file << "  \"stashPotions\": " << data.stashPotions << ",\n";
+    file << "  \"stashStoneskinTonics\": " << data.stashStoneskinTonics << ",\n";
+    file << "  \"stashGlacialDraughts\": " << data.stashGlacialDraughts << ",\n";
+    file << "  \"stashBerserkerDraughts\": " << data.stashBerserkerDraughts << ",\n";
     file << "  \"galeArcherDefeated\": " << (data.galeArcherDefeated ? "true" : "false") << ",\n";
     file << "  \"elementalGolemDefeated\": " << (data.elementalGolemDefeated ? "true" : "false") << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";

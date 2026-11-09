@@ -83,6 +83,7 @@ private:
     bool showControlsModal;
     bool showInventoryModal;
     bool showMapModal;
+    bool showStashModal;
     bool showSlotModal;
     int deletingSlotIndex;
     bool isRestoringSave;

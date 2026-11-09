@@ -34,6 +34,18 @@ struct EquipmentPreset {
     bool isConfigured = false;
 };
 
+struct PlayerStash {
+    int shingles = 0;
+    int oreScraps = 0;
+    int frostShards = 0;
+    int essenceOfMist = 0;
+    int shadowEssence = 0;
+    int healthPotions = 0;
+    int stoneskinTonics = 0;
+    int glacialDraughts = 0;
+    int berserkerDraughts = 0;
+};
+
 class Inventory {
 public:
     Inventory();
@@ -188,6 +200,12 @@ public:
         return false;
     }
 
+    // Storage Stash Vault
+    PlayerStash& GetStash() { return stash; }
+    const PlayerStash& GetStash() const { return stash; }
+    void DepositItem(int itemId, int count = 1);
+    void WithdrawItem(int itemId, int count = 1);
+
     int GetEssenceOfMist() const { return essenceOfMist; }
     void SetEssenceOfMist(int count) { essenceOfMist = count >= 0 ? count : 0; }
     void AddEssenceOfMist(int count) { essenceOfMist += count; }
@@ -307,5 +325,6 @@ private:
     int stoneskinTonics = 0;
     int glacialDraughts = 0;
     int berserkerDraughts = 0;
+    PlayerStash stash;
     int weaponUpgradeLevel[GameLimits::WEAPON_COUNT] = { 0 };
 };

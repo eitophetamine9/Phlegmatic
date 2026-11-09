@@ -19,6 +19,10 @@ bool GameUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, b
     return ModalUI::DrawMapModal(windowWidth, windowHeight, mousePos, isMousePressed, player, currentState, outFastTravelStage);
 }
 
+bool GameUI::DrawStorageStashModal(int windowWidth, int windowHeight, Vector2 mousePos, bool isMousePressed, Player& player) {
+    return ModalUI::DrawStorageStash(windowWidth, windowHeight, mousePos, isMousePressed, player);
+}
+
 void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
     HUD::DrawLobby(windowWidth, windowHeight, player, isNearPedestal, nearWeaponName, hasUnreadLore);
 }
