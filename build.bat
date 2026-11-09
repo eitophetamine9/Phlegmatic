@@ -37,13 +37,13 @@ g++ -std=c++17 -O2 -static ^
     src\ui\UI.cpp ^
     src\states\Cutscene.cpp ^
     src\states\Tutorial.cpp ^
-    src\states\RuinedCastleHandler.cpp ^
-    src\states\CrossroadsHandler.cpp ^
-    src\states\ZyphdenHandler.cpp ^
-    src\states\QuarryHandler.cpp ^
-    src\states\RestlessMistForestHandler.cpp ^
-    src\states\NorthZyphdenHandler.cpp ^
-    src\states\FrostCavernsHandler.cpp ^
+    src\states\realms\RuinedCastleHandler.cpp ^
+    src\states\realms\CrossroadsHandler.cpp ^
+    src\states\realms\ZyphdenHandler.cpp ^
+    src\states\realms\QuarryHandler.cpp ^
+    src\states\realms\RestlessMistForestHandler.cpp ^
+    src\states\realms\NorthZyphdenHandler.cpp ^
+    src\states\realms\FrostCavernsHandler.cpp ^
     src\states\Game.cpp ^
     -Isrc ^
     -Isrc\core ^
@@ -52,6 +52,7 @@ g++ -std=c++17 -O2 -static ^
     -Isrc\entities ^
     -Isrc\rendering ^
     -Isrc\states ^
+    -Isrc\states\realms ^
     -Isrc\ui ^
     -Ivendor\raylib\include ^
     -Lvendor\raylib\lib ^

@@ -16,13 +16,13 @@
 
 #include "../combat/CollisionSystem.hpp"
 #include "../world/WaveManager.hpp"
-#include "RuinedCastleHandler.hpp"
-#include "CrossroadsHandler.hpp"
-#include "ZyphdenHandler.hpp"
-#include "QuarryHandler.hpp"
-#include "RestlessMistForestHandler.hpp"
-#include "NorthZyphdenHandler.hpp"
-#include "FrostCavernsHandler.hpp"
+#include "realms/RuinedCastleHandler.hpp"
+#include "realms/CrossroadsHandler.hpp"
+#include "realms/ZyphdenHandler.hpp"
+#include "realms/QuarryHandler.hpp"
+#include "realms/RestlessMistForestHandler.hpp"
+#include "realms/NorthZyphdenHandler.hpp"
+#include "realms/FrostCavernsHandler.hpp"
 #include <functional>
 #include <string>
 

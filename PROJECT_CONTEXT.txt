@@ -105,11 +105,14 @@ Phlegmatic/
         ├── GameState.hpp          # GameState enum (TITLE_SCREEN, RUINED_CASTLE, ZYPHDEN, etc.)
         ├── Tutorial.hpp/.cpp      # Tutorial objective tracker, composure guide popup, boundary walls
         ├── Cutscene.hpp/.cpp      # Cinematic storytelling cutscenes and epilogues
-        ├── RuinedCastleHandler.hpp/.cpp # Scripted gates, Zil encounter, and arena unlock trigger
-        ├── CrossroadsHandler.hpp/.cpp   # Roadside shrines, enemy patrols, highway monoliths
-        ├── ZyphdenHandler.hpp/.cpp      # Keep throne, Knight Lenon spar, Varek forge, tavern
-        ├── QuarryHandler.hpp/.cpp       # Subterranean depths, Ore Golems, Primordial Altar
-        └── RestlessMistForestHandler.hpp/.cpp # Foggy western realm, Gale Bandits, Altar of Whispers
+        └── realms/                # Decoupled realm state handlers and environmental controllers
+            ├── RuinedCastleHandler.hpp/.cpp       # Scripted gates, Zil encounter, and arena unlock trigger
+            ├── CrossroadsHandler.hpp/.cpp         # Roadside shrines, enemy patrols, highway monoliths
+            ├── ZyphdenHandler.hpp/.cpp            # Keep throne, Knight Lenon spar, Varek forge, tavern
+            ├── QuarryHandler.hpp/.cpp             # Subterranean depths, Ore Golems, Primordial Altar
+            ├── RestlessMistForestHandler.hpp/.cpp # Foggy western realm, Gale Bandits, Altar of Whispers
+            ├── NorthZyphdenHandler.hpp/.cpp       # Highland trail, Torvald bounties, Berserker Troll, Chasm entrance
+            └── FrostCavernsHandler.hpp/.cpp       # Permafrost Crypts, icy inertia, Frost Revenant boss
 
 ================================================================================
 4. CURRENT FEATURES & SYSTEMS (VERSION 0.0.1b)
@@ -713,7 +716,7 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Gauntlet completion rewards: +300 Silver Shingles, +15 Ore Scraps, +8 Essence of Mist, +6 Shadow Essence, and Apex Champion Crest.
 
 ================================================================================
-14. VERSION 0.0.1j MILESTONES (PHASES 1 - 8)
+14. VERSION 0.0.1j MILESTONES (PHASES 1 - 9)
 ================================================================================
 - Visceral Execution & Stagger Deathblow System:
   * Shattering enemy posture opens an execution window signaled by an animated diamond target reticle.
@@ -747,5 +750,10 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
 - Ancient Vanguard Storage Stash Trunk:
   * Persistent storage vault located at Zyphden Town Square and accessible at all bonfires via [T].
   * Dual-pane Carried Pouch vs Vault Stash interface with full save serialization.
+
+- File Architecture Restructuring & Subsystem Decoupling:
+  * Restructured all 7 realm state coordinators into dedicated src/states/realms/ subsystem.
+  * Decoupled realm logic from top-level state orchestrator in Game.hpp/cpp.
+  * Synchronized build.bat (-Isrc/states/realms) and CMakeLists.txt compilation configurations.
 
 

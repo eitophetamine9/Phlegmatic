@@ -39,12 +39,14 @@
 | **Aiming** | `Mouse Cursor` | Reticle targeting for weapon thrusts, dashes, and parry reflections. |
 | **Light Attack** | `Left Mouse Button` | Swift slash/thrust combo (Daggers every 5th strike consumes 14 stamina, Truth Seeker 2-hit combo, Elemental Totem piercing bolt). |
 | **Heavy Signature Combo** | `Right Mouse Button` | Multi-stage weapon combos (Daggers 3-stage, Mace 2-stage, Crusader Blade 3-stage, Truth Seeker 2-stage, Halberd 3-stage). |
-| **Armor Set Special Skill** | `V Key` | Triggers active skill on 3/3 matching armor sets (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires). |
+| **Armor Set Special Skill** | `V Key` | Triggers active skill on 3/3 matching armor sets (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires, Glacial Frost Nova). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
-| **Timed Parry** | `F Key` | Active guard window. Staggers melee foes and **reflects incoming projectiles**. |
+| **Timed Parry / Execution** | `F Key` | Active guard window. Staggers melee foes, reflects projectiles, and performs **Visceral Execution Deathblows** on posture-broken targets. |
 | **Phlegmatic Trance** | `SPACE Key` | Active at 100 Composure. **5.0s invulnerability, zero stamina cost & auto-deflection aura**. |
-| **Health Potion** | `1 Key` or `H Key` | Consumes 1 elixir to heal **+45 HP** immediately (**7.0s cooldown**). |
+| **Combat Quick Belt** | `1, 2, 3 Keys` | Rapid consumption of Health Potions, Stoneskin Tonics, Glacial Draughts, or Berserker Draughts. |
 | **Interact / Advance** | `E Key` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
+| **Storage Stash Trunk** | `T Key` | Open the persistent Storage Stash Vault at Zyphden Town Square or any realm campfire. |
+| **Tactical Radar Toggle** | `N Key` | Toggle the corner tactical mini-map radar and cardinal compass tape HUD. |
 | **Dialogue Page** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
@@ -72,15 +74,15 @@
 > * **Quick Weapon Swap & Apex Boss Gauntlet**: Instant weapon cycling mid-combat on `[TAB]` and Knight Lenon's 3-stage Apex Boss Gauntlet rush mode.
 >
 > ### Version 0.0.1j Implementation Roadmap
-> 1. **Phase 1**: Visceral Execution & Stagger Deathblow System
-> 2. **Phase 2**: Alchemy Workshop & Quick-Item Belt (Tavern Keeper Brena)
-> 3. **Phase 3**: The 7th Sacred Relic: Totem of the Phlegmatic Core
-> 4. **Phase 4**: Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
-> 5. **Phase 5**: Tactical Corner Mini-Map Radar & Compass HUD
-> 6. **Phase 6**: Bestiary Mastery Hunting Perks & Codex Seals
-> 7. **Phase 7**: Subterranean Highland Caverns Sub-Zone (The Permafrost Crypts)
-> 8. **Phase 8**: Storage Stash Chest & Persistence Verification
-> 9. **Phase 9**: File Architecture Restructuring & Subsystem Decoupling
+> 1. **Phase 1**: Visceral Execution & Stagger Deathblow System [COMPLETED]
+> 2. **Phase 2**: Alchemy Workshop & Quick-Item Belt (Tavern Keeper Brena) [COMPLETED]
+> 3. **Phase 3**: The 7th Sacred Relic: Totem of the Phlegmatic Core [COMPLETED]
+> 4. **Phase 4**: Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions [COMPLETED]
+> 5. **Phase 5**: Tactical Corner Mini-Map Radar & Compass HUD [COMPLETED]
+> 6. **Phase 6**: Bestiary Mastery Hunting Perks & Codex Seals [COMPLETED]
+> 7. **Phase 7**: Subterranean Highland Caverns Sub-Zone (The Permafrost Crypts) [COMPLETED]
+> 8. **Phase 8**: Storage Stash Chest & Persistence Verification [COMPLETED]
+> 9. **Phase 9**: File Architecture Restructuring & Subsystem Decoupling [COMPLETED]
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 
@@ -142,6 +144,7 @@ Phlegmatic/
     ├── rendering/              # Procedural vector silhouettes & asset loader
     ├── ui/                     # Dedicated HUD, modals, titles, and responsive UI components
     └── states/                 # State coordinators, handlers, and game logic
+        └── realms/             # Modular realm exploration and encounter controllers
 ```
 
 ---

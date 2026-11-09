@@ -28,13 +28,13 @@ set(SOURCES
     src/ui/UI.cpp
     src/states/Cutscene.cpp
     src/states/Tutorial.cpp
-    src/states/RuinedCastleHandler.cpp
-    src/states/CrossroadsHandler.cpp
-    src/states/ZyphdenHandler.cpp
-    src/states/QuarryHandler.cpp
-    src/states/RestlessMistForestHandler.cpp
-    src/states/NorthZyphdenHandler.cpp
-    src/states/FrostCavernsHandler.cpp
+    src/states/realms/RuinedCastleHandler.cpp
+    src/states/realms/CrossroadsHandler.cpp
+    src/states/realms/ZyphdenHandler.cpp
+    src/states/realms/QuarryHandler.cpp
+    src/states/realms/RestlessMistForestHandler.cpp
+    src/states/realms/NorthZyphdenHandler.cpp
+    src/states/realms/FrostCavernsHandler.cpp
     src/states/Game.cpp
 )
 
@@ -48,6 +48,7 @@ target_include_directories(phlegmatic PRIVATE
     src/entities
     src/rendering
     src/states
+    src/states/realms
     src/ui
     vendor/raylib/include
 )

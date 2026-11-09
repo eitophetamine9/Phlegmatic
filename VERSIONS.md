@@ -71,6 +71,12 @@
 * **Dual-Pane Stash Modal**: Side-by-side Carried Pouch and Vault Stash interface with single-item and bulk deposit/withdraw actions.
 * **Full Persistence**: Stash quantities for shingles, iron scraps, frost shards, mist essence, shadow essence, and all elixirs serialized to save slots.
 
+#### 9. File Architecture Restructuring & Subsystem Decoupling
+* **Decoupled Realm Subsystem (`src/states/realms/`)**: Migrated all 7 realm environment coordinators (`RuinedCastleHandler`, `CrossroadsHandler`, `ZyphdenHandler`, `QuarryHandler`, `RestlessMistForestHandler`, `NorthZyphdenHandler`, `FrostCavernsHandler`) into an isolated `realms/` subsystem directory.
+* **Compilation & Build Automation**: Synchronized `build.bat` MinGW GCC compilation flags with `-Isrc/states/realms` and mapped source paths.
+* **CMake Configuration**: Updated `CMakeLists.txt` to automatically discover and compile all headers and source files under `src/states/realms/`.
+* **Header Inclusions**: Refactored `Game.hpp` includes to utilize standardized `realms/` relative imports, decoupling core state management from environmental encounter logic.
+
 ### In-Development Roadmap
 1. [COMPLETED] Visceral Execution & Stagger Deathblow System
 2. [COMPLETED] Alchemy Workshop & Quick-Item Belt
@@ -80,7 +86,7 @@
 6. [COMPLETED] Bestiary Mastery Hunting Perks
 7. [COMPLETED] Permafrost Crypts Subterranean Caverns
 8. [COMPLETED] Storage Stash Chest & Persistence
-9. **File Architecture Restructuring & Subsystem Decoupling**: Extracting realm handlers into `src/states/realms/` and item systems into `src/items/`.
+9. [COMPLETED] File Architecture Restructuring & Subsystem Decoupling: Decoupled realm handlers into src/states/realms/ and synchronized build configurations.
 
 ---
 
