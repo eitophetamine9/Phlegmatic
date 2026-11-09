@@ -540,6 +540,12 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
             DrawCircleV({ center.x, center.y + 3.5f * scale }, 3.5f * scale, isUnlocked ? Color{ 120, 245, 160, 255 } : baseCol);
             break;
         }
+        case TotemType::TOTEM_PHLEGMATIC_CORE: {
+            DrawPoly(center, 6, 11.5f * scale, 30.0f, isUnlocked ? Color{ 110, 215, 255, 255 } : baseCol);
+            DrawPolyLines(center, 6, 11.5f * scale, 30.0f, isUnlocked ? Color{ 200, 245, 255, 255 } : glowCol);
+            DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 240, 250, 255, 255 } : glowCol);
+            break;
+        }
         case TotemType::NONE:
         default:
             DrawCircleLines((int)center.x, (int)center.y, 8.0f * scale, Color{ 70, 85, 105, 160 });
@@ -1070,22 +1076,23 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             DrawText("Attune a discovered primal relic to awaken elemental resonances.", (int)tTextX, (int)totemSlotRec.y + 26, 11, Color{ 130, 145, 165, 200 });
         }
 
-        // Row 2: 1x5 Quick-Attune Grid for all 5 Totems!
+        // Row 2: 1x6 Quick-Attune Grid for all 6 Totems!
         float totGridY = totemSlotRec.y + totemSlotRec.height + 6.0f;
         struct TotemBtnInfo { TotemType type; int tierPips; };
-        TotemBtnInfo totemBtns[5] = {
+        TotemBtnInfo totemBtns[6] = {
             { TotemType::TOTEM_SANITY, 2 },
             { TotemType::TOTEM_INSANITY, 2 },
             { TotemType::TOTEM_MIST, 3 },
             { TotemType::CRUSADER_TOTEM, 3 },
-            { TotemType::ELEMENTAL_CORE_TOTEM, 4 }
+            { TotemType::ELEMENTAL_CORE_TOTEM, 4 },
+            { TotemType::TOTEM_PHLEGMATIC_CORE, 4 }
         };
-        float tBtnW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float tBtnW = (leftW - 32.0f - 20.0f) / 6.0f;
         float tBtnH = 38.0f;
         int hoveredTotemIdx = -1;
         Rectangle hoveredTotemRec = { 0, 0, 0, 0 };
 
-        for (int ti = 0; ti < 5; ++ti) {
+        for (int ti = 0; ti < 6; ++ti) {
             Rectangle tbRec = { leftX + 16.0f + (float)ti * (tBtnW + 4.0f), totGridY, tBtnW, tBtnH };
             bool isTUnlocked = player.GetInventory().HasTotem(totemBtns[ti].type);
             bool isTEquipped = (player.GetTotem() == totemBtns[ti].type);
@@ -1725,29 +1732,30 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 4. TOTEM RELIC CATALOG GRID & INSPECTION
             // =========================================================
             struct TotemListEntry { TotemType type; const char* lockMsg; int tierPips; };
-            TotemListEntry totems[5] = {
+            TotemListEntry totems[GameLimits::ATTUNABLE_TOTEM_COUNT] = {
                 { TotemType::TOTEM_SANITY, "Ruined Castle - Awakening Pedestal", 2 },
                 { TotemType::TOTEM_INSANITY, "Northern Crags - Berserker Troll Boss (25% drop)", 4 },
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
-                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 }
+                { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 },
+                { TotemType::TOTEM_PHLEGMATIC_CORE, "Northern Crags - Altar of Cold Solitude / Torvald Bounty", 4 }
             };
 
             int unlockedCount = 0;
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < GameLimits::ATTUNABLE_TOTEM_COUNT; ++i) {
                 if (player.GetInventory().HasTotem(totems[i].type)) unlockedCount++;
             }
 
             // Left Grid Container
             DrawRectangleRounded(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 15, 20, 30, 240 });
             DrawRectangleRoundedLines(Rectangle{ rightX + 16.0f, drawerListY, gridW, gridH }, 0.04f, 4, Color{ 48, 65, 92, 180 });
-            std::string gridTitle = "ATTUNED PRIMAL CORES (" + std::to_string(unlockedCount) + "/5 UNLOCKED)";
+            std::string gridTitle = "ATTUNED PRIMAL CORES (" + std::to_string(unlockedCount) + "/" + std::to_string(GameLimits::ATTUNABLE_TOTEM_COUNT) + " UNLOCKED)";
             DrawText(gridTitle.c_str(), (int)rightX + 28, (int)drawerListY + 8, 12, Color{ 255, 215, 90, 240 });
             DrawLine((int)rightX + 28, (int)drawerListY + 24, (int)(rightX + 16.0f + gridW - 12.0f), (int)drawerListY + 24, Color{ 42, 58, 82, 160 });
 
-            if (s_inspectedTotem < 0 || s_inspectedTotem >= 5) s_inspectedTotem = 0;
+            if (s_inspectedTotem < 0 || s_inspectedTotem >= GameLimits::ATTUNABLE_TOTEM_COUNT) s_inspectedTotem = 0;
 
-            for (int i = 0; i < 5; ++i) {
+            for (int i = 0; i < GameLimits::ATTUNABLE_TOTEM_COUNT; ++i) {
                 int col = i % 3;
                 int row = i / 3;
                 Rectangle bRec = { gridStartX + (float)col * (bSize + bSpacingX), gridStartY + (float)row * (bSize + bSpacingY), bSize, bSize };
@@ -1832,6 +1840,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
                 FontManager::DrawTextWrapped("Bestows +65% overall damage, +35% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
+                DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
+                FontManager::DrawTextWrapped("Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 200, 240, 255, 220 });
             }
 
             // Divider

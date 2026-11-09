@@ -108,6 +108,8 @@ Player::Player() {
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
 
 
 
@@ -231,6 +233,8 @@ void Player::Init(Vector2 startPos) {
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -306,6 +310,8 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
+    grayHealth = 0.0f;
+    grayHealthTimer = 0.0f;
 
     iFrameTimer = 0.0f;
     willOfAtlasTimer = 0.0f;
@@ -858,6 +864,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         ResetFrostbite();
     }
     if (berserkerTimer > 0.0f) berserkerTimer -= dt;
+    if (grayHealthTimer > 0.0f) {
+        grayHealthTimer -= dt;
+        if (grayHealthTimer <= 0.0f) {
+            grayHealth = 0.0f;
+        }
+    }
 
     // Visceral Execution update
     if (isExecuting) {
@@ -2842,6 +2854,15 @@ bool Player::UseBerserkerDraught(ParticleSystem& particles) {
     return false;
 }
 
+void Player::RecoverGrayHealth(float amount, ParticleSystem& particles) {
+    if (grayHealth <= 0.0f) return;
+    float recovered = fminf(grayHealth, amount);
+    grayHealth -= recovered;
+    health = fminf(GetMaxHealth(), health + recovered);
+    particles.SpawnFloatingText(position, "+" + std::to_string((int)recovered) + " GRAY HP", Color{ 140, 230, 255, 255 }, 18.0f);
+    particles.SpawnSparks(position, Color{ 120, 215, 255, 200 }, 8, 50.0f);
+}
+
 
 
 bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce) {
@@ -2937,6 +2958,16 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
     if (berserkerTimer > 0.0f) {
         finalAmount *= 1.20f; // +20% incoming damage while Berserk
+    }
+
+    // Totem of the Phlegmatic Core: 80% knockback reduction + 25% damage converted to Gray Health
+    if (currentTotem == TotemType::TOTEM_PHLEGMATIC_CORE) {
+        knockbackDir.x *= 0.20f;
+        knockbackDir.y *= 0.20f;
+        float grayAdd = finalAmount * 0.25f;
+        grayHealth = fminf(GetMaxHealth() - (health - finalAmount), grayHealth + grayAdd);
+        grayHealthTimer = 6.0f;
+        particles.SpawnSparks(position, Color{ 140, 220, 255, 200 }, 6, 40.0f);
     }
 
     // Crusader Plate Dawnfire Aegis Shield

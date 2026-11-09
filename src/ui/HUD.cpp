@@ -199,6 +199,15 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         activeBuffs.push_back({ "BLOOD FRENZY: +135% DMG", Color{ 255, 45, 60, 255 }, Color{ 255, 150, 160, 255 }, Color{ 52, 14, 18, 240 }, true });
     }
 
+    if (player.GetTotem() == TotemType::TOTEM_PHLEGMATIC_CORE) {
+        if (player.GetGrayHealth() > 0.0f) {
+            char ghBuf[40];
+            snprintf(ghBuf, sizeof(ghBuf), "GRAY HEALTH: %d HP", (int)player.GetGrayHealth());
+            activeBuffs.push_back({ ghBuf, Color{ 185, 215, 240, 255 }, Color{ 230, 245, 255, 255 }, Color{ 30, 44, 60, 240 }, true });
+        }
+        activeBuffs.push_back({ "PHLEGMATIC APATHY: -80% KB", Color{ 140, 215, 255, 255 }, Color{ 200, 240, 255, 255 }, Color{ 20, 38, 55, 240 }, false });
+    }
+
     if (player.HasAdrenalineBuff()) {
         char b[32];
         snprintf(b, sizeof(b), "ADRENALINE: %.1fs", player.GetAdrenalineTimer());
@@ -416,6 +425,18 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     DrawText("HP", (int)hudX + 14, (int)hudY + 12, 11, Color{ 235, 80, 90, 255 });
     Rectangle hpRec = { hudX + 68, hudY + 12, 170, 12 };
     DrawResourceBar(hpRec, player.GetHealth(), player.GetMaxHealth(), Color{ 235, 55, 75, 255 }, Color{ 32, 20, 24, 220 }, Color{ 85, 40, 50, 220 }, true);
+    if (player.GetGrayHealth() > 0.0f && player.GetMaxHealth() > 0.001f) {
+        float maxH = player.GetMaxHealth();
+        float hpPct = fmaxf(0.0f, fminf(1.0f, player.GetHealth() / maxH));
+        float grayPct = fmaxf(0.0f, fminf(1.0f - hpPct, player.GetGrayHealth() / maxH));
+        float startX = hpRec.x + hpRec.width * hpPct;
+        float grayW = hpRec.width * grayPct;
+        if (grayW > 0.0f) {
+            float pulse = 0.5f + 0.5f * sinf((float)GetTime() * 8.0f);
+            Color grayCol = Color{ (unsigned char)(180 + 30 * pulse), (unsigned char)(195 + 25 * pulse), (unsigned char)(215 + 20 * pulse), 190 };
+            DrawRectangleRounded(Rectangle{ startX, hpRec.y + 1, grayW, hpRec.height - 2 }, 0.2f, 4, grayCol);
+        }
+    }
     char hpBuf[32];
     snprintf(hpBuf, sizeof(hpBuf), "%d/%d", (int)player.GetHealth(), (int)player.GetMaxHealth());
     DrawText(hpBuf, (int)hudX + 246, (int)hudY + 12, 10, Color{ 230, 205, 210, 225 });

@@ -104,7 +104,9 @@ void NorthZyphdenHandler::CloseDialogue(Player& player, ParticleSystem& particle
 
     int totalOre = 0;
     int totalShingles = 0;
+    bool allCompleted = true;
     for (auto& b : bounties) {
+        if (!b.completed) allCompleted = false;
         if (b.completed && !b.claimed) {
             b.claimed = true;
             totalOre += b.oreReward;
@@ -119,6 +121,13 @@ void NorthZyphdenHandler::CloseDialogue(Player& player, ParticleSystem& particle
         char rewBuf[64];
         snprintf(rewBuf, sizeof(rewBuf), "REWARDS: +%d ORE SCRAPS, +%d SHINGLES!", totalOre, totalShingles);
         particles.SpawnFloatingText(player.GetPosition(), rewBuf, Color{ 255, 225, 90, 255 }, 24.0f);
+    }
+    if (allCompleted && !player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE)) {
+        player.GetInventory().UnlockTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+        SoundFX::PlayParrySuccess();
+        particles.SpawnFloatingText(player.GetPosition(), "RELIC UNLOCKED: TOTEM OF THE PHLEGMATIC CORE!", Color{ 140, 215, 255, 255 }, 24.0f);
+        particles.SpawnSparks(player.GetPosition(), Color{ 120, 210, 255, 255 }, 45, 200.0f);
+        particles.AddScreenShake(6.0f, 0.35f);
     }
 }
 
@@ -482,6 +491,18 @@ void NorthZyphdenHandler::Update(
         }
     }
 
+    // Altar of Cold Solitude Interaction (Totem of the Phlegmatic Core)
+    Vector2 phlegmaticAltarPos = { 1400.0f, 320.0f };
+    if (!player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE) && Vector2Distance(playerPos, phlegmaticAltarPos) <= 48.0f) {
+        if (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+            player.GetInventory().UnlockTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+            SoundFX::PlayParrySuccess();
+            particles.SpawnFloatingText(phlegmaticAltarPos, "RELIC UNLOCKED: TOTEM OF THE PHLEGMATIC CORE!", Color{ 140, 215, 255, 255 }, 24.0f);
+            particles.SpawnSparks(phlegmaticAltarPos, Color{ 120, 210, 255, 255 }, 50, 220.0f);
+            particles.AddScreenShake(6.0f, 0.35f);
+        }
+    }
+
     // Berserker Troll Arena Trigger & Altar Rematch
     Vector2 arenaCenter = { 1200.0f, 440.0f };
     float distToArena = Vector2Distance(playerPos, arenaCenter);
@@ -659,6 +680,28 @@ void NorthZyphdenHandler::Render(
     // Highland Campfire Waypoint Rest
     highlandCampfire.Draw(time, player);
     DrawTorvald(time, playerPos);
+
+    // Altar of Cold Solitude (Totem of the Phlegmatic Core Shrine)
+    Vector2 phlegmaticAltarPos = { 1400.0f, 320.0f };
+    DrawEllipse((int)phlegmaticAltarPos.x, (int)(phlegmaticAltarPos.y + 14), 32.0f, 16.0f, Color{ 8, 14, 22, 140 });
+    DrawRectangleRounded(Rectangle{ phlegmaticAltarPos.x - 24, phlegmaticAltarPos.y - 12, 48, 26 }, 0.25f, 4, Color{ 36, 48, 66, 255 });
+    DrawRectangleRoundedLines(Rectangle{ phlegmaticAltarPos.x - 24, phlegmaticAltarPos.y - 12, 48, 26 }, 0.25f, 4, Color{ 68, 92, 124, 255 });
+    DrawRectangleRounded(Rectangle{ phlegmaticAltarPos.x - 16, phlegmaticAltarPos.y - 20, 32, 14 }, 0.25f, 4, Color{ 48, 64, 86, 255 });
+
+    float altarBob = sinf(time * 2.8f) * 4.0f;
+    Vector2 corePos = { phlegmaticAltarPos.x, phlegmaticAltarPos.y - 32.0f + altarBob };
+    bool hasRelic = player.GetInventory().HasTotem(TotemType::TOTEM_PHLEGMATIC_CORE);
+    Color coreGlow = hasRelic ? Color{ 80, 120, 160, 160 } : Color{ 140, 220, 255, 255 };
+    DrawCircleGradient(corePos, 18.0f, Color{ coreGlow.r, coreGlow.g, coreGlow.b, 80 }, Color{ 0, 0, 0, 0 });
+    DrawPoly(corePos, 4, 10.0f, 45.0f, coreGlow);
+    DrawPoly(corePos, 4, 6.0f, 45.0f, Color{ 230, 250, 255, 255 });
+
+    if (!hasRelic && Vector2Distance(playerPos, phlegmaticAltarPos) <= 52.0f) {
+        std::string prompt = "[E] Commune with Altar of Cold Solitude";
+        int pw = FontManager::MeasureText(prompt, 10);
+        FontManager::DrawGameTextShadow(prompt, (int)phlegmaticAltarPos.x - pw / 2, (int)phlegmaticAltarPos.y - 56, 10, Color{ 180, 235, 255, 255 });
+    }
+
     for (const auto& stele : loreSteles) {
         // Drop shadow
         DrawEllipse((int)stele.position.x, (int)(stele.position.y + 12), stele.radius * 1.15f, stele.radius * 0.55f, Color{ 10, 14, 20, 140 });

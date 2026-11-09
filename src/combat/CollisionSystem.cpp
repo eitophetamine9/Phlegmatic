@@ -142,6 +142,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             if (hit) {
+                // Totem of the Phlegmatic Core on-hit resonance: recover Gray Health & apply chill
+                if (player.GetTotem() == TotemType::TOTEM_PHLEGMATIC_CORE) {
+                    player.RecoverGrayHealth(14.0f, particles);
+                    enemy.ApplyStagger(0.35f);
+                    particles.SpawnSparks(enemy.GetPosition(), Color{ 140, 220, 255, 200 }, 8, 80.0f);
+                }
+
                 // Melancholic shell shatter: War Mace or Heavy attacks shatter brittle black-bile shells
                 if (enemy.GetHumor() == HumorType::MELANCHOLIC && !enemy.IsShattered()) {
                     if (attack.weapon == WeaponType::MACE || attack.type == AttackType::HEAVY) {

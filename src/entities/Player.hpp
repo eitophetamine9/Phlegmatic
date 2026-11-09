@@ -223,6 +223,11 @@ public:
     bool IsDiscomposed() const { return !isInPhlegmaticTrance && composure < 25.0f; }
     bool IsComposed() const { return !isInPhlegmaticTrance && composure >= 25.0f && composure < 80.0f; }
     bool HasStoicPoise() const { return isInPhlegmaticTrance || (composure >= 80.0f); }
+
+    // Gray Health Mechanics (Totem of the Phlegmatic Core)
+    float GetGrayHealth() const { return grayHealth; }
+    float GetGrayHealthTimer() const { return grayHealthTimer; }
+    void RecoverGrayHealth(float amount, ParticleSystem& particles);
     bool IsTranceReady() const { return !isInPhlegmaticTrance && composure >= 100.0f; }
 
     // Humoral Alignment & Bleed Status
@@ -346,6 +351,10 @@ private:
     float stoneskinTimer;
     float glacialImmunityTimer;
     float berserkerTimer;
+
+    // Phlegmatic Core Gray Health
+    float grayHealth;
+    float grayHealthTimer;
 
     // Dash & I-Frames state (Q Key)
     float dashCooldown;

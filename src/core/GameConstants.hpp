@@ -16,8 +16,8 @@ namespace GameLimits {
     inline constexpr int ARMOR_SET_COUNT = 8;       // NONE, COMMONERS_SCRAP, CRUSADER_PLATE, VANGUARD_BASTION, SHADOWSTRIDER, FORGED_SCRAP_IRON, BASALT_GOLEM, FROSTWARDEN
 
     // Sacred Totems
-    inline constexpr int TOTEM_COUNT = 6;           // NONE, TOTEM_SANITY, TOTEM_INSANITY, TOTEM_MIST, CRUSADER_TOTEM, ELEMENTAL_CORE_TOTEM
-    inline constexpr int ATTUNABLE_TOTEM_COUNT = 5; // Equippable relics listed in UI (excluding NONE)
+    inline constexpr int TOTEM_COUNT = 7;           // NONE, TOTEM_SANITY, TOTEM_INSANITY, TOTEM_MIST, CRUSADER_TOTEM, ELEMENTAL_CORE_TOTEM, TOTEM_PHLEGMATIC_CORE
+    inline constexpr int ATTUNABLE_TOTEM_COUNT = 6; // Equippable relics listed in UI (excluding NONE)
 
     // World & Exploration Progression
     inline constexpr int CAMPFIRE_COUNT = 6;        // 1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden

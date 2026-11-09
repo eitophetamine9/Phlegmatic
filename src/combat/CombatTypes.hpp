@@ -73,7 +73,8 @@ enum class TotemType {
     TOTEM_INSANITY,        // Sandbox: +30% overall damage, -10% armor
     TOTEM_MIST,            // Sandbox: +20% stamina recovery, +5% cd reduction, -5% damage
     CRUSADER_TOTEM,        // Sandbox: +30% defense, -10% movement speed
-    ELEMENTAL_CORE_TOTEM   // Secret Boss: +Defense, projectile on light attack (5s CD), -speed
+    ELEMENTAL_CORE_TOTEM,  // Secret Boss: +Defense, projectile on light attack (5s CD), -speed
+    TOTEM_PHLEGMATIC_CORE  // Northern Highland: -80% knockback, gray health recovery, chill counter
 };
 
 // The Medieval Four Humors Alignment
