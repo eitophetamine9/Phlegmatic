@@ -48,7 +48,8 @@
 | **Dialogue Page** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
-| **Equipment & Grimoire** | `I Key` or `TAB` | Open Tactical Equipment doll, single Totem slot, Weapons arsenal, and Illuminated Book Lore Journal. |
+| **Quick Weapon Swap** | `TAB Key` | Instantly cycle through all unlocked weapons in your arsenal mid-combat. |
+| **Equipment & Grimoire** | `I Key` | Open Tactical Equipment doll, modular armor loadouts, weapons arsenal, and Illuminated Book Lore Journal. |
 | **Interactive Realm Map** | `M Key` | Open tactical frosted teal map with live player tracking and stage POIs. |
 | **Fullscreen Toggle** | `F11` or `Alt + Enter` | Switch between windowed and native crisp fullscreen display modes. |
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
@@ -58,18 +59,30 @@
 
 ---
 
-## Current Version: 0.0.1f
+## Current Version: 0.0.1j (In-Development)
 
 > [!NOTE]
-> Phlegmatic is currently on **Version 0.0.1f**.
+> Phlegmatic is currently on **Version 0.0.1j (In-Development)**, succeeding Version 0.0.1i.
 >
-> ### Version 0.0.1f Overview
-> * **Royal Combat Arena Wave Milestones & Rewards**: Resource chest payouts on waves 5, 10, and 15, and the legendary **Victor's Crest** quest trophy for completing wave 20.
-> * **Acoustic Audio Immersion & Dynamic Boss Ducking**: Procedural anvil strikes, tavern hearth crackles, and forest wind ambience with dynamic background audio ducking during intense boss encounters.
-> * **HUD Loadout Badges & Weapon Tier Indicators**: Visual armor set indicators ([H] [C] [L]), active set bonus status banners, and weapon upgrade tier badges (+0 BASE, +1 FORGED, +2 MASTERWORK).
-> * **Combat Hyper-Armor & Poise Tuning**: Stagger immunity and 30% damage mitigation during colossal heavy weapon windups, 70% knockback resistance for the Basalt Golem armor set, and standardized line-swept projectile hitboxes.
+> ### Version 0.0.1i Milestone Highlights
+> * **Northern Arsenal & Frostwarden Armor**: Glacial Cleaver colossal great-axe with heavy Frost Tremor shockwaves and the 3-piece Frostwarden set with Glacial Tenacity passive and Glacial Frost Nova active skill.
+> * **Highland Weather & Procedural Audio**: Procedural howling blizzard ambient audio synthesis, snow crunch footsteps, blizzard particle stream, and breakable frost crystal deposits.
+> * **Frostbite Environmental Chill System**: Sub-zero temperature accumulation inflicting Frostbite (-25% speed, -40% stamina regen) with bonfire thawing and Frostwarden cold immunity.
+> * **Outcast Ranger Torvald NPC & Bounties**: Stationed near the Highland Bonfire offering 3 tiered hunting contracts with real-time progression and rewards.
+> * **Quick Weapon Swap & Apex Boss Gauntlet**: Instant weapon cycling mid-combat on `[TAB]` and Knight Lenon's 3-stage Apex Boss Gauntlet rush mode.
 >
-> For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md#release-highlights-version-001f)**.
+> ### Version 0.0.1j Implementation Roadmap
+> 1. **Phase 1**: Visceral Execution & Stagger Deathblow System
+> 2. **Phase 2**: Alchemy Workshop & Quick-Item Belt (Tavern Keeper Brena)
+> 3. **Phase 3**: The 7th Sacred Relic: Totem of the Phlegmatic Core
+> 4. **Phase 4**: Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions
+> 5. **Phase 5**: Tactical Corner Mini-Map Radar & Compass HUD
+> 6. **Phase 6**: Bestiary Mastery Hunting Perks & Codex Seals
+> 7. **Phase 7**: Subterranean Highland Caverns Sub-Zone (The Permafrost Crypts)
+> 8. **Phase 8**: Storage Stash Chest & Persistence Verification
+> 9. **Phase 9**: File Architecture Restructuring & Subsystem Decoupling
+>
+> For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 
 ---
 
@@ -127,7 +140,8 @@ Phlegmatic/
     ├── world/                  # Level geometry, map environments, monoliths, chests
     ├── entities/               # Player, companion minion, enemy AI, modular vector renderers
     ├── rendering/              # Procedural vector silhouettes & asset loader
-    └── states/                 # State coordinators, handlers, and modular HUD/UI
+    ├── ui/                     # Dedicated HUD, modals, titles, and responsive UI components
+    └── states/                 # State coordinators, handlers, and game logic
 ```
 
 ---

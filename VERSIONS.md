@@ -6,6 +6,7 @@
 
 ## Table of Versions
 
+- [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns-in-development)
 - [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
 - [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
@@ -14,6 +15,21 @@
 - [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
 - [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
 - [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)
+
+### In-Development Roadmap
+1. **Visceral Execution & Stagger Deathblow System**: Poise-break vulnerability, execution reticles, melee visceral deathblows with i-frames and weapon-scaled critical burst.
+2. **Alchemy Workshop & Quick-Item Belt**: Tavern Keeper Brena brewing station, combat tonics (Stoneskin, Glacial, Berserker, Swiftfoot), and 1-3 quick belt hotkeys.
+3. **Totem of the Phlegmatic Core**: 7th sacred relic with Phlegmatic Apathy, gray health recovery, and counter-freeze aura.
+4. **Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions**: Day/Dusk/Night ambient transitions, point-light radiuses, and nocturnal elite spawns.
+5. **Tactical Corner Mini-Map Radar & Compass HUD**: Top-right mini-radar with player heading, POIs, NPC markers, and enemy pips.
+6. **Bestiary Mastery Hunting Perks**: Passive combat traits unlocked by Tier 2 and Tier 3 kill seals in the Bestiary Codex.
+7. **Permafrost Crypts Subterranean Caverns**: Highland cave dungeon with icy platforms, breakable stalagmites, Frost Revenant boss, and Lore Fragment XV.
+8. **Storage Stash Chest & Persistence**: Campfire and town stash chest for materials and loadouts with save serialization.
+9. **File Architecture Restructuring & Subsystem Decoupling**: Extracting realm handlers into `src/states/realms/` and item systems into `src/items/`.
 
 ---
 
