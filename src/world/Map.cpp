@@ -1639,3 +1639,8 @@ void GameMap::DrawNorthZyphdenWalls(Vector2 playerPos) const {
     DrawCircleGradient(Vector2{ 1085.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
     DrawCircleGradient(Vector2{ 1315.0f, 1445.0f }, 30.0f, Color{ 100, 200, 255, 90 }, Color{ 0, 0, 0, 0 });
 }
+
+void GameMap::DrawLighting(Camera2D camera, Vector2 playerPos) const {
+    timeOfDay.DrawLighting(camera, playerPos, bounds, torches, IsInterior());
+}
+

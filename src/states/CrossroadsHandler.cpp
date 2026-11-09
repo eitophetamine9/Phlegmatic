@@ -601,27 +601,19 @@ void CrossroadsHandler::Render(
 
 
         map.DrawWallsAndPillars(player.GetPosition());
-
+        map.DrawLighting(camera, player.GetPosition());
     }
 
     EndMode2D();
 
-
-
     // Location Header: "CROSSROADS"
-
     GameUI::DrawCampaignHUD(
-
         screenWidth,
-
         screenHeight,
-
         player,
-
         "CROSSROADS",
-
-        player.GetInventory().HasUnreadFragments()
-
+        player.GetInventory().HasUnreadFragments(),
+        &map.GetTimeOfDay()
     );
 
 

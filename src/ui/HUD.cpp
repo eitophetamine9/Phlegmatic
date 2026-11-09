@@ -1,6 +1,7 @@
 #include "HUD.hpp"
 #include "../combat/Weapon.hpp"
 #include "../entities/Player.hpp"
+#include "../world/TimeOfDay.hpp"
 #include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
@@ -810,7 +811,7 @@ void HUD::DrawCurrencyBadge(int windowWidth, int shingles, int oreScraps) {
     FontManager::DrawText(scrapText, (int)(scrapBadgeX + 34), (int)(badgeY + 8), 12, Color{ 255, 225, 130, 245 }, GameFont::BODY);
 }
 
-void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
+void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
     // Silver Shingles and Ore Scraps currency badges in top right
     DrawCurrencyBadge(windowWidth, player.GetInventory().GetShingles(), player.GetInventory().GetOreScraps());
     // Player HUD Panel (Bottom Left)
@@ -842,8 +843,8 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
     DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
 
-    // Top Location Header Banner (NO wave counter in campaign!)
-    DrawLocationHeader(windowWidth, locationName);
+    // Top Location Header Banner with Time-of-Day Clock Dial
+    DrawLocationHeader(windowWidth, locationName, tod);
 
     // Map button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 380), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });
@@ -1050,8 +1051,8 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, float hp, float maxHp, f
     DrawText("[C] Controls", windowWidth - 128, 25, 12, Color{ 120, 220, 255, 240 });
 }
 
-void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName) {
-    const float bannerW = 340.0f;
+void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName, const TimeOfDaySystem* tod) {
+    const float bannerW = (tod != nullptr) ? 460.0f : 340.0f;
     const float bannerH = 42.0f;
     float bannerX = ((float)windowWidth - bannerW) * 0.5f;
     float bannerY = 16.0f;
@@ -1068,12 +1069,55 @@ void HUD::DrawLocationHeader(int windowWidth, const std::string& locationName) {
     DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 22, bannerY + 8 }, 1.5f, cornerCol);
     DrawLineEx({ bannerX + bannerW - 8, bannerY + 8 }, { bannerX + bannerW - 8, bannerY + 22 }, 1.5f, cornerCol);
 
-    // Map Name centered in Gold
-    int nameW = MeasureText(locationName.c_str(), 16);
-    DrawText(locationName.c_str(), (int)(bannerX + (bannerW - nameW) * 0.5f), (int)bannerY + 13, 16, Color{ 255, 225, 95, 255 });
+    if (tod != nullptr) {
+        // Location text on the left
+        DrawText(locationName.c_str(), (int)bannerX + 22, (int)bannerY + 13, 14, Color{ 255, 225, 95, 255 });
+
+        // Celestial Clock Badge on right
+        float dialW = 126.0f;
+        float dialH = bannerH - 12.0f;
+        float dialX = bannerX + bannerW - dialW - 10.0f;
+        float dialY = bannerY + 6.0f;
+
+        bool isNight = tod->IsNight();
+        Color dialBorder = isNight ? Color{ 100, 160, 240, 200 } : Color{ 210, 175, 70, 200 };
+        DrawRectangleRounded(Rectangle{ dialX, dialY, dialW, dialH }, 0.35f, 4, Color{ 10, 14, 22, 230 });
+        DrawRectangleRoundedLines(Rectangle{ dialX, dialY, dialW, dialH }, 0.35f, 4, dialBorder);
+
+        // Celestial Orb Icon
+        float cx = dialX + 16.0f;
+        float cy = dialY + dialH * 0.5f;
+        if (tod->GetPhase() == TimePhase::DAY || tod->GetPhase() == TimePhase::DAWN) {
+            // Radiant Golden Sun
+            DrawCircle((int)cx, (int)cy, 5.0f, Color{ 255, 215, 70, 255 });
+            DrawLineEx({ cx - 8.0f, cy }, { cx + 8.0f, cy }, 1.0f, Color{ 255, 235, 120, 220 });
+            DrawLineEx({ cx, cy - 8.0f }, { cx, cy + 8.0f }, 1.0f, Color{ 255, 235, 120, 220 });
+        } else {
+            // Silver Crescent Moon
+            DrawCircle((int)cx, (int)cy, 5.5f, Color{ 200, 225, 255, 255 });
+            DrawCircle((int)cx + 2, (int)cy - 1, 4.5f, Color{ 10, 14, 22, 255 });
+            DrawCircle((int)cx + 6, (int)cy - 4, 1.0f, Color{ 230, 245, 255, 255 });
+        }
+
+        // Formatted Time
+        std::string timeStr = tod->GetFormattedTime();
+        DrawText(timeStr.c_str(), (int)dialX + 30, (int)dialY + 8, 12, Color{ 240, 245, 255, 255 });
+
+        // Phase Tag
+        const char* phaseName = tod->GetPhaseName();
+        Color phaseCol = isNight ? Color{ 130, 200, 255, 255 } :
+                         (tod->GetPhase() == TimePhase::DUSK ? Color{ 235, 140, 180, 255 } :
+                         (tod->GetPhase() == TimePhase::DAWN ? Color{ 255, 190, 110, 255 } : Color{ 255, 225, 110, 255 }));
+        int pw = MeasureText(phaseName, 9);
+        DrawText(phaseName, (int)(dialX + dialW - pw - 8), (int)dialY + 10, 9, phaseCol);
+    } else {
+        // Map Name centered in Gold
+        int nameW = MeasureText(locationName.c_str(), 16);
+        DrawText(locationName.c_str(), (int)(bannerX + (bannerW - nameW) * 0.5f), (int)bannerY + 13, 16, Color{ 255, 225, 95, 255 });
+    }
 }
 
-void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
+void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
     const float hudX = 24.0f;
     const float hudY = (float)windowHeight - 110.0f;
     const float hudWidth = 310.0f;
@@ -1130,7 +1174,7 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float max
     DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 22, 14, Color{ 255, 255, 255, 255 });
 
     // Top Location Header Banner (NO wave counter in campaign!)
-    DrawLocationHeader(windowWidth, locationName);
+    DrawLocationHeader(windowWidth, locationName, tod);
 
     // Journal & Lore button in top right
     DrawRectangleRounded(Rectangle{ (float)(windowWidth - 275), 16.0f, 120.0f, 32.0f }, 0.3f, 4, Color{ 25, 35, 52, 220 });

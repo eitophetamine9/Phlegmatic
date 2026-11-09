@@ -128,4 +128,9 @@ private:
     RealmTransition screenTransition;
     void UpdateScreenTransition(float dt);
     void RenderScreenTransition();
+
+    // Dynamic Time-of-Day & Nightfall Incursions
+    float nightfallSpawnTimer = 0.0f;
+    bool nightfallAlertTriggered = false;
+    void UpdateNightfallIncursions(float dt);
 };

@@ -184,6 +184,19 @@ void LootDrop::SpawnFromEnemy(const Enemy& enemy, std::vector<LootDrop>& outDrop
     Vector2 pos = enemy.GetPosition();
     EnemyType type = enemy.GetType();
 
+    if (enemy.IsNightfallElite()) {
+        int shingleCount = 12 + (rand() % 9);
+        outDrops.emplace_back(LootType::SHINGLES, pos, shingleCount);
+        outDrops.emplace_back(LootType::ORE_SCRAP, Vector2{ pos.x + 14.0f, pos.y }, 2);
+        if ((rand() % 100) < 45) {
+            outDrops.emplace_back(LootType::MIST_ESSENCE, Vector2{ pos.x - 14.0f, pos.y }, 1);
+        }
+        if ((rand() % 100) < 30) {
+            outDrops.emplace_back(LootType::ELIXIR_FLASK, Vector2{ pos.x, pos.y - 14.0f }, 1);
+        }
+        return;
+    }
+
     if (type == EnemyType::ELEMENTAL_GOLEM) {
         // Secret Boss Elemental Golem: 8-12 Ore Scraps + 80-120 Shingles + 2 Elixirs
         int scrapCount = 8 + (rand() % 5);

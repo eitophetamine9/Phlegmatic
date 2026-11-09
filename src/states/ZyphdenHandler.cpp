@@ -2359,10 +2359,9 @@ void ZyphdenHandler::Render(
 
     particles.Draw();
     campfire.Draw((float)GetTime(), player);
+    map.DrawLighting(camera, player.GetPosition());
 
     EndMode2D();
-
-
 
     Vector2 mousePos = GetMousePosition();
 
@@ -2370,13 +2369,11 @@ void ZyphdenHandler::Render(
 
     DrawCircle((int)mousePos.x, (int)mousePos.y, 2.0f, Color{ 0, 229, 255, 240 });
 
-
-
     bool hasUnread = player.GetInventory().HasUnreadFragments();
 
     const char* locationTitle = inRoyalKeep ? "ZYPHDEN ROYAL KEEP" : (inTavern ? "HEARTHSIDE TAVERN" : "ZYPHDEN");
 
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, locationTitle, hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, locationTitle, hasUnread, &map.GetTimeOfDay());
 
 
 

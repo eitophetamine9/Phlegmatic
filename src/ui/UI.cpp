@@ -27,8 +27,8 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, const Player& play
     HUD::DrawCombat(windowWidth, windowHeight, player, currentWave, totalWaves, hasUnreadLore);
 }
 
-void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore) {
-    HUD::DrawCampaignHUD(windowWidth, windowHeight, player, locationName, hasUnreadLore);
+void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& player, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
+    HUD::DrawCampaignHUD(windowWidth, windowHeight, player, locationName, hasUnreadLore, tod);
 }
 
 void GameUI::DrawLobbyHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
@@ -39,8 +39,8 @@ void GameUI::DrawCombatHUD(int windowWidth, int windowHeight, float hp, float ma
     HUD::DrawCombat(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, currentWave, totalWaves, hasUnreadLore);
 }
 
-void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore) {
-    HUD::DrawCampaignHUD(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, locationName, hasUnreadLore);
+void GameUI::DrawCampaignHUD(int windowWidth, int windowHeight, float hp, float maxHp, float stamina, float maxStamina, WeaponType weapon, float dashCooldown, float parryCooldown, float heavyCooldown, bool isParrying, bool hasCounterBuff, const std::string& locationName, bool hasUnreadLore, const TimeOfDaySystem* tod) {
+    HUD::DrawCampaignHUD(windowWidth, windowHeight, hp, maxHp, stamina, maxStamina, weapon, dashCooldown, parryCooldown, heavyCooldown, isParrying, hasCounterBuff, locationName, hasUnreadLore, tod);
 }
 
 void GameUI::DrawBossHealthBar(int windowWidth, const std::string& bossName, float hp, float maxHp) {

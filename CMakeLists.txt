@@ -9,6 +9,7 @@ set(SOURCES
     src/core/SoundFX.cpp
     src/core/Particles.cpp
     src/core/SaveManager.cpp
+    src/world/TimeOfDay.cpp
     src/world/Map.cpp
     src/world/WaveManager.cpp
     src/rendering/AssetManager.cpp
@@ -32,6 +33,7 @@ set(SOURCES
     src/states/ZyphdenHandler.cpp
     src/states/QuarryHandler.cpp
     src/states/RestlessMistForestHandler.cpp
+    src/states/NorthZyphdenHandler.cpp
     src/states/Game.cpp
 )
 

@@ -103,6 +103,9 @@ public:
     void SetLeashed(bool leashed) { isLeashed = leashed; }
     bool IsLeashed() const { return isLeashed; }
 
+    bool IsNightfallElite() const { return isNightfallElite; }
+    void SetNightfallElite(bool elite);
+
     friend class EnemyRenderer;
 
 private:
@@ -110,6 +113,7 @@ private:
     HumorType humor;
     EnemyState state;
     bool isPerformingMeleeSmite;
+    bool isNightfallElite = false;
     float quenchedTimer;
     float shatteredTimer;
 

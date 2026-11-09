@@ -156,6 +156,12 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 74, 32, 36, 255 }; // Crimson enraged berserker hide
     }
 
+    if (enemy.isNightfallElite) {
+        float nPulse = (sinf((float)GetTime() * 4.5f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius * 2.2f, Color{ 120, 35, 210, (unsigned char)(65 + 35 * nPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 6.0f + 2.0f * nPulse, Color{ 180, 80, 255, 210 });
+    }
+
     // Humoral Alignment Visual Auras
     float timeVal = (float)GetTime() * 4.0f;
     if (enemy.humor == HumorType::CHOLERIC) {
@@ -572,7 +578,9 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawRectangleLines((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 40, 45, 60, 200 });
 
         // Overhead Humor / Status tag
-        if (enemy.IsQuenched()) {
+        if (enemy.IsNightfallElite()) {
+            DrawText("NIGHTFALL ELITE", (int)(enemy.position.x - 36.0f), (int)(barY - 9.0f), 8, Color{ 205, 130, 255, 240 });
+        } else if (enemy.IsQuenched()) {
             DrawText("QUENCHED", (int)(enemy.position.x - 22.0f), (int)(barY - 9.0f), 8, Color{ 140, 230, 255, 230 });
         } else if (enemy.IsShattered()) {
             DrawText("SHATTERED", (int)(enemy.position.x - 24.0f), (int)(barY - 9.0f), 8, Color{ 210, 140, 255, 230 });

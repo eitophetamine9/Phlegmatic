@@ -1,6 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "../rendering/FontManager.hpp"
+#include "TimeOfDay.hpp"
 #include <vector>
 
 enum class MapEnvironment {
@@ -43,6 +44,17 @@ public:
     void SetGateOpen(bool open) { gateOpen = open; }
     bool IsGateOpen() const { return gateOpen; }
 
+    void Update(float dt) { timeOfDay.Update(dt); }
+    void DrawLighting(Camera2D camera, Vector2 playerPos) const;
+    TimeOfDaySystem& GetTimeOfDay() { return timeOfDay; }
+    const TimeOfDaySystem& GetTimeOfDay() const { return timeOfDay; }
+    const std::vector<Vector2>& GetTorches() const { return torches; }
+    bool IsInterior() const {
+        return currentEnv == MapEnvironment::TAVERN_INTERIOR ||
+               currentEnv == MapEnvironment::FORGE_INTERIOR ||
+               currentEnv == MapEnvironment::ROYAL_KEEP;
+    }
+
 private:
     MapEnvironment currentEnv;
     Rectangle bounds;
@@ -50,6 +62,7 @@ private:
     std::vector<Vector2> torches;
     std::vector<WallObstacle> obstacles;
     bool gateOpen = false;
+    mutable TimeOfDaySystem timeOfDay;
 
     void DrawRuinedCastleFloor() const;
     void DrawRuinedCastleWalls(Vector2 playerPos) const;

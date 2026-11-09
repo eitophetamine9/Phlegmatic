@@ -830,6 +830,8 @@ void NorthZyphdenHandler::Render(
         DrawLineEx(flake.position, p2, flake.size * 0.75f, Color{ 230, 245, 255, (unsigned char)(flake.alpha * 240) });
     }
 
+    map.DrawLighting(camera, player.GetPosition());
+
     EndMode2D();
 
     // Frostbite Screen Edge Vignette
@@ -853,7 +855,7 @@ void NorthZyphdenHandler::Render(
 
     // Campaign HUD
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "NORTHERN CRAGS OF ZYPHDEN", hasUnread, &map.GetTimeOfDay());
 
     // Boss Health Bar for Berserker Troll
     for (const auto& enemy : enemies) {

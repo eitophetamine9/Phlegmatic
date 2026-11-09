@@ -473,6 +473,8 @@ void RuinedCastleHandler::Render(
         }
     }
 
+    map.DrawLighting(camera, player.GetPosition());
+
     EndMode2D();
 
     Vector2 mousePos = GetMousePosition();
@@ -483,7 +485,7 @@ void RuinedCastleHandler::Render(
     tutorial.DrawHUD(screenWidth, screenHeight);
 
     bool hasUnread = player.GetInventory().HasUnreadFragments();
-    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RUINED CASTLE", hasUnread);
+    GameUI::DrawCampaignHUD(screenWidth, screenHeight, player, "RUINED CASTLE", hasUnread, &map.GetTimeOfDay());
 
     // Zil Boss Health Bar
     for (const auto& enemy : enemies) {

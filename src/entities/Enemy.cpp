@@ -320,25 +320,39 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
     health = maxHealth;
 }
 
-std::string Enemy::GetName() const {
-    switch (type) {
-        case EnemyType::SLASHER: return "CULTIST SLASHER";
-        case EnemyType::BRUTE: return "IRON BRUTE";
-        case EnemyType::CHARGER: return "SHADOW CHARGER";
-        case EnemyType::ARCHER: return "DEATHSEEKER ARCHER";
-        case EnemyType::PYROMANCER: return "VOID PYROMANCER";
-        case EnemyType::INQUISITOR_BOSS: return "THE GRAND INQUISITOR";
-        case EnemyType::ZIL_BOSS: return "ZIL'S FRAGMENT";
-        case EnemyType::KNIGHT_LENON_BOSS: return "KNIGHT LENON - VANGUARD CAPTAIN";
-        case EnemyType::ORE_GOLEM: return "ORE GOLEM";
-        case EnemyType::ELEMENTAL_GOLEM: return "ELEMENTAL GOLEM (PRIMORDIAL TITAN)";
-        case EnemyType::MINI_ELEMENTAL_GOLEM: return "MINI ELEMENTAL GOLEM";
-        case EnemyType::GALE_BANDIT: return "GALE BANDIT";
-        case EnemyType::GALE_ARCHER_BOSS: return "GALE ARCHER (MIST WARDEN)";
-        case EnemyType::FROST_TROLL: return "FROST TROLL";
-        case EnemyType::BERSERKER_TROLL: return "BERSERKER TROLL (CRAG WARLORD)";
+void Enemy::SetNightfallElite(bool elite) {
+    isNightfallElite = elite;
+    if (elite) {
+        maxHealth *= 1.45f;
+        health = maxHealth;
+        moveSpeed *= 1.20f;
+        defense += 15.0f;
     }
-    return "UNKNOWN";
+}
+
+std::string Enemy::GetName() const {
+    std::string baseName = "UNKNOWN";
+    switch (type) {
+        case EnemyType::SLASHER: baseName = "CULTIST SLASHER"; break;
+        case EnemyType::BRUTE: baseName = "IRON BRUTE"; break;
+        case EnemyType::CHARGER: baseName = "SHADOW CHARGER"; break;
+        case EnemyType::ARCHER: baseName = "DEATHSEEKER ARCHER"; break;
+        case EnemyType::PYROMANCER: baseName = "VOID PYROMANCER"; break;
+        case EnemyType::INQUISITOR_BOSS: baseName = "THE GRAND INQUISITOR"; break;
+        case EnemyType::ZIL_BOSS: baseName = "ZIL'S FRAGMENT"; break;
+        case EnemyType::KNIGHT_LENON_BOSS: baseName = "KNIGHT LENON - VANGUARD CAPTAIN"; break;
+        case EnemyType::ORE_GOLEM: baseName = "ORE GOLEM"; break;
+        case EnemyType::ELEMENTAL_GOLEM: baseName = "ELEMENTAL GOLEM (PRIMORDIAL TITAN)"; break;
+        case EnemyType::MINI_ELEMENTAL_GOLEM: baseName = "MINI ELEMENTAL GOLEM"; break;
+        case EnemyType::GALE_BANDIT: baseName = "GALE BANDIT"; break;
+        case EnemyType::GALE_ARCHER_BOSS: baseName = "GALE ARCHER (MIST WARDEN)"; break;
+        case EnemyType::FROST_TROLL: baseName = "FROST TROLL"; break;
+        case EnemyType::BERSERKER_TROLL: baseName = "BERSERKER TROLL (CRAG WARLORD)"; break;
+    }
+    if (isNightfallElite) {
+        return "NIGHTFALL " + baseName;
+    }
+    return baseName;
 }
 
 std::string Enemy::GetHumorName() const {

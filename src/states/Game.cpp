@@ -633,11 +633,48 @@ void Game::RenderScreenTransition() {
     }
 }
 
+void Game::UpdateNightfallIncursions(float dt) {
+    if (currentState == GameState::TITLE_SCREEN || currentState == GameState::PROLOGUE_CUTSCENE) return;
 
+    bool isNight = map.GetTimeOfDay().IsNight();
+    if (isNight && !nightfallAlertTriggered) {
+        nightfallAlertTriggered = true;
+        SoundFX::PlayHitImpact();
+        particles.AddScreenShake(6.0f, 0.4f);
+        particles.SpawnFloatingText(player.GetPosition(), "NIGHTFALL DESCENDS - VOID PROWLERS EMERGE!", Color{ 190, 110, 255, 255 }, 26.0f);
+    } else if (!isNight) {
+        nightfallAlertTriggered = false;
+    }
 
+    bool canSpawnIncursion = (currentState == GameState::CROSSROADS ||
+                              currentState == GameState::NORTH_ZYPHDEN ||
+                              currentState == GameState::RESTLESS_MIST_FOREST ||
+                              currentState == GameState::RUINED_CASTLE ||
+                              currentState == GameState::QUARRY_DEPTHS);
 
+    if (isNight && canSpawnIncursion) {
+        nightfallSpawnTimer += dt;
+        if (nightfallSpawnTimer >= 22.0f) {
+            nightfallSpawnTimer = 0.0f;
+            if (enemies.size() < 12) {
+                float angle = ((float)rand() / (float)RAND_MAX) * 6.28318f;
+                float dist = 360.0f + ((float)rand() / (float)RAND_MAX) * 120.0f;
+                Vector2 spawnPos = { player.GetPosition().x + cosf(angle) * dist, player.GetPosition().y + sinf(angle) * dist };
+                spawnPos = map.ResolveCollision(spawnPos, spawnPos, 20.0f);
 
+                EnemyType eType = (rand() % 2 == 0) ? EnemyType::SLASHER : EnemyType::BRUTE;
+                Enemy elite(eType, spawnPos);
+                elite.SetNightfallElite(true);
+                enemies.push_back(elite);
 
+                particles.SpawnSparks(spawnPos, Color{ 160, 60, 255, 255 }, 30, 140.0f);
+                particles.SpawnFloatingText(spawnPos, "NIGHTFALL VOID STALKER SPAWNED!", Color{ 200, 120, 255, 255 }, 22.0f);
+            }
+        }
+    } else {
+        nightfallSpawnTimer = 0.0f;
+    }
+}
 
 void Game::EnterCrossroads() {
 
@@ -1454,12 +1491,9 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 void Game::Update(float dt) {
-
-
-
     particles.Update(dt);
-
-
+    map.Update(dt);
+    UpdateNightfallIncursions(dt);
 
     camera.offset = { (float)GetScreenWidth() * 0.5f, (float)GetScreenHeight() * 0.5f };
 
