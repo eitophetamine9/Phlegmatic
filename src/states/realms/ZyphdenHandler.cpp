@@ -3080,11 +3080,11 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     "Sun-Forged Claymore",
                     "HEAVY GREATSWORD",
                     2, 75, 150,
-                    "+6 Damage (36 Light / 124 Heavy)",
-                    "+12 Damage (42 Light / 145 Heavy), +25% Poise / Defense Pierce",
+                    "+6 Damage (36 Light / 139 Heavy)",
+                    "+12 Damage (42 Light / 162 Heavy), +25% Poise / Defense Pierce",
                     Color{ 255, 175, 40, 255 },
                     16, 65,
-                    "Colossal two-handed broadsword. Hyper-armor cleaves shatter defenses.",
+                    "Colossal solar broadsword. 2-stage Solar Cataclysm ignites foes & slams down.",
                     0, 0
                 },
                 {
@@ -3092,23 +3092,23 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     "Storm Glaive",
                     "MIST-FORGED POLEARM",
                     2, 70, 140,
-                    "+5 Damage (25 Light / 86 Heavy)",
-                    "+11 Damage (31 Light / 102 Heavy), +35% Defense Pierce, +25% Crit",
+                    "+5 Damage (25 Light / 120 Heavy)",
+                    "+11 Damage (31 Light / 142 Heavy), +35% Defense Pierce, +25% Crit",
                     Color{ 100, 245, 230, 255 },
                     10, 50,
-                    "Aerodynamic wind polearm. Piercing line thrusts and tempest vortex.",
+                    "Wind polearm. Zephyr Surge i-frame dash into Tempest Cyclone & Crescent Wave.",
                     3, 1
                 },
                 {
                     WeaponType::GLACIAL_CLEAVER,
-                    "Glacial Spiked Cleaver",
-                    "HIGHLAND TROLL CLEAVER",
+                    "Twin Glacial Cleavers",
+                    "DUAL FROST CLEAVERS",
                     2, 85, 160,
-                    "+6 Damage (36 Light / 112 Heavy)",
-                    "+14 Damage (44 Light / 132 Heavy), +30% Defense Pierce, +65% Poise",
+                    "+5 Light / +8 Finisher (25 Light / 54 Finisher)",
+                    "+11 Light / +18 Finisher (31 Light / 64 Finisher), +30% Pierce, +45% Poise",
                     Color{ 140, 220, 255, 255 },
                     18, 75,
-                    "Forged from Berserker Troll horn and volcanic slag. Overhead cleaves erupt frost tremors.",
+                    "Dual Troll-horn cleavers. High-speed flurry & 4-stage Fury of Cleaves rupture.",
                     2, 3
                 }
             };

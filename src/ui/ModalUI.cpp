@@ -2007,7 +2007,11 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             } else if (weps[s_inspectedWep].type == WeaponType::ZEPHYR_DAGGERS) {
                 DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 225, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::SUN_CLAYMORE) {
-                DrawText("[Archetype]: Devastating heavy cleaves with unbreakable hyper-armor posture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 160, 60, 240 });
+                DrawText("[Archetype]: 2-stage Solar Cataclysm heavy ignites foes then detonates a scorching pillar.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 170, 60, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::STORM_GLAIVE) {
+                DrawText("[Archetype]: 2-stage Tempest Cyclone grants i-frame surge, +15 Poise & Crescent Gale Wave.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 230, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::GLACIAL_CLEAVER) {
+                DrawText("[Archetype]: Dual-wielding frost barrage with 4-stage Fury of Cleaves heavy rupture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 140, 225, 255, 240 });
             } else {
                 DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 160, 185, 215, 220 });
             }

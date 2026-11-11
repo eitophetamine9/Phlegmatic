@@ -213,15 +213,28 @@ void Projectile::Draw() const {
         }
 
         case ProjectileType::GALE_ARROW: {
-            Vector2 tip = { position.x + dir.x * (radius * 3.0f), position.y + dir.y * (radius * 3.0f) };
-            Vector2 tail = { position.x - dir.x * (radius * 2.8f), position.y - dir.y * (radius * 2.8f) };
-            Vector2 featherL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.3f), position.y - dir.y * 2.0f - normal.y * (radius * 1.3f) };
-            Vector2 featherR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.3f), position.y - dir.y * 2.0f + normal.y * (radius * 1.3f) };
+            if (radius >= 16.0f) {
+                float faceDeg = atan2f(velocity.y, velocity.x) * RAD2DEG;
+                DrawCircleGradient(position, radius * 2.4f, Color{ 90, 245, 230, 85 }, Color{ 0, 0, 0, 0 });
+                DrawRing(position, radius * 0.9f, radius * 1.45f, faceDeg - 68.0f, faceDeg + 68.0f, 14, Color{ 100, 245, 230, 210 });
+                DrawRing(position, radius * 1.25f, radius * 1.65f, faceDeg - 54.0f, faceDeg + 54.0f, 14, Color{ 210, 255, 250, 240 });
+                Vector2 arcLead = { position.x + dir.x * (radius * 1.35f), position.y + dir.y * (radius * 1.35f) };
+                Vector2 wingL = { position.x - dir.x * (radius * 0.4f) - normal.x * (radius * 1.75f), position.y - dir.y * (radius * 0.4f) - normal.y * (radius * 1.75f) };
+                Vector2 wingR = { position.x - dir.x * (radius * 0.4f) + normal.x * (radius * 1.75f), position.y - dir.y * (radius * 0.4f) + normal.y * (radius * 1.75f) };
+                DrawLineEx(wingL, arcLead, 4.0f, Color{ 140, 255, 245, 245 });
+                DrawLineEx(arcLead, wingR, 4.0f, Color{ 140, 255, 245, 245 });
+                DrawCircleV(arcLead, 4.5f, WHITE);
+            } else {
+                Vector2 tip = { position.x + dir.x * (radius * 3.0f), position.y + dir.y * (radius * 3.0f) };
+                Vector2 tail = { position.x - dir.x * (radius * 2.8f), position.y - dir.y * (radius * 2.8f) };
+                Vector2 featherL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.3f), position.y - dir.y * 2.0f - normal.y * (radius * 1.3f) };
+                Vector2 featherR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.3f), position.y - dir.y * 2.0f + normal.y * (radius * 1.3f) };
 
-            DrawCircleGradient(position, radius * 2.0f, Color{ 80, 240, 210, 90 }, Color{ 0, 0, 0, 0 });
-            DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
-            DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
-            DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+                DrawCircleGradient(position, radius * 2.0f, Color{ 80, 240, 210, 90 }, Color{ 0, 0, 0, 0 });
+                DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
+                DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
+                DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+            }
             break;
         }
 

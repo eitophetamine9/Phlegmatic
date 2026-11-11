@@ -71,6 +71,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
         bool hitAny = false;
+        bool stormGlaiveComposureAwarded = false;
 
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive()) continue;
@@ -163,6 +164,37 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                             // Stage 2: Sacred Judgment Pillar 100% defense pierce
                             particles.SpawnFloatingText(enemy.GetPosition(), "JUDGMENT! (100% PIERCE)", Color{ 255, 255, 180, 255 }, 24.0f);
                             particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 140, 255 }, 25, 220.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::SUN_CLAYMORE) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Sunfire Crescent applies Solar Burn
+                            enemy.ApplySolarBurn(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR BURN! (4s)", Color{ 255, 195, 50, 255 }, 18.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 170, 40, 255 }, 16, 150.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Solar Cataclysm Slam deals +30% bonus against burning foes
+                            if (enemy.HasSolarBurn()) {
+                                attackDamage *= 1.30f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR CATACLYSM! +30%", Color{ 255, 235, 90, 255 }, 22.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 220, 70, 255 }, 24, 200.0f);
+                            }
+                        }
+                    } else if (attack.weapon == WeaponType::STORM_GLAIVE) {
+                        if (player.GetHeavyStage() == 2 && !stormGlaiveComposureAwarded) {
+                            stormGlaiveComposureAwarded = true;
+                            player.ModifyComposure(15.0f);
+                            particles.SpawnFloatingText(player.GetPosition(), "+15 COMPOSURE", Color{ 120, 245, 235, 255 }, 18.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::GLACIAL_CLEAVER) {
+                        if (player.GetHeavyStage() <= 3) {
+                            enemy.ApplyChill(2.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 150, 230, 255, 255 }, 12, 130.0f);
+                        } else {
+                            float chillDur = player.HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 4.0f : 3.5f;
+                            enemy.ApplyChill(chillDur);
+                            enemy.ApplyArmorFracture(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "GLACIAL RUPTURE!", Color{ 160, 235, 255, 255 }, 22.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 180, 245, 255, 255 }, 26, 210.0f);
                         }
                     }
                 }
@@ -398,14 +430,19 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
                             handleEnemyDefeated(enemy);
                         }
-                        particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
-                        particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
-                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 12.0f) {
+                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 16.0f) {
+                            particles.SpawnSparks(proj.GetPosition(), Color{ 110, 255, 240, 255 }, 20, 180.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "CRESCENT GALE! -" + std::to_string((int)proj.GetDamage()), Color{ 110, 255, 240, 255 }, 22.0f);
+                        } else {
+                            particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
+                        }
+                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 12.0f && proj.GetRadius() < 16.0f) {
                             enemy.ApplyArmorFracture(4.0f);
                             enemy.ApplyStagger(1.2f);
                             particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR SHATTERED! STUNNED!", Color{ 100, 255, 230, 255 }, 22.0f);
                             particles.AddScreenShake(4.5f, 0.15f);
-                        } else if (proj.GetType() == ProjectileType::GALE_ARROW) {
+                        } else if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() < 12.0f) {
                             // Light attack windburst AoE (30% of weapon damage to nearby enemies)
                             float burstRadius = 55.0f;
                             float burstDamage = proj.GetDamage() * 0.30f;

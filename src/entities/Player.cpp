@@ -1496,31 +1496,23 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
             } else if (currentWeapon == WeaponType::SUN_CLAYMORE) {
 
-                currentAttack.range = stats.heavyRange;
-                currentAttack.arcAngle = stats.heavyArc;
-                float baseDmg = stats.heavyDamage;
+                // Sun-Forged Claymore Heavy Stage 1: Sunfire Crescent (180 deg sweep, inflicts 4s Solar Burn)
+                float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                currentAttack.range = 165.0f;
+                currentAttack.arcAngle = 180.0f;
+                float baseDmg = (stats.upgradeLevel >= 2) ? 76.0f : ((stats.upgradeLevel >= 1) ? 65.0f : 55.0f);
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
-                currentAttack.knockback = 420.0f * stats.poiseMultiplier;
+                currentAttack.knockback = 360.0f * stats.poiseMultiplier * poiseSetMult;
                 currentAttack.defensePierce = stats.defensePierceBonus;
-                currentAttack.duration = stats.heavyDuration;
-                currentAttack.timer = stats.heavyDuration;
-                currentAttack.hasShockwave = true;
-                currentAttack.shockwavePos = { position.x + forwardDir.x * 60.0f, position.y + forwardDir.y * 60.0f };
-                currentAttack.shockwaveRadius = 120.0f;
+                currentAttack.duration = 0.22f;
+                currentAttack.timer = 0.22f;
 
                 SoundFX::PlayHeavyAttack();
-                SoundFX::PlayCrusaderClash();
-                particles.AddScreenShake(8.0f, 0.25f);
+                particles.AddScreenShake(6.5f, 0.20f);
                 particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 175, 40, 255 });
-                particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 32, 220.0f);
-                if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
-                    currentAttack.hasShockwave = true;
-                    currentAttack.shockwaveRadius = 150.0f;
-                    currentAttack.damage += 30.0f;
-                    particles.SpawnFloatingText(position, "EARTH RUPTURE +30", Color{ 255, 180, 60, 255 }, 22.0f);
-                }
-                velocity.x += forwardDir.x * 120.0f;
-                velocity.y += forwardDir.y * 120.0f;
+                particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 28, 200.0f);
+                velocity.x += forwardDir.x * 140.0f;
+                velocity.y += forwardDir.y * 140.0f;
 
             } else if (currentWeapon == WeaponType::WINDRUNNER_RECURVE) {
                 Vector2 spawnPos = { position.x + forwardDir.x * (radius + 18.0f), position.y + forwardDir.y * (radius + 18.0f) };
@@ -1541,48 +1533,48 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 particles.SpawnSparks(spawnPos, Color{ 120, 255, 230, 255 }, 24, 180.0f);
             } else if (currentWeapon == WeaponType::STORM_GLAIVE) {
 
-                currentAttack.range = stats.heavyRange;
-                currentAttack.arcAngle = stats.heavyArc;
-                float baseDmg = stats.heavyDamage;
+                // Storm Glaive Heavy Stage 1: Zephyr Surge Step (0.18s i-frames, 190px piercing gale corridor)
+                float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                iFrameTimer = 0.18f;
+                currentAttack.isLineBox = true;
+                currentAttack.isFrontalCircle = false;
+                currentAttack.range = 190.0f;
+                currentAttack.width = 52.0f;
+                currentAttack.arcAngle = 0.0f;
+                float baseDmg = (stats.upgradeLevel >= 2) ? 68.0f : ((stats.upgradeLevel >= 1) ? 58.0f : 48.0f);
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
-                currentAttack.knockback = 300.0f * stats.poiseMultiplier;
+                currentAttack.knockback = 280.0f * stats.poiseMultiplier * poiseSetMult;
                 currentAttack.defensePierce = stats.defensePierceBonus;
-                currentAttack.duration = stats.heavyDuration;
-                currentAttack.timer = stats.heavyDuration;
+                currentAttack.duration = 0.18f;
+                currentAttack.timer = 0.18f;
 
+                SoundFX::PlayDash();
                 SoundFX::PlayHeavyAttack();
                 particles.AddScreenShake(5.0f, 0.16f);
                 particles.SpawnSlashTrail(position, forwardDir, Color{ 100, 245, 230, 255 });
-                particles.SpawnSparks(position, Color{ 140, 255, 240, 255 }, 24, 180.0f);
-                velocity.x += forwardDir.x * 240.0f;
-                velocity.y += forwardDir.y * 240.0f;
+                particles.SpawnSparks(position, Color{ 140, 255, 240, 255 }, 22, 180.0f);
+                velocity.x = forwardDir.x * 360.0f;
+                velocity.y = forwardDir.y * 360.0f;
 
             } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
 
-                currentAttack.range = stats.heavyRange;
-                currentAttack.arcAngle = stats.heavyArc;
-                float baseDmg = stats.heavyDamage;
+                // Twin Glacial Cleavers Heavy Stage 1: Fury of Cleaves (fast advancing frost barrage)
+                float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                currentAttack.range = 140.0f;
+                currentAttack.arcAngle = 165.0f;
+                float baseDmg = (stats.upgradeLevel >= 2) ? 34.0f : ((stats.upgradeLevel >= 1) ? 28.0f : 24.0f);
                 currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
-                currentAttack.knockback = 480.0f * stats.poiseMultiplier;
+                currentAttack.knockback = 210.0f * stats.poiseMultiplier * poiseSetMult;
                 currentAttack.defensePierce = stats.defensePierceBonus;
-                currentAttack.duration = stats.heavyDuration;
-                currentAttack.timer = stats.heavyDuration;
-                currentAttack.hasShockwave = true;
-                currentAttack.shockwavePos = { position.x + forwardDir.x * 65.0f, position.y + forwardDir.y * 65.0f };
-                currentAttack.shockwaveRadius = 135.0f;
+                currentAttack.duration = 0.11f;
+                currentAttack.timer = 0.11f;
 
-                SoundFX::PlayHeavyAttack();
-                SoundFX::PlayCrusaderClash();
-                particles.AddScreenShake(8.5f, 0.25f);
-                particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
-                particles.SpawnSparks(position, Color{ 180, 240, 255, 255 }, 32, 220.0f);
-                if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
-                    currentAttack.shockwaveRadius = 165.0f;
-                    currentAttack.damage += 35.0f;
-                    particles.SpawnFloatingText(position, "FROST TREMOR +35", Color{ 140, 230, 255, 255 }, 22.0f);
-                }
-                velocity.x += forwardDir.x * 140.0f;
-                velocity.y += forwardDir.y * 140.0f;
+                SoundFX::PlayLightAttack();
+                particles.AddScreenShake(3.5f, 0.12f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 225, 255, 255 });
+                particles.SpawnSparks(position, Color{ 180, 242, 255, 255 }, 14, 150.0f);
+                velocity.x += forwardDir.x * 135.0f;
+                velocity.y += forwardDir.y * 135.0f;
 
             } else {
 
@@ -1724,6 +1716,102 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                     SoundFX::PlayTranceActivate();
                     particles.AddScreenShake(8.0f, 0.26f);
                     particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 240, 100, 255 }, 35, 220.0f);
+                } else if (currentWeapon == WeaponType::SUN_CLAYMORE) {
+                    // Sun-Forged Claymore Heavy Stage 2: Solar Cataclysm Slam (Frontal pillar circle +25% Pierce)
+                    heavyStage = 2;
+                    float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isFrontalCircle = true;
+                    currentAttack.circleRadius = 115.0f;
+                    currentAttack.circleCenter = { position.x + forwardDir.x * 85.0f, position.y + forwardDir.y * 85.0f };
+                    currentAttack.range = 200.0f;
+                    currentAttack.arcAngle = 0.0f;
+                    currentAttack.isLineBox = false;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 86.0f : ((stats.upgradeLevel >= 1) ? 74.0f : 62.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                    currentAttack.knockback = 460.0f * stats.poiseMultiplier * poiseSetMult;
+                    currentAttack.defensePierce = fminf(1.0f, 0.25f + stats.defensePierceBonus);
+                    currentAttack.duration = 0.26f;
+                    currentAttack.timer = 0.26f;
+                    currentAttack.hasHit = false;
+                    currentAttack.hasShockwave = false;
+
+                    shockwaveActive = true;
+                    shockwaveTimer = 0.38f;
+                    shockwavePos = currentAttack.circleCenter;
+                    shockwaveRadius = 115.0f;
+
+                    if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
+                        currentAttack.hasShockwave = true;
+                        currentAttack.shockwavePos = currentAttack.circleCenter;
+                        currentAttack.shockwaveRadius = 155.0f;
+                        currentAttack.damage += 30.0f * GetTotemDamageMultiplier();
+                        shockwaveRadius = 155.0f;
+                        particles.SpawnFloatingText(position, "EARTH RUPTURE +30", Color{ 255, 180, 60, 255 }, 22.0f);
+                    }
+
+                    SoundFX::PlayTranceActivate();
+                    SoundFX::PlayCrusaderClash();
+                    particles.AddScreenShake(9.5f, 0.28f);
+                    particles.SpawnSparks(currentAttack.circleCenter, Color{ 255, 225, 90, 255 }, 42, 240.0f);
+                } else if (currentWeapon == WeaponType::STORM_GLAIVE) {
+                    // Storm Glaive Heavy Stage 2: Tempest Cyclone (360 vortex + piercing Crescent Gale Wave)
+                    heavyStage = 2;
+                    float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isFrontalCircle = false;
+                    currentAttack.isLineBox = false;
+                    currentAttack.range = 180.0f;
+                    currentAttack.arcAngle = 360.0f;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 74.0f : ((stats.upgradeLevel >= 1) ? 62.0f : 52.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                    currentAttack.knockback = 320.0f * stats.poiseMultiplier * poiseSetMult;
+                    currentAttack.defensePierce = stats.defensePierceBonus;
+                    currentAttack.duration = 0.24f;
+                    currentAttack.timer = 0.24f;
+                    currentAttack.hasHit = false;
+                    currentAttack.hasShockwave = false;
+
+                    shockwaveActive = true;
+                    shockwaveTimer = 0.38f;
+                    shockwavePos = position;
+                    shockwaveRadius = 180.0f;
+
+                    float waveBase = (stats.upgradeLevel >= 2) ? 62.0f : ((stats.upgradeLevel >= 1) ? 54.0f : 45.0f);
+                    float waveDmg = (counterBuffTimer > 0.0f ? (waveBase * 1.5f) : waveBase) * GetTotemDamageMultiplier();
+                    Vector2 waveSpawn = { position.x + forwardDir.x * (radius + 16.0f), position.y + forwardDir.y * (radius + 16.0f) };
+                    Projectile galeWave(waveSpawn, { forwardDir.x * 680.0f, forwardDir.y * 680.0f }, 18.0f, waveDmg, ProjectileType::GALE_ARROW, true, 0.35f);
+                    galeWave.SetPiercing(true);
+                    spawnedProjectiles.push_back(galeWave);
+
+                    SoundFX::PlayCrusaderClash();
+                    particles.AddScreenShake(6.5f, 0.22f);
+                    particles.SpawnSparks(position, Color{ 120, 255, 240, 255 }, 32, 220.0f);
+                } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+                    // Twin Glacial Cleavers Heavy Stage 2: Fury of Cleaves (Left-hand rapid mirror sweep)
+                    heavyStage = 2;
+                    float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isFrontalCircle = false;
+                    currentAttack.isLineBox = false;
+                    currentAttack.range = 140.0f;
+                    currentAttack.arcAngle = 165.0f;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 34.0f : ((stats.upgradeLevel >= 1) ? 28.0f : 24.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                    currentAttack.knockback = 210.0f * stats.poiseMultiplier * poiseSetMult;
+                    currentAttack.defensePierce = stats.defensePierceBonus;
+                    currentAttack.duration = 0.11f;
+                    currentAttack.timer = 0.11f;
+                    currentAttack.hasHit = false;
+                    currentAttack.hasShockwave = false;
+
+                    velocity.x += forwardDir.x * 135.0f;
+                    velocity.y += forwardDir.y * 135.0f;
+
+                    SoundFX::PlayLightAttack();
+                    particles.AddScreenShake(3.5f, 0.12f);
+                    particles.SpawnSlashTrail(position, forwardDir, Color{ 160, 235, 255, 255 });
+                    particles.SpawnSparks(position, Color{ 180, 245, 255, 255 }, 16, 160.0f);
                 } else {
                     currentAttack.type = AttackType::NONE;
                     heavyStage = 1;
@@ -1772,8 +1860,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                     if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
                     currentAttack.hasShockwave = true;
+                    currentAttack.shockwavePos = position;
                     currentAttack.shockwaveRadius = 150.0f;
                     currentAttack.damage += 30.0f;
+                    shockwaveActive = true;
+                    shockwaveTimer = 0.38f;
+                    shockwavePos = position;
+                    shockwaveRadius = 150.0f;
                     particles.SpawnFloatingText(position, "EARTH RUPTURE +30", Color{ 255, 180, 60, 255 }, 22.0f);
                 }
                 velocity.x += forwardDir.x * 120.0f;
@@ -1804,10 +1897,78 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
                     SoundFX::PlayLightAttack();
                     particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 90.0f, position.y + forwardDir.y * 90.0f }, Color{ 220, 245, 255, 255 }, 10, 130.0f);
+                } else if (currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+                    // Twin Glacial Cleavers Heavy Stage 3: Fury of Cleaves (Cross-cleave flurry)
+                    heavyStage = 3;
+                    float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+                    currentAttack.type = AttackType::HEAVY;
+                    currentAttack.isFrontalCircle = false;
+                    currentAttack.isLineBox = false;
+                    currentAttack.range = 145.0f;
+                    currentAttack.arcAngle = 175.0f;
+                    float baseDmg = (stats.upgradeLevel >= 2) ? 34.0f : ((stats.upgradeLevel >= 1) ? 28.0f : 24.0f);
+                    currentAttack.damage = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg) * GetTotemDamageMultiplier();
+                    currentAttack.knockback = 220.0f * stats.poiseMultiplier * poiseSetMult;
+                    currentAttack.defensePierce = stats.defensePierceBonus;
+                    currentAttack.duration = 0.11f;
+                    currentAttack.timer = 0.11f;
+                    currentAttack.hasHit = false;
+                    currentAttack.hasShockwave = false;
+
+                    velocity.x += forwardDir.x * 135.0f;
+                    velocity.y += forwardDir.y * 135.0f;
+
+                    SoundFX::PlayHeavyAttack();
+                    particles.AddScreenShake(4.5f, 0.14f);
+                    particles.SpawnSlashTrail(position, forwardDir, Color{ 160, 235, 255, 255 });
+                    particles.SpawnSparks(position, Color{ 200, 248, 255, 255 }, 20, 180.0f);
                 } else {
                     currentAttack.type = AttackType::NONE;
                     heavyStage = 1;
                 }
+            } else if (currentAttack.type == AttackType::HEAVY && heavyStage == 3 && currentWeapon == WeaponType::GLACIAL_CLEAVER) {
+                // Twin Glacial Cleavers Heavy Stage 4 Finisher: Glacial Cross-Rupture
+                heavyStage = 4;
+                Vector2 forwardDir = { cosf(facingAngle * DEG2RAD), sinf(facingAngle * DEG2RAD) };
+                WeaponStats stats = GetEquippedWeaponStats();
+                float poiseSetMult = HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 1.20f : 1.0f;
+
+                currentAttack.type = AttackType::HEAVY;
+                currentAttack.isFrontalCircle = false;
+                currentAttack.isLineBox = false;
+                currentAttack.range = 155.0f;
+                currentAttack.arcAngle = 220.0f;
+                float baseDmg = stats.heavyDamage;
+                float rawDmg = (counterBuffTimer > 0.0f ? (baseDmg * 1.5f) : baseDmg);
+                currentAttack.knockback = 420.0f * stats.poiseMultiplier * poiseSetMult;
+                currentAttack.defensePierce = stats.defensePierceBonus;
+                currentAttack.duration = 0.24f;
+                currentAttack.timer = 0.24f;
+                currentAttack.hasHit = false;
+                currentAttack.hasShockwave = true;
+                currentAttack.shockwavePos = { position.x + forwardDir.x * 70.0f, position.y + forwardDir.y * 70.0f };
+                currentAttack.shockwaveRadius = 125.0f;
+
+                if (HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+                    currentAttack.shockwaveRadius = 175.0f;
+                    rawDmg += 35.0f;
+                    particles.SpawnFloatingText(position, "FROST TREMOR +35", Color{ 140, 230, 255, 255 }, 22.0f);
+                }
+                currentAttack.damage = rawDmg * GetTotemDamageMultiplier();
+
+                shockwaveActive = true;
+                shockwaveTimer = 0.38f;
+                shockwavePos = currentAttack.shockwavePos;
+                shockwaveRadius = currentAttack.shockwaveRadius;
+
+                velocity.x += forwardDir.x * 150.0f;
+                velocity.y += forwardDir.y * 150.0f;
+
+                SoundFX::PlayCrusaderClash();
+                SoundFX::PlayHeavyAttack();
+                particles.AddScreenShake(9.0f, 0.26f);
+                particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 230, 255, 255 });
+                particles.SpawnSparks(currentAttack.shockwavePos, Color{ 180, 245, 255, 255 }, 38, 240.0f);
             } else if (currentAttack.type == AttackType::HEAVY && heavyStage == 3 && currentWeapon == WeaponType::HALBERD) {
                 if (halberdStabCount < 3) {
                     halberdStabCount++;
@@ -1877,7 +2038,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         if (isParrying) currentSpeed *= 0.35f;
 
-        if (isHeavyWindingUp) currentSpeed *= 0.25f;
+        if (isHeavyWindingUp && currentWeapon != WeaponType::GLACIAL_CLEAVER) currentSpeed *= 0.25f;
 
         if (currentAttack.type == AttackType::LIGHT) currentSpeed *= 0.65f;
 
@@ -2036,9 +2197,9 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
 
 
 
-    // Truth Seeker 2-hit combo tracking
+    // Truth Seeker & Twin Glacial Cleavers 2-hit alternating combo tracking
 
-    if (currentWeapon == WeaponType::TRUTH_SEEKER) {
+    if (currentWeapon == WeaponType::TRUTH_SEEKER || currentWeapon == WeaponType::GLACIAL_CLEAVER) {
 
         if (comboTimer > 0.0f && comboStep == 1) {
 
