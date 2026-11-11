@@ -6,7 +6,8 @@
 
 ## Table of Versions
 
-- [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns-in-development)
+- [Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks](#version-001k---3-slot-weapon-hotbar-enlarged-icon-hud-glsl-lighting--combat-reworks)
+- [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns)
 - [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
 - [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
@@ -18,7 +19,53 @@
 
 ---
 
-## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns (In-Development)
+## Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks
+
+### Major Features & Bug Fixes Implemented
+
+#### 1. Modal Navigation Repairs & `[TAB]` Inventory Restoration
+* **Realm Map `[M]` Same-Frame Dismissal Fix**: Removed duplicate `IsKeyPressed(KEY_M)` / `KEY_ESCAPE` close checks inside `ModalUI::DrawMapModal` and `ModalUI::DrawInventory` so `[M]` keeps the Realm Map open cleanly until toggled off by `Game::Update`.
+* **Humoral Bestiary Access & `[B]` Shortcut**: Fixed `Game.cpp` tab-switch redirection (`inventoryActiveTab == 3` instead of `2`) so clicking **Bestiary** or pressing `[3]` inside Inventory no longer jumps to the Realm Map, and added a direct `[B]` hotkey to jump straight to Bestiary.
+* **Top-Right HUD Click Parity**: Extended mouse click handling for the Map, Inventory, and Controls HUD pills across `RESTLESS_MIST_FOREST`, `NORTH_ZYPHDEN`, and `FROST_CAVERNS`.
+* **`[TAB]` Inventory Restoration**: Removed the old `[TAB]` sequential weapon-cycling binding across `Game.cpp`, `ZyphdenHandler`, and `NorthZyphdenHandler`, restoring `[TAB]` as the primary Inventory toggle (`[I]` remains supported as a secondary alias).
+
+#### 2. 3-Slot Weapon Hotbar (`[1]`-`[3]`) & Rebound Quick Belt (`[H]` / `[4]`-`[6]`)
+* **3-Slot Arsenal Hotbar**: Added `weaponHotbar[3]` and `activeWeaponSlot` inside `Inventory`, with Inventory drawer `[SLOT 1]`, `[SLOT 2]`, and `[SLOT 3]` assignment controls, numbered badge indicators, automatic assignment of newly unlocked weapons into empty slots, and instant combat switching on `[1]`, `[2]`, and `[3]`.
+* **Save Persistence**: Serialized `weaponHotbar` and `activeWeaponSlot` in `SaveManager` with backward-compatible seeding when loading legacy pre-`0.0.1k` saves.
+* **Consumable Key Rebindings**: Moved Quick Belt elixirs off `[1-3]` cleanly onto **`[H]`** (Consecrated Health Potion), **`[4]`** (Stoneskin Tonic), **`[5]`** (Glacial Thaw Draught), and **`[6]`** (Berserker Brew) across gameplay logic, HUD prompts, Apothecary Brena's shop, and the Controls overlay.
+
+#### 3. Enlarged Vector-Icon Action Bar & 3-Slot Weapon Hotbar Dock
+* **Enlarged Action & Potion Slots**: Scaled bottom-center slots from `46x46` to `58x62` (`64x68` at >=1500px width) with custom procedural vector silhouettes inside every slot (`DASH`, dynamic active `LIGHT`/`HEAVY` weapon icons, heraldic `PARRY`, custom flasks for `HEAL`/`STONE`/`THAW`/`BERSERK`, and set-specific `SKILL [V]` emblems), cooldown wipe animations, and active Armor Skill highlights.
+* **Bottom-Right 3-Slot Weapon Dock**: Replaced the small single-weapon readout across Lobby, Combat, and Campaign HUDs with a framed `114px`-tall dock matching the bottom-left Player Card, showing active weapon name/upgrade tier/`L & H` damage above three `64x66` (`70x72` wide) procedural weapon icon slots (`[1]`, `[2]`, `[3]`).
+* **Arena Hint Alignment**: Raised `[T] RETURN TO REALM` above the bottom-left Player Card to eliminate overlap with `DEF / WILL`.
+
+#### 4. GLSL 330 Multiplicative Day-Night Shader & Realm Light Emitters
+* **Offscreen Lightmap & Shaders**: Overhauled `TimeOfDaySystem` to compose scene lighting via a dynamically resized offscreen `RenderTexture2D`, an embedded GLSL 330 inverse-square cubic attenuation point-light shader (with bilinear radial fallback), and a shoulder-mapped Purkinje composite shader applied via `BLEND_MULTIPLIED`.
+* **Natural Diurnal & Subterranean Profiles**: Eliminated flat purple washes and stray star pixels on terrain, tuning crisp Day neutrality (`08:30-17:30`), cosine Dawn (`05:00-08:30`) / Dusk (`17:30-20:30`) transitions, moonlit Night (`20:30-05:00`), warm Tavern/Keep interiors, and subterranean ambient profiles for Quarry Depths & Frost Caverns.
+* **Full Realm Emitter Registration**: Registered campfires, sacred altars, torches, crystals, and glowing braziers every frame across all realm handlers.
+
+#### 5. Removal of Stagger-on-Every-Hit Loop & Visceral Execution
+* **Removed Broken Stunlock Loop**: Removed `[E]` Visceral Execution deathblows, `Adrenaline Surge`, `IsVulnerableToExecution()`, and spinning execution reticles across `CollisionSystem`, `Player`, `Enemy`, `EnemyRenderer`, `HUD`, and `ModalUI`.
+* **Totem of the Phlegmatic Core Adjustment**: Replaced per-hit `enemy.ApplyStagger(0.35f)` with `enemy.ApplyChill(3.0f)` while preserving Gray Health counter-recovery and `-80%` knockback resistance.
+* **Bestiary Tier 3 Perk Updates**: Updated *Troll Slayer T3* to restore `+25 HP` on heavy finisher hits/kills and *Cultist Purifier T3* to restore `+15 Stamina` & `+10 Composure` on cultist kills.
+
+#### 6. Weapon Reworks: Twin Glacial Cleavers, Sun-Forged Claymore & Storm Glaive
+* **Twin Glacial Cleavers (`WeaponType::GLACIAL_CLEAVER`)**: Transformed into high-tempo dual-wielding frost cleavers rendered in both player hands (`0.14s` light duration, `0.20s` cooldown, `13` stamina, `20 / 25 / 31` alternating slashes) with a **4-stage automated "Fury of Cleaves"** heavy combo ending in **Glacial Cross-Rupture** (`46 / 54 / 64` dmg + `3.5s` Chill + Frost Tremor synergy at `175px` for `+35` dmg when wearing Frostwarden).
+* **Sun-Forged Claymore Heavy ("Solar Cataclysm")**: Reworked heavy attack into a 2-stage greatsword combo: **Stage 1 Sunfire Crescent** (`180 deg` sweep inflicting `4.0s` Solar Burn DoT) into **Stage 2 Solar Cataclysm Slam** (`115px` forward Solar Flare Pillar with `+25%` defense pierce, `+30%` vs burning targets, and Basalt Golem Earth Rupture synergy).
+* **Storm Glaive Heavy ("Tempest Cyclone")**: Reworked heavy attack into a 2-stage wind polearm combo: **Stage 1 Zephyr Surge Step** (`0.18s` i-frame gale lunge corridor) into **Stage 2 Tempest Cyclone** (`360 deg` `180px` gale vortex restoring `+15` Composure on hit and firing a piercing **Crescent Gale Wave** projectile).
+
+#### 7. Frostwarden Set Revamp (`FROST NOVA`, Ice Ward & Cold Resist)
+* **Enemy Chill Status**: Added `Enemy::ApplyChill` (`-40%` movement speed, `30%` slower windups, icy cyan rim visuals & frost particles).
+* **`FROST NOVA` Active Skill (`[V]`)**: Renamed from `Glacial Frost Nova` to fit cleanly in the HUD; unleashes a `190px` 12-spire crystalline nova dealing `75` frost dmg, `1.2s` non-boss stun, `4.0s` Chill, `-20%` Armor Fracture, and grants a `6.0s` `45 HP` **Ice Ward** that retaliates against melee attackers (`18` frost dmg + `3.0s` Chill) and persists full duration for retaliation even if absorbed.
+* **Functional `Glacial Tenacity` Passives**: Hooked actual `30% Cold Resistance` against frost trolls and cold projectiles (`Projectile::isCold`) and `+20%` heavy poise damage multiplier across all weapons.
+
+#### 8. Stamina & Relic Balance Adjustments
+* **Bow & Daggers Stamina**: Removed the 5-hit free-swing bypass on daggers (`Dual Daggers`: `9` light / `28` heavy / `16` dash; `Twin Zephyr Daggers`: `8` light / `25` heavy / `14` dash) and raised `Windrunner's Recurve` arrow cost (`18` light / `42` heavy stamina).
+* **Totem of Mist Tuning**: Tuned movement speed multiplier to `0.95x` (`-5%`), removed cooldown haste (`1.0x`), and adjusted stamina regeneration to `+10%` while preserving Mist Fairy crits (`+20%` chance, `+35%` dmg) and healing orbs (`+30 HP`).
+
+---
+
+## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns
 
 ### Major Features Implemented
 

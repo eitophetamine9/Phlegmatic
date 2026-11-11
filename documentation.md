@@ -69,6 +69,7 @@
   - [Directory Hierarchy](#directory-hierarchy)
   - [State Coordinator Pattern](#state-coordinator-pattern)
   - [Collision Geometry & Hit Registration](#collision-geometry--hit-registration)
+  - [GLSL 330 Multiplicative Day-Night Shader Pipeline](#glsl-330-multiplicative-day-night-shader-pipeline)
   - [Procedural Acoustic Audio Synthesis](#procedural-acoustic-audio-synthesis)
   - [Custom Asset Drop Pipeline](#custom-asset-drop-pipeline)
 - [8. Building & Setup Guide](#8-building--setup-guide)
@@ -84,15 +85,14 @@
 
 ## Version History & Patch Notes
 
-For comprehensive patch notes, combat tuning revisions, and version changelogs across all releases (v0.0.1b through v0.0.1g), see the dedicated **[Version History & Patch Notes Compendium (VERSIONS.md)](VERSIONS.md)**.
+For comprehensive patch notes, combat tuning revisions, and version changelogs across all releases (v0.0.1b through v0.0.1k), see the dedicated **[Version History & Patch Notes Compendium (VERSIONS.md)](VERSIONS.md)**.
 
-### Latest Release: Version 0.0.1g
-* **Equipment Matrix Overhaul**: Reference-grade equipment bubbles with corner brackets, tier pips, and custom vector icons across all armor sets and totems.
-* **Legible Totem Debuff Text**: Color-coded stat texts rendering positive buffs in emerald/cyan (`[+] ...`) and negative debuffs in bold crimson red (`[-] ...`).
-* **Crusader's Totem & Will of Atlas**: Rebalanced stats (+25% DEF, +35 HP, +18% DMG, -12% SPD, -20% ATK SPD, +15 Will) and added "Will of Atlas" crisis passive granting 4.0s full invulnerability below 20% health (60s CD).
-* **Mini Elemental Golem Companion Overhaul**: Boosted to 380 HP and 42 DEF, with 3 distinct tactical attack patterns (Heavy AoE Slam, Forward Knockback Bash, and Elemental Spike Throw).
-* **Knight Lenon Courtyard Rematches**: Courtyard sparring rematch prompt `[G]` (30s recovery cooldown) with 25% drop rate for the Crusader's Totem.
-* **Windrunner's Recurve Bow Rebalance**: Calibrated raw base damage to 9 / 11 / 13 light and 36 / 44 / 52 heavy while preserving fast draw speed, low stamina cost, and impact Windburst AoE.
+### Latest Release: Version 0.0.1k
+* **3-Slot Weapon Hotbar & Rebound Quick Belt**: Equip up to 3 weapons via Inventory `[SLOT 1/2/3]` and hot-swap mid-combat with `[1]`, `[2]`, `[3]` (persisted in JSON saves). Consumables moved to `[H]` (Health Potion), `[4]` (Stoneskin Tonic), `[5]` (Glacial Thaw Draught), and `[6]` (Berserker Brew).
+* **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias), repaired `[M]` Realm Map same-frame closing and Bestiary tab routing, added direct `[B]` Bestiary hotkey, and enabled top-right HUD clicks across northern/eastern realms.
+* **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon, flask, shield, and armor skill icons alongside an enlarged bottom-right 3-Weapon Hotbar Dock (`64x66` / `70x72`).
+* **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat ambient washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point lights, Purkinje composite tone-mapping, and full realm light registration.
+* **Combat & Balance Reworks**: Removed the stagger-on-every-hit / Visceral Execution stunlock loop (replacing Phlegmatic Core per-hit stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and raised stamina/tuned speed on Bow, Daggers, and **Totem of Mist**.
 
 ---
 
@@ -138,7 +138,7 @@ The player begins their pilgrimage amidst the cold ashes of the southern sanctua
 
 ### Lore Fragments Codex (Iâ€“X)
 
-The game world contains ten discoverable historical fragments documented inside the in-game Journal (`[I]` or `[TAB]`):
+The game world contains 15 discoverable historical fragments (I-XV) documented inside the in-game Journal (`[TAB]` or `[I]`):
 
 
 
@@ -176,7 +176,7 @@ The game world contains ten discoverable historical fragments documented inside 
 
 > [!IMPORTANT]
 
-> **REMINDER â€” Lore Journal Navigation**: You can inspect newly gathered fragments at any time during gameplay by pressing `[I]` or `[TAB]`. Reading lore steles grants immediate narrative context and sheds light on enemy weaknesses across Tydeshire's five realms.
+> **REMINDER â€” Lore Journal Navigation**: You can inspect newly gathered fragments at any time during gameplay by pressing `[TAB]` (`[I]` alias). Reading lore steles grants immediate narrative context and sheds light on enemy weaknesses across Tydeshire's five realms.
 
 
 
@@ -557,9 +557,11 @@ Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0
 
 
 
-### Consumable Health Elixirs & Out-of-Combat Regeneration
+### Consumable Health Elixirs, Combat Tonics & Out-of-Combat Regeneration
 
-* **Health Potions (`[1]` or `[H]`)**: Drinking an elixir restores **+45 HP** immediately and initiates a **7.0-second cooldown timer**.
+* **Health Potions (`[H]`)**: Drinking an elixir restores **+45 HP** immediately and initiates a **7.0-second cooldown timer**.
+
+* **Alchemy Combat Tonics (`[4]`, `[5]`, `[6]`)**: Brewed by Tavern Keeper Brena at Hearthside Tavern - Stoneskin Tonic (`[4]`, +18 Def, -10% Speed, 12s), Glacial Thaw Draught (`[5]`, Frostbite immunity & Chill cleanse, 15s), and Berserker Brew (`[6]`, +30% Dmg, -15% Def, 10s).
 
 * **Out-of-Combat Regeneration**: Staying disengaged from combat for **4.0+ seconds** activates passive health recovery at **+8.0 HP/s** up to maximum capacity.
 
@@ -709,7 +711,13 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 
 | `SPACE Key` | Phlegmatic Trance | Available at 100 Composure. **5.0s invulnerability, zero stamina cost, 120px projectile reflection sphere**. |
 
-| `1 Key` or `H Key` | Health Potion | Consumes 1 elixir to heal **+45 HP** (**7.0s cooldown**). |
+| `1, 2, 3 Keys` | 3-Slot Weapon Hotbar | Instantly swap between up to 3 weapons assigned to your hotbar slots mid-combat. |
+
+| `H Key` | Health Potion | Consumes 1 elixir to heal **+45 HP** (**7.0s cooldown**). |
+
+| `4, 5, 6 Keys` | Alchemy Tonics | Drink Stoneskin (`[4]`), Glacial Thaw (`[5]`), or Berserker Brew (`[6]`). |
+
+| `V Key` | Armor Set Skill | Activate 3/3 armor set skill (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires, FROST NOVA). |
 
 | `E Key` / `Enter` | Interact | Talk to NPCs, open chests, read monoliths, and transition doors. |
 
@@ -719,7 +727,9 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 
 | `O Key` | Toggle Objectives | Expand or collapse the pinned Chapter 1 quest tracker card. |
 
-| `I Key` or `TAB` | Lore & Equipment | Open the in-game Journal, Equipment stats, and Totem slots. |
+| `TAB` (`I Key`) | Inventory & Grimoire | Open the Equipment Matrix, 3-Slot Weapon Hotbar assignment, Lore Journal, Bestiary, and Realm Map. |
+
+| `B Key` | Humoral Bestiary | Open Inventory directly to the Humoral Bestiary & Mastery Perks tab. |
 
 | `M Key` | Interactive Realm Map | Open the full parchment map with live player tracking and POI tooltips. |
 
@@ -753,21 +763,27 @@ Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctr
 
 
 
-### Modular Visual Action Bar
+### Modular Visual Action Bar & 3-Slot Weapon Hotbar Dock
 
-Located at the bottom center of the HUD, the visual action bar provides real-time ability tracking:
+Located at the bottom center of the HUD, the enlarged vector-icon action bar (`58x62` standard / `64x68` wide display) provides real-time ability tracking with procedural vector silhouettes:
 
-* **Slot 1 (`[Q]`)**: Dash â€” Icon, active evasion pulse, and recovery sweep.
+* **Slot 1 (`[Q]`)**: Dash - Winged evasion chevrons, active evasion pulse, and recovery sweep.
 
-* **Slot 2 (`[LMB]`)**: Light Attack â€” Cadence recovery wipe.
+* **Slot 2 (`[LMB]`)**: Light Attack - Dynamic miniature silhouette of the equipped weapon with cadence wipe.
 
-* **Slot 3 (`[RMB]`)**: Heavy Attack â€” Multi-stage cooldown sweep with numeric timer (`2.1s`, `3.6s`).
+* **Slot 3 (`[RMB]`)**: Heavy Attack - Empowered weapon cleave silhouette with multi-stage cooldown sweep.
 
-* **Slot 4 (`[F]`)**: Parry â€” Radiant gold when ready, cyan flash on active guard, dark recovery wipe.
+* **Slot 4 (`[F]`)**: Parry - Heraldic heater shield (golden when ready, cyan flash on active guard, dark recovery wipe).
 
-* **Slot 5 (`[SPACE]`)**: Phlegmatic Trance â€” Cyan focus medallion glowing when ready (`TRANCE READY [SPACE]`), countdown sweep when active (`5.0s`).
+* **Slot 5 (`[H]`)**: Health Flask - Alchemical flask icon, emerald stock badge (`xN`), and **7.0s countdown timer**.
 
-* **Slot 6 (`[1]`)**: Health Flask â€” Emerald theme, stock badge (`xN`), and **7.0s countdown timer**.
+* **Slots 6-8 (`[4]`, `[5]`, `[6]`)**: Alchemy Belt - Faceted flask icons for Stoneskin (`[4]`), Glacial Thaw (`[5]`), and Berserker Brew (`[6]`) with active duration timers.
+
+* **Slot 9 (`[V]`)**: Armor Skill - Dynamic armor-set heraldic emblem (`BURST`, `AEGIS`, `CHARGE`, `DECOY`, `SPIKES`, `SPIRES`, `NOVA`) with active ward/buff glow.
+
+* **Phlegmatic Trance Pill (`[SPACE]`)**: Center focus medallion above the tray glowing when Composure hits 100 (`TRANCE READY [SPACE]`), with 5.0s countdown sweep when active.
+
+* **Bottom-Right 3-Slot Weapon Hotbar Dock (`[1]`, `[2]`, `[3]`)**: Framed 114px-tall dock matching the bottom-left Player Card, showing equipped weapon name/tier/damage above three `64x66` (`70x72` wide) procedural weapon icon slots bound to `[1]`, `[2]`, and `[3]`.
 
 
 
@@ -793,15 +809,17 @@ Displayed directly alongside the Player Health, Stamina, and Composure bars:
 
 
 
-### In-Game Lore Journal, Equipment Paper Doll & Realm Map
+### In-Game Equipment Matrix, Lore Journal, Bestiary & Realm Map
 
-Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
+Opened via `[TAB]` (`[I]` alias), `[B]` (Bestiary), or `[M]` (Realm Map):
 
-* **Tab 1: Equipment & Arsenal**: Inspect weapons, weapon upgrade tiers (+1, +2, Consecrated), armor sets, damage mitigation statistics, and equip discovered sacred totems.
+* **Tab 1 (`[1]`)**: Equipment, 3-Slot Hotbar & Arsenal - Inspect weapons and upgrade tiers (+1, +2, Consecrated), bind up to 3 unlocked weapons into Hotbar Slots `[1]`, `[2]`, and `[3]`, manage armor sets and saved loadouts, and equip discovered sacred totems.
 
-* **Tab 2: Lore Journal**: Browse 10 discovered historical fragments with unread badges (`(!)`).
+* **Tab 2 (`[2]`)**: Lore Journal - Browse 15 discovered historical fragments (`I-XV`) with unread badges (`(!)`).
 
-* **Tab 3: Interactive Realm Map (`[M]`)**: Inspect the cartographic survey of Tydeshire, pan/zoom across terrain, filter POIs, and locate the player beacon.
+* **Tab 3 (`[3]` / `[B]`)**: Humoral Bestiary - Track defeated hostiles across 12 archetypes, study tactical weakness guides, and unlock passive Mastery Hunting Perks at Tier 2 (`15 Kills`) and Tier 3 (`35 Kills`).
+
+* **Tab 4 (`[4]` / `[M]`)**: Interactive Realm Map - Inspect the frosted tactical cartography of Tydeshire, filter POIs, and locate the live player beacon.
 
 
 
@@ -827,19 +845,21 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 | **Truth Seeker (Partial)** | 26 / 24 dmg (2-Hit) | 78 dmg (Dual 360Â° + Beam) | 0.65s | Consecrated relic blade. Light attack chains a slash into an upward radiant slice. Heavy unleashes dual 360Â° sweeps (42 + 36 dmg) and fires a holy piercing beam (22 dmg, 10% pierce). |
 
-| **Dual Daggers** | 11 dmg (**0 Stamina**) | 60 dmg (Lunge + Spin) | 0.50s | Zero stamina light attacks. Heavy executes a high-velocity piercing lunge (**22 dmg + i-frames**) followed by a 360Â° whirlwind (**38 dmg**). |
+| **Dual Daggers** | 12 dmg (9 Stamina) | 58 dmg (3-Stage Lunge + Cross-Slash + Vault Kick) | 0.50s | Agile twin blades consuming 9 stamina per light swing. Heavy chains invulnerable Shadow Puncture (Bleed), Backstab Cross-Slash (+40% vs bleeding/rear), and staggering Vault Kick. |
 
-| **War Mace** | 28 dmg (Frontal Smack) | 96 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes an earth-shattering overhead smash followed by a 360Â° ground tremor that **ignores 20% of enemy defense**. |
+| **War Mace** | 24 dmg (Frontal Smack) | 78 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes Overhead Skull Crusher (Armor Fracture -20% for 4s) into Seismic Tremor (**25% armor pierce**). |
 
-| **Royal Halberd** | 22 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.95s | Extended reach polearm. Heavy combo features Stage 1 invulnerable vault lunge (32 dmg), Stage 2 wide 220Â° sweep (44 dmg), and Stage 3 rapid multi-thrust flurry (58/72/88 dmg). |
+| **Royal Halberd** | 18 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.80s | Extended reach polearm. Heavy features i-frame Vault Lunge, wide 220-deg cleave, and a rapid 3-stab flurry. |
 
-| **Twin Zephyr Daggers** | 16 dmg (**0 Stamina**) | 68 dmg (Shadow Slip) | 0.45s | High-velocity dual curved blades. Heavy attack triggers an evasive 120px dash with 0.32s i-frames, 360Â° whirlwind, and an explosive shadow decoy. |
+| **Twin Zephyr Daggers** | 16 dmg (8 Stamina) | 68 dmg (Shadow Slip + Decoy) | 0.35s | High-velocity wind blades consuming 8 stamina per swing. Heavy triggers an evasive Shadow-Step with i-frames, 360-deg whirlwind, and explosive shadow decoy. |
 
-| **Windrunner's Recurve** | 9 / 11 / 13 dmg (Gale Arrow) | 36 / 44 / 52 dmg (Gale Piercer Drill) | 0.28s | Acrobatic wind bow. Fires rapid non-piercing gale arrows (0.28s cd) with impact Windburst AoE (radius 55px, 30% weapon damage). Heavy channels Gale Piercer Drill with drawn bowstring visuals, 50% defense pierce, on-hit Armor Fracture (-40% defense for 4s), and 1.2s stun/stagger. |
+| **Windrunner's Recurve** | 9 / 11 / 13 dmg (18 Stamina) | 36 / 44 / 52 dmg (42 Stamina) | 0.50s | Acrobatic wind bow firing rapid Gale Arrows with 55px Windburst AoE (30% weapon dmg). Heavy channels Gale Piercer Drill (50% defense pierce, Armor Fracture -40% for 4s, 1.2s stun). |
 
-| **Sun-Forged Claymore** | 34 dmg (120Â° Cleave) | 92 dmg (Solar Rupture) | 1.10s | Colossal holy greatsword. Light attack executes a broad sweep. Heavy delivers Solar Rupture with an expanding radiant shockwave ring and hyper-armor mitigation. |
+| **Sun-Forged Claymore** | 30 dmg (140-deg Cleave) | 117 dmg (2-Stage Solar Cataclysm) | 1.15s | Colossal solar greatsword. Heavy chains Stage 1 Sunfire Crescent (180-deg sweep + 4s Solar Burn) into Stage 2 Solar Cataclysm Slam (115px Solar Flare Pillar, +25% pierce, +30% vs burning foes). |
 
-| **Storm Glaive** | 28 dmg (Spear Thrust) | 78 dmg (Tempest Vortex) | 0.70s | Vanguard polearm. Light attack delivers an extended linear thrust. Heavy executes a 240Â° tempest cleave with heavy posture knockback. |
+| **Storm Glaive** | 20 dmg (Spear Thrust) | 100 dmg (2-Stage Tempest Cyclone) | 0.70s | Aerodynamic polearm. Heavy chains Stage 1 Zephyr Surge Step (0.18s i-frame gale corridor) into Stage 2 Tempest Cyclone (360-deg vortex restoring +15 Composure + piercing Crescent Gale Wave). |
+
+| **Twin Glacial Cleavers** | 20 / 25 / 31 dmg (13 Stamina) | 46 / 54 / 64 dmg per hit (4-Stage Fury) | 0.85s | Dual-wielding frost cleavers with fast alternating light swings. Heavy triggers an automated 4-stage Fury of Cleaves barrage ending in Glacial Cross-Rupture (+3.5s Chill, or 175px Frost Tremor +35 dmg with Frostwarden). |
 
 
 
@@ -867,7 +887,7 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 * **Stance Philosophy**: Fluid, predatory skirmishing. Relies on agility and breathless recovery.
 
-* **Tactical Advice**: Light attacks cost **0 stamina**. Keep slicing continuously to apply pressure, then use the heavy lunge's built-in i-frames to phase through counter-attacks.
+* **Tactical Advice**: Light attacks cost **9 stamina** per strike (and 8 stamina on Twin Zephyr Daggers), rewarding deliberate stamina pacing and heavy i-frame repositioning over reckless spamming.
 
 
 
@@ -883,7 +903,7 @@ Opened via `[I]` or `[TAB]` (or `[M]` directly for the Realm Map):
 
 
 
-Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, altars, and boss encounters. Players can equip one active totem in the Journal / Equipment interface (`[I]` or `[TAB]` -> Equipment Tab) to augment their combat style:
+Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, altars, and boss encounters. Players can equip one active totem in the Inventory / Equipment Matrix (`[TAB]` or `[I]` -> Tab 1) to augment their combat style:
 
 
 
@@ -895,11 +915,13 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 | **Totem of Insanity** | Cathedral crypt reliquary | **+30% Overall Damage** | **-10% Armor Defense** | Arterial Crimson (`[255, 65, 80]`) |
 
-| **Totem of Mist** | East Crossroads shroud shrine | **+20% Crit Chance, +35% Crit Damage, Summons Mist Fairy companion with 14s Healing Orb spawns (+30 HP)** | **-15% Defense, -25 Max HP** | Vapor Azure (`[140, 210, 255]`) |
+| **Totem of Mist** | Gale Archer (Restless Mist Forest, 15% drop rate) | **+20% Crit Chance, +35% Crit Dmg, +10% Stamina Regen, +10 Will, Mist Fairy companion (+30 HP Orbs)** | **-5% Move Speed, -15% Defense, -25 Max HP** | Vapor Azure (`[140, 210, 255]`) |
 
 | **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
 
-| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths - 25% drop rate) | **+25 Defense, Projectile on Light Attack (5.0s Cooldown)** | **-15% Movement Speed** | Molten Amber (`[255, 130, 45]`) |
+| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths) | **+25% Defense, +25 Will, Empowered Mini Golem Companion, Piercing Projectile (54 DMG)** | **-10% Movement Speed, Companion Respawn 60s** | Molten Amber (`[255, 130, 45]`) |
+
+| **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (Northern Crags) | **+30 Max HP, +25 Will, +20% Defense, -80% Knockback, 25% Gray Health recovery, Chills enemies on hit & parry** | **-8% Move Speed, -10% Stamina Regen** | Glacial Cyan (`[140, 220, 255]`) |
 
 
 
@@ -923,7 +945,7 @@ Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, a
 
 > [!TIP]
 
-> **Dual Daggers Stamina Advantage**: Dual Daggers consume zero stamina for light slashes, leaving all your stamina pool free for rapid evasive dashes and heavy lunges.
+> **Dual Daggers Stamina Pacing**: Every dagger slash consumes stamina (`9` base / `8` Zephyr), so weave in patient pauses or parry counters between flurries to avoid exhaustion.
 
 
 
@@ -1105,11 +1127,21 @@ State coordination is decoupled into discrete state handlers:
 
 `CollisionSystem.cpp` performs precision geometric checks:
 
-* Sector / Cone checks via dot products and angular offsets for weapon sweeps.
+* Sector / Cone checks via dot products and angular offsets for weapon sweeps and frontal blast circles (Claymore Solar Flare, Cleaver Rupture).
 
 * Oriented bounding boxes for beam attacks and lunges.
 
-* Circle-to-circle hit registration for projectile deflections and proximity pickups.
+* Circle-to-circle hit registration for projectile deflections, Chill application, and proximity pickups.
+
+
+
+### GLSL 330 Multiplicative Day-Night Shader Pipeline
+
+`TimeOfDay.cpp` renders environmental atmosphere onto a dynamically resized offscreen `RenderTexture2D` lightmap using embedded GLSL 330 fragment shaders (with bilinear radial texture fallback):
+
+* **Point-Light Attenuation Shader**: Evaluates smooth inverse-square and cubic edge falloff per registered emitter (player hip lantern, bonfires, shrines, torches, portals, frost crystals) with organic flame flicker.
+
+* **Purkinje Composite Tone-Mapper**: Applies a soft highlight shoulder rolloff and subtle night Purkinje blue shift before compositing over the world via `BLEND_MULTIPLIED`, keeping sunlit Day completely unclouded (`WHITE`), blending smooth cosine Dawn/Dusk transitions, and carving bright warm islands out of moonlit nights and subterranean caverns.
 
 
 

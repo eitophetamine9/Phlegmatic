@@ -37,21 +37,22 @@
 | :--- | :--- | :--- |
 | **Movement** | `W, A, S, D` or `Arrow Keys` | 8-directional fluid traversal with solid obstacle collision. |
 | **Aiming** | `Mouse Cursor` | Reticle targeting for weapon thrusts, dashes, and parry reflections. |
-| **Light Attack** | `Left Mouse Button` | Swift slash/thrust combo (Daggers every 5th strike consumes 14 stamina, Truth Seeker 2-hit combo, Elemental Totem piercing bolt). |
-| **Heavy Signature Combo** | `Right Mouse Button` | Multi-stage weapon combos (Daggers 3-stage, Mace 2-stage, Crusader Blade 3-stage, Truth Seeker 2-stage, Halberd 3-stage). |
-| **Armor Set Special Skill** | `V Key` | Triggers active skill on 3/3 matching armor sets (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires, Glacial Frost Nova). |
+| **Light Attack** | `Left Mouse Button` | Swift slash/thrust combo (Daggers consume stamina per swing: `9`/`8`, Truth Seeker 2-hit combo, Twin Glacial Cleavers alternating slashes, Windrunner rapid Gale Arrows). |
+| **Heavy Signature Combo** | `Right Mouse Button` | Multi-stage weapon combos (Daggers 3-stage, Mace 2-stage, Crusader Blade 3-stage, Truth Seeker 2-stage, Halberd 3-stage, Sun Claymore 2-stage Solar Cataclysm, Storm Glaive 2-stage Tempest Cyclone, Twin Glacial Cleavers 4-stage Fury of Cleaves). |
+| **Armor Set Special Skill** | `V Key` | Triggers active skill on 3/3 matching armor sets (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires, FROST NOVA). |
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
-| **Timed Parry / Execution** | `F Key` | Active guard window. Staggers melee foes, reflects projectiles, and performs **Visceral Execution Deathblows** on posture-broken targets. |
+| **Timed Parry** | `F Key` | Active guard window. Staggers melee foes, grants counter boost, and reflects projectiles toward cursor. |
 | **Phlegmatic Trance** | `SPACE Key` | Active at 100 Composure. **5.0s invulnerability, zero stamina cost & auto-deflection aura**. |
-| **Combat Quick Belt** | `1, 2, 3 Keys` | Rapid consumption of Health Potions, Stoneskin Tonics, Glacial Draughts, or Berserker Draughts. |
+| **3-Slot Weapon Hotbar** | `1, 2, 3 Keys` | Instantly swap between up to 3 weapons assigned to your hotbar slots mid-combat. |
+| **Combat Quick Belt** | `H Key` / `4, 5, 6 Keys` | Consume Health Potions (`[H]`), Stoneskin Tonics (`[4]`), Glacial Thaw Draughts (`[5]`), and Berserker Brews (`[6]`). |
 | **Interact / Advance** | `E Key` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
-| **Storage Stash Trunk** | `T Key` | Open the persistent Storage Stash Vault at Zyphden Town Square or any realm campfire. |
+| **Storage Stash Trunk** | `T Key` | Open the persistent Storage Stash Vault at Zyphden Town Square or any realm campfire (or return from Arena). |
 | **Tactical Radar Toggle** | `N Key` | Toggle the corner tactical mini-map radar and cardinal compass tape HUD. |
 | **Dialogue Page** | `A Key` / `D Key` | Navigate between previous and next pages of active dialogue. |
 | **Dismiss / Close** | `ESC Key` | Safely close active dialogue boxes, popups, and inventory modals. |
 | **Objectives Tracker** | `O Key` | Toggle the pinned Chapter 1 quest objectives card. |
-| **Quick Weapon Swap** | `TAB Key` | Instantly cycle through all unlocked weapons in your arsenal mid-combat. |
-| **Equipment & Grimoire** | `I Key` | Open Tactical Equipment doll, modular armor loadouts, weapons arsenal, and Illuminated Book Lore Journal. |
+| **Inventory & Grimoire** | `TAB Key` (`I Key` alias) | Open Tactical Equipment Matrix, 3-Slot Weapon Hotbar assignment, armor loadouts, Lore Journal, Bestiary, and Realm Map. |
+| **Humoral Bestiary** | `B Key` | Open the Inventory modal directly to the Humoral Bestiary & Mastery Perks tab. |
 | **Interactive Realm Map** | `M Key` | Open tactical frosted teal map with live player tracking and stage POIs. |
 | **Fullscreen Toggle** | `F11` or `Alt + Enter` | Switch between windowed and native crisp fullscreen display modes. |
 | **Controls Guide** | `C Key` | Toggle the in-game keybindings overlay modal. |
@@ -61,28 +62,27 @@
 
 ---
 
-## Current Version: 0.0.1j (In-Development)
+## Current Version: 0.0.1k
 
 > [!NOTE]
-> Phlegmatic is currently on **Version 0.0.1j (In-Development)**, succeeding Version 0.0.1i.
+> Phlegmatic is currently on **Version 0.0.1k**, succeeding Version 0.0.1j.
 >
-> ### Version 0.0.1i Milestone Highlights
-> * **Northern Arsenal & Frostwarden Armor**: Glacial Cleaver colossal great-axe with heavy Frost Tremor shockwaves and the 3-piece Frostwarden set with Glacial Tenacity passive and Glacial Frost Nova active skill.
-> * **Highland Weather & Procedural Audio**: Procedural howling blizzard ambient audio synthesis, snow crunch footsteps, blizzard particle stream, and breakable frost crystal deposits.
-> * **Frostbite Environmental Chill System**: Sub-zero temperature accumulation inflicting Frostbite (-25% speed, -40% stamina regen) with bonfire thawing and Frostwarden cold immunity.
-> * **Outcast Ranger Torvald NPC & Bounties**: Stationed near the Highland Bonfire offering 3 tiered hunting contracts with real-time progression and rewards.
-> * **Quick Weapon Swap & Apex Boss Gauntlet**: Instant weapon cycling mid-combat on `[TAB]` and Knight Lenon's 3-stage Apex Boss Gauntlet rush mode.
+> ### Version 0.0.1k Highlights
+> * **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias preserved), fixed the `[M]` Realm Map instant-close regression, fixed Humoral Bestiary tab routing with a dedicated `[B]` shortcut, and enabled top-right HUD clicks in northern/eastern realms.
+> * **3-Slot Weapon Hotbar & Rebound Quick Belt**: Equip up to 3 weapons via Inventory `[SLOT 1/2/3]` controls and switch mid-combat using `[1]`, `[2]`, `[3]` with full JSON save persistence. Potions moved cleanly to `[H]` (Heal), `[4]` (Stoneskin), `[5]` (Glacial Thaw), and `[6]` (Berserker Brew).
+> * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon/potion/armor skill icons and replaced the bottom-right box with an enlarged 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` per slot).
+> * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat color washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point-light shaders, Purkinje composite tone-mapping, and full realm emitter registration.
+> * **Combat & Balance Reworks**: Removed the broken stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and rebalanced stamina/speed on Bow, Daggers, and **Totem of Mist**.
 >
-> ### Version 0.0.1j Implementation Roadmap
-> 1. **Phase 1**: Visceral Execution & Stagger Deathblow System [COMPLETED]
-> 2. **Phase 2**: Alchemy Workshop & Quick-Item Belt (Tavern Keeper Brena) [COMPLETED]
-> 3. **Phase 3**: The 7th Sacred Relic: Totem of the Phlegmatic Core [COMPLETED]
-> 4. **Phase 4**: Dynamic Time-of-Day Lighting Cycle & Nightfall Incursions [COMPLETED]
-> 5. **Phase 5**: Tactical Corner Mini-Map Radar & Compass HUD [COMPLETED]
-> 6. **Phase 6**: Bestiary Mastery Hunting Perks & Codex Seals [COMPLETED]
-> 7. **Phase 7**: Subterranean Highland Caverns Sub-Zone (The Permafrost Crypts) [COMPLETED]
-> 8. **Phase 8**: Storage Stash Chest & Persistence Verification [COMPLETED]
-> 9. **Phase 9**: File Architecture Restructuring & Subsystem Decoupling [COMPLETED]
+> ### Version 0.0.1k Implementation Roadmap
+> 1. **Milestone 1**: `[M]` Map & Bestiary Modal Fixes + `[TAB]` Inventory Restoration [COMPLETED]
+> 2. **Milestone 2**: 3-Slot Weapon Hotbar (`[1-3]`), Potion Rebinds (`[H/4-6]`) & Save Persistence [COMPLETED]
+> 3. **Milestone 3**: Enlarged HUD Action Bar, Procedural Icons & 3-Slot Weapon Dock [COMPLETED]
+> 4. **Milestone 4**: GLSL 330 Multiplicative Day-Night Shader & Realm Emitter Overhaul [COMPLETED]
+> 5. **Milestone 5**: Removal of Infinite Stagger Loop, Visceral Execution & Bestiary T3 Rebalance [COMPLETED]
+> 6. **Milestone 6**: Weapon Reworks (Twin Glacial Cleavers, Sun-Forged Claymore & Storm Glaive) [COMPLETED]
+> 7. **Milestone 7**: Frostwarden Revamp & Bow / Daggers / Mist Totem Balance [COMPLETED]
+> 8. **Milestone 8**: Documentation Synchronization, Build Verification & Release Prep [COMPLETED]
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 
