@@ -46,6 +46,10 @@ public:
     bool IsGateOpen() const { return gateOpen; }
 
     void Update(float dt) { timeOfDay.Update(dt); }
+    void ClearDynamicLights() const { timeOfDay.ClearLights(); }
+    void AddDynamicLight(Vector2 pos, float radius, Color color, float intensity = 1.0f) const {
+        timeOfDay.RegisterLight(pos, radius, color, intensity);
+    }
     void DrawLighting(Camera2D camera, Vector2 playerPos) const;
     TimeOfDaySystem& GetTimeOfDay() { return timeOfDay; }
     const TimeOfDaySystem& GetTimeOfDay() const { return timeOfDay; }
@@ -53,7 +57,10 @@ public:
     bool IsInterior() const {
         return currentEnv == MapEnvironment::TAVERN_INTERIOR ||
                currentEnv == MapEnvironment::FORGE_INTERIOR ||
-               currentEnv == MapEnvironment::ROYAL_KEEP ||
+               currentEnv == MapEnvironment::ROYAL_KEEP;
+    }
+    bool IsSubterranean() const {
+        return currentEnv == MapEnvironment::QUARRY_DEPTHS ||
                currentEnv == MapEnvironment::FROST_CAVERNS;
     }
 

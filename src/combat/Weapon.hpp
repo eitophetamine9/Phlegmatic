@@ -44,10 +44,10 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::DAGGERS:
             stats = {
                 "Dual Daggers",
-                "Swift twin-blade flurry with 0 stamina light attacks. Heavy attack unleashes a 3-stage combo: Shadow Puncture (invulnerable lunge applying Bleed), Backstab Cross-Slash (+40% bonus against bleeding/rear targets), and Vault Kick (staggers target and propels player backward).",
-                12.0f, 65.0f, 95.0f, 0.14f, 0.18f, 0.0f,
-                58.0f, 95.0f, 360.0f, 0.18f, 0.12f, 1.80f, 18.0f,
-                14.0f, 0.50f,
+                "Swift twin-blade flurry (9 stamina light strikes). Heavy attack unleashes a 3-stage combo: Shadow Puncture (invulnerable lunge applying Bleed), Backstab Cross-Slash (+40% bonus against bleeding/rear targets), and Vault Kick (staggers target and propels player backward).",
+                12.0f, 65.0f, 95.0f, 0.14f, 0.18f, 9.0f,
+                58.0f, 95.0f, 360.0f, 0.18f, 0.12f, 1.80f, 28.0f,
+                16.0f, 0.50f,
                 0, 1.0f, 0.0f, 1.0f, 0.0f
             };
             if (upgradeLevel >= 1) {
@@ -135,10 +135,10 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::ZEPHYR_DAGGERS:
             stats = {
                 "Twin Zephyr Daggers",
-                "Gale-forged dual curved blades pulsing with Shadow Essence. Light attack unleashes an effortless wind flurry (0 stamina). Heavy attack performs an evasive Shadow-Step with invulnerability frames, striking in a 360-deg whirlwind and leaving an explosive decoy.",
-                16.0f, 75.0f, 105.0f, 0.12f, 0.15f, 0.0f,
-                68.0f, 110.0f, 360.0f, 0.15f, 0.12f, 1.50f, 15.0f,
-                10.0f, 0.35f,
+                "Gale-forged dual curved blades pulsing with Shadow Essence. Light attack unleashes a rapid wind flurry (8 stamina). Heavy attack performs an evasive Shadow-Step with invulnerability frames, striking in a 360-deg whirlwind and leaving an explosive decoy.",
+                16.0f, 75.0f, 105.0f, 0.12f, 0.15f, 8.0f,
+                68.0f, 110.0f, 360.0f, 0.15f, 0.12f, 1.50f, 25.0f,
+                14.0f, 0.35f,
                 0, 1.0f, 0.15f, 1.15f, 0.0f
             };
             if (upgradeLevel >= 1) {
@@ -160,8 +160,8 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             stats = {
                 "Windrunner's Recurve",
                 "Acrobatic wind bow crafted from Gale Archer trophies. Light attack fires rapid wind arrows with an impact windburst AoE (30% weapon dmg). Heavy attack channels a Gale Piercer Drill Arrow with 50% defense pierce that shatters enemy armor and stuns foes.",
-                9.0f, 520.0f, 20.0f, 0.20f, 0.28f, 8.0f,
-                36.0f, 620.0f, 25.0f, 0.38f, 0.28f, 2.60f, 24.0f,
+                9.0f, 520.0f, 20.0f, 0.20f, 0.28f, 18.0f,
+                36.0f, 620.0f, 25.0f, 0.38f, 0.28f, 2.60f, 42.0f,
                 14.0f, 0.50f,
                 0, 1.30f, 0.50f, 1.25f, 0.0f
             };
@@ -183,9 +183,9 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::SUN_CLAYMORE:
             stats = {
                 "Sun-Forged Claymore",
-                "Colossal two-handed broadsword bathed in golden sunfire. Generates unstoppable hyper-armor and sweeping 200-deg holy cleaves that shatter enemy guards.",
+                "Colossal greatsword bathed in golden sunfire. Heavy attack unleashes a 2-stage Solar Cataclysm combo: Sunfire Crescent (inflicts 4s Solar Burn) into an overhead Solar Cataclysm Slam (+25% pierce, +30% vs burning foes).",
                 30.0f, 115.0f, 140.0f, 0.30f, 0.45f, 24.0f,
-                105.0f, 165.0f, 200.0f, 0.42f, 0.38f, 2.60f, 38.0f,
+                117.0f, 200.0f, 180.0f, 0.40f, 0.22f, 2.60f, 38.0f,
                 24.0f, 1.15f,
                 0, 1.40f, 0.15f, 1.0f, 0.0f
             };
@@ -193,13 +193,13 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Sun-Forged Claymore +1";
                 stats.lightDamage = 36.0f;
-                stats.heavyDamage = 124.0f;
+                stats.heavyDamage = 139.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Sun-Forged Claymore +2";
                 stats.lightDamage = 42.0f;
-                stats.heavyDamage = 145.0f;
+                stats.heavyDamage = 162.0f;
                 stats.defensePierceBonus = 0.25f;
                 stats.poiseMultiplier = 1.60f;
             }
@@ -208,9 +208,9 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::STORM_GLAIVE:
             stats = {
                 "Storm Glaive",
-                "Aerodynamic wind polearm infused with condensed Gale Mist. Light attacks execute linear piercing thrusts. Heavy attacks unleash a sweeping tempest vortex cleave.",
+                "Aerodynamic wind polearm infused with condensed Gale Mist. Heavy attack unleashes a 2-stage Tempest Cyclone combo: Zephyr Surge Step (0.18s i-frame gale lunge) into Tempest Cyclone (+15 Composure on hit & piercing Crescent Gale Wave).",
                 20.0f, 155.0f, 55.0f, 0.18f, 0.28f, 12.0f,
-                72.0f, 180.0f, 240.0f, 0.28f, 0.32f, 1.90f, 26.0f,
+                100.0f, 180.0f, 360.0f, 0.26f, 0.18f, 2.00f, 28.0f,
                 16.0f, 0.70f,
                 0, 1.15f, 0.25f, 1.15f, 0.0f
             };
@@ -218,13 +218,13 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Storm Glaive +1";
                 stats.lightDamage = 25.0f;
-                stats.heavyDamage = 86.0f;
+                stats.heavyDamage = 120.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Storm Glaive +2";
                 stats.lightDamage = 31.0f;
-                stats.heavyDamage = 102.0f;
+                stats.heavyDamage = 142.0f;
                 stats.defensePierceBonus = 0.35f;
                 stats.critMultiplier = 1.25f;
             }
@@ -232,26 +232,26 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
 
         case WeaponType::GLACIAL_CLEAVER:
             stats = {
-                "Glacial Spiked Cleaver",
-                "Colossal great-axe forged from Berserker Troll horns and tempered slag. Light attacks execute staggering cleaves. Heavy attack unleashes an overhead hyper-armored skull cleave that erupts into a chilling frost tremor shockwave.",
-                30.0f, 105.0f, 115.0f, 0.28f, 0.48f, 24.0f,
-                94.0f, 160.0f, 260.0f, 0.40f, 0.38f, 2.80f, 36.0f,
-                24.0f, 1.10f,
-                0, 1.40f, 0.20f, 1.10f, 0.0f
+                "Twin Glacial Cleavers",
+                "Dual jagged frost-steel cleavers forged from Berserker Troll horns. Alternating light swings carve at high speed. Heavy attack unleashes Fury of Cleaves, an automated 4-stage berserk barrage ending in Glacial Cross-Rupture.",
+                20.0f, 92.0f, 130.0f, 0.14f, 0.20f, 13.0f,
+                46.0f, 140.0f, 165.0f, 0.22f, 0.11f, 2.30f, 36.0f,
+                18.0f, 0.85f,
+                0, 1.25f, 0.20f, 1.15f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
-                stats.name = "Glacial Spiked Cleaver +1";
-                stats.lightDamage = 36.0f;
-                stats.heavyDamage = 112.0f;
+                stats.name = "Twin Glacial Cleavers +1";
+                stats.lightDamage = 25.0f;
+                stats.heavyDamage = 54.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
-                stats.name = "Glacial Spiked Cleaver +2";
-                stats.lightDamage = 44.0f;
-                stats.heavyDamage = 132.0f;
+                stats.name = "Twin Glacial Cleavers +2";
+                stats.lightDamage = 31.0f;
+                stats.heavyDamage = 64.0f;
                 stats.defensePierceBonus = 0.30f;
-                stats.poiseMultiplier = 1.65f;
+                stats.poiseMultiplier = 1.45f;
             }
             return stats;
 
@@ -259,7 +259,7 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         default:
             stats = {
                 "Crusader Blade",
-                "Consecrated broadsword of the Order. Heavy attack executes a 3-stage martial combo: Crescent Cleave (restores +12 Composure), Shock Thrust (piercing line interrupting enemy windups), and Radiant Execution (downward holy cleave dealing +50% bonus damage to staggered foes).",
+                "Consecrated broadsword of the Order. Heavy attack executes a 3-stage martial combo: Crescent Cleave (restores +12 Composure), Shock Thrust (piercing line interrupting enemy windups), and Radiant Sunder (downward holy cleave dealing +50% bonus damage to staggered foes).",
                 18.0f, 75.0f, 110.0f, 0.22f, 0.35f, 15.0f,
                 88.0f, 125.0f, 160.0f, 0.22f, 0.38f, 2.20f, 30.0f,
                 20.0f, 0.85f,

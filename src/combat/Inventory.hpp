@@ -55,8 +55,21 @@ public:
     // Weapon Arsenal
     bool HasWeapon(WeaponType type) const;
     void UnlockWeapon(WeaponType type);
-    void ClearWeapons() { unlockedWeapons.clear(); }
+    void ClearWeapons() {
+        unlockedWeapons.clear();
+        weaponHotbar[0] = WeaponType::NONE;
+        weaponHotbar[1] = WeaponType::NONE;
+        weaponHotbar[2] = WeaponType::NONE;
+        activeWeaponSlot = 0;
+    }
     const std::vector<WeaponType>& GetUnlockedWeapons() const { return unlockedWeapons; }
+
+    // 3-Slot Weapon Hotbar ([1], [2], [3])
+    WeaponType GetHotbarWeapon(int slotIdx) const;
+    void SetHotbarWeapon(int slotIdx, WeaponType type);
+    int GetActiveWeaponSlot() const { return activeWeaponSlot; }
+    void SetActiveWeaponSlot(int slotIdx);
+    int GetWeaponHotbarSlot(WeaponType type) const;
 
     // Armor Wardrobe (Modular Pieces)
     bool HasArmor(ArmorType type) const;
@@ -297,6 +310,8 @@ public:
 private:
     EquipmentPreset loadouts[3];
     int activeLoadoutIdx = 0;
+    WeaponType weaponHotbar[3] = { WeaponType::NONE, WeaponType::NONE, WeaponType::NONE };
+    int activeWeaponSlot = 0;
     std::vector<WeaponType> unlockedWeapons;
     std::vector<ArmorType> unlockedArmors;
     ArmorType equippedArmor = ArmorType::NONE;

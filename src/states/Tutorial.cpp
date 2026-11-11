@@ -177,13 +177,13 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
             break;
         case TutorialStep::INVENTORY_CHECK:
             popupTitle = "EQUIPMENT & ATTRIBUTES";
-            popupBody = "Your armaments are equipped and ready.\n\nOpen your Journal & Inventory [I] to inspect your character paper doll, armor defense, and martial stats.";
-            popupHint = "Press [I] or click Journal to Open Inventory";
+            popupBody = "Your armaments are equipped and ready.\n\nOpen your Inventory & Journal [TAB] or [I] to inspect your character paper doll, weapon hotbar, and martial stats.";
+            popupHint = "Press [TAB] / [I] or click Inventory to Inspect";
             break;
         case TutorialStep::LORE_DISCOVERY:
             popupTitle = "THE SCATTERED CHRONICLES";
             popupBody = "The history of Tydeshire was shattered into fragments when King Charlz went mad.\n\nCross the eastern stone bridge to inspect the ancient relic chest. All 4 chronicles can be discovered across the castle ruins!";
-            popupHint = "[E] Open Relic Chest  |  [I] Open Lore Journal";
+            popupHint = "[E] Open Relic Chest  |  [TAB] / [I] Open Lore Journal";
             break;
         case TutorialStep::DEFENSE_SENTINEL:
             popupTitle = "DEFENSE TRIAL: COMPOSURE & PHLEGMATIC MECHANICS";
@@ -385,8 +385,8 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
         }
 
         case TutorialStep::INVENTORY_CHECK: {
-            currentObjectiveText = "EQUIPMENT & STATS: Open Journal / Inventory [I] to inspect equipment and attributes.";
-            currentControlHint = "Press [I] or click Journal to inspect Character Paper Doll & Stats";
+            currentObjectiveText = "EQUIPMENT & STATS: Open Inventory / Journal [TAB] or [I] to inspect equipment and attributes.";
+            currentControlHint = "Press [TAB] / [I] or click Inventory to inspect Character Paper Doll & Stats";
 
             if (hasOpenedInventory || IsKeyPressed(KEY_I) || IsKeyPressed(KEY_TAB)) {
                 hasOpenedInventory = true;
@@ -398,7 +398,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
 
         case TutorialStep::LORE_DISCOVERY: {
             currentObjectiveText = "LOST CHRONICLES: Cross the eastern bridge to inspect the glowing ancient chest [E].";
-            currentControlHint = "Press [E] to Open Chest  |  Press [I] to read Lore Journal";
+            currentControlHint = "Press [E] to Open Chest  |  Press [TAB] / [I] to read Lore Journal";
 
             if (chest.CheckInteraction(playerPos) && (IsKeyPressed(KEY_E) || IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER))) {
                 chest.opened = true;

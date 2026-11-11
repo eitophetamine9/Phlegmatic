@@ -26,7 +26,7 @@ public:
     void TriggerParry(ParticleSystem& particles);
 
     // Damage handling
-    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f);
+    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f, bool isCold = false);
     void Heal(float amount);
     void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
@@ -34,13 +34,6 @@ public:
     void SetWeapon(WeaponType newWeapon);
     WeaponType GetWeapon() const { return currentWeapon; }
     WeaponType GetEquippedWeapon() const { return currentWeapon; }
-
-    // Visceral Execution & Adrenaline Buff
-    bool IsExecuting() const { return isExecuting; }
-    void StartExecution(Vector2 targetPos);
-    bool HasAdrenalineBuff() const { return adrenalineTimer > 0.0f; }
-    float GetAdrenalineTimer() const { return adrenalineTimer; }
-    void TriggerAdrenalineBuff(float duration) { adrenalineTimer = duration; }
 
     void SetArmor(ArmorType newArmor);
     ArmorType GetArmor() const { return currentArmor; }
@@ -118,6 +111,8 @@ public:
     float GetArmorSkillCooldown() const { return armorSkillCooldown; }
     float GetArmorSkillMaxCooldown() const { return armorSkillMaxCooldown; }
     float GetArmorSkillShieldHp() const { return armorSkillShieldHp; }
+    float GetArmorSkillActiveTimer() const { return armorSkillActiveTimer; }
+    bool HasFrostwardenWardActive() const { return HasFullArmorSet(ArmorSet::FROSTWARDEN) && armorSkillActiveTimer > 0.0f; }
 
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }
@@ -140,6 +135,7 @@ public:
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
     void ResetStamina() { stamina = maxStamina; }
+    void RestoreStamina(float amount) { stamina = fminf(maxStamina, stamina + amount); }
     bool IsParrying() const { return isParrying; }
     bool IsDashing() const { return isDashing; }
     bool IsAlive() const { return health > 0.0f; }
@@ -172,7 +168,7 @@ public:
     float GetStaggerTimer() const { return staggerTimer; }
 
     // Invulnerability / I-Frames
-    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f || isExecuting; }
+    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f; }
     bool HasWillOfAtlasActive() const { return willOfAtlasTimer > 0.0f; }
     float GetWillOfAtlasTimer() const { return willOfAtlasTimer; }
     float GetWillOfAtlasCooldown() const { return willOfAtlasCooldown; }
@@ -256,7 +252,7 @@ public:
     void ThawFrostbite(float amount);
     void ResetFrostbite();
     void UpdateSnowFootsteps(float dt, ParticleSystem& particles);
-    void QuickSwapWeapon(ParticleSystem& particles);
+    bool EquipHotbarSlot(int slotIdx, ParticleSystem& particles);
 
     // Bestiary Mastery Hunting Perks
     bool HasTrollSlayerT2() const;
@@ -320,6 +316,9 @@ private:
     float pendingAoERadius;
     float pendingAoEStun;
     float pendingAoEArmorShred;
+    float pendingAoEChill;
+    bool pendingAoEStunNonBossOnly;
+    float frostNovaVisualTimer;
 
     // Phlegmatic Composure & Trance State
     float composure;
@@ -344,7 +343,6 @@ private:
     float counterBuffTimer;
     float potionCooldown;
     float elementalProjectileCooldown;
-    int daggerLightAttackCounter = 0;
 
     // Stagger & Poise State
     float staggerTimer;
@@ -354,12 +352,6 @@ private:
     float frostbiteMeter;
     bool isFrostbitten;
     float snowFootstepTimer;
-
-    // Visceral Execution state
-    bool isExecuting;
-    float executionTimer;
-    Vector2 executionTargetPos;
-    float adrenalineTimer;
 
     // Consumable Elixir Buff Timers
     float stoneskinTimer;

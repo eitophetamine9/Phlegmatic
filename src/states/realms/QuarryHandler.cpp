@@ -375,9 +375,19 @@ void QuarryHandler::Render(
         }
     }
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    map.AddDynamicLight(campfire.position, 290.0f, Color{ 255, 168, 72, 255 }, 0.96f);
+    map.AddDynamicLight(altarPosition, 260.0f, Color{ 255, 195, 90, 255 }, 0.88f);
+    map.AddDynamicLight({ 860.0f, 250.0f }, 200.0f, Color{ 255, 130, 50, 255 }, 0.80f);
+    map.AddDynamicLight({ 1140.0f, 250.0f }, 200.0f, Color{ 110, 220, 255, 255 }, 0.80f);
+    map.AddDynamicLight({ 860.0f, 370.0f }, 200.0f, Color{ 235, 185, 70, 255 }, 0.80f);
+    map.AddDynamicLight({ 1140.0f, 370.0f }, 200.0f, Color{ 190, 130, 255, 255 }, 0.80f);
+    map.AddDynamicLight({ 240.0f, 750.0f }, 210.0f, Color{ 255, 200, 100, 255 }, 0.78f);
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     // Mouse Reticle
     Vector2 mousePos = GetMousePosition();

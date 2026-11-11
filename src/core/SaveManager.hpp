@@ -76,6 +76,8 @@ struct GameSaveData {
     bool galeArcherDefeated = false;
     bool elementalGolemDefeated = false;
     int equippedWeapon = 1;
+    int weaponHotbar[3] = { 0, 0, 0 };
+    int activeWeaponSlot = 0;
     int equippedArmor = 0;
     int equippedHelmet = 0;
     int equippedChestplate = 0;

@@ -44,9 +44,9 @@ inline TotemStats GetTotemStats(TotemType type) {
             return {
                 "Totem of Mist",
                 "A phantom talisman swirling with woodland vapor. Awakens a loyal Mist Fairy that guides strikes into vital points (+20% Crit Chance, +35% Crit Dmg) and periodically conjures restorative mist healing orbs (+30 HP).",
-                "Summons Mist Fairy (+20% Crit, +35% Crit Dmg, Healing Orbs), +20% Stamina Regen",
-                "-15% Defense, -25 Max Health",
-                1.0f, 0.85f, 1.0f, 1.20f, 0.95f, 10.0f, -25.0f,
+                "Summons Mist Fairy (+20% Crit, +35% Crit Dmg, Healing Orbs), +10% Stamina Regen, +10 Will",
+                "-5% Movement Speed, -15% Defense, -25 Max Health",
+                1.0f, 0.85f, 0.95f, 1.10f, 1.0f, 10.0f, -25.0f,
                 Color{ 110, 240, 225, 255 }
             };
         case TotemType::CRUSADER_TOTEM:

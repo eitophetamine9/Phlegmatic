@@ -41,8 +41,6 @@ void PlayerRenderer::Draw(const Player& player) {
 
     else if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
 
-    else if (player.IsExecuting()) bodyColor = Color{ 255, 60, 60, 255 };
-
     else if (player.staggerTimer > 0.0f) bodyColor = Color{ 240, 180, 60, 240 };
 
 
@@ -112,8 +110,49 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f + 2.0f * pulse, Color{ 255, 50, 70, (unsigned char)(180 * pulse) });
     }
 
-    // Crusader Plate Dawnfire Aegis Bubble
-    if (player.armorSkillShieldHp > 0.0f) {
+    // Frostwarden Frost Nova (12 radiating crystalline ice spires)
+    if (player.frostNovaVisualTimer > 0.0f) {
+        float novaProgress = fminf(1.0f, fmaxf(0.0f, 1.0f - (player.frostNovaVisualTimer / 0.65f)));
+        float curR = 26.0f + (190.0f - 26.0f) * novaProgress;
+        unsigned char alpha = (unsigned char)(240 * (1.0f - novaProgress));
+        DrawCircleGradient(player.position, curR, Color{ 100, 215, 255, (unsigned char)(alpha * 0.28f) }, Color{ 60, 170, 240, 0 });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, curR, Color{ 165, 240, 255, alpha });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, curR * 0.72f, Color{ 110, 220, 255, (unsigned char)(alpha * 0.85f) });
+        for (int s = 0; s < 12; ++s) {
+            float rad = ((float)s * 30.0f + novaProgress * 12.0f) * DEG2RAD;
+            Vector2 dirS = { cosf(rad), sinf(rad) };
+            Vector2 perpS = { -dirS.y, dirS.x };
+            float halfW = 10.5f * (1.0f - 0.35f * novaProgress);
+            Vector2 baseMid = { player.position.x + dirS.x * (curR * 0.42f), player.position.y + dirS.y * (curR * 0.42f) };
+            Vector2 baseL = { baseMid.x - perpS.x * halfW, baseMid.y - perpS.y * halfW };
+            Vector2 baseR = { baseMid.x + perpS.x * halfW, baseMid.y + perpS.y * halfW };
+            Vector2 tip = { player.position.x + dirS.x * (curR + 18.0f), player.position.y + dirS.y * (curR + 18.0f) };
+            DrawTriangle(baseL, tip, baseR, Color{ 130, 232, 255, (unsigned char)(alpha * 0.85f) });
+            DrawTriangleLines(baseL, tip, baseR, Color{ 225, 250, 255, alpha });
+            DrawLineEx(baseMid, tip, 2.0f, Color{ 245, 255, 255, alpha });
+        }
+    }
+
+    // Active Armor Set Shield Bubble (Frostwarden Permafrost Ice Ward vs Crusader Dawnfire Aegis)
+    if (player.HasFullArmorSet(ArmorSet::FROSTWARDEN) && (player.armorSkillActiveTimer > 0.0f || player.armorSkillShieldHp > 0.0f)) {
+        float pulse = 0.75f + 0.25f * sinf((float)GetTime() * 7.0f);
+        if (player.armorSkillShieldHp > 0.0f) {
+            DrawCircleGradient(player.position, player.radius + 18.0f, Color{ 120, 225, 255, (unsigned char)(45 * pulse) }, Color{ 70, 185, 245, 0 });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 13.0f, Color{ 160, 240, 255, (unsigned char)(230 * pulse) });
+        }
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 18.0f, Color{ 110, 220, 255, (unsigned char)(175 * pulse) });
+        for (int i = 0; i < 6; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 6.0f) + (float)GetTime() * 2.6f;
+            float orbitR = player.radius + 20.0f;
+            Vector2 c = { player.position.x + cosf(ang) * orbitR, player.position.y + sinf(ang) * orbitR };
+            Vector2 outV = { c.x + cosf(ang) * 5.0f, c.y + sinf(ang) * 5.0f };
+            Vector2 inV = { c.x - cosf(ang) * 5.0f, c.y - sinf(ang) * 5.0f };
+            Vector2 sideA = { c.x - sinf(ang) * 3.2f, c.y + cosf(ang) * 3.2f };
+            Vector2 sideB = { c.x + sinf(ang) * 3.2f, c.y - cosf(ang) * 3.2f };
+            DrawTriangle(outV, sideA, sideB, Color{ 195, 248, 255, 235 });
+            DrawTriangle(inV, sideB, sideA, Color{ 110, 220, 255, 235 });
+        }
+    } else if (player.armorSkillShieldHp > 0.0f) {
         float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f, Color{ 255, 230, 90, (unsigned char)(220 * pulse) });
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 16.0f, Color{ 255, 200, 60, (unsigned char)(140 * pulse) });
@@ -592,24 +631,6 @@ void PlayerRenderer::Draw(const Player& player) {
 
         }
 
-
-
-        // Draw active shockwave ring if expanding
-
-        if (player.shockwaveActive) {
-
-            float shockProgress = 1.0f - (player.shockwaveTimer / 0.38f);
-
-            float curRadius = player.shockwaveRadius * shockProgress;
-
-            unsigned char alpha = (unsigned char)(255 * (1.0f - shockProgress));
-
-            DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius, Color{ 255, 180, 50, alpha });
-
-            DrawCircle((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.4f, Color{ 255, 140, 40, (unsigned char)(alpha * 0.25f) });
-
-        }
-
     } else if (player.currentWeapon == WeaponType::HALBERD) {
 
         float halberdAngle = player.facingAngle + 30.0f;
@@ -788,14 +809,41 @@ void PlayerRenderer::Draw(const Player& player) {
             DrawCircleV(tipFlare, 4.5f, Color{ 255, 255, 220, 255 });
         } else if (player.currentAttack.type == AttackType::HEAVY) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-            claymoreAngle = player.facingAngle - 100.0f + progress * 200.0f;
-            AssetManager::DrawClaymore(rightHand, claymoreAngle, 64.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 160, 40, 255 });
+            if (player.heavyStage == 1) {
+                // Stage 1: Sunfire Crescent (180-deg golden sweep)
+                claymoreAngle = player.facingAngle - 90.0f + progress * 180.0f;
+                AssetManager::DrawClaymore(rightHand, claymoreAngle, 64.0f, Color{ 255, 245, 180, 255 }, Color{ 255, 160, 40, 255 });
 
-            float startAngle = player.facingAngle - 100.0f;
-            float sweepAngle = progress * 200.0f;
-            DrawCircleSector(player.position, player.currentAttack.range * 1.12f, startAngle, startAngle + sweepAngle, 24, Color{ 255, 100, 20, 60 });
-            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 24, Color{ 255, 190, 50, 130 });
-            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 24, Color{ 255, 250, 200, 255 });
+                float startAngle = player.facingAngle - 90.0f;
+                float sweepAngle = progress * 180.0f;
+                DrawCircleSector(player.position, player.currentAttack.range * 1.08f, startAngle, startAngle + sweepAngle, 22, Color{ 255, 110, 20, 65 });
+                DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 200, 60, 130 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 255, 250, 200, 255 });
+                float leadRad = (startAngle + sweepAngle) * DEG2RAD;
+                Vector2 tipFlare = { player.position.x + cosf(leadRad) * player.currentAttack.range, player.position.y + sinf(leadRad) * player.currentAttack.range };
+                DrawCircleV(tipFlare, 6.0f, Color{ 255, 255, 210, 255 });
+            } else {
+                // Stage 2: Solar Cataclysm Slam (Blazing sky-beam pillar & multi-ring sun-sigil detonation)
+                claymoreAngle = player.facingAngle;
+                Vector2 plungeOrigin = { rightHand.x + cosf(claymoreAngle * DEG2RAD) * 26.0f, rightHand.y + sinf(claymoreAngle * DEG2RAD) * 26.0f };
+                AssetManager::DrawClaymore(plungeOrigin, claymoreAngle, 66.0f, Color{ 255, 255, 210, 255 }, Color{ 255, 190, 50, 255 });
+
+                Vector2 center = player.currentAttack.circleCenter;
+                float pillarR = player.currentAttack.circleRadius;
+                float fade = 1.0f - progress * 0.45f;
+                Vector2 beamTop = { center.x, center.y - 260.0f };
+                DrawLineEx(beamTop, center, 24.0f, Color{ 255, 175, 45, (unsigned char)(135 * fade) });
+                DrawLineEx(beamTop, center, 10.0f, Color{ 255, 250, 200, (unsigned char)(230 * fade) });
+                DrawCircleV(center, pillarR * (0.45f + 0.55f * progress), Color{ 255, 170, 35, (unsigned char)(95 * (1.0f - progress)) });
+                DrawCircleV(center, pillarR * 0.42f, Color{ 255, 235, 130, (unsigned char)(140 * (1.0f - progress * 0.6f)) });
+                DrawCircleLines((int)center.x, (int)center.y, pillarR, Color{ 255, 230, 90, 240 });
+                DrawCircleLines((int)center.x, (int)center.y, pillarR * (0.45f + 0.55f * progress), Color{ 255, 255, 210, 255 });
+                for (int r = 0; r < 8; r++) {
+                    float rayAng = (r * 45.0f + progress * 35.0f) * DEG2RAD;
+                    Vector2 rOut = { center.x + cosf(rayAng) * pillarR * 1.15f, center.y + sinf(rayAng) * pillarR * 1.15f };
+                    DrawLineEx(center, rOut, 2.5f, Color{ 255, 225, 110, (unsigned char)(195 * fade) });
+                }
+            }
         } else if (player.isHeavyWindingUp) {
             claymoreAngle = player.facingAngle - 110.0f;
             AssetManager::DrawClaymore(rightHand, claymoreAngle, 58.0f, Color{ 255, 210, 80, 255 }, Color{ 255, 120, 20, 230 });
@@ -824,17 +872,43 @@ void PlayerRenderer::Draw(const Player& player) {
             DrawLineEx(c4, c3, 3.0f, Color{ 180, 255, 245, 240 });
         } else if (player.currentAttack.type == AttackType::HEAVY) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-            glaiveAngle = player.facingAngle - 120.0f + progress * 240.0f;
-            AssetManager::DrawGlaive(rightHand, glaiveAngle, 60.0f, Color{ 180, 255, 245, 255 }, Color{ 90, 245, 225, 240 });
+            if (player.heavyStage == 1) {
+                // Stage 1: Zephyr Surge Step (High-speed forward thrust + i-frame gale corridor)
+                float thrustExt = sinf(progress * 3.14159f) * 44.0f;
+                Vector2 thrustOrigin = { rightHand.x + cosf(player.facingAngle * DEG2RAD) * thrustExt, rightHand.y + sinf(player.facingAngle * DEG2RAD) * thrustExt };
+                glaiveAngle = player.facingAngle;
+                AssetManager::DrawGlaive(thrustOrigin, glaiveAngle, 64.0f, Color{ 180, 255, 245, 255 }, Color{ 90, 245, 225, 240 });
 
-            float startAngle = player.facingAngle - 120.0f;
-            float sweepAngle = progress * 240.0f;
-            DrawCircleSector(player.position, player.currentAttack.range * 1.06f, startAngle, startAngle + sweepAngle, 22, Color{ 80, 220, 205, 40 });
-            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 110, 245, 230, 95 });
-            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 22, Color{ 180, 255, 245, 240 });
-            float leadRad = (startAngle + sweepAngle) * DEG2RAD;
-            Vector2 tipFlare = { player.position.x + cosf(leadRad) * player.currentAttack.range, player.position.y + sinf(leadRad) * player.currentAttack.range };
-            DrawCircleV(tipFlare, 4.0f, Color{ 220, 255, 250, 255 });
+                float rad = player.facingAngle * DEG2RAD;
+                Vector2 dir = { cosf(rad), sinf(rad) };
+                Vector2 normal = { -dir.y, dir.x };
+                float halfWidth = 26.0f;
+                float length = player.currentAttack.range;
+                Vector2 c1 = { player.position.x - normal.x * halfWidth, player.position.y - normal.y * halfWidth };
+                Vector2 c2 = { player.position.x + normal.x * halfWidth, player.position.y + normal.y * halfWidth };
+                Vector2 c3 = { c2.x + dir.x * length, c2.y + dir.y * length };
+                Vector2 c4 = { c1.x + dir.x * length, c1.y + dir.y * length };
+                DrawTriangle(c1, c2, c3, Color{ 100, 245, 230, (unsigned char)(85 * (1.0f - progress * 0.4f)) });
+                DrawTriangle(c1, c3, c4, Color{ 100, 245, 230, (unsigned char)(85 * (1.0f - progress * 0.4f)) });
+                DrawLineEx(c1, c4, 2.2f, Color{ 190, 255, 245, 230 });
+                DrawLineEx(c2, c3, 2.2f, Color{ 190, 255, 245, 230 });
+                DrawLineEx(c4, c3, 3.5f, WHITE);
+                DrawCircleLines((int)player.position.x, (int)player.position.y, 28.0f + progress * 10.0f, Color{ 160, 255, 245, (unsigned char)(190 * (1.0f - progress)) });
+            } else {
+                // Stage 2: Tempest Cyclone (360-deg spinning wind vortex + layered wind-crescent trails)
+                glaiveAngle = player.facingAngle + progress * 420.0f;
+                AssetManager::DrawGlaive(rightHand, glaiveAngle, 64.0f, Color{ 200, 255, 250, 255 }, Color{ 100, 245, 230, 255 });
+                float r = player.currentAttack.range;
+                unsigned char a = (unsigned char)(230 * (1.0f - progress * 0.45f));
+                DrawCircleV(player.position, r * (0.4f + 0.6f * progress), Color{ 90, 240, 225, (unsigned char)(55 * (1.0f - progress)) });
+                DrawCircleLines((int)player.position.x, (int)player.position.y, r, Color{ 160, 255, 245, a });
+                DrawCircleLines((int)player.position.x, (int)player.position.y, r * 0.68f, Color{ 110, 245, 230, (unsigned char)(a * 0.85f) });
+                DrawCircleLines((int)player.position.x, (int)player.position.y, r * 0.38f, Color{ 220, 255, 250, a });
+                for (int w = 0; w < 4; w++) {
+                    float aStart = player.facingAngle + progress * 360.0f + w * 90.0f;
+                    DrawCircleSectorLines(player.position, r * (0.76f + 0.08f * (w % 2)), aStart, aStart + 58.0f, 10, Color{ 210, 255, 250, a });
+                }
+            }
         } else if (player.isHeavyWindingUp) {
             glaiveAngle = player.facingAngle - 120.0f;
             AssetManager::DrawGlaive(rightHand, glaiveAngle, 54.0f, Color{ 140, 240, 225, 255 }, Color{ 70, 210, 195, 220 });
@@ -842,25 +916,99 @@ void PlayerRenderer::Draw(const Player& player) {
             AssetManager::DrawGlaive(rightHand, glaiveAngle, 48.0f, Color{ 120, 230, 215, 255 }, Color{ 60, 180, 165, 180 });
         }
     } else if (player.currentWeapon == WeaponType::GLACIAL_CLEAVER) {
-        float cleaverAngle = player.facingAngle + 35.0f;
+        // Dual-wielding Twin Glacial Cleavers
+        float angleR = player.facingAngle + 32.0f;
+        float angleL = player.facingAngle - 32.0f;
+        Color iceHead = Color{ 170, 232, 255, 255 };
+        Color iceGlow = Color{ 85, 198, 245, 235 };
+
         if (player.currentAttack.type == AttackType::LIGHT) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-            cleaverAngle = player.facingAngle - 60.0f + progress * 120.0f;
-            AssetManager::DrawCleaver(rightHand, cleaverAngle, 56.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 230 });
+            if (player.comboStep == 2) {
+                // Left cleaver upward slash, right held ready
+                angleL = player.facingAngle + 65.0f - progress * 130.0f;
+                AssetManager::DrawCleaver(rightHand, angleR, 44.0f, Color{ 140, 210, 245, 255 }, Color{ 70, 175, 225, 190 });
+                AssetManager::DrawCleaver(leftHand, angleL, 52.0f, iceHead, iceGlow);
+                float sweepStart = player.facingAngle + 65.0f - progress * player.currentAttack.arcAngle;
+                DrawCircleSector(player.position, player.currentAttack.range, sweepStart, player.facingAngle + 65.0f, 16, Color{ 130, 225, 255, 65 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, sweepStart, player.facingAngle + 65.0f, 16, Color{ 195, 245, 255, 220 });
+            } else {
+                // Right cleaver downward slash, left held ready
+                angleR = player.facingAngle - 65.0f + progress * 130.0f;
+                AssetManager::DrawCleaver(leftHand, angleL, 44.0f, Color{ 140, 210, 245, 255 }, Color{ 70, 175, 225, 190 });
+                AssetManager::DrawCleaver(rightHand, angleR, 52.0f, iceHead, iceGlow);
+                float sweepStart = player.facingAngle - 65.0f;
+                DrawCircleSector(player.position, player.currentAttack.range, sweepStart, sweepStart + progress * player.currentAttack.arcAngle, 16, Color{ 130, 225, 255, 65 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, sweepStart, sweepStart + progress * player.currentAttack.arcAngle, 16, Color{ 195, 245, 255, 220 });
+            }
         } else if (player.currentAttack.type == AttackType::HEAVY) {
             float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
-            cleaverAngle = player.facingAngle - 100.0f + progress * 200.0f;
-            AssetManager::DrawCleaver(rightHand, cleaverAngle, 64.0f, Color{ 190, 240, 255, 255 }, Color{ 110, 215, 255, 255 });
-            float startAngle = player.facingAngle - 100.0f;
-            float sweepAngle = progress * 200.0f;
-            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 100, 210, 255, 70 });
-            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 20, Color{ 180, 240, 255, 220 });
+            if (player.heavyStage == 1) {
+                angleR = player.facingAngle - 82.0f + progress * 165.0f;
+                AssetManager::DrawCleaver(leftHand, angleL, 46.0f, iceHead, iceGlow);
+                AssetManager::DrawCleaver(rightHand, angleR, 56.0f, Color{ 200, 245, 255, 255 }, Color{ 110, 220, 255, 255 });
+                float startA = player.facingAngle - 82.0f;
+                DrawCircleSector(player.position, player.currentAttack.range, startA, startA + progress * 165.0f, 18, Color{ 110, 215, 255, 75 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, startA, startA + progress * 165.0f, 18, Color{ 195, 245, 255, 235 });
+            } else if (player.heavyStage == 2) {
+                angleL = player.facingAngle + 82.0f - progress * 165.0f;
+                AssetManager::DrawCleaver(rightHand, angleR, 46.0f, iceHead, iceGlow);
+                AssetManager::DrawCleaver(leftHand, angleL, 56.0f, Color{ 200, 245, 255, 255 }, Color{ 110, 220, 255, 255 });
+                float endA = player.facingAngle + 82.0f;
+                DrawCircleSector(player.position, player.currentAttack.range, endA - progress * 165.0f, endA, 18, Color{ 110, 215, 255, 75 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, endA - progress * 165.0f, endA, 18, Color{ 195, 245, 255, 235 });
+            } else if (player.heavyStage == 3) {
+                // Twin X-cross flurry
+                angleR = player.facingAngle - 88.0f + progress * 175.0f;
+                angleL = player.facingAngle + 88.0f - progress * 175.0f;
+                AssetManager::DrawCleaver(rightHand, angleR, 58.0f, Color{ 210, 248, 255, 255 }, Color{ 125, 225, 255, 255 });
+                AssetManager::DrawCleaver(leftHand, angleL, 58.0f, Color{ 210, 248, 255, 255 }, Color{ 125, 225, 255, 255 });
+                DrawCircleSector(player.position, player.currentAttack.range, player.facingAngle - 88.0f, player.facingAngle - 88.0f + progress * 175.0f, 18, Color{ 120, 225, 255, 70 });
+                DrawCircleSector(player.position, player.currentAttack.range, player.facingAngle + 88.0f - progress * 175.0f, player.facingAngle + 88.0f, 18, Color{ 160, 238, 255, 70 });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, player.facingAngle - 88.0f, player.facingAngle + 88.0f, 18, Color{ 210, 250, 255, 240 });
+            } else {
+                // Stage 4 Finisher: Glacial Cross-Rupture slam
+                angleR = player.facingAngle + 55.0f - progress * 55.0f;
+                angleL = player.facingAngle - 55.0f + progress * 55.0f;
+                AssetManager::DrawCleaver(rightHand, angleR, 62.0f, Color{ 225, 252, 255, 255 }, Color{ 130, 230, 255, 255 });
+                AssetManager::DrawCleaver(leftHand, angleL, 62.0f, Color{ 225, 252, 255, 255 }, Color{ 130, 230, 255, 255 });
+                float startA = player.facingAngle - 110.0f;
+                DrawCircleSector(player.position, player.currentAttack.range, startA, startA + 220.0f, 22, Color{ 120, 225, 255, (unsigned char)(95 * (1.0f - progress * 0.4f)) });
+                DrawCircleSectorLines(player.position, player.currentAttack.range, startA, startA + 220.0f, 22, Color{ 210, 250, 255, 250 });
+                Vector2 rupPos = player.currentAttack.shockwavePos;
+                float rupR = player.currentAttack.shockwaveRadius;
+                DrawCircleV(rupPos, rupR * (0.35f + 0.55f * progress), Color{ 140, 235, 255, (unsigned char)(110 * (1.0f - progress)) });
+                DrawCircleLines((int)rupPos.x, (int)rupPos.y, rupR, Color{ 200, 248, 255, 235 });
+            }
         } else if (player.isHeavyWindingUp) {
-            cleaverAngle = player.facingAngle - 100.0f;
-            AssetManager::DrawCleaver(rightHand, cleaverAngle, 54.0f, Color{ 140, 210, 245, 255 }, Color{ 70, 180, 230, 200 });
+            angleR = player.facingAngle - 105.0f;
+            angleL = player.facingAngle + 105.0f;
+            AssetManager::DrawCleaver(rightHand, angleR, 52.0f, Color{ 180, 235, 255, 255 }, Color{ 90, 205, 245, 220 });
+            AssetManager::DrawCleaver(leftHand, angleL, 52.0f, Color{ 180, 235, 255, 255 }, Color{ 90, 205, 245, 220 });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, 34.0f, Color{ 150, 230, 255, 190 });
         } else {
-            AssetManager::DrawCleaver(rightHand, cleaverAngle, 48.0f, Color{ 130, 200, 235, 255 }, Color{ 60, 160, 215, 180 });
+            AssetManager::DrawCleaver(rightHand, angleR, 45.0f, Color{ 145, 215, 245, 255 }, Color{ 65, 170, 220, 185 });
+            AssetManager::DrawCleaver(leftHand, angleL, 45.0f, Color{ 145, 215, 245, 255 }, Color{ 65, 170, 220, 185 });
         }
+    }
+
+    // Active heavy finisher shockwave ring (extracted globally across all weapons & armor sets)
+    if (player.shockwaveActive) {
+        float shockProgress = fminf(1.0f, fmaxf(0.0f, 1.0f - (player.shockwaveTimer / 0.38f)));
+        float curRadius = player.shockwaveRadius * shockProgress;
+        unsigned char alpha = (unsigned char)(255 * (1.0f - shockProgress));
+        Color outerCol = Color{ 255, 180, 50, alpha };
+        Color innerCol = Color{ 255, 140, 40, (unsigned char)(alpha * 0.25f) };
+        if (player.currentWeapon == WeaponType::GLACIAL_CLEAVER || player.HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+            outerCol = Color{ 140, 230, 255, alpha };
+            innerCol = Color{ 100, 205, 255, (unsigned char)(alpha * 0.28f) };
+        } else if (player.currentWeapon == WeaponType::STORM_GLAIVE) {
+            outerCol = Color{ 110, 245, 230, alpha };
+            innerCol = Color{ 80, 220, 205, (unsigned char)(alpha * 0.25f) };
+        }
+        DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius, outerCol);
+        DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.78f, outerCol);
+        DrawCircle((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.4f, innerCol);
     }
 
     // Friendly Mini Elemental Golem Companion

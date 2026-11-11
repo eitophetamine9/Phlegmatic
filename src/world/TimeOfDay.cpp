@@ -3,18 +3,124 @@
 #include <cstdio>
 #include <algorithm>
 
-static Color LerpColor(Color c1, Color c2, float t) {
-    t = fmaxf(0.0f, fminf(1.0f, t));
+static const char* kPointLightFragShader = R"(
+#version 330
+in vec2 fragTexCoord;
+in vec4 fragColor;
+out vec4 finalColor;
+
+void main() {
+    vec2 d = (fragTexCoord - vec2(0.5)) * 2.0;
+    float dist = length(d);
+    float edgeFade = 1.0 - smoothstep(0.0, 1.0, dist);
+    float invSq = 1.0 / (1.0 + 4.8 * dist * dist);
+    float atten = clamp(invSq * edgeFade * edgeFade, 0.0, 1.0) * fragColor.a;
+    vec3 warmCore = mix(fragColor.rgb, vec3(1.0, 0.97, 0.90), clamp((1.0 - dist * 2.1) * 0.28, 0.0, 0.28));
+    finalColor = vec4(warmCore * atten * 1.15, 1.0);
+}
+)";
+
+static const char* kCompositeFragShader = R"(
+#version 330
+in vec2 fragTexCoord;
+in vec4 fragColor;
+uniform sampler2D texture0;
+uniform float uDarkness;
+out vec4 finalColor;
+
+void main() {
+    vec3 light = texture(texture0, fragTexCoord).rgb;
+    // Soft shoulder rolloff so overlapping fire/torch pools glow naturally without harsh clipping
+    vec3 mapped = light / (vec3(1.0) + max(light - vec3(0.85), vec3(0.0)) * 0.55);
+    // Purkinje blue-shift on dark night ambient regions while keeping lit areas rich & vibrant
+    float lum = dot(mapped, vec3(0.299, 0.587, 0.114));
+    float coolMask = clamp((0.36 - lum) * 2.4, 0.0, 1.0) * uDarkness;
+    vec3 purkinjeTint = vec3(0.91, 0.97, 1.13);
+    vec3 result = mix(mapped, mapped * purkinjeTint, coolMask * 0.45);
+    finalColor = vec4(clamp(result, 0.05, 1.12), 1.0);
+}
+)";
+
+static Color LerpColorCosine(Color c1, Color c2, float linearT) {
+    float t = fmaxf(0.0f, fminf(1.0f, linearT));
+    float smoothT = 0.5f - 0.5f * cosf(PI * t);
     return Color{
-        (unsigned char)(c1.r + (c2.r - c1.r) * t),
-        (unsigned char)(c1.g + (c2.g - c1.g) * t),
-        (unsigned char)(c1.b + (c2.b - c1.b) * t),
-        (unsigned char)(c1.a + (c2.a - c1.a) * t)
+        (unsigned char)(c1.r + (c2.r - c1.r) * smoothT),
+        (unsigned char)(c1.g + (c2.g - c1.g) * smoothT),
+        (unsigned char)(c1.b + (c2.b - c1.b) * smoothT),
+        255
     };
 }
 
 TimeOfDaySystem::TimeOfDaySystem()
     : worldHours(8.0f), timeSpeed(24.0f / 360.0f) { // 360 seconds for full 24h cycle
+}
+
+TimeOfDaySystem::~TimeOfDaySystem() {
+    if (IsWindowReady()) {
+        UnloadResources();
+    }
+}
+
+void TimeOfDaySystem::InitResources(int width, int height) {
+    if (width <= 0 || height <= 0) return;
+
+    if (!shadersInitialized) {
+        shadersInitialized = true;
+        pointLightShader = LoadShaderFromMemory(nullptr, kPointLightFragShader);
+        compositeShader = LoadShaderFromMemory(nullptr, kCompositeFragShader);
+        if (IsShaderValid(compositeShader)) {
+            compositeDarknessLoc = GetShaderLocation(compositeShader, "uDarkness");
+        }
+    }
+
+    if (!texturesInitialized) {
+        texturesInitialized = true;
+        Image whiteImg = GenImageColor(2, 2, WHITE);
+        whiteQuadTex = LoadTextureFromImage(whiteImg);
+        UnloadImage(whiteImg);
+        SetTextureFilter(whiteQuadTex, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(whiteQuadTex, TEXTURE_WRAP_CLAMP);
+
+        Image gradImg = GenImageGradientRadial(128, 128, 0.0f, WHITE, BLANK);
+        radialFalloffTex = LoadTextureFromImage(gradImg);
+        UnloadImage(gradImg);
+        SetTextureFilter(radialFalloffTex, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(radialFalloffTex, TEXTURE_WRAP_CLAMP);
+    }
+
+    if (!lightMapInitialized || lightMap.texture.width != width || lightMap.texture.height != height) {
+        if (lightMapInitialized) {
+            UnloadRenderTexture(lightMap);
+        }
+        lightMap = LoadRenderTexture(width, height);
+        SetTextureFilter(lightMap.texture, TEXTURE_FILTER_BILINEAR);
+        SetTextureWrap(lightMap.texture, TEXTURE_WRAP_CLAMP);
+        lightMapInitialized = true;
+    }
+}
+
+void TimeOfDaySystem::UnloadResources() {
+    if (lightMapInitialized) {
+        UnloadRenderTexture(lightMap);
+        lightMap = { 0 };
+        lightMapInitialized = false;
+    }
+    if (shadersInitialized) {
+        if (IsShaderValid(pointLightShader)) UnloadShader(pointLightShader);
+        if (IsShaderValid(compositeShader)) UnloadShader(compositeShader);
+        pointLightShader = { 0 };
+        compositeShader = { 0 };
+        compositeDarknessLoc = -1;
+        shadersInitialized = false;
+    }
+    if (texturesInitialized) {
+        if (whiteQuadTex.id != 0) UnloadTexture(whiteQuadTex);
+        if (radialFalloffTex.id != 0) UnloadTexture(radialFalloffTex);
+        whiteQuadTex = { 0 };
+        radialFalloffTex = { 0 };
+        texturesInitialized = false;
+    }
 }
 
 void TimeOfDaySystem::Update(float dt) {
@@ -43,8 +149,8 @@ std::string TimeOfDaySystem::GetFormattedTime() const {
 
 TimePhase TimeOfDaySystem::GetPhase() const {
     if (worldHours >= 5.0f && worldHours < 8.5f) return TimePhase::DAWN;
-    if (worldHours >= 8.5f && worldHours < 18.0f) return TimePhase::DAY;
-    if (worldHours >= 18.0f && worldHours < 21.0f) return TimePhase::DUSK;
+    if (worldHours >= 8.5f && worldHours < 17.5f) return TimePhase::DAY;
+    if (worldHours >= 17.5f && worldHours < 20.5f) return TimePhase::DUSK;
     return TimePhase::NIGHT;
 }
 
@@ -59,37 +165,54 @@ const char* TimeOfDaySystem::GetPhaseName() const {
 }
 
 Color TimeOfDaySystem::GetAmbientColor() const {
-    // 08:30 - 18:00 : Clear daylight
-    if (worldHours >= 8.5f && worldHours < 18.0f) {
-        return Color{ 0, 0, 0, 0 };
+    const Color cDay      = { 255, 255, 255, 255 };
+    const Color cGoldHour = { 255, 224, 178, 255 };
+    const Color cSunset   = { 226, 146, 128, 255 };
+    const Color cTwilight = { 122, 104, 152, 255 };
+    const Color cNight    = { 44,  58,  102, 255 };
+    const Color cPreDawn  = { 148, 166, 206, 255 };
+    const Color cSunrise  = { 244, 192, 148, 255 };
+
+    // 08:30 - 17:30 : Clear daylight (pure multiplicative white = no tint)
+    if (worldHours >= 8.5f && worldHours < 17.5f) {
+        return cDay;
     }
-    // 18:00 - 20:00 : Sunset twilight onset
-    if (worldHours >= 18.0f && worldHours < 20.0f) {
-        float t = (worldHours - 18.0f) / 2.0f;
-        return LerpColor(Color{ 0, 0, 0, 0 }, Color{ 145, 65, 105, 75 }, t);
+    // 17:30 - 18:45 : Golden Hour
+    if (worldHours >= 17.5f && worldHours < 18.75f) {
+        return LerpColorCosine(cDay, cGoldHour, (worldHours - 17.5f) / 1.25f);
     }
-    // 20:00 - 21.5 : Dusk into deep night
-    if (worldHours >= 20.0f && worldHours < 21.5f) {
-        float t = (worldHours - 20.0f) / 1.5f;
-        return LerpColor(Color{ 145, 65, 105, 75 }, Color{ 8, 12, 28, 160 }, t);
+    // 18:45 - 19:45 : Warm Amber-Rose Sunset
+    if (worldHours >= 18.75f && worldHours < 19.75f) {
+        return LerpColorCosine(cGoldHour, cSunset, (worldHours - 18.75f) / 1.0f);
     }
-    // 21:30 - 05:00 : Deep night
-    if (worldHours >= 21.5f || worldHours < 5.0f) {
-        return Color{ 8, 12, 28, 160 };
+    // 19:45 - 20:30 : Dusk Twilight -> Moonlit Indigo
+    if (worldHours >= 19.75f && worldHours < 20.5f) {
+        Color mid = LerpColorCosine(cSunset, cTwilight, (worldHours - 19.75f) / 0.375f);
+        if (worldHours >= 20.125f) {
+            return LerpColorCosine(cTwilight, cNight, (worldHours - 20.125f) / 0.375f);
+        }
+        return mid;
     }
-    // 05:00 - 07:00 : Night to dawn sunrise
-    if (worldHours >= 5.0f && worldHours < 7.0f) {
-        float t = (worldHours - 5.0f) / 2.0f;
-        return LerpColor(Color{ 8, 12, 28, 160 }, Color{ 235, 150, 75, 65 }, t);
+    // 20:30 - 05:00 : Crisp Moonlit Night
+    if (worldHours >= 20.5f || worldHours < 5.0f) {
+        return cNight;
     }
-    // 07:00 - 08:30 : Dawn into clear day
-    float t = (worldHours - 7.0f) / 1.5f;
-    return LerpColor(Color{ 235, 150, 75, 65 }, Color{ 0, 0, 0, 0 }, t);
+    // 05:00 - 06:15 : Pre-dawn mist
+    if (worldHours >= 5.0f && worldHours < 6.25f) {
+        return LerpColorCosine(cNight, cPreDawn, (worldHours - 5.0f) / 1.25f);
+    }
+    // 06:15 - 07:30 : Warm Peach Sunrise
+    if (worldHours >= 6.25f && worldHours < 7.5f) {
+        return LerpColorCosine(cPreDawn, cSunrise, (worldHours - 6.25f) / 1.25f);
+    }
+    // 07:30 - 08:30 : Morning Clarity into Daylight
+    return LerpColorCosine(cSunrise, cDay, (worldHours - 7.5f) / 1.0f);
 }
 
 float TimeOfDaySystem::GetDarknessLevel() const {
     Color amb = GetAmbientColor();
-    return (float)amb.a / 255.0f;
+    float lum = (0.299f * (float)amb.r + 0.587f * (float)amb.g + 0.114f * (float)amb.b) / 255.0f;
+    return fmaxf(0.0f, fminf(1.0f, 1.0f - lum));
 }
 
 void TimeOfDaySystem::ClearLights() {
@@ -100,56 +223,132 @@ void TimeOfDaySystem::RegisterLight(Vector2 pos, float radius, Color color, floa
     activeLights.push_back({ pos, radius, color, intensity });
 }
 
-void TimeOfDaySystem::DrawLighting(Camera2D camera, Vector2 playerPos, const Rectangle& mapBounds, const std::vector<Vector2>& torches, bool isInterior) {
-    (void)camera;
-
-    if (isInterior) {
-        // Soft cozy tavern/forge warm hearth glow
-        DrawRectangleRec(mapBounds, Color{ 25, 15, 10, 35 });
-        return;
-    }
+void TimeOfDaySystem::DrawLighting(
+    Camera2D camera,
+    Vector2 playerPos,
+    const Rectangle& mapBounds,
+    const std::vector<Vector2>& torches,
+    bool isInterior,
+    bool isSubterranean,
+    bool isFrostSubterranean
+) {
+    (void)mapBounds;
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    if (sw <= 0 || sh <= 0) return;
 
     Color ambColor = GetAmbientColor();
-    float darkness = GetDarknessLevel();
+    if (isInterior) {
+        // Warm candlelit cozy interior shadow lifted by hearths, furnaces, and braziers
+        ambColor = Color{ 208, 178, 150, 255 };
+    } else if (isFrostSubterranean) {
+        // Deep glacial blue cavern ambiance illuminated by ice crystals & campfire
+        ambColor = Color{ 58, 82, 124, 255 };
+    } else if (isSubterranean) {
+        // Deep subterranean mine ambiance illuminated by mining braziers & elemental altar
+        ambColor = Color{ 64, 60, 82, 255 };
+    }
 
-    if (ambColor.a == 0 && darkness < 0.01f) {
+    if (ambColor.r >= 253 && ambColor.g >= 253 && ambColor.b >= 253) {
         return;
     }
 
-    // 1. World Ambient Darkness Tint
-    DrawRectangleRec(mapBounds, ambColor);
+    InitResources(sw, sh);
+    if (!lightMapInitialized) return;
 
-    // 2. Point Lights (Flickering Torches, Campfires, and Player Lantern)
-    // Player hip lantern
-    if (playerPos.x > -9000.0f) {
-        float pFlicker = 1.0f + 0.03f * sinf((float)GetTime() * 8.0f);
-        DrawCircleGradient(playerPos, 190.0f * pFlicker, Color{ 255, 225, 150, (unsigned char)(70 * darkness) }, Color{ 0, 0, 0, 0 });
-        DrawCircleGradient(playerPos, 90.0f * pFlicker, Color{ 255, 245, 190, (unsigned char)(110 * darkness) }, Color{ 0, 0, 0, 0 });
-    }
+    float lum = (0.299f * (float)ambColor.r + 0.587f * (float)ambColor.g + 0.114f * (float)ambColor.b) / 255.0f;
+    float darkness = fmaxf(0.0f, fminf(1.0f, 1.0f - lum));
+    float lightWeight = (isInterior || isSubterranean || isFrostSubterranean) ? 0.92f : fminf(1.0f, 0.28f + darkness * 0.92f);
+    float time = (float)GetTime();
 
-    // Registered Torches from Map
-    for (const auto& torch : torches) {
-        float tFlicker = 1.0f + 0.05f * sinf((float)GetTime() * 9.0f + torch.x);
-        DrawCircleGradient(torch, 150.0f * tFlicker, Color{ 255, 155, 45, (unsigned char)(75 * darkness) }, Color{ 0, 0, 0, 0 });
-        DrawCircleGradient(torch, 70.0f * tFlicker, Color{ 255, 210, 95, (unsigned char)(125 * darkness) }, Color{ 0, 0, 0, 0 });
-    }
+    bool usePointShader = IsShaderValid(pointLightShader) && whiteQuadTex.id != 0;
 
-    // Registered dynamic point lights (campfires, altars, spells)
-    for (const auto& light : activeLights) {
-        float lFlicker = 1.0f + 0.04f * sinf((float)GetTime() * 7.5f + light.position.y);
-        DrawCircleGradient(light.position, light.radius * lFlicker, ColorAlpha(light.color, 0.40f * light.intensity * darkness), Color{ 0, 0, 0, 0 });
-        DrawCircleGradient(light.position, light.radius * 0.45f * lFlicker, ColorAlpha(light.color, 0.65f * light.intensity * darkness), Color{ 0, 0, 0, 0 });
-    }
+    auto DrawPointQuad = [&](Vector2 pos, float radius, Color col, float intensity) {
+        float clampedInt = fmaxf(0.0f, fminf(1.0f, intensity));
+        if (clampedInt <= 0.005f || radius <= 1.0f) return;
 
-    // 3. Starlight Twinkles at Deep Night
-    if (GetPhase() == TimePhase::NIGHT) {
-        float t = (float)GetTime();
-        for (int i = 0; i < 40; ++i) {
-            float sx = mapBounds.x + fmodf((float)(i * 137 + 41), mapBounds.width);
-            float sy = mapBounds.y + fmodf((float)(i * 93 + 17), mapBounds.height * 0.45f);
-            float twinkle = 0.5f + 0.5f * sinf(t * 3.0f + (float)i * 1.7f);
-            DrawCircle((int)sx, (int)sy, 1.5f, Color{ 210, 230, 255, (unsigned char)(80 * twinkle) });
+        Rectangle dst = { pos.x - radius, pos.y - radius, radius * 2.0f, radius * 2.0f };
+        if (usePointShader) {
+            Rectangle src = { 0.0f, 0.0f, (float)whiteQuadTex.width, (float)whiteQuadTex.height };
+            Color tint = { col.r, col.g, col.b, (unsigned char)(clampedInt * 255.0f) };
+            DrawTexturePro(whiteQuadTex, src, dst, { 0.0f, 0.0f }, 0.0f, tint);
+        } else if (radialFalloffTex.id != 0) {
+            Rectangle src = { 0.0f, 0.0f, (float)radialFalloffTex.width, (float)radialFalloffTex.height };
+            DrawTexturePro(radialFalloffTex, src, dst, { 0.0f, 0.0f }, 0.0f, ColorAlpha(col, clampedInt * 0.85f));
         }
+    };
+
+    // 1. Offscreen Multiplicative Lightmap Pass
+    BeginTextureMode(lightMap);
+    ClearBackground(ambColor);
+    BeginMode2D(camera);
+    BeginBlendMode(BLEND_ADDITIVE);
+    if (usePointShader) {
+        BeginShaderMode(pointLightShader);
+    }
+
+    // Player warm hip lantern
+    if (playerPos.x > -9000.0f) {
+        float pFlicker = 1.0f + 0.025f * sinf(time * 7.2f) + 0.012f * sinf(time * 16.4f);
+        DrawPointQuad(playerPos, 245.0f * pFlicker, Color{ 255, 224, 158, 255 }, 0.88f * lightWeight);
+    }
+
+    // Map wall/brazier torches
+    Color torchCol = isFrostSubterranean ? Color{ 120, 215, 255, 255 } : Color{ 255, 168, 72, 255 };
+    for (const auto& torch : torches) {
+        float tFlicker = 1.0f + 0.045f * sinf(time * 8.5f + torch.x * 0.13f) + 0.020f * sinf(time * 19.0f + torch.y * 0.09f);
+        DrawPointQuad(torch, 210.0f * tFlicker, torchCol, 0.86f * lightWeight);
+    }
+
+    // Dynamic realm & spell point lights (campfires, altars, portals, crystals, projectiles)
+    for (const auto& light : activeLights) {
+        float lFlicker = 1.0f + 0.035f * sinf(time * 7.5f + light.position.x * 0.07f + light.position.y * 0.11f);
+        DrawPointQuad(light.position, light.radius * lFlicker, light.color, light.intensity * lightWeight);
+    }
+
+    if (usePointShader) {
+        EndShaderMode();
+    }
+    EndBlendMode();
+    EndMode2D();
+    EndTextureMode();
+
+    // 2. Multiplicative Composite Pass onto Main Scene Buffer
+    Rectangle srcFull = { 0.0f, 0.0f, (float)lightMap.texture.width, -(float)lightMap.texture.height };
+    Rectangle dstFull = { 0.0f, 0.0f, (float)sw, (float)sh };
+
+    BeginBlendMode(BLEND_MULTIPLIED);
+    if (IsShaderValid(compositeShader)) {
+        if (compositeDarknessLoc >= 0) {
+            SetShaderValue(compositeShader, compositeDarknessLoc, &darkness, SHADER_UNIFORM_FLOAT);
+        }
+        BeginShaderMode(compositeShader);
+        DrawTexturePro(lightMap.texture, srcFull, dstFull, { 0.0f, 0.0f }, 0.0f, WHITE);
+        EndShaderMode();
+    } else {
+        DrawTexturePro(lightMap.texture, srcFull, dstFull, { 0.0f, 0.0f }, 0.0f, WHITE);
+    }
+    EndBlendMode();
+
+    // 3. Delicate Atmospheric Light Bloom in Mist/Air (subtle warm scatter, no hard edges)
+    if (radialFalloffTex.id != 0 && lightWeight > 0.25f) {
+        BeginMode2D(camera);
+        BeginBlendMode(BLEND_ADDITIVE);
+        Rectangle rSrc = { 0.0f, 0.0f, (float)radialFalloffTex.width, (float)radialFalloffTex.height };
+
+        for (const auto& torch : torches) {
+            float bloomR = 90.0f + 4.0f * sinf(time * 8.5f + torch.x * 0.13f);
+            Rectangle rDst = { torch.x - bloomR, torch.y - bloomR, bloomR * 2.0f, bloomR * 2.0f };
+            DrawTexturePro(radialFalloffTex, rSrc, rDst, { 0.0f, 0.0f }, 0.0f, ColorAlpha(torchCol, 0.09f * lightWeight));
+        }
+        for (const auto& light : activeLights) {
+            float bloomR = light.radius * 0.42f;
+            Rectangle rDst = { light.position.x - bloomR, light.position.y - bloomR, bloomR * 2.0f, bloomR * 2.0f };
+            DrawTexturePro(radialFalloffTex, rSrc, rDst, { 0.0f, 0.0f }, 0.0f, ColorAlpha(light.color, 0.08f * light.intensity * lightWeight));
+        }
+
+        EndBlendMode();
+        EndMode2D();
     }
 }
 

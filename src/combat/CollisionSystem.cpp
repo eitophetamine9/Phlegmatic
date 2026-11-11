@@ -9,84 +9,30 @@
 #include <cmath>
 
 void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& enemies, std::vector<Projectile>& projectiles, ParticleSystem& particles, Camera2D camera, std::vector<LootDrop>* outLootDrops) {
-    // Visceral Execution on stunned/staggered enemies ([E] key)
-    if (IsKeyPressed(KEY_E) && !player.IsExecuting() && !player.IsDashing() && player.IsAlive()) {
-        float closestDistSq = 999999.0f;
-        int targetEnemyIdx = -1;
-        Vector2 pPos = player.GetPosition();
-
-        for (size_t i = 0; i < enemies.size(); ++i) {
-            if (!enemies[i].IsAlive() || !enemies[i].IsVulnerableToExecution()) continue;
-            float dx = enemies[i].GetPosition().x - pPos.x;
-            float dy = enemies[i].GetPosition().y - pPos.y;
-            float distSq = dx * dx + dy * dy;
-            float maxExecDist = player.GetRadius() + enemies[i].GetRadius() + 55.0f;
-            if (distSq <= maxExecDist * maxExecDist && distSq < closestDistSq) {
-                closestDistSq = distSq;
-                targetEnemyIdx = (int)i;
-            }
+    auto handleEnemyDefeated = [&](const Enemy& defeatedEnemy) {
+        if (outLootDrops) {
+            LootDrop::SpawnFromEnemy(defeatedEnemy, *outLootDrops);
         }
-
-        if (targetEnemyIdx >= 0) {
-            Enemy& target = enemies[targetEnemyIdx];
-            player.StartExecution(target.GetPosition());
-
-            WeaponType wType = player.GetEquippedWeapon();
-            WeaponStats wStats = player.GetEquippedWeaponStats();
-            float baseExecDmg = wStats.heavyDamage;
-
-            float damageMultiplier = 3.2f;
-            if (wType == WeaponType::GLACIAL_CLEAVER || wType == WeaponType::SUN_CLAYMORE || wType == WeaponType::MACE) {
-                damageMultiplier = 3.8f; // Colossal crushing blow
-            } else if (wType == WeaponType::TRUTH_SEEKER || wType == WeaponType::SWORD || wType == WeaponType::HALBERD || wType == WeaponType::STORM_GLAIVE) {
-                damageMultiplier = 3.2f; // Blade/Reach impale
-            } else if (wType == WeaponType::DAGGERS || wType == WeaponType::ZEPHYR_DAGGERS) {
-                damageMultiplier = 2.9f; // Throat flurry
-                target.ApplyBleed(5.0f);
-            } else if (wType == WeaponType::WINDRUNNER_RECURVE) {
-                damageMultiplier = 3.0f; // Point-blank blast
-            }
-
-            float finalDamage = baseExecDmg * damageMultiplier * player.GetTotemDamageMultiplier();
-            Vector2 toTarget = { target.GetPosition().x - pPos.x, target.GetPosition().y - pPos.y };
-            Vector2 knockbackDir = Vector2Normalize(toTarget);
-            if (knockbackDir.x == 0.0f && knockbackDir.y == 0.0f) knockbackDir = { 1.0f, 0.0f };
-
-            // Apply 100% defense pierce execution strike
-            bool wasKilled = target.TakeDamage(finalDamage, { knockbackDir.x * 320.0f, knockbackDir.y * 320.0f }, particles, 1.0f);
-
-            // Audio & Screen Juice
-            SoundFX::PlayCrusaderClash();
-            SoundFX::PlayHeavyAttack();
-            particles.AddScreenShake(9.0f, 0.35f);
-            particles.SpawnSparks(target.GetPosition(), Color{ 255, 30, 30, 255 }, 40, 250.0f);
-            particles.SpawnSparks(target.GetPosition(), Color{ 255, 230, 80, 255 }, 30, 220.0f);
-            particles.SpawnFloatingText(target.GetPosition(), "VISCERAL EXECUTION!", Color{ 255, 45, 45, 255 }, 28.0f);
-            particles.SpawnFloatingText({ pPos.x, pPos.y - 30.0f }, "+35 COMPOSURE", Color{ 110, 225, 255, 255 }, 20.0f);
-
-            player.ModifyComposure(35.0f);
-            player.TriggerAdrenalineBuff(6.0f);
-
-            // Troll Slayer Tier 3 Perk: Executing trolls grants immediate 25 HP heal
-            if (player.HasTrollSlayerT3() && (target.GetType() == EnemyType::FROST_TROLL || target.GetType() == EnemyType::BERSERKER_TROLL)) {
-                player.Heal(25.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 22.0f);
-                particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 25, 150.0f);
-            }
-
-            if (wasKilled && outLootDrops) {
-                LootDrop::SpawnFromEnemy(target, *outLootDrops);
-                int bonusShingles = 25 + (int)(target.GetMaxHealth() * 0.15f);
-                outLootDrops->emplace_back(LootType::SHINGLES, target.GetPosition(), bonusShingles);
-                outLootDrops->emplace_back(LootType::ORE_SCRAP, target.GetPosition(), 2);
-                particles.SpawnFloatingText(target.GetPosition(), "+EXECUTION BOUNTY!", Color{ 255, 215, 60, 255 }, 18.0f);
-            }
+        EnemyType eType = defeatedEnemy.GetType();
+        if (player.HasTrollSlayerT3() && (eType == EnemyType::FROST_TROLL || eType == EnemyType::BERSERKER_TROLL)) {
+            player.Heal(25.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 20.0f);
+            particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 18, 120.0f);
+        } else if (player.HasCultistPurifierT3() && (eType == EnemyType::SLASHER || eType == EnemyType::ARCHER || eType == EnemyType::PYROMANCER || eType == EnemyType::BRUTE)) {
+            player.RestoreStamina(15.0f);
+            player.ModifyComposure(10.0f);
+            particles.SpawnFloatingText(player.GetPosition(), "PURIFIER: +15 STAM / +10 POISE", Color{ 120, 230, 255, 255 }, 18.0f);
+            particles.SpawnSparks(player.GetPosition(), Color{ 120, 225, 255, 255 }, 14, 100.0f);
         }
-    }
+    };
 
     // 0. Armor skill pending AoE resolution
     if (player.pendingArmorSkillAoE) {
         player.pendingArmorSkillAoE = false;
+        float chillDur = player.pendingAoEChill;
+        bool nonBossStunOnly = player.pendingAoEStunNonBossOnly;
+        player.pendingAoEChill = 0.0f;
+        player.pendingAoEStunNonBossOnly = false;
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive()) continue;
             float dist = Vector2Distance(player.GetPosition(), enemy.GetPosition());
@@ -94,11 +40,15 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 Vector2 kDir = Vector2Normalize(Vector2Subtract(enemy.GetPosition(), player.GetPosition()));
                 if (kDir.x == 0.0f && kDir.y == 0.0f) kDir = { 0.0f, -1.0f };
                 if (enemy.TakeDamage(player.pendingAoEDamage, kDir, particles, player.pendingAoEArmorShred)) {
-                    if (outLootDrops) {
-                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
-                    }
+                    handleEnemyDefeated(enemy);
                 }
-                if (player.pendingAoEStun > 0.0f) {
+                if (chillDur > 0.0f && enemy.IsAlive()) {
+                    enemy.ApplyChill(chillDur);
+                }
+                if (player.pendingAoEArmorShred > 0.0f && enemy.IsAlive()) {
+                    enemy.ApplyArmorFracture(5.0f);
+                }
+                if (player.pendingAoEStun > 0.0f && (!nonBossStunOnly || !enemy.IsBoss()) && enemy.IsAlive()) {
                     enemy.ApplyStagger(player.pendingAoEStun);
                 }
             }
@@ -131,6 +81,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
     if (player.IsAttacking() && !player.GetCurrentAttack().hasHit) {
         const auto& attack = player.GetCurrentAttack();
         bool hitAny = false;
+        bool stormGlaiveComposureAwarded = false;
 
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive()) continue;
@@ -149,10 +100,10 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             if (hit) {
-                // Totem of the Phlegmatic Core on-hit resonance: recover Gray Health & apply chill
+                // Totem of the Phlegmatic Core on-hit resonance: recover Gray Health & apply Chill (no per-hit stun)
                 if (player.GetTotem() == TotemType::TOTEM_PHLEGMATIC_CORE) {
                     player.RecoverGrayHealth(14.0f, particles);
-                    enemy.ApplyStagger(0.35f);
+                    enemy.ApplyChill(3.0f);
                     particles.SpawnSparks(enemy.GetPosition(), Color{ 140, 220, 255, 200 }, 8, 80.0f);
                 }
 
@@ -224,6 +175,37 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                             particles.SpawnFloatingText(enemy.GetPosition(), "JUDGMENT! (100% PIERCE)", Color{ 255, 255, 180, 255 }, 24.0f);
                             particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 240, 140, 255 }, 25, 220.0f);
                         }
+                    } else if (attack.weapon == WeaponType::SUN_CLAYMORE) {
+                        if (player.GetHeavyStage() == 1) {
+                            // Stage 1: Sunfire Crescent applies Solar Burn
+                            enemy.ApplySolarBurn(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR BURN! (4s)", Color{ 255, 195, 50, 255 }, 18.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 170, 40, 255 }, 16, 150.0f);
+                        } else if (player.GetHeavyStage() == 2) {
+                            // Stage 2: Solar Cataclysm Slam deals +30% bonus against burning foes
+                            if (enemy.HasSolarBurn()) {
+                                attackDamage *= 1.30f;
+                                particles.SpawnFloatingText(enemy.GetPosition(), "SOLAR CATACLYSM! +30%", Color{ 255, 235, 90, 255 }, 22.0f);
+                                particles.SpawnSparks(enemy.GetPosition(), Color{ 255, 220, 70, 255 }, 24, 200.0f);
+                            }
+                        }
+                    } else if (attack.weapon == WeaponType::STORM_GLAIVE) {
+                        if (player.GetHeavyStage() == 2 && !stormGlaiveComposureAwarded) {
+                            stormGlaiveComposureAwarded = true;
+                            player.ModifyComposure(15.0f);
+                            particles.SpawnFloatingText(player.GetPosition(), "+15 COMPOSURE", Color{ 120, 245, 235, 255 }, 18.0f);
+                        }
+                    } else if (attack.weapon == WeaponType::GLACIAL_CLEAVER) {
+                        if (player.GetHeavyStage() <= 3) {
+                            enemy.ApplyChill(2.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 150, 230, 255, 255 }, 12, 130.0f);
+                        } else {
+                            float chillDur = player.HasFullArmorSet(ArmorSet::FROSTWARDEN) ? 4.0f : 3.5f;
+                            enemy.ApplyChill(chillDur);
+                            enemy.ApplyArmorFracture(4.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "GLACIAL RUPTURE!", Color{ 160, 235, 255, 255 }, 22.0f);
+                            particles.SpawnSparks(enemy.GetPosition(), Color{ 180, 245, 255, 255 }, 26, 210.0f);
+                        }
                     }
                 }
 
@@ -239,9 +221,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 float finalPierce = fminf(1.0f, attack.defensePierce + player.GetBestiaryDefensePierce(enemy.GetType()));
 
                 if (enemy.TakeDamage(attackDamage, knockbackDir, particles, finalPierce)) {
-                    if (outLootDrops) {
-                        LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
-                    }
+                    handleEnemyDefeated(enemy);
                 }
                 hitAny = true;
             }
@@ -338,7 +318,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
             else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
 
-            bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
+            bool isColdAttack = (enemy.GetType() == EnemyType::FROST_TROLL ||
+                                 enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                 enemy.GetType() == EnemyType::FROST_REVENANT);
+
+            bool wasProtectedByWard = player.HasFrostwardenWardActive() && !player.IsParrying() &&
+                                      !player.IsDashing() && !player.IsDaggerLunging() && !player.HasInvulnerability();
+            bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles, 0.0f, isColdAttack);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
                 particles.TriggerHitStop(0.06f);
@@ -346,30 +332,43 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (enemy.GetHumor() == HumorType::CHOLERIC) {
                     player.ModifyComposure(30.0f); // Quenching Choleric Frenzy composure bonus!
                 }
-            } else if (tookDamage) {
-                // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
-                if (enemy.GetHumor() == HumorType::SANGUINE) {
-                    player.ApplyBleed(3.0f, particles);
+            } else {
+                if (wasProtectedByWard && enemy.IsAlive()) {
+                    Vector2 retDir = { -knockbackDir.x, -knockbackDir.y };
+                    if (enemy.TakeDamage(18.0f, retDir, particles, 0.0f)) {
+                        handleEnemyDefeated(enemy);
+                    }
+                    if (enemy.IsAlive()) {
+                        enemy.ApplyChill(3.0f);
+                    }
+                    particles.SpawnFloatingText(enemy.GetPosition(), "ICE WARD! -18", Color{ 140, 230, 255, 255 }, 18.0f);
+                    particles.SpawnSparks(enemy.GetPosition(), Color{ 160, 240, 255, 255 }, 18, 160.0f);
                 }
-                if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
-                    player.AddFrostbite(18.0f);
-                }
+                if (tookDamage) {
+                    // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
+                    if (enemy.GetHumor() == HumorType::SANGUINE) {
+                        player.ApplyBleed(3.0f, particles);
+                    }
+                    if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
+                        player.AddFrostbite(18.0f, &particles);
+                    }
 
-                // Heavy and crushing boss attacks apply stagger to player if unparried
-                bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
-                                      enemy.GetType() == EnemyType::CHARGER ||
-                                      enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
-                                      enemy.GetType() == EnemyType::ZIL_BOSS ||
-                                      enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
-                                      enemy.GetType() == EnemyType::FROST_TROLL ||
-                                      enemy.GetType() == EnemyType::BERSERKER_TROLL ||
-                                      enemy.GetType() == EnemyType::FROST_REVENANT);
-                if (isHeavyAttack) {
-                    player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
-                    particles.TriggerHitStop(0.04f);
-                    particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
-                    if (!player.HasStaggerImmunity()) {
-                        player.ApplyStagger(1.0f, particles);
+                    // Heavy and crushing boss attacks apply stagger to player if unparried
+                    bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
+                                          enemy.GetType() == EnemyType::CHARGER ||
+                                          enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
+                                          enemy.GetType() == EnemyType::ZIL_BOSS ||
+                                          enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
+                                          enemy.GetType() == EnemyType::FROST_TROLL ||
+                                          enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                          enemy.GetType() == EnemyType::FROST_REVENANT);
+                    if (isHeavyAttack) {
+                        player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
+                        particles.TriggerHitStop(0.04f);
+                        particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
+                        if (!player.HasStaggerImmunity()) {
+                            player.ApplyStagger(1.0f, particles);
+                        }
                     }
                 }
             }
@@ -436,7 +435,11 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 } else {
                     // Hit player
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    player.TakeDamage(proj.GetDamage(), knockDir, particles);
+                    if (player.TakeDamage(proj.GetDamage(), knockDir, particles, 0.0f, proj.IsCold())) {
+                        if (proj.IsCold()) {
+                            player.AddFrostbite(14.0f, &particles);
+                        }
+                    }
                     if (proj.GetType() == ProjectileType::BOLT) {
                         player.ApplyBleed(3.0f, particles);
                     }
@@ -458,18 +461,21 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         proj.RecordHitEnemy((int)eIdx);
                         Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
                         if (enemy.TakeDamage(proj.GetDamage(), knockDir, particles, proj.GetDefensePierce())) {
-                            if (outLootDrops) {
-                                LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
-                            }
+                            handleEnemyDefeated(enemy);
                         }
-                        particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
-                        particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
-                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 12.0f) {
+                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 16.0f) {
+                            particles.SpawnSparks(proj.GetPosition(), Color{ 110, 255, 240, 255 }, 20, 180.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "CRESCENT GALE! -" + std::to_string((int)proj.GetDamage()), Color{ 110, 255, 240, 255 }, 22.0f);
+                        } else {
+                            particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
+                        }
+                        if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 12.0f && proj.GetRadius() < 16.0f) {
                             enemy.ApplyArmorFracture(4.0f);
                             enemy.ApplyStagger(1.2f);
                             particles.SpawnFloatingText(enemy.GetPosition(), "ARMOR SHATTERED! STUNNED!", Color{ 100, 255, 230, 255 }, 22.0f);
                             particles.AddScreenShake(4.5f, 0.15f);
-                        } else if (proj.GetType() == ProjectileType::GALE_ARROW) {
+                        } else if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() < 12.0f) {
                             // Light attack windburst AoE (30% of weapon damage to nearby enemies)
                             float burstRadius = 55.0f;
                             float burstDamage = proj.GetDamage() * 0.30f;
@@ -483,7 +489,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                                 if (Vector2Distance(impactPos, otherEnemy.GetPosition()) <= burstRadius + otherEnemy.GetRadius()) {
                                     Vector2 aoeKnock = Vector2Normalize(Vector2Subtract(otherEnemy.GetPosition(), impactPos));
                                     if (otherEnemy.TakeDamage(burstDamage, aoeKnock, particles, proj.GetDefensePierce())) {
-                                        if (outLootDrops) LootDrop::SpawnFromEnemy(otherEnemy, *outLootDrops);
+                                        handleEnemyDefeated(otherEnemy);
                                     }
                                 }
                             }
@@ -528,7 +534,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 comp.attackCooldown = 1.0f;
                 Vector2 knock = dir;
                 if (nearestEnemy->TakeDamage(comp.damage, knock, particles, 0.15f)) {
-                    if (outLootDrops) LootDrop::SpawnFromEnemy(*nearestEnemy, *outLootDrops);
+                    handleEnemyDefeated(*nearestEnemy);
                 }
                 particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 18, 140.0f);
                 particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -14", Color{ 100, 245, 180, 255 }, 20.0f);
@@ -585,7 +591,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     float poisonDmg = 14.0f;
                     Vector2 zeroKnock = { 0.0f, 0.0f };
                     if (enemy.TakeDamage(poisonDmg, zeroKnock, particles, 1.0f)) {
-                        if (outLootDrops) LootDrop::SpawnFromEnemy(enemy, *outLootDrops);
+                        handleEnemyDefeated(enemy);
                     }
                     particles.SpawnSparks(enemy.GetPosition(), Color{ 80, 230, 110, 220 }, 8, 45.0f);
                     particles.SpawnFloatingText(enemy.GetPosition(), "-14 POISON", Color{ 90, 245, 140, 255 }, 17.0f);

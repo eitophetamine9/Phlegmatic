@@ -879,12 +879,6 @@ void ZyphdenHandler::Update(
 
         }
 
-        if (IsKeyPressed(KEY_TAB)) {
-
-            player.QuickSwapWeapon(particles);
-
-        }
-
     }
 
 
@@ -1611,7 +1605,7 @@ void ZyphdenHandler::Update(
 
                     "You have unlatched the Royal Armory Relic Chest.",
 
-                    "Obtained two flasks of Consecrated Health Elixir! Press [1] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
+                    "Obtained two flasks of Consecrated Health Elixir! Press [H] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
 
                     "Recovered Fragment X: 'The Royal Armory Archives' — recording the ancient arts of armor penetration, posture breaking, and counter ripostes."
 
@@ -2373,9 +2367,29 @@ void ZyphdenHandler::Render(
         FontManager::DrawGameTextShadow("[T] OPEN STORAGE STASH TRUNK", (int)stashTrunkPos.x - 90, (int)stashTrunkPos.y - 30, 11, Color{ 255, 225, 120, 255 });
     }
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    if (inTavern) {
+        map.AddDynamicLight({ 870.0f, 620.0f }, 290.0f, Color{ 255, 165, 72, 255 }, 0.98f);
+        map.AddDynamicLight({ 680.0f, 760.0f }, 190.0f, Color{ 255, 195, 105, 255 }, 0.78f);
+        map.AddDynamicLight({ 920.0f, 760.0f }, 190.0f, Color{ 255, 195, 105, 255 }, 0.78f);
+    } else if (inForge) {
+        map.AddDynamicLight({ 800.0f, 430.0f }, 340.0f, Color{ 255, 130, 48, 255 }, 1.00f);
+        map.AddDynamicLight({ 620.0f, 560.0f }, 195.0f, Color{ 255, 185, 95, 255 }, 0.78f);
+        map.AddDynamicLight({ 980.0f, 560.0f }, 195.0f, Color{ 255, 185, 95, 255 }, 0.78f);
+    } else if (inRoyalKeep) {
+        map.AddDynamicLight({ 1000.0f, 220.0f }, 320.0f, Color{ 255, 220, 130, 255 }, 0.92f);
+        map.AddDynamicLight({ 650.0f, 600.0f }, 160.0f, Color{ 120, 215, 255, 255 }, 0.65f);
+    } else {
+        map.AddDynamicLight(campfire.position, 310.0f, Color{ 255, 168, 70, 255 }, 0.96f);
+        map.AddDynamicLight({ 160.0f, 730.0f }, 215.0f, Color{ 105, 240, 215, 255 }, 0.75f);
+        map.AddDynamicLight({ 1380.0f, 120.0f }, 215.0f, Color{ 140, 215, 255, 255 }, 0.75f);
+        map.AddDynamicLight({ 1680.0f, 700.0f }, 215.0f, Color{ 255, 195, 90, 255 }, 0.78f);
+        Projectile::RegisterDynamicLights(projectiles, map);
+    }
+
+    map.DrawLighting(camera, player.GetPosition());
 
     Vector2 mousePos = GetMousePosition();
 
@@ -3066,11 +3080,11 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     "Sun-Forged Claymore",
                     "HEAVY GREATSWORD",
                     2, 75, 150,
-                    "+6 Damage (36 Light / 124 Heavy)",
-                    "+12 Damage (42 Light / 145 Heavy), +25% Poise / Defense Pierce",
+                    "+6 Damage (36 Light / 139 Heavy)",
+                    "+12 Damage (42 Light / 162 Heavy), +25% Poise / Defense Pierce",
                     Color{ 255, 175, 40, 255 },
                     16, 65,
-                    "Colossal two-handed broadsword. Hyper-armor cleaves shatter defenses.",
+                    "Colossal solar broadsword. 2-stage Solar Cataclysm ignites foes & slams down.",
                     0, 0
                 },
                 {
@@ -3078,23 +3092,23 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     "Storm Glaive",
                     "MIST-FORGED POLEARM",
                     2, 70, 140,
-                    "+5 Damage (25 Light / 86 Heavy)",
-                    "+11 Damage (31 Light / 102 Heavy), +35% Defense Pierce, +25% Crit",
+                    "+5 Damage (25 Light / 120 Heavy)",
+                    "+11 Damage (31 Light / 142 Heavy), +35% Defense Pierce, +25% Crit",
                     Color{ 100, 245, 230, 255 },
                     10, 50,
-                    "Aerodynamic wind polearm. Piercing line thrusts and tempest vortex.",
+                    "Wind polearm. Zephyr Surge i-frame dash into Tempest Cyclone & Crescent Wave.",
                     3, 1
                 },
                 {
                     WeaponType::GLACIAL_CLEAVER,
-                    "Glacial Spiked Cleaver",
-                    "HIGHLAND TROLL CLEAVER",
+                    "Twin Glacial Cleavers",
+                    "DUAL FROST CLEAVERS",
                     2, 85, 160,
-                    "+6 Damage (36 Light / 112 Heavy)",
-                    "+14 Damage (44 Light / 132 Heavy), +30% Defense Pierce, +65% Poise",
+                    "+5 Light / +8 Finisher (25 Light / 54 Finisher)",
+                    "+11 Light / +18 Finisher (31 Light / 64 Finisher), +30% Pierce, +45% Poise",
                     Color{ 140, 220, 255, 255 },
                     18, 75,
-                    "Forged from Berserker Troll horn and volcanic slag. Overhead cleaves erupt frost tremors.",
+                    "Dual Troll-horn cleavers. High-speed flurry & 4-stage Fury of Cleaves rupture.",
                     2, 3
                 }
             };
@@ -3531,7 +3545,7 @@ void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particl
 
     DrawText("Concentrated restorative draught brewed from dried mountain bellflowers and blossom honey.", (int)cardX + 130, (int)cardY + 48, 11, Color{ 185, 210, 235, 220 });
 
-    DrawText("Restores 45 Vitality upon consumption. Press [1] in combat to drink (7.0s cooldown).", (int)cardX + 130, (int)cardY + 66, 11, Color{ 130, 225, 255, 230 });
+    DrawText("Restores 45 Vitality upon consumption. Press [H] in combat to drink (7.0s cooldown).", (int)cardX + 130, (int)cardY + 66, 11, Color{ 130, 225, 255, 230 });
 
 
 
@@ -3735,7 +3749,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "STONESKIN TONIC",
             "+40% Physical Defense and complete stagger poise immunity for 15s. Heavy armor composure.",
-            "Quick Belt Slot [2]",
+            "Quick Belt Slot [4]",
             "Cost: 2 Ore Scraps + 20 Shingles",
             inv.GetStoneskinTonicCount(),
             Color{ 245, 195, 50, 255 },
@@ -3751,7 +3765,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "GLACIAL THAW DRAUGHT",
             "Instantly cleanses Frostbite and grants 90s complete cold immunity in Northern Crags.",
-            "Quick Belt Slot [3]",
+            "Quick Belt Slot [5]",
             "Cost: 2 Frost Shards + 15 Shingles",
             inv.GetGlacialDraughtCount(),
             Color{ 110, 225, 255, 255 },
@@ -3767,7 +3781,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "BERSERKER BREW",
             "+35% Attack Speed and +30% Damage for 12s (+20% incoming damage penalty). High-risk fury.",
-            "Quick Belt Slot [4]",
+            "Quick Belt Slot [6]",
             "Cost: 1 Mist Essence + 25 Shingles",
             inv.GetBerserkerDraughtCount(),
             Color{ 255, 60, 60, 255 },
@@ -3783,7 +3797,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "CONSECRATED HEALTH FLASK",
             "Restores +45 Vitality upon consumption (7.0s cooldown). Max capacity 5 flasks.",
-            "Quick Belt Slot [1]",
+            "Quick Belt Slot [H]",
             "Cost: 15 Shingles",
             inv.GetHealthPotionCount(),
             Color{ 80, 255, 140, 255 },

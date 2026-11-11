@@ -367,9 +367,21 @@ void FrostCavernsHandler::Render(
 
     particles.Draw();
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    map.AddDynamicLight(campfire.position, 310.0f, Color{ 255, 165, 65, 255 }, 1.00f);
+    map.AddDynamicLight(loreStelePos, 175.0f, Color{ 110, 220, 255, 255 }, 0.78f);
+    map.AddDynamicLight(sarcophagusPos, 245.0f, Color{ 110, 200, 255, 255 }, 0.84f);
+    map.AddDynamicLight(returnArchPos, 185.0f, Color{ 150, 220, 255, 255 }, 0.72f);
+    for (const auto& sm : stalagmites) {
+        if (!sm.broken) {
+            map.AddDynamicLight(sm.position, 115.0f, Color{ 115, 215, 255, 255 }, 0.62f);
+        }
+    }
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     // Frostbite Vignette
     float frostMeter = player.GetFrostbiteMeter();

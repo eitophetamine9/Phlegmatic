@@ -213,15 +213,28 @@ void Projectile::Draw() const {
         }
 
         case ProjectileType::GALE_ARROW: {
-            Vector2 tip = { position.x + dir.x * (radius * 3.0f), position.y + dir.y * (radius * 3.0f) };
-            Vector2 tail = { position.x - dir.x * (radius * 2.8f), position.y - dir.y * (radius * 2.8f) };
-            Vector2 featherL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.3f), position.y - dir.y * 2.0f - normal.y * (radius * 1.3f) };
-            Vector2 featherR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.3f), position.y - dir.y * 2.0f + normal.y * (radius * 1.3f) };
+            if (radius >= 16.0f) {
+                float faceDeg = atan2f(velocity.y, velocity.x) * RAD2DEG;
+                DrawCircleGradient(position, radius * 2.4f, Color{ 90, 245, 230, 85 }, Color{ 0, 0, 0, 0 });
+                DrawRing(position, radius * 0.9f, radius * 1.45f, faceDeg - 68.0f, faceDeg + 68.0f, 14, Color{ 100, 245, 230, 210 });
+                DrawRing(position, radius * 1.25f, radius * 1.65f, faceDeg - 54.0f, faceDeg + 54.0f, 14, Color{ 210, 255, 250, 240 });
+                Vector2 arcLead = { position.x + dir.x * (radius * 1.35f), position.y + dir.y * (radius * 1.35f) };
+                Vector2 wingL = { position.x - dir.x * (radius * 0.4f) - normal.x * (radius * 1.75f), position.y - dir.y * (radius * 0.4f) - normal.y * (radius * 1.75f) };
+                Vector2 wingR = { position.x - dir.x * (radius * 0.4f) + normal.x * (radius * 1.75f), position.y - dir.y * (radius * 0.4f) + normal.y * (radius * 1.75f) };
+                DrawLineEx(wingL, arcLead, 4.0f, Color{ 140, 255, 245, 245 });
+                DrawLineEx(arcLead, wingR, 4.0f, Color{ 140, 255, 245, 245 });
+                DrawCircleV(arcLead, 4.5f, WHITE);
+            } else {
+                Vector2 tip = { position.x + dir.x * (radius * 3.0f), position.y + dir.y * (radius * 3.0f) };
+                Vector2 tail = { position.x - dir.x * (radius * 2.8f), position.y - dir.y * (radius * 2.8f) };
+                Vector2 featherL = { position.x - dir.x * 2.0f - normal.x * (radius * 1.3f), position.y - dir.y * 2.0f - normal.y * (radius * 1.3f) };
+                Vector2 featherR = { position.x - dir.x * 2.0f + normal.x * (radius * 1.3f), position.y - dir.y * 2.0f + normal.y * (radius * 1.3f) };
 
-            DrawCircleGradient(position, radius * 2.0f, Color{ 80, 240, 210, 90 }, Color{ 0, 0, 0, 0 });
-            DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
-            DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
-            DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+                DrawCircleGradient(position, radius * 2.0f, Color{ 80, 240, 210, 90 }, Color{ 0, 0, 0, 0 });
+                DrawLineEx(tail, tip, 3.0f, Color{ 140, 255, 230, 255 });
+                DrawTriangle(tip, featherL, featherR, Color{ 90, 235, 215, 240 });
+                DrawCircleV(tip, 3.0f, Color{ 255, 255, 255, 255 });
+            }
             break;
         }
 
@@ -247,6 +260,37 @@ void Projectile::Draw() const {
             DrawLineEx(pommel, tip, 2.5f, Color{ 160, 185, 205, 255 });
             DrawCircleV(pommel, 2.0f, Color{ 80, 95, 110, 255 });
             break;
+        }
+    }
+}
+
+void Projectile::RegisterDynamicLights(const std::vector<Projectile>& projectiles, const GameMap& map) {
+    for (const auto& proj : projectiles) {
+        if (!proj.IsActive()) continue;
+        switch (proj.GetType()) {
+            case ProjectileType::HOLY_BEAM:
+                map.AddDynamicLight(proj.GetPosition(), 120.0f, Color{ 255, 225, 110, 255 }, 0.85f);
+                break;
+            case ProjectileType::ELEMENTAL_BOLT:
+                map.AddDynamicLight(proj.GetPosition(), 135.0f, Color{ 255, 130, 55, 255 }, 0.85f);
+                break;
+            case ProjectileType::VOID_ORB:
+                map.AddDynamicLight(proj.GetPosition(), 115.0f, proj.color, 0.80f);
+                break;
+            case ProjectileType::NOVA_STAR:
+                map.AddDynamicLight(proj.GetPosition(), 110.0f, proj.color, 0.78f);
+                break;
+            case ProjectileType::BEAM_SHARD:
+                map.AddDynamicLight(proj.GetPosition(), 95.0f, proj.color, 0.72f);
+                break;
+            case ProjectileType::GALE_ARROW:
+                map.AddDynamicLight(proj.GetPosition(), 110.0f, Color{ 110, 245, 225, 255 }, 0.72f);
+                break;
+            case ProjectileType::ELEMENTAL_SPIKE:
+                map.AddDynamicLight(proj.GetPosition(), 90.0f, Color{ 255, 180, 65, 255 }, 0.65f);
+                break;
+            default:
+                break;
         }
     }
 }

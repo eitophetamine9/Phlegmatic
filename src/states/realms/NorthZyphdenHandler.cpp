@@ -343,14 +343,11 @@ void NorthZyphdenHandler::Update(
     if (IsKeyPressed(KEY_F)) {
         player.TriggerParry(particles);
     }
-    if (IsKeyPressed(KEY_H) || IsKeyPressed(KEY_ONE)) {
+    if (IsKeyPressed(KEY_H)) {
         player.UseHealthPotion(particles);
     }
     if (IsKeyPressed(KEY_V)) {
         player.TriggerArmorSkill(particles);
-    }
-    if (IsKeyPressed(KEY_TAB)) {
-        player.QuickSwapWeapon(particles);
     }
 
     // Shortcuts
@@ -858,9 +855,25 @@ void NorthZyphdenHandler::Render(
         DrawLineEx(flake.position, p2, flake.size * 0.75f, Color{ 230, 245, 255, (unsigned char)(flake.alpha * 240) });
     }
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    map.AddDynamicLight(highlandCampfire.position, 300.0f, Color{ 255, 168, 72, 255 }, 0.96f);
+    map.AddDynamicLight(phlegmaticAltarPos, 205.0f, Color{ 130, 220, 255, 255 }, 0.82f);
+    map.AddDynamicLight({ 1200.0f, 240.0f }, 255.0f, Color{ 255, 110, 80, 255 }, 0.84f);
+    map.AddDynamicLight(cavernsEntrancePos, 235.0f, Color{ 95, 195, 255, 255 }, 0.80f);
+    for (const auto& crystal : frostCrystals) {
+        if (!crystal.broken) {
+            map.AddDynamicLight(crystal.position, 115.0f, Color{ 130, 220, 255, 255 }, 0.65f);
+        }
+    }
+    for (const auto& stele : loreSteles) {
+        Color stCol = stele.collected ? Color{ 120, 185, 240, 255 } : Color{ 255, 215, 110, 255 };
+        map.AddDynamicLight(stele.position, 125.0f, stCol, 0.65f);
+    }
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     // Frostbite Screen Edge Vignette
     float frostMeter = player.GetFrostbiteMeter();

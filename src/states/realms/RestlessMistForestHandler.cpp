@@ -95,7 +95,7 @@ void RestlessMistForestHandler::Update(
     if (IsKeyPressed(KEY_F)) {
         player.TriggerParry(particles);
     }
-    if (IsKeyPressed(KEY_H) || IsKeyPressed(KEY_ONE)) {
+    if (IsKeyPressed(KEY_H)) {
         player.UseHealthPotion(particles);
     }
     if (IsKeyPressed(KEY_V)) {
@@ -415,9 +415,15 @@ void RestlessMistForestHandler::Render(
         FontManager::DrawGameTextShadow("[E] / [T] RETURN TO ZYPHDEN REALM (EAST)", (int)eastGatePos.x - 30, (int)eastGatePos.y - 45, 11, Color{ 255, 225, 120, 240 });
     }
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    map.AddDynamicLight(campfire.position, 290.0f, Color{ 255, 168, 72, 255 }, 0.96f);
+    map.AddDynamicLight(altarPosition, 265.0f, Color{ 100, 250, 220, 255 }, 0.88f);
+    map.AddDynamicLight(eastGatePos, 200.0f, Color{ 255, 210, 120, 255 }, 0.75f);
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     // Screen-space reticle
     Vector2 mousePos = GetMousePosition();

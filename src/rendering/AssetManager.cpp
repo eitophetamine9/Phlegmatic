@@ -361,12 +361,8 @@ void AssetManager::DrawCharacterDoll(Vector2 center, float scale, WeaponType wea
         DrawLineEx(collar, { collar.x + 14.0f * scale, collar.y - 4.0f * scale }, 3.5f * scale, Color{ 160, 255, 240, 255 });
     }
     else if (weapon == WeaponType::GLACIAL_CLEAVER) {
-        Vector2 hilt = { handR.x + 2.0f * scale, handR.y + 12.0f * scale };
-        Vector2 tip = { hilt.x + 8.0f * scale, hilt.y - 74.0f * scale };
-        DrawLineEx(hilt, tip, 5.0f * scale, Color{ 48, 56, 68, 255 });
-        Vector2 head = { tip.x - 2.0f * scale, tip.y + 16.0f * scale };
-        DrawTriangle(head, { head.x + 24.0f * scale, head.y - 18.0f * scale }, { head.x + 20.0f * scale, head.y + 16.0f * scale }, Color{ 160, 225, 255, 255 });
-        DrawTriangleLines(head, { head.x + 24.0f * scale, head.y - 18.0f * scale }, { head.x + 20.0f * scale, head.y + 16.0f * scale }, Color{ 30, 45, 65, 255 });
+        DrawCleaver({ handR.x + 2.0f * scale, handR.y + 8.0f * scale }, -65.0f, 46.0f * scale, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
+        DrawCleaver({ p.x - 20.0f * scale, p.y + 24.0f * scale }, -115.0f, 46.0f * scale, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
     }
 }
 
@@ -549,9 +545,10 @@ void AssetManager::DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool 
             DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
         }
     } else if (weapon == WeaponType::GLACIAL_CLEAVER) {
-        DrawCleaver({ weaponAnchor.x - 14.0f, weaponAnchor.y + 14.0f }, -45.0f, 48.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
+        DrawCleaver({ weaponAnchor.x - 16.0f, weaponAnchor.y + 12.0f }, -40.0f, 38.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
+        DrawCleaver({ weaponAnchor.x + 16.0f, weaponAnchor.y + 12.0f }, -140.0f, 38.0f, Color{ 160, 225, 255, 255 }, Color{ 80, 190, 240, 220 });
         if (isSelected || isHovered) {
-            const char* name = "GLACIAL SPIKED CLEAVER";
+            const char* name = "TWIN GLACIAL CLEAVERS";
             int w = MeasureText(name, 11);
             DrawText(name, (int)(position.x - w * 0.5f), (int)(position.y + 40), 11, isSelected ? Color{ 255, 220, 90, 255 } : Color{ 200, 215, 235, 220 });
         }
@@ -690,4 +687,73 @@ void AssetManager::DrawCleaver(Vector2 origin, float angle, float length, Color 
 
     // Spiked pommel butt
     DrawCircleV(origin, 4.0f, Color{ 90, 115, 140, 255 });
+}
+
+void AssetManager::DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float scale, bool isUnlocked, bool isEquipped) {
+    Color baseCol = isUnlocked ? (isEquipped ? Color{ 255, 235, 140, 255 } : Color{ 220, 235, 255, 255 }) : Color{ 90, 105, 120, 180 };
+    Color glowCol = isUnlocked ? (isEquipped ? Color{ 255, 205, 50, 200 } : Color{ 80, 160, 240, 160 }) : Color{ 50, 60, 75, 120 };
+
+    switch (weapon) {
+        case WeaponType::SWORD:
+            DrawSword({ center.x - 9.0f * scale, center.y + 9.0f * scale }, -45.0f, 24.0f * scale, baseCol, glowCol);
+            break;
+        case WeaponType::DAGGERS:
+            DrawDaggers({ center.x - 5.0f * scale, center.y }, { center.x + 5.0f * scale, center.y }, -60.0f, -120.0f,
+                isUnlocked ? Color{ 180, 255, 220, 255 } : baseCol,
+                isUnlocked ? Color{ 60, 240, 180, 180 } : glowCol);
+            break;
+        case WeaponType::MACE:
+            DrawMace({ center.x - 8.0f * scale, center.y + 8.0f * scale }, -45.0f, 22.0f * scale,
+                isUnlocked ? Color{ 235, 180, 120, 255 } : baseCol,
+                isUnlocked ? Color{ 255, 140, 40, 180 } : glowCol);
+            break;
+        case WeaponType::HALBERD:
+            DrawHalberd({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 26.0f * scale,
+                isUnlocked ? Color{ 230, 240, 255, 255 } : baseCol,
+                isUnlocked ? Color{ 140, 200, 255, 180 } : glowCol);
+            break;
+        case WeaponType::TRUTH_SEEKER:
+            DrawSword({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 26.0f * scale,
+                isUnlocked ? Color{ 255, 235, 140, 255 } : baseCol,
+                isUnlocked ? Color{ 255, 200, 50, 220 } : glowCol);
+            break;
+        case WeaponType::ZEPHYR_DAGGERS:
+            DrawDaggers({ center.x - 5.0f * scale, center.y }, { center.x + 5.0f * scale, center.y }, -60.0f, -120.0f,
+                isUnlocked ? Color{ 110, 245, 220, 255 } : baseCol,
+                isUnlocked ? Color{ 40, 210, 180, 200 } : glowCol);
+            break;
+        case WeaponType::WINDRUNNER_RECURVE: {
+            Vector2 upperTip = { center.x - 8.0f * scale, center.y - 12.0f * scale };
+            Vector2 lowerTip = { center.x + 8.0f * scale, center.y + 12.0f * scale };
+            Color bowCol = isUnlocked ? Color{ 110, 245, 220, 255 } : baseCol;
+            Color stringCol = isUnlocked ? Color{ 255, 255, 255, 200 } : Color{ 90, 105, 120, 140 };
+            DrawSplineSegmentBezierQuadratic(upperTip, { center.x - 4.0f * scale, center.y }, lowerTip, 2.0f * scale, bowCol);
+            DrawLineEx(upperTip, lowerTip, 1.0f * scale, stringCol);
+            DrawLineEx({ center.x - 7.0f * scale, center.y + 7.0f * scale }, { center.x + 7.0f * scale, center.y - 7.0f * scale }, 1.2f * scale, isUnlocked ? Color{ 255, 215, 80, 230 } : baseCol);
+            break;
+        }
+        case WeaponType::SUN_CLAYMORE:
+            DrawClaymore({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
+                isUnlocked ? Color{ 255, 220, 110, 255 } : baseCol,
+                isUnlocked ? Color{ 255, 140, 30, 200 } : glowCol);
+            break;
+        case WeaponType::STORM_GLAIVE:
+            DrawGlaive({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
+                isUnlocked ? Color{ 140, 255, 235, 255 } : baseCol,
+                isUnlocked ? Color{ 60, 210, 190, 200 } : glowCol);
+            break;
+        case WeaponType::GLACIAL_CLEAVER:
+            DrawCleaver({ center.x - 9.0f * scale, center.y + 8.0f * scale }, -40.0f, 22.0f * scale,
+                isUnlocked ? Color{ 160, 225, 255, 255 } : baseCol,
+                isUnlocked ? Color{ 80, 190, 240, 200 } : glowCol);
+            DrawCleaver({ center.x + 9.0f * scale, center.y + 8.0f * scale }, -140.0f, 22.0f * scale,
+                isUnlocked ? Color{ 160, 225, 255, 255 } : baseCol,
+                isUnlocked ? Color{ 80, 190, 240, 200 } : glowCol);
+            break;
+        case WeaponType::NONE:
+        default:
+            DrawCircleLines((int)center.x, (int)center.y, 7.0f * scale, Color{ 70, 85, 105, 130 });
+            DrawLineEx({ center.x - 5.0f * scale, center.y }, { center.x + 5.0f * scale, center.y }, 1.5f * scale, Color{ 70, 85, 105, 130 });
+            break;
+    }
 }

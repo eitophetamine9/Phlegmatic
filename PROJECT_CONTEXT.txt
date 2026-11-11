@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 9, 2026
-Branch: ver.0.0.1j
-Release Version: 0.0.1j (in-development)
+Generated: November 11, 2026
+Branch: ver.0.0.1k
+Release Version: 0.0.1k
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -88,6 +88,7 @@ Phlegmatic/
     │   ├── Projectile.hpp/.cpp    # Piercing projectiles (Holy Beam, Cultist psionic orbs, Gale Arrow)
     │   └── LootDrop.hpp/.cpp      # Physical Shingles and scrap loot drop physics, magnet attraction
     ├── world/
+    │   ├── TimeOfDay.hpp/.cpp     # GLSL 330 multiplicative diurnal & subterranean lighting
     │   ├── Map.hpp/.cpp           # Multi-environment world renderer (Castle, Crossroads, Zyphden, Keep, Forge, Tavern)
     │   ├── Campfire.hpp           # Attunable bonfire waypoints and resting mechanics
     │   ├── WaveManager.hpp/.cpp   # 20-stage arena wave manager, drop scheduling, timers
@@ -755,5 +756,28 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Restructured all 7 realm state coordinators into dedicated src/states/realms/ subsystem.
   * Decoupled realm logic from top-level state orchestrator in Game.hpp/cpp.
   * Synchronized build.bat (-Isrc/states/realms) and CMakeLists.txt compilation configurations.
+
+================================================================================
+15. VERSION 0.0.1k MILESTONES (PHASES 1 - 8)
+================================================================================
+- Modal Fixes & [TAB] Inventory Restoration:
+  * Fixed [M] Realm Map immediate closure bug and Bestiary tab index routing (Tab 2 vs Map Tab 3).
+  * Added direct [B] Bestiary hotkey and enabled top-right HUD click detection in Mist Forest, North Zyphden, and Frost Caverns.
+  * Restored [TAB] as primary Inventory toggle ([I] alias preserved).
+- 3-Slot Weapon Hotbar & Potion Keybinds:
+  * Added weaponHotbar[3] & activeWeaponSlot in Inventory with SaveManager serialization and pre-0.0.1k save seeding.
+  * Bound [1], [2], [3] to active hotbar weapon switching with Inventory [SLOT 1/2/3] assignment controls.
+  * Rebound potions cleanly onto [H] Heal, [4] Stoneskin, [5] Glacial Thaw, and [6] Berserker Brew.
+- Enlarged Vector-Icon HUD & 3-Weapon Dock:
+  * Enlarged bottom-center action slots (58x62 / 64x68) with custom procedural icons and active armor skill highlights.
+  * Added bottom-right 3-Slot Weapon Hotbar Dock (64x66 / 70x72) and repositioned Arena [T] return hint.
+- GLSL 330 Multiplicative Day-Night Shader Overhaul:
+  * Built offscreen RenderTexture2D lightmap in TimeOfDay.cpp with inverse-square point-light and Purkinje composite GLSL shaders.
+  * Registered torches, campfires, altars, crystals, and portals across all realm handlers.
+- Combat Stagger Loop Fix & Weapon/Armor Reworks:
+  * Removed broken per-hit stagger / Visceral Execution loop and updated Phlegmatic Core to apply 3.0s Chill on hit.
+  * Reworked Twin Glacial Cleavers (dual-wield + 4-stage Fury of Cleaves), Sun-Forged Claymore (2-stage Solar Cataclysm), Storm Glaive (2-stage Tempest Cyclone + Crescent Gale Wave).
+  * Revamped Frostwarden Armor: Enemy Chill status (-40% speed), FROST NOVA [V] with 12-spire VFX, 6s 45 HP Ice Ward retaliation, 30% Cold Resist, and +20% heavy poise.
+  * Raised stamina on Windrunner Bow (18/42) & Daggers (9/28, 8/25; removed 5-hit free bypass) and tuned Totem of Mist speed/haste (0.95x speed, 1.0x cooldown, +10% stamina regen).
 
 

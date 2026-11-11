@@ -65,7 +65,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 16, 225 });
 
     const float modalW = 780.0f;
-    const float modalH = 580.0f;
+    const float modalH = 600.0f;
     float modalX = ((float)windowWidth - modalW) * 0.5f;
     float modalY = ((float)windowHeight - modalH) * 0.5f;
 
@@ -109,15 +109,16 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
             { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
             { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
-            { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
-            { "TAB Key",       "Quick Swap","Instantly cycle through unlocked weapons during combat.", Color{ 255, 215, 80, 255 } },
-            { "I Key",         "Inventory", "Open Equipment Matrix, Chronicles Grimoire & Bestiary.", Color{ 140, 210, 255, 255 } },
-            { "1 - 4 Keys",     "Quick Belt", "Drink Health Potion [1], Stoneskin [2], Glacial Thaw [3], Berserk [4].", Color{ 140, 240, 180, 255 } },
-            { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
-            { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
+            { "E Key",         "Interact",  "Talk to NPCs, inspect altars, forge weapons, and rest at bonfires.", Color{ 200, 150, 255, 255 } },
+            { "TAB / I Key",   "Inventory", "Open Equipment Matrix, 3-Slot Weapon Hotbar, Chronicles & Bestiary.", Color{ 255, 215, 80, 255 } },
+            { "B Key",         "Bestiary",  "Open the Humoral Bestiary & Monster Weakness Codex directly.", Color{ 140, 210, 255, 255 } },
+            { "1 - 3 Keys",    "Weapon Bar","Equip weapons bound to Hotbar Slots 1, 2, and 3.", Color{ 255, 215, 80, 255 } },
+            { "H, 4 - 6",      "Quick Belt","Drink Health [H], Stoneskin [4], Glacial Thaw [5], Berserk [6].", Color{ 140, 240, 180, 255 } },
+            { "C Key",         "Controls",  "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
+            { "R / L / ESC",   "Menu Keys", "[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
         };
 
-        float rowHeight = 38.0f;
+        float rowHeight = 35.0f;
         for (int i = 0; i < (int)std::size(items); i++) {
             float rowY = startY + (float)i * rowHeight;
 
@@ -262,66 +263,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
 
 
 static void DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float scale, bool isUnlocked, bool isEquipped) {
-    Color baseCol = isUnlocked ? (isEquipped ? Color{ 255, 235, 140, 255 } : Color{ 220, 235, 255, 255 }) : Color{ 90, 105, 120, 180 };
-    Color glowCol = isUnlocked ? (isEquipped ? Color{ 255, 205, 50, 200 } : Color{ 80, 160, 240, 160 }) : Color{ 50, 60, 75, 120 };
-
-    switch (weapon) {
-        case WeaponType::SWORD:
-            AssetManager::DrawSword({ center.x - 9.0f * scale, center.y + 9.0f * scale }, -45.0f, 24.0f * scale, baseCol, glowCol);
-            break;
-        case WeaponType::DAGGERS:
-            AssetManager::DrawDaggers({ center.x - 5.0f * scale, center.y }, { center.x + 5.0f * scale, center.y }, -60.0f, -120.0f, 
-                isUnlocked ? Color{ 180, 255, 220, 255 } : baseCol,
-                isUnlocked ? Color{ 60, 240, 180, 180 } : glowCol);
-            break;
-        case WeaponType::MACE:
-            AssetManager::DrawMace({ center.x - 8.0f * scale, center.y + 8.0f * scale }, -45.0f, 22.0f * scale,
-                isUnlocked ? Color{ 235, 180, 120, 255 } : baseCol,
-                isUnlocked ? Color{ 255, 140, 40, 180 } : glowCol);
-            break;
-        case WeaponType::HALBERD:
-            AssetManager::DrawHalberd({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 26.0f * scale,
-                isUnlocked ? Color{ 230, 240, 255, 255 } : baseCol,
-                isUnlocked ? Color{ 140, 200, 255, 180 } : glowCol);
-            break;
-        case WeaponType::TRUTH_SEEKER:
-            AssetManager::DrawSword({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 26.0f * scale,
-                isUnlocked ? Color{ 255, 235, 140, 255 } : baseCol,
-                isUnlocked ? Color{ 255, 200, 50, 220 } : glowCol);
-            break;
-        case WeaponType::ZEPHYR_DAGGERS:
-            AssetManager::DrawDaggers({ center.x - 5.0f * scale, center.y }, { center.x + 5.0f * scale, center.y }, -60.0f, -120.0f,
-                isUnlocked ? Color{ 110, 245, 220, 255 } : baseCol,
-                isUnlocked ? Color{ 40, 210, 180, 200 } : glowCol);
-            break;
-        case WeaponType::WINDRUNNER_RECURVE: {
-            Vector2 upperTip = { center.x - 8.0f * scale, center.y - 12.0f * scale };
-            Vector2 lowerTip = { center.x + 8.0f * scale, center.y + 12.0f * scale };
-            Color bowCol = isUnlocked ? Color{ 110, 245, 220, 255 } : baseCol;
-            Color stringCol = isUnlocked ? Color{ 255, 255, 255, 200 } : Color{ 90, 105, 120, 140 };
-            DrawSplineSegmentBezierQuadratic(upperTip, { center.x - 4.0f * scale, center.y }, lowerTip, 2.0f * scale, bowCol);
-            DrawLineEx(upperTip, lowerTip, 1.0f * scale, stringCol);
-            DrawLineEx({ center.x - 7.0f * scale, center.y + 7.0f * scale }, { center.x + 7.0f * scale, center.y - 7.0f * scale }, 1.2f * scale, isUnlocked ? Color{ 255, 215, 80, 230 } : baseCol);
-            break;
-        }
-        case WeaponType::SUN_CLAYMORE:
-            AssetManager::DrawClaymore({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
-                isUnlocked ? Color{ 255, 220, 110, 255 } : baseCol,
-                isUnlocked ? Color{ 255, 140, 30, 200 } : glowCol);
-            break;
-        case WeaponType::STORM_GLAIVE:
-            AssetManager::DrawGlaive({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
-                isUnlocked ? Color{ 140, 255, 235, 255 } : baseCol,
-                isUnlocked ? Color{ 60, 210, 190, 200 } : glowCol);
-            break;
-        case WeaponType::GLACIAL_CLEAVER:
-            AssetManager::DrawCleaver({ center.x - 10.0f * scale, center.y + 10.0f * scale }, -45.0f, 28.0f * scale,
-                isUnlocked ? Color{ 160, 225, 255, 255 } : baseCol,
-                isUnlocked ? Color{ 80, 190, 240, 200 } : glowCol);
-            break;
-        default:
-            break;
-    }
+    AssetManager::DrawWeaponSlotIcon(center, weapon, scale, isUnlocked, isEquipped);
 }
 
 // ==========================================
@@ -726,7 +668,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
     DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
     DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
-    DrawText("CLOSE [ESC/I]", (int)closeX + 16, (int)closeY + 9, 13, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
+    DrawText("CLOSE [ESC/TAB]", (int)closeX + 10, (int)closeY + 9, 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
 
     bool closeClicked = (isCloseHov && isMousePressed);
 
@@ -788,7 +730,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
     // Tab 4: Realm Map [M]
     Rectangle tab4Rec = { modalX + 716, tabY, 190.0f, 34.0f };
     bool isTab4Hov = CheckCollisionPointRec(mousePos, tab4Rec);
-    if ((isTab4Hov && isMousePressed) || IsKeyPressed(KEY_FOUR) || IsKeyPressed(KEY_M)) {
+    if ((isTab4Hov && isMousePressed) || IsKeyPressed(KEY_FOUR)) {
         activeTab = 3;
         SoundFX::PlayButtonClick();
         return true; // Signals closing inventory and opening map
@@ -962,7 +904,35 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // -------------------------------------------------------------
         float secWepY = secArmorY + slotH + 26.0f;
         DrawLine((int)leftX + 16, (int)secWepY, (int)(leftX + leftW - 16), (int)secWepY, Color{ 45, 60, 85, 180 });
-        DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 14, Color{ 255, 215, 90, 240 });
+        DrawText("WEAPONS (ARSENAL & HOTBAR [1-3])", (int)leftX + 16, (int)secWepY + 6, 13, Color{ 255, 215, 90, 240 });
+
+        // Compact 3-Slot Hotbar Quick-Switch Chips aligned right of header
+        for (int s = 0; s < 3; ++s) {
+            float chipW = 42.0f;
+            float chipH = 18.0f;
+            Rectangle chipRec = { leftX + leftW - 16.0f - (float)(3 - s) * (chipW + 4.0f), secWepY + 3.0f, chipW, chipH };
+            WeaponType slotWep = player.GetInventory().GetHotbarWeapon(s);
+            bool isSlotActive = (player.GetInventory().GetActiveWeaponSlot() == s && slotWep != WeaponType::NONE);
+            bool isChipHov = CheckCollisionPointRec(mousePos, chipRec);
+            if (isChipHov && isMousePressed) {
+                if (slotWep != WeaponType::NONE && player.GetInventory().HasWeapon(slotWep)) {
+                    player.GetInventory().SetActiveWeaponSlot(s);
+                    player.SetWeapon(slotWep);
+                    SoundFX::PlayEquipWeapon();
+                }
+                s_selectedSlot = 4;
+            }
+            DrawRectangleRounded(chipRec, 0.25f, 4, isSlotActive ? Color{ 48, 68, 102, 245 } : (isChipHov ? Color{ 32, 44, 68, 230 } : Color{ 18, 24, 36, 220 }));
+            DrawRectangleRoundedLines(chipRec, 0.25f, 4, isSlotActive ? Color{ 255, 215, 80, 255 } : Color{ 60, 82, 118, 200 });
+            char slotLbl[8];
+            snprintf(slotLbl, sizeof(slotLbl), "[%d]", s + 1);
+            DrawText(slotLbl, (int)chipRec.x + 4, (int)chipRec.y + 4, 10, isSlotActive ? Color{ 255, 225, 100, 255 } : Color{ 165, 190, 220, 220 });
+            if (slotWep != WeaponType::NONE) {
+                DrawWeaponSlotIcon({ chipRec.x + chipW - 12.0f, chipRec.y + chipH * 0.5f }, slotWep, 0.42f, true, isSlotActive);
+            } else {
+                DrawText("-", (int)(chipRec.x + chipW - 13.0f), (int)chipRec.y + 4, 10, Color{ 100, 115, 135, 180 });
+            }
+        }
 
         struct WepBtnInfo { WeaponType type; };
         WepBtnInfo wepBtns[10] = {
@@ -1010,6 +980,14 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             if (isWUnlocked && curUpg > 0) {
                 std::string badge = "+" + std::to_string(curUpg);
                 DrawText(badge.c_str(), (int)(wRec.x + wRec.width - 16), (int)(wRec.y + wRec.height - 12), 10, Color{ 255, 220, 100, 255 });
+            }
+
+            // Hotbar assignment key badge [1] / [2] / [3] in top-left corner
+            int hbIdx = player.GetInventory().GetWeaponHotbarSlot(wepBtns[i].type);
+            if (isWUnlocked && hbIdx >= 0) {
+                Rectangle hbPill = { wRec.x + 2.0f, wRec.y + 2.0f, 15.0f, 12.0f };
+                DrawRectangleRounded(hbPill, 0.3f, 3, isWEquipped ? Color{ 255, 210, 70, 235 } : Color{ 24, 48, 82, 235 });
+                DrawText(std::to_string(hbIdx + 1).c_str(), (int)hbPill.x + 5, (int)hbPill.y + 1, 10, isWEquipped ? Color{ 14, 18, 26, 255 } : Color{ 160, 225, 255, 255 });
             }
         }
 
@@ -1149,7 +1127,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         struct MatSlot { const char* label; int count; Color col; const char* tag; };
         MatSlot matSlots[5] = {
-            { "POTIONS", player.GetInventory().GetHealthPotionCount(), Color{ 235, 75, 75, 255 }, "[F] Heal" },
+            { "POTIONS", player.GetInventory().GetHealthPotionCount(), Color{ 235, 75, 75, 255 }, "[H] Heal" },
             { "SHINGLES", player.GetInventory().GetShingles(), Color{ 215, 225, 245, 255 }, "Currency" },
             { "ORE SCRAP", player.GetInventory().GetOreScraps(), Color{ 235, 165, 65, 255 }, "Forge Ore" },
             { "MIST ESS.", player.GetInventory().GetEssenceOfMist(), Color{ 90, 225, 210, 255 }, "Summoning" },
@@ -1920,6 +1898,12 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                     std::string badge = "+" + std::to_string(upgLvl);
                     DrawText(badge.c_str(), (int)(bRec.x + bRec.width - 18), (int)(bRec.y + bRec.height - 13), 10, Color{ 255, 220, 100, 255 });
                 }
+                int hbIdx = player.GetInventory().GetWeaponHotbarSlot(weps[i].type);
+                if (isUnlocked && hbIdx >= 0) {
+                    Rectangle hbPill = { bRec.x + 4.0f, bRec.y + 4.0f, 18.0f, 14.0f };
+                    DrawRectangleRounded(hbPill, 0.3f, 3, isEquipped ? Color{ 255, 210, 70, 240 } : Color{ 24, 48, 82, 235 });
+                    DrawText(std::to_string(hbIdx + 1).c_str(), (int)hbPill.x + 6, (int)hbPill.y + 2, 10, isEquipped ? Color{ 14, 18, 26, 255 } : Color{ 170, 230, 255, 255 });
+                }
             }
 
             // Right Inspection Panel
@@ -1965,10 +1949,39 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)drawerListY + 72, (int)(panelX + panelW - 14), (int)drawerListY + 72, Color{ 45, 62, 90, 180 });
+
+            // 3-Slot Hotbar Assignment Strip
+            int curHotbarSlot = player.GetInventory().GetWeaponHotbarSlot(weps[s_inspectedWep].type);
+            DrawText("HOTBAR:", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            float hbStartX = panelX + 74.0f;
+            float hbBtnW = (panelW - 88.0f - 12.0f) / 3.0f;
+            for (int hs = 0; hs < 3; ++hs) {
+                Rectangle hsRec = { hbStartX + (float)hs * (hbBtnW + 6.0f), drawerListY + 78.0f, hbBtnW, 22.0f };
+                bool isAssignedHere = (curHotbarSlot == hs);
+                bool isHsHov = isInspUnlocked && CheckCollisionPointRec(mousePos, hsRec);
+                if (isHsHov && isMousePressed) {
+                    player.GetInventory().SetHotbarWeapon(hs, weps[s_inspectedWep].type);
+                    player.GetInventory().SetActiveWeaponSlot(hs);
+                    player.SetWeapon(weps[s_inspectedWep].type);
+                    SoundFX::PlayEquipWeapon();
+                }
+                Color hsBg = !isInspUnlocked ? Color{ 20, 24, 34, 180 } :
+                    (isAssignedHere ? Color{ 55, 78, 118, 250 } : (isHsHov ? Color{ 44, 66, 102, 240 } : Color{ 26, 36, 54, 225 }));
+                Color hsBorder = !isInspUnlocked ? Color{ 48, 56, 72, 160 } :
+                    (isAssignedHere ? Color{ 255, 215, 80, 255 } : (isHsHov ? Color{ 130, 210, 255, 240 } : Color{ 62, 84, 120, 200 }));
+                DrawRectangleRounded(hsRec, 0.25f, 4, hsBg);
+                DrawRectangleRoundedLines(hsRec, 0.25f, 4, hsBorder);
+                char hsLabel[24];
+                snprintf(hsLabel, sizeof(hsLabel), isAssignedHere ? "[%d] BOUND" : "[%d] SLOT %d", hs + 1, hs + 1);
+                int hlW = MeasureText(hsLabel, 10);
+                Color hlCol = !isInspUnlocked ? Color{ 100, 110, 125, 170 } :
+                    (isAssignedHere ? Color{ 255, 225, 100, 255 } : Color{ 205, 225, 245, 235 });
+                DrawText(hsLabel, (int)(hsRec.x + (hsRec.width - hlW) * 0.5f), (int)hsRec.y + 6, 10, hlCol);
+            }
 
             // Stats
-            DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 106, 11, Color{ 255, 215, 90, 240 });
             int equippedUpg = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
             WeaponStats curSt = GetWeaponStats(player.GetWeapon(), equippedUpg);
             int lightDelta = (int)(st.lightDamage - curSt.lightDamage);
@@ -1980,31 +1993,35 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             if (!isInspEquipped && lightDelta != 0) sLine1 += " (" + std::string(lightDelta > 0 ? "+" : "") + std::to_string(lightDelta) + ")";
             sLine1 += " | Heavy: " + std::to_string((int)st.heavyDamage);
             if (!isInspEquipped && heavyDelta != 0) sLine1 += " (" + std::string(heavyDelta > 0 ? "+" : "") + std::to_string(heavyDelta) + ")";
-            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 122, 11, Color{ 105, 240, 185, 240 });
 
             std::string sLine2 = "Reach: " + std::to_string((int)st.lightRange) + "px";
             if (!isInspEquipped && reachDelta != 0) sLine2 += " (" + std::string(reachDelta > 0 ? "+" : "") + std::to_string(reachDelta) + ")";
             sLine2 += " | Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
             if (!isInspEquipped && pierceDelta != 0) sLine2 += " (" + std::string(pierceDelta > 0 ? "+" : "") + std::to_string(pierceDelta) + "%)";
-            DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 118, 12, Color{ 140, 210, 255, 240 });
+            DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 137, 11, Color{ 140, 210, 255, 240 });
 
             // Special weapon archetype traits
             if (weps[s_inspectedWep].type == WeaponType::WINDRUNNER_RECURVE) {
-                DrawText("[Archetype]: Charged shots break enemy guard & stun. Rapid pierce velocity.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 220, 95, 240 });
+                DrawText("[Archetype]: Charged shots break enemy guard & stun. Rapid pierce velocity.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 220, 95, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::ZEPHYR_DAGGERS) {
-                DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 110, 245, 225, 240 });
+                DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 225, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::SUN_CLAYMORE) {
-                DrawText("[Archetype]: Devastating heavy cleaves with unbreakable hyper-armor posture.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 160, 60, 240 });
+                DrawText("[Archetype]: 2-stage Solar Cataclysm heavy ignites foes then detonates a scorching pillar.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 170, 60, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::STORM_GLAIVE) {
+                DrawText("[Archetype]: 2-stage Tempest Cyclone grants i-frame surge, +15 Poise & Crescent Gale Wave.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 230, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::GLACIAL_CLEAVER) {
+                DrawText("[Archetype]: Dual-wielding frost barrage with 4-stage Fury of Cleaves heavy rupture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 140, 225, 255, 240 });
             } else {
-                DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 160, 185, 215, 220 });
+                DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 160, 185, 215, 220 });
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 158, (int)(panelX + panelW - 14), (int)drawerListY + 158, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)drawerListY + 169, (int)(panelX + panelW - 14), (int)drawerListY + 169, Color{ 45, 62, 90, 180 });
 
             // Lore
-            DrawText("WEAPON HISTORY & CODEX", (int)panelX + 14, (int)drawerListY + 166, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 186, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("WEAPON HISTORY & CODEX", (int)panelX + 14, (int)drawerListY + 176, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 193, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -2244,9 +2261,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         if (cur.killIdx == 9 || cur.killIdx == 10) {
             perkTitle = "HUNTING PERK: TROLL SLAYER";
-            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Poise Dmg, Executions Heal 25 HP, +15% Base Dmg, +25 Frost Resist." :
+            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Dmg vs Trolls, +25 Frost Resist, Troll Kills Heal 25 HP." :
                        (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :
-                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Poise & Heal on Execute.");
+                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Dmg & Heal 25 HP on Troll Kill.");
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         } else if (cur.killIdx == 5 || cur.killIdx == 6) {
             perkTitle = "HUNTING PERK: GOLEM BREAKER";
@@ -2262,9 +2279,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         } else {
             perkTitle = "HUNTING PERK: CULTIST PURIFIER";
-            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore 15 Stamina and Extend Adrenaline Buff." :
+            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore +15 Stamina & +10 Composure." :
                        (u5 ? "ACTIVE [TIER II]: +10% Melee Damage vs Cultists, +10 Max Composure." :
-                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Adrenaline on kill.");
+                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Composure on kill.");
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         }
 
@@ -3353,7 +3370,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
 
 
-    DrawText("Tip: Press [I] anywhere in the world to open your Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
+    DrawText("Tip: Press [TAB] or [I] anywhere in the world to open your Inventory & Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
 
 
 
@@ -4117,7 +4134,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 32, 70, 85, 255 } : Color{ 14, 32, 42, 220 });
     DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 80, 225, 245, 255 } : Color{ 40, 100, 120, 200 });
     DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
-    bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_M);
+    bool shouldClose = (isCloseHov && isMousePressed);
 
     // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <6>) & LEYLINE MAP
     struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
