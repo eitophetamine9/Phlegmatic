@@ -366,9 +366,18 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     }
 
     if (player.GetArmorSkillShieldHp() > 0.0f) {
-        char b[32];
-        snprintf(b, sizeof(b), "WARD SHIELD: %d HP", (int)player.GetArmorSkillShieldHp());
-        activeBuffs.push_back({ b, Color{ 90, 225, 255, 255 }, Color{ 160, 245, 255, 255 }, Color{ 14, 36, 48, 240 }, true });
+        char b[36];
+        if (player.HasFullArmorSet(ArmorSet::FROSTWARDEN)) {
+            snprintf(b, sizeof(b), "ICE WARD: %d HP (%.1fs)", (int)player.GetArmorSkillShieldHp(), player.GetArmorSkillActiveTimer());
+            activeBuffs.push_back({ b, Color{ 120, 235, 255, 255 }, Color{ 195, 248, 255, 255 }, Color{ 14, 38, 54, 240 }, true });
+        } else {
+            snprintf(b, sizeof(b), "WARD SHIELD: %d HP", (int)player.GetArmorSkillShieldHp());
+            activeBuffs.push_back({ b, Color{ 90, 225, 255, 255 }, Color{ 160, 245, 255, 255 }, Color{ 14, 36, 48, 240 }, true });
+        }
+    } else if (player.HasFrostwardenWardActive()) {
+        char b[36];
+        snprintf(b, sizeof(b), "ICE WARD RETALIATE: %.1fs", player.GetArmorSkillActiveTimer());
+        activeBuffs.push_back({ b, Color{ 110, 225, 255, 255 }, Color{ 185, 245, 255, 255 }, Color{ 14, 34, 48, 235 }, true });
     }
 
     if (player.IsInsideSmokeMist()) {

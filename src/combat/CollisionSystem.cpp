@@ -29,6 +29,10 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
     // 0. Armor skill pending AoE resolution
     if (player.pendingArmorSkillAoE) {
         player.pendingArmorSkillAoE = false;
+        float chillDur = player.pendingAoEChill;
+        bool nonBossStunOnly = player.pendingAoEStunNonBossOnly;
+        player.pendingAoEChill = 0.0f;
+        player.pendingAoEStunNonBossOnly = false;
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive()) continue;
             float dist = Vector2Distance(player.GetPosition(), enemy.GetPosition());
@@ -38,7 +42,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (enemy.TakeDamage(player.pendingAoEDamage, kDir, particles, player.pendingAoEArmorShred)) {
                     handleEnemyDefeated(enemy);
                 }
-                if (player.pendingAoEStun > 0.0f) {
+                if (chillDur > 0.0f && enemy.IsAlive()) {
+                    enemy.ApplyChill(chillDur);
+                }
+                if (player.pendingAoEArmorShred > 0.0f && enemy.IsAlive()) {
+                    enemy.ApplyArmorFracture(5.0f);
+                }
+                if (player.pendingAoEStun > 0.0f && (!nonBossStunOnly || !enemy.IsBoss()) && enemy.IsAlive()) {
                     enemy.ApplyStagger(player.pendingAoEStun);
                 }
             }
@@ -308,7 +318,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
             else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
 
-            bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles);
+            bool isColdAttack = (enemy.GetType() == EnemyType::FROST_TROLL ||
+                                 enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                 enemy.GetType() == EnemyType::FROST_REVENANT);
+
+            bool wasProtectedByWard = player.HasFrostwardenWardActive() && !player.IsParrying() &&
+                                      !player.IsDashing() && !player.IsDaggerLunging() && !player.HasInvulnerability();
+            bool tookDamage = player.TakeDamage(baseDamage, knockbackDir, particles, 0.0f, isColdAttack);
             if (!tookDamage && player.IsParrying()) {
                 enemy.OnParried(particles);
                 particles.TriggerHitStop(0.06f);
@@ -316,30 +332,43 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (enemy.GetHumor() == HumorType::CHOLERIC) {
                     player.ModifyComposure(30.0f); // Quenching Choleric Frenzy composure bonus!
                 }
-            } else if (tookDamage) {
-                // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
-                if (enemy.GetHumor() == HumorType::SANGUINE) {
-                    player.ApplyBleed(3.0f, particles);
+            } else {
+                if (wasProtectedByWard && enemy.IsAlive()) {
+                    Vector2 retDir = { -knockbackDir.x, -knockbackDir.y };
+                    if (enemy.TakeDamage(18.0f, retDir, particles, 0.0f)) {
+                        handleEnemyDefeated(enemy);
+                    }
+                    if (enemy.IsAlive()) {
+                        enemy.ApplyChill(3.0f);
+                    }
+                    particles.SpawnFloatingText(enemy.GetPosition(), "ICE WARD! -18", Color{ 140, 230, 255, 255 }, 18.0f);
+                    particles.SpawnSparks(enemy.GetPosition(), Color{ 160, 240, 255, 255 }, 18, 160.0f);
                 }
-                if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
-                    player.AddFrostbite(18.0f);
-                }
+                if (tookDamage) {
+                    // Sanguine bleed: unmitigated strikes apply arterial hemorrhage unless in Stoic Poise
+                    if (enemy.GetHumor() == HumorType::SANGUINE) {
+                        player.ApplyBleed(3.0f, particles);
+                    }
+                    if (enemy.GetType() == EnemyType::FROST_REVENANT || enemy.GetType() == EnemyType::FROST_TROLL) {
+                        player.AddFrostbite(18.0f, &particles);
+                    }
 
-                // Heavy and crushing boss attacks apply stagger to player if unparried
-                bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
-                                      enemy.GetType() == EnemyType::CHARGER ||
-                                      enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
-                                      enemy.GetType() == EnemyType::ZIL_BOSS ||
-                                      enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
-                                      enemy.GetType() == EnemyType::FROST_TROLL ||
-                                      enemy.GetType() == EnemyType::BERSERKER_TROLL ||
-                                      enemy.GetType() == EnemyType::FROST_REVENANT);
-                if (isHeavyAttack) {
-                    player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
-                    particles.TriggerHitStop(0.04f);
-                    particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
-                    if (!player.HasStaggerImmunity()) {
-                        player.ApplyStagger(1.0f, particles);
+                    // Heavy and crushing boss attacks apply stagger to player if unparried
+                    bool isHeavyAttack = (enemy.GetType() == EnemyType::BRUTE ||
+                                          enemy.GetType() == EnemyType::CHARGER ||
+                                          enemy.GetType() == EnemyType::INQUISITOR_BOSS ||
+                                          enemy.GetType() == EnemyType::ZIL_BOSS ||
+                                          enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS ||
+                                          enemy.GetType() == EnemyType::FROST_TROLL ||
+                                          enemy.GetType() == EnemyType::BERSERKER_TROLL ||
+                                          enemy.GetType() == EnemyType::FROST_REVENANT);
+                    if (isHeavyAttack) {
+                        player.ModifyComposure(-25.0f); // Unmitigated heavy enemy impact!
+                        particles.TriggerHitStop(0.04f);
+                        particles.AddDirectionalShake(knockbackDir, 8.5f, 0.25f);
+                        if (!player.HasStaggerImmunity()) {
+                            player.ApplyStagger(1.0f, particles);
+                        }
                     }
                 }
             }
@@ -406,7 +435,11 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 } else {
                     // Hit player
                     Vector2 knockDir = Vector2Normalize(proj.GetVelocity());
-                    player.TakeDamage(proj.GetDamage(), knockDir, particles);
+                    if (player.TakeDamage(proj.GetDamage(), knockDir, particles, 0.0f, proj.IsCold())) {
+                        if (proj.IsCold()) {
+                            player.AddFrostbite(14.0f, &particles);
+                        }
+                    }
                     if (proj.GetType() == ProjectileType::BOLT) {
                         player.ApplyBleed(3.0f, particles);
                     }

@@ -110,8 +110,49 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f + 2.0f * pulse, Color{ 255, 50, 70, (unsigned char)(180 * pulse) });
     }
 
-    // Crusader Plate Dawnfire Aegis Bubble
-    if (player.armorSkillShieldHp > 0.0f) {
+    // Frostwarden Frost Nova (12 radiating crystalline ice spires)
+    if (player.frostNovaVisualTimer > 0.0f) {
+        float novaProgress = fminf(1.0f, fmaxf(0.0f, 1.0f - (player.frostNovaVisualTimer / 0.65f)));
+        float curR = 26.0f + (190.0f - 26.0f) * novaProgress;
+        unsigned char alpha = (unsigned char)(240 * (1.0f - novaProgress));
+        DrawCircleGradient(player.position, curR, Color{ 100, 215, 255, (unsigned char)(alpha * 0.28f) }, Color{ 60, 170, 240, 0 });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, curR, Color{ 165, 240, 255, alpha });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, curR * 0.72f, Color{ 110, 220, 255, (unsigned char)(alpha * 0.85f) });
+        for (int s = 0; s < 12; ++s) {
+            float rad = ((float)s * 30.0f + novaProgress * 12.0f) * DEG2RAD;
+            Vector2 dirS = { cosf(rad), sinf(rad) };
+            Vector2 perpS = { -dirS.y, dirS.x };
+            float halfW = 10.5f * (1.0f - 0.35f * novaProgress);
+            Vector2 baseMid = { player.position.x + dirS.x * (curR * 0.42f), player.position.y + dirS.y * (curR * 0.42f) };
+            Vector2 baseL = { baseMid.x - perpS.x * halfW, baseMid.y - perpS.y * halfW };
+            Vector2 baseR = { baseMid.x + perpS.x * halfW, baseMid.y + perpS.y * halfW };
+            Vector2 tip = { player.position.x + dirS.x * (curR + 18.0f), player.position.y + dirS.y * (curR + 18.0f) };
+            DrawTriangle(baseL, tip, baseR, Color{ 130, 232, 255, (unsigned char)(alpha * 0.85f) });
+            DrawTriangleLines(baseL, tip, baseR, Color{ 225, 250, 255, alpha });
+            DrawLineEx(baseMid, tip, 2.0f, Color{ 245, 255, 255, alpha });
+        }
+    }
+
+    // Active Armor Set Shield Bubble (Frostwarden Permafrost Ice Ward vs Crusader Dawnfire Aegis)
+    if (player.HasFullArmorSet(ArmorSet::FROSTWARDEN) && (player.armorSkillActiveTimer > 0.0f || player.armorSkillShieldHp > 0.0f)) {
+        float pulse = 0.75f + 0.25f * sinf((float)GetTime() * 7.0f);
+        if (player.armorSkillShieldHp > 0.0f) {
+            DrawCircleGradient(player.position, player.radius + 18.0f, Color{ 120, 225, 255, (unsigned char)(45 * pulse) }, Color{ 70, 185, 245, 0 });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 13.0f, Color{ 160, 240, 255, (unsigned char)(230 * pulse) });
+        }
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 18.0f, Color{ 110, 220, 255, (unsigned char)(175 * pulse) });
+        for (int i = 0; i < 6; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 6.0f) + (float)GetTime() * 2.6f;
+            float orbitR = player.radius + 20.0f;
+            Vector2 c = { player.position.x + cosf(ang) * orbitR, player.position.y + sinf(ang) * orbitR };
+            Vector2 outV = { c.x + cosf(ang) * 5.0f, c.y + sinf(ang) * 5.0f };
+            Vector2 inV = { c.x - cosf(ang) * 5.0f, c.y - sinf(ang) * 5.0f };
+            Vector2 sideA = { c.x - sinf(ang) * 3.2f, c.y + cosf(ang) * 3.2f };
+            Vector2 sideB = { c.x + sinf(ang) * 3.2f, c.y - cosf(ang) * 3.2f };
+            DrawTriangle(outV, sideA, sideB, Color{ 195, 248, 255, 235 });
+            DrawTriangle(inV, sideB, sideA, Color{ 110, 220, 255, 235 });
+        }
+    } else if (player.armorSkillShieldHp > 0.0f) {
         float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 6.0f);
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 12.0f, Color{ 255, 230, 90, (unsigned char)(220 * pulse) });
         DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 16.0f, Color{ 255, 200, 60, (unsigned char)(140 * pulse) });

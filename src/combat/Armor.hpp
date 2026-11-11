@@ -339,9 +339,9 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 ArmorSet::FROSTWARDEN,
                 "Frostwarden Attire",
                 "Glacial Tenacity",
-                "+30% Cold Resistance & immunity to Frostbite chill/slow. Heavy attacks deal +20% poise damage. [Glacial Cleaver Synergy]: Heavy slams unleash a radial Frost Tremor (+35 frost damage, 3s enemy chill).",
-                "Glacial Frost Nova",
-                "Slams weapon into the frozen earth, unleashing a 140px radial ring of razor-sharp ice spires dealing 60 damage and freezing targets for 2.0s.",
+                "+30% Cold Resistance & immunity to Frostbite chill/slow. Heavy attacks deal +20% poise damage. [Glacial Cleaver Synergy]: Heavy finisher slams unleash Frost Tremor (+35 frost damage, 175px radius, 4s enemy chill).",
+                "FROST NOVA",
+                "Unleashes a 190px crystalline Frost Nova dealing 75 frost damage, stunning non-bosses for 1.2s, infusing 4s Chill and -20% Armor Fracture, and bestowing a 6s Ice Ward (45 HP shield that retaliates against melee hits for 18 frost dmg & 3s Chill).",
                 28.0f
             };
         case ArmorSet::NONE:

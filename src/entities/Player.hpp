@@ -26,7 +26,7 @@ public:
     void TriggerParry(ParticleSystem& particles);
 
     // Damage handling
-    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f);
+    bool TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& particles, float defensePierce = 0.0f, bool isCold = false);
     void Heal(float amount);
     void Revive(Vector2 startPos, float hpPercent = 1.0f);
 
@@ -112,6 +112,7 @@ public:
     float GetArmorSkillMaxCooldown() const { return armorSkillMaxCooldown; }
     float GetArmorSkillShieldHp() const { return armorSkillShieldHp; }
     float GetArmorSkillActiveTimer() const { return armorSkillActiveTimer; }
+    bool HasFrostwardenWardActive() const { return HasFullArmorSet(ArmorSet::FROSTWARDEN) && armorSkillActiveTimer > 0.0f; }
 
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }
@@ -315,6 +316,9 @@ private:
     float pendingAoERadius;
     float pendingAoEStun;
     float pendingAoEArmorShred;
+    float pendingAoEChill;
+    bool pendingAoEStunNonBossOnly;
+    float frostNovaVisualTimer;
 
     // Phlegmatic Composure & Trance State
     float composure;
@@ -339,7 +343,6 @@ private:
     float counterBuffTimer;
     float potionCooldown;
     float elementalProjectileCooldown;
-    int daggerLightAttackCounter = 0;
 
     // Stagger & Poise State
     float staggerTimer;

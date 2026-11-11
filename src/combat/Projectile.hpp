@@ -40,6 +40,11 @@ public:
 
     bool IsPiercing() const { return isPiercing; }
     void SetPiercing(bool p) { isPiercing = p; }
+    bool IsCold() const { return isCold; }
+    void SetCold(bool c) {
+        isCold = c;
+        if (c) color = Color{ 120, 230, 255, 255 };
+    }
     bool HasHitEnemy(int id) const {
         for (int h : hitEnemyIds) if (h == id) return true;
         return false;
@@ -59,5 +64,6 @@ private:
     float maxLifetime;
     Color color;
     bool isPiercing = false;
+    bool isCold = false;
     std::vector<int> hitEnemyIds;
 };

@@ -1024,6 +1024,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                             Vector2 spawn = { position.x + sDir.x * (radius + 12.0f), position.y + sDir.y * (radius + 12.0f) };
                             Vector2 vel = { sDir.x * 380.0f, sDir.y * 380.0f };
                             outProjectiles.emplace_back(spawn, vel, 8.0f, 24.0f, ProjectileType::NOVA_STAR, false);
+                            outProjectiles.back().SetCold(true);
                         }
                         SoundFX::PlayProjectileShoot();
                         particles.SpawnSparks(position, Color{ 100, 220, 255, 255 }, 24, 180.0f);
@@ -1032,6 +1033,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         Vector2 spawn = { position.x + forwardDir.x * (radius + 14.0f), position.y + forwardDir.y * (radius + 14.0f) };
                         Vector2 vel = { forwardDir.x * 540.0f, forwardDir.y * 540.0f };
                         outProjectiles.emplace_back(spawn, vel, 10.0f, 34.0f, ProjectileType::BEAM_SHARD, false);
+                        outProjectiles.back().SetCold(true);
                         SoundFX::PlayCrusaderClash();
                         particles.SpawnSparks(position, Color{ 120, 235, 255, 255 }, 25, 200.0f);
                     } else {
