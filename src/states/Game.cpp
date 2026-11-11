@@ -1721,6 +1721,14 @@ void Game::Update(float dt) {
 
 
 
+    bool pressTab = IsKeyPressed(KEY_TAB);
+
+
+
+    bool pressB = IsKeyPressed(KEY_B);
+
+
+
     bool pressC = IsKeyPressed(KEY_C);
 
 
@@ -1773,7 +1781,7 @@ void Game::Update(float dt) {
 
 
 
-        } else if (pressI) {
+        } else if (pressI || pressTab) {
 
 
 
@@ -1786,6 +1794,30 @@ void Game::Update(float dt) {
 
 
             inventoryActiveTab = 0;
+
+
+
+            SoundFX::PlayButtonClick();
+
+
+
+            return;
+
+
+
+        } else if (pressB) {
+
+
+
+            showControlsModal = false;
+
+
+
+            showInventoryModal = true;
+
+
+
+            inventoryActiveTab = 2;
 
 
 
@@ -1829,11 +1861,43 @@ void Game::Update(float dt) {
 
 
 
-        if (pressI || pressEsc) {
+        if (pressI || pressTab || pressEsc) {
 
 
 
             showInventoryModal = false;
+
+
+
+            SoundFX::PlayButtonClick();
+
+
+
+            return;
+
+
+
+        } else if (pressB) {
+
+
+
+            if (inventoryActiveTab == 2) {
+
+
+
+                showInventoryModal = false;
+
+
+
+            } else {
+
+
+
+                inventoryActiveTab = 2;
+
+
+
+            }
 
 
 
@@ -1921,7 +1985,7 @@ void Game::Update(float dt) {
 
 
 
-        } else if (pressI) {
+        } else if (pressI || pressTab) {
 
 
 
@@ -1934,6 +1998,30 @@ void Game::Update(float dt) {
 
 
             inventoryActiveTab = 0;
+
+
+
+            SoundFX::PlayButtonClick();
+
+
+
+            return;
+
+
+
+        } else if (pressB) {
+
+
+
+            showMapModal = false;
+
+
+
+            showInventoryModal = true;
+
+
+
+            inventoryActiveTab = 2;
 
 
 
@@ -2008,7 +2096,7 @@ void Game::Update(float dt) {
 
 
 
-    if (pressI) {
+    if (pressI || pressTab) {
 
 
 
@@ -2029,6 +2117,30 @@ void Game::Update(float dt) {
 
 
         }
+
+
+
+        SoundFX::PlayButtonClick();
+
+
+
+        return;
+
+
+
+    }
+
+
+
+    if (pressB) {
+
+
+
+        showInventoryModal = true;
+
+
+
+        inventoryActiveTab = 2;
 
 
 
@@ -2070,11 +2182,7 @@ void Game::Update(float dt) {
 
 
 
-    if (IsKeyPressed(KEY_TAB) && !showControlsModal && !showInventoryModal && !showMapModal && player.IsAlive()) {
-        player.QuickSwapWeapon(particles);
-    }
-
-    // Check HUD top right button clicks in Ruined Castle, Lobby, Arena, Crossroads, Zyphden
+    // Check HUD top right button clicks across Lobby, Arena, and Campaign Realms
 
 
 
@@ -2082,19 +2190,22 @@ void Game::Update(float dt) {
 
 
 
-        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA || currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM || currentState == GameState::QUARRY_DEPTHS) {
+        if (currentState == GameState::RUINED_CASTLE || currentState == GameState::LOBBY || currentState == GameState::ARENA ||
+            currentState == GameState::CROSSROADS || currentState == GameState::ZYPHDEN_REALM || currentState == GameState::QUARRY_DEPTHS ||
+            currentState == GameState::RESTLESS_MIST_FOREST || currentState == GameState::NORTH_ZYPHDEN ||
+            currentState == GameState::FROST_CAVERNS || currentState == GameState::BORDERLANDS_GATE) {
 
 
 
-            Rectangle mapBtnRec = { (float)(GetScreenWidth() - 380), 16.0f, 120.0f, 32.0f };
+            Rectangle mapBtnRec = { (float)(GetScreenWidth() - 404), 16.0f, 122.0f, 32.0f };
 
 
 
-            Rectangle journalBtnRec = { (float)(GetScreenWidth() - 250), 16.0f, 110.0f, 32.0f };
+            Rectangle journalBtnRec = { (float)(GetScreenWidth() - 274), 16.0f, 134.0f, 32.0f };
 
 
 
-            Rectangle controlsBtnRec = { (float)(GetScreenWidth() - 130), 16.0f, 110.0f, 32.0f };
+            Rectangle controlsBtnRec = { (float)(GetScreenWidth() - 132), 16.0f, 112.0f, 32.0f };
 
 
 
@@ -4572,7 +4683,7 @@ void Game::RenderScene() {
 
 
 
-        if (inventoryActiveTab == 2) {
+        if (inventoryActiveTab == 3) {
 
 
 

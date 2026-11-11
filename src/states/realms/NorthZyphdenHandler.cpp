@@ -349,9 +349,6 @@ void NorthZyphdenHandler::Update(
     if (IsKeyPressed(KEY_V)) {
         player.TriggerArmorSkill(particles);
     }
-    if (IsKeyPressed(KEY_TAB)) {
-        player.QuickSwapWeapon(particles);
-    }
 
     // Shortcuts
     if (IsKeyPressed(KEY_L)) {

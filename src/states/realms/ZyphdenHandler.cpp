@@ -879,12 +879,6 @@ void ZyphdenHandler::Update(
 
         }
 
-        if (IsKeyPressed(KEY_TAB)) {
-
-            player.QuickSwapWeapon(particles);
-
-        }
-
     }
 
 

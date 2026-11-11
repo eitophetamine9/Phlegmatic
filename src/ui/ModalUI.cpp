@@ -110,8 +110,8 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
             { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
             { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
-            { "TAB Key",       "Quick Swap","Instantly cycle through unlocked weapons during combat.", Color{ 255, 215, 80, 255 } },
-            { "I Key",         "Inventory", "Open Equipment Matrix, Chronicles Grimoire & Bestiary.", Color{ 140, 210, 255, 255 } },
+            { "TAB / I Key",   "Inventory", "Open Equipment Matrix, 3-Slot Weapon Hotbar, Chronicles & Bestiary.", Color{ 255, 215, 80, 255 } },
+            { "B Key",         "Bestiary",  "Open the Humoral Bestiary & Monster Weakness Codex directly.", Color{ 140, 210, 255, 255 } },
             { "1 - 4 Keys",     "Quick Belt", "Drink Health Potion [1], Stoneskin [2], Glacial Thaw [3], Berserk [4].", Color{ 140, 240, 180, 255 } },
             { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
             { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
@@ -726,7 +726,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
     DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 55, 75, 110, 255 } : Color{ 28, 36, 52, 230 });
     DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 120, 220, 255, 255 } : Color{ 70, 90, 125, 230 });
-    DrawText("CLOSE [ESC/I]", (int)closeX + 16, (int)closeY + 9, 13, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
+    DrawText("CLOSE [ESC/TAB]", (int)closeX + 10, (int)closeY + 9, 12, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 190, 210, 235, 220 });
 
     bool closeClicked = (isCloseHov && isMousePressed);
 
@@ -788,7 +788,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
     // Tab 4: Realm Map [M]
     Rectangle tab4Rec = { modalX + 716, tabY, 190.0f, 34.0f };
     bool isTab4Hov = CheckCollisionPointRec(mousePos, tab4Rec);
-    if ((isTab4Hov && isMousePressed) || IsKeyPressed(KEY_FOUR) || IsKeyPressed(KEY_M)) {
+    if ((isTab4Hov && isMousePressed) || IsKeyPressed(KEY_FOUR)) {
         activeTab = 3;
         SoundFX::PlayButtonClick();
         return true; // Signals closing inventory and opening map
@@ -3353,7 +3353,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
 
 
-    DrawText("Tip: Press [I] anywhere in the world to open your Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
+    DrawText("Tip: Press [TAB] or [I] anywhere in the world to open your Inventory & Lore Journal.", (int)col2X + 20, (int)sec2Y + 154, 11, Color{ 255, 180, 70, 230 });
 
 
 
@@ -4117,7 +4117,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawRectangleRounded(closeRec, 0.25f, 4, isCloseHov ? Color{ 32, 70, 85, 255 } : Color{ 14, 32, 42, 220 });
     DrawRectangleRoundedLines(closeRec, 0.25f, 4, isCloseHov ? Color{ 80, 225, 245, 255 } : Color{ 40, 100, 120, 200 });
     DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
-    bool shouldClose = (isCloseHov && isMousePressed) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_M);
+    bool shouldClose = (isCloseHov && isMousePressed);
 
     // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <6>) & LEYLINE MAP
     struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
