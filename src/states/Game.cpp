@@ -68,7 +68,7 @@ Game::~Game() {
 
     FontManager::Unload();
 
-
+    map.GetTimeOfDay().UnloadResources();
 
     CloseWindow();
 

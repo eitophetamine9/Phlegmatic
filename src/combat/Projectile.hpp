@@ -21,6 +21,7 @@ public:
 
     void Update(float dt, const GameMap& map, ParticleSystem& particles);
     void Draw() const;
+    static void RegisterDynamicLights(const std::vector<Projectile>& projectiles, const GameMap& map);
 
     bool IsActive() const { return active; }
     void Destroy() { active = false; }

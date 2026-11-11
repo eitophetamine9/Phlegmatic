@@ -250,3 +250,34 @@ void Projectile::Draw() const {
         }
     }
 }
+
+void Projectile::RegisterDynamicLights(const std::vector<Projectile>& projectiles, const GameMap& map) {
+    for (const auto& proj : projectiles) {
+        if (!proj.IsActive()) continue;
+        switch (proj.GetType()) {
+            case ProjectileType::HOLY_BEAM:
+                map.AddDynamicLight(proj.GetPosition(), 120.0f, Color{ 255, 225, 110, 255 }, 0.85f);
+                break;
+            case ProjectileType::ELEMENTAL_BOLT:
+                map.AddDynamicLight(proj.GetPosition(), 135.0f, Color{ 255, 130, 55, 255 }, 0.85f);
+                break;
+            case ProjectileType::VOID_ORB:
+                map.AddDynamicLight(proj.GetPosition(), 115.0f, proj.color, 0.80f);
+                break;
+            case ProjectileType::NOVA_STAR:
+                map.AddDynamicLight(proj.GetPosition(), 110.0f, proj.color, 0.78f);
+                break;
+            case ProjectileType::BEAM_SHARD:
+                map.AddDynamicLight(proj.GetPosition(), 95.0f, proj.color, 0.72f);
+                break;
+            case ProjectileType::GALE_ARROW:
+                map.AddDynamicLight(proj.GetPosition(), 110.0f, Color{ 110, 245, 225, 255 }, 0.72f);
+                break;
+            case ProjectileType::ELEMENTAL_SPIKE:
+                map.AddDynamicLight(proj.GetPosition(), 90.0f, Color{ 255, 180, 65, 255 }, 0.65f);
+                break;
+            default:
+                break;
+        }
+    }
+}

@@ -473,9 +473,26 @@ void RuinedCastleHandler::Render(
         }
     }
 
-    map.DrawLighting(camera, player.GetPosition());
-
     EndMode2D();
+
+    map.ClearDynamicLights();
+    if (campfire.position.x > 10.0f) {
+        map.AddDynamicLight(campfire.position, 280.0f, Color{ 255, 165, 70, 255 }, 0.95f);
+    }
+    if (!tutorial.HasDefeatedTutorialEnemy()) {
+        map.AddDynamicLight({ 800.0f, 430.0f }, 210.0f, Color{ 255, 95, 85, 255 }, 0.78f);
+    }
+    if ((zilDefeated || zilSparedPlayer) && !zilEncounterActive) {
+        map.AddDynamicLight({ 800.0f, 290.0f }, 260.0f, Color{ 255, 215, 110, 255 }, 0.90f);
+    } else {
+        map.AddDynamicLight({ 800.0f, 290.0f }, 220.0f, Color{ 160, 205, 255, 255 }, 0.68f);
+    }
+    if (!castlePillar.read) {
+        map.AddDynamicLight(castlePillar.position, 130.0f, Color{ 100, 220, 255, 255 }, 0.65f);
+    }
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     Vector2 mousePos = GetMousePosition();
     DrawCircleLines((int)mousePos.x, (int)mousePos.y, 8.0f, Color{ 255, 255, 255, 180 });

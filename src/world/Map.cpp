@@ -1754,6 +1754,14 @@ void GameMap::DrawFrostCavernsWalls(Vector2 playerPos) const {
 }
 
 void GameMap::DrawLighting(Camera2D camera, Vector2 playerPos) const {
-    timeOfDay.DrawLighting(camera, playerPos, bounds, torches, IsInterior());
+    timeOfDay.DrawLighting(
+        camera,
+        playerPos,
+        bounds,
+        torches,
+        IsInterior(),
+        IsSubterranean(),
+        currentEnv == MapEnvironment::FROST_CAVERNS
+    );
 }
 

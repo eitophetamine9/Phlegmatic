@@ -601,10 +601,22 @@ void CrossroadsHandler::Render(
 
 
         map.DrawWallsAndPillars(player.GetPosition());
-        map.DrawLighting(camera, player.GetPosition());
     }
 
     EndMode2D();
+
+    map.ClearDynamicLights();
+    map.AddDynamicLight(campfire.position, 290.0f, Color{ 255, 168, 72, 255 }, 0.95f);
+    if (!chest.opened) {
+        map.AddDynamicLight(chest.position, 175.0f, Color{ 105, 240, 185, 255 }, 0.72f);
+    }
+    if (!crossroadsPillar.read) {
+        map.AddDynamicLight(crossroadsPillar.position, 135.0f, Color{ 100, 220, 255, 255 }, 0.65f);
+    }
+    map.AddDynamicLight({ 800.0f, 190.0f }, 230.0f, Color{ 255, 210, 115, 255 }, 0.78f);
+    Projectile::RegisterDynamicLights(projectiles, map);
+
+    map.DrawLighting(camera, player.GetPosition());
 
     // Location Header: "CROSSROADS"
     GameUI::DrawCampaignHUD(
