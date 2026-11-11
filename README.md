@@ -11,7 +11,7 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
 
-*Explore the land of Tydeshire, learn it's deepest secrets and become its next savior from the madness...*
+*Explore the land of Tydeshire, learn its deepest secrets, and become its next savior from the madness...*
 
 ---
 
@@ -73,16 +73,6 @@
 > * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon/potion/armor skill icons and replaced the bottom-right box with an enlarged 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` per slot).
 > * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat color washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point-light shaders, Purkinje composite tone-mapping, and full realm emitter registration.
 > * **Combat & Balance Reworks**: Removed the broken stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and rebalanced stamina/speed on Bow, Daggers, and **Totem of Mist**.
->
-> ### Version 0.0.1k Implementation Roadmap
-> 1. **Milestone 1**: `[M]` Map & Bestiary Modal Fixes + `[TAB]` Inventory Restoration [COMPLETED]
-> 2. **Milestone 2**: 3-Slot Weapon Hotbar (`[1-3]`), Potion Rebinds (`[H/4-6]`) & Save Persistence [COMPLETED]
-> 3. **Milestone 3**: Enlarged HUD Action Bar, Procedural Icons & 3-Slot Weapon Dock [COMPLETED]
-> 4. **Milestone 4**: GLSL 330 Multiplicative Day-Night Shader & Realm Emitter Overhaul [COMPLETED]
-> 5. **Milestone 5**: Removal of Infinite Stagger Loop, Visceral Execution & Bestiary T3 Rebalance [COMPLETED]
-> 6. **Milestone 6**: Weapon Reworks (Twin Glacial Cleavers, Sun-Forged Claymore & Storm Glaive) [COMPLETED]
-> 7. **Milestone 7**: Frostwarden Revamp & Bow / Daggers / Mist Totem Balance [COMPLETED]
-> 8. **Milestone 8**: Documentation Synchronization, Build Verification & Release Prep [COMPLETED]
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 

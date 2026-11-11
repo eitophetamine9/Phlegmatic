@@ -1,32 +1,17 @@
 # PHLEGMATIC - Complete Game Documentation & Technical Reference
 
-
-
 <div align="center">
 
-
-
 [![C++17](https://img.shields.io/badge/Language-C%2B%2B17-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)](https://isocpp.org/)
-
 [![Raylib](https://img.shields.io/badge/Engine-Raylib%20v6.2-white?style=for-the-badge&logo=raylib&logoColor=black&color=white)](https://www.raylib.com/)
-
 [![Platform](https://img.shields.io/badge/Platform-Windows%20(x64)-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
-
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
-
-
 
 *The definitive technical reference manual, game system compendium, combat mathematics handbook, and narrative lore guide for **Phlegmatic**.*
 
-
-
 ---
 
-
-
 </div>
-
-
 
 ## Table of Contents
 
@@ -34,33 +19,40 @@
 - [1. Overview & Lore of Tydeshire](#1-overview--lore-of-tydeshire)
   - [The Great Unification & The Five Crowns](#the-great-unification--the-five-crowns)
   - [The Fracture & The Long Road](#the-fracture--the-long-road)
-  - [Lore Fragments Codex (I-X)](#lore-fragments-codex-ix)
+  - [Lore Fragments Codex (I-XV)](#lore-fragments-codex-i-xv)
   - [Characters & Royal Court](#characters--royal-court)
 - [2. Campaign Progression & World Design](#2-campaign-progression--world-design)
   - [Act I: The Ruined Castle](#act-i-the-ruined-castle)
   - [Act II: The Crossroads of the Damned](#act-ii-the-crossroads-of-the-damned)
   - [Realm Transition Screen](#realm-transition-screen)
   - [Act III: Fortified Realm of Zyphden](#act-iii-fortified-realm-of-zyphden)
-  - [Hearthside Tavern](#hearthside-tavern)
+  - [Blacksmith Varek's Forge](#blacksmith-vareks-forge)
+  - [Hearthside Tavern, Provisions & Alchemy Workshop](#hearthside-tavern-provisions--alchemy-workshop)
+  - [Multi-Slot Save Architecture & Storage Vault](#multi-slot-save-architecture--storage-vault)
   - [Expanded Zyphden Royal Keep](#expanded-zyphden-royal-keep)
   - [Act IV: Subterranean Quarry Depths & Primordial Altar](#act-iv-subterranean-quarry-depths--primordial-altar)
   - [Act V: Restless Mist Forest & Altar of Whispers](#act-v-restless-mist-forest--altar-of-whispers)
-  - [Combat Arena & 20-Wave Humoral Gauntlet](#combat-arena--20-wave-humoral-gauntlet)
+  - [Act VI: Northern Crags & The Permafrost Crypts](#act-vi-northern-crags--the-permafrost-crypts)
+  - [Combat Arena & 25-Wave Humoral Gauntlet](#combat-arena--25-wave-humoral-gauntlet)
 - [3. Combat Systems & Mathematical Formulas](#3-combat-systems--mathematical-formulas)
   - [Defense & Armor Penetration Formula](#defense--armor-penetration-formula)
   - [Will Stat & Stagger Duration Formula](#will-stat--stagger-duration-formula)
   - [Anti-Stunlock Buffer](#anti-stunlock-buffer)
   - [Invulnerability Frames (i-frames)](#invulnerability-frames-i-frames)
   - [Parry Guard, Counter Buff & Projectile Reflection](#parry-guard-counter-buff--projectile-reflection)
-  - [Consumable Health Elixirs & Out-of-Combat Regeneration](#consumable-health-elixirs--out-of-combat-regeneration)
+  - [Consumable Health Elixirs, Combat Tonics & Out-of-Combat Regeneration](#consumable-health-elixirs-combat-tonics--out-of-combat-regeneration)
+  - [Phlegmatic Composure System & Stoic Poise](#phlegmatic-composure-system--stoic-poise)
+  - [Medieval Four Humors Alignment](#medieval-four-humors-alignment)
+  - [Combat Juice: Hit-Stop & Directional Camera Shake](#combat-juice-hit-stop--directional-camera-shake)
 - [4. Controls & Interface Reference](#4-controls--interface-reference)
   - [Keybindings Guide](#keybindings-guide)
-  - [Modular Visual Action Bar](#modular-visual-action-bar)
+  - [Modular Visual Action Bar & 3-Slot Weapon Hotbar Dock](#modular-visual-action-bar--3-slot-weapon-hotbar-dock)
   - [Attributes & Posture Status Indicators](#attributes--posture-status-indicators)
-  - [In-Game Lore Journal, Equipment Paper Doll & Realm Map](#in-game-lore-journal-equipment-paper-doll--realm-map)
+  - [In-Game Equipment Matrix, Lore Journal, Bestiary & Realm Map](#in-game-equipment-matrix-lore-journal-bestiary--realm-map)
 - [5. Weapon Arsenal, Armor & Totems](#5-weapon-arsenal-armor--totems)
   - [Arsenal Summary Table](#arsenal-summary-table)
   - [Detailed Weapon Stances](#detailed-weapon-stances)
+  - [Armor Sets & Frostwarden Synergy](#armor-sets--frostwarden-synergy)
   - [Sacred Totems Compendium](#sacred-totems-compendium)
 - [6. Bestiary & Boss Encounters](#6-bestiary--boss-encounters)
   - [Hostiles Compendium](#hostiles-compendium)
@@ -76,1214 +68,502 @@
   - [Automated MinGW-w64 Batch Script](#automated-mingw-w64-batch-script)
   - [CMake & Ninja Build](#cmake--ninja-build)
   - [Precompiled Executables](#precompiled-executables)
-- [9. Roadmap & Version 0.0.1d Technical Plans](#9-roadmap--version-001d-technical-plans)
-  - [Act V: Northern Frontier Borders](#act-v-northern-frontier-borders)
-  - [Environmental Weather Physics](#environmental-weather-physics)
-  - [Synthesized Environmental Ambience & Audio Sliders](#synthesized-environmental-ambience--audio-sliders)
+- [9. Uncharted Realms Beyond Zyphden](#9-uncharted-realms-beyond-zyphden)
 
 ---
 
 ## Version History & Patch Notes
 
-For comprehensive patch notes, combat tuning revisions, and version changelogs across all releases (v0.0.1b through v0.0.1k), see the dedicated **[Version History & Patch Notes Compendium (VERSIONS.md)](VERSIONS.md)**.
+For complete release notes, balance revisions, and changelogs across versions (`v0.0.1b` through `v0.0.1k`), consult **[Version History & Patch Notes Compendium (VERSIONS.md)](VERSIONS.md)**.
 
 ### Latest Release: Version 0.0.1k
+
 * **3-Slot Weapon Hotbar & Rebound Quick Belt**: Equip up to 3 weapons via Inventory `[SLOT 1/2/3]` and hot-swap mid-combat with `[1]`, `[2]`, `[3]` (persisted in JSON saves). Consumables moved to `[H]` (Health Potion), `[4]` (Stoneskin Tonic), `[5]` (Glacial Thaw Draught), and `[6]` (Berserker Brew).
-* **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias), repaired `[M]` Realm Map same-frame closing and Bestiary tab routing, added direct `[B]` Bestiary hotkey, and enabled top-right HUD clicks across northern/eastern realms.
+* **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias), repaired `[M]` Realm Map same-frame closing and Bestiary tab routing, added direct `[B]` Bestiary hotkey, and enabled top-right HUD clicks in northern/eastern realms.
 * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon, flask, shield, and armor skill icons alongside an enlarged bottom-right 3-Weapon Hotbar Dock (`64x66` / `70x72`).
-* **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat ambient washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point lights, Purkinje composite tone-mapping, and full realm light registration.
-* **Combat & Balance Reworks**: Removed the stagger-on-every-hit / Visceral Execution stunlock loop (replacing Phlegmatic Core per-hit stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and raised stamina/tuned speed on Bow, Daggers, and **Totem of Mist**.
+* **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat ambient washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point lights, Purkinje composite tone-mapping, and full realm emitter registration.
+* **Combat & Balance Reworks**: Removed the stagger-on-every-hit / Visceral Execution loop (replacing Phlegmatic Core per-hit stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and raised stamina / tuned speed on Bow, Daggers, and **Totem of Mist**.
 
 ---
 
 ## 1. Overview & Lore of Tydeshire
 
-
-
 ### The Great Unification & The Five Crowns
 
-For more than five centuries, the Land of Tydeshire was consumed by unrelenting feudal warfare. Warlords clashed over barren frontiers, and regional dynasties collapsed as quickly as they arose. Unity remained impossible until **King Charlz** ascended through martial supremacy and iron will, forging an empire from the blood of five fractured territories. 
-
-
+For more than five centuries, the Land of Tydeshire was consumed by unrelenting feudal warfare. Warlords clashed over barren frontiers, and regional dynasties collapsed as quickly as they arose. Unity remained impossible until **King Charlz** ascended through martial supremacy and iron will, forging an empire from five fractured territories.
 
 Crowned *Charlz the Liege of Kings*, he divided the continent into five sovereign realms to govern peace:
 
-1. **Zyphden** â€” Realm of the Gale Winds and high wind-spires.
-
-2. **Azshden** â€” Iron cliffs and coastal bastions.
-
-3. **Fleurshden** â€” Fertile river valleys and blooming thorns.
-
-4. **Noirden** â€” Shrouded obsidian peaks and mists.
-
-5. **Solsden** â€” Radiant sun-plains, golden altars, and the High Sanctuary.
-
-
+1. **Zyphden** -- Realm of the Gale Winds and high wind-spires.
+2. **Azshden** -- Iron cliffs and coastal bastions.
+3. **Fleurshden** -- Fertile river valleys and blooming thorns.
+4. **Noirden** -- Shrouded obsidian peaks and mists.
+5. **Solsden** -- Radiant sun-plains, golden altars, and the High Sanctuary.
 
 > [!NOTE]
-
 > **The Five Crowns Accord**: Each kingdom was chartered with a specific duty to preserve the continental leylines. Together, their five primordial seals held back the ancient void corruption lurking beneath Tydeshire.
-
-
 
 ### The Fracture & The Long Road
 
-The Pax Charlz endured for three decades. But peace in Tydeshire was only ever borrowed. King Charlz succumbed to an unknown creeping madness, dissolving royal assemblies and vanishing into the northern frontiers without an heir. With the High Throne vacant, fear turned brother against brother. Border seals were fractured, and primeval monstrosities crawled forth from the mire.
+The Pax Charlz endured for three decades before King Charlz succumbed to an unknown creeping madness, dissolving royal assemblies and vanishing into the northern frontiers without an heir. With the High Throne vacant, fear turned brother against brother, border seals fractured, and primeval monstrosities crawled forth from the mire.
 
+The player begins their pilgrimage amidst the cold ashes of the southern sanctuary, armed with little more than instinct, bound north through the corrupted **Crossroads** into the fortified gates of **Zyphden**.
 
+### Lore Fragments Codex (I-XV)
 
-The player begins their pilgrimage amidst the cold ashes of the southern sanctuary, armed with little more than instinct, bound on a long trek north through the corrupted **Crossroads** into the fortified gates of **Zyphden**.
-
-
-
-### Lore Fragments Codex (Iâ€“X)
-
-The game world contains 15 discoverable historical fragments (I-XV) documented inside the in-game Journal (`[TAB]` or `[I]`):
-
-
+The game world contains 15 discoverable historical fragments documented inside the in-game Lore Journal (`[TAB]` or `[I]` -> Tab 2):
 
 | Fragment ID | Title | In-Game Location | Historical Significance |
-
 | :--- | :--- | :--- | :--- |
-
-| **`frag_01`** | **The Great Unification** | Awakening Courtyard Stele | Chronicles King Charlz crushing warring factions and chartering the Five Crowns. |
-
-| **`frag_02`** | **The Shadow over Zyphden** | Eastern Ruins Chest & Noticeboard | Documents the first rumors of the Lord Liege's madness and envoy disappearances. |
-
-| **`frag_03`** | **Zil's Holy Oath** | High Altar (Zil Remnant Duel) | The solemn vow of Sun-Crusader Zil as he rode south to anchor the high altars. |
-
-| **`frag_04`** | **The Five Broken Seals** | Northwest Library Reliquary | Details the five elemental warding seals tethered directly to the High Crown. |
-
-| **`frag_05`** | **The Crossroads Watch** | Crossroads Ancient Shrine | The tragic massacre of the southern border patrol when the highway went dark. |
-
-| **`frag_06`** | **Rite of the Gale Winds** | Zyphden Wind Lectern | Architectural folios describing the resonance leylines powering Zyphden's ramparts. |
-
-| **`frag_07`** | **Lenon's Field Log** | Courtyard Gates Lectern | Vanguard Captain Lenon's personal reflections on his missing sworn brother Zil. |
-
-| **`frag_08`** | **The Sovereign's Burden** | Courtyard Sparring Training Grounds | King Kreptu's secret correspondence regarding dwindling grain stores and war. |
-
-| **`frag_09`** | **Inscription of Ancient Pillars** | Inscribed Runic Monoliths | Ancient First Warden runes teaching how inner Will hardens posture against stagger. |
-
-| **`frag_10`** | **The Royal Armory Archives** | Royal Keep Armory Chest | Tactical treaties detailing weapon armor penetration, poise breaks, and ripostes. |
-
-
+| `frag_01` | **The Great Unification** | Ruined Castle Awakening Stele | Chronicles King Charlz uniting the Five Crowns at the High Summit. |
+| `frag_02` | **The Shadow over Zyphden** | Eastern Ruins Relic Chest | Documents early rumors of the Lord Liege's madness and lost envoys. |
+| `frag_03` | **Zil's Holy Oath** | Ruined Castle High Altar | Records Sun-Crusader Zil's vow as he anchored the southern sanctuary. |
+| `frag_04` | **The Five Broken Seals** | Southeast Ruined Ramparts | Details the five elemental warding seals bound directly to the High Crown. |
+| `frag_05` | **The Crossroads Watch** | Crossroads Roadside Plinth | Chronicles the ambushed southern patrol when the highway fell dark. |
+| `frag_06` | **Rite of the Gale Winds** | Zyphden Northern Wind Lectern | Explains the resonance leylines and the hidden Totem of Sanity. |
+| `frag_07` | **Lenon's Field Log** | Zyphden Garrison Armory | Vanguard Captain Lenon's personal reflections on his sworn brother Zil. |
+| `frag_08` | **The Sovereign's Burden** | Courtyard Sparring Grounds | King Kreptu's resolve to rally remaining crusaders and hold Zyphden. |
+| `frag_09` | **Inscription of the Ancient Pillars** | Royal Keep Throne Pillar | First Warden runes teaching how inner Will strengthens poise against stagger. |
+| `frag_10` | **The Royal Armory Archives** | Royal Keep Eastern Vault | Martial treatises on weapon armor penetration and poise-break timing. |
+| `frag_11` | **The Frigid Highland War** | North Zyphden Outpost Monolith | Chronicles the ancient highland clash between Charlz and the Troll clans. |
+| `frag_12` | **Curse of the Berserker** | Troll Burial Mound (North) | Explains how corrupted subterranean veins warped the Berserker Trolls. |
+| `frag_13` | **The Shattered Totem of Blood** | North Zyphden Blood Altar | Warns of the blood frenzy relic trading defense for ferocious power. |
+| `frag_14` | **Watch of the Northern Vanguard** | Vanguard Lookout Cairn | A sentry's final entry warning of the beasts howling through the blizzard. |
+| `frag_15` | **The Wailing Depths** | Permafrost Crypts Dais | Chronicles the Frost Revenant haunting the subterranean glacial catacombs. |
 
 > [!TIP]
-
-> **Unread Notification Badges**: When a new fragment is uncovered in the world, the HUD Lore button and Journal tab display an amber alert badge (`(!)`). Open the codex to read the uncovered lore at any time.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Lore Journal Navigation**: You can inspect newly gathered fragments at any time during gameplay by pressing `[TAB]` (`[I]` alias). Reading lore steles grants immediate narrative context and sheds light on enemy weaknesses across Tydeshire's five realms.
-
-
-
-> [!TIP]
-
-> **Dialogue History Review**: Missed a line of dialogue? Use the `[A]` and `[D]` keys to flip pages backward and forward in any active dialogue window before pressing `[E]` or `[ESC]` to conclude.
-
-
+> **Unread Badges & Dialogue History**: Newly uncovered fragments flag the Journal badge with `(!)`. During any NPC or stele dialogue, press `[A]` and `[D]` to flip backward and forward between pages before pressing `[E]` or `[ESC]`.
 
 ### Characters & Royal Court
 
-* **King Kreptu (Monarch of Zyphden)**: Sovereign lord presiding over the gale realm from his golden dais. Pragmatic, weary, yet resolute, he sanctions courtyard combat trials for worthy champions.
-
+* **King Kreptu (Monarch of Zyphden)**: Sovereign lord presiding over the gale realm from his golden dais, sanctioning courtyard combat trials for worthy champions.
 * **Knight Lenon (Vanguard Captain)**: Sworn brother of Lord Zil. An honorable martial master wielding high-velocity lunges and whirlwind cleaves in the Eastern Courtyard.
-
-* **Zil's Remnant (Shadow of the Sun Crusader)**: The spectral guardian of the high altar in the Ruined Castle, wielding Truth Seeker to test the conviction of wanderers.
-
-* **Chancellor Malakor**: Head of the Zyphden Privy Council. Cynical and calculating, he manages tax revenues and mystical leylines.
-
-* **Sentinel Donald & Sentinel Garrick**: Twin Royal Halberdiers guarding the sovereign throne dais with unyielding martial vigilance.
-
-* **Archivist Thaddeus**: Keeper of ancient chronicles in the Western Archives. Reverent scholar of ancient monoliths and elemental leylines.
-
-* **Lady Genevieve**: Noble patron of the Royal Armory who advises on armor craft and weapon balance.
-
-* **Tavernkeep Eldon**: Hospitable barkeep running the Hearthside Tavern, serving warm stew and shelter by the hearth.
-
-* **Chronicler Cedric, Blacksmith Varek, Elder Maeve**: Town residents offering historical wisdom, armor-crafting guidance, and refugee perspectives.
-
-
+* **Zil's Remnant (Shadow of the Sun Crusader)**: Spectral guardian of the Ruined Castle's high altar wielding Truth Seeker to test wanderers.
+* **Chancellor Malakor, Sentinels Donald & Garrick, Archivist Thaddeus, Lady Genevieve**: The Zyphden Royal Keep court guiding statecraft, archives, and Sovereign Hall security.
+* **Tavernkeep Eldon & Tavern Keeper Brena**: Hosts of Hearthside Tavern supplying healing elixirs (Eldon) and specialized combat tonics brewed at the cauldron (Brena).
+* **Blacksmith Varek, Outcast Ranger Torvald, Cedric & Maeve**: Frontier artisans, historians, and highland bounty hunters across Zyphden and the Northern Crags.
 
 ---
 
-
-
 ## 2. Campaign Progression & World Design
-
-
 
 ### Act I: The Ruined Castle
 
 The player awakes unarmed in an overgrown cathedral courtyard:
 
 1. Inspect the central plinth to claim the **Crusader's Broadsword**.
-
-2. Master movement (`[WASD]`), directional dashing (`[Q]`), parrying (`[F]`), and light/heavy sword slashes.
-
-3. Slay the guardian Ruin Sentinel to dissolve the magical **Sanctuary Ward** sealing the high altar.
-
-4. Duel **Zil's Remnant** at the high dais:
-
-   - Defeating him awards the sacred **Truth Seeker (Partial)** and **Fragment III**.
-
-   - If defeated, the player is granted an honorable rematch modal or can accept his mercy to receive **Zil's Token**.
-
-5. Pass through the northern gateway to enter the Crossroads.
-
-
+2. Master movement (`[WASD]`), evasive dashing (`[Q]`), parrying (`[F]`), and light/heavy sword combos.
+3. Slay the guardian Ruin Sentinel to dissolve the **Sanctuary Ward** sealing the high altar.
+4. Confront **Zil's Remnant** at the high dais to win **Truth Seeker (Partial)** + `frag_03`, or accept his mercy to receive **Zil's Token**.
+5. Step through the northern gateway to enter the Crossroads.
 
 > [!IMPORTANT]
-
-> **REMINDER â€” Sanctuary Ward**: You cannot approach the high altar until the initial Ruin Sentinel is defeated. Slaying the sentinel unseals the stone staircase leading to Zil's altar.
-
-
-
-> [!TIP]
-
-> **Zil's Remnant Mercy Option**: If you find Zil's Remnant too challenging on your first pilgrimage, accepting his mercy grants you **Zil's Token**, permitting safe passage through the northern gateway into the Crossroads without losing any story progression.
-
-
+> **Sanctuary Ward**: You cannot climb to Zil's high altar until the initial Ruin Sentinel is defeated. If Zil proves too lethal early on, accepting his mercy grants **Zil's Token** for safe passage north without blocking story progress.
 
 ### Act II: The Crossroads of the Damned
 
-A ruined wilderness connecting the southern ruins to the northern fortress:
+A ruined wilderness highway connecting the southern castle ruins to the northern fortress:
 
-* High-threat monster ambushes (Cultist Slashers, Deathseeker Archers, Void Pyromancers, and Shadow Chargers).
-
-* Ancient shrine holding the **Totem of Sanity** (+15% Stamina Regen, +10 Will).
-
-* Highway Inscribed Monolith (`frag_09`) and Crossroads Supply Chest (+2 Health Potions).
-
+* Ambush patrols of Cultist Slashers, Deathseeker Archers, Void Pyromancers, and Shadow Chargers.
+* Hidden shrine in the eastern clearing holding the **Totem of Sanity** (`+15%` Overall Damage, `+15` Will).
+* Highway Relic Plinth (`frag_05`) and Crossroads Supply Chest (`+2` Health Potions).
 * Northern gateway leading into the Zyphden transition portal.
 
-
-
 > [!TIP]
-
-> **Telegraph Clarity**: Cultist Slashers and Chargers display directional red cones and linear paths. Deathseeker Archers show laser aim lines. Void Pyromancers project 3-way trajectory lasers with flaring ground landing tingesâ€”step aside with `[Q]` or deflect projectiles back with `[F]`!
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Totem of Sanity**: Do not miss the secluded shrine in the eastern clearing of the Crossroads. Claiming the Totem of Sanity grants a permanent **+15% Stamina Regeneration** and **+10 Will** bonus when equipped in your Journal inventory!
-
-
+> **Telegraph Clarity**: Melee slashers and chargers project amber/red cones and linear lanes, archers draw red aim lines, and pyromancers trace 3-way landing markers. Sidestep with `[Q]` or reflect missiles back toward your cursor with `[F]`.
 
 ### Realm Transition Screen
 
-An atmospheric realm-entry screen bridging the wilderness to Zyphden:
-
-* Elegant dark stone presentation card with ambient dust particles and corner brackets.
-
-* Automatic asset drop slot (`assets/zyphden_transition.png`): If present, displays custom 16:9 illustration; otherwise renders an artistic blueprint placeholder with dimension guides.
-
-* Press `[SPACE]`, `[ENTER]`, or click the on-screen button to step across the threshold into Zyphden.
-
-
-
-> [!TIP]
-
-> **Custom Transition Illustration**: The transition screen natively checks for `assets/zyphden_transition.png`. Drop any 16:9 digital illustration or concept art into that location, and the game will automatically display it on your next journey across the realm threshold!
-
-
+Between major realm gates, the engine presents a framed dark-stone card with ambient embers and checks `assets/zyphden_transition.png` for optional custom 16:9 concept art. Press `[SPACE]`, `[ENTER]`, or click **Continue** to step through.
 
 ### Act III: Fortified Realm of Zyphden
 
-The capital city of the gale winds:
-
-* Cobblestone avenues, residential manors, market squares, and royal gardens.
-
-* Town noticeboard and three lore historians (Cedric, Varek, Maeve).
-
-* Three environmental lore items (`frag_06`, `frag_07`, `frag_08`).
-
-
+The stone capital of the gale winds features cobblestone plazas, artisan workshops, historical steles (`frag_06`, `frag_07`, `frag_08`), townfolk lore encounters, the Hearthside Tavern, Blacksmith Varek's Forge, and the Royal Keep.
 
 ### Blacksmith Varek's Forge
 
-Located in the northern artisan sector of Zyphden:
+Stationed in the northern artisan quarter (`[E]` at the anvil):
 
-* **Interactive Forge Anvil**: Press `[E]` near the forge anvil to open the weapon upgrading interface.
+* **Weapon Forging & Tier Upgrades**: Upgrade unlocked weapons (`+1 Refined`, `+2 Masterwork`, or `Consecrated`) using Silver Shingles, Ore Scraps, Mist Essence, Shadow Essence, and Frost Shards.
+* **Masterwork Weapons & Armor Matrix**: Craft late-game armaments (`Twin Glacial Cleavers`, `Sun-Forged Claymore`, `Storm Glaive`, `Windrunner's Recurve`) and modular 3-piece armor sets (`Crusader Plate`, `Vanguard Bastion`, `Shadowstrider`, `Basalt Golem`, `Frostwarden Attire`).
 
-* **Tier Progression**: Spend earned **Silver Shingles** to upgrade discovered weapons:
+### Hearthside Tavern, Provisions & Alchemy Workshop
 
-  * **Refined (+1)**: Costs 100 Shingles. Grants +20% base damage and +15% poise damage.
+Warm indoor refuge south of the town square:
 
-  * **Masterwork (+2)**: Costs 250 Shingles. Unlocks critical hit enhancements and increased attack reach.
-
-  * **Consecrated Relic**: High defense piercing and radiant projectile arcs.
-
-
-
-### Hearthside Tavern & Eldon's Provisions
-
-Cozy indoor retreat with a roaring fireplace, timber bar, and warm acoustics:
-
-* Meet **Tavernkeep Eldon** behind the counter to initiate the royal questline.
-
-* **Provisions Counter**: Purchase restorative **Health Potions** for **35 Silver Shingles** each to restock your flasks before royal trials.
-
-* Triggers scripted entrance of **Knight Lenon** entering through the tavern doorway to inspect your blade or Zil's token.
-
-
+* **Tavernkeep Eldon**: Initiates Knight Lenon's courtyard summons and sells **Consecrated Health Potions** (`35` Shingles).
+* **Tavern Keeper Brena**: Operates the bubbling cauldron station to brew **Stoneskin Tonics** (`[4]`), **Glacial Thaw Draughts** (`[5]`), and **Berserker Brews** (`[6]`).
 
 > [!IMPORTANT]
+> **Tavern Story Gate**: Speak with Tavernkeep Eldon inside Hearthside Tavern first to trigger Knight Lenon's entrance and unlock your formal audience with King Kreptu in the Royal Keep.
 
-> **REMINDER â€” Tavern Progress Trigger**: The inner courtyard of the Royal Keep is guarded by sovereign sentinels. Speak with Tavernkeep Eldon in the Hearthside Tavern first to prompt Knight Lenon's arrival and receive your formal audience summons.
+### Multi-Slot Save Architecture & Storage Vault
 
-
-
-### Multi-Slot Save Architecture
-
-* **3-Slot Save Manager (`SaveManager`)**: Stores complete campaign progression across `save_slot_1.dat`, `save_slot_2.dat`, and `save_slot_3.dat`.
-
-* **State Persistence**: Records active realm/chapter, player coordinates, remaining HP, Composure, equipped weapon/armor/totem, inventory weapon upgrades, unlocked lore fragments, Silver Shingles purse, health potion stock, and boss defeat milestones.
-
-* **Title Record Modal**: Allows players to select active save slots, inspect saved playtime metrics, start fresh adventures, or safely delete deprecated files with verification prompts.
-
-* **Auto-Save Frequency**: Saves automatically upon realm transitions, boss victories, monolith readings, vendor upgrades, and returning to the Title Screen (`~`).
-
-
+* **3-Slot Save Manager (`SaveManager`)**: Saves across `save_slot_1.json` - `save_slot_3.json`, persisting active realm, coordinates, stats, equipped weapon/armor/totem, **3-slot Weapon Hotbar bindings**, weapon tiers, potions/tonics, materials, stash contents, `15` lore fragments, Bestiary kills, and arena milestones.
+* **Storage Stash Vault (`[T]`)**: Located at Zyphden Town Square and accessible from all realm campfires via a dual-pane Carried Pouch / Vault Stash transfer modal.
 
 ### Expanded Zyphden Royal Keep
 
-Grand stone hall expanded to **1200x1100** bounds:
-
-* Stepped royal dais with King Kreptu seated upon his golden throne at `{ 1000, 275 }`.
-
-* 940px crimson runner carpet leading from the southern entry portal directly to the throne, marked with the gold Sovereign Seal medallion.
-
-* Eight solid marble colonnade pillars, Western Royal Archives with bookshelves, and Eastern Armory with weapon displays.
-
-* Five interactive court NPCs (Malakor, Donald, Garrick, Thaddeus, Genevieve).
-
-* Inscribed Monolith (`frag_09`), Armory Chest (+2 Potions, `frag_10`), and Provisions Chest (+1 Potion).
-
-
+Grand stone hall (`1200x1100`) featuring King Kreptu's golden dais, marble colonnades, Royal Archives, Armory Vault (`frag_09`, `frag_10`), and five court NPCs guarding the sovereign crown.
 
 ### Act IV: Subterranean Quarry Depths & Primordial Altar
 
-Gated behind defeating Knight Lenon in the courtyard martial spar:
+Unlocked after defeating Knight Lenon (`[E]` at the eastern archway):
 
-* **The Eastern Archway & Transition Screen**: Interacting with the eastern rampart portal (`[E]`) triggers `GameState::QUARRY_TRANSITION`, presenting illustrated lore exposition of Zyphden's ancient mineral shafts.
-
-* **Quarry Mines Environment**: Underground cavern with carved basalt walls, glinting crystalline mineral seams, slate flagstone walkways, and ancient minecart rail circuits.
-
-* **Ore Golem Patrols & 7-Second Spawners**: Four basalt Ore Golems patrol the shafts. Upon defeat, they drop valuable Ore Scraps and automatically reconstitute every 7.0 seconds.
-
-* **The Primordial Altar Dais**: Located at `{ 1000, 320 }`, surrounded by 4 monolithic elemental pillars. Gathering all 10 Lore Fragments awakens the secret titan boss: **Elemental Golem (Primordial Titan)**. Conquering the titan bestows the **Elemental Core Totem**.
-
-
+* Mineral cavern populated by four armored **Ore Golems** (`7.0s` respawn) dropping Ore Scraps for smithing.
+* **Primordial Altar (`{ 1000, 320 }`)**: Awakens the **Elemental Golem (Primordial Titan)** boss, which drops the **Elemental Core Totem**, Ore Scraps, Silver Shingles, and Health Potions.
 
 ### Act V: Restless Mist Forest & Altar of Whispers
 
-Beyond the western ramparts of Zyphden Courtyard lies the **Restless Mist Forest** (`GameState::RESTLESS_MIST_FOREST`), an ancient woodland veiled in perpetual twilight.
+Located beyond Zyphden's western ramparts (`1800x1300` twilight woodland):
 
-- **Environment Dimensions**: 1800x1300 woodland with moss-covered stone pillars, twisted oak boughs, and dense ground fog.
-- **Inhabitants**: **Gale Bandits**, outlaws who harness the turbulent winds. They wield dual daggers for quick melee flurries and throw high-speed throwing knives from medium range.
-- **Drop Tables**:
-  - Gale Bandits: Silver Shingles and **Essence of Mist** (35% drop rate). **Strictly NO Ore Scraps**.
-  - Altar Offering: Placing 2x Essence of Mist upon the **Altar of Whispers** (`{ 1130.0f, 650.0f }`) awakens **The Gale Archer**.
-  - Gale Archer: Guaranteed **Shadow Essence** (1-2x), Silver Shingles, and a **15% roll for the Totem of Mist**. **Strictly NO Ore Scraps**.
+* **Gale Bandits**: Swift dual-dagger ambushers and throwing-knife skirmishers dropping Silver Shingles and **Essence of Mist** (`35%` rate; no Ore Scraps).
+* **Altar of Whispers (`{ 1130, 650 }`)**: Offering `2x` Essence of Mist summons **The Gale Archer**, awarding Shadow Essence and a `15%` chance to claim the **Totem of Mist**.
 
-### Combat Arena & 20-Wave Humoral Gauntlet
+### Act VI: Northern Crags & The Permafrost Crypts
 
-Unlocked permanently upon completing the Chapter 1 storyline:
+Northern alpine frontier beyond Zyphden's north gate (`2400x1500`):
 
-* Accessible directly from the Title Screen or the Lobby portal.
+* **Frostbite & Blizzards**: Sub-zero chill slowly builds up (`-25%` move speed and `-40%` stamina regen at `100%`), thawed rapidly beside the Highland Bonfire or mitigated by **Frostwarden Attire** and **Glacial Thaw Draughts**.
+* **Outcast Ranger Torvald & Bounties**: Offers three repeatable/tiered hunting contracts (**Frostfang Cull**, **Glacial Shard Harvest**, **Highland Slayer**) beside breakable Frost Crystal nodes.
+* **Berserker Troll Warlord**: Summoned via the Blood Altar (`30s` rematch cooldown), guarding a `25%` drop chance for the **Totem of Insanity**.
+* **Shrine of Cold Solitude (`{ 1400, 320 }`)**: Bestows the 7th Sacred Relic, **Totem of the Phlegmatic Core**, upon clearing highland bounties.
+* **The Permafrost Crypts (`GameState::FROST_CAVERNS`)**: Accessed via the northern chasm entrance (`{ 2200, 260 }`), featuring low-friction black ice inertia, breakable crystal stalagmites, Lore Fragment XV, and the **Frost Revenant** phantom boss.
 
-* 5 escalating combat waves featuring mixed vanguard formations, dual-brute shockwaves, and the climactic boss encounter against **The Grand Inquisitor**.
+### Combat Arena & 25-Wave Humoral Gauntlet
 
-* Adhesive Bandages (+30 HP) spawn periodically across the arena floor for sustained survival.
+Permanently unlocked from the Title Screen, Lobby portal, or Knight Lenon:
 
-
-
-> [!TIP]
-
-> **Arena Medical Pickups**: When facing overwhelming enemy waves in the Arena, watch for green glowing Adhesive Bandages on the floor. Each pickup restores **+30 HP** immediately upon touch.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Arena Checkpoints**: Completing all 5 waves of the Royal Combat Arena crowns you the Champion of Zyphden and permanently records your victory in the game state.
-
-
+* **25-Wave Survival Gauntlet**: Five escalating tiers culling Southern Cultists, Highland Trolls, Unleashed Ore Golems, and recurring Arena bosses (`Wave 5/10/15/20/25`, culminating in the **Crag Berserker Warlord**). Adhesive Bandages (`+30 HP`) spawn on the arena floor.
+* **3-Stage Apex Boss Gauntlet**: Accessed directly via Knight Lenon (`[G] APEX BOSS GAUNTLET`), chaining Zil's Remnant, the Elemental Golem Titan, and the Berserker Troll Warlord back-to-back.
 
 ---
-
-
 
 ## 3. Combat Systems & Mathematical Formulas
 
-
-
 ### Defense & Armor Penetration Formula
 
-All damage inflicted upon the player or enemies undergoes damage reduction via the mitigation equation:
-
-
+All damage inflicted upon the player or enemies passes through physical armor mitigation:
 
 ```text
-
 Mitigated Damage = Raw Damage * [ 100 / (100 + Defense * (1 - Pierce)) ]
-
 ```
 
-
-
-* **Defense**: Physical defense rating provided by equipment (e.g. Crusader Plate = 24 Def) or enemy archetype.
-
-* **Pierce**: Armor penetration fraction (e.g. War Mace heavy tremors ignore 20% of target defense, `Pierce = 0.20`).
-
-* **Minimum Damage**: Unmitigated blows will always deal at least 1 damage.
-
-
+* **Defense**: Combined helmet/chest/leggings/totem defense or enemy base armor.
+* **Pierce**: Armor penetration fraction (e.g., War Mace Earthshaker ignores `25%`, Gale Piercer ignores `50%`, Truth Seeker Sacred Judgment beam ignores `100%`).
+* **Minimum Damage**: Any unmitigated hit deals at least `1` damage.
 
 > [!IMPORTANT]
-
-> **REMINDER â€” Armor vs. Pierce**: Enemies with heavy plate (such as Iron Brutes) heavily mitigate light sword strikes. Switch to the War Mace or land timed parry ripostes to pierce their defenses.
-
-
+> **Armor vs. Pierce**: Heavily plated foes (Iron Brutes, Ore Golems, Elemental Golem) absorb light sword swings. Use the War Mace, Gale Piercer Drill, Claymore Solar Slam, or timed Parry counters to fracture and bypass their armor.
 
 ### Will Stat & Stagger Duration Formula
 
-When an entity is parried or struck by devastating heavy blows (e.g. Iron Brute slams, Charger thrusts, boss smites), they enter a **Staggered** state where actions are disabled:
-
-
+When parried or hit by high-poise finishers, entities enter a temporary **Staggered** recovery state:
 
 ```text
-
 Stagger Duration = Base Stagger * 100 / (100 + Will * 1.25)
-
 ```
 
-
-
 #### Player Will Scaling
-
-* **Unarmored (Starting)**: 20 Will $\rightarrow$ **0.80s** stagger.
-
-* **Crusader Plate**: 65 Will $\rightarrow$ **0.55s** stagger.
-
-
+* **Unarmored (Starting)**: `20` Will -> **0.80s** stagger.
+* **Crusader Plate**: `65` Will -> **0.55s** stagger.
 
 #### Enemy Will Scaling Upon Parry
-
-* **Cultist Slasher** (10 Will) $\rightarrow$ **1.95s** stagger.
-
-* **Deathseeker Archer** (15 Will) $\rightarrow$ **1.85s** stagger.
-
-* **Void Pyromancer** (20 Will) $\rightarrow$ **1.76s** stagger.
-
-* **Shadow Charger** (30 Will) $\rightarrow$ **1.60s** stagger.
-
-* **Iron Brute** (50 Will) $\rightarrow$ **1.35s** stagger.
-
-* **The Grand Inquisitor** (60 Will) $\rightarrow$ **1.25s** stagger.
-
-* **Zil's Remnant** (65 Will) $\rightarrow$ **1.21s** stagger.
-
-* **Knight Lenon** (70 Will) $\rightarrow$ **1.17s** stagger.
-
-
+* **Cultist Slasher** (`10` Will) -> **1.95s** stagger.
+* **Deathseeker Archer** (`15` Will) -> **1.85s** stagger.
+* **Void Pyromancer** (`20` Will) -> **1.76s** stagger.
+* **Shadow Charger** (`30` Will) -> **1.60s** stagger.
+* **Iron Brute** (`50` Will) -> **1.35s** stagger.
+* **The Grand Inquisitor** (`60` Will) -> **1.25s** stagger.
+* **Zil's Remnant** (`65` Will) -> **1.21s** stagger.
+* **Knight Lenon** (`70` Will) -> **1.17s** stagger.
 
 > [!IMPORTANT]
-
-> **REMINDER â€” Will Stat Mechanics**: Will does not reduce incoming numeric damageâ€”it accelerates your recovery from physical poise breaks. Higher Will lets you recover and raise your guard before enemies can chain attacks.
-
-
-
-> [!TIP]
-
-> **Break Stagger with Poise Buffs**: Equipping the Crusader Plate reduces your stagger duration from 0.80s down to 0.55s, allowing you to raise your shield before an enemy can land a follow-up attack.
-
-
+> **Will Stat Mechanics**: Will does not reduce incoming numeric damage; it accelerates your recovery from poise breaks so you can raise guard (`[F]`) or dash (`[Q]`) before follow-up blows land.
 
 ### Anti-Stunlock Buffer
 
-To ensure fair and responsive combat, recovering from a stagger immediately grants the player **1.8 seconds of Stagger Immunity**. During this grace window, heavy enemy blows will still deal damage but cannot chain-stagger the player.
-
-
-
-> [!TIP]
-
-> **Utilizing the Immunity Buffer**: When you break out of a stagger, you have a 1.8-second window where heavy attacks cannot knock you down again. Use this window to dash away (`[Q]`) or immediately counter-strike!
-
-
+Recovering from a player stagger grants **1.8 seconds of Stagger Immunity**. During this grace window, heavy blows deal damage but cannot chain-stagger the player.
 
 ### Invulnerability Frames (i-frames)
 
-Activating **Dash (`[Q]`)** triggers a rapid 8-directional burst with **0.25 seconds of invulnerability frames**. During this active evasion window:
-
-* Melee swings and shockwaves pass through the player harmlessly.
-
-* Projectiles are safely phased through.
-
-* Spawns an amber-white `"EVADED"` combat badge above the player's head.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Dash Recovery Window**: While Dash grants 0.25s of complete invulnerability (`EVADED`), it has a weapon-dependent recovery cooldown (0.50s - 1.25s). Timing your dashes deliberately is far more effective than spamming.
-
-
+Activating **Dash (`[Q]`)** triggers a directional burst with **0.25 seconds of invulnerability frames**, allowing melee hits, shockwaves, and projectiles to pass harmlessly while spawning an `EVADED` badge above the player.
 
 ### Parry Guard, Counter Buff & Projectile Reflection
 
-Pressing **Parry (`[F]`)** activates a golden cyan-tinted shield barrier for **0.24 seconds**:
+Pressing **Parry (`[F]`)** raises a golden cyan guard barrier for **0.24 seconds**:
 
-* **Melee Deflection**: Parrying a melee attack perfectly negates all damage, inflicts **STAGGERED!** on the attacker, and grants the player a **+50% (1.5x) Counter-Attack Damage Multiplier** for 2.4 seconds.
-
-* **Projectile Reflection**: Parrying an incoming enemy arrow or spell projectile deflects it back toward your mouse reticle with double speed and amplified damage.
-
-
-
-> [!TIP]
-
-> **Mastering Projectile Reflection**: You do not need to aim at the shooter to reflect. The projectile will fly directly toward wherever your **mouse cursor** is pointing at the instant of parry!
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Parry Guard Timing**: The active parry window lasts for exactly 0.24 seconds. Activate it just as the enemy's attack swing begins forward motion for a guaranteed stagger and the +50% counter-damage boost.
-
-
+* **Melee Deflection**: Negates incoming hit damage, staggers the attacker, and grants **+50% Counter-Attack Damage** (`1.5x`) for `2.4s`.
+* **Projectile Reflection**: Deflects arrows, void orbs, and beams straight toward your **mouse cursor** with doubled velocity and amplified damage.
 
 ### Consumable Health Elixirs, Combat Tonics & Out-of-Combat Regeneration
 
-* **Health Potions (`[H]`)**: Drinking an elixir restores **+45 HP** immediately and initiates a **7.0-second cooldown timer**.
-
-* **Alchemy Combat Tonics (`[4]`, `[5]`, `[6]`)**: Brewed by Tavern Keeper Brena at Hearthside Tavern - Stoneskin Tonic (`[4]`, +18 Def, -10% Speed, 12s), Glacial Thaw Draught (`[5]`, Frostbite immunity & Chill cleanse, 15s), and Berserker Brew (`[6]`, +30% Dmg, -15% Def, 10s).
-
-* **Out-of-Combat Regeneration**: Staying disengaged from combat for **4.0+ seconds** activates passive health recovery at **+8.0 HP/s** up to maximum capacity.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Potion Cooldown**: Health potions carry an intentional 7.0-second cooldown to prevent flask-spamming during intense boss duels. Monitor your visual action bar icon to track the remaining recovery time.
-
-
-
-> [!TIP]
-
-> **Out-of-Combat Health Recovery**: If you run out of potions, disengage from enemies and avoid taking damage for 4.0 seconds. Your vitality will automatically regenerate at +8.0 HP per second until fully healed!
-
-
+* **Health Potions (`[H]`)**: Restores **+45 HP** immediately on a **7.0-second cooldown**.
+* **Stoneskin Tonic (`[4]`)**: Grants **+18 Defense** (`-10%` movement speed) for `12.0s`.
+* **Glacial Thaw Draught (`[5]`)**: Cleanses chill and grants **complete Frostbite immunity** for `15.0s`.
+* **Berserker Brew (`[6]`)**: Grants **+30% Attack Damage** (`-15%` Defense) for `10.0s`.
+* **Out-of-Combat Regeneration**: Remaining undamaged for **4.0+ seconds** restores **+8.0 HP/s** passively.
 
 ### Phlegmatic Composure System & Stoic Poise
 
-The **Phlegmatic Composure** system governs the player's mental resilience, deliberate focus, and unflinching poise under intense combat stress.
-
-
-
-#### Composure Mechanics
-
-* **Gauge Bounds**: `0.0f` (Discomposed) to `100.0f` (Max Focus / Trance Ready).
+The **Phlegmatic Composure** meter (`0.0` to `100.0`) measures focus and poise under pressure:
 
 * **Gaining Composure**:
-
-  * **Timed Parry (`[F]`)**: **+25.0 Composure** on successful deflection.
-
-  * **Evasive Dash (`[Q]`)**: **+15.0 Composure** when phasing through enemy hitboxes during i-frames.
-
-  * **Quenching Choleric Frenzy**: **+30.0 Composure** bonus when deflecting a Choleric hostile.
-
-  * **Patient Stance**: **+8.0 Composure/s** for standing unhit within 220px of a telegraphing enemy without spamming attacks.
-
-* **Losing Composure**:
-
-  * **Unmitigated Heavy Hits**: **-25.0 Composure** on taking damage from heavy enemy attacks.
-
-  * **Exhausted Swings**: **-15.0 Composure** when attempting heavy attacks without sufficient stamina.
-
-  * **Natural Decay**: Slowly decays at **-1.5 Composure/s** when disengaged from combat.
-
-
-
-#### Composure Poise Tiers
-
-* **Discomposed (< 30.0)**:
-
-  * Indicated by a pulsating red alert badge (`POISE: LOW [DISCOMPOSED]`).
-
-  * **+15% Stagger Duration Penalty**: Vulnerable to extended enemy stagger chains.
-
-* **Composed (30.0 â€“ 79.9)**:
-
-  * Baseline state of mental equilibrium (`POISE: XX [COMPOSED]`).
-
-  * Normal recovery and standard stamina regeneration.
-
-* **Stoic Poise (80.0 â€“ 100.0)**:
-
-  * Indicated by a radiant gold badge (`POISE: MAX [STOIC POISE]`).
-
-  * **Hyper-Armor**: Complete immunity to stagger and knockback during heavy attack windups.
-
-  * **Hemostasis**: Complete immunity to Sanguine arterial bleed damage.
-
-
-
-#### Active Ability â€” Phlegmatic Trance (`[SPACE]`)
-
-When Composure reaches maximum capacity (**100.0**), the player can press `[SPACE]` to enter the mystical **Phlegmatic Trance** for **5.0 seconds**:
-
-* **Complete Invulnerability**: Complete damage immunity (`TRANCE INVULN!`).
-
-* **Zero Stamina Drain**: All light, heavy, and dash actions consume 0 stamina.
-
-* **Automatic Reflection Sphere**: Automatically reflects all enemy projectiles within a **120px spherical aura** without requiring manual parry inputs.
-
-
-
----
-
-
+  * **Timed Parry (`[F]`)**: `+25.0` Composure (`+30.0` total when quenching Choleric frenzies).
+  * **Evasive Dash (`[Q]`)**: `+15.0` Composure when dodging through an active hitbox.
+  * **Patient Stance**: `+8.0` Composure/s while standing composed near telegraphing enemies without spamming.
+* **Losing Composure**: `-25.0` on heavy hits taken, `-15.0` on exhausted heavy attempts, and `-1.5/s` decay out of combat.
+* **Composure Tiers**:
+  * **Discomposed (`< 30.0`)**: `+15%` stagger duration vulnerability.
+  * **Composed (`30.0 - 79.9`)**: Baseline recovery equilibrium.
+  * **Stoic Poise (`80.0 - 100.0`)**: Hyper-armor during heavy attack windups and immunity to Sanguine Bleed.
+* **Active Ability -- Phlegmatic Trance (`[SPACE]` at `100` Composure)**:
+  * **5.0 seconds** of full invulnerability (`TRANCE INVULN!`), zero stamina cost on all actions, and an automatic `120px` projectile reflection aura.
 
 ### Medieval Four Humors Alignment
 
-Enemies across Tydeshire are aligned with the ancient Medieval Four Humors doctrine, exhibiting distinct behavioral temperaments, visual auras, and tactical vulnerabilities:
-
-
-
 | Humor Type | Element & Color | Combat Temperament | Tactical Vulnerability & Interaction |
-
 | :--- | :--- | :--- | :--- |
-
-| **Choleric** | Yellow Bile (Amber Fire `[255, 140, 40]`) | Relentless aggression, furious charge velocity, and shortened windups. | **Quenching**: Deflecting a Choleric strike with a timed parry extinguishes their fury, applying **QUENCHED!** (-30% movement speed for 5.0s, **2.0x stagger duration**, and grants **+30 Composure** to the player). |
-
-| **Melancholic** | Black Bile (Earth/Void `[160, 60, 255]`) | Hardened defense carapace granting **+50% base armor** and stoic resilience. | **Shattering**: Striking with a War Mace or 2-stage heavy cleave shatters their carapace, applying **SHELL SHATTERED!** (**-35% defense reduction** for 4.0s). |
-
-| **Sanguine** | Blood (Arterial Crimson `[255, 60, 75]`) | Rapid flurry strikes and piercing arrows that inflict arterial hemorrhage. | **Hemorrhage**: Unmitigated strikes inflict **Bleed** (10 damage over 3.0s). Reaching **Stoic Poise (80+ Composure)** provides complete immunity against bleed procs. |
-
-| **Phlegmatic** | Cold Water (Azure Cyan `[80, 220, 255]`) | Deliberate defense, steady positioning, and calculated guard counters. | **Patience & Poise**: Vulnerable to guard breaks, heavy tremors, and timed counter-ripostes. |
-
-
-
----
-
-
+| **Choleric** | Yellow Bile (`[255, 140, 40]`) | Relentless aggression, rapid charge velocity, and short windups. | **Quenching**: Parrying inflicts `QUENCHED!` (`-30%` speed for 5.0s, **2.0x stagger duration**, and `+30` Composure). |
+| **Melancholic** | Black Bile (`[160, 60, 255]`) | Hardened carapace granting **+50% base armor** and poise. | **Shattering**: War Mace or 2-stage heavies inflict `SHELL SHATTERED!` (`-35%` defense for 4.0s). |
+| **Sanguine** | Blood (`[255, 60, 75]`) | Flurry strikes and piercing volleys causing hemorrhage. | **Hemorrhage**: Inflicts Bleed (`10` dmg over `3.0s`); **Stoic Poise (`80+`)** grants Bleed immunity. |
+| **Phlegmatic** | Cold Water (`[80, 220, 255]`) | Measured guard stances, chilled strikes, and steady spacing. | **Patience & Poise**: Vulnerable to armor fracture, heavy tremors, and timed ripostes. |
 
 ### Combat Juice: Hit-Stop & Directional Camera Shake
 
-* **Hit-Stop Micro-Pause**: Delivers a visceral 2-3 frame micro-pause (**0.04s - 0.06s freeze**) upon parry deflections, heavy cleaves, projectile reflections, and armor shell breaks. During hit-stop, entity simulation pauses while camera shake and particle effects continue, creating impactful, crunchy combat feedback.
-
-* **Directional Camera Shake**: Smooth directional impulse camera shake reacting directly to the trajectory of strikes, tremors, and deflections, blending impulse vectors with decay jitter for realistic recoil physics.
-
-
+Parry deflections, heavy finishers, projectile reflections, and armor fractures trigger a `0.04s - 0.06s` hit-stop freeze paired with directional camera impulse shake along the strike vector.
 
 ---
 
-
-
 ## 4. Controls & Interface Reference
-
-
 
 ### Keybindings Guide
 
-
-
 | Key / Input | Action Name | Gameplay Function |
-
 | :--- | :--- | :--- |
-
-| `W, A, S, D` / `Arrows` | Movement | 8-directional traversal with solid obstacle collision. |
-
-| `Mouse Cursor` | Aiming | Reticle aiming for sword thrusts, dashes, and parry reflections. |
-
-| `Left Mouse Button` | Light Attack | Swift slash/thrust with low stamina cost and quick recovery cadence. |
-
-| `Right Mouse Button` | Heavy Cleave | Signature multi-stage strike, lunge, or shockwave. |
-
-| `Q Key` | Dash (Evade) | Fast directional burst with **0.25s i-frames** (`EVADED`). |
-
-| `F Key` | Timed Parry | Active guard window. Staggers melee foes and reflects missiles. |
-
-| `SPACE Key` | Phlegmatic Trance | Available at 100 Composure. **5.0s invulnerability, zero stamina cost, 120px projectile reflection sphere**. |
-
-| `1, 2, 3 Keys` | 3-Slot Weapon Hotbar | Instantly swap between up to 3 weapons assigned to your hotbar slots mid-combat. |
-
-| `H Key` | Health Potion | Consumes 1 elixir to heal **+45 HP** (**7.0s cooldown**). |
-
+| `W, A, S, D` / `Arrows` | Movement | 8-directional traversal with obstacle sliding. |
+| `Mouse Cursor` | Aiming | Reticle aiming for slashes, bows, dashes, and reflected shots. |
+| `Left Mouse Button` | Light Attack | Fast slash, thrust, twin-cleaver swing, or Gale Arrow volley. |
+| `Right Mouse Button` | Heavy Combo | Weapon signature multi-stage combo or piercing drill shot. |
+| `Q Key` | Dash (Evade) | Directional burst with **0.25s i-frames** (`EVADED`). |
+| `F Key` | Timed Parry | Active `0.24s` guard window; staggers melee attackers & reflects missiles. |
+| `SPACE Key` | Phlegmatic Trance | At `100` Composure: **5.0s invulnerability, 0 stamina cost, 120px auto-reflect aura**. |
+| `1, 2, 3 Keys` | 3-Slot Weapon Hotbar | Instantly swap between up to 3 weapons bound in your hotbar slots. |
+| `H Key` | Health Potion | Consumes 1 elixir to heal **+45 HP** (`7.0s` cooldown). |
 | `4, 5, 6 Keys` | Alchemy Tonics | Drink Stoneskin (`[4]`), Glacial Thaw (`[5]`), or Berserker Brew (`[6]`). |
-
-| `V Key` | Armor Set Skill | Activate 3/3 armor set skill (Dust Burst, Dawnfire Aegis, Seismic Quake, Shadow Decoy, Spike Wall, Basalt Spires, FROST NOVA). |
-
-| `E Key` / `Enter` | Interact | Talk to NPCs, open chests, read monoliths, and transition doors. |
-
-| `A Key` / `D Key` | Dialogue Page | Navigate between previous and next pages of active dialogue. |
-
-| `ESC Key` | Close / Dismiss | Safely dismiss open dialogues, popups, and journal modals. |
-
-| `O Key` | Toggle Objectives | Expand or collapse the pinned Chapter 1 quest tracker card. |
-
-| `TAB` (`I Key`) | Inventory & Grimoire | Open the Equipment Matrix, 3-Slot Weapon Hotbar assignment, Lore Journal, Bestiary, and Realm Map. |
-
-| `B Key` | Humoral Bestiary | Open Inventory directly to the Humoral Bestiary & Mastery Perks tab. |
-
-| `M Key` | Interactive Realm Map | Open the full parchment map with live player tracking and POI tooltips. |
-
-| `F11` / `Alt + Enter` | Fullscreen Toggle | Switch between windowed and native crisp fullscreen display modes. |
-
-| `C Key` | Controls Guide | Toggle the quick-reference keybindings overlay. |
-
-| `~ Key` (Tilde / Grave) | Title Screen | Instantly return to the Title Screen from any state. |
-
-| `R Key` | Respawn / Retry | Instantly restart an active trial or respawn after defeat. |
-
-| `L Key` | Return to Lobby | Warp back to the Armory Sanctuary from lobby-connected states. |
-
-
-
-> [!NOTE]
-
-> **Safe UI Dismissal**: Pressing `[ESC]` will safely dismiss any active modal, popup, or dialogue window without pausing or exiting the game.
-
-
+| `V Key` | Armor Set Skill | Trigger 3/3 armor set skill (`FROST NOVA`, `Dawnfire Aegis`, `Basalt Spires`, etc.). |
+| `E Key` / `Enter` | Interact | Speak with NPCs, loot chests, inspect steles, forge, and cross portals. |
+| `A Key` / `D Key` | Dialogue Page | Turn dialogue pages backward/forward. |
+| `TAB` (`I Key`) | Inventory & Grimoire | Open Equipment Matrix, 3-Slot Hotbar assignment, Lore Journal, Bestiary, and Map. |
+| `B Key` | Humoral Bestiary | Open Inventory directly to Tab 3 (Humoral Bestiary & Mastery Perks). |
+| `M Key` | Interactive Realm Map | Open frosted tactical map with live player marker and POI labels. |
+| `N Key` | Tactical Radar | Toggle corner mini-radar and 8-way cardinal compass ribbon. |
+| `T Key` | Stash Vault / Return | Open Storage Stash Vault at town/campfires, or return to Zyphden from Arena. |
+| `O Key` | Objectives Tracker | Toggle pinned Chapter 1 quest objectives panel. |
+| `C Key` | Controls Guide | Toggle quick-reference keybindings overlay. |
+| `ESC Key` | Close / Dismiss | Dismiss open modals, popups, or active dialogues. |
+| `F11` / `Alt + Enter` | Fullscreen Toggle | Toggle crisp windowed / native fullscreen modes. |
+| `R Key` | Respawn / Retry | Retry active trial or respawn after defeat. |
+| `L Key` | Return to Hub | Fast return to Lobby / Armory Sanctuary where supported. |
+| `~ Key` (Tilde) | Title Screen | Return to the Title Screen from any state. |
 
 > [!TIP]
-
-> **In-Game Controls Overlay**: In the heat of battle, you don't need to pause or exitâ€”simply press `[C]` at any moment to summon a semi-transparent HUD overlay showing all keybindings and combat shortcuts.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Objectives Tracker**: Press `[O]` to expand or collapse the active Chapter 1 quest tracker. It tracks your current primary task, whether claiming your initial weapon or seeking audience with King Kreptu.
-
-
+> **In-Game Controls Overlay**: Press `[C]` at any time in combat or town to bring up the keybindings overlay without quitting or pausing external menus.
 
 ### Modular Visual Action Bar & 3-Slot Weapon Hotbar Dock
 
-Located at the bottom center of the HUD, the enlarged vector-icon action bar (`58x62` standard / `64x68` wide display) provides real-time ability tracking with procedural vector silhouettes:
-
-* **Slot 1 (`[Q]`)**: Dash - Winged evasion chevrons, active evasion pulse, and recovery sweep.
-
-* **Slot 2 (`[LMB]`)**: Light Attack - Dynamic miniature silhouette of the equipped weapon with cadence wipe.
-
-* **Slot 3 (`[RMB]`)**: Heavy Attack - Empowered weapon cleave silhouette with multi-stage cooldown sweep.
-
-* **Slot 4 (`[F]`)**: Parry - Heraldic heater shield (golden when ready, cyan flash on active guard, dark recovery wipe).
-
-* **Slot 5 (`[H]`)**: Health Flask - Alchemical flask icon, emerald stock badge (`xN`), and **7.0s countdown timer**.
-
-* **Slots 6-8 (`[4]`, `[5]`, `[6]`)**: Alchemy Belt - Faceted flask icons for Stoneskin (`[4]`), Glacial Thaw (`[5]`), and Berserker Brew (`[6]`) with active duration timers.
-
-* **Slot 9 (`[V]`)**: Armor Skill - Dynamic armor-set heraldic emblem (`BURST`, `AEGIS`, `CHARGE`, `DECOY`, `SPIKES`, `SPIRES`, `NOVA`) with active ward/buff glow.
-
-* **Phlegmatic Trance Pill (`[SPACE]`)**: Center focus medallion above the tray glowing when Composure hits 100 (`TRANCE READY [SPACE]`), with 5.0s countdown sweep when active.
-
-* **Bottom-Right 3-Slot Weapon Hotbar Dock (`[1]`, `[2]`, `[3]`)**: Framed 114px-tall dock matching the bottom-left Player Card, showing equipped weapon name/tier/damage above three `64x66` (`70x72` wide) procedural weapon icon slots bound to `[1]`, `[2]`, and `[3]`.
-
-
+* **Bottom-Center Action Bar (`58x62` standard / `64x68` wide)**: Nine framed slots with procedural SVG-style vector silhouettes, keybind tags, stock counters, cooldown wipes, and active buff highlights:
+  * **Slots 1-4**: `[Q]` Dash (winged chevron), `[LMB]` Light (active weapon silhouette), `[RMB]` Heavy (empowered cleave silhouette), `[F]` Parry (heraldic shield).
+  * **Slots 5-8**: `[H]` Health Flask, `[4]` Stoneskin Tonic, `[5]` Glacial Thaw Draught, `[6]` Berserker Brew.
+  * **Slot 9**: `[V]` Armor Skill with dynamic set emblem (`BURST`, `AEGIS`, `CHARGE`, `DECOY`, `SPIKES`, `SPIRES`, `NOVA`) lighting up while wards/buffs remain active.
+  * **Trance Medallion**: Centered `[SPACE]` pill above the action bar illuminating at `100` Composure.
+* **Bottom-Right 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` slots)**: Framed `114px`-tall card aligned cleanly with the Player Card, displaying the active weapon header (`Name`, `+Tier`, `Light / Heavy DMG`) above `[1]`, `[2]`, and `[3]` procedural weapon icon slots.
 
 ### Attributes & Posture Status Indicators
 
-Displayed directly alongside the Player Health, Stamina, and Composure bars:
+Displayed inside the bottom-left Player Card:
 
-* **DEF: XX**: Total active defense rating including equipped armor.
-
-* **WILL: XX**: Current willpower stat mitigating incoming stagger durations.
-
-* **SHINGLES: XX**: Active purse of Silver Shingles for blacksmith forging and apothecary provisions.
-
-* **POISE: XX [STATUS]**: Real-time Composure poise tier:
-
-  * `[DISCOMPOSED]` (Red, < 30 Composure): +15% stagger duration vulnerability.
-
-  * `[COMPOSED]` (Slate Blue, 30-79 Composure): Equilibrium.
-
-  * `[STOIC POISE]` (Radiant Gold, 80-100 Composure): Hyper-Armor immunity to stagger and bleed during heavy attack windups.
-
-* **Dynamic Posture Pill**: Displays real-time state: `STAGGERED!`, `POISE GUARD`, `I-FRAMES`, `+50% COUNTER`, or `COMBAT READY`.
-
-
+* **DEF / WILL / SHINGLES**: Live defensive mitigation, stagger recovery rating, and Silver Shingles purse.
+* **POISE `[DISCOMPOSED / COMPOSED / STOIC POISE]`**: Live Composure tier indicator alongside dynamic posture and buff tray pills (`ICE WARD`, `STAGGERED!`, `+50% COUNTER`, `EVADED`, `BLOOD FRENZY`, `FROSTBITE`).
 
 ### In-Game Equipment Matrix, Lore Journal, Bestiary & Realm Map
 
 Opened via `[TAB]` (`[I]` alias), `[B]` (Bestiary), or `[M]` (Realm Map):
 
-* **Tab 1 (`[1]`)**: Equipment, 3-Slot Hotbar & Arsenal - Inspect weapons and upgrade tiers (+1, +2, Consecrated), bind up to 3 unlocked weapons into Hotbar Slots `[1]`, `[2]`, and `[3]`, manage armor sets and saved loadouts, and equip discovered sacred totems.
-
-* **Tab 2 (`[2]`)**: Lore Journal - Browse 15 discovered historical fragments (`I-XV`) with unread badges (`(!)`).
-
-* **Tab 3 (`[3]` / `[B]`)**: Humoral Bestiary - Track defeated hostiles across 12 archetypes, study tactical weakness guides, and unlock passive Mastery Hunting Perks at Tier 2 (`15 Kills`) and Tier 3 (`35 Kills`).
-
-* **Tab 4 (`[4]` / `[M]`)**: Interactive Realm Map - Inspect the frosted tactical cartography of Tydeshire, filter POIs, and locate the live player beacon.
-
-
+* **Tab 1 (`[1]`) -- Equipment, 3-Slot Hotbar & Arsenal**: Inspect weapons and upgrade tiers, assign up to 3 unlocked weapons to Hotbar `[SLOT 1]`, `[SLOT 2]`, and `[SLOT 3]`, toggle saved loadouts (`I / II / III`), inspect armor sets, and equip sacred totems.
+* **Tab 2 (`[2]`) -- Lore Journal**: Dual-page medieval book tracking all 15 discovered fragments (`I-XV`) with unread badges (`(!)`).
+* **Tab 3 (`[3]` / `[B]`) -- Humoral Bestiary**: Browse 11 hostile archetypes, weakness dossiers, and unlock permanent Mastery Hunting Perks at Tier 2 (`15 Kills`) and Tier 3 (`35 Kills`).
+* **Tab 4 (`[4]` / `[M]`) -- Interactive Realm Map**: Cartographic view of Tydeshire with live player marker and POI tooltips.
 
 ---
-
-
 
 ## 5. Weapon Arsenal, Armor & Totems
 
-
-
 ### Arsenal Summary Table
 
-
-
-| Weapon | Light Attack | Heavy Cleave | Dash CD | Special Properties & Passives |
-
+| Weapon | Light Attack | Heavy Combo | Dash CD | Special Mechanics & Passives |
 | :--- | :--- | :--- | :--- | :--- |
-
-| **Unarmed** | None | None | 0.75s | Starting state in cathedral awakening. |
-
-| **Crusader's Broadsword** | 18 dmg (110Â° arc) | 70 dmg (2-Stage cleave) | 0.85s | Balanced reach. Heavy cleave consists of Stage 1 wide 160Â° sweep (42 dmg) followed by Stage 2 upward line/box shockwave (28 dmg). |
-
-| **Truth Seeker (Partial)** | 26 / 24 dmg (2-Hit) | 78 dmg (Dual 360Â° + Beam) | 0.65s | Consecrated relic blade. Light attack chains a slash into an upward radiant slice. Heavy unleashes dual 360Â° sweeps (42 + 36 dmg) and fires a holy piercing beam (22 dmg, 10% pierce). |
-
-| **Dual Daggers** | 12 dmg (9 Stamina) | 58 dmg (3-Stage Lunge + Cross-Slash + Vault Kick) | 0.50s | Agile twin blades consuming 9 stamina per light swing. Heavy chains invulnerable Shadow Puncture (Bleed), Backstab Cross-Slash (+40% vs bleeding/rear), and staggering Vault Kick. |
-
-| **War Mace** | 24 dmg (Frontal Smack) | 78 dmg (Earthshaker) | 1.25s | Massive poise crusher. Heavy executes Overhead Skull Crusher (Armor Fracture -20% for 4s) into Seismic Tremor (**25% armor pierce**). |
-
-| **Royal Halberd** | 18 dmg (Linear Thrust) | 58 / 72 / 88 dmg (3-Stage) | 0.80s | Extended reach polearm. Heavy features i-frame Vault Lunge, wide 220-deg cleave, and a rapid 3-stab flurry. |
-
-| **Twin Zephyr Daggers** | 16 dmg (8 Stamina) | 68 dmg (Shadow Slip + Decoy) | 0.35s | High-velocity wind blades consuming 8 stamina per swing. Heavy triggers an evasive Shadow-Step with i-frames, 360-deg whirlwind, and explosive shadow decoy. |
-
-| **Windrunner's Recurve** | 9 / 11 / 13 dmg (18 Stamina) | 36 / 44 / 52 dmg (42 Stamina) | 0.50s | Acrobatic wind bow firing rapid Gale Arrows with 55px Windburst AoE (30% weapon dmg). Heavy channels Gale Piercer Drill (50% defense pierce, Armor Fracture -40% for 4s, 1.2s stun). |
-
-| **Sun-Forged Claymore** | 30 dmg (140-deg Cleave) | 117 dmg (2-Stage Solar Cataclysm) | 1.15s | Colossal solar greatsword. Heavy chains Stage 1 Sunfire Crescent (180-deg sweep + 4s Solar Burn) into Stage 2 Solar Cataclysm Slam (115px Solar Flare Pillar, +25% pierce, +30% vs burning foes). |
-
-| **Storm Glaive** | 20 dmg (Spear Thrust) | 100 dmg (2-Stage Tempest Cyclone) | 0.70s | Aerodynamic polearm. Heavy chains Stage 1 Zephyr Surge Step (0.18s i-frame gale corridor) into Stage 2 Tempest Cyclone (360-deg vortex restoring +15 Composure + piercing Crescent Gale Wave). |
-
-| **Twin Glacial Cleavers** | 20 / 25 / 31 dmg (13 Stamina) | 46 / 54 / 64 dmg per hit (4-Stage Fury) | 0.85s | Dual-wielding frost cleavers with fast alternating light swings. Heavy triggers an automated 4-stage Fury of Cleaves barrage ending in Glacial Cross-Rupture (+3.5s Chill, or 175px Frost Tremor +35 dmg with Frostwarden). |
-
-
+| **Unarmed** | None | None | `0.75s` | Starting state in cathedral awakening. |
+| **Crusader Blade** | `18 / 22 / 26` dmg (`110-deg`, `15` Stam) | `88 / 102 / 118` dmg (`3-Stage`) | `0.85s` | Stage 1 Crescent Cleave (`+12` Composure), Stage 2 Shock Thrust (interrupts windups), Stage 3 Radiant Sunder (`+50%` vs staggered). |
+| **Truth Seeker (Partial)** | `22 / 28` dmg (`130-deg`, `14` Stam) | `72 / 88` dmg (`2-Stage + Beam`) | `0.65s` | Stage 1 Dawnfire Ring (Solar Burn + Holy Beam), Stage 2 Sacred Judgment Pillar (`100%` defense pierce + self-cleanse). |
+| **Dual Daggers** | `12 / 15 / 18` dmg (`9` Stam) | `58 / 68 / 80` dmg (`3-Stage`) | `0.50s` | `9` stamina per light strike. Heavy chains invulnerable Shadow Puncture (Bleed), Backstab Cross-Slash (`+40%` vs bleeding/rear), and staggering Vault Kick. |
+| **War Mace** | `24 / 28 / 34` dmg (`22` Stam) | `78 / 92 / 108` dmg (`2-Stage`) | `1.25s` | Slow high-poise crusher. Heavy executes Skull Crusher (`-20%` Armor Fracture `4s`) into `360-deg` Seismic Tremor (`25%` armor pierce). |
+| **Royal Halberd** | `18 / 22 / 26` dmg (`140px`, `14` Stam) | `58 / 72 / 88` dmg (`3-Stage`) | `0.80s` | Extended polearm. Heavy executes i-frame Vault Lunge, `220-deg` cleave, and rapid 3-stab flurry. |
+| **Twin Zephyr Daggers** | `16 / 20 / 25` dmg (`8` Stam) | `68 / 80 / 95` dmg (`Shadow Slip`) | `0.35s` | Gale curved blades (`8` stamina per light strike). Heavy executes i-frame Shadow-Step, `360-deg` whirlwind, and explosive shadow decoy. |
+| **Windrunner's Recurve** | `9 / 11 / 13` dmg (`18` Stam) | `36 / 44 / 52` dmg (`42` Stam) | `0.50s` | Rapid Gale Arrows (`55px` Windburst AoE at `30%` dmg). Heavy fires Gale Piercer Drill (`50%` pierce, `-40%` Armor Fracture `4s`, `1.2s` stun). |
+| **Sun-Forged Claymore** | `30 / 36 / 42` dmg (`140-deg`, `24` Stam) | `117 / 139 / 162` dmg (`2-Stage`) | `1.15s` | Heavy chains Sunfire Crescent (`180-deg` + `4s` Solar Burn) into Solar Cataclysm Slam (`115px` Solar Flare Pillar, `+25%` pierce, `+30%` vs burning). |
+| **Storm Glaive** | `20 / 25 / 31` dmg (`155px`, `12` Stam) | `100 / 120 / 142` dmg (`2-Stage`) | `0.70s` | Heavy chains Zephyr Surge Step (`0.18s` i-frame gale corridor) into `360-deg` Tempest Cyclone (`+15` Composure on hit + piercing Crescent Gale Wave). |
+| **Twin Glacial Cleavers** | `20 / 25 / 31` dmg (`13` Stam) | `46 / 54 / 64` dmg/hit (`4-Stage`) | `0.85s` | Dual-wielding frost cleavers with fast alternating swings (`0.14s`). Heavy triggers automated 4-stage **Fury of Cleaves** ending in **Glacial Cross-Rupture** (`3.5s` Chill; `175px` Frost Tremor `+35` dmg with Frostwarden). |
 
 ### Detailed Weapon Stances
 
+* **Crusader Blade & Sun-Forged Claymore**: Broad frontal arcs ideal for clearing packs; Sun-Forged Claymore's Stage 2 Solar Cataclysm Slam rewards setting targets ablaze with Stage 1 Sunfire Crescent (`+30%` detonation bonus).
+* **Truth Seeker (Partial)**: Upward Dawnfire slashes and `100%` armor-piercing Sacred Judgment lasers cleave entire enemy columns cleanly.
+* **Dual Daggers & Twin Zephyr Daggers**: High-tempo skirmishing blades costing `9` / `8` stamina per swing. Manage stamina pacing deliberately and leverage heavy i-frame lunges and shadow decoys to weave around heavy swings.
+* **Twin Glacial Cleavers**: Dual-wielded in both hands for brisk alternating slashes and a forward-propelling 4-stage **Fury of Cleaves** barrage that stacks Chill and fractures armored lines.
+* **Storm Glaive & Royal Halberd**: Long-reach polearms controlling spacing through linear corridors and `360-deg` cyclone / multi-stab combinations.
+* **Windrunner's Recurve**: Mobile skirmish bow pairing rapid Windburst arrows with high-commitment `42`-stamina Gale Piercer Drill shots.
 
+> [!IMPORTANT]
+> **Weapon Stamina & Heavy Commitment**: Light daggers and bow arrows now cost meaningful stamina per action (`8`-`9` on Daggers, `18`/`42` on Bow), and heavy combos commit along your cursor trajectory. Open heavy chains during post-parry windows or enemy recovery frames.
 
-#### Crusader's Broadsword
+### Armor Sets & Frostwarden Synergy
 
-* **Stance Philosophy**: Standard military vanguard doctrine. Exceptional balance of defense and reach.
+Equipping 3/3 matching pieces awakens both passive traits and an active `[V]` Armor Skill:
 
-* **Tactical Advice**: Use the wide Stage 1 cleave to control crowds of slashers, then let Stage 2 catch fleeing archers.
-
-
-
-#### Truth Seeker (Partial)
-
-* **Stance Philosophy**: Holy sun-crusader relic. Emits sacred dawnfire that pierces corrupted flesh.
-
-* **Tactical Advice**: The holy beam fired at the end of the heavy combo travels up to 400px. Line up multiple enemies to pierce through an entire column!
-
-
-
-#### Dual Daggers
-
-* **Stance Philosophy**: Fluid, predatory skirmishing. Relies on agility and breathless recovery.
-
-* **Tactical Advice**: Light attacks cost **9 stamina** per strike (and 8 stamina on Twin Zephyr Daggers), rewarding deliberate stamina pacing and heavy i-frame repositioning over reckless spamming.
-
-
-
-#### War Mace
-
-* **Stance Philosophy**: Heavy blunt trauma designed to crush fortified armor plates.
-
-* **Tactical Advice**: Heaviest weapon in the game. Stage 2 Earthshaker tremor ignores 20% of enemy defense. Ideal against Iron Brutes and Knight Lenon.
-
-
+* **Commoner's Scrap (`Dust Burst`)**: Low-weight mobility with radial dust stagger.
+* **Crusader Plate (`Dawnfire Aegis`)**: Radiant absorb barrier with AoE detonation on expiration/shatter.
+* **Vanguard Bastion (`Seismic Charge`)**: `+50` Max HP, hyper-armor, and Halberd/Glaive reach/pierce synergy.
+* **Shadowstrider (`Shadow Decoy`)**: Evasive smoke dash decoy (`25s` cooldown).
+* **Forged Scrap Iron (`Ironclad Spike Wall`)**: Reflects `40%` melee damage; Mace armor-fracture synergy.
+* **Basalt Golem Carapace (`Basalt Spire Wall`)**: `+35` Def, `70%` knockback resist, periodic heavy absorb, and Sun-Forged Claymore Earth Rupture (`+30` earth dmg).
+* **Frostwarden Attire (`FROST NOVA`)**: `+30%` Cold Resistance (`FROST_TROLL`, `BERSERKER_TROLL`, `FROST_REVENANT`, and cold projectiles), Frostbite immunity, `+20%` heavy poise damage, and **Twin Glacial Cleavers Frost Tremor** synergy (`175px` shockwave `+35` frost dmg, `4s` Chill). Pressing `[V]` unleashes a `190px` 12-spire crystalline **FROST NOVA** (`75` frost dmg, `1.2s` non-boss stun, `4.0s` Chill, `-20%` Armor Fracture) plus a `6.0s` `45 HP` **Ice Ward** retaliating against melee attackers for `18` frost dmg and `3.0s` Chill.
 
 ### Sacred Totems Compendium
 
-
-
-Sacred Totems are ancient spiritual relics recovered across Tydeshire's ruins, altars, and boss encounters. Players can equip one active totem in the Inventory / Equipment Matrix (`[TAB]` or `[I]` -> Tab 1) to augment their combat style:
-
-
+Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 
 | Totem Relic | Acquisition Source | Stat Multipliers & Buffs | Drawbacks & Nerfs | Visual Glow |
-
 | :--- | :--- | :--- | :--- | :--- |
-
-| **Totem of Sanity** | Hidden ruins along Crossroads path | **+15% Overall Damage, +15 Will** | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
-
-| **Totem of Insanity** | Cathedral crypt reliquary | **+30% Overall Damage** | **-10% Armor Defense** | Arterial Crimson (`[255, 65, 80]`) |
-
-| **Totem of Mist** | Gale Archer (Restless Mist Forest, 15% drop rate) | **+20% Crit Chance, +35% Crit Dmg, +10% Stamina Regen, +10 Will, Mist Fairy companion (+30 HP Orbs)** | **-5% Move Speed, -15% Defense, -25 Max HP** | Vapor Azure (`[140, 210, 255]`) |
-
-| **Crusader's Totem** | Defeating Knight Lenon in Royal Keep | **+30% Armor Defense, +20 Will** | **-10% Movement Speed** | Radiant Gold (`[255, 215, 80]`) |
-
-| **Elemental Core Totem** | Defeating Elemental Golem (Quarry Depths) | **+25% Defense, +25 Will, Empowered Mini Golem Companion, Piercing Projectile (54 DMG)** | **-10% Movement Speed, Companion Respawn 60s** | Molten Amber (`[255, 130, 45]`) |
-
-| **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (Northern Crags) | **+30 Max HP, +25 Will, +20% Defense, -80% Knockback, 25% Gray Health recovery, Chills enemies on hit & parry** | **-8% Move Speed, -10% Stamina Regen** | Glacial Cyan (`[140, 220, 255]`) |
-
-
-
-> [!TIP]
-
-> **Elemental Core Synergy**: The Elemental Core Totem awakens a loyal Mini Elemental Golem companion and fires an infinitely piercing elemental bolt on light attacks (54 damage, 3.0s cooldown). The companion actively executes Heavy AoE Slams, Forward Knockback Bashes, and Elemental Spike Throws to protect the player!
-
-
-
-> [!TIP]
-
-> **Weapon Swapping in Lobby**: You can swap weapons freely between missions at the pedestals in the Lobby sanctuary. Try different armaments in the Arena to discover your preferred combat style!
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Heavy Attack Commitment**: Heavy attacks (`[RMB]`) deliver massive burst damage but commit your character to the swing trajectory. Unleash heavy attacks when the target is reeling from a stagger or during recovery windows.
-
-
-
-> [!TIP]
-
-> **Dual Daggers Stamina Pacing**: Every dagger slash consumes stamina (`9` base / `8` Zephyr), so weave in patient pauses or parry counters between flurries to avoid exhaustion.
-
-
+| **Totem of Sanity** | Crossroads ruined shrine | `+15%` Overall Damage, `+15` Will | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
+| **Totem of Insanity** | Berserker Troll (`25%` drop) | `+65%` DMG (`+135%` at `<40%` HP), `+35%` Move Speed, `+25%` Attack Speed | `-50%` Defense, `x1.5` incoming damage | Arterial Crimson (`[255, 45, 60]`) |
+| **Totem of Mist** | Gale Archer (`15%` drop) | Mist Fairy (`+20%` Crit Chance, `+35%` Crit Dmg, `+30 HP` Orbs), `+10%` Stamina Regen, `+10` Will | `-5%` Move Speed, `-15%` Defense, `-25` Max HP | Vapor Azure (`[110, 240, 225]`) |
+| **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25%` Defense, `+35` Max HP, `+18%` DMG, Will of Atlas (`4s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
+| **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem Companion (`380 HP`, `42 DEF`), Piercing Bolt (`54` DMG) | `-10%` Move Speed, `60s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
+| **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30` Max HP, `+25` Will, `+20%` Defense, `-80%` Knockback, `25%` Gray Health recovery, Chills enemies (`3s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
 
 ---
-
-
 
 ## 6. Bestiary & Boss Encounters
 
-
-
 ### Hostiles Compendium
 
-
-
 | Enemy Name | Type | Def | Will | Telegraph Indicator | Combat Behavior & Strategy |
-
 | :--- | :--- | :--- | :--- | :--- | :--- |
-
-| **Cultist Slasher** | Melee Vanguard | 8 | 10 | Amber/Red Cone (95Â°, 115px) | Swift forward slash. Sidestep or parry right before impact to stagger for 1.95s. |
-
-| **Deathseeker Archer** | Ranged Kiting | 6 | 15 | Red Laser Aim Line (360px) | Retreats when approached; fires piercing bolts. Parry reflects bolt directly back. |
-
-| **Void Pyromancer** | Occult Caster | 10 | 20 | 3-Way Laser & Glowing Landing Tinges | Casts tri-directional void orbs. Orbs can be reflected back with `[F]`. |
-
-| **Shadow Charger** | Dash Melee | 12 | 30 | Linear Path (50px width, 240px) | High-speed linear thrust. Evade laterally with `[Q]` or parry head-on. |
-
-| **Iron Brute** | Heavy Crusher | 32 | 50 | Expanding Red Circle (150px AoE) | High armor tank. Ground slam inflicts heavy stagger if unevaded. |
-
-| **Ore Golem** | Melancholic Tank | 45 | 55 | Expanding Red Circle (135px AoE) | High-durability mineral chassis (220 HP, 45 Def). Smashes ground with heavy stone tremors. Best countered with War Mace or heavy 2-stage cleaves to shatter stone armor. Respawns after 7.0s and drops Ore Scraps for smithing. |
-
-
-
-> [!TIP]
-
-> **Countering Cultist Slashers**: Cultist Slashers always telegraph with an amber/red cone before swinging. A single well-timed parry (`[F]`) leaves them staggered for nearly 2 full seconds (1.95s), ample time for a full heavy combo.
-
-
+| **Cultist Slasher** | Melee Vanguard | `8` | `10` | Amber/Red Cone (`95-deg`, `115px`) | Swift forward slash. Sidestep or parry right before impact for `1.95s` stagger. |
+| **Deathseeker Archer** | Ranged Kiting | `6` | `15` | Red Laser Aim Line (`360px`) | Retreats when approached; parry reflects bolts directly back at cursor. |
+| **Void Pyromancer** | Occult Caster | `10` | `20` | 3-Way Laser & Landing Flare | Casts tri-directional void orbs; orbs can be reflected cleanly with `[F]`. |
+| **Shadow Charger** | Dash Melee | `12` | `30` | Linear Corridor (`50x240px`) | High-speed lunge thrust. Evade laterally (`[Q]`) or parry head-on. |
+| **Iron Brute** | Heavy Crusher | `32` | `50` | Expanding Red Circle (`150px` AoE) | High-armor crusher. Heavy mace swings or armor fracture shatter its defense. |
+| **Ore Golem** | Melancholic Tank | `45` | `55` | Expanding Red Circle (`135px` AoE) | Quarry mineral guardian (`220 HP`, `45` Def) dropping Ore Scraps on `7.0s` respawn. |
+| **Gale Bandit** | Mist Skirmisher | `10` | `18` | Slash Cone & Knife Aim Line | Rapid dual-blade dashes and ranged throwing knives in Restless Mist Forest. |
+| **Frost Troll** | Highland Brute | `24` | `45` | Heavy Spiked Club Sweep / Smash | Inflicts chill/frostbite in North Zyphden; mitigated by Frostwarden Cold Resist. |
 
 > [!IMPORTANT]
-
-> **REMINDER â€” Red Telegraphed Attacks**: Attacks displaying red ground telegraphs (cones, lines, circles) cannot be interrupted by light attacks. Either dodge out with `[Q]` or parry at the exact moment of impact.
-
-
+> **Red Telegraphed Attacks**: Heavy enemy swings marked by expanding red circles, cones, or laser corridors cannot be canceled by light pokes. Dodge out with `[Q]` or time `[F]` parry on impact.
 
 ### Boss Encounters & AI Cadence
 
-
-
-#### Zil's Remnant (Shadow of the Sun Crusader)
-
-* **Stats**: 520 HP, 28 Defense, 65 Will, 115 MoveSpeed.
-
-* **Moveset**: Upward Radiant Box Slice, Dawnfire 360 Tremor Sweep, and Holy Beam piercing blast.
-
-* **Special Phase**: Features a telegraphed follow-up cleave preceded by a **0.42s blade gleam telegraph** (140Â° arc, 165px range).
-
-* **Strategy**: Do not get greedy during his 3-hit combo. Parry his initial slice, evade the 360 sweep with `[Q]`, and punish during his beam recovery.
-
-
-
-#### Knight Lenon (Vanguard Captain Spar)
-
-* **Stats**: 640 HP, 32 Defense, 70 Will, 125 MoveSpeed.
-
-* **Moveset**: Rapid 0.48s lunge thrust, 0.55s whirlwind cleave, and 0.45s recovery cycle.
-
-* **Reward**: Besting him awards the consecrated **Crusader Plate (+24 Def, +30 HP, 65 Will)**, unseals the Royal Combat Arena, and rolls a **25% drop rate** for the **Crusader's Totem**. Knight Lenon can be freely rematched in the courtyard via **[G] SPAR REMATCH (30s Cooldown)** for ongoing practice and additional drop opportunities (+80 Silver Shingles and +4 Ore Scraps bonus reward if already owned).
-
-* **Strategy**: Lenon has 70 Will and recovers quickly from staggers. Break his posture with parries, unleash a quick 2-hit combo, and immediately prepare to dodge his follow-up lunge.
-
-
-
-#### The Grand Inquisitor (Arena Boss)
-
-* **Stats**: 500 HP, 26 Defense, 60 Will.
-
-* **Moveset**: Rotates between 12-way Radial Star Trajectories, Linear Beam Shard, and Cataclysmic Smite AoE.
-
-* **Strategy**: Stay mobile. Use dash i-frames to phase through radial stars, and parry his linear beam shards to reflect massive holy damage back into him.
-
-
-
-#### Elemental Golem (Primordial Titan)
-
-* **Stats**: 850 HP, 55 Defense (~35% damage reduction), 90 Will, 100 MoveSpeed.
-
-* **Humor Alignment**: Melancholic [Earth / Primordial Magma].
-
-* **Summoning Requirement**: Accessible in the Subterranean Quarry Depths after defeating Knight Lenon. Requires depositing all 10 recovered Lore Fragments upon the Primordial Altar.
-
-* **Moveset & 4-Phase Combat Rotation**:
-
-  * **Phase 1 (Ground Tremor Cleave)**: Charges a massive 190px circular shockwave (0.72s windup) dealing heavy blunt trauma.
-
-  * **Phase 2 (Molten Shard Salvo)**: Conjures and unleashes high-velocity elemental projectiles aimed directly at the player.
-
-  * **Phase 3 (Tri-Directional Volley)**: Hurls a tri-directional fan of elemental missiles across the quarry cavern.
-
-  * **Phase 4 (Radial Nova Shockwave)**: Radiates an 8-directional elemental star burst, demanding precise timing on dash i-frames (`[Q]`) or parry reflections (`[F]`).
-
-* **Reward**: Drops the **Elemental Core Totem**, 12â€“18 Ore Scraps, 150â€“250 Silver Shingles, and 3 Health Elixirs.
-
-* **Tactical Strategy**: With 55 Defense and 90 Will, the Elemental Golem is nearly impervious to light spam. Utilize the **War Mace** or the Crusader Broadsword's 2-stage heavy cleave to trigger **SHELL SHATTERED!** (-35% defense). Keep mobile during projectile salvos, parry incoming shards to deflect damage back into the titan, and trigger **Phlegmatic Trance (`[SPACE]`)** at 100 Composure for 5.0 seconds of invulnerability and automatic projectile reflection.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Boss Stagger Windows**: Bosses possess high Will (60â€“90) and recover from staggers quickly. Never commit to more than a 2-hit sequence while a boss is reeling.
-
-
+* **Zil's Remnant (`520 HP`, `28 Def`, `65 Will`)**: Alternates upward radiant slice, `360-deg` Dawnfire tremor, and piercing Holy Beams preceded by a `0.42s` blade gleam (`140-deg` arc, `165px`). Punish only during beam recovery.
+* **Knight Lenon (`640 HP`, `32 Def`, `70 Will`)**: Fast `0.48s` lunge thrust and `0.55s` whirlwind cleave. Rematchable in Zyphden courtyard via `[G]` (`30s` cooldown) for Crusader's Totem rolls (`25%`).
+* **The Grand Inquisitor (`500 HP`, `26 Def`, `60 Will`)**: Rotates between 12-way radial star bursts, linear beam shards, and Cataclysmic Smite AoEs. Reflect linear shards with `[F]` for massive burst damage.
+* **Elemental Golem (`850 HP`, `55 Def`, `90 Will`)**: Four-phase Melancholic Titan in Quarry Depths combining `190px` ground tremors, molten shards, tri-volleys, and 8-way novas. Break armor with War Mace or Claymore Solar Cataclysm.
+* **The Gale Archer**: Mist Forest trophy boss firing triple gale volleys and rapid evasive vaults; awards Shadow Essence and `15%` Totem of Mist drop rolls.
+* **Berserker Troll Warlord**: Highland apex boss chaining massive spiked club smashes, ground shockwaves, and rage sweeps; awards `25%` Totem of Insanity drop rolls.
+* **Frost Revenant**: Permafrost Crypts phantom boss gliding across black ice with 6-way cold `NOVA_STAR` volleys, piercing `BEAM_SHARD` lances (`isCold = true`), and teleport flurries.
 
 ---
 
-
-
 ## 7. Technical Architecture & Engine Pipeline
-
-
 
 ### Directory Hierarchy
 
 ```text
-
 Phlegmatic/
-
-â”œâ”€â”€ assets/                     # Custom drop directory for sprites & transition illustrations
-
-â”‚   â””â”€â”€ README.md               # Asset specifications (dimensions & formats)
-
-â”œâ”€â”€ bin/                        # Precompiled 64-bit Windows executable
-
-â”œâ”€â”€ src/
-
-â”‚   â”œâ”€â”€ main.cpp                # Game entry point & window lifecycle
-
-â”‚   â”œâ”€â”€ core/                   # Engine config, procedural sound, particle emitter
-
-â”‚   â”œâ”€â”€ combat/                 # Weapons, armor, collision, math formulas, projectiles
-
-â”‚   â”œâ”€â”€ world/                  # Level geometry, map environments, interactable monoliths
-
-â”‚   â”œâ”€â”€ entities/               # Player, enemy AI, modular vector renderers
-
-â”‚   â”œâ”€â”€ rendering/              # Procedural vector silhouettes & asset loader
-
-â”‚   â””â”€â”€ states/                 # State coordinators, handlers, and modular HUD/UI
-
-â”œâ”€â”€ vendor/raylib/              # Precompiled Raylib 6.2 headers & static libraries
-
-â”œâ”€â”€ build.bat                   # Automated compilation batch script
-
-â”œâ”€â”€ run.bat                     # Launcher script
-
-â”œâ”€â”€ documentation.md            # Complete game design & technical manual
-
-â””â”€â”€ CMakeLists.txt              # Cross-platform CMake configuration
-
+|-- assets/                     # Custom drop directory for sprites & transition art
+|-- bin/                        # Precompiled 64-bit Windows executable
+|-- src/
+|   |-- main.cpp                # Entry point & main loop lifecycle
+|   |-- core/                   # Config, GameConstants, SaveManager, SoundFX, Particles
+|   |-- combat/                 # Weapons, Armor, Totems, Inventory, Collision, Projectiles
+|   |-- world/                  # TimeOfDay, Map geometry, WaveManager, Campfire, Interactables
+|   |-- entities/               # Player, Enemy, PlayerRenderer, EnemyRenderer
+|   |-- rendering/              # AssetManager (paper doll & vector icons), FontManager
+|   |-- ui/                     # HUD, ModalUI, TitleUI, UI facade
+|   `-- states/                 # Game coordinator, Cutscene, Tutorial
+|       `-- realms/             # 7 decoupled realm handlers (Castle..FrostCaverns)
+|-- vendor/raylib/              # Precompiled Raylib 6.2 headers & static library
+|-- build.bat                   # Automated MinGW-w64 compilation script
+|-- run.bat                     # Launcher script
+|-- CMakeLists.txt              # Cross-platform CMake build configuration
+|-- documentation.md            # Complete game & technical reference
+`-- VERSIONS.md                 # Full version changelog compendium
 ```
-
-
 
 ### State Coordinator Pattern
 
-State coordination is decoupled into discrete state handlers:
-
-* `RuinedCastleHandler`: Manages Act I tutorial, sanctuary ward, and Zil encounter.
-
-* `CrossroadsHandler`: Manages Act II wilderness encounters, ambushes, and gateway triggers.
-
-* `ZyphdenHandler`: Manages Act III town logic, tavern sequence, expanded Royal Keep, and courtyard duel.
-
-* `WaveManager`: Controls Arena trial waves, spawning algorithms, and medical pickup timers.
-
-
+State coordination is decoupled cleanly across [`Game`](file:///c:/Users/Erick/Phlegmatic/src/states/Game.hpp) and seven dedicated realm controllers inside `src/states/realms/` (`RuinedCastleHandler`, `CrossroadsHandler`, `ZyphdenHandler`, `QuarryHandler`, `RestlessMistForestHandler`, `NorthZyphdenHandler`, `FrostCavernsHandler`) alongside [`WaveManager`](file:///c:/Users/Erick/Phlegmatic/src/world/WaveManager.hpp) for Arena & Gauntlet flow.
 
 ### Collision Geometry & Hit Registration
 
-`CollisionSystem.cpp` performs precision geometric checks:
-
-* Sector / Cone checks via dot products and angular offsets for weapon sweeps and frontal blast circles (Claymore Solar Flare, Cleaver Rupture).
-
-* Oriented bounding boxes for beam attacks and lunges.
-
-* Circle-to-circle hit registration for projectile deflections, Chill application, and proximity pickups.
-
-
+[`CollisionSystem.cpp`](file:///c:/Users/Erick/Phlegmatic/src/combat/CollisionSystem.cpp) handles sector/cone dot-product sweeps, frontal AoE blast circles (Solar Flare Pillar, Glacial Cross-Rupture), oriented beam bounding checks, Chill/Burn/Fracture status propagation, projectile deflections, and Frostwarden Ice Ward melee retaliation.
 
 ### GLSL 330 Multiplicative Day-Night Shader Pipeline
 
-`TimeOfDay.cpp` renders environmental atmosphere onto a dynamically resized offscreen `RenderTexture2D` lightmap using embedded GLSL 330 fragment shaders (with bilinear radial texture fallback):
+[`TimeOfDay.cpp`](file:///c:/Users/Erick/Phlegmatic/src/world/TimeOfDay.cpp) renders environmental atmosphere onto a dynamically resized offscreen `RenderTexture2D` lightmap using embedded GLSL 330 fragment shaders (with bilinear radial texture fallback):
 
-* **Point-Light Attenuation Shader**: Evaluates smooth inverse-square and cubic edge falloff per registered emitter (player hip lantern, bonfires, shrines, torches, portals, frost crystals) with organic flame flicker.
-
-* **Purkinje Composite Tone-Mapper**: Applies a soft highlight shoulder rolloff and subtle night Purkinje blue shift before compositing over the world via `BLEND_MULTIPLIED`, keeping sunlit Day completely unclouded (`WHITE`), blending smooth cosine Dawn/Dusk transitions, and carving bright warm islands out of moonlit nights and subterranean caverns.
-
-
+* **Point-Light Attenuation Shader**: Evaluates smooth inverse-square and cubic edge falloff per registered emitter (player hip lantern, bonfires, altars, torches, portals, frost crystals) with subtle flame flicker.
+* **Purkinje Composite Tone-Mapper**: Applies a soft highlight shoulder rolloff and cool night Purkinje tint before compositing onto the scene via `BLEND_MULTIPLIED`, preserving clean neutral `WHITE` daylight (`08:30-17:30`), smooth cosine Dawn/Dusk transitions, and rich torchlit islands across night and subterranean realms.
 
 ### Procedural Acoustic Audio Synthesis
 
-All audio cues are procedurally synthesized at runtime via Raylib's audio buffer APIs (`SoundFX.cpp`), eliminating external sound asset dependencies:
-
-* Cathedral abbey bells with acoustic overtone partials.
-
-* Steel blade slashes and parry clangs with realistic metallic ring decay.
-
-* Heavy plate armor blunt impact thuds.
-
-* Wooden crossbow releases and portcullis gate rumbles.
-
-
+[`SoundFX.cpp`](file:///c:/Users/Erick/Phlegmatic/src/core/SoundFX.cpp) synthesizes waveforms in memory via Raylib audio buffers (cathedral bells, metallic sword slashes & parry clangs, heavy impacts, howling blizzards, snow crunch footsteps, portcullis rumbles) without requiring external `.wav` dependencies.
 
 ### Custom Asset Drop Pipeline
 
-Custom assets placed in `assets/` are automatically loaded at launch:
-
-* `assets/zyphden_transition.png`: 1920x1080 or 1280x720 artwork replacing the Zyphden transition placeholder screen.
-
-* `assets/player.png`: 64x64 or 128x128 sprite sheet replacing procedural player silhouette.
-
-* `assets/enemy_melee.png`: Custom slasher enemy sprite.
-
-* `assets/enemy_brute.png`: Custom brute crusher boss sprite.
-
-* `assets/tileset.png`: Custom floor tiles replacing procedural stone flagstones.
-
-
-
-> [!TIP]
-
-> **Custom Illustration Auto-Detection**: Drop any custom 16:9 illustration into `assets/zyphden_transition.png`. You do not need to recompile the projectâ€”the engine detects the file on next launch and replaces the blueprint placeholder automatically!
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Zero External Asset Dependencies**: By default, the engine generates all audio waveforms and vector character models algorithmically. The game can run fully standalone without requiring any external PNG or WAV files.
-
-
+Assets dropped under `assets/` load automatically at launch without recompilation (`assets/zyphden_transition.png` for custom transition artwork, optional sprite sheet / tileset overrides).
 
 ---
 
-
-
 ## 8. Building & Setup Guide
-
-
 
 ### Automated MinGW-w64 Batch Script
 
-Run the automated build script from PowerShell or Command Prompt:
-
 ```powershell
-
 .\build.bat
-
 ```
 
-This invokes GCC 17 with `-O2 -static -std=c++17`, linking static Raylib 6.2 libraries, and produces `phlegmatic.exe` (project root) and `bin\phlegmatic.exe`.
-
-
+Compiles all 31 `.cpp` translation units with `-std=c++17 -O2 -static` against static Raylib 6.2 and writes both `phlegmatic.exe` and `bin\phlegmatic.exe`.
 
 ### CMake & Ninja Build
 
 ```powershell
-
 cmake -B build -G Ninja
-
 cmake --build build
-
 .\build\phlegmatic.exe
-
 ```
-
-
 
 ### Precompiled Executables
 
-Standalone executables are bundled directly in the repository:
-
-* `.\phlegmatic.exe`
-
-* `.\bin\phlegmatic.exe`
-
-* Launch directly via `.\run.bat`.
-
-
-
-> [!TIP]
-
-> **Instant Launch Without Compiling**: You can immediately test gameplay by executing `.\run.bat` or double-clicking `phlegmatic.exe` in the repository root. All Raylib 6.2 binaries and static assets are self-contained.
-
-
-
-> [!IMPORTANT]
-
-> **REMINDER â€” Clean Rebuilds**: If you modify core struct layouts or headers, run `build.bat` to trigger a clean GCC compilation. The script compiles all translation units with optimization level `-O2` in under 5 seconds.
-
-
+Run `.\phlegmatic.exe`, `.\bin\phlegmatic.exe`, or `.\run.bat` directly with zero external runtime dependencies.
 
 ---
 
+## 9. Uncharted Realms Beyond Zyphden
 
+While Zyphden and its surrounding highlands, quarry depths, mist forests, and permafrost crypts form the playable campaign frontier, the remaining four sovereign Crowns of Tydeshire frame future realm expansions:
 
-## 9. Roadmap & Version 0.0.1d Technical Plans
-
-
-
-### Act V: Northern Marches & Realm Border Crossings
-
-* **Realm Border Gates**: Opening the northern mountain passes of Zyphden leading into the neighbouring nations of Azshden and Fleurshden.
-
-* **Environmental Weather Physics**: Dynamic gale wind physics that deflect lightweight projectile paths, combined with alpine snow particle shaders and slippery frozen terrain.
-
-* **New Hostile Factions**: Royal Vanguard Deserters wielding long-reach halberds, Frost Cultists casting ice barriers, and automated Siege Ballistas.
-
-
-
-### Advanced Weapon Archetypes
-
-* **Polearm / Halberd**: Extended piercing reach, sweeping pole-vault strikes, and anti-cavalry thrusts.
-
-* **Flail & Greatshield**: Deflection-focused vanguard armament capable of absorbing heavy crushing blows without poise depletion.
-
-
-
-### Synthesized Acoustic Ambience & Audio Mixer
-
-* **Procedural Environmental Ambience**: Continuous synthesized background soundscapes (whistling wind drafts, subterranean cavern echoes, cathedral reverberations, and tavern fireplace crackle).
-
-* **Audio Mixer Configuration**: Dedicated Master, Sound Effects, and Ambience volume control sliders accessible from the in-game settings modal.
-
-
-
-### Bestiary Codex & Rematch Arena Trials
-
-* **Bestiary Kill Counters & Lore Unlocks**: Track enemy encounters and unlock detailed lore excerpts and drop rate tables in the in-game Journal.
-
-* **Sanctuary Rematch Crucible**: Challenge empowered variants of Zil's Remnant, Knight Lenon, and the Elemental Golem with custom trial modifiers and speedrun timers.
-
+* **Azshden**: Iron coastal cliffs and fortified naval bastions in the western seas.
+* **Fleurshden**: Corrupted fertile river valleys and thorn-bound aqueducts.
+* **Noirden**: Shrouded obsidian peaks, shadow citadels, and lingering void rifts.
+* **Solsden**: Sunlit high plateaus ascending toward King Charlz's High Sanctuary.
