@@ -118,6 +118,7 @@ public:
     float GetArmorSkillCooldown() const { return armorSkillCooldown; }
     float GetArmorSkillMaxCooldown() const { return armorSkillMaxCooldown; }
     float GetArmorSkillShieldHp() const { return armorSkillShieldHp; }
+    float GetArmorSkillActiveTimer() const { return armorSkillActiveTimer; }
 
     void SetTotem(TotemType newTotem);
     TotemType GetTotem() const { return currentTotem; }

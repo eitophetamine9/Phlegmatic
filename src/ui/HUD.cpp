@@ -3,6 +3,7 @@
 #include "../entities/Player.hpp"
 #include "../entities/Enemy.hpp"
 #include "../world/TimeOfDay.hpp"
+#include "../rendering/AssetManager.hpp"
 #include "../rendering/FontManager.hpp"
 #include <cmath>
 #include <cstdio>
@@ -65,57 +66,233 @@ static void DrawLowHealthVignette(int windowWidth, int windowHeight, float curre
     DrawRectangleGradientH(windowWidth - bandSize, 0, bandSize, windowHeight, Color{ 220, 25, 35, 0 }, Color{ 220, 25, 35, alpha });
 }
 
+static void DrawActionSlotIcon(Vector2 c, ActionIconType type, ArmorSet armorSet, float s, Color tint, bool isDimmed) {
+    Color col = isDimmed ? ColorAlpha(tint, 0.42f) : tint;
+    Color accent = isDimmed ? Color{ 195, 205, 220, 120 } : Color{ 245, 250, 255, 240 };
+
+    switch (type) {
+        case ActionIconType::DASH: {
+            // Sweeping motion wake streaks
+            DrawLineEx({ c.x - 10.0f * s, c.y - 5.0f * s }, { c.x - 2.0f * s, c.y - 5.0f * s }, 1.6f * s, ColorAlpha(col, 0.65f));
+            DrawLineEx({ c.x - 12.0f * s, c.y }, { c.x - 1.0f * s, c.y }, 1.8f * s, ColorAlpha(col, 0.85f));
+            DrawLineEx({ c.x - 10.0f * s, c.y + 5.0f * s }, { c.x - 2.0f * s, c.y + 5.0f * s }, 1.6f * s, ColorAlpha(col, 0.65f));
+            // Bold directional double chevron
+            DrawLineEx({ c.x - 2.0f * s, c.y - 7.5f * s }, { c.x + 5.0f * s, c.y }, 2.2f * s, col);
+            DrawLineEx({ c.x - 2.0f * s, c.y + 7.5f * s }, { c.x + 5.0f * s, c.y }, 2.2f * s, col);
+            DrawLineEx({ c.x + 3.5f * s, c.y - 6.0f * s }, { c.x + 10.0f * s, c.y }, 2.4f * s, accent);
+            DrawLineEx({ c.x + 3.5f * s, c.y + 6.0f * s }, { c.x + 10.0f * s, c.y }, 2.4f * s, accent);
+            break;
+        }
+        case ActionIconType::LIGHT_ATTACK: {
+            // Quick diagonal slash blade + crescent arc
+            Vector2 hilt = { c.x - 8.5f * s, c.y + 8.5f * s };
+            Vector2 tip = { c.x + 8.5f * s, c.y - 8.5f * s };
+            DrawLineEx(hilt, tip, 4.0f * s, ColorAlpha(col, 0.45f));
+            DrawLineEx(hilt, tip, 2.2f * s, accent);
+            DrawLineEx({ c.x - 9.0f * s, c.y + 2.0f * s }, { c.x - 2.0f * s, c.y + 9.0f * s }, 2.2f * s, Color{ 225, 195, 105, col.a });
+            DrawCircleSectorLines({ c.x - 1.0f * s, c.y + 1.0f * s }, 11.5f * s, 215.0f, 345.0f, 12, col);
+            break;
+        }
+        case ActionIconType::HEAVY_ATTACK: {
+            // Crushing greatsword cleave onto radial impact star
+            Vector2 grip = { c.x - 9.5f * s, c.y - 9.5f * s };
+            Vector2 tip = { c.x + 6.5f * s, c.y + 6.5f * s };
+            DrawLineEx(grip, tip, 5.5f * s, ColorAlpha(col, 0.55f));
+            DrawLineEx(grip, tip, 2.8f * s, accent);
+            DrawLineEx({ c.x - 10.0f * s, c.y - 2.5f * s }, { c.x - 2.5f * s, c.y - 10.0f * s }, 2.5f * s, col);
+            Vector2 impact = { c.x + 5.5f * s, c.y + 5.5f * s };
+            DrawLineEx({ impact.x - 5.5f * s, impact.y }, { impact.x + 5.5f * s, impact.y }, 1.6f * s, col);
+            DrawLineEx({ impact.x, impact.y - 5.5f * s }, { impact.x, impact.y + 5.5f * s }, 1.6f * s, col);
+            DrawCircleLines((int)impact.x, (int)impact.y, 4.5f * s, ColorAlpha(col, 0.75f));
+            break;
+        }
+        case ActionIconType::PARRY: {
+            // Kite shield + top deflection spark arc
+            Vector2 pTopL = { c.x - 8.5f * s, c.y - 8.0f * s };
+            Vector2 pTopR = { c.x + 8.5f * s, c.y - 8.0f * s };
+            Vector2 pMidL = { c.x - 7.5f * s, c.y + 1.0f * s };
+            Vector2 pMidR = { c.x + 7.5f * s, c.y + 1.0f * s };
+            Vector2 pBot  = { c.x, c.y + 10.5f * s };
+            Color shieldFill = Color{ (unsigned char)(col.r / 4), (unsigned char)(col.g / 4), (unsigned char)(col.b / 4), col.a };
+            DrawTriangle(pTopL, pMidL, pTopR, shieldFill);
+            DrawTriangle(pTopR, pMidL, pMidR, shieldFill);
+            DrawTriangle(pMidL, pBot, pMidR, shieldFill);
+            DrawLineEx(pTopL, pTopR, 2.0f * s, col);
+            DrawLineEx(pTopL, pMidL, 2.0f * s, col);
+            DrawLineEx(pTopR, pMidR, 2.0f * s, col);
+            DrawLineEx(pMidL, pBot, 2.0f * s, col);
+            DrawLineEx(pMidR, pBot, 2.0f * s, col);
+            // Spark deflect gleam
+            DrawLineEx({ c.x - 10.5f * s, c.y - 10.0f * s }, { c.x - 4.0f * s, c.y - 4.0f * s }, 2.0f * s, accent);
+            DrawCircleV({ c.x - 4.0f * s, c.y - 4.0f * s }, 2.2f * s, accent);
+            break;
+        }
+        case ActionIconType::POTION_HEAL: {
+            // Rounded emerald-rose restorative flask with bold cross
+            DrawRectangleRounded(Rectangle{ c.x - 3.0f * s, c.y - 11.5f * s, 6.0f * s, 4.0f * s }, 0.3f, 2, Color{ 165, 130, 85, col.a });
+            DrawRectangleRounded(Rectangle{ c.x - 3.5f * s, c.y - 8.0f * s, 7.0f * s, 3.5f * s }, 0.25f, 2, accent);
+            DrawCircleV({ c.x, c.y + 2.5f * s }, 8.5f * s, Color{ 18, 42, 30, col.a });
+            DrawCircleV({ c.x, c.y + 3.0f * s }, 7.0f * s, col);
+            DrawCircleLines((int)c.x, (int)(c.y + 2.5f * s), 8.5f * s, accent);
+            DrawLineEx({ c.x - 3.6f * s, c.y + 3.0f * s }, { c.x + 3.6f * s, c.y + 3.0f * s }, 2.2f * s, accent);
+            DrawLineEx({ c.x, c.y - 0.6f * s }, { c.x, c.y + 6.6f * s }, 2.2f * s, accent);
+            break;
+        }
+        case ActionIconType::POTION_STONE: {
+            // Heavy golden tonic bottle with diamond ward crest
+            DrawRectangleRounded(Rectangle{ c.x - 3.0f * s, c.y - 11.5f * s, 6.0f * s, 4.0f * s }, 0.3f, 2, Color{ 165, 130, 85, col.a });
+            DrawPoly({ c.x, c.y + 2.5f * s }, 6, 9.0f * s, 30.0f, col);
+            DrawPolyLinesEx({ c.x, c.y + 2.5f * s }, 6, 9.0f * s, 30.0f, 1.5f * s, accent);
+            DrawPoly({ c.x, c.y + 2.5f * s }, 4, 4.0f * s, 0.0f, Color{ 45, 32, 12, col.a });
+            break;
+        }
+        case ActionIconType::POTION_THAW: {
+            // Icy tall phial with 6-point snowflake
+            DrawRectangleRounded(Rectangle{ c.x - 2.5f * s, c.y - 11.5f * s, 5.0f * s, 3.5f * s }, 0.3f, 2, accent);
+            DrawPoly({ c.x, c.y + 2.5f * s }, 6, 8.8f * s, 0.0f, Color{ 16, 48, 70, col.a });
+            DrawPolyLinesEx({ c.x, c.y + 2.5f * s }, 6, 8.8f * s, 0.0f, 1.6f * s, col);
+            for (int k = 0; k < 3; ++k) {
+                float a = (float)k * 60.0f * DEG2RAD;
+                Vector2 p1 = { c.x + cosf(a) * 5.2f * s, c.y + 2.5f * s + sinf(a) * 5.2f * s };
+                Vector2 p2 = { c.x - cosf(a) * 5.2f * s, c.y + 2.5f * s - sinf(a) * 5.2f * s };
+                DrawLineEx(p1, p2, 1.4f * s, accent);
+            }
+            break;
+        }
+        case ActionIconType::POTION_BERSERK: {
+            // Crimson flared brew flask with jagged flame crest
+            DrawRectangleRounded(Rectangle{ c.x - 3.0f * s, c.y - 11.5f * s, 6.0f * s, 3.8f * s }, 0.3f, 2, Color{ 140, 85, 70, col.a });
+            DrawTriangle({ c.x, c.y - 7.5f * s }, { c.x - 8.5f * s, c.y + 9.5f * s }, { c.x + 8.5f * s, c.y + 9.5f * s }, col);
+            DrawTriangleLines({ c.x, c.y - 7.5f * s }, { c.x - 8.5f * s, c.y + 9.5f * s }, { c.x + 8.5f * s, c.y + 9.5f * s }, accent);
+            DrawTriangle({ c.x, c.y - 2.0f * s }, { c.x - 3.5f * s, c.y + 7.0f * s }, { c.x + 3.5f * s, c.y + 7.0f * s }, Color{ 255, 220, 120, col.a });
+            break;
+        }
+        case ActionIconType::ARMOR_SKILL: {
+            if (armorSet == ArmorSet::FROSTWARDEN) {
+                // Radiant 8-point glacial ice nova star
+                for (int k = 0; k < 4; ++k) {
+                    float a = (float)k * 45.0f * DEG2RAD;
+                    float len = (k % 2 == 0) ? 10.5f * s : 7.5f * s;
+                    DrawLineEx({ c.x + cosf(a) * len, c.y + sinf(a) * len },
+                               { c.x - cosf(a) * len, c.y - sinf(a) * len }, 2.0f * s, col);
+                }
+                DrawPoly({ c.x, c.y }, 4, 4.2f * s, 0.0f, accent);
+            } else if (armorSet == ArmorSet::CRUSADER_PLATE) {
+                DrawCircleLines((int)c.x, (int)c.y, 9.5f * s, col);
+                DrawCircleLines((int)c.x, (int)c.y, 6.0f * s, accent);
+                DrawLineEx({ c.x - 10.5f * s, c.y }, { c.x + 10.5f * s, c.y }, 1.6f * s, col);
+                DrawLineEx({ c.x, c.y - 10.5f * s }, { c.x, c.y + 10.5f * s }, 1.6f * s, col);
+            } else if (armorSet == ArmorSet::VANGUARD_BASTION) {
+                DrawTriangle({ c.x + 10.0f * s, c.y }, { c.x - 2.0f * s, c.y - 8.0f * s }, { c.x - 2.0f * s, c.y + 8.0f * s }, col);
+                DrawLineEx({ c.x - 9.0f * s, c.y - 6.0f * s }, { c.x - 3.0f * s, c.y }, 2.0f * s, accent);
+                DrawLineEx({ c.x - 9.0f * s, c.y + 6.0f * s }, { c.x - 3.0f * s, c.y }, 2.0f * s, accent);
+            } else if (armorSet == ArmorSet::SHADOWSTRIDER) {
+                DrawTriangle({ c.x, c.y - 9.5f * s }, { c.x - 8.5f * s, c.y + 8.0f * s }, { c.x + 8.5f * s, c.y + 8.0f * s }, ColorAlpha(col, 0.35f));
+                DrawCircleSectorLines(c, 8.5f * s, 25.0f, 165.0f, 10, col);
+                DrawCircleSectorLines(c, 5.5f * s, 195.0f, 345.0f, 10, accent);
+            } else if (armorSet == ArmorSet::BASALT_GOLEM) {
+                DrawTriangle({ c.x - 6.5f * s, c.y - 7.0f * s }, { c.x - 10.5f * s, c.y + 8.0f * s }, { c.x - 2.5f * s, c.y + 8.0f * s }, col);
+                DrawTriangle({ c.x, c.y - 10.5f * s }, { c.x - 4.0f * s, c.y + 8.0f * s }, { c.x + 4.0f * s, c.y + 8.0f * s }, accent);
+                DrawTriangle({ c.x + 6.5f * s, c.y - 7.0f * s }, { c.x + 2.5f * s, c.y + 8.0f * s }, { c.x + 10.5f * s, c.y + 8.0f * s }, col);
+            } else if (armorSet == ArmorSet::FORGED_SCRAP_IRON) {
+                DrawPolyLinesEx(c, 6, 7.5f * s, 0.0f, 2.0f * s, col);
+                for (int k = 0; k < 6; ++k) {
+                    float a = (float)k * 60.0f * DEG2RAD;
+                    DrawLineEx({ c.x + cosf(a) * 6.5f * s, c.y + sinf(a) * 6.5f * s },
+                               { c.x + cosf(a) * 11.0f * s, c.y + sinf(a) * 11.0f * s }, 1.8f * s, accent);
+                }
+            } else if (armorSet == ArmorSet::COMMONERS_SCRAP) {
+                DrawCircleLines((int)(c.x - 3.5f * s), (int)(c.y + 2.0f * s), 5.0f * s, col);
+                DrawCircleLines((int)(c.x + 3.5f * s), (int)(c.y + 2.0f * s), 5.0f * s, col);
+                DrawCircleLines((int)c.x, (int)(c.y - 3.0f * s), 5.5f * s, accent);
+            } else {
+                DrawRectangleRoundedLines(Rectangle{ c.x - 7.5f * s, c.y - 7.5f * s, 15.0f * s, 15.0f * s }, 0.3f, 2, ColorAlpha(col, 0.45f));
+                DrawLineEx({ c.x - 4.5f * s, c.y }, { c.x + 4.5f * s, c.y }, 1.5f * s, ColorAlpha(col, 0.45f));
+            }
+            break;
+        }
+        case ActionIconType::NONE:
+        default:
+            break;
+    }
+}
+
+static const char* GetShortArmorSkillLabel(ArmorSet set) {
+    switch (set) {
+        case ArmorSet::COMMONERS_SCRAP:   return "BURST";
+        case ArmorSet::CRUSADER_PLATE:    return "AEGIS";
+        case ArmorSet::VANGUARD_BASTION:  return "CHARGE";
+        case ArmorSet::SHADOWSTRIDER:     return "DECOY";
+        case ArmorSet::FORGED_SCRAP_IRON: return "SPIKES";
+        case ArmorSet::BASALT_GOLEM:      return "SPIRES";
+        case ArmorSet::FROSTWARDEN:       return "NOVA";
+        case ArmorSet::NONE:
+        default:                          return "NO SET";
+    }
+}
+
 void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
     const Rectangle& r = slot.bounds;
     bool onCooldown = slot.currentCooldown > 0.001f;
     bool outOfStock = (slot.stockCount == 0);
 
     // Background tile
-    Color bgColor = outOfStock ? Color{ 24, 14, 18, 220 } : Color{ 14, 18, 26, 230 };
-    DrawRectangleRounded(r, 0.22f, 4, bgColor);
+    Color bgColor = outOfStock ? Color{ 24, 14, 18, 225 } : (slot.isActive ? Color{ 20, 32, 46, 240 } : Color{ 14, 18, 26, 232 });
+    DrawRectangleRounded(r, 0.20f, 5, bgColor);
+
+    // Subtle top sheen
+    DrawRectangleRounded(Rectangle{ r.x + 2.0f, r.y + 2.0f, r.width - 4.0f, r.height * 0.26f }, 0.25f, 3, Color{ 255, 255, 255, 14 });
 
     // Cooldown wipe overlay
     if (onCooldown && slot.maxCooldown > 0.001f) {
         float ratio = fminf(1.0f, fmaxf(0.0f, slot.currentCooldown / slot.maxCooldown));
         float sweepH = r.height * ratio;
         float sweepY = r.y + (r.height - sweepH);
-        DrawRectangleRounded(Rectangle{ r.x, sweepY, r.width, sweepH }, 0.22f, 4, Color{ 8, 10, 16, 210 });
-        DrawLineEx({ r.x + 3.0f, sweepY }, { r.x + r.width - 3.0f, sweepY }, 1.5f, Color{ 200, 220, 255, 180 });
+        DrawRectangleRounded(Rectangle{ r.x, sweepY, r.width, sweepH }, 0.20f, 4, Color{ 8, 10, 16, 200 });
+        DrawLineEx({ r.x + 3.0f, sweepY }, { r.x + r.width - 3.0f, sweepY }, 1.5f, Color{ 200, 220, 255, 175 });
+    }
+
+    // Center Procedural Vector Icon
+    if (slot.iconType != ActionIconType::NONE) {
+        float iconScale = fmaxf(0.95f, r.width / 52.0f);
+        Vector2 iconCenter = { r.x + r.width * 0.5f, r.y + r.height * 0.49f };
+        DrawActionSlotIcon(iconCenter, slot.iconType, slot.armorSet, iconScale, slot.themeColor, onCooldown || outOfStock);
     }
 
     // Border
     Color borderColor;
     if (slot.isActive) {
         borderColor = slot.themeColor;
-        // Outer glowing pulse ring
-        DrawRectangleRoundedLines(Rectangle{ r.x - 2.0f, r.y - 2.0f, r.width + 4.0f, r.height + 4.0f }, 0.25f, 4, Color{ slot.themeColor.r, slot.themeColor.g, slot.themeColor.b, 180 });
+        DrawRectangleRoundedLines(Rectangle{ r.x - 2.0f, r.y - 2.0f, r.width + 4.0f, r.height + 4.0f }, 0.22f, 4, Color{ slot.themeColor.r, slot.themeColor.g, slot.themeColor.b, 185 });
     } else if (onCooldown) {
-        borderColor = Color{ 48, 58, 76, 200 };
+        borderColor = Color{ 52, 64, 84, 210 };
     } else if (outOfStock) {
-        borderColor = Color{ 120, 40, 50, 190 };
+        borderColor = Color{ 125, 42, 52, 200 };
     } else {
-        borderColor = Color{ slot.themeColor.r, slot.themeColor.g, slot.themeColor.b, 200 };
+        borderColor = Color{ slot.themeColor.r, slot.themeColor.g, slot.themeColor.b, 205 };
     }
-    DrawRectangleRoundedLines(r, 0.22f, 4, borderColor);
+    DrawRectangleRoundedLines(r, 0.20f, 5, borderColor);
 
-    // Keybind badge at top-left
-    DrawText(slot.keybind, (int)r.x + 4, (int)r.y + 4, 10, Color{ 210, 225, 245, 220 });
+    // Keybind pill badge at top-left
+    int kw = MeasureText(slot.keybind, 9);
+    DrawRectangleRounded(Rectangle{ r.x + 3.0f, r.y + 3.0f, (float)kw + 6.0f, 12.0f }, 0.35f, 3, Color{ 10, 14, 22, 215 });
+    DrawText(slot.keybind, (int)r.x + 6, (int)r.y + 4, 9, Color{ 220, 235, 255, 240 });
 
     // Stock badge at top-right (if consumable)
     if (slot.stockCount >= 0) {
         std::string stockStr = "x" + std::to_string(slot.stockCount);
-        int sw = MeasureText(stockStr.c_str(), 10);
-        float badgeW = (float)sw + 8.0f;
-        float badgeH = 13.0f;
+        int sw = MeasureText(stockStr.c_str(), 9);
+        float badgeW = (float)sw + 6.0f;
+        float badgeH = 12.0f;
         float badgeX = r.x + r.width - badgeW - 3.0f;
         float badgeY = r.y + 3.0f;
-        Color badgeBg = (slot.stockCount > 0) ? Color{ 20, 60, 35, 220 } : Color{ 60, 20, 25, 220 };
-        Color badgeTxt = (slot.stockCount > 0) ? Color{ 120, 255, 170, 255 } : Color{ 255, 120, 120, 255 };
+        Color badgeBg = (slot.stockCount > 0) ? Color{ 20, 62, 36, 225 } : Color{ 62, 20, 26, 225 };
+        Color badgeTxt = (slot.stockCount > 0) ? Color{ 130, 255, 175, 255 } : Color{ 255, 125, 125, 255 };
         DrawRectangleRounded(Rectangle{ badgeX, badgeY, badgeW, badgeH }, 0.35f, 3, badgeBg);
-        DrawText(stockStr.c_str(), (int)badgeX + 4, (int)badgeY + 1, 10, badgeTxt);
+        DrawText(stockStr.c_str(), (int)badgeX + 3, (int)badgeY + 2, 9, badgeTxt);
     }
 
-    // Centered content: countdown if on cooldown, else action name
+    // Cooldown readout centered over dimmed icon
     if (onCooldown) {
         char cdBuf[16];
         if (slot.currentCooldown >= 10.0f) {
@@ -123,33 +300,50 @@ void HUD::DrawActionSlot(const ActionSlotInfo& slot) {
         } else {
             snprintf(cdBuf, sizeof(cdBuf), "%.1fs", slot.currentCooldown);
         }
-        int cw = MeasureText(cdBuf, 13);
+        int cw = MeasureText(cdBuf, 14);
         int cx = (int)(r.x + (r.width - cw) * 0.5f);
-        int cy = (int)(r.y + (r.height - 13) * 0.5f);
-        DrawText(cdBuf, cx + 1, cy + 1, 13, Color{ 0, 0, 0, 220 });
-        DrawText(cdBuf, cx, cy, 13, Color{ 255, 240, 150, 255 });
-    } else {
-        int nw = MeasureText(slot.actionName, 10);
-        int nx = (int)(r.x + (r.width - nw) * 0.5f);
-        int ny = (int)(r.y + (r.height - 10) * 0.5f + 3.0f);
-        Color txtCol = outOfStock ? Color{ 140, 100, 105, 180 } : (slot.isActive ? Color{ 255, 255, 255, 255 } : slot.themeColor);
-        DrawText(slot.actionName, nx, ny, 10, txtCol);
+        int cy = (int)(r.y + (r.height - 14) * 0.48f);
+        DrawText(cdBuf, cx + 1, cy + 1, 14, Color{ 0, 0, 0, 235 });
+        DrawText(cdBuf, cx, cy, 14, Color{ 255, 242, 155, 255 });
     }
+
+    // Bottom micro-label
+    int labelSize = (r.width >= 60.0f) ? 10 : 9;
+    int nw = MeasureText(slot.actionName, labelSize);
+    int nx = (int)(r.x + (r.width - nw) * 0.5f);
+    int ny = (int)(r.y + r.height - labelSize - 3.0f);
+    Color txtCol = outOfStock ? Color{ 140, 100, 105, 185 } : (slot.isActive ? Color{ 255, 255, 255, 255 } : ColorAlpha(slot.themeColor, 0.92f));
+    DrawText(slot.actionName, nx, ny, labelSize, txtCol);
 }
 
 void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player) {
     const int numSlots = 9;
-    const float slotW = 46.0f;
-    const float slotH = 46.0f;
-    const float slotSpacing = 6.0f;
+    const float slotW = fmaxf(54.0f, fminf(64.0f, (float)windowWidth * 0.043f));
+    const float slotH = slotW + 7.0f;
+    const float slotSpacing = (windowWidth >= 1400) ? 7.0f : 5.0f;
     const float totalW = numSlots * slotW + (numSlots - 1) * slotSpacing;
-    const float barX = ((float)windowWidth - totalW) * 0.5f;
+
+    // Keep ActionBar centered while preventing overlap with Bottom-Left PlayerCard (344px) and Bottom-Right Weapon Dock
+    const float dockSlotW = (windowWidth >= 1400) ? 72.0f : 64.0f;
+    const float dockGap = (windowWidth >= 1400) ? 8.0f : 6.0f;
+    const float dockW = 3.0f * dockSlotW + 2.0f * dockGap + 20.0f;
+    const float dockLeft = (float)windowWidth - dockW - 20.0f;
+    const float playerCardRight = 24.0f + 320.0f;
+
+    float barX = ((float)windowWidth - totalW) * 0.5f;
+    if (windowWidth >= 1150) {
+        float minBarX = playerCardRight + 18.0f;
+        float maxBarX = dockLeft - totalW - 18.0f;
+        if (minBarX <= maxBarX) {
+            barX = fmaxf(minBarX, fminf(barX, maxBarX));
+        }
+    }
     const float barY = (float)windowHeight - slotH - 18.0f;
 
     // Backing glass plate
     Rectangle plate = { barX - 10.0f, barY - 16.0f, totalW + 20.0f, slotH + 24.0f };
-    DrawRectangleRounded(plate, 0.22f, 6, Color{ 12, 16, 24, 215 });
-    DrawRectangleRoundedLines(plate, 0.22f, 6, Color{ 48, 62, 85, 200 });
+    DrawRectangleRounded(plate, 0.20f, 6, Color{ 12, 16, 24, 220 });
+    DrawRectangleRoundedLines(plate, 0.20f, 6, Color{ 48, 62, 85, 210 });
 
     // Active Combat Buff & Relic Status Tray (Positioned directly above Action Bar)
     struct BuffPill {
@@ -173,7 +367,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
 
     if (player.GetArmorSkillShieldHp() > 0.0f) {
         char b[32];
-        snprintf(b, sizeof(b), "AEGIS SHIELD: %d HP", (int)player.GetArmorSkillShieldHp());
+        snprintf(b, sizeof(b), "WARD SHIELD: %d HP", (int)player.GetArmorSkillShieldHp());
         activeBuffs.push_back({ b, Color{ 90, 225, 255, 255 }, Color{ 160, 245, 255, 255 }, Color{ 14, 36, 48, 240 }, true });
     }
 
@@ -256,7 +450,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         }
         totalPillsW += (float)(activeBuffs.size() - 1) * pillSpacing;
 
-        float curPillX = ((float)windowWidth - totalPillsW) * 0.5f;
+        float curPillX = plate.x + (plate.width - totalPillsW) * 0.5f;
         for (size_t i = 0; i < activeBuffs.size(); ++i) {
             const auto& pill = activeBuffs[i];
             float pw = pillWidths[i];
@@ -310,6 +504,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     dashSlot.themeColor = Color{ 70, 160, 255, 255 };
     dashSlot.isActive = player.IsDashing();
     dashSlot.stockCount = -1;
+    dashSlot.iconType = ActionIconType::DASH;
     DrawActionSlot(dashSlot);
 
     // Slot 2: Light Attack [LMB]
@@ -322,6 +517,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     lightSlot.themeColor = Color{ 90, 230, 255, 255 };
     lightSlot.isActive = player.IsAttacking() && player.GetCurrentAttack().type == AttackType::LIGHT;
     lightSlot.stockCount = -1;
+    lightSlot.iconType = ActionIconType::LIGHT_ATTACK;
     DrawActionSlot(lightSlot);
 
     // Slot 3: Heavy Attack [RMB]
@@ -334,6 +530,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     heavySlot.themeColor = Color{ 255, 175, 50, 255 };
     heavySlot.isActive = player.IsHeavyWindingUp() || (player.IsAttacking() && player.GetCurrentAttack().type == AttackType::HEAVY);
     heavySlot.stockCount = -1;
+    heavySlot.iconType = ActionIconType::HEAVY_ATTACK;
     DrawActionSlot(heavySlot);
 
     // Slot 4: Parry [F]
@@ -346,6 +543,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     parrySlot.themeColor = player.HasCounterBuff() ? Color{ 255, 225, 80, 255 } : Color{ 80, 240, 255, 255 };
     parrySlot.isActive = player.IsParrying() || player.HasCounterBuff();
     parrySlot.stockCount = -1;
+    parrySlot.iconType = ActionIconType::PARRY;
     DrawActionSlot(parrySlot);
 
     // Slot 5: Health Potion [H]
@@ -358,6 +556,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     potSlot.themeColor = Color{ 70, 230, 130, 255 };
     potSlot.isActive = false;
     potSlot.stockCount = player.GetInventory().GetHealthPotionCount();
+    potSlot.iconType = ActionIconType::POTION_HEAL;
     DrawActionSlot(potSlot);
 
     // Slot 6: Stoneskin Tonic [4]
@@ -370,6 +569,7 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     stoneSlot.themeColor = Color{ 245, 195, 50, 255 };
     stoneSlot.isActive = player.HasStoneskinActive();
     stoneSlot.stockCount = player.GetInventory().GetStoneskinTonicCount();
+    stoneSlot.iconType = ActionIconType::POTION_STONE;
     DrawActionSlot(stoneSlot);
 
     // Slot 7: Glacial Draught [5]
@@ -382,18 +582,20 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     thawSlot.themeColor = Color{ 110, 225, 255, 255 };
     thawSlot.isActive = player.HasGlacialImmunityActive();
     thawSlot.stockCount = player.GetInventory().GetGlacialDraughtCount();
+    thawSlot.iconType = ActionIconType::POTION_THAW;
     DrawActionSlot(thawSlot);
 
     // Slot 8: Berserker Brew [6]
     ActionSlotInfo berserkSlot;
     berserkSlot.bounds = { barX + 7 * (slotW + slotSpacing), barY, slotW, slotH };
-    berserkSlot.actionName = "BERSERK";
+    berserkSlot.actionName = "RAGE";
     berserkSlot.keybind = "[6]";
     berserkSlot.currentCooldown = player.GetBerserkerTimer();
     berserkSlot.maxCooldown = 12.0f;
     berserkSlot.themeColor = Color{ 255, 55, 65, 255 };
     berserkSlot.isActive = player.HasBerserkerActive();
     berserkSlot.stockCount = player.GetInventory().GetBerserkerDraughtCount();
+    berserkSlot.iconType = ActionIconType::POTION_BERSERK;
     DrawActionSlot(berserkSlot);
 
     // Slot 9: Armor Skill [V]
@@ -401,13 +603,16 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     ArmorSetInfo setInfo = GetArmorSetInfo(curSet);
     ActionSlotInfo armorSkillSlot;
     armorSkillSlot.bounds = { barX + 8 * (slotW + slotSpacing), barY, slotW, slotH };
-    armorSkillSlot.actionName = (curSet != ArmorSet::NONE) ? setInfo.skillName.c_str() : "NO SET";
+    armorSkillSlot.actionName = GetShortArmorSkillLabel(curSet);
     armorSkillSlot.keybind = "[V]";
     armorSkillSlot.currentCooldown = player.GetArmorSkillCooldown();
     armorSkillSlot.maxCooldown = (curSet != ArmorSet::NONE) ? setInfo.skillCooldown : 30.0f;
-    armorSkillSlot.themeColor = (curSet != ArmorSet::NONE) ? Color{ 255, 215, 80, 255 } : Color{ 110, 125, 145, 160 };
-    armorSkillSlot.isActive = (player.GetArmorSkillShieldHp() > 0.0f);
+    armorSkillSlot.themeColor = (curSet == ArmorSet::FROSTWARDEN) ? Color{ 120, 230, 255, 255 } :
+                                ((curSet != ArmorSet::NONE) ? Color{ 255, 215, 80, 255 } : Color{ 110, 125, 145, 160 });
+    armorSkillSlot.isActive = (player.GetArmorSkillShieldHp() > 0.0f) || (player.GetArmorSkillActiveTimer() > 0.0f);
     armorSkillSlot.stockCount = -1;
+    armorSkillSlot.iconType = ActionIconType::ARMOR_SKILL;
+    armorSkillSlot.armorSet = curSet;
     DrawActionSlot(armorSkillSlot);
 }
 
@@ -633,6 +838,130 @@ static void DrawPlayerCard(int windowWidth, int windowHeight, const Player& play
     }
 }
 
+static const char* GetShortWeaponLabel(WeaponType w) {
+    switch (w) {
+        case WeaponType::SWORD:              return "SWORD";
+        case WeaponType::DAGGERS:            return "DAGGERS";
+        case WeaponType::MACE:               return "MACE";
+        case WeaponType::TRUTH_SEEKER:       return "TRUTH";
+        case WeaponType::HALBERD:            return "HALBERD";
+        case WeaponType::ZEPHYR_DAGGERS:     return "ZEPHYR";
+        case WeaponType::WINDRUNNER_RECURVE: return "RECURVE";
+        case WeaponType::SUN_CLAYMORE:       return "CLAYMORE";
+        case WeaponType::STORM_GLAIVE:       return "GLAIVE";
+        case WeaponType::GLACIAL_CLEAVER:    return "CLEAVER";
+        case WeaponType::NONE:
+        default:                             return "EMPTY";
+    }
+}
+
+void HUD::DrawWeaponHotbarDock(int windowWidth, int windowHeight, const Player& player) {
+    const float slotW = (windowWidth >= 1400) ? 72.0f : 64.0f;
+    const float slotH = (windowWidth >= 1400) ? 74.0f : 66.0f;
+    const float gap = (windowWidth >= 1400) ? 8.0f : 6.0f;
+    const float pad = 10.0f;
+    const float dockW = 3.0f * slotW + 2.0f * gap + pad * 2.0f;
+    const float dockH = slotH + 16.0f;
+    const float dockX = (float)windowWidth - dockW - 20.0f;
+    const float dockY = (float)windowHeight - dockH - 18.0f;
+
+    // Active Weapon Name & Damage Readout Header Pill directly above dock
+    WeaponType equipped = player.GetWeapon();
+    int equippedTier = (equipped != WeaponType::NONE) ? player.GetInventory().GetWeaponUpgrade(equipped) : 0;
+    WeaponStats activeStats = GetWeaponStats(equipped, equippedTier);
+
+    Rectangle headerRec = { dockX, dockY - 28.0f, dockW, 24.0f };
+    DrawRectangleRounded(headerRec, 0.25f, 4, Color{ 12, 16, 24, 225 });
+    DrawRectangleRoundedLines(headerRec, 0.25f, 4, (equipped != WeaponType::NONE) ? Color{ 210, 175, 75, 220 } : Color{ 55, 72, 96, 200 });
+
+    if (equipped != WeaponType::NONE) {
+        char dmgTag[32];
+        snprintf(dmgTag, sizeof(dmgTag), "%d/%d", (int)activeStats.lightDamage, (int)activeStats.heavyDamage);
+        int dw = MeasureText(dmgTag, 10);
+        int dmgX = (int)(headerRec.x + headerRec.width - (float)dw - 8.0f);
+        DrawText(dmgTag, dmgX, (int)headerRec.y + 7, 10, Color{ 120, 230, 255, 245 });
+
+        float maxNameW = (float)dmgX - headerRec.x - 14.0f;
+        int nameSize = 10;
+        std::string displayName = activeStats.name;
+        if ((float)MeasureText(displayName.c_str(), nameSize) > maxNameW) {
+            nameSize = 9;
+            if ((float)MeasureText(displayName.c_str(), nameSize) > maxNameW) {
+                displayName = GetShortWeaponLabel(equipped);
+                if (equippedTier >= 1) displayName += " +" + std::to_string(equippedTier);
+            }
+        }
+        DrawText(displayName.c_str(), (int)headerRec.x + 8, (int)headerRec.y + (nameSize == 10 ? 7 : 8), nameSize, Color{ 255, 235, 165, 255 });
+    } else {
+        DrawText("UNARMED", (int)headerRec.x + 8, (int)headerRec.y + 7, 10, Color{ 160, 175, 200, 200 });
+        const char* hint = "HOTBAR [1-3]";
+        int hw = MeasureText(hint, 9);
+        DrawText(hint, (int)(headerRec.x + headerRec.width - (float)hw - 8.0f), (int)headerRec.y + 8, 9, Color{ 120, 150, 185, 190 });
+    }
+
+    // Outer Dock Frame
+    Rectangle dockRec = { dockX, dockY, dockW, dockH };
+    DrawRectangleRounded(dockRec, 0.20f, 6, Color{ 12, 16, 24, 225 });
+    DrawRectangleRoundedLines(dockRec, 0.20f, 6, Color{ 50, 66, 92, 225 });
+
+    int activeSlot = player.GetInventory().GetActiveWeaponSlot();
+    float iconScale = (windowWidth >= 1400) ? 1.55f : 1.38f;
+
+    for (int i = 0; i < 3; ++i) {
+        WeaponType slotWep = player.GetInventory().GetHotbarWeapon(i);
+        bool hasWep = (slotWep != WeaponType::NONE);
+        bool isActive = (i == activeSlot);
+        int tier = hasWep ? player.GetInventory().GetWeaponUpgrade(slotWep) : 0;
+
+        Rectangle r = { dockX + pad + (float)i * (slotW + gap), dockY + 8.0f, slotW, slotH };
+
+        Color tileBg = isActive ? Color{ 28, 24, 14, 240 } : (hasWep ? Color{ 16, 21, 32, 230 } : Color{ 11, 14, 20, 195 });
+        DrawRectangleRounded(r, 0.18f, 5, tileBg);
+
+        if (hasWep) {
+            DrawRectangleRounded(Rectangle{ r.x + 2.0f, r.y + 2.0f, r.width - 4.0f, r.height * 0.24f }, 0.22f, 3, Color{ 255, 255, 255, 14 });
+        }
+
+        Color borderCol = isActive ? Color{ 255, 215, 80, 255 } : (hasWep ? Color{ 68, 92, 126, 220 } : Color{ 38, 48, 66, 165 });
+        if (isActive) {
+            DrawRectangleRoundedLines(Rectangle{ r.x - 2.0f, r.y - 2.0f, r.width + 4.0f, r.height + 4.0f }, 0.22f, 4, Color{ 255, 205, 60, 160 });
+        }
+        DrawRectangleRoundedLines(r, 0.18f, 5, borderCol);
+
+        // Keybind Pill top-left [1], [2], [3]
+        char keyStr[8];
+        snprintf(keyStr, sizeof(keyStr), "[%d]", i + 1);
+        int kw = MeasureText(keyStr, 9);
+        DrawRectangleRounded(Rectangle{ r.x + 3.0f, r.y + 3.0f, (float)kw + 6.0f, 12.0f }, 0.35f, 3, isActive ? Color{ 62, 46, 16, 240 } : Color{ 10, 14, 22, 220 });
+        DrawText(keyStr, (int)r.x + 6, (int)r.y + 4, 9, isActive ? Color{ 255, 225, 95, 255 } : Color{ 210, 225, 245, 230 });
+
+        // Upgrade Tier Pill top-right (+1 / +2 / C)
+        if (hasWep && tier > 0) {
+            const char* tStr = (slotWep == WeaponType::TRUTH_SEEKER) ? "C" : (tier >= 2 ? "+2" : "+1");
+            Color tCol = (slotWep == WeaponType::TRUTH_SEEKER) ? Color{ 255, 225, 90, 255 } : ((tier >= 2) ? Color{ 110, 245, 170, 255 } : Color{ 120, 225, 255, 255 });
+            int tw = MeasureText(tStr, 9);
+            float tW = (float)tw + 6.0f;
+            float tX = r.x + r.width - tW - 3.0f;
+            DrawRectangleRounded(Rectangle{ tX, r.y + 3.0f, tW, 12.0f }, 0.35f, 3, Color{ 14, 24, 38, 225 });
+            DrawText(tStr, (int)tX + 3, (int)r.y + 4, 9, tCol);
+        }
+
+        // Centered Procedural Weapon Icon
+        if (hasWep) {
+            Vector2 iconCenter = { r.x + r.width * 0.5f, r.y + r.height * 0.46f };
+            AssetManager::DrawWeaponSlotIcon(iconCenter, slotWep, iconScale, true, isActive);
+        }
+
+        // Bottom Micro-Label
+        const char* shortName = GetShortWeaponLabel(slotWep);
+        int lw = MeasureText(shortName, 9);
+        int lx = (int)(r.x + (r.width - (float)lw) * 0.5f);
+        int ly = (int)(r.y + r.height - 12.0f);
+        Color lblCol = hasWep ? (isActive ? Color{ 255, 235, 165, 255 } : Color{ 185, 208, 235, 225 }) : Color{ 95, 110, 130, 175 };
+        DrawText(shortName, lx, ly, 9, lblCol);
+    }
+}
+
 void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore) {
     // Top Lobby Banner
     const float bannerW = 460.0f;
@@ -681,28 +1010,14 @@ void HUD::DrawLobby(int windowWidth, int windowHeight, const Player& player, boo
         DrawText(prompt.c_str(), (int)(px + 15), (int)(py + 9), 14, Color{ 255, 255, 255, 255 });
     }
 
-    // Active Weapon Card (Bottom Right)
-    WeaponStats stats = GetWeaponStats(player.GetWeapon(), player.GetInventory().GetWeaponUpgrade(player.GetWeapon()));
-    const float cardW = 320.0f;
-    const float cardH = 92.0f;
-    float cardX = (float)windowWidth - cardW - 24.0f;
-    float cardY = (float)windowHeight - cardH - 24.0f;
-
-    DrawRectangleRounded(Rectangle{ cardX, cardY, cardW, cardH }, 0.2f, 6, Color{ 16, 20, 30, 220 });
-    DrawRectangleRoundedLines(Rectangle{ cardX, cardY, cardW, cardH }, 0.2f, 6, Color{ 55, 75, 105, 240 });
-
-    DrawText("EQUIPPED WEAPON:", (int)cardX + 14, (int)cardY + 10, 11, Color{ 255, 215, 80, 255 });
-    DrawText(stats.name.c_str(), (int)cardX + 14, (int)cardY + 26, 16, Color{ 255, 255, 255, 255 });
-    DrawText(stats.description.c_str(), (int)cardX + 14, (int)cardY + 48, 10, Color{ 190, 210, 235, 220 });
-
-    std::string dmgInfo = "L-Atk: " + std::to_string((int)stats.lightDamage) + " dmg  |  H-Atk: " + std::to_string((int)stats.heavyDamage) + " dmg";
-    DrawText(dmgInfo.c_str(), (int)cardX + 14, (int)cardY + 70, 11, Color{ 120, 230, 255, 240 });
-
     // Player HUD Panel (Bottom Left)
     DrawPlayerCard(windowWidth, windowHeight, player);
 
     // Modular Visual Cooldown Action Bar (Bottom Center)
     DrawActionBar(windowWidth, windowHeight, player);
+
+    // 3-Slot Weapon Hotbar Dock (Bottom Right)
+    DrawWeaponHotbarDock(windowWidth, windowHeight, player);
 }
 
 void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, int currentWave, int totalWaves, bool hasUnreadLore) {
@@ -712,28 +1027,8 @@ void HUD::DrawCombat(int windowWidth, int windowHeight, const Player& player, in
     // Modular Visual Cooldown Action Bar (Bottom Center)
     DrawActionBar(windowWidth, windowHeight, player);
 
-    // Active Weapon Badge (Bottom Right)
-    int currentTier = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
-    WeaponStats stats = GetWeaponStats(player.GetWeapon(), currentTier);
-    const float wBadgeW = 210.0f;
-    const float wBadgeH = 52.0f;
-    float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
-    float wBadgeY = (float)windowHeight - wBadgeH - 24.0f;
-
-    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 220 });
-    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 230 });
-
-    std::string tierStr = (currentTier == 0) ? "+0 BASE" : ((currentTier == 1) ? "+1 FORGED" : "+2 MASTERWORK");
-    if (player.GetWeapon() == WeaponType::TRUTH_SEEKER && currentTier >= 1) tierStr = "CONSECRATED";
-    Color tierCol = (currentTier == 0) ? Color{ 175, 195, 220, 220 } : ((currentTier == 1) ? Color{ 120, 220, 255, 255 } : Color{ 110, 245, 170, 255 });
-
-    DrawText("WEAPON", (int)wBadgeX + 12, (int)wBadgeY + 6, 10, Color{ 255, 215, 80, 255 });
-    DrawText(tierStr.c_str(), (int)(wBadgeX + wBadgeW - MeasureText(tierStr.c_str(), 10) - 12), (int)wBadgeY + 6, 10, tierCol);
-    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 19, 13, Color{ 255, 255, 255, 255 });
-
-    char dmgBuf[48];
-    snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
-    DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
+    // 3-Slot Weapon Hotbar Dock (Bottom Right)
+    DrawWeaponHotbarDock(windowWidth, windowHeight, player);
 
     // Top Wave Status Banner
     bool isMilestoneWave = (currentWave % 5 == 0);
@@ -821,28 +1116,8 @@ void HUD::DrawCampaignHUD(int windowWidth, int windowHeight, const Player& playe
     // Modular Visual Cooldown Action Bar (Bottom Center)
     DrawActionBar(windowWidth, windowHeight, player);
 
-    // Active Weapon Badge (Bottom Right)
-    int currentTier = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
-    WeaponStats stats = GetWeaponStats(player.GetWeapon(), currentTier);
-    const float wBadgeW = 210.0f;
-    const float wBadgeH = 52.0f;
-    float wBadgeX = (float)windowWidth - wBadgeW - 24.0f;
-    float wBadgeY = (float)windowHeight - wBadgeH - 24.0f;
-
-    DrawRectangleRounded(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 16, 20, 30, 220 });
-    DrawRectangleRoundedLines(Rectangle{ wBadgeX, wBadgeY, wBadgeW, wBadgeH }, 0.25f, 6, Color{ 55, 75, 105, 230 });
-
-    std::string tierStr = (currentTier == 0) ? "+0 BASE" : ((currentTier == 1) ? "+1 FORGED" : "+2 MASTERWORK");
-    if (player.GetWeapon() == WeaponType::TRUTH_SEEKER && currentTier >= 1) tierStr = "CONSECRATED";
-    Color tierCol = (currentTier == 0) ? Color{ 175, 195, 220, 220 } : ((currentTier == 1) ? Color{ 120, 220, 255, 255 } : Color{ 110, 245, 170, 255 });
-
-    DrawText("WEAPON", (int)wBadgeX + 12, (int)wBadgeY + 6, 10, Color{ 255, 215, 80, 255 });
-    DrawText(tierStr.c_str(), (int)(wBadgeX + wBadgeW - MeasureText(tierStr.c_str(), 10) - 12), (int)wBadgeY + 6, 10, tierCol);
-    DrawText(stats.name.c_str(), (int)wBadgeX + 12, (int)wBadgeY + 19, 13, Color{ 255, 255, 255, 255 });
-
-    char dmgBuf[48];
-    snprintf(dmgBuf, sizeof(dmgBuf), "%d Light / %d Heavy Dmg", (int)stats.lightDamage, (int)stats.heavyDamage);
-    DrawText(dmgBuf, (int)wBadgeX + 12, (int)wBadgeY + 34, 10, Color{ 175, 200, 230, 210 });
+    // 3-Slot Weapon Hotbar Dock (Bottom Right)
+    DrawWeaponHotbarDock(windowWidth, windowHeight, player);
 
     // Top Location Header Banner with Time-of-Day Clock Dial
     DrawLocationHeader(windowWidth, locationName, tod);

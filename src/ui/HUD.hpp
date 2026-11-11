@@ -8,6 +8,19 @@ class Player;
 class Enemy;
 class TimeOfDaySystem;
 
+enum class ActionIconType {
+    NONE,
+    DASH,
+    LIGHT_ATTACK,
+    HEAVY_ATTACK,
+    PARRY,
+    POTION_HEAL,
+    POTION_STONE,
+    POTION_THAW,
+    POTION_BERSERK,
+    ARMOR_SKILL
+};
+
 struct ActionSlotInfo {
     Rectangle bounds;
     const char* actionName;
@@ -17,6 +30,8 @@ struct ActionSlotInfo {
     int stockCount = -1; // -1 = infinite / normal ability, >= 0 = consumable stock
     Color themeColor;
     bool isActive = false;
+    ActionIconType iconType = ActionIconType::NONE;
+    ArmorSet armorSet = ArmorSet::NONE;
 };
 
 class HUD {
@@ -24,6 +39,7 @@ public:
     // Modular Visual Cooldown Action Bar
     static void DrawActionSlot(const ActionSlotInfo& slot);
     static void DrawActionBar(int windowWidth, int windowHeight, const Player& player);
+    static void DrawWeaponHotbarDock(int windowWidth, int windowHeight, const Player& player);
 
     // Primary Player-based Draw Methods
     static void DrawLobby(int windowWidth, int windowHeight, const Player& player, bool isNearPedestal, const std::string& nearWeaponName, bool hasUnreadLore = false);

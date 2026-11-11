@@ -4591,7 +4591,12 @@ void Game::RenderScene() {
         } else {
             GameUI::DrawCombatHUD(w, h, player, waveManager.GetCurrentWave(), waveManager.GetTotalWaves(), hasUnread);
         }
-        DrawText("[T] RETURN TO REALM", 24, h - 36, 16, Color{ 160, 210, 255, 200 });
+        {
+            Rectangle retRec = { 24.0f, 18.0f, 204.0f, 32.0f };
+            DrawRectangleRounded(retRec, 0.3f, 4, Color{ 18, 26, 40, 225 });
+            DrawRectangleRoundedLines(retRec, 0.3f, 4, Color{ 70, 110, 155, 230 });
+            DrawText("[T] RETURN TO REALM", (int)retRec.x + 14, (int)retRec.y + 9, 13, Color{ 165, 220, 255, 245 });
+        }
 
 
 

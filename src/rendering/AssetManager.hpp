@@ -33,6 +33,7 @@ public:
     static void DrawClaymore(Vector2 origin, float angle, float length, Color bladeColor, Color glowColor);
     static void DrawGlaive(Vector2 origin, float angle, float length, Color headColor, Color glowColor);
     static void DrawCleaver(Vector2 origin, float angle, float length, Color headColor, Color glowColor);
+    static void DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float scale, bool isUnlocked, bool isEquipped);
 
     // Pedestals & Environment
     static void DrawWeaponPedestal(Vector2 position, WeaponType weapon, bool isSelected, bool isHovered, float time);
