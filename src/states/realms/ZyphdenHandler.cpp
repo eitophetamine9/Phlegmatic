@@ -1605,7 +1605,7 @@ void ZyphdenHandler::Update(
 
                     "You have unlatched the Royal Armory Relic Chest.",
 
-                    "Obtained two flasks of Consecrated Health Elixir! Press [1] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
+                    "Obtained two flasks of Consecrated Health Elixir! Press [H] in battle to drink an elixir and restore 45 Health (7.0s cooldown).",
 
                     "Recovered Fragment X: 'The Royal Armory Archives' — recording the ancient arts of armor penetration, posture breaking, and counter ripostes."
 
@@ -3525,7 +3525,7 @@ void ZyphdenHandler::DrawProvisionsModal(Player& player, ParticleSystem& particl
 
     DrawText("Concentrated restorative draught brewed from dried mountain bellflowers and blossom honey.", (int)cardX + 130, (int)cardY + 48, 11, Color{ 185, 210, 235, 220 });
 
-    DrawText("Restores 45 Vitality upon consumption. Press [1] in combat to drink (7.0s cooldown).", (int)cardX + 130, (int)cardY + 66, 11, Color{ 130, 225, 255, 230 });
+    DrawText("Restores 45 Vitality upon consumption. Press [H] in combat to drink (7.0s cooldown).", (int)cardX + 130, (int)cardY + 66, 11, Color{ 130, 225, 255, 230 });
 
 
 
@@ -3729,7 +3729,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "STONESKIN TONIC",
             "+40% Physical Defense and complete stagger poise immunity for 15s. Heavy armor composure.",
-            "Quick Belt Slot [2]",
+            "Quick Belt Slot [4]",
             "Cost: 2 Ore Scraps + 20 Shingles",
             inv.GetStoneskinTonicCount(),
             Color{ 245, 195, 50, 255 },
@@ -3745,7 +3745,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "GLACIAL THAW DRAUGHT",
             "Instantly cleanses Frostbite and grants 90s complete cold immunity in Northern Crags.",
-            "Quick Belt Slot [3]",
+            "Quick Belt Slot [5]",
             "Cost: 2 Frost Shards + 15 Shingles",
             inv.GetGlacialDraughtCount(),
             Color{ 110, 225, 255, 255 },
@@ -3761,7 +3761,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "BERSERKER BREW",
             "+35% Attack Speed and +30% Damage for 12s (+20% incoming damage penalty). High-risk fury.",
-            "Quick Belt Slot [4]",
+            "Quick Belt Slot [6]",
             "Cost: 1 Mist Essence + 25 Shingles",
             inv.GetBerserkerDraughtCount(),
             Color{ 255, 60, 60, 255 },
@@ -3777,7 +3777,7 @@ void ZyphdenHandler::DrawAlchemyModal(Player& player, ParticleSystem& particles,
         {
             "CONSECRATED HEALTH FLASK",
             "Restores +45 Vitality upon consumption (7.0s cooldown). Max capacity 5 flasks.",
-            "Quick Belt Slot [1]",
+            "Quick Belt Slot [H]",
             "Cost: 15 Shingles",
             inv.GetHealthPotionCount(),
             Color{ 80, 255, 140, 255 },

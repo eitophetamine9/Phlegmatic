@@ -1091,6 +1091,10 @@ void Game::SaveActiveGame() {
 
 
     data.equippedWeapon = (int)player.GetWeapon();
+    data.activeWeaponSlot = player.GetInventory().GetActiveWeaponSlot();
+    for (int s = 0; s < 3; ++s) {
+        data.weaponHotbar[s] = (int)player.GetInventory().GetHotbarWeapon(s);
+    }
     data.equippedArmor = (int)player.GetArmor();
     data.equippedHelmet = (int)player.GetHelmet();
     data.equippedChestplate = (int)player.GetChestplate();
@@ -1265,6 +1269,9 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
 
+    player.GetInventory().ClearWeapons();
+    player.GetInventory().UnlockWeapon(WeaponType::NONE);
+
     for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
         player.GetInventory().SetWeaponUpgrade((WeaponType)i, data.weaponUpgrades[i]);
 
@@ -1332,6 +1339,31 @@ void Game::LoadActiveGame(int slotIndex) {
 
 
     player.SetWeapon((WeaponType)data.equippedWeapon);
+
+    bool hasSavedHotbar = false;
+    for (int s = 0; s < 3; ++s) {
+        if (data.weaponHotbar[s] != 0) {
+            hasSavedHotbar = true;
+            break;
+        }
+    }
+    if (hasSavedHotbar) {
+        for (int s = 0; s < 3; ++s) {
+            WeaponType wt = (WeaponType)data.weaponHotbar[s];
+            if (wt != WeaponType::NONE && player.GetInventory().HasWeapon(wt)) {
+                player.GetInventory().SetHotbarWeapon(s, wt);
+            } else {
+                player.GetInventory().SetHotbarWeapon(s, WeaponType::NONE);
+            }
+        }
+        player.GetInventory().SetActiveWeaponSlot(data.activeWeaponSlot);
+        // Ensure equipped weapon has a matching active slot if present on hotbar
+        int curSlot = player.GetInventory().GetWeaponHotbarSlot((WeaponType)data.equippedWeapon);
+        if (curSlot >= 0) {
+            player.GetInventory().SetActiveWeaponSlot(curSlot);
+        }
+    }
+
     player.SetArmor((ArmorType)data.equippedArmor);
     player.SetHelmet((HelmetType)data.equippedHelmet);
     player.SetChestplate((ChestplateType)data.equippedChestplate);

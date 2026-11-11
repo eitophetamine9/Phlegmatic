@@ -65,7 +65,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 8, 10, 16, 225 });
 
     const float modalW = 780.0f;
-    const float modalH = 580.0f;
+    const float modalH = 600.0f;
     float modalX = ((float)windowWidth - modalW) * 0.5f;
     float modalY = ((float)windowHeight - modalH) * 0.5f;
 
@@ -112,12 +112,13 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
             { "TAB / I Key",   "Inventory", "Open Equipment Matrix, 3-Slot Weapon Hotbar, Chronicles & Bestiary.", Color{ 255, 215, 80, 255 } },
             { "B Key",         "Bestiary",  "Open the Humoral Bestiary & Monster Weakness Codex directly.", Color{ 140, 210, 255, 255 } },
-            { "1 - 4 Keys",     "Quick Belt", "Drink Health Potion [1], Stoneskin [2], Glacial Thaw [3], Berserk [4].", Color{ 140, 240, 180, 255 } },
-            { "C Key",         "Controls", "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
-            { "R / L / ESC",   "Menu Keys","[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
+            { "1 - 3 Keys",    "Weapon Bar","Equip weapons bound to Hotbar Slots 1, 2, and 3.", Color{ 255, 215, 80, 255 } },
+            { "H, 4 - 6",      "Quick Belt","Drink Health [H], Stoneskin [4], Glacial Thaw [5], Berserk [6].", Color{ 140, 240, 180, 255 } },
+            { "C Key",         "Controls",  "Toggle this Controls Menu modal at any time.", Color{ 160, 180, 200, 255 } },
+            { "R / L / ESC",   "Menu Keys", "[R] Respawn/Reset  |  [L] Return to Lobby  |  [ESC] Title Screen.", Color{ 140, 160, 180, 255 } }
         };
 
-        float rowHeight = 38.0f;
+        float rowHeight = 35.0f;
         for (int i = 0; i < (int)std::size(items); i++) {
             float rowY = startY + (float)i * rowHeight;
 
@@ -962,7 +963,35 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         // -------------------------------------------------------------
         float secWepY = secArmorY + slotH + 26.0f;
         DrawLine((int)leftX + 16, (int)secWepY, (int)(leftX + leftW - 16), (int)secWepY, Color{ 45, 60, 85, 180 });
-        DrawText("WEAPONS (PRIMARY ARSENAL)", (int)leftX + 16, (int)secWepY + 6, 14, Color{ 255, 215, 90, 240 });
+        DrawText("WEAPONS (ARSENAL & HOTBAR [1-3])", (int)leftX + 16, (int)secWepY + 6, 13, Color{ 255, 215, 90, 240 });
+
+        // Compact 3-Slot Hotbar Quick-Switch Chips aligned right of header
+        for (int s = 0; s < 3; ++s) {
+            float chipW = 42.0f;
+            float chipH = 18.0f;
+            Rectangle chipRec = { leftX + leftW - 16.0f - (float)(3 - s) * (chipW + 4.0f), secWepY + 3.0f, chipW, chipH };
+            WeaponType slotWep = player.GetInventory().GetHotbarWeapon(s);
+            bool isSlotActive = (player.GetInventory().GetActiveWeaponSlot() == s && slotWep != WeaponType::NONE);
+            bool isChipHov = CheckCollisionPointRec(mousePos, chipRec);
+            if (isChipHov && isMousePressed) {
+                if (slotWep != WeaponType::NONE && player.GetInventory().HasWeapon(slotWep)) {
+                    player.GetInventory().SetActiveWeaponSlot(s);
+                    player.SetWeapon(slotWep);
+                    SoundFX::PlayEquipWeapon();
+                }
+                s_selectedSlot = 4;
+            }
+            DrawRectangleRounded(chipRec, 0.25f, 4, isSlotActive ? Color{ 48, 68, 102, 245 } : (isChipHov ? Color{ 32, 44, 68, 230 } : Color{ 18, 24, 36, 220 }));
+            DrawRectangleRoundedLines(chipRec, 0.25f, 4, isSlotActive ? Color{ 255, 215, 80, 255 } : Color{ 60, 82, 118, 200 });
+            char slotLbl[8];
+            snprintf(slotLbl, sizeof(slotLbl), "[%d]", s + 1);
+            DrawText(slotLbl, (int)chipRec.x + 4, (int)chipRec.y + 4, 10, isSlotActive ? Color{ 255, 225, 100, 255 } : Color{ 165, 190, 220, 220 });
+            if (slotWep != WeaponType::NONE) {
+                DrawWeaponSlotIcon({ chipRec.x + chipW - 12.0f, chipRec.y + chipH * 0.5f }, slotWep, 0.42f, true, isSlotActive);
+            } else {
+                DrawText("-", (int)(chipRec.x + chipW - 13.0f), (int)chipRec.y + 4, 10, Color{ 100, 115, 135, 180 });
+            }
+        }
 
         struct WepBtnInfo { WeaponType type; };
         WepBtnInfo wepBtns[10] = {
@@ -1010,6 +1039,14 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             if (isWUnlocked && curUpg > 0) {
                 std::string badge = "+" + std::to_string(curUpg);
                 DrawText(badge.c_str(), (int)(wRec.x + wRec.width - 16), (int)(wRec.y + wRec.height - 12), 10, Color{ 255, 220, 100, 255 });
+            }
+
+            // Hotbar assignment key badge [1] / [2] / [3] in top-left corner
+            int hbIdx = player.GetInventory().GetWeaponHotbarSlot(wepBtns[i].type);
+            if (isWUnlocked && hbIdx >= 0) {
+                Rectangle hbPill = { wRec.x + 2.0f, wRec.y + 2.0f, 15.0f, 12.0f };
+                DrawRectangleRounded(hbPill, 0.3f, 3, isWEquipped ? Color{ 255, 210, 70, 235 } : Color{ 24, 48, 82, 235 });
+                DrawText(std::to_string(hbIdx + 1).c_str(), (int)hbPill.x + 5, (int)hbPill.y + 1, 10, isWEquipped ? Color{ 14, 18, 26, 255 } : Color{ 160, 225, 255, 255 });
             }
         }
 
@@ -1149,7 +1186,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         struct MatSlot { const char* label; int count; Color col; const char* tag; };
         MatSlot matSlots[5] = {
-            { "POTIONS", player.GetInventory().GetHealthPotionCount(), Color{ 235, 75, 75, 255 }, "[F] Heal" },
+            { "POTIONS", player.GetInventory().GetHealthPotionCount(), Color{ 235, 75, 75, 255 }, "[H] Heal" },
             { "SHINGLES", player.GetInventory().GetShingles(), Color{ 215, 225, 245, 255 }, "Currency" },
             { "ORE SCRAP", player.GetInventory().GetOreScraps(), Color{ 235, 165, 65, 255 }, "Forge Ore" },
             { "MIST ESS.", player.GetInventory().GetEssenceOfMist(), Color{ 90, 225, 210, 255 }, "Summoning" },
@@ -1920,6 +1957,12 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                     std::string badge = "+" + std::to_string(upgLvl);
                     DrawText(badge.c_str(), (int)(bRec.x + bRec.width - 18), (int)(bRec.y + bRec.height - 13), 10, Color{ 255, 220, 100, 255 });
                 }
+                int hbIdx = player.GetInventory().GetWeaponHotbarSlot(weps[i].type);
+                if (isUnlocked && hbIdx >= 0) {
+                    Rectangle hbPill = { bRec.x + 4.0f, bRec.y + 4.0f, 18.0f, 14.0f };
+                    DrawRectangleRounded(hbPill, 0.3f, 3, isEquipped ? Color{ 255, 210, 70, 240 } : Color{ 24, 48, 82, 235 });
+                    DrawText(std::to_string(hbIdx + 1).c_str(), (int)hbPill.x + 6, (int)hbPill.y + 2, 10, isEquipped ? Color{ 14, 18, 26, 255 } : Color{ 170, 230, 255, 255 });
+                }
             }
 
             // Right Inspection Panel
@@ -1965,10 +2008,39 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)drawerListY + 72, (int)(panelX + panelW - 14), (int)drawerListY + 72, Color{ 45, 62, 90, 180 });
+
+            // 3-Slot Hotbar Assignment Strip
+            int curHotbarSlot = player.GetInventory().GetWeaponHotbarSlot(weps[s_inspectedWep].type);
+            DrawText("HOTBAR:", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            float hbStartX = panelX + 74.0f;
+            float hbBtnW = (panelW - 88.0f - 12.0f) / 3.0f;
+            for (int hs = 0; hs < 3; ++hs) {
+                Rectangle hsRec = { hbStartX + (float)hs * (hbBtnW + 6.0f), drawerListY + 78.0f, hbBtnW, 22.0f };
+                bool isAssignedHere = (curHotbarSlot == hs);
+                bool isHsHov = isInspUnlocked && CheckCollisionPointRec(mousePos, hsRec);
+                if (isHsHov && isMousePressed) {
+                    player.GetInventory().SetHotbarWeapon(hs, weps[s_inspectedWep].type);
+                    player.GetInventory().SetActiveWeaponSlot(hs);
+                    player.SetWeapon(weps[s_inspectedWep].type);
+                    SoundFX::PlayEquipWeapon();
+                }
+                Color hsBg = !isInspUnlocked ? Color{ 20, 24, 34, 180 } :
+                    (isAssignedHere ? Color{ 55, 78, 118, 250 } : (isHsHov ? Color{ 44, 66, 102, 240 } : Color{ 26, 36, 54, 225 }));
+                Color hsBorder = !isInspUnlocked ? Color{ 48, 56, 72, 160 } :
+                    (isAssignedHere ? Color{ 255, 215, 80, 255 } : (isHsHov ? Color{ 130, 210, 255, 240 } : Color{ 62, 84, 120, 200 }));
+                DrawRectangleRounded(hsRec, 0.25f, 4, hsBg);
+                DrawRectangleRoundedLines(hsRec, 0.25f, 4, hsBorder);
+                char hsLabel[24];
+                snprintf(hsLabel, sizeof(hsLabel), isAssignedHere ? "[%d] BOUND" : "[%d] SLOT %d", hs + 1, hs + 1);
+                int hlW = MeasureText(hsLabel, 10);
+                Color hlCol = !isInspUnlocked ? Color{ 100, 110, 125, 170 } :
+                    (isAssignedHere ? Color{ 255, 225, 100, 255 } : Color{ 205, 225, 245, 235 });
+                DrawText(hsLabel, (int)(hsRec.x + (hsRec.width - hlW) * 0.5f), (int)hsRec.y + 6, 10, hlCol);
+            }
 
             // Stats
-            DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
+            DrawText("COMBAT ATTRIBUTES & METRICS", (int)panelX + 14, (int)drawerListY + 106, 11, Color{ 255, 215, 90, 240 });
             int equippedUpg = player.GetInventory().GetWeaponUpgrade(player.GetWeapon());
             WeaponStats curSt = GetWeaponStats(player.GetWeapon(), equippedUpg);
             int lightDelta = (int)(st.lightDamage - curSt.lightDamage);
@@ -1980,31 +2052,31 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             if (!isInspEquipped && lightDelta != 0) sLine1 += " (" + std::string(lightDelta > 0 ? "+" : "") + std::to_string(lightDelta) + ")";
             sLine1 += " | Heavy: " + std::to_string((int)st.heavyDamage);
             if (!isInspEquipped && heavyDelta != 0) sLine1 += " (" + std::string(heavyDelta > 0 ? "+" : "") + std::to_string(heavyDelta) + ")";
-            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 100, 12, Color{ 105, 240, 185, 240 });
+            DrawText(sLine1.c_str(), (int)panelX + 14, (int)drawerListY + 122, 11, Color{ 105, 240, 185, 240 });
 
             std::string sLine2 = "Reach: " + std::to_string((int)st.lightRange) + "px";
             if (!isInspEquipped && reachDelta != 0) sLine2 += " (" + std::string(reachDelta > 0 ? "+" : "") + std::to_string(reachDelta) + ")";
             sLine2 += " | Pierce: " + std::to_string((int)(st.defensePierceBonus * 100.0f)) + "%";
             if (!isInspEquipped && pierceDelta != 0) sLine2 += " (" + std::string(pierceDelta > 0 ? "+" : "") + std::to_string(pierceDelta) + "%)";
-            DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 118, 12, Color{ 140, 210, 255, 240 });
+            DrawText(sLine2.c_str(), (int)panelX + 14, (int)drawerListY + 137, 11, Color{ 140, 210, 255, 240 });
 
             // Special weapon archetype traits
             if (weps[s_inspectedWep].type == WeaponType::WINDRUNNER_RECURVE) {
-                DrawText("[Archetype]: Charged shots break enemy guard & stun. Rapid pierce velocity.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 220, 95, 240 });
+                DrawText("[Archetype]: Charged shots break enemy guard & stun. Rapid pierce velocity.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 220, 95, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::ZEPHYR_DAGGERS) {
-                DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 110, 245, 225, 240 });
+                DrawText("[Archetype]: High crit multiplier & rapid flurry strikes with evasive momentum.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 225, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::SUN_CLAYMORE) {
-                DrawText("[Archetype]: Devastating heavy cleaves with unbreakable hyper-armor posture.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 255, 160, 60, 240 });
+                DrawText("[Archetype]: Devastating heavy cleaves with unbreakable hyper-armor posture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 255, 160, 60, 240 });
             } else {
-                DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 138, 11, Color{ 160, 185, 215, 220 });
+                DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 160, 185, 215, 220 });
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 158, (int)(panelX + panelW - 14), (int)drawerListY + 158, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)drawerListY + 169, (int)(panelX + panelW - 14), (int)drawerListY + 169, Color{ 45, 62, 90, 180 });
 
             // Lore
-            DrawText("WEAPON HISTORY & CODEX", (int)panelX + 14, (int)drawerListY + 166, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 186, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("WEAPON HISTORY & CODEX", (int)panelX + 14, (int)drawerListY + 176, 11, Color{ 255, 215, 90, 240 });
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 193, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;

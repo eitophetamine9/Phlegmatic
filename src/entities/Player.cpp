@@ -332,8 +332,19 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
 void Player::SetWeapon(WeaponType newWeapon) {
     currentWeapon = newWeapon;
     daggerLightAttackCounter = 0;
+    isHeavyWindingUp = false;
+    heavyWindupTimer = 0.0f;
+    comboStep = 1;
+    comboTimer = 0.0f;
 
     inventory.UnlockWeapon(newWeapon);
+
+    int hotbarSlot = inventory.GetWeaponHotbarSlot(newWeapon);
+    if (hotbarSlot >= 0) {
+        inventory.SetActiveWeaponSlot(hotbarSlot);
+    } else if (newWeapon != WeaponType::NONE) {
+        inventory.SetHotbarWeapon(inventory.GetActiveWeaponSlot(), newWeapon);
+    }
 
     if (newWeapon == WeaponType::TRUTH_SEEKER) {
 
@@ -794,44 +805,26 @@ void Player::UpdateSnowFootsteps(float dt, ParticleSystem& particles) {
     }
 }
 
-void Player::QuickSwapWeapon(ParticleSystem& particles) {
-    std::vector<WeaponType> unlocked;
-    const WeaponType candidateWeapons[] = {
-        WeaponType::SWORD,
-        WeaponType::DAGGERS,
-        WeaponType::MACE,
-        WeaponType::HALBERD,
-        WeaponType::ZEPHYR_DAGGERS,
-        WeaponType::WINDRUNNER_RECURVE,
-        WeaponType::SUN_CLAYMORE,
-        WeaponType::STORM_GLAIVE,
-        WeaponType::GLACIAL_CLEAVER,
-        WeaponType::TRUTH_SEEKER
-    };
+bool Player::EquipHotbarSlot(int slotIdx, ParticleSystem& particles) {
+    if (slotIdx < 0 || slotIdx >= 3) return false;
 
-    for (WeaponType wt : candidateWeapons) {
-        if (inventory.HasWeapon(wt)) {
-            unlocked.push_back(wt);
-        }
+    WeaponType targetWeapon = inventory.GetHotbarWeapon(slotIdx);
+    inventory.SetActiveWeaponSlot(slotIdx);
+
+    if (targetWeapon == WeaponType::NONE || !inventory.HasWeapon(targetWeapon)) {
+        particles.SpawnFloatingText(position, "SLOT " + std::to_string(slotIdx + 1) + " EMPTY", Color{ 165, 175, 195, 220 }, 18.0f);
+        return false;
     }
 
-    if (unlocked.empty()) return;
-
-    int currentIdx = -1;
-    for (size_t i = 0; i < unlocked.size(); ++i) {
-        if (unlocked[i] == currentWeapon) {
-            currentIdx = (int)i;
-            break;
-        }
+    if (targetWeapon == currentWeapon) {
+        return true;
     }
 
-    int nextIdx = (currentIdx + 1) % (int)unlocked.size();
-    SetWeapon(unlocked[nextIdx]);
-    SoundFX::PlayEquipWeapon();
-
+    SetWeapon(targetWeapon);
     WeaponStats stats = GetEquippedWeaponStats();
-    particles.SpawnFloatingText(position, "SWAPPED: " + stats.name, Color{ 255, 220, 90, 255 }, 22.0f);
-    particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 14, 80.0f);
+    particles.SpawnFloatingText(position, "[" + std::to_string(slotIdx + 1) + "] " + stats.name, Color{ 255, 225, 100, 255 }, 20.0f);
+    particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 10, 70.0f);
+    return true;
 }
 
 void Player::StartExecution(Vector2 targetPos) {
@@ -1063,17 +1056,26 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
 
-    // Health Potion consumption via [1] or [H] (7-second cooldown)
-    if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_H)) {
+    // 3-Slot Weapon Hotbar switching via [1], [2], [3]
+    if (IsKeyPressed(KEY_ONE)) {
+        EquipHotbarSlot(0, particles);
+    } else if (IsKeyPressed(KEY_TWO)) {
+        EquipHotbarSlot(1, particles);
+    } else if (IsKeyPressed(KEY_THREE)) {
+        EquipHotbarSlot(2, particles);
+    }
+
+    // Quick Belt Potions & Elixirs via [H], [4], [5], [6]
+    if (IsKeyPressed(KEY_H)) {
         UseHealthPotion(particles);
     }
-    if (IsKeyPressed(KEY_TWO)) {
+    if (IsKeyPressed(KEY_FOUR)) {
         UseStoneskinTonic(particles);
     }
-    if (IsKeyPressed(KEY_THREE)) {
+    if (IsKeyPressed(KEY_FIVE)) {
         UseGlacialDraught(particles);
     }
-    if (IsKeyPressed(KEY_FOUR)) {
+    if (IsKeyPressed(KEY_SIX)) {
         UseBerserkerDraught(particles);
     }
 

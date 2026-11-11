@@ -176,6 +176,12 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.arenaHighestWave = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedWeapon\"") != std::string::npos) {
             outData.equippedWeapon = SaveHelpers::ExtractIntValue(line, 1);
+        } else if (line.find("\"activeWeaponSlot\"") != std::string::npos) {
+            outData.activeWeaponSlot = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"weaponHotbar\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.weaponHotbar, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
         } else if (line.find("\"equippedArmor\"") != std::string::npos) {
             outData.equippedArmor = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedHelmet\"") != std::string::npos) {
@@ -289,6 +295,8 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"elementalGolemDefeated\": " << (data.elementalGolemDefeated ? "true" : "false") << ",\n";
     file << "  \"arenaHighestWave\": " << data.arenaHighestWave << ",\n";
     file << "  \"equippedWeapon\": " << data.equippedWeapon << ",\n";
+    file << "  \"activeWeaponSlot\": " << data.activeWeaponSlot << ",\n";
+    file << "  \"weaponHotbar\": [" << data.weaponHotbar[0] << ", " << data.weaponHotbar[1] << ", " << data.weaponHotbar[2] << "],\n";
     file << "  \"equippedArmor\": " << data.equippedArmor << ",\n";
     file << "  \"equippedHelmet\": " << data.equippedHelmet << ",\n";
     file << "  \"equippedChestplate\": " << data.equippedChestplate << ",\n";

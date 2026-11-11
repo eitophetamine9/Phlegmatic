@@ -348,11 +348,11 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     parrySlot.stockCount = -1;
     DrawActionSlot(parrySlot);
 
-    // Slot 5: Health Potion [1]
+    // Slot 5: Health Potion [H]
     ActionSlotInfo potSlot;
     potSlot.bounds = { barX + 4 * (slotW + slotSpacing), barY, slotW, slotH };
     potSlot.actionName = "HEAL";
-    potSlot.keybind = "[1]";
+    potSlot.keybind = "[H]";
     potSlot.currentCooldown = player.GetPotionCooldown();
     potSlot.maxCooldown = 7.0f;
     potSlot.themeColor = Color{ 70, 230, 130, 255 };
@@ -360,11 +360,11 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     potSlot.stockCount = player.GetInventory().GetHealthPotionCount();
     DrawActionSlot(potSlot);
 
-    // Slot 6: Stoneskin Tonic [2]
+    // Slot 6: Stoneskin Tonic [4]
     ActionSlotInfo stoneSlot;
     stoneSlot.bounds = { barX + 5 * (slotW + slotSpacing), barY, slotW, slotH };
     stoneSlot.actionName = "STONE";
-    stoneSlot.keybind = "[2]";
+    stoneSlot.keybind = "[4]";
     stoneSlot.currentCooldown = player.GetStoneskinTimer();
     stoneSlot.maxCooldown = 15.0f;
     stoneSlot.themeColor = Color{ 245, 195, 50, 255 };
@@ -372,11 +372,11 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     stoneSlot.stockCount = player.GetInventory().GetStoneskinTonicCount();
     DrawActionSlot(stoneSlot);
 
-    // Slot 7: Glacial Draught [3]
+    // Slot 7: Glacial Draught [5]
     ActionSlotInfo thawSlot;
     thawSlot.bounds = { barX + 6 * (slotW + slotSpacing), barY, slotW, slotH };
     thawSlot.actionName = "THAW";
-    thawSlot.keybind = "[3]";
+    thawSlot.keybind = "[5]";
     thawSlot.currentCooldown = player.GetGlacialImmunityTimer();
     thawSlot.maxCooldown = 90.0f;
     thawSlot.themeColor = Color{ 110, 225, 255, 255 };
@@ -384,11 +384,11 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
     thawSlot.stockCount = player.GetInventory().GetGlacialDraughtCount();
     DrawActionSlot(thawSlot);
 
-    // Slot 8: Berserker Brew [4]
+    // Slot 8: Berserker Brew [6]
     ActionSlotInfo berserkSlot;
     berserkSlot.bounds = { barX + 7 * (slotW + slotSpacing), barY, slotW, slotH };
     berserkSlot.actionName = "BERSERK";
-    berserkSlot.keybind = "[4]";
+    berserkSlot.keybind = "[6]";
     berserkSlot.currentCooldown = player.GetBerserkerTimer();
     berserkSlot.maxCooldown = 12.0f;
     berserkSlot.themeColor = Color{ 255, 55, 65, 255 };

@@ -12,8 +12,12 @@ void Inventory::InitDefault() {
     fragments.clear();
     questItems.clear();
 
-    // Default starting weapons
+    // Default starting weapons & hotbar
     unlockedWeapons.push_back(WeaponType::NONE);
+    weaponHotbar[0] = WeaponType::NONE;
+    weaponHotbar[1] = WeaponType::NONE;
+    weaponHotbar[2] = WeaponType::NONE;
+    activeWeaponSlot = 0;
 
     // Default armors & pieces: ONLY NONE!
     equippedArmor = ArmorType::NONE;
@@ -231,6 +235,47 @@ void Inventory::UnlockWeapon(WeaponType type) {
     if (!HasWeapon(type)) {
         unlockedWeapons.push_back(type);
     }
+    // Auto-fill the first empty hotbar slot when discovering a new weapon
+    if (type != WeaponType::NONE && GetWeaponHotbarSlot(type) < 0) {
+        for (int i = 0; i < 3; ++i) {
+            if (weaponHotbar[i] == WeaponType::NONE) {
+                weaponHotbar[i] = type;
+                break;
+            }
+        }
+    }
+}
+
+WeaponType Inventory::GetHotbarWeapon(int slotIdx) const {
+    if (slotIdx < 0 || slotIdx >= 3) return WeaponType::NONE;
+    return weaponHotbar[slotIdx];
+}
+
+void Inventory::SetHotbarWeapon(int slotIdx, WeaponType type) {
+    if (slotIdx < 0 || slotIdx >= 3) return;
+    if (type != WeaponType::NONE) {
+        for (int i = 0; i < 3; ++i) {
+            if (i != slotIdx && weaponHotbar[i] == type) {
+                weaponHotbar[i] = weaponHotbar[slotIdx];
+                break;
+            }
+        }
+    }
+    weaponHotbar[slotIdx] = type;
+}
+
+void Inventory::SetActiveWeaponSlot(int slotIdx) {
+    if (slotIdx >= 0 && slotIdx < 3) {
+        activeWeaponSlot = slotIdx;
+    }
+}
+
+int Inventory::GetWeaponHotbarSlot(WeaponType type) const {
+    if (type == WeaponType::NONE) return -1;
+    for (int i = 0; i < 3; ++i) {
+        if (weaponHotbar[i] == type) return i;
+    }
+    return -1;
 }
 
 void Inventory::SetEquippedArmor(ArmorType type) {

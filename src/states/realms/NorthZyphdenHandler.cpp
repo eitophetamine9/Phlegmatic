@@ -343,7 +343,7 @@ void NorthZyphdenHandler::Update(
     if (IsKeyPressed(KEY_F)) {
         player.TriggerParry(particles);
     }
-    if (IsKeyPressed(KEY_H) || IsKeyPressed(KEY_ONE)) {
+    if (IsKeyPressed(KEY_H)) {
         player.UseHealthPotion(particles);
     }
     if (IsKeyPressed(KEY_V)) {
