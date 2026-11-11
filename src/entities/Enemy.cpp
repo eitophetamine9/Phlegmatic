@@ -22,6 +22,7 @@ Enemy::Enemy(EnemyType type, Vector2 startPos) : type(type), position(startPos) 
     will = 20.0f;
     quenchedTimer = 0.0f;
     shatteredTimer = 0.0f;
+    chillTimer = 0.0f;
 
     switch (type) {
         case EnemyType::SLASHER:
@@ -472,10 +473,19 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
     if (armorFractureTimer > 0.0f) {
         armorFractureTimer -= dt;
     }
+    if (chillTimer > 0.0f) {
+        chillTimer -= dt;
+        if (GetRandomValue(0, 6) == 0) {
+            particles.SpawnSparks(position, Color{ 130, 225, 255, 190 }, 1, 25.0f);
+        }
+    }
 
     float dx = playerPos.x - position.x;
     float dy = playerPos.y - position.y;
     float distToPlayer = sqrtf(dx * dx + dy * dy);
+
+    float chillMoveMult = IsChilled() ? 0.60f : 1.0f;
+    float chillWindupMult = IsChilled() ? 0.70f : 1.0f;
 
     // Aim calculation
     if (state == EnemyState::IDLE_CHASE || state == EnemyState::TELEGRAPH_WINDUP) {
@@ -484,7 +494,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
             float angleDiff = targetAngle - facingAngle;
             while (angleDiff > 180.0f) angleDiff -= 360.0f;
             while (angleDiff < -180.0f) angleDiff += 360.0f;
-            facingAngle += angleDiff * dt * (type == EnemyType::ARCHER ? 4.5f : 3.5f);
+            facingAngle += angleDiff * dt * chillWindupMult * (type == EnemyType::ARCHER ? 4.5f : 3.5f);
         } else {
             facingAngle = atan2f(dy, dx) * RAD2DEG;
         }
@@ -496,8 +506,8 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
             if (kitingRange > 0.0f && distToPlayer < kitingRange) {
                 // Back away from player
                 Vector2 moveDir = Vector2Normalize({ dx, dy });
-                velocity.x = -moveDir.x * (moveSpeed * 0.9f);
-                velocity.y = -moveDir.y * (moveSpeed * 0.9f);
+                velocity.x = -moveDir.x * (moveSpeed * 0.9f * chillMoveMult);
+                velocity.y = -moveDir.y * (moveSpeed * 0.9f * chillMoveMult);
             } else if (distToPlayer <= attackRange * 0.95f) {
                 // Ready to attack
                 state = EnemyState::TELEGRAPH_WINDUP;
@@ -707,15 +717,15 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     if (distToPlayer <= 320.0f && distFromSpawn <= 420.0f) {
                         // Aggroed! Move towards player
                         Vector2 moveDir = Vector2Normalize({ dx, dy });
-                        float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
+                        float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f) * chillMoveMult;
                         velocity.x = moveDir.x * currentSpeed;
                         velocity.y = moveDir.y * currentSpeed;
                     } else {
                         // Leashed / De-aggroed: return towards spawnPoint!
                         if (distFromSpawn > 20.0f) {
                             Vector2 toSpawn = Vector2Normalize({ spawnPoint.x - position.x, spawnPoint.y - position.y });
-                            velocity.x = toSpawn.x * (moveSpeed * 0.75f);
-                            velocity.y = toSpawn.y * (moveSpeed * 0.75f);
+                            velocity.x = toSpawn.x * (moveSpeed * 0.75f * chillMoveMult);
+                            velocity.y = toSpawn.y * (moveSpeed * 0.75f * chillMoveMult);
                             facingAngle = atan2f(toSpawn.y, toSpawn.x) * RAD2DEG;
                         } else {
                             velocity = { 0.0f, 0.0f };
@@ -724,7 +734,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                 } else {
                     // Approach player
                     Vector2 moveDir = Vector2Normalize({ dx, dy });
-                    float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f);
+                    float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f) * chillMoveMult;
                     velocity.x = moveDir.x * currentSpeed;
                     velocity.y = moveDir.y * currentSpeed;
                 }
@@ -765,7 +775,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         }
 
         case EnemyState::TELEGRAPH_WINDUP: {
-            stateTimer -= dt;
+            stateTimer -= dt * chillWindupMult;
             float progress = 1.0f - (stateTimer / windupDuration);
             telegraph.progress = fmaxf(0.0f, fminf(1.0f, progress));
             telegraph.origin = position;

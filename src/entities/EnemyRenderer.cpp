@@ -195,6 +195,22 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 5.0f + 2.0f * bPulse, Color{ 255, 45, 65, (unsigned char)(150 + 80 * bPulse) });
     }
 
+    if (enemy.IsChilled()) {
+        bodyColor = Color{
+            (unsigned char)(bodyColor.r * 0.55f + 110 * 0.45f),
+            (unsigned char)(bodyColor.g * 0.55f + 215 * 0.45f),
+            (unsigned char)(bodyColor.b * 0.45f + 255 * 0.55f),
+            bodyColor.a
+        };
+        float frostSpin = (float)GetTime() * 2.5f;
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 4.5f, Color{ 130, 230, 255, 185 });
+        for (int s = 0; s < 4; ++s) {
+            float sa = frostSpin + (float)s * (3.14159265f * 0.5f);
+            Vector2 spPos = { enemy.position.x + cosf(sa) * (enemy.radius + 6.5f), enemy.position.y + sinf(sa) * (enemy.radius + 6.5f) };
+            DrawPoly(spPos, 4, 3.8f, sa * RAD2DEG, Color{ 180, 242, 255, 220 });
+        }
+    }
+
     bool isStunned = (enemy.state == EnemyState::STUNNED);
     AssetManager::DrawEnemySilhouette(enemy.position, enemy.facingAngle, bodyColor, enemy.radius, isStunned);
 
@@ -600,35 +616,12 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         // Overhead Humor / Status tag
         if (enemy.IsNightfallElite()) {
             DrawText("NIGHTFALL ELITE", (int)(enemy.position.x - 36.0f), (int)(barY - 9.0f), 8, Color{ 205, 130, 255, 240 });
+        } else if (enemy.IsChilled()) {
+            DrawText("CHILLED", (int)(enemy.position.x - 19.0f), (int)(barY - 9.0f), 8, Color{ 135, 235, 255, 240 });
         } else if (enemy.IsQuenched()) {
             DrawText("QUENCHED", (int)(enemy.position.x - 22.0f), (int)(barY - 9.0f), 8, Color{ 140, 230, 255, 230 });
         } else if (enemy.IsShattered()) {
             DrawText("SHATTERED", (int)(enemy.position.x - 24.0f), (int)(barY - 9.0f), 8, Color{ 210, 140, 255, 230 });
         }
-    }
-
-    // Visceral Execution Reticle indicator when stunned
-    if (enemy.IsVulnerableToExecution()) {
-        float pulse = sinf((float)GetTime() * 8.0f) * 0.5f + 0.5f;
-        float reticleY = enemy.position.y - enemy.radius - 28.0f;
-        Color reticleCol = Color{ 255, (unsigned char)(70 + 130 * pulse), 40, 255 };
-
-        // Glowing animated execution diamond
-        Vector2 dTop = { enemy.position.x, reticleY - 9.0f - 2.0f * pulse };
-        Vector2 dRight = { enemy.position.x + 8.0f + 2.0f * pulse, reticleY };
-        Vector2 dBottom = { enemy.position.x, reticleY + 9.0f + 2.0f * pulse };
-        Vector2 dLeft = { enemy.position.x - 8.0f - 2.0f * pulse, reticleY };
-        DrawLineEx(dTop, dRight, 2.5f, reticleCol);
-        DrawLineEx(dRight, dBottom, 2.5f, reticleCol);
-        DrawLineEx(dBottom, dLeft, 2.5f, reticleCol);
-        DrawLineEx(dLeft, dTop, 2.5f, reticleCol);
-        DrawCircleV({ enemy.position.x, reticleY }, 3.0f, Color{ 255, 245, 180, 255 });
-
-        // Tactical execute badge
-        const char* promptTxt = "[E] EXECUTE";
-        int txtW = MeasureText(promptTxt, 10);
-        DrawRectangle((int)(enemy.position.x - txtW * 0.5f - 4), (int)(reticleY - 24.0f), txtW + 8, 14, Color{ 20, 15, 22, 230 });
-        DrawRectangleLines((int)(enemy.position.x - txtW * 0.5f - 4), (int)(reticleY - 24.0f), txtW + 8, 14, reticleCol);
-        DrawText(promptTxt, (int)(enemy.position.x - txtW * 0.5f), (int)(reticleY - 22.0f), 10, Color{ 255, 235, 120, 255 });
     }
 }

@@ -35,13 +35,6 @@ public:
     WeaponType GetWeapon() const { return currentWeapon; }
     WeaponType GetEquippedWeapon() const { return currentWeapon; }
 
-    // Visceral Execution & Adrenaline Buff
-    bool IsExecuting() const { return isExecuting; }
-    void StartExecution(Vector2 targetPos);
-    bool HasAdrenalineBuff() const { return adrenalineTimer > 0.0f; }
-    float GetAdrenalineTimer() const { return adrenalineTimer; }
-    void TriggerAdrenalineBuff(float duration) { adrenalineTimer = duration; }
-
     void SetArmor(ArmorType newArmor);
     ArmorType GetArmor() const { return currentArmor; }
 
@@ -141,6 +134,7 @@ public:
     float GetStamina() const { return stamina; }
     float GetMaxStamina() const { return maxStamina; }
     void ResetStamina() { stamina = maxStamina; }
+    void RestoreStamina(float amount) { stamina = fminf(maxStamina, stamina + amount); }
     bool IsParrying() const { return isParrying; }
     bool IsDashing() const { return isDashing; }
     bool IsAlive() const { return health > 0.0f; }
@@ -173,7 +167,7 @@ public:
     float GetStaggerTimer() const { return staggerTimer; }
 
     // Invulnerability / I-Frames
-    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f || isExecuting; }
+    bool HasInvulnerability() const { return iFrameTimer > 0.0f || willOfAtlasTimer > 0.0f; }
     bool HasWillOfAtlasActive() const { return willOfAtlasTimer > 0.0f; }
     float GetWillOfAtlasTimer() const { return willOfAtlasTimer; }
     float GetWillOfAtlasCooldown() const { return willOfAtlasCooldown; }
@@ -355,12 +349,6 @@ private:
     float frostbiteMeter;
     bool isFrostbitten;
     float snowFootstepTimer;
-
-    // Visceral Execution state
-    bool isExecuting;
-    float executionTimer;
-    Vector2 executionTargetPos;
-    float adrenalineTimer;
 
     // Consumable Elixir Buff Timers
     float stoneskinTimer;

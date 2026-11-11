@@ -58,9 +58,6 @@ public:
         stunDuration = duration;
         stateTimer = duration;
     }
-    bool IsVulnerableToExecution() const {
-        return state == EnemyState::STUNNED && stateTimer > 0.05f && health > 0.0f;
-    }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
     EnemyType GetType() const { return type; }
@@ -81,6 +78,8 @@ public:
     bool HasArmorFracture() const { return armorFractureTimer > 0.0f; }
     void ApplySolarBurn(float duration) { solarBurnTimer = duration; }
     bool HasSolarBurn() const { return solarBurnTimer > 0.0f; }
+    void ApplyChill(float duration) { if (duration > chillTimer) chillTimer = duration; }
+    bool IsChilled() const { return chillTimer > 0.0f; }
 
     bool IsBoss() const { return type == EnemyType::INQUISITOR_BOSS || type == EnemyType::ZIL_BOSS || type == EnemyType::KNIGHT_LENON_BOSS || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::BERSERKER_TROLL || type == EnemyType::GALE_ARCHER_BOSS || type == EnemyType::FROST_REVENANT; }
     bool HasMeleeHitbox() const {
@@ -124,6 +123,7 @@ private:
     float armorFractureTimer = 0.0f;
     float solarBurnTimer = 0.0f;
     float solarBurnTickTimer = 0.0f;
+    float chillTimer = 0.0f;
 
     Vector2 spawnPoint;
     Vector2 position;

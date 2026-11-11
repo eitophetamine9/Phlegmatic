@@ -259,7 +259,7 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         default:
             stats = {
                 "Crusader Blade",
-                "Consecrated broadsword of the Order. Heavy attack executes a 3-stage martial combo: Crescent Cleave (restores +12 Composure), Shock Thrust (piercing line interrupting enemy windups), and Radiant Execution (downward holy cleave dealing +50% bonus damage to staggered foes).",
+                "Consecrated broadsword of the Order. Heavy attack executes a 3-stage martial combo: Crescent Cleave (restores +12 Composure), Shock Thrust (piercing line interrupting enemy windups), and Radiant Sunder (downward holy cleave dealing +50% bonus damage to staggered foes).",
                 18.0f, 75.0f, 110.0f, 0.22f, 0.35f, 15.0f,
                 88.0f, 125.0f, 160.0f, 0.22f, 0.38f, 2.20f, 30.0f,
                 20.0f, 0.85f,

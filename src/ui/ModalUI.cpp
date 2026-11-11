@@ -109,7 +109,7 @@ bool ModalUI::DrawControls(int windowWidth, int windowHeight, Vector2 mousePos, 
             { "Right Click",   "Heavy Atk","Charged lunging cleave. Devastating damage and massive knockback.", Color{ 255, 180, 60, 255 } },
             { "Q Key",         "DASH",     "High-velocity directional dash with i-frames invulnerability. Evade attacks!", Color{ 120, 240, 180, 255 } },
             { "F Key",         "PARRY",    "Active 0.28s guard. Timely parries stagger foes & grant +50% counter dmg buff!", Color{ 255, 230, 80, 255 } },
-            { "E Key",         "Interact/Exec", "Talk to NPCs, trigger Visceral Execution on staggered foes.", Color{ 200, 150, 255, 255 } },
+            { "E Key",         "Interact",  "Talk to NPCs, inspect altars, forge weapons, and rest at bonfires.", Color{ 200, 150, 255, 255 } },
             { "TAB / I Key",   "Inventory", "Open Equipment Matrix, 3-Slot Weapon Hotbar, Chronicles & Bestiary.", Color{ 255, 215, 80, 255 } },
             { "B Key",         "Bestiary",  "Open the Humoral Bestiary & Monster Weakness Codex directly.", Color{ 140, 210, 255, 255 } },
             { "1 - 3 Keys",    "Weapon Bar","Equip weapons bound to Hotbar Slots 1, 2, and 3.", Color{ 255, 215, 80, 255 } },
@@ -2257,9 +2257,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         if (cur.killIdx == 9 || cur.killIdx == 10) {
             perkTitle = "HUNTING PERK: TROLL SLAYER";
-            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Poise Dmg, Executions Heal 25 HP, +15% Base Dmg, +25 Frost Resist." :
+            perkDesc = u15 ? "ACTIVE [TIER III]: +25% Dmg vs Trolls, +25 Frost Resist, Troll Kills Heal 25 HP." :
                        (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :
-                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Poise & Heal on Execute.");
+                             "LOCKED: 5 kills grants +15% Dmg & Frost Resist; 15 kills grants +25% Dmg & Heal 25 HP on Troll Kill.");
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         } else if (cur.killIdx == 5 || cur.killIdx == 6) {
             perkTitle = "HUNTING PERK: GOLEM BREAKER";
@@ -2275,9 +2275,9 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         } else {
             perkTitle = "HUNTING PERK: CULTIST PURIFIER";
-            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore 15 Stamina and Extend Adrenaline Buff." :
+            perkDesc = u15 ? "ACTIVE [TIER III]: +15% Damage vs Cultists, Kills Restore +15 Stamina & +10 Composure." :
                        (u5 ? "ACTIVE [TIER II]: +10% Melee Damage vs Cultists, +10 Max Composure." :
-                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Adrenaline on kill.");
+                             "LOCKED: 5 kills grants +10% Dmg & Composure; 15 kills grants Stamina and Composure on kill.");
             perkBadgeCol = u15 ? Color{ 255, 215, 80, 255 } : (u5 ? Color{ 120, 220, 255, 255 } : Color{ 150, 165, 185, 180 });
         }
 

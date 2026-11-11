@@ -101,10 +101,6 @@ Player::Player() {
 
     snowFootstepTimer = 0.0f;
 
-    isExecuting = false;
-    executionTimer = 0.0f;
-    executionTargetPos = { 0.0f, 0.0f };
-    adrenalineTimer = 0.0f;
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
@@ -226,10 +222,6 @@ void Player::Init(Vector2 startPos) {
 
     snowFootstepTimer = 0.0f;
 
-    isExecuting = false;
-    executionTimer = 0.0f;
-    executionTargetPos = { 0.0f, 0.0f };
-    adrenalineTimer = 0.0f;
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
@@ -303,10 +295,6 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
 
     snowFootstepTimer = 0.0f;
 
-    isExecuting = false;
-    executionTimer = 0.0f;
-    executionTargetPos = { 0.0f, 0.0f };
-    adrenalineTimer = 0.0f;
     stoneskinTimer = 0.0f;
     glacialImmunityTimer = 0.0f;
     berserkerTimer = 0.0f;
@@ -604,9 +592,6 @@ float Player::GetTotemDamageMultiplier() const {
     } else {
         mult = GetTotemStats(currentTotem).damageMultiplier;
     }
-    if (adrenalineTimer > 0.0f) {
-        mult *= 1.15f; // +15% Damage during Adrenaline rush from Visceral Execution
-    }
     if (berserkerTimer > 0.0f) {
         mult *= 1.30f; // +30% Damage while Berserker Draught active
     }
@@ -674,9 +659,6 @@ float Player::GetSpeed() const {
     }
     if (isFrostbitten) {
         base *= 0.80f; // -20% Move Speed when Frostbitten
-    }
-    if (adrenalineTimer > 0.0f) {
-        base *= 1.20f; // +20% Move Speed during Adrenaline rush from Visceral Execution
     }
     return base;
 }
@@ -827,21 +809,11 @@ bool Player::EquipHotbarSlot(int slotIdx, ParticleSystem& particles) {
     return true;
 }
 
-void Player::StartExecution(Vector2 targetPos) {
-    isExecuting = true;
-    executionTimer = 0.45f;
-    executionTargetPos = targetPos;
-    float dx = targetPos.x - position.x;
-    float dy = targetPos.y - position.y;
-    facingAngle = atan2f(dy, dx) * RAD2DEG;
-    velocity = { 0.0f, 0.0f };
-}
-
 void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles) {
     if (!IsAlive()) return;
 
-    // Face towards mouse unless locked in dash or execution
-    if (!isDashing && !isExecuting) {
+    // Face towards mouse unless locked in dash
+    if (!isDashing) {
         float dx = mouseWorldPos.x - position.x;
         float dy = mouseWorldPos.y - position.y;
         facingAngle = atan2f(dy, dx) * RAD2DEG;
@@ -856,7 +828,6 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     if (potionCooldown > 0.0f) potionCooldown -= dt;
     if (iFrameTimer > 0.0f) iFrameTimer -= dt;
     if (staggerImmunityTimer > 0.0f) staggerImmunityTimer -= dt;
-    if (adrenalineTimer > 0.0f) adrenalineTimer -= dt;
     if (stoneskinTimer > 0.0f) stoneskinTimer -= dt;
     if (glacialImmunityTimer > 0.0f) {
         glacialImmunityTimer -= dt;
@@ -867,24 +838,6 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
         grayHealthTimer -= dt;
         if (grayHealthTimer <= 0.0f) {
             grayHealth = 0.0f;
-        }
-    }
-
-    // Visceral Execution update
-    if (isExecuting) {
-        executionTimer -= dt;
-        iFrameTimer = 0.25f;
-        Vector2 toTarget = { executionTargetPos.x - position.x, executionTargetPos.y - position.y };
-        float dist = sqrtf(toTarget.x * toTarget.x + toTarget.y * toTarget.y);
-        if (dist > 12.0f) {
-            velocity.x = (toTarget.x / dist) * 220.0f;
-            velocity.y = (toTarget.y / dist) * 220.0f;
-        } else {
-            velocity = { 0.0f, 0.0f };
-        }
-        if (executionTimer <= 0.0f) {
-            isExecuting = false;
-            velocity = { 0.0f, 0.0f };
         }
     }
 
@@ -1906,7 +1859,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
         velocity.y *= 0.70f;
 
-    } else if (!isDashing && !isDaggerLunging && !isExecuting) {
+    } else if (!isDashing && !isDaggerLunging) {
 
         Vector2 moveDir = { 0.0f, 0.0f };
 

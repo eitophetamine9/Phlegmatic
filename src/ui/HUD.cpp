@@ -404,12 +404,6 @@ void HUD::DrawActionBar(int windowWidth, int windowHeight, const Player& player)
         activeBuffs.push_back({ "PHLEGMATIC APATHY: -80% KB", Color{ 140, 215, 255, 255 }, Color{ 200, 240, 255, 255 }, Color{ 20, 38, 55, 240 }, false });
     }
 
-    if (player.HasAdrenalineBuff()) {
-        char b[32];
-        snprintf(b, sizeof(b), "ADRENALINE: %.1fs", player.GetAdrenalineTimer());
-        activeBuffs.push_back({ b, Color{ 255, 120, 40, 255 }, Color{ 255, 195, 110, 255 }, Color{ 52, 22, 10, 240 }, true });
-    }
-
     if (player.HasStoneskinActive()) {
         char b[32];
         snprintf(b, sizeof(b), "STONESKIN: %.1fs", player.GetStoneskinTimer());

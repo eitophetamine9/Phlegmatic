@@ -41,8 +41,6 @@ void PlayerRenderer::Draw(const Player& player) {
 
     else if (player.isDashing) bodyColor = Color{ 100, 200, 255, 180 };
 
-    else if (player.IsExecuting()) bodyColor = Color{ 255, 60, 60, 255 };
-
     else if (player.staggerTimer > 0.0f) bodyColor = Color{ 240, 180, 60, 240 };
 
 
