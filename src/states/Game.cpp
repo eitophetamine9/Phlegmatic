@@ -3074,7 +3074,7 @@ void Game::Update(float dt) {
 
 
 
-                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED - COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
 
 
 
@@ -3322,7 +3322,7 @@ void Game::Update(float dt) {
 
 
 
-                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED - COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
 
 
 

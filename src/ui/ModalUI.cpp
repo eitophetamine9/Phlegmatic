@@ -2218,7 +2218,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         // Header Title
         FontManager::DrawTextTitleCenteredShadow(cur.name, (int)(bRightX + bRightW * 0.5f), (int)contentY + 16, 20, Color{ 255, 235, 140, 255 });
-        std::string sub = std::string(cur.latinTitle) + "  —  " + cur.humorName;
+        std::string sub = std::string(cur.latinTitle) + "  -  " + cur.humorName;
         FontManager::DrawTextCenteredShadow(sub, (int)(bRightX + bRightW * 0.5f), (int)contentY + 44, 12, cur.humorColor);
 
         // Ornamental divider
@@ -3199,7 +3199,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
     
 
-    const char* subQuote = "“The northern road into Zyphden and the remaining kingdoms of Tydeshire is currently in development.”";
+    const char* subQuote = "\"The northern road into Zyphden and the remaining kingdoms of Tydeshire is currently in development.\"";
 
     int subW = MeasureText(subQuote, 13);
 
@@ -3589,7 +3589,7 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
 
 
 
-    const char* realmSubtitle = "Guardian of the Gale Winds  •  Seat of King Kreptu's Court";
+    const char* realmSubtitle = "Guardian of the Gale Winds  |  Seat of King Kreptu's Court";
 
     int subW = FontManager::MeasureText(realmSubtitle, 13);
 

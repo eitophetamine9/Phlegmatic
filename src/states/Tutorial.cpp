@@ -187,7 +187,7 @@ void TutorialManager::TriggerStepPopup(TutorialStep step) {
             break;
         case TutorialStep::DEFENSE_SENTINEL:
             popupTitle = "DEFENSE TRIAL: COMPOSURE & PHLEGMATIC MECHANICS";
-            popupBody = "A Ruin Sentinel has awakened! Master your Phlegmatic Composure to dominate combat:\n\n• COMPOSURE GAUGE & POISE TIERS:\n  - Discomposed (<25%): -20% Stamina recovery, vulnerable to Bleed.\n  - Stoic Poise (>=80%): +20% Stamina recovery, immune to Bleed & Stagger.\n  - Phlegmatic Trance (100%): Press [SPACE] to unleash tranquil fury and heightened poise!\n\n• BUILDING COMPOSURE:\n  - Timed Parry [F]: Deflect before impact (+25 Composure, staggers foe, +50% Counter Damage).\n  - Evasive Dash [Q]: Slip through strikes with i-frames (+15 Composure).\n  - Whiffing attacks/parries or taking unmitigated hits lowers composure.\n\n• Defeat the Sentinel to break the ward sealing the High Altar.";
+            popupBody = "A Ruin Sentinel has awakened! Master your Phlegmatic Composure to dominate combat:\n\n* COMPOSURE GAUGE & POISE TIERS:\n  - Discomposed (<25%): -20% Stamina recovery, vulnerable to Bleed.\n  - Stoic Poise (>=80%): +20% Stamina recovery, immune to Bleed & Stagger.\n  - Phlegmatic Trance (100%): Press [SPACE] to unleash tranquil fury and heightened poise!\n\n* BUILDING COMPOSURE:\n  - Timed Parry [F]: Deflect before impact (+25 Composure, staggers foe, +50% Counter Damage).\n  - Evasive Dash [Q]: Slip through strikes with i-frames (+15 Composure).\n  - Whiffing attacks/parries or taking unmitigated hits lowers composure.\n\n* Defeat the Sentinel to break the ward sealing the High Altar.";
             popupHint = "[F] Parry (+25 Poise)  |  [Q] Dash (+15 Poise)  |  [SPACE] Trance at 100%";
             break;
         case TutorialStep::GATE_OPENED:
@@ -441,7 +441,7 @@ void TutorialManager::Update(float dt, Player& player, GameMap& map, ParticleSys
                 currentStep = TutorialStep::GATE_OPENED;
                 TriggerStepPopup(TutorialStep::GATE_OPENED);
                 SoundFX::PlayGateOpen();
-                particles.SpawnFloatingText(playerPos, "SENTINEL DEFEATED — ALTAR STEPS CLEARED!", Color{ 120, 240, 180, 255 }, 22.0f);
+                particles.SpawnFloatingText(playerPos, "SENTINEL DEFEATED - ALTAR STEPS CLEARED!", Color{ 120, 240, 180, 255 }, 22.0f);
             }
             break;
         }
