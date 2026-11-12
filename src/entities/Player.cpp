@@ -3257,11 +3257,11 @@ void Player::Draw() const {
 }
 
 bool Player::HasTrollSlayerT2() const {
-    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 5;
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10) + inventory.GetEnemyKills(11)) >= 5;
 }
 
 bool Player::HasTrollSlayerT3() const {
-    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 15;
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10) + inventory.GetEnemyKills(11)) >= 15;
 }
 
 bool Player::HasGolemBreakerT2() const {
@@ -3292,7 +3292,7 @@ bool Player::HasCultistPurifierT3() const {
 
 float Player::GetBestiaryDamageMultiplier(EnemyType type) const {
     float mult = 1.0f;
-    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL) {
+    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL || type == EnemyType::FROST_REVENANT) {
         if (HasTrollSlayerT3()) mult *= 1.25f;
         else if (HasTrollSlayerT2()) mult *= 1.15f;
     } else if (type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) {

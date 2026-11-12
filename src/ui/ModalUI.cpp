@@ -2153,6 +2153,15 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 "Chieftain of the northern highland troll clan who drank from the corrupted subterranean blood veins.",
                 "When death nears, his blood surges with ferocious fury, shattering enemy armor and poise.",
                 "Guards the ancient Blood Altar in the highest crags, waiting for a champion to challenge his throne."
+            },
+            {
+                "Frost Revenant", "Phantasma Glacialis", "PHLEGMATIC (Frost Boss)", Color{ 120, 230, 255, 255 }, 11,
+                "Ethereal rime phantasm that glides across permafrost, unleashing ice spikes and teleport flurries.",
+                "Time evasive dashes through teleport re-entries and stay aggressive while frostbite recovery is down.",
+                "Silver Shingles (50-75), Shadow Essence (2x), Elixir Flasks (2x)",
+                "Fallen crusader specter bound beneath the Permafrost Crypts of the Phlegmatic Chasm.",
+                "Condenses ambient moisture into razor ice barrages capable of rapidly chilling careless challengers.",
+                "Anchored to the Glacial Sarcophagus Dais until defeated alongside the deepest northern crypt seals."
             }
         };
 
@@ -2259,7 +2268,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         const char* perkDesc = "Accumulate kills to unlock family-wide hunting traits.";
         Color perkBadgeCol = Color{ 150, 165, 185, 200 };
 
-        if (cur.killIdx == 9 || cur.killIdx == 10) {
+        if (cur.killIdx == 9 || cur.killIdx == 10 || cur.killIdx == 11) {
             perkTitle = "HUNTING PERK: TROLL SLAYER";
             perkDesc = u15 ? "ACTIVE [TIER III]: +25% Dmg vs Trolls, +25 Frost Resist, Troll Kills Heal 25 HP." :
                        (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :

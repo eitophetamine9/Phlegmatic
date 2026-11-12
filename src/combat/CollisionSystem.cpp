@@ -14,7 +14,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             LootDrop::SpawnFromEnemy(defeatedEnemy, *outLootDrops);
         }
         EnemyType eType = defeatedEnemy.GetType();
-        if (player.HasTrollSlayerT3() && (eType == EnemyType::FROST_TROLL || eType == EnemyType::BERSERKER_TROLL)) {
+        if (player.HasTrollSlayerT3() && (eType == EnemyType::FROST_TROLL || eType == EnemyType::BERSERKER_TROLL || eType == EnemyType::FROST_REVENANT)) {
             player.Heal(25.0f);
             particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 20.0f);
             particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 18, 120.0f);
