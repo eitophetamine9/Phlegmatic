@@ -1807,8 +1807,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 FontManager::DrawTextWrapped("When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
-                DrawText("[Companion]: Mini Elemental Golem (380 HP, 42 DEF)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
-                FontManager::DrawTextWrapped("Wields 3 new combat attack patterns: Heavy AoE Slam, Forward Bash Knockback, and Elemental Spike Throw.",
+                DrawText("[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
+                FontManager::DrawTextWrapped("Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
                 DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
@@ -1816,7 +1816,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
                 DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
-                FontManager::DrawTextWrapped("Bestows +65% overall damage, +35% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
+                FontManager::DrawTextWrapped("Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
                 DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });

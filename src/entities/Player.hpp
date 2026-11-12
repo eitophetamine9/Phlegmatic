@@ -45,18 +45,20 @@ public:
     ChestplateType GetChestplate() const { return equippedChestplate; }
     LeggingsType GetLeggings() const { return equippedLeggings; }
 
-    // Friendly Mini Elemental Golem Companion (75% stats of boss minion)
+    // Friendly Mini Elemental Golem Companion (empowered frontline tank/bruiser)
     struct CompanionGolem {
         bool active = false;
         Vector2 position = { 0.0f, 0.0f };
-        float health = 240.0f;     // 75% of mini golem (320 HP)
-        float maxHealth = 240.0f;
-        float defense = 28.0f;     // 75% of mini golem (38 DEF)
-        float damage = 18.0f;
-        float radius = 15.0f;
+        float health = 460.0f;
+        float maxHealth = 460.0f;
+        float defense = 55.0f;
+        float damage = 32.0f;
+        float radius = 16.0f;
         float attackCooldown = 0.0f;
         float respawnTimer = 0.0f;
         float strikeTimer = 0.0f;
+        float invulnTimer = 0.0f;
+        int attackPattern = 0;
     } companion;
 
     const CompanionGolem& GetCompanion() const { return companion; }

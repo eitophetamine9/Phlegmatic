@@ -95,7 +95,7 @@ inline HelmetStats GetHelmetStats(HelmetType type) {
             return {
                 "Shadowstrider Cowl",
                 "Dark-weave assassin's hood that blends into the damp dungeon fog.",
-                2.0f, 0.0f, 1.06f, 1.15f, 6.0f,
+                2.0f, 0.0f, 1.03f, 1.15f, 6.0f,
                 Color{ 18, 22, 32, 255 }, Color{ 60, 240, 175, 255 }, ArmorSet::SHADOWSTRIDER
             };
         case HelmetType::SCRAP_SALLET:
@@ -157,7 +157,7 @@ inline ChestplateStats GetChestplateStats(ChestplateType type) {
             return {
                 "Shadowstrider Doublet",
                 "Supple midnight-leather vest tailored for silent footwork and agile blade dances.",
-                4.0f, 0.0f, 1.08f, 1.15f, 2.0f,
+                4.0f, 0.0f, 1.04f, 1.15f, 2.0f,
                 Color{ 24, 28, 40, 255 }, Color{ 95, 70, 135, 255 }, ArmorSet::SHADOWSTRIDER
             };
         case ChestplateType::SCRAP_CUIRASS:
@@ -219,7 +219,7 @@ inline LeggingsStats GetLeggingsStats(LeggingsType type) {
             return {
                 "Shadowstrider Tights",
                 "Ultra-light treated leather breeches permitting silent and swift dashing.",
-                2.0f, 0.0f, 1.07f, 1.15f, 2.0f,
+                2.0f, 0.0f, 1.03f, 1.15f, 2.0f,
                 Color{ 20, 24, 35, 255 }, Color{ 80, 60, 115, 255 }, ArmorSet::SHADOWSTRIDER
             };
         case LeggingsType::SCRAP_GREAVES:
@@ -309,7 +309,7 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 ArmorSet::SHADOWSTRIDER,
                 "Shadowstrider Garb",
                 "Veil of the Mist",
-                "+20% Move Speed, -30% Dash Stamina Cost, +0.10s Dodge i-frames. [Daggers & Bow Synergy]: +15% Crit Chance. Perfect evades have a 15% chance to trigger an AoE Smoke Mist that increases evasion and poisons enemies inside.",
+                "+10% Set Move Speed (~21% total w/ pieces), -30% Dash Stamina Cost, +0.10s Dodge i-frames. [Daggers & Bow Synergy]: +15% Crit Chance. Perfect evades have a 15% chance to trigger an AoE Smoke Mist that increases evasion and poisons enemies inside.",
                 "Shadow Decoy & Vanish",
                 "Vaporizes into mist with 0.5s invulnerability. Leaves an illusion decoy drawing aggro before exploding for 40 dmg.",
                 25.0f

@@ -35,9 +35,9 @@ inline TotemStats GetTotemStats(TotemType type) {
             return {
                 "Totem of Insanity",
                 "A feral crimson relic carved from the skull horn of the Berserker Troll. Awakens unstoppable berserker bloodlust, surging overall damage and speed, but leaving the bearer terribly vulnerable and reckless to all hostile strikes. When health falls below 40%, blood frenzy awakens, surging overall damage from +65% to +135%.",
-                "+65% DMG (+135% DMG below 40% HP), +35% Move Speed, +25% Attack Speed",
+                "+65% DMG (+135% DMG below 40% HP), +18% Move Speed, +25% Attack Speed",
                 "-50% Armor Defense, Takes x1.5 Extra Damage from all enemy attacks",
-                1.65f, 0.50f, 1.35f, 1.30f, 0.75f, 0.0f, 0.0f,
+                1.65f, 0.50f, 1.18f, 1.30f, 0.75f, 0.0f, 0.0f,
                 Color{ 255, 45, 60, 255 }
             };
         case TotemType::TOTEM_MIST:
@@ -61,9 +61,9 @@ inline TotemStats GetTotemStats(TotemType type) {
         case TotemType::ELEMENTAL_CORE_TOTEM:
             return {
                 "Elemental Core Totem",
-                "A core of primordial magma, frost, and basalt. Awakens an empowered Mini Elemental Golem (380 HP, 42 DEF) wielding AoE slams, bash knockbacks, and ranged spike throws, plus piercing elemental bolts.",
-                "Empowered Mini Golem Companion (Slam AoE, Bash Knockback, Spike Throw), Piercing Projectile (54 DMG)",
-                "Companion Dies: 60s Respawn | -10% Movement Speed",
+                "A core of primordial magma, frost, and basalt. Awakens an empowered Mini Elemental Golem (460 HP, 55 DEF, +4 HP/s Regen) wielding Heavy AoE Slams (36 DMG), Forward Bash Fractures (32 DMG), and Piercing Spike Throws (34 DMG), plus 54 DMG bearer bolts.",
+                "Empowered Mini Golem (460 HP, 55 DEF, Slam/Bash/Spike), Bearer Bolt (54 DMG, 3s CD)",
+                "Companion Dies: 35s Respawn | -10% Movement Speed",
                 1.0f, 1.25f, 0.90f, 1.0f, 1.0f, 25.0f, 0.0f,
                 Color{ 255, 140, 45, 255 }
             };
