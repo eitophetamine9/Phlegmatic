@@ -63,6 +63,12 @@
 * **Bow & Daggers Stamina**: Removed the 5-hit free-swing bypass on daggers (`Dual Daggers`: `9` light / `28` heavy / `16` dash; `Twin Zephyr Daggers`: `8` light / `25` heavy / `14` dash) and raised `Windrunner's Recurve` arrow cost (`18` light / `42` heavy stamina).
 * **Totem of Mist Tuning**: Tuned movement speed multiplier to `0.95x` (`-5%`), removed cooldown haste (`1.0x`), and adjusted stamina regeneration to `+10%` while preserving Mist Fairy crits (`+20%` chance, `+35%` dmg) and healing orbs (`+30 HP`).
 
+#### 9. Companion Buffs, Speed Rebalance & Persistence Polish (`ver.0.0.1k` Follow-up)
+* **Save & Bestiary Progression Fixes**: Raised `LORE_FRAGMENT_COUNT` (`14` -> `15`) so Fragment XV (`frag_15`) persists properly in save slots, and raised `BESTIARY_COUNT` (`11` -> `12`) to track **Frost Revenant** (`Phantasma Glacialis`) kills alongside northern Frost/Troll Slayer perks.
+* **Empowered Mini Elemental Golem Companion**: Raised companion durability to `460 HP` and `55 DEF` with `+4 HP/s` self-regeneration, `0.55s` hit invulnerability frames (preventing multi-frame boss strike shreds), faster movement (`215 px/s`), `35s` shatter respawn, and a 3-pattern attack rotation (**Heavy AoE Slam** `36 DMG` / `80px`, **Forward Bash Knockback** `32 DMG` + Armor Fracture, and **Elemental Spike Throw** `34 DMG` piercing projectile up to `280px`).
+* **Shadowstrider & Totem Speed Rebalance**: Tempered Shadowstrider piece modifiers (`1.03 / 1.04 / 1.03`) and full-set speed (`1.25x -> 1.10x`) for a balanced `~+21%` nimble feel, reduced **Totem of Insanity** speed (`+35% -> +18%`), and eased **Basalt Golem**'s extra set penalty (`0.90x -> 0.96x`) so heavy sets stay responsive.
+* **UI Text Hygiene**: Normalized non-ASCII smart quotes, em-dashes, and bullets in rendered UI, dialogue, and lore strings to pure ASCII for crisp Raylib bitmap rendering.
+
 ---
 
 ## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns

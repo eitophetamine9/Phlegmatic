@@ -1,7 +1,7 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 11, 2026
+Generated: November 12, 2026
 Branch: ver.0.0.1k
 Release Version: 0.0.1k
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
@@ -779,5 +779,10 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Reworked Twin Glacial Cleavers (dual-wield + 4-stage Fury of Cleaves), Sun-Forged Claymore (2-stage Solar Cataclysm), Storm Glaive (2-stage Tempest Cyclone + Crescent Gale Wave).
   * Revamped Frostwarden Armor: Enemy Chill status (-40% speed), FROST NOVA [V] with 12-spire VFX, 6s 45 HP Ice Ward retaliation, 30% Cold Resist, and +20% heavy poise.
   * Raised stamina on Windrunner Bow (18/42) & Daggers (9/28, 8/25; removed 5-hit free bypass) and tuned Totem of Mist speed/haste (0.95x speed, 1.0x cooldown, +10% stamina regen).
+- Save, Bestiary, Companion & Speed Follow-Up Polish:
+  * Raised LORE_FRAGMENT_COUNT (14 -> 15) so Fragment XV persists in SaveManager, and added Frost Revenant as Bestiary entry #12 (BESTIARY_COUNT = 12).
+  * Buffed Mini Elemental Golem Companion to 460 HP / 55 DEF with 0.55s hit i-frames, +4 HP/s regen, 35s respawn, and 3-pattern rotation (AoE Slam 36 DMG, Forward Bash Fracture 32 DMG, Piercing Spike 34 DMG up to 280px).
+  * Rebalanced Shadowstrider speed pieces (1.03/1.04/1.03) and set bonus (1.10x -> ~+21% net nimble speed), nerfed Totem of Insanity speed (+35% -> +18%), and softened Basalt Golem extra penalty (0.90x -> 0.96x).
+  * Normalized non-ASCII punctuation across UI, dialogue, and lore strings.
 
 
