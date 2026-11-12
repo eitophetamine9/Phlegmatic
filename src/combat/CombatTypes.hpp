@@ -69,11 +69,11 @@ enum class ArmorSet {
 
 enum class TotemType {
     NONE,
-    TOTEM_SANITY,          // Campaign: +15% overall damage, no nerfs
-    TOTEM_INSANITY,        // Sandbox: +30% overall damage, -10% armor
-    TOTEM_MIST,            // Sandbox: +20% stamina recovery, +5% cd reduction, -5% damage
-    CRUSADER_TOTEM,        // Sandbox: +30% defense, -10% movement speed
-    ELEMENTAL_CORE_TOTEM,  // Secret Boss: +Defense, projectile on light attack (5s CD), -speed
+    TOTEM_SANITY,          // Crossroads: +15% overall damage, +15 Will, no nerfs
+    TOTEM_INSANITY,        // Northern Crags Boss: +65% DMG (+135% <40% HP), +18% move speed, +25% atk speed, -50% DEF, x1.5 taken
+    TOTEM_MIST,            // Mist Forest Boss: Mist Fairy (+20% crit, +35% crit dmg, +30 HP orbs), +10% stam regen, -5% speed
+    CRUSADER_TOTEM,        // Zyphden Spar: +25% defense, +35 max HP, +18% attack, Will of Atlas, -12% speed
+    ELEMENTAL_CORE_TOTEM,  // Quarry Boss: +25% DEF, Mini Golem (460 HP, 55 DEF, 3 patterns), 54 DMG bolt (3s CD), -10% speed
     TOTEM_PHLEGMATIC_CORE  // Northern Highland: -80% knockback, gray health recovery, chill counter
 };
 

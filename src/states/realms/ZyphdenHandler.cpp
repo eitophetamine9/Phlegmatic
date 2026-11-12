@@ -1229,9 +1229,9 @@ void ZyphdenHandler::Update(
 
                         std::vector<std::string> pages = {
 
-                            "Step close to the hearth and let the chill seep out of your bones, traveler. After what you’ve walked through on the Crossroads highway, you look like you haven't slept under a dry roof in weeks. The fire is warm, and the stew is fresh.",
+                            "Step close to the hearth and let the chill seep out of your bones, traveler. After what you've walked through on the Crossroads highway, you look like you haven't slept under a dry roof in weeks. The fire is warm, and the stew is fresh.",
 
-                            "Zyphden used to be a city of open laughter and high banners, but ever since the northern roads went quiet, every stranger at my door brings fresh dread. Listen... those heavy footsteps outside the archway. That’s Captain Lenon’s stride. He rarely visits the tavern unless the wind carries trouble."
+                            "Zyphden used to be a city of open laughter and high banners, but ever since the northern roads went quiet, every stranger at my door brings fresh dread. Listen... those heavy footsteps outside the archway. That's Captain Lenon's stride. He rarely visits the tavern unless the wind carries trouble."
 
                         };
 

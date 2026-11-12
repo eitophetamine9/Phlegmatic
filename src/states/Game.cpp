@@ -3074,7 +3074,7 @@ void Game::Update(float dt) {
 
 
 
-                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED - COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
 
 
 
@@ -3322,7 +3322,7 @@ void Game::Update(float dt) {
 
 
 
-                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED — COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "ARENA LOCKED - COMPLETE CHAPTER 1 FIRST!", Color{ 255, 90, 90, 255 }, 20.0f);
 
 
 
@@ -3848,6 +3848,7 @@ void Game::Update(float dt) {
                 case EnemyType::GALE_ARCHER_BOSS: kIdx = 8; break;
                 case EnemyType::FROST_TROLL: kIdx = 9; break;
                 case EnemyType::BERSERKER_TROLL: kIdx = 10; break;
+                case EnemyType::FROST_REVENANT: kIdx = 11; break;
                 default: break;
             }
             if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);

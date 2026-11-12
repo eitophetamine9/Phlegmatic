@@ -578,6 +578,7 @@ void Player::RelocateCompanionToPlayer() {
     Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
     companion.position = Vector2Add(position, offset);
     companion.attackCooldown = 0.0f;
+    companion.invulnTimer = 0.0f;
     if (currentTotem == TotemType::TOTEM_MIST) {
         mistFairy.active = true;
         mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
@@ -678,9 +679,9 @@ float Player::GetSpeed() const {
                     * GetLeggingsStats(equippedLeggings).speedModifier
                     * GetTotemStats(currentTotem).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
-        speedMult *= 1.25f; // +25% Move Speed
+        speedMult *= 1.10f; // +10% Set Move Speed (~+21% total with light pieces)
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
-        speedMult *= 0.90f;
+        speedMult *= 0.96f;
     }
     float base = Config::PLAYER_SPEED * speedMult;
     if (speedBuffTimer > 0.0f) {
@@ -926,10 +927,18 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 companion.active = true;
                 companion.health = companion.maxHealth;
                 companion.respawnTimer = 0.0f;
+                companion.invulnTimer = 0.5f;
                 RelocateCompanionToPlayer();
                 particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
                 particles.SpawnSparks(companion.position, Color{ 255, 170, 50, 255 }, 25, 180.0f);
                 SoundFX::PlayParrySuccess();
+            }
+        } else {
+            if (companion.invulnTimer > 0.0f) {
+                companion.invulnTimer -= dt;
+            }
+            if (companion.health < companion.maxHealth) {
+                companion.health = fminf(companion.maxHealth, companion.health + 4.0f * dt);
             }
         }
     } else {
@@ -3257,11 +3266,11 @@ void Player::Draw() const {
 }
 
 bool Player::HasTrollSlayerT2() const {
-    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 5;
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10) + inventory.GetEnemyKills(11)) >= 5;
 }
 
 bool Player::HasTrollSlayerT3() const {
-    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10)) >= 15;
+    return (inventory.GetEnemyKills(9) + inventory.GetEnemyKills(10) + inventory.GetEnemyKills(11)) >= 15;
 }
 
 bool Player::HasGolemBreakerT2() const {
@@ -3292,7 +3301,7 @@ bool Player::HasCultistPurifierT3() const {
 
 float Player::GetBestiaryDamageMultiplier(EnemyType type) const {
     float mult = 1.0f;
-    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL) {
+    if (type == EnemyType::FROST_TROLL || type == EnemyType::BERSERKER_TROLL || type == EnemyType::FROST_REVENANT) {
         if (HasTrollSlayerT3()) mult *= 1.25f;
         else if (HasTrollSlayerT2()) mult *= 1.15f;
     } else if (type == EnemyType::ORE_GOLEM || type == EnemyType::ELEMENTAL_GOLEM || type == EnemyType::MINI_ELEMENTAL_GOLEM) {

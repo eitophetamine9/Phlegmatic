@@ -21,8 +21,8 @@ namespace GameLimits {
 
     // World & Exploration Progression
     inline constexpr int CAMPFIRE_COUNT = 6;        // 1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden
-    inline constexpr int BESTIARY_COUNT = 11;       // 0: Slasher, 1: Archer, 2: Pyromancer, 3: Brute, 4: Inquisitor, 5: Ore Golem, 6: Elemental Golem, 7: Gale Bandit, 8: Gale Archer, 9: Frost Troll, 10: Berserker Troll
-    inline constexpr int LORE_FRAGMENT_COUNT = 14;  // frag_01 through frag_14
+    inline constexpr int BESTIARY_COUNT = 12;       // 0: Slasher, 1: Archer, 2: Pyromancer, 3: Brute, 4: Inquisitor, 5: Ore Golem, 6: Elemental Golem, 7: Gale Bandit, 8: Gale Archer, 9: Frost Troll, 10: Berserker Troll, 11: Frost Revenant
+    inline constexpr int LORE_FRAGMENT_COUNT = 15;  // frag_01 through frag_15
     inline constexpr int LOADOUT_COUNT = 3;         // Loadouts: I, II, III
     inline constexpr int MATERIAL_SLOT_COUNT = 5;   // Shingles, Ore Scraps, Mist Essence, Shadow Essence, Potions
 }

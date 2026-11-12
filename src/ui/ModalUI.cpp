@@ -1807,8 +1807,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 FontManager::DrawTextWrapped("When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
-                DrawText("[Companion]: Mini Elemental Golem (380 HP, 42 DEF)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
-                FontManager::DrawTextWrapped("Wields 3 new combat attack patterns: Heavy AoE Slam, Forward Bash Knockback, and Elemental Spike Throw.",
+                DrawText("[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
+                FontManager::DrawTextWrapped("Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
                 DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
@@ -1816,7 +1816,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
                 DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
-                FontManager::DrawTextWrapped("Bestows +65% overall damage, +35% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
+                FontManager::DrawTextWrapped("Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
                 DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
@@ -2153,6 +2153,15 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 "Chieftain of the northern highland troll clan who drank from the corrupted subterranean blood veins.",
                 "When death nears, his blood surges with ferocious fury, shattering enemy armor and poise.",
                 "Guards the ancient Blood Altar in the highest crags, waiting for a champion to challenge his throne."
+            },
+            {
+                "Frost Revenant", "Phantasma Glacialis", "PHLEGMATIC (Frost Boss)", Color{ 120, 230, 255, 255 }, 11,
+                "Ethereal rime phantasm that glides across permafrost, unleashing ice spikes and teleport flurries.",
+                "Time evasive dashes through teleport re-entries and stay aggressive while frostbite recovery is down.",
+                "Silver Shingles (50-75), Shadow Essence (2x), Elixir Flasks (2x)",
+                "Fallen crusader specter bound beneath the Permafrost Crypts of the Phlegmatic Chasm.",
+                "Condenses ambient moisture into razor ice barrages capable of rapidly chilling careless challengers.",
+                "Anchored to the Glacial Sarcophagus Dais until defeated alongside the deepest northern crypt seals."
             }
         };
 
@@ -2209,7 +2218,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
         // Header Title
         FontManager::DrawTextTitleCenteredShadow(cur.name, (int)(bRightX + bRightW * 0.5f), (int)contentY + 16, 20, Color{ 255, 235, 140, 255 });
-        std::string sub = std::string(cur.latinTitle) + "  —  " + cur.humorName;
+        std::string sub = std::string(cur.latinTitle) + "  -  " + cur.humorName;
         FontManager::DrawTextCenteredShadow(sub, (int)(bRightX + bRightW * 0.5f), (int)contentY + 44, 12, cur.humorColor);
 
         // Ornamental divider
@@ -2259,7 +2268,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         const char* perkDesc = "Accumulate kills to unlock family-wide hunting traits.";
         Color perkBadgeCol = Color{ 150, 165, 185, 200 };
 
-        if (cur.killIdx == 9 || cur.killIdx == 10) {
+        if (cur.killIdx == 9 || cur.killIdx == 10 || cur.killIdx == 11) {
             perkTitle = "HUNTING PERK: TROLL SLAYER";
             perkDesc = u15 ? "ACTIVE [TIER III]: +25% Dmg vs Trolls, +25 Frost Resist, Troll Kills Heal 25 HP." :
                        (u5 ? "ACTIVE [TIER II]: +15% Damage vs Trolls, +25 Frostbite Resistance." :
@@ -3190,7 +3199,7 @@ int ModalUI::DrawBorderlandsGateway(int windowWidth, int windowHeight, Vector2 m
 
     
 
-    const char* subQuote = "“The northern road into Zyphden and the remaining kingdoms of Tydeshire is currently in development.”";
+    const char* subQuote = "\"The northern road into Zyphden and the remaining kingdoms of Tydeshire is currently in development.\"";
 
     int subW = MeasureText(subQuote, 13);
 
@@ -3580,7 +3589,7 @@ bool ModalUI::DrawZyphdenTransition(int windowWidth, int windowHeight, Vector2 m
 
 
 
-    const char* realmSubtitle = "Guardian of the Gale Winds  •  Seat of King Kreptu's Court";
+    const char* realmSubtitle = "Guardian of the Gale Winds  |  Seat of King Kreptu's Court";
 
     int subW = FontManager::MeasureText(realmSubtitle, 13);
 

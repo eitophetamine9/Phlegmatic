@@ -88,7 +88,7 @@ int TitleUI::Draw(int windowWidth, int windowHeight, Vector2 mousePos, bool isMo
     DrawRectangle(0, 0, windowWidth, windowHeight, Color{ 6, 8, 14, 235 });
 
     // Header
-    FontManager::DrawTextTitleCentered("— SELECT PILGRIMAGE RECORD —", windowWidth / 2, 42, 28, Color{ 255, 215, 80, 255 });
+    FontManager::DrawTextTitleCentered("- SELECT PILGRIMAGE RECORD -", windowWidth / 2, 42, 28, Color{ 255, 215, 80, 255 });
     FontManager::DrawTextCentered("Choose a sacred chronicle to continue your pilgrimage or begin anew", windowWidth / 2, 78, 14, Color{ 170, 195, 225, 210 });
 
     const float totalCardsWidth = 1040.0f;

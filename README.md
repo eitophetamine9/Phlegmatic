@@ -25,9 +25,9 @@
 
 ## Lore Briefing: Land of Tydeshire
 
-> *“For over 500 years, the Land of Tydeshire was consumed by unending war until King Charlz unified the realm, crowning himself the Liege of Kings. He divided the continent into five sovereign realms to preserve peace: Zyphden, Azshden, Fleurshden, Noirden, and Solsden.*
+> *"For over 500 years, the Land of Tydeshire was consumed by unending war until King Charlz unified the realm, crowning himself the Liege of Kings. He divided the continent into five sovereign realms to preserve peace: Zyphden, Azshden, Fleurshden, Noirden, and Solsden.*
 >
-> *Yet peace in Tydeshire was only ever borrowed. Three decades later, the Lord Liege vanished into madness, plunging the realm into paranoia and blood. As the ancient warding seals fracture, the true history of his fall lies scattered across forgotten steles and sunlit ruins, waiting for one who can pierce the illusions.”*
+> *Yet peace in Tydeshire was only ever borrowed. Three decades later, the Lord Liege vanished into madness, plunging the realm into paranoia and blood. As the ancient warding seals fracture, the true history of his fall lies scattered across forgotten steles and sunlit ruins, waiting for one who can pierce the illusions."*
 
 ---
 
@@ -72,7 +72,8 @@
 > * **3-Slot Weapon Hotbar & Rebound Quick Belt**: Equip up to 3 weapons via Inventory `[SLOT 1/2/3]` controls and switch mid-combat using `[1]`, `[2]`, `[3]` with full JSON save persistence. Potions moved cleanly to `[H]` (Heal), `[4]` (Stoneskin), `[5]` (Glacial Thaw), and `[6]` (Berserker Brew).
 > * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon/potion/armor skill icons and replaced the bottom-right box with an enlarged 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` per slot).
 > * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat color washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point-light shaders, Purkinje composite tone-mapping, and full realm emitter registration.
-> * **Combat & Balance Reworks**: Removed the broken stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and rebalanced stamina/speed on Bow, Daggers, and **Totem of Mist**.
+> * **Combat & Balance Reworks**: Removed the stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); buffed the **Elemental Core Golem Companion** (`460 HP`, `55 DEF`, `0.55s` hit i-frames, `+4 HP/s` regen, `35s` respawn, cycling Slam/Bash/Spike patterns); and rebalanced stamina/speed across Bow, Daggers, **Shadowstrider** (`~+21%` net nimble speed), **Totem of Mist**, and **Totem of Insanity** (`+18%` speed) while keeping heavy armor pacing smooth.
+> * **Save, Bestiary & Text Hygiene Fixes**: Persisted Lore Fragment XV (`frag_15`) in `SaveManager`, added **Frost Revenant** as Bestiary entry #12, and normalized non-ASCII UI/dialogue punctuation cleanly for bitmap font rendering.
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 

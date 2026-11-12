@@ -82,7 +82,8 @@ For complete release notes, balance revisions, and changelogs across versions (`
 * **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias), repaired `[M]` Realm Map same-frame closing and Bestiary tab routing, added direct `[B]` Bestiary hotkey, and enabled top-right HUD clicks in northern/eastern realms.
 * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon, flask, shield, and armor skill icons alongside an enlarged bottom-right 3-Weapon Hotbar Dock (`64x66` / `70x72`).
 * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat ambient washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point lights, Purkinje composite tone-mapping, and full realm emitter registration.
-* **Combat & Balance Reworks**: Removed the stagger-on-every-hit / Visceral Execution loop (replacing Phlegmatic Core per-hit stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); and raised stamina / tuned speed on Bow, Daggers, and **Totem of Mist**.
+* **Combat & Balance Reworks**: Removed the stagger-on-every-hit / Visceral Execution loop (replacing Phlegmatic Core per-hit stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); buffed the **Mini Elemental Golem Companion** (`460 HP`, `55 DEF`, `0.55s` i-frames, `+4 HP/s` regen, `35s` respawn, Slam/Bash/Spike rotation); and tuned speed/stamina on Bow, Daggers, **Shadowstrider** (`~+21%` net speed), **Totem of Mist**, and **Totem of Insanity** (`+18%` speed) without slowing heavy armor sets.
+* **Persistence, Bestiary & Text Polish**: Fixed Lore Fragment XV (`frag_15`) save/load truncation (`LORE_FRAGMENT_COUNT = 15`), tracked **Frost Revenant** as Bestiary entry #12, and sanitized non-ASCII UI/dialogue typography.
 
 ---
 
@@ -392,7 +393,7 @@ Opened via `[TAB]` (`[I]` alias), `[B]` (Bestiary), or `[M]` (Realm Map):
 
 * **Tab 1 (`[1]`) -- Equipment, 3-Slot Hotbar & Arsenal**: Inspect weapons and upgrade tiers, assign up to 3 unlocked weapons to Hotbar `[SLOT 1]`, `[SLOT 2]`, and `[SLOT 3]`, toggle saved loadouts (`I / II / III`), inspect armor sets, and equip sacred totems.
 * **Tab 2 (`[2]`) -- Lore Journal**: Dual-page medieval book tracking all 15 discovered fragments (`I-XV`) with unread badges (`(!)`).
-* **Tab 3 (`[3]` / `[B]`) -- Humoral Bestiary**: Browse 11 hostile archetypes, weakness dossiers, and unlock permanent Mastery Hunting Perks at Tier 2 (`15 Kills`) and Tier 3 (`35 Kills`).
+* **Tab 3 (`[3]` / `[B]`) -- Humoral Bestiary**: Browse 12 hostile archetypes (including **Frost Revenant**), weakness dossiers, and unlock permanent Mastery Hunting Perks at Tier 2 (`5-10 Kills`) and Tier 3 (`12-25 Kills`).
 * **Tab 4 (`[4]` / `[M]`) -- Interactive Realm Map**: Cartographic view of Tydeshire with live player marker and POI tooltips.
 
 ---
@@ -434,7 +435,7 @@ Equipping 3/3 matching pieces awakens both passive traits and an active `[V]` Ar
 * **Commoner's Scrap (`Dust Burst`)**: Low-weight mobility with radial dust stagger.
 * **Crusader Plate (`Dawnfire Aegis`)**: Radiant absorb barrier with AoE detonation on expiration/shatter.
 * **Vanguard Bastion (`Seismic Charge`)**: `+50` Max HP, hyper-armor, and Halberd/Glaive reach/pierce synergy.
-* **Shadowstrider (`Shadow Decoy`)**: Evasive smoke dash decoy (`25s` cooldown).
+* **Shadowstrider (`Shadow Decoy`)**: Nimble leather mobility (`1.03 / 1.04 / 1.03` pieces with `+10%` set bonus for `~+21%` total speed), `-30%` Dash stamina cost, `+0.10s` Dodge i-frames, `+15%` Crit Chance with Daggers/Bow, and evasive smoke decoy (`25s` cooldown).
 * **Forged Scrap Iron (`Ironclad Spike Wall`)**: Reflects `40%` melee damage; Mace armor-fracture synergy.
 * **Basalt Golem Carapace (`Basalt Spire Wall`)**: `+35` Def, `70%` knockback resist, periodic heavy absorb, and Sun-Forged Claymore Earth Rupture (`+30` earth dmg).
 * **Frostwarden Attire (`FROST NOVA`)**: `+30%` Cold Resistance (`FROST_TROLL`, `BERSERKER_TROLL`, `FROST_REVENANT`, and cold projectiles), Frostbite immunity, `+20%` heavy poise damage, and **Twin Glacial Cleavers Frost Tremor** synergy (`175px` shockwave `+35` frost dmg, `4s` Chill). Pressing `[V]` unleashes a `190px` 12-spire crystalline **FROST NOVA** (`75` frost dmg, `1.2s` non-boss stun, `4.0s` Chill, `-20%` Armor Fracture) plus a `6.0s` `45 HP` **Ice Ward** retaliating against melee attackers for `18` frost dmg and `3.0s` Chill.
@@ -446,10 +447,10 @@ Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 | Totem Relic | Acquisition Source | Stat Multipliers & Buffs | Drawbacks & Nerfs | Visual Glow |
 | :--- | :--- | :--- | :--- | :--- |
 | **Totem of Sanity** | Crossroads ruined shrine | `+15%` Overall Damage, `+15` Will | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
-| **Totem of Insanity** | Berserker Troll (`25%` drop) | `+65%` DMG (`+135%` at `<40%` HP), `+35%` Move Speed, `+25%` Attack Speed | `-50%` Defense, `x1.5` incoming damage | Arterial Crimson (`[255, 45, 60]`) |
+| **Totem of Insanity** | Berserker Troll (`25%` drop) | `+65%` DMG (`+135%` at `<40%` HP), `+18%` Move Speed, `+25%` Attack Speed | `-50%` Defense, `x1.5` incoming damage | Arterial Crimson (`[255, 45, 60]`) |
 | **Totem of Mist** | Gale Archer (`15%` drop) | Mist Fairy (`+20%` Crit Chance, `+35%` Crit Dmg, `+30 HP` Orbs), `+10%` Stamina Regen, `+10` Will | `-5%` Move Speed, `-15%` Defense, `-25` Max HP | Vapor Azure (`[110, 240, 225]`) |
 | **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25%` Defense, `+35` Max HP, `+18%` DMG, Will of Atlas (`4s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
-| **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem Companion (`380 HP`, `42 DEF`), Piercing Bolt (`54` DMG) | `-10%` Move Speed, `60s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
+| **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem (`460 HP`, `55 DEF`, `+4 HP/s` Regen; Slam `36 DMG`, Bash `32 DMG`, Spike `34 DMG`), Bearer Bolt (`54` DMG, `3s` CD) | `-10%` Move Speed, `35s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
 | **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30` Max HP, `+25` Will, `+20%` Defense, `-80%` Knockback, `25%` Gray Health recovery, Chills enemies (`3s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
 
 ---

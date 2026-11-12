@@ -14,7 +14,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             LootDrop::SpawnFromEnemy(defeatedEnemy, *outLootDrops);
         }
         EnemyType eType = defeatedEnemy.GetType();
-        if (player.HasTrollSlayerT3() && (eType == EnemyType::FROST_TROLL || eType == EnemyType::BERSERKER_TROLL)) {
+        if (player.HasTrollSlayerT3() && (eType == EnemyType::FROST_TROLL || eType == EnemyType::BERSERKER_TROLL || eType == EnemyType::FROST_REVENANT)) {
             player.Heal(25.0f);
             particles.SpawnFloatingText(player.GetPosition(), "TROLL SLAYER: +25 HP!", Color{ 120, 255, 170, 255 }, 20.0f);
             particles.SpawnSparks(player.GetPosition(), Color{ 140, 240, 180, 255 }, 18, 120.0f);
@@ -466,6 +466,9 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         if (proj.GetType() == ProjectileType::GALE_ARROW && proj.GetRadius() >= 16.0f) {
                             particles.SpawnSparks(proj.GetPosition(), Color{ 110, 255, 240, 255 }, 20, 180.0f);
                             particles.SpawnFloatingText(enemy.GetPosition(), "CRESCENT GALE! -" + std::to_string((int)proj.GetDamage()), Color{ 110, 255, 240, 255 }, 22.0f);
+                        } else if (proj.GetType() == ProjectileType::ELEMENTAL_SPIKE) {
+                            particles.SpawnSparks(proj.GetPosition(), Color{ 255, 190, 60, 255 }, 16, 150.0f);
+                            particles.SpawnFloatingText(enemy.GetPosition(), "GOLEM SPIKE! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 195, 70, 255 }, 20.0f);
                         } else {
                             particles.SpawnSparks(proj.GetPosition(), Color{ 255, 140, 50, 255 }, 18, 160.0f);
                             particles.SpawnFloatingText(enemy.GetPosition(), "PIERCING BOLT! -" + std::to_string((int)proj.GetDamage()), Color{ 255, 175, 45, 255 }, 22.0f);
@@ -511,7 +514,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         if (comp.attackCooldown > 0.0f) comp.attackCooldown -= dt;
 
         Enemy* nearestEnemy = nullptr;
-        float nearestDist = 320.0f;
+        float nearestDist = 340.0f;
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive()) continue;
             float d = Vector2Distance(comp.position, enemy.GetPosition());
@@ -522,33 +525,79 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
 
         float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
-        if (distToPlayer > 350.0f) {
+        if (distToPlayer > 400.0f) {
             player.RelocateCompanionToPlayer();
             particles.SpawnSparks(comp.position, Color{ 255, 170, 50, 255 }, 14, 120.0f);
         } else if (nearestEnemy) {
             Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
             Vector2 dir = Vector2Normalize(toEnemy);
-            if (nearestDist > 32.0f) {
-                comp.position = Vector2Add(comp.position, Vector2Scale(dir, 165.0f * dt));
-            } else if (comp.attackCooldown <= 0.0f) {
-                comp.attackCooldown = 1.0f;
-                Vector2 knock = dir;
-                if (nearestEnemy->TakeDamage(comp.damage, knock, particles, 0.15f)) {
-                    handleEnemyDefeated(*nearestEnemy);
+            if (dir.x == 0.0f && dir.y == 0.0f) dir = { 1.0f, 0.0f };
+
+            float moveStep = 215.0f * dt;
+            if (nearestDist > 42.0f) {
+                comp.position = Vector2Add(comp.position, Vector2Scale(dir, moveStep));
+            }
+
+            if (comp.attackCooldown <= 0.0f) {
+                int pattern = comp.attackPattern % 3;
+                if (pattern == 2 && nearestDist <= 280.0f) {
+                    // Pattern 3: Piercing Elemental Spike Throw
+                    comp.attackCooldown = 0.95f;
+                    comp.attackPattern = (comp.attackPattern + 1) % 3;
+                    Vector2 spikeVel = Vector2Scale(dir, 500.0f);
+                    Projectile spike(comp.position, spikeVel, 9.0f, 34.0f, ProjectileType::ELEMENTAL_SPIKE, true, 0.30f);
+                    spike.SetPiercing(true);
+                    projectiles.push_back(spike);
+                    particles.SpawnSparks(comp.position, Color{ 255, 190, 60, 255 }, 16, 150.0f);
+                    SoundFX::PlayLightAttack();
+                } else if (pattern == 0 && nearestDist <= 55.0f) {
+                    // Pattern 1: Heavy AoE Slam (80px radius)
+                    comp.attackCooldown = 0.95f;
+                    comp.attackPattern = (comp.attackPattern + 1) % 3;
+                    float slamDmg = comp.damage + 4.0f; // 36 DMG
+                    float slamRadius = 80.0f;
+                    for (auto& target : enemies) {
+                        if (!target.IsAlive()) continue;
+                        if (Vector2Distance(comp.position, target.GetPosition()) <= slamRadius + target.GetRadius()) {
+                            Vector2 knock = Vector2Normalize(Vector2Subtract(target.GetPosition(), comp.position));
+                            if (knock.x == 0.0f && knock.y == 0.0f) knock = dir;
+                            if (target.TakeDamage(slamDmg, knock, particles, 0.20f)) {
+                                handleEnemyDefeated(target);
+                            }
+                        }
+                    }
+                    particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 24, 180.0f);
+                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -" + std::to_string((int)slamDmg), Color{ 100, 245, 180, 255 }, 20.0f);
+                    SoundFX::PlayHitImpact();
+                } else if (nearestDist <= 65.0f) {
+                    // Pattern 2: Forward Bash Knockback + Armor Fracture + Brief Stagger
+                    comp.attackCooldown = 0.95f;
+                    comp.attackPattern = (comp.attackPattern + 1) % 3;
+                    comp.position = Vector2Add(comp.position, Vector2Scale(dir, fminf(18.0f, nearestDist * 0.4f)));
+                    float bashDmg = comp.damage; // 32 DMG
+                    Vector2 strongKnock = Vector2Scale(dir, 1.8f);
+                    if (nearestEnemy->TakeDamage(bashDmg, strongKnock, particles, 0.25f)) {
+                        handleEnemyDefeated(*nearestEnemy);
+                    }
+                    if (nearestEnemy->IsAlive()) {
+                        nearestEnemy->ApplyArmorFracture(3.0f);
+                        nearestEnemy->ApplyStagger(nearestEnemy->IsBoss() ? 0.25f : 0.50f);
+                    }
+                    particles.SpawnSparks(nearestEnemy->GetPosition(), Color{ 255, 160, 50, 255 }, 20, 160.0f);
+                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM BASH! -" + std::to_string((int)bashDmg), Color{ 255, 185, 70, 255 }, 20.0f);
+                    SoundFX::PlayHitImpact();
                 }
-                particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 18, 140.0f);
-                particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -14", Color{ 100, 245, 180, 255 }, 20.0f);
-                SoundFX::PlayHitImpact();
             }
         } else {
-            if (distToPlayer > 60.0f) {
+            if (distToPlayer > 56.0f) {
                 Vector2 toPlayer = Vector2Normalize(Vector2Subtract(player.GetPosition(), comp.position));
-                comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 175.0f * dt));
+                comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 230.0f * dt));
             }
         }
 
         for (auto& enemy : enemies) {
             if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
+            if (comp.invulnTimer > 0.0f) break;
             if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 15.0f)) {
                 float effDef = comp.defense;
                 float baseDmg = 18.0f;
@@ -565,12 +614,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
                 float dmg = baseDmg * (100.0f / (100.0f + effDef));
                 comp.health -= dmg;
+                comp.invulnTimer = 0.55f;
                 particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
                 particles.SpawnSparks(comp.position, Color{ 180, 160, 140, 255 }, 12, 120.0f);
                 if (comp.health <= 0.0f) {
                     comp.active = false;
-                    comp.respawnTimer = 60.0f;
-                    particles.SpawnFloatingText(comp.position, "COMPANION SHATTERED! (60s Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+                    comp.respawnTimer = 35.0f;
+                    particles.SpawnFloatingText(comp.position, "COMPANION SHATTERED! (35s Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
                     particles.SpawnSparks(comp.position, Color{ 255, 140, 50, 255 }, 35, 200.0f);
                     SoundFX::PlayHitImpact();
                     break;

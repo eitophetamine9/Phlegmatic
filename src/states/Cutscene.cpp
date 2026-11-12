@@ -141,7 +141,7 @@ void Cutscene::Draw(int windowWidth, int windowHeight) const {
     DrawLineEx({ cardX + cardW - 16, cardY + cardH - 16 }, { cardX + cardW - 16, cardY + cardH - 46 }, 2.0f, cornerColor);
 
     // Header: CHRONICLES OF TYDESHIRE
-    const char* subHeader = "— CHRONICLES OF TYDESHIRE —";
+    const char* subHeader = "- CHRONICLES OF TYDESHIRE -";
     int shW = FontManager::MeasureText(subHeader, 14, GameFont::TITLE);
     FontManager::DrawText(subHeader, (int)(cardX + (cardW - shW) * 0.5f), (int)cardY + 36, 14, Color{ 200, 175, 120, 200 }, GameFont::TITLE);
 
