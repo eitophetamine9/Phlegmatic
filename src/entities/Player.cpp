@@ -833,6 +833,10 @@ bool Player::EquipHotbarSlot(int slotIdx, ParticleSystem& particles) {
     }
 
     SetWeapon(targetWeapon);
+    isHeavyWindingUp = false;
+    heavyWindupTimer = 0.0f;
+    heavyStage = 0;
+    SoundFX::PlayEquipWeapon();
     WeaponStats stats = GetEquippedWeaponStats();
     particles.SpawnFloatingText(position, "[" + std::to_string(slotIdx + 1) + "] " + stats.name, Color{ 255, 225, 100, 255 }, 20.0f);
     particles.SpawnSparks(position, Color{ 255, 215, 80, 255 }, 10, 70.0f);
@@ -1183,15 +1187,13 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 
     // Out of combat health regeneration (recovers health when off combat for 4+ seconds)
-
     timeSinceCombat += dt;
-
+    if (currentTotem == TotemType::CHAMPION_TOTEM && health < GetMaxHealth()) {
+        health = fminf(GetMaxHealth(), health + 2.0f * dt); // Steady +2 HP/s continuous combat regeneration
+    }
     if (timeSinceCombat >= 4.0f && health < GetMaxHealth()) {
-
-        float regenRate = 8.0f; // +8 HP/sec out of combat
-
+        float regenRate = (currentTotem == TotemType::CHAMPION_TOTEM) ? 14.0f : 8.0f;
         health = fminf(GetMaxHealth(), health + regenRate * dt);
-
     }
 
 
@@ -2982,7 +2984,11 @@ bool Player::UseHealthPotion(ParticleSystem& particles) {
 
         SoundFX::PlayHeal();
         particles.SpawnSparks(position, Color{ 80, 255, 140, 255 }, 25, 140.0f);
-        particles.SpawnFloatingText(position, "+45 HP", Color{ 80, 255, 140, 255 }, 24.0f);
+        if (currentTotem == TotemType::CHAMPION_TOTEM) {
+            particles.SpawnFloatingText(position, "+14 HP (Champion -70%)", Color{ 255, 175, 120, 255 }, 22.0f);
+        } else {
+            particles.SpawnFloatingText(position, "+45 HP", Color{ 80, 255, 140, 255 }, 24.0f);
+        }
         return true;
     }
     return false;
@@ -3254,9 +3260,10 @@ bool Player::TakeDamage(float amount, Vector2 knockbackDir, ParticleSystem& part
 
 
 void Player::Heal(float amount) {
-
+    if (currentTotem == TotemType::CHAMPION_TOTEM) {
+        amount *= 0.30f; // Withered Vitality: -70% incoming healing from external sources
+    }
     health = fminf(GetMaxHealth(), health + amount);
-
 }
 
 

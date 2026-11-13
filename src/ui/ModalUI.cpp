@@ -488,6 +488,13 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
             DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 240, 250, 255, 255 } : glowCol);
             break;
         }
+        case TotemType::CHAMPION_TOTEM: {
+            DrawCircleLines((int)center.x, (int)center.y, 11.5f * scale, isUnlocked ? Color{ 255, 220, 75, 240 } : glowCol);
+            DrawPoly(center, 5, 8.5f * scale, 0.0f, isUnlocked ? Color{ 255, 205, 50, 255 } : baseCol);
+            DrawPolyLines(center, 5, 8.5f * scale, 0.0f, isUnlocked ? Color{ 255, 245, 140, 255 } : glowCol);
+            DrawCircleV(center, 3.0f * scale, isUnlocked ? Color{ 255, 255, 255, 255 } : glowCol);
+            break;
+        }
         case TotemType::NONE:
         default:
             DrawCircleLines((int)center.x, (int)center.y, 8.0f * scale, Color{ 70, 85, 105, 160 });
@@ -1054,23 +1061,24 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             DrawText("Attune a discovered primal relic to awaken elemental resonances.", (int)tTextX, (int)totemSlotRec.y + 26, 11, Color{ 130, 145, 165, 200 });
         }
 
-        // Row 2: 1x6 Quick-Attune Grid for all 6 Totems!
+        // Row 2: 1x7 Quick-Attune Grid for all 7 Totems!
         float totGridY = totemSlotRec.y + totemSlotRec.height + 6.0f;
         struct TotemBtnInfo { TotemType type; int tierPips; };
-        TotemBtnInfo totemBtns[6] = {
+        TotemBtnInfo totemBtns[7] = {
             { TotemType::TOTEM_SANITY, 2 },
             { TotemType::TOTEM_INSANITY, 2 },
             { TotemType::TOTEM_MIST, 3 },
             { TotemType::CRUSADER_TOTEM, 3 },
             { TotemType::ELEMENTAL_CORE_TOTEM, 4 },
-            { TotemType::TOTEM_PHLEGMATIC_CORE, 4 }
+            { TotemType::TOTEM_PHLEGMATIC_CORE, 4 },
+            { TotemType::CHAMPION_TOTEM, 5 }
         };
-        float tBtnW = (leftW - 32.0f - 20.0f) / 6.0f;
+        float tBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
         float tBtnH = 38.0f;
         int hoveredTotemIdx = -1;
         Rectangle hoveredTotemRec = { 0, 0, 0, 0 };
 
-        for (int ti = 0; ti < 6; ++ti) {
+        for (int ti = 0; ti < 7; ++ti) {
             Rectangle tbRec = { leftX + 16.0f + (float)ti * (tBtnW + 4.0f), totGridY, tBtnW, tBtnH };
             bool isTUnlocked = player.GetInventory().HasTotem(totemBtns[ti].type);
             bool isTEquipped = (player.GetTotem() == totemBtns[ti].type);
@@ -1716,7 +1724,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { TotemType::TOTEM_MIST, "Restless Mist Forest - Gale Archer Boss (15% drop)", 3 },
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
                 { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 },
-                { TotemType::TOTEM_PHLEGMATIC_CORE, "Northern Crags - Altar of Cold Solitude / Torvald Bounty", 4 }
+                { TotemType::TOTEM_PHLEGMATIC_CORE, "Northern Crags - Altar of Cold Solitude / Torvald Bounty", 4 },
+                { TotemType::CHAMPION_TOTEM, "Royal Combat Arena - Apex Wave 25 / Gauntlet Victory", 5 }
             };
 
             int unlockedCount = 0;
@@ -1822,6 +1831,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
                 FontManager::DrawTextWrapped("Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 200, 240, 255, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::CHAMPION_TOTEM) {
+                DrawText("[Primal Trait]: Undying Warlord's Fortitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
+                FontManager::DrawTextWrapped("Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 235, 185, 220 });
             }
 
             // Divider

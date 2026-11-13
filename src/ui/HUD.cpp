@@ -917,8 +917,9 @@ void HUD::DrawWeaponHotbarDock(int windowWidth, int windowHeight, const Player& 
         int tier = hasWep ? player.GetInventory().GetWeaponUpgrade(slotWep) : 0;
 
         Rectangle r = { dockX + pad + (float)i * (slotW + gap), dockY + 8.0f, slotW, slotH };
+        bool isHov = CheckCollisionPointRec(GetMousePosition(), r);
 
-        Color tileBg = isActive ? Color{ 28, 24, 14, 240 } : (hasWep ? Color{ 16, 21, 32, 230 } : Color{ 11, 14, 20, 195 });
+        Color tileBg = isActive ? Color{ 28, 24, 14, 240 } : (isHov ? Color{ 28, 38, 54, 240 } : (hasWep ? Color{ 16, 21, 32, 230 } : Color{ 11, 14, 20, 195 }));
         DrawRectangleRounded(r, 0.18f, 5, tileBg);
 
         if (hasWep) {
