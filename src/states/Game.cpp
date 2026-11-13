@@ -502,6 +502,17 @@ void Game::ExecuteFastTravel(int stageId) {
                 "Frostbound Highlands of the Berserker Troll Clan"
             );
             break;
+        case 7: // Permafrost Crypts
+            StartRealmTransition(
+                [this]() {
+                    EnterFrostCaverns();
+                    player.SetPosition({ 300.0f, 1200.0f });
+                    camera.target = player.GetPosition();
+                },
+                "PERMAFROST CRYPTS",
+                "Subterranean Caverns & Frost Revenant Sarcophagus"
+            );
+            break;
         default:
             break;
     }

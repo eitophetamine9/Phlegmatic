@@ -4145,15 +4145,16 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawText("CLOSE [M]", (int)closeRec.x + 16, (int)closeRec.y + 8, 11, isCloseHov ? Color{ 255, 255, 255, 255 } : Color{ 180, 225, 240, 220 });
     bool shouldClose = (isCloseHov && isMousePressed);
 
-    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <6>) & LEYLINE MAP
+    // 3. TACTICAL DIAMOND WAYPOINTS (<1> - <7>) & LEYLINE MAP
     struct MapStage { int id; const char* name; Vector2 pos; const char* threat; const char* minLvl; const char* lore; };
-    MapStage stages[6] = {
+    MapStage stages[7] = {
         { 1, "STAGE #1: RUINED CASTLE", { modalX + 310.0f, modalY + 510.0f }, "Normal", "Min Level: 1", "At the beginning, run the foundations for playing via the newest patches. Dangerous foes are available and relevant leylines will lead all." },
         { 2, "STAGE #2: CROSSROADS", { modalX + 590.0f, modalY + 420.0f }, "Moderate", "Min Level: 5", "A sprawling highway crossing southern pines. Bandits ambush supply lines while ancient stone shrines whisper of Solsden." },
         { 3, "STAGE #3: ZYPHDEN KEEP", { modalX + 720.0f, modalY + 250.0f }, "High", "Min Level: 15", "The fortified royal citadel. King Kreptu watches from the throne dais as Chancellor Malakor and forge masters guard the flame." },
         { 4, "STAGE #4: QUARRY MINES", { modalX + 860.0f, modalY + 380.0f }, "Severe", "Min Level: 20", "Subterranean basalt shafts overrun by rogue ore golems. Mining picks strike primordial veins of ancient crystal." },
         { 5, "STAGE #5: RESTLESS MIST FOREST", { modalX + 440.0f, modalY + 260.0f }, "Lethal", "Min Level: 25", "Haunted western woodlands shrouded in primordial fog. Gale bandits roam the glades while the Whispering Altar calls." },
-        { 6, "STAGE #6: NORTHERN CRAGS", { modalX + 720.0f, modalY + 120.0f }, "Cataclysmic", "Min Level: 30", "Frostbound highland crags north of Zyphden. Savage Frost Trolls prowl the jagged peaks under the dominion of the Berserker Troll." }
+        { 6, "STAGE #6: NORTHERN CRAGS", { modalX + 720.0f, modalY + 120.0f }, "Cataclysmic", "Min Level: 30", "Frostbound highland crags north of Zyphden. Savage Frost Trolls prowl the jagged peaks under the dominion of the Berserker Troll." },
+        { 7, "STAGE #7: PERMAFROST CRYPTS", { modalX + 890.0f, modalY + 120.0f }, "Nightmarish", "Min Level: 35", "Subterranean glacial abyss beneath the Northern Crags. Fallen knights guard the sealed crypts and the ethereal Frost Revenant." }
     };
 
     static int s_selectedStage = 1;
@@ -4166,6 +4167,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     else if (currentState == GameState::QUARRY_DEPTHS) activeStageId = 4;
     else if (currentState == GameState::RESTLESS_MIST_FOREST) activeStageId = 5;
     else if (currentState == GameState::NORTH_ZYPHDEN) activeStageId = 6;
+    else if (currentState == GameState::FROST_CAVERNS) activeStageId = 7;
 
     // Draw connecting leylines between diamond waypoints (Image 2)
     Color leylineCol = Color{ 40, 140, 160, 180 };
@@ -4174,6 +4176,7 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     DrawLineEx(stages[2].pos, stages[3].pos, 2.5f, leylineCol);
     DrawLineEx(stages[2].pos, stages[4].pos, 2.5f, Color{ 40, 140, 160, 180 });
     DrawLineEx(stages[2].pos, stages[5].pos, 2.5f, Color{ 40, 140, 160, 180 });
+    DrawLineEx(stages[5].pos, stages[6].pos, 2.5f, Color{ 80, 220, 255, 200 });
 
     // Draw Diamond Waypoints (<1> - <5>)
     float animTime = (float)GetTime();
@@ -4264,11 +4267,11 @@ bool ModalUI::DrawMapModal(int windowWidth, int windowHeight, Vector2 mousePos, 
     Rectangle leftArrow = { cardX - 28.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     Rectangle rightArrow = { cardX + cardW + 4.0f, cardY + cardH * 0.5f - 18.0f, 24.0f, 36.0f };
     if (CheckCollisionPointRec(mousePos, leftArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage <= 1) ? 6 : (s_selectedStage - 1);
+        s_selectedStage = (s_selectedStage <= 1) ? 7 : (s_selectedStage - 1);
         SoundFX::PlayButtonClick();
     }
     if (CheckCollisionPointRec(mousePos, rightArrow) && isMousePressed) {
-        s_selectedStage = (s_selectedStage >= 6) ? 1 : (s_selectedStage + 1);
+        s_selectedStage = (s_selectedStage >= 7) ? 1 : (s_selectedStage + 1);
         SoundFX::PlayButtonClick();
     }
     DrawText("<", (int)leftArrow.x + 8, (int)leftArrow.y + 8, 20, Color{ 80, 220, 245, 220 });
