@@ -192,6 +192,32 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.equippedLeggings = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"equippedTotem\"") != std::string::npos) {
             outData.equippedTotem = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"activeLoadoutIdx\"") != std::string::npos) {
+            outData.activeLoadoutIdx = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"loadoutWeapons\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutWeapons, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
+        } else if (line.find("\"loadoutHelmets\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutHelmets, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
+        } else if (line.find("\"loadoutChestplates\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutChestplates, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
+        } else if (line.find("\"loadoutLeggings\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutLeggings, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
+        } else if (line.find("\"loadoutTotems\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutTotems, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
+        } else if (line.find("\"loadoutConfigured\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.loadoutConfigured, [](const std::string& token) {
+                return SaveHelpers::SafeParseBool(token, false);
+            });
         } else if (line.find("\"bossZilDefeated\"") != std::string::npos) {
             outData.bossZilDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"knightLenonSparCompleted\"") != std::string::npos) {
@@ -302,6 +328,37 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"equippedChestplate\": " << data.equippedChestplate << ",\n";
     file << "  \"equippedLeggings\": " << data.equippedLeggings << ",\n";
     file << "  \"equippedTotem\": " << data.equippedTotem << ",\n";
+    file << "  \"activeLoadoutIdx\": " << data.activeLoadoutIdx << ",\n";
+    file << "  \"loadoutWeapons\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << data.loadoutWeapons[i] << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+    file << "  \"loadoutHelmets\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << data.loadoutHelmets[i] << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+    file << "  \"loadoutChestplates\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << data.loadoutChestplates[i] << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+    file << "  \"loadoutLeggings\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << data.loadoutLeggings[i] << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+    file << "  \"loadoutTotems\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << data.loadoutTotems[i] << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+    file << "  \"loadoutConfigured\": [";
+    for (int i = 0; i < GameLimits::LOADOUT_COUNT; ++i) {
+        file << (data.loadoutConfigured[i] ? "true" : "false") << (i < GameLimits::LOADOUT_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
 
     // Weapon upgrades
     file << "  \"weaponUpgrades\": [";

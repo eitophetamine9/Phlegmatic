@@ -1101,6 +1101,17 @@ void Game::SaveActiveGame() {
     data.equippedLeggings = (int)player.GetLeggings();
     data.equippedTotem = (int)player.GetTotem();
 
+    data.activeLoadoutIdx = player.GetInventory().GetActiveLoadoutIndex();
+    for (int lo = 0; lo < GameLimits::LOADOUT_COUNT; ++lo) {
+        const auto& preset = player.GetInventory().GetLoadout(lo);
+        data.loadoutWeapons[lo] = (int)preset.weapon;
+        data.loadoutHelmets[lo] = (int)preset.helmet;
+        data.loadoutChestplates[lo] = (int)preset.chestplate;
+        data.loadoutLeggings[lo] = (int)preset.leggings;
+        data.loadoutTotems[lo] = (int)preset.totem;
+        data.loadoutConfigured[lo] = preset.isConfigured;
+    }
+
 
 
 
@@ -1373,6 +1384,22 @@ void Game::LoadActiveGame(int slotIndex) {
     player.GetInventory().SetEquippedLeggings((LeggingsType)data.equippedLeggings);
     player.SetTotem((TotemType)data.equippedTotem);
     player.GetInventory().SetEquippedTotem((TotemType)data.equippedTotem);
+
+    for (int lo = 0; lo < GameLimits::LOADOUT_COUNT; ++lo) {
+        if (data.loadoutConfigured[lo]) {
+            EquipmentPreset preset;
+            preset.weapon = (WeaponType)data.loadoutWeapons[lo];
+            preset.helmet = (HelmetType)data.loadoutHelmets[lo];
+            preset.chestplate = (ChestplateType)data.loadoutChestplates[lo];
+            preset.leggings = (LeggingsType)data.loadoutLeggings[lo];
+            preset.totem = (TotemType)data.loadoutTotems[lo];
+            preset.isConfigured = true;
+            player.GetInventory().SetLoadout(lo, preset);
+        }
+    }
+    if (data.activeLoadoutIdx >= 0 && data.activeLoadoutIdx < GameLimits::LOADOUT_COUNT) {
+        player.GetInventory().SetActiveLoadoutIndex(data.activeLoadoutIdx);
+    }
 
 
 
@@ -1894,21 +1921,10 @@ void Game::Update(float dt) {
 
 
         if (pressI || pressTab || pressEsc) {
-
-
-
             showInventoryModal = false;
-
-
-
+            SaveActiveGame();
             SoundFX::PlayButtonClick();
-
-
-
             return;
-
-
-
         } else if (pressB) {
 
 
@@ -4707,19 +4723,10 @@ void Game::RenderScene() {
 
         bool close = GameUI::DrawInventoryModal(w, h, mousePos, isMousePressed, player, inventoryActiveTab, inventorySelectedFragment);
 
-
-
         if (close) {
-
-
-
             showInventoryModal = false;
-
-
-
+            SaveActiveGame();
         }
-
-
 
         if (inventoryActiveTab == 3) {
 
