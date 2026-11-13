@@ -200,7 +200,7 @@ Warm indoor refuge south of the town square:
 
 ### Multi-Slot Save Architecture & Storage Vault
 
-* **3-Slot Save Manager (`SaveManager`)**: Saves across `save_slot_1.json` - `save_slot_3.json`, persisting active realm, coordinates, stats, equipped weapon/armor/totem, **3-slot Weapon Hotbar bindings**, weapon tiers, potions/tonics, materials, stash contents, `15` lore fragments, Bestiary kills, and arena milestones.
+* **3-Slot Save Manager (`SaveManager`)**: Saves across `save_slot_1.json` - `save_slot_3.json`, persisting active realm, coordinates, stats, equipped weapon/armor/totem, **3-slot Weapon Hotbar bindings**, **3 persistent equipment loadouts [ I ] [ II ] [ III ]**, weapon tiers, potions/tonics, materials, stash contents, `7` campfire waypoints, `15` lore fragments, `12` Bestiary kill codices, and arena milestones. Auto-saves upon closing the inventory modal.
 * **Storage Stash Vault (`[T]`)**: Located at Zyphden Town Square and accessible from all realm campfires via a dual-pane Carried Pouch / Vault Stash transfer modal.
 
 ### Expanded Zyphden Royal Keep
@@ -452,6 +452,7 @@ Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 | **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25%` Defense, `+35` Max HP, `+18%` DMG, Will of Atlas (`4s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
 | **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem (`460 HP`, `55 DEF`, `+4 HP/s` Regen; Slam `36 DMG`, Bash `32 DMG`, Spike `34 DMG`), Bearer Bolt (`54` DMG, `3s` CD) | `-10%` Move Speed, `35s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
 | **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30` Max HP, `+25` Will, `+20%` Defense, `-80%` Knockback, `25%` Gray Health recovery, Chills enemies (`3s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
+| **Champion's Totem** | Royal Combat Arena (Apex Victory) | `+35%` DMG, `+30%` Defense, `+15%` Move Speed, `+35%` Stamina Regen, `-20%` Cooldowns, `+40` Will, `+50` Max HP, `+14.0 HP/s` Out-of-Combat Regen (`+2.0 HP/s` in combat) | Withered Vitality (`-70%` incoming healing from potions, drops, and kill-perks) | Champion Gold (`[245, 200, 60]`) |
 
 ---
 

@@ -758,7 +758,7 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Synchronized build.bat (-Isrc/states/realms) and CMakeLists.txt compilation configurations.
 
 ================================================================================
-15. VERSION 0.0.1k MILESTONES (PHASES 1 - 8)
+15. VERSION 0.0.1k MILESTONES (PHASES 1 - 10)
 ================================================================================
 - Modal Fixes & [TAB] Inventory Restoration:
   * Fixed [M] Realm Map immediate closure bug and Bestiary tab index routing (Tab 2 vs Map Tab 3).
@@ -784,5 +784,18 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Buffed Mini Elemental Golem Companion to 460 HP / 55 DEF with 0.55s hit i-frames, +4 HP/s regen, 35s respawn, and 3-pattern rotation (AoE Slam 36 DMG, Forward Bash Fracture 32 DMG, Piercing Spike 34 DMG up to 280px).
   * Rebalanced Shadowstrider speed pieces (1.03/1.04/1.03) and set bonus (1.10x -> ~+21% net nimble speed), nerfed Totem of Insanity speed (+35% -> +18%), and softened Basalt Golem extra penalty (0.90x -> 0.96x).
   * Normalized non-ASCII punctuation across UI, dialogue, and lore strings.
+- Persistent Equipment Loadouts & Auto-Save:
+  * Fully serialized loadouts[3] (weapons, helmets, chestplates, leggings, totems, configured flags) and activeLoadoutIdx into GameSaveData and JSON save files with backward-compatible array parsing.
+  * Added auto-saving on closing the inventory modal ([TAB] / [ESC]) so snapshots taken via [SAVE] persist immediately across game reboots.
+- Stage #7 Permafrost Crypts Waypoint & Bonfire 7 Fast Travel:
+  * Raised CAMPFIRE_COUNT from 6 to 7 in GameConstants.hpp and SaveManager.hpp so the subterranean Permafrost Crypts bonfire unlocks and saves properly.
+  * Added STAGE #7: PERMAFROST CRYPTS with diamond waypoint, connecting leylines, active stage tracking, and fast-travel execution to EnterFrostCaverns() on the Realm Map.
+- Champion's Totem (8th Sacred Relic, 7th Attunable) & Combat Tactility Polish:
+  * Added TotemType::CHAMPION_TOTEM awarded upon conquering Wave 25 or Apex Boss Gauntlet in the Arena.
+  * Raised TOTEM_COUNT to 8 and ATTUNABLE_TOTEM_COUNT to 7 in GameConstants.hpp.
+  * Stats: +35% DMG, +30% DEF, +15% Speed, +35% Stamina Regen, -20% Cooldowns, +40 Will, +50 Max HP, Radiant Gold ([245, 200, 60]).
+  * Passive Health Regeneration Surge (+14.0 HP/s out-of-combat, +2.0 HP/s continuous in-combat) counterbalanced by Withered Vitality (-70% incoming healing from external potions, drops, and kill-perks).
+  * Combat Audio & Controls: Added metallic unsheathe audio (SoundFX::PlayEquipWeapon()) and attack state reset on hotbar swap. Enabled mouse-click weapon swapping on HUD hotbar dock cards with hover highlights.
+  * Frost Revenant telegraph tuning: Melee cone windup extended from 0.50s to 0.62s for fair dodge reaction windows.
 
 

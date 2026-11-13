@@ -43,7 +43,8 @@
 | **Dash (Evade)** | `Q Key` | Fast directional burst with **0.25s i-frames** (`EVADED`). |
 | **Timed Parry** | `F Key` | Active guard window. Staggers melee foes, grants counter boost, and reflects projectiles toward cursor. |
 | **Phlegmatic Trance** | `SPACE Key` | Active at 100 Composure. **5.0s invulnerability, zero stamina cost & auto-deflection aura**. |
-| **3-Slot Weapon Hotbar** | `1, 2, 3 Keys` | Instantly swap between up to 3 weapons assigned to your hotbar slots mid-combat. |
+| **3-Slot Weapon Hotbar** | `1, 2, 3 Keys` or `Click` | Instantly swap between up to 3 weapons assigned to your hotbar slots mid-combat (via hotkeys or clicking HUD dock). |
+| **Equipment Loadout Presets** | `[ I ]`, `[ II ]`, `[ III ]` | Snapshot and switch complete loadouts (weapon, armor, totem) in Equipment Matrix with persistent reboot saves. |
 | **Combat Quick Belt** | `H Key` / `4, 5, 6 Keys` | Consume Health Potions (`[H]`), Stoneskin Tonics (`[4]`), Glacial Thaw Draughts (`[5]`), and Berserker Brews (`[6]`). |
 | **Interact / Advance** | `E Key` / `Enter` | Talk to NPCs, open chests, read monoliths, and transition doors. |
 | **Storage Stash Trunk** | `T Key` | Open the persistent Storage Stash Vault at Zyphden Town Square or any realm campfire (or return from Arena). |
@@ -73,7 +74,10 @@
 > * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon/potion/armor skill icons and replaced the bottom-right box with an enlarged 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` per slot).
 > * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat color washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point-light shaders, Purkinje composite tone-mapping, and full realm emitter registration.
 > * **Combat & Balance Reworks**: Removed the stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); buffed the **Elemental Core Golem Companion** (`460 HP`, `55 DEF`, `0.55s` hit i-frames, `+4 HP/s` regen, `35s` respawn, cycling Slam/Bash/Spike patterns); and rebalanced stamina/speed across Bow, Daggers, **Shadowstrider** (`~+21%` net nimble speed), **Totem of Mist**, and **Totem of Insanity** (`+18%` speed) while keeping heavy armor pacing smooth.
-> * **Save, Bestiary & Text Hygiene Fixes**: Persisted Lore Fragment XV (`frag_15`) in `SaveManager`, added **Frost Revenant** as Bestiary entry #12, and normalized non-ASCII UI/dialogue punctuation cleanly for bitmap font rendering.
+> * **Save, Bestiary, Map & Loadout Persistence**: Fully serialized Equipment Loadout presets (`[ I ]`, `[ II ]`, `[ III ]`) across game reboots with auto-saving on inventory close; expanded campfire capacity to 7 persisting the Permafrost Crypts bonfire; added **STAGE #7: PERMAFROST CRYPTS** with live waypoint and fast-travel on the Realm Map; persisted Lore Fragment XV (`frag_15`) and added **Frost Revenant** as Bestiary entry #12.
+> * **Champion's Totem (8th Sacred Relic, 7th Attunable)**: Earned by conquering the Royal Combat Arena (Wave 25 / Apex Gauntlet). Imbues colossal martial buffs (+35% DMG, +30% DEF, +15% Speed, +35% Stamina Regen, -20% CDs, +40 Will, +50 Max HP) and surged passive health regeneration (+14 HP/s out of combat, +2 HP/s in combat) counter-balanced by *Withered Vitality* (-70% incoming healing from external potions and drops).
+> * **Combat Tactility & QoL**: Added metallic unsheathe audio cues upon hotbar swapping, clickable HUD hotbar dock cards, smooth attack state clearing on weapon swap, and tuned Frost Revenant melee cone windup (`0.50s -> 0.62s`).
+> * **Text Hygiene & Punctuation**: Normalized all non-ASCII UI, modal, and dialogue punctuation cleanly for robust bitmap font rendering.
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 
