@@ -702,7 +702,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = false;
                     } else {
                         // Frost Shift / Melee Frost Cleave
-                        windupDuration = 0.50f;
+                        windupDuration = 0.62f;
                         stateTimer = windupDuration;
                         telegraph.shape = TelegraphShape::CONE;
                         telegraph.radius = 135.0f;

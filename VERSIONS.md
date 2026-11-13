@@ -69,6 +69,12 @@
 * **Shadowstrider & Totem Speed Rebalance**: Tempered Shadowstrider piece modifiers (`1.03 / 1.04 / 1.03`) and full-set speed (`1.25x -> 1.10x`) for a balanced `~+21%` nimble feel, reduced **Totem of Insanity** speed (`+35% -> +18%`), and eased **Basalt Golem**'s extra set penalty (`0.90x -> 0.96x`) so heavy sets stay responsive.
 * **UI Text Hygiene**: Normalized non-ASCII smart quotes, em-dashes, and bullets in rendered UI, dialogue, and lore strings to pure ASCII for crisp Raylib bitmap rendering.
 
+#### 10. Persistent Equipment Loadouts, Stage 7 Crypts Waypoint & Champion's Totem
+* **Persistent Equipment Loadout Snapshots**: Fully serialized `loadouts[3]` (weapons, helmets, chestplates, leggings, totems, configured flags) and `activeLoadoutIdx` into `GameSaveData` and JSON save files with backward-compatible array parsing. Added auto-saving on closing the inventory modal (`[TAB]` / `[ESC]`) so snapshots taken via `[SAVE]` and equipment adjustments persist immediately across game reboots.
+* **Stage #7 Permafrost Crypts Waypoint & Bonfire 7 Parity**: Raised `CAMPFIRE_COUNT` from `6` to `7` in `GameConstants.hpp` and `SaveManager.hpp` so the subterranean Permafrost Crypts bonfire unlocks and saves properly; added `STAGE #7: PERMAFROST CRYPTS` with diamond waypoint, connecting leylines, active stage tracking, and fast-travel execution to `EnterFrostCaverns()` on the Realm Map.
+* **Champion's Totem (8th Sacred Relic, 7th Attunable)**: Added the `CHAMPION_TOTEM` awarded for conquering the Royal Combat Arena (Wave 25 or Apex Gauntlet). Features massive all-stat enhancements (`+35% Damage`, `+30% Armor Defense`, `+15% Movement Speed`, `+35% Stamina Regen`, `-20% Cooldowns`, `+40 Will`, `+50 Max HP`) and surged passive health regeneration (`+14.0 HP/s` out-of-combat, `+2.0 HP/s` continuous in-combat) counterbalanced by *Withered Vitality* (`-70%` incoming healing from external potions, drops, and kill-perks).
+* **Combat Tactility & QoL Polish**: Added metallic unsheathe audio when equipping weapons via hotbar keys (`[1]`, `[2]`, `[3]`), enabled mouse-click weapon swapping directly on the HUD hotbar dock cards with hover highlights and swing suppression, cleared pending attack windups on weapon swap, and tuned Frost Revenant's melee cone windup from `0.50s` to `0.62s` for fair dodge reaction windows.
+
 ---
 
 ## Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns

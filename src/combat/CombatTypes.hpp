@@ -74,7 +74,8 @@ enum class TotemType {
     TOTEM_MIST,            // Mist Forest Boss: Mist Fairy (+20% crit, +35% crit dmg, +30 HP orbs), +10% stam regen, -5% speed
     CRUSADER_TOTEM,        // Zyphden Spar: +25% defense, +35 max HP, +18% attack, Will of Atlas, -12% speed
     ELEMENTAL_CORE_TOTEM,  // Quarry Boss: +25% DEF, Mini Golem (460 HP, 55 DEF, 3 patterns), 54 DMG bolt (3s CD), -10% speed
-    TOTEM_PHLEGMATIC_CORE  // Northern Highland: -80% knockback, gray health recovery, chill counter
+    TOTEM_PHLEGMATIC_CORE, // Northern Highland: -80% knockback, gray health recovery, chill counter
+    CHAMPION_TOTEM         // Royal Arena: +35% DMG, +30% DEF, +15% speed, +35% stam, -20% CDs, +40 Will, +50 HP, +14 HP/s regen (+2 in combat), -70% external healing
 };
 
 // The Medieval Four Humors Alignment

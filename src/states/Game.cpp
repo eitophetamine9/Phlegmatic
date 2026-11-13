@@ -502,6 +502,17 @@ void Game::ExecuteFastTravel(int stageId) {
                 "Frostbound Highlands of the Berserker Troll Clan"
             );
             break;
+        case 7: // Permafrost Crypts
+            StartRealmTransition(
+                [this]() {
+                    EnterFrostCaverns();
+                    player.SetPosition({ 300.0f, 1200.0f });
+                    camera.target = player.GetPosition();
+                },
+                "PERMAFROST CRYPTS",
+                "Subterranean Caverns & Frost Revenant Sarcophagus"
+            );
+            break;
         default:
             break;
     }
@@ -1101,6 +1112,17 @@ void Game::SaveActiveGame() {
     data.equippedLeggings = (int)player.GetLeggings();
     data.equippedTotem = (int)player.GetTotem();
 
+    data.activeLoadoutIdx = player.GetInventory().GetActiveLoadoutIndex();
+    for (int lo = 0; lo < GameLimits::LOADOUT_COUNT; ++lo) {
+        const auto& preset = player.GetInventory().GetLoadout(lo);
+        data.loadoutWeapons[lo] = (int)preset.weapon;
+        data.loadoutHelmets[lo] = (int)preset.helmet;
+        data.loadoutChestplates[lo] = (int)preset.chestplate;
+        data.loadoutLeggings[lo] = (int)preset.leggings;
+        data.loadoutTotems[lo] = (int)preset.totem;
+        data.loadoutConfigured[lo] = preset.isConfigured;
+    }
+
 
 
 
@@ -1373,6 +1395,22 @@ void Game::LoadActiveGame(int slotIndex) {
     player.GetInventory().SetEquippedLeggings((LeggingsType)data.equippedLeggings);
     player.SetTotem((TotemType)data.equippedTotem);
     player.GetInventory().SetEquippedTotem((TotemType)data.equippedTotem);
+
+    for (int lo = 0; lo < GameLimits::LOADOUT_COUNT; ++lo) {
+        if (data.loadoutConfigured[lo]) {
+            EquipmentPreset preset;
+            preset.weapon = (WeaponType)data.loadoutWeapons[lo];
+            preset.helmet = (HelmetType)data.loadoutHelmets[lo];
+            preset.chestplate = (ChestplateType)data.loadoutChestplates[lo];
+            preset.leggings = (LeggingsType)data.loadoutLeggings[lo];
+            preset.totem = (TotemType)data.loadoutTotems[lo];
+            preset.isConfigured = true;
+            player.GetInventory().SetLoadout(lo, preset);
+        }
+    }
+    if (data.activeLoadoutIdx >= 0 && data.activeLoadoutIdx < GameLimits::LOADOUT_COUNT) {
+        player.GetInventory().SetActiveLoadoutIndex(data.activeLoadoutIdx);
+    }
 
 
 
@@ -1894,21 +1932,10 @@ void Game::Update(float dt) {
 
 
         if (pressI || pressTab || pressEsc) {
-
-
-
             showInventoryModal = false;
-
-
-
+            SaveActiveGame();
             SoundFX::PlayButtonClick();
-
-
-
             return;
-
-
-
         } else if (pressB) {
 
 
@@ -3511,13 +3538,28 @@ void Game::Update(float dt) {
 
 
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-
-
-
-        player.TriggerLightAttack(particles);
-
-
-
+        int screenW = GetScreenWidth();
+        int screenH = GetScreenHeight();
+        const float slotW = (screenW >= 1400) ? 72.0f : 64.0f;
+        const float slotH = (screenW >= 1400) ? 74.0f : 66.0f;
+        const float gap = (screenW >= 1400) ? 8.0f : 6.0f;
+        const float pad = 10.0f;
+        const float dockW = 3.0f * slotW + 2.0f * gap + pad * 2.0f;
+        const float dockH = slotH + 16.0f;
+        const float dockX = (float)screenW - dockW - 20.0f;
+        const float dockY = (float)screenH - dockH - 18.0f;
+        bool clickedHotbar = false;
+        for (int s = 0; s < 3; ++s) {
+            Rectangle r = { dockX + pad + (float)s * (slotW + gap), dockY + 8.0f, slotW, slotH };
+            if (CheckCollisionPointRec(mouseScreen, r)) {
+                player.EquipHotbarSlot(s, particles);
+                clickedHotbar = true;
+                break;
+            }
+        }
+        if (!clickedHotbar) {
+            player.TriggerLightAttack(particles);
+        }
     }
 
 
@@ -3707,6 +3749,10 @@ void Game::Update(float dt) {
                         Color{ 255, 215, 80, 255 }
                     });
                 }
+            }
+            if (!player.GetInventory().HasTotem(TotemType::CHAMPION_TOTEM)) {
+                player.GetInventory().UnlockTotem(TotemType::CHAMPION_TOTEM);
+                particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CHAMPION'S TOTEM!", Color{ 255, 215, 80, 255 }, 28.0f);
             }
             SoundFX::PlayCrusaderClash();
             SoundFX::PlayCoinPickup();
@@ -4707,19 +4753,10 @@ void Game::RenderScene() {
 
         bool close = GameUI::DrawInventoryModal(w, h, mousePos, isMousePressed, player, inventoryActiveTab, inventorySelectedFragment);
 
-
-
         if (close) {
-
-
-
             showInventoryModal = false;
-
-
-
+            SaveActiveGame();
         }
-
-
 
         if (inventoryActiveTab == 3) {
 

@@ -263,8 +263,8 @@ public:
         if (idx >= 0 && idx < GameLimits::WEAPON_COUNT) weaponUpgradeLevel[idx]++;
     }
 
-    // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden)
-    bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false };
+    // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden, 7: Permafrost Crypts)
+    bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false, false };
     bool IsCampfireUnlocked(int id) const {
         if (id >= 1 && id <= GameLimits::CAMPFIRE_COUNT) return unlockedCampfires[id - 1];
         return false;
@@ -297,6 +297,9 @@ public:
     void SetActiveLoadoutIndex(int idx) { if (idx >= 0 && idx < 3) activeLoadoutIdx = idx; }
     const EquipmentPreset& GetLoadout(int idx) const { return loadouts[(idx >= 0 && idx < 3) ? idx : 0]; }
     EquipmentPreset& GetLoadout(int idx) { return loadouts[(idx >= 0 && idx < 3) ? idx : 0]; }
+    void SetLoadout(int idx, const EquipmentPreset& preset) {
+        if (idx >= 0 && idx < 3) loadouts[idx] = preset;
+    }
     void SaveCurrentToLoadout(int idx, WeaponType wep, HelmetType helm, ChestplateType chest, LeggingsType leg, TotemType tot) {
         if (idx < 0 || idx >= 3) return;
         loadouts[idx].weapon = wep;

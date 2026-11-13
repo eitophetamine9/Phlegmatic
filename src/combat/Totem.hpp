@@ -76,6 +76,15 @@ inline TotemStats GetTotemStats(TotemType type) {
                 1.0f, 1.20f, 0.92f, 0.90f, 1.0f, 25.0f, 30.0f,
                 Color{ 140, 220, 255, 255 }
             };
+        case TotemType::CHAMPION_TOTEM:
+            return {
+                "Champion's Totem",
+                "A colossal laurels-and-sun-crested vanguard effigy forged in the royal gladiatorial pits of Zyphden. Bestowed upon victors who conquer the Royal Combat Arena. Imbues peerless martial prowess, swiftness, and unyielding armor with surged passive regeneration, but demands merciless endurance: external potions and restorative aids are severely suppressed.",
+                "+35% DMG, +30% DEF, +15% Speed, +35% Stamina Regen, -20% CDs, +40 Will, +50 Max HP, +14 HP/s Passive Regen (+2 in combat)",
+                "Withered Vitality: All incoming healing from potions, drops, and external sources reduced by 70%",
+                1.35f, 1.30f, 1.15f, 1.35f, 0.80f, 40.0f, 50.0f,
+                Color{ 245, 200, 60, 255 }
+            };
         case TotemType::NONE:
         default:
             return {
