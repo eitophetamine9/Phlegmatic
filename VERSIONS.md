@@ -6,7 +6,7 @@
 
 ## Table of Versions
 
-- [Version 0.0.1l - Apex Boss Gauntlet Overhaul, Conqueror's Totem, World Progression Gates & Real-Time Cooldown Architecture](#version-001l---apex-boss-gauntlet-overhaul-conquerors-totem-world-progression-gates--real-time-cooldown-architecture)
+- [Version 0.0.1l - Apex Boss Escalation, Totem Leveling, Commanding Titan, Sovereign's Scepter & Commander's Legion](#version-001l---apex-boss-escalation-totem-leveling-commanding-titan-sovereigns-scepter--commanders-legion)
 - [Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks](#version-001k---3-slot-weapon-hotbar-enlarged-icon-hud-glsl-lighting--combat-reworks)
 - [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns)
 - [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
@@ -20,21 +20,26 @@
 
 ---
 
-## Version 0.0.1l - Apex Boss Gauntlet Overhaul, Conqueror's Totem, World Progression Gates & Real-Time Cooldown Architecture
+## Version 0.0.1l - Apex Boss Escalation, Totem Leveling, Commanding Titan, Sovereign's Scepter & Commander's Legion
 
 ### Major Features & Balance Revisions Implemented
 
-#### 1. Apex Boss Gauntlet Overhaul, Damage Multiplier & New Attack Patterns
-* **Apex Boss Stat Boosts**: Enhanced all three consecutive champions within the Apex Boss Gauntlet with dedicated Apex scaling:
-  * *Apex Remnant Zil*: Health elevated to 1,250 HP, +12 Defense, and 85 Will poise.
-  * *Apex Primordial Titan*: Health elevated to 1,850 HP, +16 Defense, and 100 Will poise.
-  * *Apex Berserker Troll Warlord*: Health elevated to 2,800 HP, +20 Defense, and 110 Will poise.
-* **+50% Apex Lethality Multiplier**: Introduced an explicit `1.50x` outgoing damage multiplier to all melee strikes and projectile attacks executed by enemies designated as `isApexBoss`.
-* **Visual Aura & Identification**: Apex Gauntlet bosses are rendered with a radiant crimson-gold champion aura (`Color{ 255, 55, 75 }`), dual pulsing outer rings, and an overhead `"APEX CHAMPION"` badge in addition to the `"APEX "` name prefix.
+#### 1. Apex Boss Gauntlet Difficulty Escalation & Combat Tuning
+* **Massive Boss Stat Escalation**: To ensure the Apex Boss Gauntlet serves as the ultimate pinnacle endgame challenge worthy of the Champion's Totem, all three consecutive champions have received substantial health, defense, poise, and mobility increases:
+  * *Apex Remnant Zil*: Health elevated from 1,250 to 2,200 HP, Defense raised to 50, Will poise increased to 110, and Move Speed tuned to 165.
+  * *Apex Primordial Golem Titan*: Health elevated from 1,850 to 3,400 HP, Defense raised to 75, Will poise increased to 140, and Move Speed tuned to 145.
+  * *Apex Berserker Troll Warlord*: Health elevated from 2,800 to 4,800 HP, Defense raised to 58, Will poise increased to 150, and Move Speed tuned to 235.
+* **1.85x - 2.0x Lethality Multiplier**: Elevated the outgoing damage multiplier for Apex champions: Zil and the Golem Titan hit with a 1.85x multiplier, while the Berserker Troll Warlord strikes with an overwhelming 2.0x lethal multiplier. Apex projectiles deal 45 to 55 base damage.
+* **Snappy Attack Cadences & Windups**: Windup telegraph durations across all Apex bosses reduced by 25% (`windupDuration *= 0.75f`), and recovery durations reduced by 30% (`recoveryDuration * 0.70f`), eliminating sluggish windows and demanding split-second parries and dodges.
+* **<35% HP Enrage Phase**: When reduced below 35% health, Apex bosses enter an unyielding enrage state: gaining an additional +20% move speed, another -15% windup time, and -25% recovery duration. In this state, they radiate an intense crimson fury aura with secondary pulsing shockwave rings.
+* **Escalated Boss Reinforcements**: WaveManager reinforces each gauntlet stage with deadlier companion rosters:
+  * *Stage 1*: Apex Remnant Zil backed by 2 Iron Brutes and 1 Void Pyromancer.
+  * *Stage 2*: Apex Primordial Golem Titan supported by 3 Mini Golems and 1 Ore Golem.
+  * *Stage 3*: Apex Berserker Troll Warlord flanked by 2 Frost Trolls and 2 Void Pyromancers.
 * **New Boss Attack Patterns**:
-  * *Apex Zil Phase 4 (Solar Cross-Cataclysm)*: Triggers a high-velocity 4-way cardinal holy beam cross detonation covering the arena axis on a 5.0-second cadence.
+  * *Apex Zil Phase 4 (Solar Cross-Cataclysm)*: High-velocity 4-way cardinal holy beam cross detonation covering the arena axis on a 5.0-second cadence.
   * *Apex Primordial Titan Phase 4 (Molten Tremor Ring & Lava Geysers)*: Erupts a 230px seismic shockwave accompanied by three molten magma projectiles fired in a wide fan.
-  * *Apex Berserker Troll Warlord (Full 3-Phase Cadence)*: Implemented unique rotational mechanics featuring Phase 0 *Highland Blood Whirlwind* (rapid circular strike), Phase 1 *Forward Glacial Cleave Cone* (95px wide frontal shock), and Phase 2 *Crag Earth Rupture Slam* (160px heavy crater slam).
+  * *Apex Berserker Troll Warlord (Full 3-Phase Cadence)*: Rotational mechanics featuring Phase 0 *Highland Blood Whirlwind* (rapid circular strike), Phase 1 *Forward Glacial Cleave Cone* (95px wide frontal shock), and Phase 2 *Crag Earth Rupture Slam* (160px heavy crater slam).
 * **Arena Bandage Drop Nerfs**: Rebalanced arena adhesive bandage spawns to make surviving trials deliberate and demanding:
   * Bandage drop rate on enemy defeat reduced from 35% to 12%.
   * Maximum simultaneous ground bandages reduced from 4 to 2.
@@ -42,27 +47,61 @@
   * Removed the free opening wave bandage from the arena floor.
 * **Champion's Totem Routing**: Champion's Totem (+35% DMG, +30% DEF, +14 HP/s out-of-combat regen, -70% potion healing) is now exclusively awarded upon completing the Apex Boss Gauntlet alongside +2500 Shingles, +75 Scraps, +10 Mist Essence, and +10 Shadow Essence.
 
-#### 2. Conqueror's Totem & 7 Permanent Tower Companions
-* **Conqueror's Totem**: Introduced the 8th attunable primal relic (`TotemType::CONQUEROR_TOTEM`), awarded for conquering standard Wave 25 of the Royal Combat Arena. Bestows +20% Defense, +40 Max HP, +25 Will, and commands a loyal 7-gladiator tower squad.
-* **7 Diverse Tower Gladiators**: Summons a full tactical squad composed of non-boss tower archetypes retaining their true base health and defense while dealing reduced baseline damage:
-  * *Tower Slasher*: 80 HP, 8 DEF, 12 DMG (rapid close-quarters steel slashes).
-  * *Tower Brute*: 190 HP, 32 DEF, 16 DMG (heavy club ground smashes with stagger).
-  * *Tower Charger*: 65 HP, 12 DEF, 13 DMG (high-speed vanguard dash strikes).
-  * *Tower Archer*: 60 HP, 6 DEF, 11 DMG (piercing long-range arrow volleys).
-  * *Tower Pyromancer*: 75 HP, 10 DEF, 12 DMG (homing occult void flame orbs).
-  * *Tower Stone Golem*: 220 HP, 45 DEF, 14 DMG (crushing rock impacts applying Armor Fracture).
-  * *Tower Frost Troll*: 280 HP, 24 DEF, 15 DMG (brutal glacial club sweeps applying chill/stagger).
-* **Orbital Leash Behavior**: Companions maintain a 7-point circular formation orbiting within 72px of the player, engaging nearby hostiles within 280px while auto-leashing back if distance exceeds 420px.
-* **All-7-Must-Die 120-Second Squad Resurrection**: Individual fallen companions stay defeated and cannot respawn while any squadmate remains alive. Only when all 7 companions have been wiped out does a 2-minute (120-second) resurrection timer begin, accompanied by an overhead countdown UI (`SQUAD RESPAWN: Xm Ys`), resurrecting all 7 gladiators simultaneously at full health upon timer completion.
+#### 2. 3-Tier Totem Leveling System & Commanding Elemental Golem Evolution
+* **3-Tier Totem Upgrades at the Forge**: Players can now upgrade all 8 primal totems at Blacksmith Varek's Forge in Zyphden using Silver Shingles and Ore Scraps across Tier I, Tier II, and Tier III:
+  * *Tier I (Base)*: Default attunement potency.
+  * *Tier II (+1)*: Enhanced multipliers (+40% to +50% stat increases), requiring 250 Shingles and 20 Ore Scraps.
+  * *Tier III (+2)*: Masterwork apex potency (+80% to +100% stat increases), requiring 500 Shingles and 45 Ore Scraps.
+  * Integrated full save persistence in `SaveManager` (`totemUpgradeLevel[TOTEM_COUNT]`), UI badge display (`[TIER I]`, `[TIER II]`, `[TIER III]`), and Forge upgrade cards.
+* **Commanding Elemental Golem Evolution (Tier 3)**:
+  * When the Elemental Core Totem reaches Tier 3, the Mini Golem companion permanently evolves into the colossal **Commanding Elemental Golem** titan (920 HP, 75 DEF, 28px body radius, +8 HP/s passive regen).
+  * The Commanding Titan commands and summons **3 orbiting Mini Golems** (280 HP, 40 DEF, 18 DMG) that fight alongside it in vanguard formation.
+  * Defeated mini golems automatically reconstitute after 35 seconds, creating a self-sustaining frontline army.
 
-#### 3. World Progression Gates Behind Knight Lenon
+#### 3. Sovereign's Scepter (Weapon 12) & Weapon Damage Scaling Rebalance
+* **Sovereign's Scepter (Weapon Type 12)**:
+  * Introduced as a pure restorative healing armament unlocked upon completing Wave 25 of the Royal Combat Arena.
+  * Minimal enemy offensive damage (4 DMG light, 0 DMG heavy) preventing direct combat cheese and focusing entirely on tactical summon sustain.
+  * *Light Attack*: Emits a targeted restoration beam restoring +24 HP to nearby summons (+30 HP at +1, +38 HP at +2).
+  * *Heavy Attack (Sanctuary Radiance)*: 360-degree radiant sanctuary wave expanding to 280px radius. Heals all active friendly summons (Commander Squad, Companion Golem, and Mini Golem sub-minions) for +75 HP (+95 HP at +1, +120 HP at +2), completely cleanses all debuffs (chill, burn, stagger), and grants +15 DEF and +20% move speed for 6 seconds.
+  * Procedural golden winged caduceus art, HUD label `"SCEPTER"`, and dedicated weapon dock integration.
+* **Comprehensive Weapon Scaling Rebalance**: Rebalanced damage progression across all 11 offensive weapons for tiers +0, +1, and +2:
+  * *Crusader Blade*: 16/54 -> 21/66 -> 26/80.
+  * *Dual Daggers*: 11/42 -> 15/56 -> 20/72 (crit 1.15x/1.30x).
+  * *War Mace*: 24/74 -> 29/88 -> 35/104 (-20% armor fracture).
+  * *Truth Seeker*: 22/70 -> 27/85 (holy beam 24/32).
+  * *Royal Halberd*: 18/56 -> 23/70 -> 28/85 (10%/15%/20% pierce).
+  * *Twin Zephyr Daggers*: 15/62 -> 19/75 -> 23/90.
+  * *Windrunner's Recurve*: 18/68 -> 22/80 -> 27/95.
+  * *Sun-Forged Claymore*: 26/88 -> 32/104 -> 38/122 (curbed from overtuned 40/138).
+  * *Storm Glaive*: 20/76 -> 25/90 -> 30/106.
+  * *Twin Glacial Cleavers*: 18/78 -> 23/92 -> 28/108.
+  * *Sovereign's Scepter*: 4/0 -> 5/0 -> 6/0 (healing +24/+75 -> +30/+95 -> +38/+120).
+
+#### 4. Commander's Totem, Spacing & Exact Enemy Procedural Sprites
+* **Renamed to Commander's Totem**: Renamed from Conqueror's Totem to Commander's Totem across all UI modals, tooltips, and codices.
+* **Player Damage Penalty**: Imposed an intentional -40% direct player attack damage penalty (`playerDamageMult = 0.60f`), shifting the player's role into a tactician commander who relies on summons and healing support.
+* **Loosened Vanguard Formation & Spacing**:
+  * Increased anchor orbit radius from 72px to 135px.
+  * Enforced personal space repulsion (<90px from player) preventing summons from hovering over or crowding the player.
+  * Added mutual companion-to-companion separation so summons do not clip into each other.
+* **1:1 Exact Enemy Procedural Sprites**:
+  * Rendered all 7 summons using the exact procedural silhouette and equipment routines from `EnemyRenderer.cpp`: Slasher (curved scythe), Brute (spiked war mace), Charger (heavy lance & shield), Archer (recurve bow), Pyromancer (void staff), Ore Golem (stone plates & glowing core), and Frost Troll (glacial clubs & tusks).
+  * Outfitted with imperial purple and gold crest pauldrons, overhead health bars, and green combat floaters.
+* **Procedural Shadowstrider Decoy Sprite**:
+  * Replaced placeholder player copy with a procedural humanoid shadow silhouette featuring a dark cowl hood, glowing violet slit eyes, crossed spectral daggers, mirage boundary, and a circular lifetime countdown ring.
+
+#### 5. Modal Inspection Card Auto-Wrap & Overflow Architecture Fix
+* **Dynamic Vertical Flow**: Overhauled the modal inspection drawer card in `ModalUI.cpp` with a dynamic cursor flow (`curY`), eliminating text clipping and overflowing.
+* **Independent Buff & Drawback Wrapping**: Separated positive relic harmonics (emerald green) and negative trait drawbacks (salmon red) into distinct text-wrapping blocks.
+* **Codex Protection**: Ensured stat lines never collide with or overwrite the `RELIC LORE & CODEX` header or body text.
+
+#### 6. World Progression Gates Behind Knight Lenon & Real-Time Background Timers
 * **Locked Mist Forest & Northern Pass Gates**: In accordance with royal decree, the Western Archway Gate (Restless Mist Forest) and Northern Mountain Pass (Northern Crags) are physically locked until the player has sparred with and defeated Captain Lenon in the courtyard (`questPhase >= ZyphdenQuestPhase::VICTORIOUS`), matching the Eastern Quarry Archway.
 * **Dynamic Warning Prompts**: Interacting with either locked gate triggers screen shake, impact audio, and floating decree warnings, while outside text banners reflect the requirement: `[E] WESTERN MIST GATE (LOCKED - SPAR WITH LENON FIRST)` and `[E] NORTHERN PASS (LOCKED - SPAR WITH LENON FIRST)`.
 * **Fast-Travel Anti-Bypass Guard**: `Game::ExecuteFastTravel` guards fast-travel destinations to stages 4-7 against sequence breaking prior to Lenon's defeat.
-
-#### 4. Elemental Golem Respawn Cooldown & Real-Time Background Timers
 * **120-Second Primordial Altar Cooldown**: Defeating the Elemental Golem (Primordial Titan) in the Quarry Depths initiates a 120-second dormancy cooldown at the Primordial Altar before the boss can be awakened again, displaying `[E] PRIMORDIAL ALTAR (DORMANT - Xm Ys)` over the altar.
-* **Real-Time Modal Cooldown Architecture**: Implemented `Game::UpdateBackgroundCooldowns` and `Player::UpdateBackgroundTimers`. Boss rematch timers, the Elemental Golem 120s respawn timer, the Conqueror Squad 120s resurrection timer, player skill and potion cooldowns, out-of-combat passive regeneration, the day/night diurnal sky clock, and arena periodic bandage dispensers now continue advancing seamlessly even while viewing Inventory, Bestiary, Map, Stash, or Controls modals.
+* **Real-Time Modal Cooldown Architecture**: Implemented `Game::UpdateBackgroundCooldowns` and `Player::UpdateBackgroundTimers`. Boss rematch timers, the Elemental Golem 120s respawn timer, the Commander Squad 120s resurrection timer, player skill and potion cooldowns, out-of-combat passive regeneration, the day/night diurnal sky clock, and arena periodic bandage dispensers now continue advancing seamlessly even while viewing Inventory, Bestiary, Map, Stash, or Controls modals.
 
 ---
 

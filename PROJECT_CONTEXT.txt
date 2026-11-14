@@ -799,7 +799,7 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Frost Revenant telegraph tuning: Melee cone windup extended from 0.50s to 0.62s for fair dodge reaction windows.
 
 ================================================================================
-16. VERSION 0.0.1l MILESTONES (INCREMENTS 1 - 4)
+16. VERSION 0.0.1l MILESTONES (INCREMENTS 1 - 5)
 ================================================================================
 - Apex Boss Gauntlet Overhaul & Attack Patterns (Increment 1):
   * Overhauled all three Apex Gauntlet champions: Apex Remnant Zil (1,250 HP, +12 DEF, 85 Will), Apex Primordial Titan (1,850 HP, +16 DEF, 100 Will), Apex Berserker Troll Warlord (2,800 HP, +20 DEF, 110 Will).
@@ -824,6 +824,16 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Real-Time Background Cooldown Architecture: implemented Game::UpdateBackgroundCooldowns and Player::UpdateBackgroundTimers so boss respawns, companion squad resurrection, skill/potion cooldowns, day/night cycles, and arena spawners continue ticking even while in Inventory, Bestiary, Map, Stash, or Controls modals.
 - Comprehensive Documentation & Version Update (Increment 4):
   * Updated README.md, VERSIONS.md, documentation.md, and PROJECT_CONTEXT.txt reflecting all v0.0.1l additions.
+- Relic Leveling, Sovereign's Scepter, Commander's Legion & Apex Escalation (Increment 5):
+  * Modal Card Dynamic Auto-Wrap: overhauled inspection card drawer in ModalUI.cpp with dynamic vertical cursor flow (curY) and independent wrapping for positive buff harmonies and negative trait drawbacks, resolving single-line overflow and collisions with RELIC LORE & CODEX.
+  * 3-Tier Totem Leveling System: all 8 primal totems can be upgraded to Tier II (+1) and Tier III (+2) at Blacksmith Varek's Forge in Zyphden using Shingles and Ore Scraps, fully serialized in SaveManager (totemUpgradeLevel[TOTEM_COUNT]) with UI tier badges.
+  * Commanding Elemental Golem Evolution: Tier 3 Elemental Core Totem evolves the mini golem companion into the colossal Commanding Elemental Golem titan (920 HP, 75 DEF, 28px radius, +8 HP/s regen) which commands and summons 3 orbiting Mini Golems (280 HP, 40 DEF, 18 DMG) with independent combat AI and 35s auto-resurrection.
+  * Sovereign's Scepter (Weapon 12): introduced pure restorative healing weapon unlocked at Arena Wave 25 (4 DMG light, 0 DMG heavy). Light attack heals targeted summons +24 HP (+30/+38); Heavy attack triggers Sanctuary Radiance full 360-degree AoE radius heal (+75/+95/+120 HP across 280px, cleansing debuffs and granting +15 DEF and +20% move speed for 6s).
+  * Comprehensive Weapon Damage Scaling Rebalance: standardized progression for all 11 offensive weapons across +0, +1, and +2 tiers (Crusader Blade 16/54 -> 26/80, Dual Daggers 11/42 -> 20/72, Mace 24/74 -> 35/104, Sun Claymore curbed to 26/88 -> 38/122, etc.).
+  * Commander's Totem Renaming & Formation: renamed Conqueror's Totem to Commander's Totem with -40% player direct damage penalty; loosened vanguard formation to 135px orbit with <90px player personal space repulsion and mutual companion separation.
+  * Exact 1:1 Enemy Procedural Sprites: rendered all 7 summons using exact procedural silhouettes and gear matching real in-game hostiles (Slasher, Brute, Charger, Archer, Pyromancer, Ore Golem, Frost Troll) with imperial purple/gold crests and overhead health bars.
+  * Procedural Shadowstrider Decoy Sprite: replaced player copy with distinct procedural hooded shadow silhouette with glowing violet slit eyes, crossed spectral daggers, mirage boundary, and lifetime countdown ring.
+  * Apex Boss Gauntlet Difficulty Escalation: escalated boss stats (Remnant Zil 2,200 HP / 50 DEF / 165 SPD, Golem Titan 3,400 HP / 75 DEF / 145 SPD, Berserker Troll Warlord 4,800 HP / 58 DEF / 235 SPD), 1.85x-2.0x lethal damage multipliers, 25% faster windup telegraphs, 30% lower attack recovery, deadlier wave reinforcements (Brutes, Pyromancers, Mini Golems, Frost Trolls), and an intense <35% HP Enrage Phase (+20% move speed, -15% windups, -25% recovery, crimson fury aura with secondary shockwave pulses).
 
 
 
