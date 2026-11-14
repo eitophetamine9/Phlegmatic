@@ -708,8 +708,8 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
     }
 
-    // Friendly Tower Companions Squad combat & movement (Conqueror's Totem)
-    if (player.GetTotem() == TotemType::CONQUEROR_TOTEM) {
+    // Friendly Tower Companions Squad combat & movement (Commander's Totem)
+    if (player.GetTotem() == TotemType::COMMANDER_TOTEM) {
         auto& squad = player.GetTowerCompanions();
         float timeSec = (float)GetTime();
 
@@ -717,14 +717,33 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             auto& comp = squad[i];
             if (!comp.active || comp.health <= 0.0f) continue;
 
-            float orbitAngle = comp.formationAngle + timeSec * 0.45f;
+            float orbitAngle = comp.formationAngle + timeSec * 0.35f;
             Vector2 anchorPos = {
-                player.GetPosition().x + cosf(orbitAngle) * 72.0f,
-                player.GetPosition().y + sinf(orbitAngle) * 72.0f
+                player.GetPosition().x + cosf(orbitAngle) * 135.0f,
+                player.GetPosition().y + sinf(orbitAngle) * 135.0f
             };
 
+            // Personal-space buffer: push away if crowding too close (<90px) to player
             float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
-            if (distToPlayer > 420.0f) {
+            if (distToPlayer < 90.0f && distToPlayer > 0.001f) {
+                Vector2 pushDir = Vector2Normalize(Vector2Subtract(comp.position, player.GetPosition()));
+                comp.position = Vector2Add(comp.position, Vector2Scale(pushDir, (90.0f - distToPlayer) * 7.5f * dt));
+            }
+
+            // Mutual companion separation so units don't bunch up
+            for (size_t j = i + 1; j < squad.size(); ++j) {
+                if (!squad[j].active || squad[j].health <= 0.0f) continue;
+                float sepDist = Vector2Distance(comp.position, squad[j].position);
+                float minSep = comp.radius + squad[j].radius + 8.0f;
+                if (sepDist < minSep && sepDist > 0.001f) {
+                    Vector2 sepDir = Vector2Normalize(Vector2Subtract(comp.position, squad[j].position));
+                    float push = (minSep - sepDist) * 0.5f;
+                    comp.position = Vector2Add(comp.position, Vector2Scale(sepDir, push * 6.0f * dt));
+                    squad[j].position = Vector2Subtract(squad[j].position, Vector2Scale(sepDir, push * 6.0f * dt));
+                }
+            }
+
+            if (distToPlayer > 440.0f) {
                 comp.position = anchorPos;
                 comp.attackCooldown = 0.0f;
                 comp.invulnTimer = 0.3f;
@@ -839,7 +858,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
                 if (comp.invulnTimer > 0.0f) break;
                 if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 10.0f)) {
-                    float effDef = comp.defense;
+                    float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 15.0f : 0.0f);
                     float baseDmg = 20.0f;
                     if (enemy.GetType() == EnemyType::BRUTE) baseDmg = 38.0f;
                     else if (enemy.GetType() == EnemyType::CHARGER) baseDmg = 22.0f;

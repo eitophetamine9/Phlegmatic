@@ -730,7 +730,7 @@ void Player::RelocateTowerCompanions() {
     float baseAngle = facingAngle * DEG2RAD;
     for (size_t i = 0; i < towerCompanions.size(); ++i) {
         float angle = baseAngle + (float)i * (2.0f * PI / (float)towerCompanions.size());
-        Vector2 offset = { cosf(angle) * 72.0f, sinf(angle) * 72.0f };
+        Vector2 offset = { cosf(angle) * 135.0f, sinf(angle) * 135.0f };
         towerCompanions[i].position = Vector2Add(position, offset);
         towerCompanions[i].attackCooldown = 0.0f;
         towerCompanions[i].invulnTimer = 0.0f;
@@ -1318,7 +1318,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             // All 7 companions are defeated
             if (towerSquadRespawnTimer <= 0.0f) {
                 towerSquadRespawnTimer = 120.0f; // 2 minutes respawn countdown begins
-                particles.SpawnFloatingText(position, "CONQUEROR SQUAD FALLEN! (2m Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+                particles.SpawnFloatingText(position, "COMMANDER SQUAD FALLEN! (2m Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
             } else {
                 towerSquadRespawnTimer -= dt;
                 if (towerSquadRespawnTimer <= 0.0f) {
@@ -1331,7 +1331,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                         c.attackVisualTimer = 0.0f;
                     }
                     RelocateTowerCompanions();
-                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                    particles.SpawnFloatingText(position, "COMMANDER SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
                     particles.SpawnSparks(position, Color{ 200, 80, 255, 255 }, 40, 220.0f);
                     SoundFX::PlayParrySuccess();
                 }
@@ -2586,7 +2586,7 @@ void Player::UpdateBackgroundTimers(float dt, ParticleSystem& particles) {
                         c.invulnTimer = 1.0f;
                     }
                     RelocateTowerCompanions();
-                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                    particles.SpawnFloatingText(position, "COMMANDER SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
                 }
             }
         } else {

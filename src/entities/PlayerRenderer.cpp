@@ -26,12 +26,49 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawCircle((int)pillar.position.x, (int)pillar.position.y, 6.0f, Color{ 255, 160, 50, (unsigned char)(220 * alpha) });
     }
 
-    // Render active Shadow Decoy
+    // Render active Shadow Decoy (Shadowstrider Clone / Decoy)
     if (player.shadowDecoy.active) {
-        float flicker = 0.6f + 0.3f * sinf((float)GetTime() * 12.0f);
-        Color shadowColor = Color{ 110, 60, 180, (unsigned char)(160 * flicker) };
-        DrawCircle((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius, shadowColor);
-        DrawCircleLines((int)player.shadowDecoy.position.x, (int)player.shadowDecoy.position.y, player.radius + 3.0f, Color{ 180, 120, 255, (unsigned char)(200 * flicker) });
+        Vector2 dPos = player.shadowDecoy.position;
+        float time = (float)GetTime();
+        float flicker = 0.75f + 0.25f * sinf(time * 10.0f);
+
+        // Ground shadow & shadowy mist puddle
+        AssetManager::DrawEntityShadow(dPos, player.radius * 1.2f);
+        DrawCircleGradient(dPos, player.radius * 1.8f, Color{ 85, 30, 140, (unsigned char)(90 * flicker) }, Color{ 0, 0, 0, 0 });
+
+        // Dark hooded silhouette
+        Color cloakCol = Color{ 24, 18, 34, 255 };
+        DrawCircleV(dPos, player.radius, Color{ 15, 10, 22, 255 });
+        DrawCircleV(dPos, player.radius - 2.5f, cloakCol);
+
+        // Shadow mantle & cowl hood
+        Vector2 cowlCenter = { dPos.x, dPos.y - 3.0f };
+        DrawCircleV(cowlCenter, player.radius * 0.65f, Color{ 36, 26, 52, 255 });
+        DrawCircleV(cowlCenter, player.radius * 0.45f, Color{ 18, 12, 28, 255 });
+
+        // Glowing violet eye slits
+        Vector2 eyeL = { cowlCenter.x - 3.5f, cowlCenter.y };
+        Vector2 eyeR = { cowlCenter.x + 3.5f, cowlCenter.y };
+        Color eyeCol = Color{ 205, 130, 255, (unsigned char)(240 * flicker) };
+        DrawCircleV(eyeL, 2.0f, eyeCol);
+        DrawCircleV(eyeR, 2.0f, eyeCol);
+        DrawCircleV(eyeL, 1.0f, WHITE);
+        DrawCircleV(eyeR, 1.0f, WHITE);
+
+        // Crossed shadow daggers
+        Vector2 dHandL = { dPos.x - 10.0f, dPos.y + 6.0f };
+        Vector2 dHandR = { dPos.x + 10.0f, dPos.y + 6.0f };
+        DrawLineEx(dHandL, { dPos.x + 4.0f, dPos.y - 6.0f }, 2.5f, Color{ 170, 95, 255, 230 });
+        DrawLineEx(dHandR, { dPos.x - 4.0f, dPos.y - 6.0f }, 2.5f, Color{ 170, 95, 255, 230 });
+        DrawLineEx(dHandL, { dPos.x + 4.0f, dPos.y - 6.0f }, 1.2f, Color{ 230, 195, 255, 255 });
+        DrawLineEx(dHandR, { dPos.x - 4.0f, dPos.y - 6.0f }, 1.2f, Color{ 230, 195, 255, 255 });
+
+        // Outer pulsing mirage boundary
+        DrawCircleLines((int)dPos.x, (int)dPos.y, player.radius + 3.0f + 2.0f * sinf(time * 6.0f), Color{ 160, 90, 240, (unsigned char)(180 * flicker) });
+
+        // Life duration countdown ring
+        float lifePct = fmaxf(0.0f, player.shadowDecoy.timer / player.shadowDecoy.duration);
+        DrawCircleSectorLines(dPos, player.radius + 6.0f, -90.0f, -90.0f + lifePct * 360.0f, 24, Color{ 215, 140, 255, 230 });
     }
 
     Color bodyColor = armorStats.primaryColor;
@@ -1133,37 +1170,96 @@ void PlayerRenderer::Draw(const Player& player) {
             if (!comp.active || comp.health <= 0.0f) continue;
 
             // Ground shadow
-            DrawEllipse((int)comp.position.x, (int)(comp.position.y + comp.radius * 0.7f), comp.radius * 0.85f, comp.radius * 0.4f, Color{ 10, 10, 15, 120 });
+            AssetManager::DrawEntityShadow(comp.position, comp.radius);
 
-            // Unit base silhouette color
-            Color unitCol = Color{ 48, 50, 58, 255 };
-            switch (comp.unitType) {
-                case EnemyType::SLASHER: unitCol = Color{ 65, 32, 42, 255 }; break;
-                case EnemyType::BRUTE: unitCol = Color{ 45, 45, 54, 255 }; break;
-                case EnemyType::CHARGER: unitCol = Color{ 38, 44, 62, 255 }; break;
-                case EnemyType::ARCHER: unitCol = Color{ 38, 54, 44, 255 }; break;
-                case EnemyType::PYROMANCER: unitCol = Color{ 52, 32, 68, 255 }; break;
-                case EnemyType::ORE_GOLEM: unitCol = Color{ 58, 52, 46, 255 }; break;
-                case EnemyType::FROST_TROLL: unitCol = Color{ 42, 56, 68, 255 }; break;
-                default: break;
+            // Unit base silhouette color matching EnemyRenderer.cpp
+            Color bodyCol = Color{ 160, 40, 50, 255 };
+            if (comp.unitType == EnemyType::SLASHER) bodyCol = Color{ 160, 40, 50, 255 };
+            else if (comp.unitType == EnemyType::BRUTE) bodyCol = Color{ 110, 30, 45, 255 };
+            else if (comp.unitType == EnemyType::CHARGER) bodyCol = Color{ 180, 80, 30, 255 };
+            else if (comp.unitType == EnemyType::ARCHER) bodyCol = Color{ 40, 110, 85, 255 };
+            else if (comp.unitType == EnemyType::PYROMANCER) bodyCol = Color{ 95, 30, 140, 255 };
+            else if (comp.unitType == EnemyType::ORE_GOLEM) bodyCol = Color{ 72, 78, 88, 255 };
+            else if (comp.unitType == EnemyType::FROST_TROLL) bodyCol = Color{ 48, 65, 85, 255 };
+
+            float facingAng = (comp.facingDirection >= 0) ? 0.0f : 180.0f;
+            AssetManager::DrawEnemySilhouette(comp.position, facingAng, bodyCol, comp.radius, false);
+
+            float rad = facingAng * DEG2RAD;
+            Vector2 dir = { cosf(rad), sinf(rad) };
+            Vector2 normal = { -dir.y, dir.x };
+            Vector2 rightHand = {
+                comp.position.x + normal.x * (comp.radius * 0.75f) + dir.x * 4.0f,
+                comp.position.y + normal.y * (comp.radius * 0.75f) + dir.y * 4.0f
+            };
+            Vector2 leftHand = {
+                comp.position.x - normal.x * (comp.radius * 0.75f) + dir.x * 4.0f,
+                comp.position.y - normal.y * (comp.radius * 0.75f) + dir.y * 4.0f
+            };
+
+            // Exact procedural weapons and armor as EnemyRenderer
+            if (comp.unitType == EnemyType::SLASHER) {
+                float swordAngle = facingAng + 35.0f;
+                if (comp.attackVisualTimer > 0.0f) {
+                    float prog = 1.0f - (comp.attackVisualTimer / 0.18f);
+                    swordAngle = facingAng - 65.0f + prog * 135.0f;
+                    DrawCircleSector(comp.position, 60.0f, facingAng - 65.0f, swordAngle, 12, Color{ 220, 80, 240, 60 });
+                }
+                AssetManager::DrawSword(rightHand, swordAngle, 30.0f, Color{ 220, 60, 80, 255 }, Color{ 255, 120, 140, 220 });
+            } else if (comp.unitType == EnemyType::BRUTE) {
+                float maceAngle = facingAng + 45.0f;
+                if (comp.attackVisualTimer > 0.0f) {
+                    maceAngle = facingAng - 85.0f + (1.0f - comp.attackVisualTimer / 0.22f) * 115.0f;
+                }
+                AssetManager::DrawMace(rightHand, maceAngle, 36.0f, Color{ 130, 135, 150, 255 }, Color{ 220, 60, 80, 220 });
+            } else if (comp.unitType == EnemyType::CHARGER) {
+                float spearLen = (comp.attackVisualTimer > 0.0f) ? 44.0f : 32.0f;
+                DrawLineEx(rightHand, { rightHand.x + dir.x * spearLen + normal.x * 6.0f, rightHand.y + dir.y * spearLen + normal.y * 6.0f }, 2.8f, Color{ 200, 130, 50, 255 });
+                DrawCircleV({ rightHand.x + dir.x * (spearLen + 2.0f), rightHand.y + dir.y * (spearLen + 2.0f) }, 3.5f, Color{ 255, 200, 100, 255 });
+            } else if (comp.unitType == EnemyType::ARCHER) {
+                Vector2 bowCenter = { comp.position.x + dir.x * (comp.radius + 5.0f), comp.position.y + dir.y * (comp.radius + 5.0f) };
+                Vector2 bowTip1 = { bowCenter.x - normal.x * 13.0f, bowCenter.y - normal.y * 13.0f };
+                Vector2 bowTip2 = { bowCenter.x + normal.x * 13.0f, bowCenter.y + normal.y * 13.0f };
+                DrawLineEx(bowTip1, bowCenter, 2.0f, Color{ 125, 90, 55, 255 });
+                DrawLineEx(bowCenter, bowTip2, 2.0f, Color{ 125, 90, 55, 255 });
+                DrawLineEx(bowTip1, bowTip2, 1.0f, Color{ 200, 200, 200, 160 });
+                if (comp.attackVisualTimer > 0.0f) {
+                    DrawLineEx(bowCenter, { bowCenter.x + dir.x * 16.0f, bowCenter.y + dir.y * 16.0f }, 2.0f, Color{ 255, 220, 90, 255 });
+                }
+            } else if (comp.unitType == EnemyType::PYROMANCER) {
+                Vector2 staffBase = { comp.position.x - dir.x * 5.0f + normal.x * 8.0f, comp.position.y - dir.y * 5.0f + normal.y * 8.0f };
+                Vector2 staffHead = { comp.position.x + dir.x * 22.0f + normal.x * 8.0f, comp.position.y + dir.y * 22.0f + normal.y * 8.0f };
+                DrawLineEx(staffBase, staffHead, 2.5f, Color{ 65, 45, 75, 255 });
+                DrawCircleV(staffHead, 5.0f, Color{ 190, 70, 255, 255 });
+                DrawCircleGradient(staffHead, 12.0f, Color{ 180, 70, 255, 140 }, Color{ 0, 0, 0, 0 });
+            } else if (comp.unitType == EnemyType::ORE_GOLEM) {
+                DrawCircleV(leftHand, 6.0f, Color{ 60, 65, 75, 255 });
+                DrawCircleV(rightHand, 6.0f, Color{ 60, 65, 75, 255 });
+                DrawCircleLines((int)leftHand.x, (int)leftHand.y, 6.0f, Color{ 255, 190, 60, 160 });
+                DrawCircleLines((int)rightHand.x, (int)rightHand.y, 6.0f, Color{ 255, 190, 60, 160 });
+            } else if (comp.unitType == EnemyType::FROST_TROLL) {
+                Vector2 hornL = { comp.position.x - normal.x * (comp.radius * 0.7f) + dir.x * (comp.radius * 0.4f), comp.position.y - normal.y * (comp.radius * 0.7f) + dir.y * (comp.radius * 0.4f) };
+                Vector2 hornR = { comp.position.x + normal.x * (comp.radius * 0.7f) + dir.x * (comp.radius * 0.4f), comp.position.y + normal.y * (comp.radius * 0.7f) + dir.y * (comp.radius * 0.4f) };
+                DrawLineEx(hornL, { hornL.x + dir.x * 12.0f - normal.x * 4.0f, hornL.y + dir.y * 12.0f - normal.y * 4.0f }, 2.5f, Color{ 215, 210, 195, 255 });
+                DrawLineEx(hornR, { hornR.x + dir.x * 12.0f + normal.x * 4.0f, hornR.y + dir.y * 12.0f + normal.y * 4.0f }, 2.5f, Color{ 215, 210, 195, 255 });
+                DrawLineEx(rightHand, { rightHand.x + dir.x * 18.0f, rightHand.y + dir.y * 18.0f }, 3.5f, Color{ 70, 90, 115, 255 });
+                DrawLineEx(leftHand, { leftHand.x + dir.x * 18.0f, leftHand.y + dir.y * 18.0f }, 3.5f, Color{ 70, 90, 115, 255 });
             }
 
-            DrawCircleV(comp.position, comp.radius * 0.85f, unitCol);
+            // Royal Commander friendly crest ring (distinguishes summon from hostile enemies!)
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 1.0f, Color{ 190, 80, 255, 200 });
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 3.0f, Color{ 255, 215, 80, 180 });
 
-            // Imperial Conqueror purple and gold heraldic crest
-            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 215, 75, 160, 230 });
-            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius - 2.0f, Color{ 255, 215, 80, 180 });
-
-            // Active attack flash
-            if (comp.attackVisualTimer > 0.0f) {
-                DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 5.0f, Color{ 255, 235, 120, 240 });
+            // Active Sovereign Scepter buff aura
+            if (comp.buffDefenseTimer > 0.0f) {
+                DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 5.0f, Color{ 120, 240, 255, 230 });
             }
 
             // Overhead health bar
             float barW = comp.radius * 1.6f;
             float barH = 3.5f;
             float barX = comp.position.x - barW * 0.5f;
-            float barY = comp.position.y - comp.radius - 7.0f;
+            float barY = comp.position.y - comp.radius - 8.0f;
             DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
             float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
             DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 215, 90, 175, 255 });
