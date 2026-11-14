@@ -354,28 +354,28 @@ void Enemy::SetApexBoss(bool apex) {
     isApexBoss = apex;
     if (apex) {
         if (type == EnemyType::ZIL_BOSS) {
-            maxHealth = 1250.0f;
+            maxHealth = 2200.0f;
             health = maxHealth;
-            defense = 38.0f;
-            will = 85.0f;
-            moveSpeed = 130.0f;
-        } else if (type == EnemyType::ELEMENTAL_GOLEM) {
-            maxHealth = 1850.0f;
-            health = maxHealth;
-            defense = 65.0f;
-            will = 105.0f;
-            moveSpeed = 115.0f;
-        } else if (type == EnemyType::BERSERKER_TROLL) {
-            maxHealth = 2800.0f;
-            health = maxHealth;
-            defense = 42.0f;
+            defense = 50.0f;
             will = 110.0f;
-            moveSpeed = 195.0f;
-        } else {
-            maxHealth *= 1.40f;
+            moveSpeed = 165.0f;
+        } else if (type == EnemyType::ELEMENTAL_GOLEM) {
+            maxHealth = 3400.0f;
             health = maxHealth;
-            defense += 12.0f;
-            will += 25.0f;
+            defense = 75.0f;
+            will = 140.0f;
+            moveSpeed = 145.0f;
+        } else if (type == EnemyType::BERSERKER_TROLL) {
+            maxHealth = 4800.0f;
+            health = maxHealth;
+            defense = 58.0f;
+            will = 150.0f;
+            moveSpeed = 235.0f;
+        } else {
+            maxHealth *= 1.75f;
+            health = maxHealth;
+            defense += 20.0f;
+            will += 40.0f;
         }
     }
 }
@@ -797,6 +797,13 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 }
+                if (isApexBoss) {
+                    windupDuration *= 0.75f;
+                    if (health < maxHealth * 0.35f) {
+                        windupDuration *= 0.85f;
+                    }
+                    stateTimer = windupDuration;
+                }
             } else {
                 if (type == EnemyType::ORE_GOLEM && isLeashed) {
                     float distFromSpawn = Vector2Distance(position, spawnPoint);
@@ -821,6 +828,9 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                     // Approach player
                     Vector2 moveDir = Vector2Normalize({ dx, dy });
                     float currentSpeed = moveSpeed * (IsQuenched() ? 0.70f : 1.0f) * chillMoveMult;
+                    if (isApexBoss && health < maxHealth * 0.35f) {
+                        currentSpeed *= 1.20f;
+                    }
                     velocity.x = moveDir.x * currentSpeed;
                     velocity.y = moveDir.y * currentSpeed;
                 }
@@ -1200,7 +1210,14 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
             }
             if (stateTimer <= 0.0f) {
                 state = EnemyState::RECOVERY;
-                stateTimer = recoveryDuration;
+                float curRec = recoveryDuration;
+                if (isApexBoss) {
+                    curRec *= 0.70f;
+                    if (health < maxHealth * 0.35f) {
+                        curRec *= 0.75f;
+                    }
+                }
+                stateTimer = curRec;
                 velocity = { 0.0f, 0.0f };
                 isPerformingMeleeSmite = false;
             }

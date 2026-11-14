@@ -320,32 +320,37 @@ void WaveManager::SpawnGauntletStage(int stage, std::vector<Enemy>& enemies, std
 
     switch (stage) {
         case 1:
-            // Stage 1: Remnant Zil (Holy Champion) + 2 Iron Brutes
+            // Stage 1: Remnant Zil (Holy Champion) + 2 Iron Brutes + 1 Void Pyromancer
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ center.x, center.y - 180.0f });
             enemies.front().SetApexBoss(true);
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x - 240.0f, center.y + 120.0f });
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x + 240.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x, center.y + 190.0f });
             particles.SpawnFloatingText(center, "APEX STAGE I: REMNANT ZIL (CHAMPION)", Color{ 255, 220, 80, 255 }, 28.0f);
             particles.AddScreenShake(6.0f, 0.3f);
             break;
 
         case 2:
-            // Stage 2: Primordial Elemental Golem Titan + 2 Mini Elemental Golems
+            // Stage 2: Primordial Elemental Golem Titan + 3 Mini Golems + 1 Ore Golem
             enemies.emplace_back(EnemyType::ELEMENTAL_GOLEM, Vector2{ center.x, center.y - 180.0f });
             enemies.front().SetApexBoss(true);
-            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 220.0f, center.y + 120.0f });
-            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 220.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 220.0f, center.y + 100.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 220.0f, center.y + 100.0f });
+            enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x, center.y + 190.0f });
+            enemies.emplace_back(EnemyType::ORE_GOLEM, Vector2{ center.x, center.y + 240.0f });
             particles.SpawnFloatingText(center, "APEX STAGE II: PRIMORDIAL GOLEM TITAN", Color{ 255, 175, 50, 255 }, 28.0f);
             particles.AddScreenShake(7.0f, 0.35f);
             break;
 
         case 3:
         default:
-            // Stage 3: The Berserker Troll Warlord + 2 Frost Trolls
+            // Stage 3: The Berserker Troll Warlord + 2 Frost Trolls + 2 Void Pyromancers
             enemies.emplace_back(EnemyType::BERSERKER_TROLL, Vector2{ center.x, center.y - 180.0f });
             enemies.front().SetApexBoss(true);
-            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y + 130.0f });
-            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y + 130.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y + 120.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x - 160.0f, center.y + 200.0f });
+            enemies.emplace_back(EnemyType::PYROMANCER, Vector2{ center.x + 160.0f, center.y + 200.0f });
             particles.SpawnFloatingText(center, "APEX FINAL STAGE: CRAG BERSERKER WARLORD", Color{ 255, 45, 60, 255 }, 30.0f);
             particles.AddScreenShake(8.0f, 0.4f);
             break;
