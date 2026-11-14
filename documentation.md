@@ -237,8 +237,8 @@ Northern alpine frontier beyond Zyphden's north mountain pass (`2400x1500`), phy
 
 Permanently unlocked from the Title Screen, Lobby portal, or Knight Lenon:
 
-* **25-Wave Survival Gauntlet**: Five escalating tiers culling Southern Cultists, Highland Trolls, Unleashed Ore Golems, and recurring Arena bosses (`Wave 5/10/15/20/25`, culminating in the **Crag Berserker Warlord**). Conquering Wave 25 awards the **Grand Apex Victor's Crest** and the **Conqueror's Totem** (commanding 7 permanent tower companions).
-* **3-Stage Apex Boss Gauntlet**: Accessed directly via Knight Lenon (`[G] APEX BOSS GAUNTLET`), chaining Apex Remnant Zil (1,250 HP), Apex Primordial Titan (1,850 HP), and the Apex Berserker Troll Warlord (2,800 HP) back-to-back with a +50% lethality multiplier, radiant champion auras, and new Phase 4 attack patterns. Conquering the gauntlet exclusively awards the **Champion's Totem**, +2500 Shingles, +75 Ore Scraps, +10 Mist Essence, +10 Shadow Essence, and the **Apex Gauntlet Warlord Trophy**.
+* **25-Wave Survival Gauntlet**: Five escalating tiers culling Southern Cultists, Highland Trolls, Unleashed Ore Golems, and recurring Arena bosses (`Wave 5/10/15/20/25`, culminating in the **Crag Berserker Warlord**). Conquering Wave 25 awards the **Grand Apex Victor's Crest**, the **Sovereign's Scepter** (pure healing armament), and the **Commander's Totem** (commanding 7 permanent tower companions with 1:1 enemy procedural sprites).
+* **3-Stage Apex Boss Gauntlet**: Accessed directly via Knight Lenon (`[G] APEX BOSS GAUNTLET`), chaining Apex Remnant Zil (2,200 HP, 50 DEF), Apex Primordial Golem Titan (3,400 HP, 75 DEF), and the Apex Berserker Troll Warlord (4,800 HP, 58 DEF) back-to-back with 1.85x-2.0x lethality multipliers, 25% faster windup telegraphs, 30% lower attack recovery, deadlier wave reinforcements, and an intense <35% HP Enrage Phase (+20% speed, -15% windup, -25% recovery, crimson fury aura). Conquering the gauntlet exclusively awards the **Champion's Totem**, +2500 Shingles, +75 Ore Scraps, +10 Mist Essence, +10 Shadow Essence, and the **Apex Gauntlet Warlord Trophy**.
 * **Arena Bandage Balance**: Adhesive Bandages have been rebalanced (12% drop rate on enemy kill, max 2 simultaneous active ground bandages, 45s periodic wall dispenser, and zero free initial bandages).
 
 ---
@@ -408,16 +408,17 @@ Opened via `[TAB]` (`[I]` alias), `[B]` (Bestiary), or `[M]` (Realm Map):
 | Weapon | Light Attack | Heavy Combo | Dash CD | Special Mechanics & Passives |
 | :--- | :--- | :--- | :--- | :--- |
 | **Unarmed** | None | None | `0.75s` | Starting state in cathedral awakening. |
-| **Crusader Blade** | `18 / 22 / 26` dmg (`110-deg`, `15` Stam) | `88 / 102 / 118` dmg (`3-Stage`) | `0.85s` | Stage 1 Crescent Cleave (`+12` Composure), Stage 2 Shock Thrust (interrupts windups), Stage 3 Radiant Sunder (`+50%` vs staggered). |
-| **Truth Seeker (Partial)** | `22 / 28` dmg (`130-deg`, `14` Stam) | `72 / 88` dmg (`2-Stage + Beam`) | `0.65s` | Stage 1 Dawnfire Ring (Solar Burn + Holy Beam), Stage 2 Sacred Judgment Pillar (`100%` defense pierce + self-cleanse). |
-| **Dual Daggers** | `12 / 15 / 18` dmg (`9` Stam) | `58 / 68 / 80` dmg (`3-Stage`) | `0.50s` | `9` stamina per light strike. Heavy chains invulnerable Shadow Puncture (Bleed), Backstab Cross-Slash (`+40%` vs bleeding/rear), and staggering Vault Kick. |
-| **War Mace** | `24 / 28 / 34` dmg (`22` Stam) | `78 / 92 / 108` dmg (`2-Stage`) | `1.25s` | Slow high-poise crusher. Heavy executes Skull Crusher (`-20%` Armor Fracture `4s`) into `360-deg` Seismic Tremor (`25%` armor pierce). |
-| **Royal Halberd** | `18 / 22 / 26` dmg (`140px`, `14` Stam) | `58 / 72 / 88` dmg (`3-Stage`) | `0.80s` | Extended polearm. Heavy executes i-frame Vault Lunge, `220-deg` cleave, and rapid 3-stab flurry. |
-| **Twin Zephyr Daggers** | `16 / 20 / 25` dmg (`8` Stam) | `68 / 80 / 95` dmg (`Shadow Slip`) | `0.35s` | Gale curved blades (`8` stamina per light strike). Heavy executes i-frame Shadow-Step, `360-deg` whirlwind, and explosive shadow decoy. |
-| **Windrunner's Recurve** | `9 / 11 / 13` dmg (`18` Stam) | `36 / 44 / 52` dmg (`42` Stam) | `0.50s` | Rapid Gale Arrows (`55px` Windburst AoE at `30%` dmg). Heavy fires Gale Piercer Drill (`50%` pierce, `-40%` Armor Fracture `4s`, `1.2s` stun). |
-| **Sun-Forged Claymore** | `30 / 36 / 42` dmg (`140-deg`, `24` Stam) | `117 / 139 / 162` dmg (`2-Stage`) | `1.15s` | Heavy chains Sunfire Crescent (`180-deg` + `4s` Solar Burn) into Solar Cataclysm Slam (`115px` Solar Flare Pillar, `+25%` pierce, `+30%` vs burning). |
-| **Storm Glaive** | `20 / 25 / 31` dmg (`155px`, `12` Stam) | `100 / 120 / 142` dmg (`2-Stage`) | `0.70s` | Heavy chains Zephyr Surge Step (`0.18s` i-frame gale corridor) into `360-deg` Tempest Cyclone (`+15` Composure on hit + piercing Crescent Gale Wave). |
-| **Twin Glacial Cleavers** | `20 / 25 / 31` dmg (`13` Stam) | `46 / 54 / 64` dmg/hit (`4-Stage`) | `0.85s` | Dual-wielding frost cleavers with fast alternating swings (`0.14s`). Heavy triggers automated 4-stage **Fury of Cleaves** ending in **Glacial Cross-Rupture** (`3.5s` Chill; `175px` Frost Tremor `+35` dmg with Frostwarden). |
+| **Crusader Blade** | `16 / 21 / 26` dmg (`110-deg`, `15` Stam) | `54 / 66 / 80` dmg (`3-Stage`) | `0.85s` | Stage 1 Crescent Cleave (`+12` Composure), Stage 2 Shock Thrust (interrupts windups), Stage 3 Radiant Sunder (`+50%` vs staggered). |
+| **Truth Seeker (Partial)** | `22 / 27` dmg (`130-deg`, `14` Stam) | `70 / 85` dmg (`2-Stage + Beam`) | `0.65s` | Stage 1 Dawnfire Ring (Solar Burn + Holy Beam `24/32`), Stage 2 Sacred Judgment Pillar (`100%` defense pierce + self-cleanse). |
+| **Dual Daggers** | `11 / 15 / 20` dmg (`9` Stam) | `42 / 56 / 72` dmg (`3-Stage`) | `0.50s` | `9` stamina per light strike. Critical multipliers (`1.15x / 1.30x`). Heavy chains invulnerable Shadow Puncture (Bleed), Backstab Cross-Slash, and staggering Vault Kick. |
+| **War Mace** | `24 / 29 / 35` dmg (`22` Stam) | `74 / 88 / 104` dmg (`2-Stage`) | `1.25s` | Slow high-poise crusher. Heavy executes Skull Crusher (`-20%` Armor Fracture `4s`) into `360-deg` Seismic Tremor (`25%` armor pierce). |
+| **Royal Halberd** | `18 / 23 / 28` dmg (`140px`, `14` Stam) | `56 / 70 / 85` dmg (`3-Stage`) | `0.80s` | Extended polearm (`10% / 15% / 20%` armor pierce). Heavy executes i-frame Vault Lunge, `220-deg` cleave, and rapid 3-stab flurry. |
+| **Twin Zephyr Daggers** | `15 / 19 / 23` dmg (`8` Stam) | `62 / 75 / 90` dmg (`Shadow Slip`) | `0.35s` | Gale curved blades (`8` stamina per light strike). Heavy executes i-frame Shadow-Step, `360-deg` whirlwind, and explosive shadow decoy. |
+| **Windrunner's Recurve** | `18 / 22 / 27` dmg (`18` Stam) | `68 / 80 / 95` dmg (`42` Stam) | `0.50s` | Rapid Gale Arrows (`55px` Windburst AoE at `30%` dmg). Heavy fires Gale Piercer Drill (`50%` pierce, `-40%` Armor Fracture `4s`, `1.2s` stun). |
+| **Sun-Forged Claymore** | `26 / 32 / 38` dmg (`140-deg`, `24` Stam) | `88 / 104 / 122` dmg (`2-Stage`) | `1.15s` | Heavy chains Sunfire Crescent (`180-deg` + `4s` Solar Burn) into Solar Cataclysm Slam (`115px` Solar Flare Pillar, `+25%` pierce, `+30%` vs burning). |
+| **Storm Glaive** | `20 / 25 / 30` dmg (`155px`, `12` Stam) | `76 / 90 / 106` dmg (`2-Stage`) | `0.70s` | Heavy chains Zephyr Surge Step (`0.18s` i-frame gale corridor) into `360-deg` Tempest Cyclone (`+15` Composure on hit + piercing Crescent Gale Wave). |
+| **Twin Glacial Cleavers** | `18 / 23 / 28` dmg (`13` Stam) | `78 / 92 / 108` dmg/hit (`4-Stage`) | `0.85s` | Dual-wielding frost cleavers with fast alternating swings (`0.14s`). Heavy triggers automated 4-stage **Fury of Cleaves** ending in **Glacial Cross-Rupture** (`3.5s` Chill; `175px` Frost Tremor `+35` dmg with Frostwarden). |
+| **Sovereign's Scepter** | `4 / 5 / 6` poke dmg (`6` Stam) | `0` enemy dmg (`24` Stam) | `0.60s` | Pure restorative healing armament. Light attack heals targeted companion `+24 / +30 / +38 HP`. Heavy triggers 360-degree **Sanctuary Radiance** (`280px` full AoE heal restoring `+75 / +95 / +120 HP` to all active summons, cleansing debuffs, and granting `+15` DEF and `+20%` speed for `6s`). |
 
 ### Detailed Weapon Stances
 
@@ -447,16 +448,16 @@ Equipping 3/3 matching pieces awakens both passive traits and an active `[V]` Ar
 
 Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 
-| Totem Relic | Acquisition Source | Stat Multipliers & Buffs | Drawbacks & Nerfs | Visual Glow |
+| Totem Relic | Acquisition Source | Tier Scaling & Attunement Powers | Drawbacks & Balancing | Visual Glow |
 | :--- | :--- | :--- | :--- | :--- |
-| **Totem of Sanity** | Crossroads ruined shrine | `+15%` Overall Damage, `+15` Will | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
-| **Totem of Insanity** | Berserker Troll (`25%` drop) | `+65%` DMG (`+135%` at `<40%` HP), `+18%` Move Speed, `+25%` Attack Speed | `-50%` Defense, `x1.5` incoming damage | Arterial Crimson (`[255, 45, 60]`) |
-| **Totem of Mist** | Gale Archer (`15%` drop) | Mist Fairy (`+20%` Crit Chance, `+35%` Crit Dmg, `+30 HP` Orbs), `+10%` Stamina Regen, `+10` Will | `-5%` Move Speed, `-15%` Defense, `-25` Max HP | Vapor Azure (`[110, 240, 225]`) |
-| **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25%` Defense, `+35` Max HP, `+18%` DMG, Will of Atlas (`4s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
-| **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem (`460 HP`, `55 DEF`, `+4 HP/s` Regen; Slam `36 DMG`, Bash `32 DMG`, Spike `34 DMG`), Bearer Bolt (`54` DMG, `3s` CD) | `-10%` Move Speed, `35s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
-| **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30` Max HP, `+25` Will, `+20%` Defense, `-80%` Knockback, `25%` Gray Health recovery, Chills enemies (`3s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
-| **Champion's Totem** | Apex Boss Gauntlet Victory | `+35%` DMG, `+30%` Defense, `+15%` Move Speed, `+35%` Stamina Regen, `-20%` Cooldowns, `+40` Will, `+50` Max HP, `+14.0 HP/s` Out-of-Combat Regen (`+2.0 HP/s` in combat) | Withered Vitality (`-70%` incoming healing from potions, drops, and kill-perks) | Champion Gold (`[245, 200, 60]`) |
-| **Conqueror's Totem** | Royal Combat Arena (Wave 25) | `+20%` Defense, `+40` Max HP, `+25` Will, commands 7 permanent Tower Gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll with true enemy HP/DEF) | `-10%` Move Speed, `120s` all-must-die squad resurrection countdown | Imperial Purple (`[185, 45, 120]`) |
+| **Totem of Sanity** | Crossroads ruined shrine | `+15% / +22% / +30%` Overall DMG, `+15 / +22 / +30` Will | None (Pure Relic) | Emerald Mint (`[100, 235, 180]`) |
+| **Totem of Insanity** | Berserker Troll (`25%` drop) | `+65% / +90% / +120%` DMG (`+135% / +180% / +230%` at `<40%` HP), `+18% / +24% / +30%` Move Speed, `+25% / +35% / +45%` Attack Speed | `-50%` Defense, `x1.5` incoming damage | Arterial Crimson (`[255, 45, 60]`) |
+| **Totem of Mist** | Gale Archer (`15%` drop) | Mist Fairy (`+20% / +28% / +36%` Crit Chance, `+35% / +50% / +65%` Crit Dmg, `+30 / +45 / +60 HP` Orbs), `+10% / +15% / +20%` Stamina Regen, `+10 / +15 / +20` Will | `-5%` Move Speed, `-15%` Defense, `-25` Max HP | Vapor Azure (`[110, 240, 225]`) |
+| **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25% / +35% / +45%` Defense, `+35 / +50 / +65` Max HP, `+18% / +25% / +32%` DMG, Will of Atlas (`4s / 5s / 6s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
+| **Elemental Core Totem** | Elemental Golem (Quarry) | **Tier I & II**: Mini Golem (`460 / 650 HP`, `55 / 65 DEF`, `+4 / +6 HP/s` Regen; Slam `36/48 DMG`, Bash `32/42 DMG`, Spike `34/45 DMG`), Bearer Bolt (`54/72 DMG`, `3s` CD).<br>**Tier III Evolution**: Evolved **Commanding Elemental Golem** titan (`920 HP`, `75 DEF`, `28px` body, `+8 HP/s` Regen) which commands and summons **3 orbiting Mini Golems** (`280 HP`, `40 DEF`, `18 DMG`, `35s` auto-respawn). | `-10%` Move Speed, `35s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
+| **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30 / +45 / +60` Max HP, `+25 / +35 / +45` Will, `+20% / +28% / +36%` Defense, `-80%` Knockback, `25% / 35% / +45%` Gray Health recovery, Chills enemies (`3s / 4s / 5s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
+| **Champion's Totem** | Apex Boss Gauntlet Victory | `+35% / +45% / +55%` DMG, `+30% / +40% / +50%` Defense, `+15% / +20% / +25%` Move Speed, `+35% / +45% / +55%` Stamina Regen, `-20% / -25% / -30%` Cooldowns, `+40 / +55 / +70` Will, `+50 / +75 / +100` Max HP, `+14.0 / +18.0 / +22.0 HP/s` Out-of-Combat Regen (`+2.0 / +3.0 / +4.0 HP/s` in combat) | Withered Vitality (`-70%` incoming healing from potions, drops, and kill-perks) | Champion Gold (`[245, 200, 60]`) |
+| **Commander's Totem** | Royal Combat Arena (Wave 25) | `+20% / +28% / +36%` Defense, `+40 / +55 / +70` Max HP, `+25 / +35 / +45` Will. Commands 7 permanent Tower Gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP/DEF and 1:1 exact procedural enemy silhouettes and equipment. Companions maintain loosened formation (`135px` orbit, `90px` personal space repulsion from player). | `-40%` player direct attack damage penalty, `120s` all-must-die squad resurrection countdown | Imperial Purple (`[185, 45, 120]`) |
 
 ---
 
@@ -487,6 +488,11 @@ Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 * **The Gale Archer**: Mist Forest trophy boss firing triple gale volleys and rapid evasive vaults; awards Shadow Essence and `15%` Totem of Mist drop rolls.
 * **Berserker Troll Warlord**: Highland apex boss chaining massive spiked club smashes, ground shockwaves, and rage sweeps; awards `25%` Totem of Insanity drop rolls.
 * **Frost Revenant**: Permafrost Crypts phantom boss gliding across black ice with 6-way cold `NOVA_STAR` volleys, piercing `BEAM_SHARD` lances (`isCold = true`), and teleport flurries.
+* **Apex Boss Gauntlet Champions**: Three escalated pinnacle encounters fought consecutively via Knight Lenon (`[G]`):
+  * *Apex Remnant Zil (`2,200 HP`, `50 Def`, `110 Will`, `165 Move Speed`)*: 1.85x damage, snappy 0.32s windups, Phase 4 Solar Cross-Cataclysm beam cross, accompanied by 2 Iron Brutes and 1 Void Pyromancer.
+  * *Apex Primordial Golem Titan (`3,400 HP`, `75 Def`, `140 Will`, `145 Move Speed`)*: 1.85x damage, Phase 4 Molten Tremor Ring (230px) and 3-way fan magma geysers, accompanied by 3 Mini Golems and 1 Ore Golem.
+  * *Apex Berserker Troll Warlord (`4,800 HP`, `58 Def`, `150 Will`, `235 Move Speed`)*: 2.0x lethal damage, 3-phase melee rotation (Highland Blood Whirlwind, Glacial Cleave Cone, Crag Earth Rupture Slam), accompanied by 2 Frost Trolls and 2 Void Pyromancers.
+  * *All Apex Champions*: Feature an unyielding `<35%` HP Enrage Phase (+20% speed, -15% windups, -25% recovery, crimson fury aura with secondary shockwave pulses).
 
 ---
 

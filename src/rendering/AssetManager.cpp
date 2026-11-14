@@ -689,6 +689,40 @@ void AssetManager::DrawCleaver(Vector2 origin, float angle, float length, Color 
     DrawCircleV(origin, 4.0f, Color{ 90, 115, 140, 255 });
 }
 
+void AssetManager::DrawScepter(Vector2 origin, float angle, float length, Color headColor, Color glowColor) {
+    float rad = angle * DEG2RAD;
+    Vector2 dir = { cosf(rad), sinf(rad) };
+    Vector2 normal = { -dir.y, dir.x };
+    Vector2 tip = { origin.x + dir.x * length, origin.y + dir.y * length };
+
+    // Ornate gilded rod shaft
+    DrawLineEx(origin, tip, 4.0f, Color{ 48, 42, 34, 255 });
+    DrawLineEx(origin, tip, 2.2f, Color{ 235, 205, 110, 255 });
+
+    // Gold filigree ring bands along shaft
+    Vector2 r1 = { origin.x + dir.x * (length * 0.35f), origin.y + dir.y * (length * 0.35f) };
+    Vector2 r2 = { origin.x + dir.x * (length * 0.70f), origin.y + dir.y * (length * 0.70f) };
+    DrawLineEx({ r1.x - normal.x * 3.5f, r1.y - normal.y * 3.5f }, { r1.x + normal.x * 3.5f, r1.y + normal.y * 3.5f }, 2.0f, Color{ 255, 230, 140, 255 });
+    DrawLineEx({ r2.x - normal.x * 4.0f, r2.y - normal.y * 4.0f }, { r2.x + normal.x * 4.0f, r2.y + normal.y * 4.0f }, 2.0f, Color{ 255, 230, 140, 255 });
+
+    // Crescent prongs head
+    Vector2 headBase = { origin.x + dir.x * (length - 4.0f), origin.y + dir.y * (length - 4.0f) };
+    Vector2 crescentL = { tip.x - normal.x * 8.0f + dir.x * 2.0f, tip.y - normal.y * 8.0f + dir.y * 2.0f };
+    Vector2 crescentR = { tip.x + normal.x * 8.0f + dir.x * 2.0f, tip.y + normal.y * 8.0f + dir.y * 2.0f };
+    DrawLineEx(headBase, crescentL, 2.5f, Color{ 255, 220, 100, 255 });
+    DrawLineEx(headBase, crescentR, 2.5f, Color{ 255, 220, 100, 255 });
+
+    // Glowing celestial radiant orb
+    Vector2 orbPos = { tip.x + dir.x * 4.0f, tip.y + dir.y * 4.0f };
+    DrawCircleV(orbPos, 6.5f, glowColor);
+    DrawCircleV(orbPos, 4.5f, headColor);
+    DrawCircleV(orbPos, 2.0f, WHITE);
+
+    // Pommel jewel
+    DrawCircleV(origin, 3.5f, Color{ 240, 210, 100, 255 });
+    DrawCircleV(origin, 1.8f, Color{ 100, 220, 255, 255 });
+}
+
 void AssetManager::DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float scale, bool isUnlocked, bool isEquipped) {
     Color baseCol = isUnlocked ? (isEquipped ? Color{ 255, 235, 140, 255 } : Color{ 220, 235, 255, 255 }) : Color{ 90, 105, 120, 180 };
     Color glowCol = isUnlocked ? (isEquipped ? Color{ 255, 205, 50, 200 } : Color{ 80, 160, 240, 160 }) : Color{ 50, 60, 75, 120 };
@@ -749,6 +783,11 @@ void AssetManager::DrawWeaponSlotIcon(Vector2 center, WeaponType weapon, float s
             DrawCleaver({ center.x + 9.0f * scale, center.y + 8.0f * scale }, -140.0f, 22.0f * scale,
                 isUnlocked ? Color{ 160, 225, 255, 255 } : baseCol,
                 isUnlocked ? Color{ 80, 190, 240, 200 } : glowCol);
+            break;
+        case WeaponType::SOVEREIGN_SCEPTER:
+            DrawScepter({ center.x - 8.0f * scale, center.y + 8.0f * scale }, -45.0f, 26.0f * scale,
+                isUnlocked ? Color{ 140, 240, 255, 255 } : baseCol,
+                isUnlocked ? Color{ 80, 210, 255, 220 } : glowCol);
             break;
         case WeaponType::NONE:
         default:

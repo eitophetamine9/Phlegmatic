@@ -159,9 +159,14 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
     }
 
     if (enemy.isApexBoss) {
-        float aPulse = (sinf((float)GetTime() * 5.0f) + 1.0f) * 0.5f;
-        DrawCircleGradient(enemy.position, enemy.radius * 2.6f, Color{ 255, 55, 75, (unsigned char)(75 + 45 * aPulse) }, Color{ 0, 0, 0, 0 });
-        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 7.0f + 3.0f * aPulse, Color{ 255, 215, 80, 230 });
+        bool isEnraged = (enemy.health < enemy.maxHealth * 0.35f);
+        float aSpeed = isEnraged ? 8.5f : 5.0f;
+        float aPulse = (sinf((float)GetTime() * aSpeed) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius * (isEnraged ? 3.0f : 2.6f), Color{ 255, (unsigned char)(isEnraged ? 20 : 55), (unsigned char)(isEnraged ? 30 : 75), (unsigned char)((isEnraged ? 110 : 75) + 45 * aPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 7.0f + 3.0f * aPulse, isEnraged ? Color{ 255, 45, 60, 245 } : Color{ 255, 215, 80, 230 });
+        if (isEnraged) {
+            DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 12.0f + 4.0f * aPulse, Color{ 255, 140, 40, 210 });
+        }
     }
 
     if (enemy.isNightfallElite) {

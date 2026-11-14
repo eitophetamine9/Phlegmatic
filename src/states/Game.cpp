@@ -1148,6 +1148,7 @@ void Game::SaveActiveGame() {
         data.unlockedLeggings[i] = player.GetInventory().HasLeggings((LeggingsType)i);
     }
     for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        data.totemUpgrades[i] = player.GetInventory().GetTotemUpgrade((TotemType)i);
         data.unlockedTotems[i] = player.GetInventory().HasTotem((TotemType)i);
     }
     for (int i = 0; i < GameLimits::CAMPFIRE_COUNT; ++i) {
@@ -1324,6 +1325,7 @@ void Game::LoadActiveGame(int slotIndex) {
         }
     }
     for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        player.GetInventory().SetTotemUpgrade((TotemType)i, data.totemUpgrades[i]);
         if (data.unlockedTotems[i]) {
             player.GetInventory().UnlockTotem((TotemType)i);
         }
@@ -3752,9 +3754,13 @@ void Game::Update(float dt) {
                 player.GetInventory().AddShingles(200);
                 player.GetInventory().AddEssenceOfMist(6);
                 player.GetInventory().AddShadowEssence(5);
-                if (!player.GetInventory().HasTotem(TotemType::CONQUEROR_TOTEM)) {
-                    player.GetInventory().UnlockTotem(TotemType::CONQUEROR_TOTEM);
-                    particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CONQUEROR'S TOTEM!", Color{ 215, 120, 255, 255 }, 28.0f);
+                if (!player.GetInventory().HasTotem(TotemType::COMMANDER_TOTEM)) {
+                    player.GetInventory().UnlockTotem(TotemType::COMMANDER_TOTEM);
+                    particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: COMMANDER'S TOTEM!", Color{ 215, 120, 255, 255 }, 28.0f);
+                }
+                if (!player.GetInventory().HasWeapon(WeaponType::SOVEREIGN_SCEPTER)) {
+                    player.GetInventory().UnlockWeapon(WeaponType::SOVEREIGN_SCEPTER);
+                    particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: SOVEREIGN'S SCEPTER!", Color{ 120, 240, 255, 255 }, 28.0f);
                 }
                 if (!player.GetInventory().HasQuestItem("item_arena_apex_crest")) {
                     player.GetInventory().AddQuestItem({

@@ -579,12 +579,49 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
     }
 }
 
+int Player::GetActiveGolemSubMinionCount() const {
+    int count = 0;
+    for (int i = 0; i < 3; ++i) {
+        if (golemSubMinions[i].active && golemSubMinions[i].health > 0.0f) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void Player::InitGolemSubMinions() {
+    for (int i = 0; i < 3; ++i) {
+        golemSubMinions[i].active = true;
+        golemSubMinions[i].maxHealth = 280.0f;
+        golemSubMinions[i].health = 280.0f;
+        golemSubMinions[i].defense = 40.0f;
+        golemSubMinions[i].damage = 18.0f;
+        golemSubMinions[i].radius = 14.0f;
+        golemSubMinions[i].attackCooldown = 0.0f;
+        golemSubMinions[i].attackVisualTimer = 0.0f;
+        golemSubMinions[i].invulnTimer = 0.0f;
+        golemSubMinions[i].formationAngle = (float)i * (2.0f * 3.14159265f / 3.0f);
+    }
+    RelocateGolemSubMinions();
+}
+
+void Player::RelocateGolemSubMinions() {
+    for (int i = 0; i < 3; ++i) {
+        float ang = golemSubMinions[i].formationAngle;
+        Vector2 offset = { cosf(ang) * 48.0f, sinf(ang) * 48.0f };
+        golemSubMinions[i].position = Vector2Add(companion.position, offset);
+    }
+}
+
 void Player::RelocateCompanionToPlayer() {
     float sideAngle = (facingAngle - 90.0f) * DEG2RAD;
     Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
     companion.position = Vector2Add(position, offset);
     companion.attackCooldown = 0.0f;
     companion.invulnTimer = 0.0f;
+    if (companion.isCommandingTitan) {
+        RelocateGolemSubMinions();
+    }
     if (currentTotem == TotemType::TOTEM_MIST) {
         mistFairy.active = true;
         mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
@@ -693,11 +730,60 @@ void Player::RelocateTowerCompanions() {
     float baseAngle = facingAngle * DEG2RAD;
     for (size_t i = 0; i < towerCompanions.size(); ++i) {
         float angle = baseAngle + (float)i * (2.0f * PI / (float)towerCompanions.size());
-        Vector2 offset = { cosf(angle) * 72.0f, sinf(angle) * 72.0f };
+        Vector2 offset = { cosf(angle) * 135.0f, sinf(angle) * 135.0f };
         towerCompanions[i].position = Vector2Add(position, offset);
         towerCompanions[i].attackCooldown = 0.0f;
         towerCompanions[i].invulnTimer = 0.0f;
         towerCompanions[i].attackVisualTimer = 0.0f;
+    }
+}
+
+void Player::HealAllSummons(float radius, float amount, bool grantBuffs, ParticleSystem& particles) {
+    // 1. Companion Golem
+    if (companion.active && companion.health > 0.0f) {
+        float dx = companion.position.x - position.x;
+        float dy = companion.position.y - position.y;
+        if (dx * dx + dy * dy <= radius * radius) {
+            companion.health = fminf(companion.maxHealth, companion.health + amount);
+            if (grantBuffs) {
+                companion.buffDefenseTimer = 6.0f;
+                companion.buffSpeedTimer = 6.0f;
+            }
+            particles.SpawnFloatingText(companion.position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 18.0f);
+            particles.SpawnSparks(companion.position, Color{ 120, 255, 180, 255 }, 8, 80.0f);
+        }
+    }
+    // 2. Sub-Minion Golems
+    for (int i = 0; i < 3; i++) {
+        if (golemSubMinions[i].active && golemSubMinions[i].health > 0.0f) {
+            float dx = golemSubMinions[i].position.x - position.x;
+            float dy = golemSubMinions[i].position.y - position.y;
+            if (dx * dx + dy * dy <= radius * radius) {
+                golemSubMinions[i].health = fminf(golemSubMinions[i].maxHealth, golemSubMinions[i].health + amount);
+                if (grantBuffs) {
+                    golemSubMinions[i].buffDefenseTimer = 6.0f;
+                    golemSubMinions[i].buffSpeedTimer = 6.0f;
+                }
+                particles.SpawnFloatingText(golemSubMinions[i].position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 16.0f);
+                particles.SpawnSparks(golemSubMinions[i].position, Color{ 120, 255, 180, 255 }, 6, 60.0f);
+            }
+        }
+    }
+    // 3. Tower Companions
+    for (auto& tc : towerCompanions) {
+        if (tc.active && tc.health > 0.0f) {
+            float dx = tc.position.x - position.x;
+            float dy = tc.position.y - position.y;
+            if (dx * dx + dy * dy <= radius * radius) {
+                tc.health = fminf(tc.maxHealth, tc.health + amount);
+                if (grantBuffs) {
+                    tc.buffDefenseTimer = 6.0f;
+                    tc.buffSpeedTimer = 6.0f;
+                }
+                particles.SpawnFloatingText(tc.position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 16.0f);
+                particles.SpawnSparks(tc.position, Color{ 120, 255, 180, 255 }, 6, 60.0f);
+            }
+        }
     }
 }
 
@@ -713,6 +799,27 @@ void Player::SetTotem(TotemType newTotem) {
         mistFairy.active = false;
     }
     if (newTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        int tier = inventory.GetTotemUpgrade(TotemType::ELEMENTAL_CORE_TOTEM);
+        if (tier == 0) {
+            companion.maxHealth = 460.0f;
+            companion.defense = 55.0f;
+            companion.damage = 32.0f;
+            companion.radius = 16.0f;
+            companion.isCommandingTitan = false;
+        } else if (tier == 1) {
+            companion.maxHealth = 600.0f;
+            companion.defense = 65.0f;
+            companion.damage = 40.0f;
+            companion.radius = 18.0f;
+            companion.isCommandingTitan = false;
+        } else {
+            companion.maxHealth = 920.0f;
+            companion.defense = 75.0f;
+            companion.damage = 48.0f;
+            companion.radius = 28.0f;
+            companion.isCommandingTitan = true;
+            InitGolemSubMinions();
+        }
         if (!companion.active && companion.respawnTimer <= 0.0f) {
             companion.active = true;
             companion.health = companion.maxHealth;
@@ -720,8 +827,9 @@ void Player::SetTotem(TotemType newTotem) {
         }
     } else {
         companion.active = false;
+        for (int i = 0; i < 3; ++i) golemSubMinions[i].active = false;
     }
-    if (newTotem == TotemType::CONQUEROR_TOTEM) {
+    if (newTotem == TotemType::COMMANDER_TOTEM) {
         if (towerCompanions.empty()) {
             InitTowerSquad();
         } else {
@@ -752,15 +860,16 @@ void Player::SetTotem(TotemType newTotem) {
 
 float Player::GetTotemDamageMultiplier() const {
     float mult = 1.0f;
+    int tier = inventory.GetTotemUpgrade(currentTotem);
     if (currentTotem == TotemType::TOTEM_INSANITY) {
         float maxHp = GetMaxHealth();
         if (maxHp > 0.0f && (health / maxHp) <= 0.40f) {
-            mult = 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+            mult = (tier == 2) ? 3.00f : ((tier == 1) ? 2.60f : 2.35f);
         } else {
-            mult = 1.65f; // Baseline: +65% overall damage
+            mult = (tier == 2) ? 2.00f : ((tier == 1) ? 1.80f : 1.65f);
         }
     } else {
-        mult = GetTotemStats(currentTotem).damageMultiplier;
+        mult = GetTotemStats(currentTotem, tier).damageMultiplier;
     }
     if (berserkerTimer > 0.0f) {
         mult *= 1.30f; // +30% Damage while Berserker Draught active
@@ -772,7 +881,7 @@ float Player::GetMaxHealth() const {
     float bonus = GetHelmetStats(equippedHelmet).maxHpBonus
                 + GetChestplateStats(equippedChestplate).maxHpBonus
                 + GetLeggingsStats(equippedLeggings).maxHpBonus
-                + GetTotemStats(currentTotem).maxHpBonus;
+                + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
         bonus += 50.0f; // +50 Max HP
     }
@@ -794,7 +903,7 @@ float Player::GetDefense() const {
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
         raw += 25.0f;
     }
-    float total = raw * GetTotemStats(currentTotem).defenseMultiplier;
+    float total = raw * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).defenseMultiplier;
     if (stoneskinTimer > 0.0f) {
         total *= 1.40f; // +40% Physical Defense while Stoneskin Tonic active
     }
@@ -806,7 +915,7 @@ float Player::GetWill() const {
                     + GetHelmetStats(equippedHelmet).willBonus
                     + GetChestplateStats(equippedChestplate).willBonus
                     + GetLeggingsStats(equippedLeggings).willBonus
-                    + GetTotemStats(currentTotem).willBonus;
+                    + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).willBonus;
     if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE)) {
         totalWill += 25.0f;
     }
@@ -817,7 +926,7 @@ float Player::GetSpeed() const {
     float speedMult = GetHelmetStats(equippedHelmet).speedModifier
                     * GetChestplateStats(equippedChestplate).speedModifier
                     * GetLeggingsStats(equippedLeggings).speedModifier
-                    * GetTotemStats(currentTotem).speedMultiplier;
+                    * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
         speedMult *= 1.10f; // +10% Set Move Speed (~+21% total with light pieces)
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
@@ -1065,6 +1174,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     }
 
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        int gTier = inventory.GetTotemUpgrade(TotemType::ELEMENTAL_CORE_TOTEM);
+        companion.isCommandingTitan = (gTier >= 2);
         if (!companion.active) {
             companion.respawnTimer -= dt;
             if (companion.respawnTimer <= 0.0f) {
@@ -1073,7 +1184,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 companion.respawnTimer = 0.0f;
                 companion.invulnTimer = 0.5f;
                 RelocateCompanionToPlayer();
-                particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+                if (companion.isCommandingTitan) {
+                    InitGolemSubMinions();
+                    particles.SpawnFloatingText(position, "COMMANDING TITAN RECONSTRUCTED!", Color{ 255, 180, 50, 255 }, 26.0f);
+                } else {
+                    particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+                }
                 particles.SpawnSparks(companion.position, Color{ 255, 170, 50, 255 }, 25, 180.0f);
                 SoundFX::PlayParrySuccess();
             }
@@ -1081,12 +1197,47 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             if (companion.invulnTimer > 0.0f) {
                 companion.invulnTimer -= dt;
             }
+            if (companion.buffDefenseTimer > 0.0f) companion.buffDefenseTimer -= dt;
+            if (companion.buffSpeedTimer > 0.0f) companion.buffSpeedTimer -= dt;
+            float regenRate = (gTier == 2) ? 8.0f : ((gTier == 1) ? 6.0f : 4.0f);
             if (companion.health < companion.maxHealth) {
-                companion.health = fminf(companion.maxHealth, companion.health + 4.0f * dt);
+                companion.health = fminf(companion.maxHealth, companion.health + regenRate * dt);
+            }
+
+            // Tier 3 Commanding Titan Sub-Minions logic
+            if (companion.isCommandingTitan) {
+                if (GetActiveGolemSubMinionCount() < 3) {
+                    companion.subMinionSummonCooldown -= dt;
+                    if (companion.subMinionSummonCooldown <= 0.0f) {
+                        companion.subMinionSummonCooldown = 18.0f;
+                        for (int i = 0; i < 3; ++i) {
+                            if (!golemSubMinions[i].active || golemSubMinions[i].health <= 0.0f) {
+                                golemSubMinions[i].active = true;
+                                golemSubMinions[i].health = golemSubMinions[i].maxHealth;
+                                golemSubMinions[i].invulnTimer = 0.5f;
+                                float ang = (float)i * (2.0f * 3.14159265f / 3.0f);
+                                golemSubMinions[i].position = Vector2Add(companion.position, { cosf(ang) * 45.0f, sinf(ang) * 45.0f });
+                                particles.SpawnFloatingText(golemSubMinions[i].position, "MINI GOLEM SUMMONED!", Color{ 255, 180, 50, 255 }, 20.0f);
+                                particles.SpawnSparks(golemSubMinions[i].position, Color{ 255, 160, 50, 255 }, 16, 120.0f);
+                                break;
+                            }
+                        }
+                    }
+                }
+                for (int i = 0; i < 3; ++i) {
+                    if (golemSubMinions[i].active) {
+                        if (golemSubMinions[i].invulnTimer > 0.0f) golemSubMinions[i].invulnTimer -= dt;
+                        if (golemSubMinions[i].attackCooldown > 0.0f) golemSubMinions[i].attackCooldown -= dt;
+                        if (golemSubMinions[i].attackVisualTimer > 0.0f) golemSubMinions[i].attackVisualTimer -= dt;
+                        if (golemSubMinions[i].buffDefenseTimer > 0.0f) golemSubMinions[i].buffDefenseTimer -= dt;
+                        if (golemSubMinions[i].buffSpeedTimer > 0.0f) golemSubMinions[i].buffSpeedTimer -= dt;
+                    }
+                }
             }
         }
     } else {
         companion.active = false;
+        for (int i = 0; i < 3; ++i) golemSubMinions[i].active = false;
     }
 
     // Totem of Mist & Mist Fairy Companion Update
@@ -1167,7 +1318,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             // All 7 companions are defeated
             if (towerSquadRespawnTimer <= 0.0f) {
                 towerSquadRespawnTimer = 120.0f; // 2 minutes respawn countdown begins
-                particles.SpawnFloatingText(position, "CONQUEROR SQUAD FALLEN! (2m Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+                particles.SpawnFloatingText(position, "COMMANDER SQUAD FALLEN! (2m Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
             } else {
                 towerSquadRespawnTimer -= dt;
                 if (towerSquadRespawnTimer <= 0.0f) {
@@ -1180,7 +1331,7 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                         c.attackVisualTimer = 0.0f;
                     }
                     RelocateTowerCompanions();
-                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                    particles.SpawnFloatingText(position, "COMMANDER SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
                     particles.SpawnSparks(position, Color{ 200, 80, 255, 255 }, 40, 220.0f);
                     SoundFX::PlayParrySuccess();
                 }
@@ -1193,6 +1344,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 if (c.invulnTimer > 0.0f) c.invulnTimer -= dt;
                 if (c.attackCooldown > 0.0f) c.attackCooldown -= dt;
                 if (c.attackVisualTimer > 0.0f) c.attackVisualTimer -= dt;
+                if (c.buffDefenseTimer > 0.0f) c.buffDefenseTimer -= dt;
+                if (c.buffSpeedTimer > 0.0f) c.buffSpeedTimer -= dt;
                 if (c.health < c.maxHealth) {
                     c.health = fminf(c.maxHealth, c.health + 2.5f * dt);
                 }
@@ -1567,6 +1720,10 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
             particles.SpawnSparks(position, Color{ 255, 220, 60, 220 }, 2, 50.0f);
 
+        } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+            particles.SpawnSparks(position, Color{ 120, 240, 255, 220 }, 3, 55.0f);
+
         } else if (currentWeapon == WeaponType::MACE) {
 
             particles.SpawnSparks(position, Color{ 255, 140, 40, 200 }, 2, 45.0f);
@@ -1820,6 +1977,33 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 particles.SpawnSparks(position, Color{ 180, 242, 255, 255 }, 14, 150.0f);
                 velocity.x += forwardDir.x * 135.0f;
                 velocity.y += forwardDir.y * 135.0f;
+
+            } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+                // Sovereign's Scepter Heavy: Sanctuary Radiance (Full 360-degree AoE wave)
+                // Pure healing rod: deals 0 damage to enemies, but heals all friendly summons within 280px
+                currentAttack.range = 280.0f;
+                currentAttack.arcAngle = 360.0f;
+                currentAttack.damage = 0.0f;
+                currentAttack.duration = 0.35f;
+                currentAttack.timer = 0.35f;
+                currentAttack.knockback = 50.0f;
+                currentAttack.defensePierce = 0.0f;
+                currentAttack.isFrontalCircle = false;
+                currentAttack.hasShockwave = false;
+
+                int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
+                float scepHeal = (scepUpg >= 2) ? 120.0f : ((scepUpg >= 1) ? 95.0f : 75.0f);
+                HealAllSummons(280.0f, scepHeal, true, particles);
+
+                SoundFX::PlayHeal();
+                particles.AddScreenShake(3.0f, 0.22f);
+                shockwaveActive = true;
+                shockwaveTimer = 0.38f;
+                shockwaveRadius = 280.0f;
+                shockwavePos = position;
+                particles.SpawnSparks(position, Color{ 255, 235, 120, 255 }, 35, 220.0f);
+                particles.SpawnFloatingText(position, "SANCTUARY RADIANCE!", Color{ 120, 240, 255, 255 }, 24.0f);
 
             } else {
 
@@ -2402,7 +2586,7 @@ void Player::UpdateBackgroundTimers(float dt, ParticleSystem& particles) {
                         c.invulnTimer = 1.0f;
                     }
                     RelocateTowerCompanions();
-                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                    particles.SpawnFloatingText(position, "COMMANDER SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
                 }
             }
         } else {
@@ -2935,6 +3119,21 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         SoundFX::PlayLightAttack();
         particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
         particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 180, 235, 255, 255 }, 12, 130.0f);
+
+    } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+        currentAttack.range = stats.lightRange;
+        currentAttack.arcAngle = stats.lightArc;
+        currentAttack.damage = stats.lightDamage * GetTotemDamageMultiplier();
+        currentAttack.knockback = 50.0f;
+        currentAttack.defensePierce = 0.0f;
+        SoundFX::PlayLightAttack();
+        SoundFX::PlayHeal();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 235, 255, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 160, 245, 255, 255 }, 12, 110.0f);
+        int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
+        float scepHeal = (scepUpg >= 2) ? 38.0f : ((scepUpg >= 1) ? 30.0f : 24.0f);
+        HealAllSummons(stats.lightRange + 45.0f, scepHeal, false, particles);
 
     } else {
 

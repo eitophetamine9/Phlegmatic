@@ -58,10 +58,36 @@ public:
         float strikeTimer = 0.0f;
         float invulnTimer = 0.0f;
         int attackPattern = 0;
+        bool isCommandingTitan = false;
+        float subMinionSummonCooldown = 0.0f;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
     } companion;
+
+    struct MiniGolemSubMinion {
+        bool active = false;
+        Vector2 position = { 0.0f, 0.0f };
+        float health = 280.0f;
+        float maxHealth = 280.0f;
+        float defense = 40.0f;
+        float damage = 18.0f;
+        float radius = 13.0f;
+        float attackCooldown = 0.0f;
+        float attackVisualTimer = 0.0f;
+        float formationAngle = 0.0f;
+        float invulnTimer = 0.0f;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
+    };
+    MiniGolemSubMinion golemSubMinions[3];
 
     const CompanionGolem& GetCompanion() const { return companion; }
     CompanionGolem& GetCompanion() { return companion; }
+    MiniGolemSubMinion* GetGolemSubMinions() { return golemSubMinions; }
+    const MiniGolemSubMinion* GetGolemSubMinions() const { return golemSubMinions; }
+    int GetActiveGolemSubMinionCount() const;
+    void InitGolemSubMinions();
+    void RelocateGolemSubMinions();
     void RelocateCompanionToPlayer();
 
     // Friendly Tower Companions Squad (Conqueror's Totem: up to 7 gladiators)
@@ -80,6 +106,8 @@ public:
         float invulnTimer = 0.0f;
         float formationAngle = 0.0f;
         int facingDirection = 1;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
     };
     std::vector<TowerCompanion> towerCompanions;
     float towerSquadRespawnTimer = 0.0f; // 2 minutes (120s), starts only when ALL 7 are dead
@@ -90,6 +118,7 @@ public:
     int GetActiveTowerCompanionCount() const;
     void InitTowerSquad();
     void RelocateTowerCompanions();
+    void HealAllSummons(float radius, float amount, bool grantBuffs, ParticleSystem& particles);
 
     // Friendly Mist Fairy Companion (Totem of Mist)
     struct MistFairy {

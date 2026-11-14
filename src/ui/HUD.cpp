@@ -853,6 +853,7 @@ static const char* GetShortWeaponLabel(WeaponType w) {
         case WeaponType::SUN_CLAYMORE:       return "CLAYMORE";
         case WeaponType::STORM_GLAIVE:       return "GLAIVE";
         case WeaponType::GLACIAL_CLEAVER:    return "CLEAVERS";
+        case WeaponType::SOVEREIGN_SCEPTER:  return "SCEPTER";
         case WeaponType::NONE:
         default:                             return "EMPTY";
     }

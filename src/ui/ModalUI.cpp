@@ -509,15 +509,19 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
     }
 }
 
-static void DrawTotemBuffDebuffText(const std::string& buffText, const std::string& nerfText, int x, int y, int fontSize) {
-    std::string bStr = "[+] " + buffText;
-    DrawText(bStr.c_str(), x, y, fontSize, Color{ 100, 245, 190, 240 });
-    int bw = FontManager::MeasureGameText(bStr, fontSize, GameFont::BODY);
-    std::string sep = " | ";
-    DrawText(sep.c_str(), x + bw, y, fontSize, Color{ 160, 175, 195, 180 });
-    int sw = FontManager::MeasureGameText(sep, fontSize, GameFont::BODY);
-    std::string nStr = "[-] " + nerfText;
-    DrawText(nStr.c_str(), x + bw + sw, y, fontSize, Color{ 255, 90, 90, 255 });
+static int DrawTotemBuffDebuffText(const std::string& buffText, const std::string& nerfText, int x, int y, int fontSize, int maxWidth = 420) {
+    int curY = y;
+    if (!buffText.empty()) {
+        std::string bStr = "[+] " + buffText;
+        FontManager::DrawTextWrapped(bStr, x, curY, maxWidth, fontSize, 2, Color{ 100, 245, 190, 240 });
+        curY += FontManager::MeasureTextWrappedHeight(bStr, maxWidth, fontSize, 2) + 4;
+    }
+    if (!nerfText.empty()) {
+        std::string nStr = "[-] " + nerfText;
+        FontManager::DrawTextWrapped(nStr, x, curY, maxWidth, fontSize, 2, Color{ 255, 90, 90, 255 });
+        curY += FontManager::MeasureTextWrappedHeight(nStr, maxWidth, fontSize, 2) + 4;
+    }
+    return curY;
 }
 
 static void DrawEquipmentBubble(Rectangle rec, bool isSelected, bool isHovered, bool isEquipped, bool isLocked, int tierPips = 0, bool showEye = false, bool eyeHidden = false) {
@@ -949,7 +953,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         }
 
         struct WepBtnInfo { WeaponType type; };
-        WepBtnInfo wepBtns[10] = {
+        WepBtnInfo wepBtns[11] = {
             { WeaponType::SWORD },
             { WeaponType::DAGGERS },
             { WeaponType::MACE },
@@ -959,7 +963,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             { WeaponType::WINDRUNNER_RECURVE },
             { WeaponType::SUN_CLAYMORE },
             { WeaponType::STORM_GLAIVE },
-            { WeaponType::GLACIAL_CLEAVER }
+            { WeaponType::GLACIAL_CLEAVER },
+            { WeaponType::SOVEREIGN_SCEPTER }
         };
         float wepBtnW = (leftW - 32.0f - (float)(std::size(wepBtns) - 1) * 4.0f) / (float)std::size(wepBtns);
         float wepBtnH = 42.0f;
@@ -1050,42 +1055,45 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             s_selectedSlot = 3;
             SoundFX::PlayEquipWeapon();
         }
-        TotemStats tStats = GetTotemStats(player.GetTotem());
         bool hasTotem = (player.GetTotem() != TotemType::NONE);
+        int equippedTotTier = player.GetInventory().GetTotemUpgrade(player.GetTotem());
+        TotemStats tStats = GetTotemStats(player.GetTotem(), equippedTotTier);
+
         bool isTotemSel = (s_selectedSlot == 3);
         DrawRectangleRounded(totemSlotRec, 0.12f, 4, isTotemSel ? Color{ 28, 42, 68, 250 } : (isTotemSlotHov ? Color{ 22, 32, 50, 220 } : Color{ 15, 20, 30, 200 }));
         DrawRectangleRoundedLines(totemSlotRec, 0.12f, 4, hasTotem ? tStats.glowColor : (isTotemSel ? Color{ 255, 215, 80, 255 } : Color{ 48, 65, 92, 200 }));
 
         Rectangle tIconBox = { totemSlotRec.x + 4.0f, totemSlotRec.y + 4.0f, 40.0f, 40.0f };
-        DrawEquipmentBubble(tIconBox, isTotemSel, isTotemSlotHov, hasTotem, false, hasTotem ? 3 : 0);
+        DrawEquipmentBubble(tIconBox, isTotemSel, isTotemSlotHov, hasTotem, false, hasTotem ? (equippedTotTier + 1) : 0);
         DrawTotemSlotIcon({ tIconBox.x + tIconBox.width * 0.5f, tIconBox.y + tIconBox.height * 0.5f }, player.GetTotem(), 0.95f, true, hasTotem);
 
         float tTextX = tIconBox.x + tIconBox.width + 10.0f;
         DrawText(hasTotem ? tStats.name.c_str() : "No Totem Attuned (Quick-Attune Below or Open Drawer)", (int)tTextX, (int)totemSlotRec.y + 6, 13, hasTotem ? tStats.glowColor : Color{ 145, 160, 180, 220 });
         if (hasTotem) {
-            DrawTotemBuffDebuffText(tStats.buffText, tStats.nerfText, (int)tTextX, (int)totemSlotRec.y + 26, 11);
+            DrawTotemBuffDebuffText(tStats.buffText, tStats.nerfText, (int)tTextX, (int)totemSlotRec.y + 24, 10, (int)(totemSlotRec.width - (tTextX - totemSlotRec.x) - 8.0f));
         } else {
             DrawText("Attune a discovered primal relic to awaken elemental resonances.", (int)tTextX, (int)totemSlotRec.y + 26, 11, Color{ 130, 145, 165, 200 });
         }
 
-        // Row 2: 1x7 Quick-Attune Grid for all 7 Totems!
+        // Row 2: 1x8 Quick-Attune Grid for all 8 Totems!
         float totGridY = totemSlotRec.y + totemSlotRec.height + 6.0f;
         struct TotemBtnInfo { TotemType type; int tierPips; };
-        TotemBtnInfo totemBtns[7] = {
+        TotemBtnInfo totemBtns[8] = {
             { TotemType::TOTEM_SANITY, 2 },
             { TotemType::TOTEM_INSANITY, 2 },
             { TotemType::TOTEM_MIST, 3 },
             { TotemType::CRUSADER_TOTEM, 3 },
             { TotemType::ELEMENTAL_CORE_TOTEM, 4 },
             { TotemType::TOTEM_PHLEGMATIC_CORE, 4 },
-            { TotemType::CHAMPION_TOTEM, 5 }
+            { TotemType::CHAMPION_TOTEM, 5 },
+            { TotemType::COMMANDER_TOTEM, 5 }
         };
-        float tBtnW = (leftW - 32.0f - 24.0f) / 7.0f;
+        float tBtnW = (leftW - 32.0f - 28.0f) / 8.0f;
         float tBtnH = 38.0f;
         int hoveredTotemIdx = -1;
         Rectangle hoveredTotemRec = { 0, 0, 0, 0 };
 
-        for (int ti = 0; ti < 7; ++ti) {
+        for (int ti = 0; ti < 8; ++ti) {
             Rectangle tbRec = { leftX + 16.0f + (float)ti * (tBtnW + 4.0f), totGridY, tBtnW, tBtnH };
             bool isTUnlocked = player.GetInventory().HasTotem(totemBtns[ti].type);
             bool isTEquipped = (player.GetTotem() == totemBtns[ti].type);
@@ -1102,7 +1110,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 s_selectedSlot = 3;
             }
 
-            DrawEquipmentBubble(tbRec, (isTEquipped && s_selectedSlot == 3), isTHov, isTEquipped, !isTUnlocked, totemBtns[ti].tierPips);
+            int tTier = player.GetInventory().GetTotemUpgrade(totemBtns[ti].type);
+            DrawEquipmentBubble(tbRec, (isTEquipped && s_selectedSlot == 3), isTHov, isTEquipped, !isTUnlocked, isTUnlocked ? (tTier + 1) : 0);
             DrawTotemSlotIcon({ tbRec.x + tbRec.width * 0.5f, tbRec.y + tbRec.height * 0.5f }, totemBtns[ti].type, 0.85f, isTUnlocked, isTEquipped);
         }
 
@@ -1111,7 +1120,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             TotemType ht = totemBtns[hoveredTotemIdx].type;
             bool htUnlocked = player.GetInventory().HasTotem(ht);
             bool htEquipped = (player.GetTotem() == ht);
-            TotemStats htStats = GetTotemStats(ht);
+            int hTier = player.GetInventory().GetTotemUpgrade(ht);
+            TotemStats htStats = GetTotemStats(ht, hTier);
 
             std::string tipTitle = htStats.name + (htEquipped ? " [ATTUNED]" : (htUnlocked ? " [CLICK TO ATTUNE]" : " [LOCKED]"));
             int tw1 = FontManager::MeasureGameText(tipTitle, 13, GameFont::BODY);
@@ -1127,7 +1137,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             DrawRectangleRoundedLines(Rectangle{ tipX, tipY, tipW, tipH }, 0.16f, 4, htEquipped ? htStats.glowColor : Color{ 70, 95, 135, 220 });
             DrawText(tipTitle.c_str(), (int)tipX + 12, (int)tipY + 6, 13, htEquipped ? htStats.glowColor : Color{ 235, 245, 255, 255 });
             if (htUnlocked) {
-                DrawTotemBuffDebuffText(htStats.buffText, htStats.nerfText, (int)tipX + 12, (int)tipY + 26, 11);
+                DrawTotemBuffDebuffText(htStats.buffText, htStats.nerfText, (int)tipX + 12, (int)tipY + 26, 11, (int)tipW - 24);
             } else {
                 DrawText("Locked // Defeat realm boss or find crypt pedestal to attune", (int)tipX + 12, (int)tipY + 26, 11, Color{ 235, 100, 100, 220 });
             }
@@ -1773,7 +1783,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             }
 
             // Right Inspection Panel
-            TotemStats st = GetTotemStats(totems[s_inspectedTotem].type);
+            int curTotTier = player.GetInventory().GetTotemUpgrade(totems[s_inspectedTotem].type);
+            TotemStats st = GetTotemStats(totems[s_inspectedTotem].type, curTotTier);
             bool isInspUnlocked = player.GetInventory().HasTotem(totems[s_inspectedTotem].type);
             bool isInspEquipped = (player.GetTotem() == totems[s_inspectedTotem].type);
 
@@ -1782,17 +1793,18 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
 
             // Preview bubble
             Rectangle prevRec = { panelX + 14.0f, drawerListY + 12.0f, 54.0f, 54.0f };
-            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, totems[s_inspectedTotem].tierPips);
+            DrawEquipmentBubble(prevRec, true, false, isInspEquipped, !isInspUnlocked, curTotTier + 1);
             DrawTotemSlotIcon({ prevRec.x + prevRec.width * 0.5f, prevRec.y + prevRec.height * 0.5f }, totems[s_inspectedTotem].type, 1.4f, isInspUnlocked, isInspEquipped);
 
             // Header titles
             float titleX = panelX + 78.0f;
             DrawText(st.name.c_str(), (int)titleX, (int)drawerListY + 12, 15, isInspEquipped ? st.glowColor : Color{ 235, 245, 255, 255 });
             DrawText("Primal Humoral Relic", (int)titleX, (int)drawerListY + 31, 11, Color{ 160, 180, 205, 200 });
-            DrawText("Attunement: Core Soul Resonance", (int)titleX, (int)drawerListY + 47, 11, Color{ 120, 240, 190, 240 });
+            std::string tierDesc = (curTotTier == 2) ? "Mastery: Tier III (Evolved)" : (curTotTier == 1 ? "Attunement: Tier II Empowered" : "Attunement: Tier I Baseline");
+            DrawText(tierDesc.c_str(), (int)titleX, (int)drawerListY + 47, 11, curTotTier == 2 ? Color{ 255, 215, 80, 255 } : Color{ 120, 240, 190, 240 });
 
-            // Action button
-            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 28.0f };
+            // Action button (ATTUNE / ATTUNED)
+            Rectangle btnRec = { panelX + panelW - 98.0f, drawerListY + 12.0f, 86.0f, 26.0f };
             bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
             if (isInspEquipped) {
                 DrawRectangleRounded(btnRec, 0.25f, 4, st.glowColor);
@@ -1811,50 +1823,116 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("LOCKED", (int)btnRec.x + 20, (int)btnRec.y + 7, 11, Color{ 235, 95, 95, 220 });
             }
 
-            // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
-
-            // Totem Buff and RED Debuff Text
-            DrawText("RELIC RESONANCES & HARMONIES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)panelX + 14, (int)drawerListY + 100, 12);
-
-            // Special notes for totems
-            if (totems[s_inspectedTotem].type == TotemType::CRUSADER_TOTEM) {
-                DrawText("[Passive]: Will of Atlas", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
-                FontManager::DrawTextWrapped("When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
-                DrawText("[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
-                FontManager::DrawTextWrapped("Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
-                DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
-                FontManager::DrawTextWrapped("A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
-                DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
-                FontManager::DrawTextWrapped("Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
-                DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
-                FontManager::DrawTextWrapped("Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 200, 240, 255, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::CHAMPION_TOTEM) {
-                DrawText("[Primal Trait]: Undying Warlord's Fortitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
-                FontManager::DrawTextWrapped("Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 235, 185, 220 });
-            } else if (totems[s_inspectedTotem].type == TotemType::CONQUEROR_TOTEM) {
-                DrawText("[Squad]: 7 Tower Gladiator Companions", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 215, 120, 255, 255 });
-                FontManager::DrawTextWrapped("Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 235, 205, 255, 220 });
+            // Upgrade Button
+            Rectangle upgRec = { panelX + panelW - 98.0f, drawerListY + 42.0f, 86.0f, 22.0f };
+            if (isInspUnlocked) {
+                if (curTotTier >= 2) {
+                    DrawRectangleRounded(upgRec, 0.25f, 3, Color{ 35, 45, 60, 200 });
+                    DrawRectangleRoundedLines(upgRec, 0.25f, 3, Color{ 255, 215, 80, 180 });
+                    DrawText("MAX TIER", (int)upgRec.x + 18, (int)upgRec.y + 5, 10, Color{ 255, 220, 100, 255 });
+                } else {
+                    int shingCost = (curTotTier == 0) ? 120 : 250;
+                    int scrapCost = (curTotTier == 0) ? 3 : 6;
+                    bool canUpg = player.GetInventory().GetShingles() >= shingCost && player.GetInventory().GetOreScraps() >= scrapCost;
+                    bool isUpgHov = CheckCollisionPointRec(mousePos, upgRec);
+                    DrawRectangleRounded(upgRec, 0.25f, 3, canUpg ? (isUpgHov ? Color{ 50, 140, 80, 255 } : Color{ 30, 95, 55, 230 }) : Color{ 30, 34, 44, 200 });
+                    DrawRectangleRoundedLines(upgRec, 0.25f, 3, canUpg ? (isUpgHov ? Color{ 140, 255, 180, 255 } : Color{ 70, 180, 110, 220 }) : Color{ 55, 60, 75, 160 });
+                    DrawText(curTotTier == 0 ? "TIER II [U]" : "EVOLVE [U]", (int)upgRec.x + (curTotTier == 0 ? 15 : 12), (int)upgRec.y + 5, 10, canUpg ? Color{ 240, 255, 245, 255 } : Color{ 140, 150, 165, 180 });
+                    if (isUpgHov && isMousePressed && canUpg) {
+                        player.GetInventory().SpendShingles(shingCost);
+                        player.GetInventory().SpendOreScraps(scrapCost);
+                        player.GetInventory().UpgradeTotem(totems[s_inspectedTotem].type);
+                        if (player.GetTotem() == totems[s_inspectedTotem].type) {
+                            player.SetTotem(totems[s_inspectedTotem].type);
+                        }
+                        SoundFX::PlayParrySuccess();
+                    }
+                }
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 175, (int)(panelX + panelW - 14), (int)drawerListY + 175, Color{ 45, 62, 90, 180 });
+            DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
+
+            int maxContentW = (int)panelW - 28;
+            int curY = (int)drawerListY + 82;
+
+            // Totem Buff and RED Debuff Text
+            DrawText("RELIC RESONANCES & HARMONIES", (int)panelX + 14, curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 16;
+            curY = DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)panelX + 14, curY, 11, maxContentW);
+
+            // Special notes for totems with dynamic height
+            std::string traitHeader = "";
+            std::string traitDesc = "";
+            Color traitColor = Color{ 255, 215, 80, 255 };
+
+            if (totems[s_inspectedTotem].type == TotemType::CRUSADER_TOTEM) {
+                traitHeader = curTotTier == 2 ? "[Passive]: Will of Atlas (Mastered - 30s Cooldown)" : (curTotTier == 1 ? "[Passive]: Will of Atlas (Empowered - 45s Cooldown)" : "[Passive]: Will of Atlas");
+                traitDesc = curTotTier == 2 ? "When Health falls below 20%, automatically awakens 6 seconds of invulnerability (30s cooldown)." : (curTotTier == 1 ? "When Health falls below 20%, automatically awakens 5 seconds of invulnerability (45s cooldown)." : "When Health falls below 20%, automatically awakens 4 seconds of invulnerability (60s cooldown).");
+                traitColor = Color{ 255, 215, 80, 255 };
+            } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
+                if (curTotTier >= 2) {
+                    traitHeader = "[EVOLVED TITAN]: Commanding Elemental Golem + 3 Mini Golems";
+                    traitDesc = "Evolves into a colossal basalt titan (920 HP, 75 DEF) with seismic AoE slams (54 DMG, 115px), fracture bashes (48 DMG), and piercing spikes (48 DMG). Commands 3 Mini Golems (280 HP, 40 DEF, 18 DMG) that fight in formation and reconstitute every 18 seconds!";
+                    traitColor = Color{ 255, 180, 50, 255 };
+                } else if (curTotTier == 1) {
+                    traitHeader = "[Companion]: Empowered Mini Golem (600 HP, 65 DEF, +6/s Regen)";
+                    traitDesc = "Empowered volcanic companion with +25% strike damage and 25s resurrection timer. Cycles Heavy AoE Slam, Forward Bash Fracture, and Piercing Spike Throw.";
+                    traitColor = Color{ 255, 160, 55, 255 };
+                } else {
+                    traitHeader = "[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)";
+                    traitDesc = "Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.";
+                    traitColor = Color{ 255, 150, 50, 255 };
+                }
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
+                traitHeader = curTotTier == 2 ? "[Companion]: Arch-Mist Fairy (Zero Penalties!)" : (curTotTier == 1 ? "[Companion]: Empowered Mist Fairy (+28% Crit, +50% Crit Dmg)" : "[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)");
+                traitDesc = curTotTier == 2 ? "The Arch-Fairy rapidly creates potent restorative mist orbs every 8 seconds (+60 HP), grants +38% Crit and +70% Crit Damage, and cleanses all stat penalties." : (curTotTier == 1 ? "An empowered vapor sprite guides critical strikes and periodically generates restorative mist healing orbs every 12 seconds (+45 HP)." : "A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).");
+                traitColor = Color{ 110, 245, 225, 255 };
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
+                traitHeader = curTotTier == 2 ? "[Trait]: Apocalyptic Blood Frenzy" : (curTotTier == 1 ? "[Trait]: Surging Blood Frenzy" : "[Trait]: Reckless Blood Frenzy");
+                traitDesc = curTotTier == 2 ? "Bestows +100% overall damage, +26% speed, and +35% attack speed. When Health drops below 40%, overall damage surges to +200%!" : (curTotTier == 1 ? "Bestows +80% overall damage, +22% speed, and +30% attack speed. When Health drops below 40%, overall damage surges to +160%!" : "Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!");
+                traitColor = Color{ 255, 75, 75, 255 };
+            } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
+                traitHeader = curTotTier == 2 ? "[Signature]: Unyielding Glacial Monolith" : (curTotTier == 1 ? "[Signature]: Phlegmatic Stoicism & Cold Ward" : "[Signature]: Phlegmatic Apathy & Cold Solitude");
+                traitDesc = curTotTier == 2 ? "Grants COMPLETE KNOCKBACK IMMUNITY (-100%), +75 Max HP, +50 Will, and converts 50% of sustained damage into temporary Gray Health. Chills all foes on hit." : (curTotTier == 1 ? "Grants -90% knockback received, +50 Max HP, +35 Will, and converts 35% of sustained damage into temporary Gray Health. Chills foes on hit." : "Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.");
+                traitColor = Color{ 130, 225, 255, 255 };
+            } else if (totems[s_inspectedTotem].type == TotemType::CHAMPION_TOTEM) {
+                traitHeader = curTotTier == 2 ? "[Apex Trait]: Peerless Warlord's Majesty" : (curTotTier == 1 ? "[Primal Trait]: Undying Warlord's Ascendancy" : "[Primal Trait]: Undying Warlord's Fortitude");
+                traitDesc = curTotTier == 2 ? "Bestows +55% overall damage, +45% defense, +22% move speed, +55% stamina recovery, -30% cooldowns, +65 Will, +95 Max HP, and surges passive health regeneration to +22 HP/s (+6 HP/s in combat). External potion healing is reduced by 45%." : (curTotTier == 1 ? "Bestows +45% overall damage, +38% defense, +18% move speed, +45% stamina recovery, -25% cooldowns, +50 Will, +70 Max HP, and surges passive health regeneration to +18 HP/s (+4 HP/s in combat). External potion healing is reduced by 60%." : "Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.");
+                traitColor = Color{ 255, 215, 80, 255 };
+            } else if (totems[s_inspectedTotem].type == TotemType::COMMANDER_TOTEM) {
+                if (curTotTier >= 2) {
+                    traitHeader = "[Royal Legion]: 7 Imperial Gladiators (135% HP/DEF, 70% DMG)";
+                    traitDesc = "Commands an undying royal vanguard with +35% Health and Defense, 70% base damage, +15% move speed, and rapid 60-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitColor = Color{ 255, 160, 220, 255 };
+                } else if (curTotTier == 1) {
+                    traitHeader = "[Squad]: 7 Veteran Gladiators (115% HP/DEF, 55% DMG)";
+                    traitDesc = "Commands an empowered vanguard with 115% HP/DEF, 55% strike power, and 90-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitColor = Color{ 235, 130, 240, 255 };
+                } else {
+                    traitHeader = "[Squad]: 7 Tower Gladiator Companions (100% HP/DEF, 40% DMG)";
+                    traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins. Reduces bearer's attack damage by 40%.";
+                    traitColor = Color{ 215, 120, 255, 255 };
+                }
+            }
+
+            if (!traitHeader.empty()) {
+                curY += 2;
+                DrawText(traitHeader.c_str(), (int)panelX + 14, curY, 11, traitColor);
+                curY += 15;
+                FontManager::DrawTextWrapped(traitDesc, (int)panelX + 14, curY, maxContentW, 11, 3, Color{ 215, 230, 255, 220 });
+                curY += FontManager::MeasureTextWrappedHeight(traitDesc, maxContentW, 11, 3) + 8;
+            }
+
+            // Divider
+            curY += 2;
+            DrawLine((int)panelX + 14, curY, (int)(panelX + panelW - 14), curY, Color{ 45, 62, 90, 180 });
+            curY += 8;
 
             // Lore
-            DrawText("RELIC LORE & CODEX", (int)panelX + 14, (int)drawerListY + 183, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 201, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("RELIC LORE & CODEX", (int)panelX + 14, curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 16;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, curY, maxContentW, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
@@ -1870,7 +1948,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 5. WEAPON ARSENAL GRID & INSPECTION
             // =========================================================
             struct WepListEntry { WeaponType type; const char* lockMsg; int tierPips; };
-            WepListEntry weps[10] = {
+            WepListEntry weps[11] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal", 1 },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal", 1 },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal", 2 },
@@ -1880,7 +1958,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies", 3 },
                 { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag", 3 },
                 { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 },
-                { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 }
+                { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 },
+                { WeaponType::SOVEREIGN_SCEPTER, "Arena of Zyphden - Conqueror's Radiant Healer", 3 }
             };
 
             int unlockedCount = 0;
@@ -2037,6 +2116,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Archetype]: 2-stage Tempest Cyclone grants i-frame surge, +15 Poise & Crescent Gale Wave.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 230, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::GLACIAL_CLEAVER) {
                 DrawText("[Archetype]: Dual-wielding frost barrage with 4-stage Fury of Cleaves heavy rupture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 140, 225, 255, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::SOVEREIGN_SCEPTER) {
+                DrawText("[Archetype]: Pure healing rod. Light pulse & 360-deg Sanctuary Radiance heal summons & grant +15 DEF/+20% SPD.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 120, 240, 255, 240 });
             } else {
                 DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 160, 185, 215, 220 });
             }
