@@ -9,14 +9,13 @@
 #include <vector>
 #include <cmath>
 
-enum class EnemyType;
-
 class Player {
 public:
     Player();
 
     void Init(Vector2 startPos);
     void Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles);
+    void UpdateBackgroundTimers(float dt, ParticleSystem& particles);
     void Draw() const;
 
     // Movement & Combat triggers
@@ -64,6 +63,33 @@ public:
     const CompanionGolem& GetCompanion() const { return companion; }
     CompanionGolem& GetCompanion() { return companion; }
     void RelocateCompanionToPlayer();
+
+    // Friendly Tower Companions Squad (Conqueror's Totem: up to 7 gladiators)
+    struct TowerCompanion {
+        bool active = false;
+        EnemyType unitType = EnemyType::SLASHER;
+        std::string name = "Tower Cultist";
+        Vector2 position = { 0.0f, 0.0f };
+        float health = 130.0f;
+        float maxHealth = 130.0f;
+        float defense = 8.0f;
+        float damage = 10.0f; // ~40% baseline damage
+        float radius = 16.0f;
+        float attackCooldown = 0.0f;
+        float attackVisualTimer = 0.0f;
+        float invulnTimer = 0.0f;
+        float formationAngle = 0.0f;
+        int facingDirection = 1;
+    };
+    std::vector<TowerCompanion> towerCompanions;
+    float towerSquadRespawnTimer = 0.0f; // 2 minutes (120s), starts only when ALL 7 are dead
+
+    const std::vector<TowerCompanion>& GetTowerCompanions() const { return towerCompanions; }
+    std::vector<TowerCompanion>& GetTowerCompanions() { return towerCompanions; }
+    float GetTowerSquadRespawnTimer() const { return towerSquadRespawnTimer; }
+    int GetActiveTowerCompanionCount() const;
+    void InitTowerSquad();
+    void RelocateTowerCompanions();
 
     // Friendly Mist Fairy Companion (Totem of Mist)
     struct MistFairy {
@@ -127,6 +153,9 @@ public:
         position = pos;
         if (companion.active || (companion.position.x == 0.0f && companion.position.y == 0.0f)) {
             RelocateCompanionToPlayer();
+        }
+        if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+            RelocateTowerCompanions();
         }
     }
     float GetRadius() const { return radius; }

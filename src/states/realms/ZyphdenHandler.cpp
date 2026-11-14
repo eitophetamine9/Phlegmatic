@@ -686,10 +686,17 @@ void ZyphdenHandler::Update(
     Vector2 westForestGate = { 160.0f, 730.0f };
     float distToWestGate = Vector2Distance(player.GetPosition(), westForestGate);
     if (distToWestGate <= 110.0f && doorCooldown <= 0.0f) {
-        if (IsKeyPressed(KEY_E) && onEnterMistForestCallback) {
-            doorCooldown = 0.5f;
-            onEnterMistForestCallback();
-            return;
+        if (IsKeyPressed(KEY_E)) {
+            if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                SoundFX::PlayHitImpact();
+                particles.SpawnFloatingText(player.GetPosition(), "Royal Decree: Spar with Captain Lenon in the courtyard before venturing west.", Color{ 255, 120, 120, 255 }, 20.0f);
+                particles.AddScreenShake(3.0f, 0.12f);
+                doorCooldown = 0.5f;
+            } else if (onEnterMistForestCallback) {
+                doorCooldown = 0.5f;
+                onEnterMistForestCallback();
+                return;
+            }
         }
     }
 
@@ -697,10 +704,17 @@ void ZyphdenHandler::Update(
     Vector2 northPassGate = { 1380.0f, 120.0f };
     float distToNorthGate = Vector2Distance(player.GetPosition(), northPassGate);
     if (distToNorthGate <= 110.0f && doorCooldown <= 0.0f) {
-        if (IsKeyPressed(KEY_E) && onEnterNorthZyphdenCallback) {
-            doorCooldown = 0.5f;
-            onEnterNorthZyphdenCallback();
-            return;
+        if (IsKeyPressed(KEY_E)) {
+            if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                SoundFX::PlayHitImpact();
+                particles.SpawnFloatingText(player.GetPosition(), "Royal Decree: Spar with Captain Lenon in the courtyard before ascending north.", Color{ 255, 120, 120, 255 }, 20.0f);
+                particles.AddScreenShake(3.0f, 0.12f);
+                doorCooldown = 0.5f;
+            } else if (onEnterNorthZyphdenCallback) {
+                doorCooldown = 0.5f;
+                onEnterNorthZyphdenCallback();
+                return;
+            }
         }
     }
 
@@ -2270,13 +2284,21 @@ void ZyphdenHandler::Render(
         // Western Archway Gate: Restless Mist Forest prompt outside
         Vector2 westForestGate = { 160.0f, 730.0f };
         if (Vector2Distance(player.GetPosition(), westForestGate) <= 150.0f) {
-            FontManager::DrawGameTextShadow("[E] ENTER RESTLESS MIST FOREST", 110, 680, 12, Color{ 110, 245, 220, 255 });
+            if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                FontManager::DrawGameTextShadow("[E] WESTERN MIST GATE (LOCKED - SPAR WITH LENON FIRST)", 70, 680, 11, Color{ 255, 110, 110, 240 });
+            } else {
+                FontManager::DrawGameTextShadow("[E] ENTER RESTLESS MIST FOREST", 110, 680, 12, Color{ 110, 245, 220, 255 });
+            }
         }
 
         // Northern Mountain Pass Gate prompt outside
         Vector2 northPassGate = { 1380.0f, 120.0f };
         if (Vector2Distance(player.GetPosition(), northPassGate) <= 150.0f) {
-            FontManager::DrawGameTextShadow("[E] ENTER NORTHERN CRAGS", 1310, 80, 12, Color{ 140, 220, 255, 255 });
+            if (questPhase < ZyphdenQuestPhase::VICTORIOUS) {
+                FontManager::DrawGameTextShadow("[E] NORTHERN PASS (LOCKED - SPAR WITH LENON FIRST)", 1270, 80, 11, Color{ 255, 110, 110, 240 });
+            } else {
+                FontManager::DrawGameTextShadow("[E] ENTER NORTHERN CRAGS", 1310, 80, 12, Color{ 140, 220, 255, 255 });
+            }
         }
 
         // Eastern Quarry Archway Gate prompt outside

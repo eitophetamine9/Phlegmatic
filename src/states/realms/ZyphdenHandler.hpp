@@ -114,6 +114,16 @@ public:
     void SetQuestPhase(int phase);
     bool IsObjectivesVisible() const { return showObjectives; }
     void ToggleObjectives() { showObjectives = !showObjectives; }
+    void TickCooldowns(float dt) {
+        if (lenonRematchCooldown > 0.0f) {
+            lenonRematchCooldown -= dt;
+            if (lenonRematchCooldown < 0.0f) lenonRematchCooldown = 0.0f;
+        }
+        if (doorCooldown > 0.0f) {
+            doorCooldown -= dt;
+            if (doorCooldown < 0.0f) doorCooldown = 0.0f;
+        }
+    }
 
 private:
     Campfire campfire;

@@ -6,8 +6,67 @@
 
 ## Table of Versions
 
+- [Version 0.0.1l - Apex Boss Gauntlet Overhaul, Conqueror's Totem, World Progression Gates & Real-Time Cooldown Architecture](#version-001l---apex-boss-gauntlet-overhaul-conquerors-totem-world-progression-gates--real-time-cooldown-architecture)
 - [Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks](#version-001k---3-slot-weapon-hotbar-enlarged-icon-hud-glsl-lighting--combat-reworks)
 - [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns)
+- [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
+- [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
+- [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)
+- [Version 0.0.1f - Arena Milestones, Soundscapes & Combat Polish](#version-001f---arena-milestones-soundscapes--combat-polish)
+- [Version 0.0.1e - Master Forge, Heavy Arsenal & Subterranean Depths](#version-001e---master-forge-heavy-arsenal--subterranean-depths)
+- [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
+- [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
+- [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1l - Apex Boss Gauntlet Overhaul, Conqueror's Totem, World Progression Gates & Real-Time Cooldown Architecture
+
+### Major Features & Balance Revisions Implemented
+
+#### 1. Apex Boss Gauntlet Overhaul, Damage Multiplier & New Attack Patterns
+* **Apex Boss Stat Boosts**: Enhanced all three consecutive champions within the Apex Boss Gauntlet with dedicated Apex scaling:
+  * *Apex Remnant Zil*: Health elevated to 1,250 HP, +12 Defense, and 85 Will poise.
+  * *Apex Primordial Titan*: Health elevated to 1,850 HP, +16 Defense, and 100 Will poise.
+  * *Apex Berserker Troll Warlord*: Health elevated to 2,800 HP, +20 Defense, and 110 Will poise.
+* **+50% Apex Lethality Multiplier**: Introduced an explicit `1.50x` outgoing damage multiplier to all melee strikes and projectile attacks executed by enemies designated as `isApexBoss`.
+* **Visual Aura & Identification**: Apex Gauntlet bosses are rendered with a radiant crimson-gold champion aura (`Color{ 255, 55, 75 }`), dual pulsing outer rings, and an overhead `"APEX CHAMPION"` badge in addition to the `"APEX "` name prefix.
+* **New Boss Attack Patterns**:
+  * *Apex Zil Phase 4 (Solar Cross-Cataclysm)*: Triggers a high-velocity 4-way cardinal holy beam cross detonation covering the arena axis on a 5.0-second cadence.
+  * *Apex Primordial Titan Phase 4 (Molten Tremor Ring & Lava Geysers)*: Erupts a 230px seismic shockwave accompanied by three molten magma projectiles fired in a wide fan.
+  * *Apex Berserker Troll Warlord (Full 3-Phase Cadence)*: Implemented unique rotational mechanics featuring Phase 0 *Highland Blood Whirlwind* (rapid circular strike), Phase 1 *Forward Glacial Cleave Cone* (95px wide frontal shock), and Phase 2 *Crag Earth Rupture Slam* (160px heavy crater slam).
+* **Arena Bandage Drop Nerfs**: Rebalanced arena adhesive bandage spawns to make surviving trials deliberate and demanding:
+  * Bandage drop rate on enemy defeat reduced from 35% to 12%.
+  * Maximum simultaneous ground bandages reduced from 4 to 2.
+  * Periodic wall bandage dispenser timer lengthened from 18 seconds to 45 seconds.
+  * Removed the free opening wave bandage from the arena floor.
+* **Champion's Totem Routing**: Champion's Totem (+35% DMG, +30% DEF, +14 HP/s out-of-combat regen, -70% potion healing) is now exclusively awarded upon completing the Apex Boss Gauntlet alongside +2500 Shingles, +75 Scraps, +10 Mist Essence, and +10 Shadow Essence.
+
+#### 2. Conqueror's Totem & 7 Permanent Tower Companions
+* **Conqueror's Totem**: Introduced the 8th attunable primal relic (`TotemType::CONQUEROR_TOTEM`), awarded for conquering standard Wave 25 of the Royal Combat Arena. Bestows +20% Defense, +40 Max HP, +25 Will, and commands a loyal 7-gladiator tower squad.
+* **7 Diverse Tower Gladiators**: Summons a full tactical squad composed of non-boss tower archetypes retaining their true base health and defense while dealing reduced baseline damage:
+  * *Tower Slasher*: 80 HP, 8 DEF, 12 DMG (rapid close-quarters steel slashes).
+  * *Tower Brute*: 190 HP, 32 DEF, 16 DMG (heavy club ground smashes with stagger).
+  * *Tower Charger*: 65 HP, 12 DEF, 13 DMG (high-speed vanguard dash strikes).
+  * *Tower Archer*: 60 HP, 6 DEF, 11 DMG (piercing long-range arrow volleys).
+  * *Tower Pyromancer*: 75 HP, 10 DEF, 12 DMG (homing occult void flame orbs).
+  * *Tower Stone Golem*: 220 HP, 45 DEF, 14 DMG (crushing rock impacts applying Armor Fracture).
+  * *Tower Frost Troll*: 280 HP, 24 DEF, 15 DMG (brutal glacial club sweeps applying chill/stagger).
+* **Orbital Leash Behavior**: Companions maintain a 7-point circular formation orbiting within 72px of the player, engaging nearby hostiles within 280px while auto-leashing back if distance exceeds 420px.
+* **All-7-Must-Die 120-Second Squad Resurrection**: Individual fallen companions stay defeated and cannot respawn while any squadmate remains alive. Only when all 7 companions have been wiped out does a 2-minute (120-second) resurrection timer begin, accompanied by an overhead countdown UI (`SQUAD RESPAWN: Xm Ys`), resurrecting all 7 gladiators simultaneously at full health upon timer completion.
+
+#### 3. World Progression Gates Behind Knight Lenon
+* **Locked Mist Forest & Northern Pass Gates**: In accordance with royal decree, the Western Archway Gate (Restless Mist Forest) and Northern Mountain Pass (Northern Crags) are physically locked until the player has sparred with and defeated Captain Lenon in the courtyard (`questPhase >= ZyphdenQuestPhase::VICTORIOUS`), matching the Eastern Quarry Archway.
+* **Dynamic Warning Prompts**: Interacting with either locked gate triggers screen shake, impact audio, and floating decree warnings, while outside text banners reflect the requirement: `[E] WESTERN MIST GATE (LOCKED - SPAR WITH LENON FIRST)` and `[E] NORTHERN PASS (LOCKED - SPAR WITH LENON FIRST)`.
+* **Fast-Travel Anti-Bypass Guard**: `Game::ExecuteFastTravel` guards fast-travel destinations to stages 4-7 against sequence breaking prior to Lenon's defeat.
+
+#### 4. Elemental Golem Respawn Cooldown & Real-Time Background Timers
+* **120-Second Primordial Altar Cooldown**: Defeating the Elemental Golem (Primordial Titan) in the Quarry Depths initiates a 120-second dormancy cooldown at the Primordial Altar before the boss can be awakened again, displaying `[E] PRIMORDIAL ALTAR (DORMANT - Xm Ys)` over the altar.
+* **Real-Time Modal Cooldown Architecture**: Implemented `Game::UpdateBackgroundCooldowns` and `Player::UpdateBackgroundTimers`. Boss rematch timers, the Elemental Golem 120s respawn timer, the Conqueror Squad 120s resurrection timer, player skill and potion cooldowns, out-of-combat passive regeneration, the day/night diurnal sky clock, and arena periodic bandage dispensers now continue advancing seamlessly even while viewing Inventory, Bestiary, Map, Stash, or Controls modals.
+
+---
+
+## Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks
 - [Version 0.0.1i - Northern Arsenal, Highland Atmosphere, Outcast Bounties & Apex Boss Gauntlet](#version-001i---northern-arsenal-highland-atmosphere-outcast-bounties--apex-boss-gauntlet)
 - [Version 0.0.1h - Northern Crags Expansion, Berserker Troll Boss & Totem of Insanity](#version-001h---northern-crags-expansion-berserker-troll-boss--totem-of-insanity)
 - [Version 0.0.1g - Equipment Overhaul, Crusader Totem & Golem Synergy](#version-001g---equipment-overhaul-crusader-totem--golem-synergy)

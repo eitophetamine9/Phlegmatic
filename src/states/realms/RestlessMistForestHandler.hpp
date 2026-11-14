@@ -60,6 +60,17 @@ public:
     bool IsBossDefeated() const { return galeArcherDefeated; }
     void SetBossDefeated(bool defeated) { galeArcherDefeated = defeated; }
     void InitSpawners();
+    void TickCooldowns(float dt) {
+        if (gateCooldown > 0.0f) {
+            gateCooldown -= dt;
+            if (gateCooldown < 0.0f) gateCooldown = 0.0f;
+        }
+        for (auto& spawner : spawners) {
+            if (!spawner.isAlive && spawner.respawnTimer > 0.0f) {
+                spawner.respawnTimer -= dt;
+            }
+        }
+    }
     void Reset() {
         galeArcherSummoned = false;
         galeArcherDefeated = false;

@@ -495,6 +495,13 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
             DrawCircleV(center, 3.0f * scale, isUnlocked ? Color{ 255, 255, 255, 255 } : glowCol);
             break;
         }
+        case TotemType::CONQUEROR_TOTEM: {
+            DrawCircleLines((int)center.x, (int)center.y, 12.0f * scale, isUnlocked ? Color{ 215, 80, 160, 240 } : glowCol);
+            DrawPoly(center, 7, 8.5f * scale, 0.0f, isUnlocked ? Color{ 195, 55, 130, 255 } : baseCol);
+            DrawPolyLines(center, 7, 8.5f * scale, 0.0f, isUnlocked ? Color{ 255, 185, 230, 255 } : glowCol);
+            DrawCircleV(center, 3.2f * scale, isUnlocked ? Color{ 255, 215, 90, 255 } : glowCol);
+            break;
+        }
         case TotemType::NONE:
         default:
             DrawCircleLines((int)center.x, (int)center.y, 8.0f * scale, Color{ 70, 85, 105, 160 });
@@ -1725,7 +1732,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { TotemType::CRUSADER_TOTEM, "Zyphden - Spar with Knight Lenon (25% drop)", 3 },
                 { TotemType::ELEMENTAL_CORE_TOTEM, "Quarry Depths - Elemental Golem Boss (25% drop)", 4 },
                 { TotemType::TOTEM_PHLEGMATIC_CORE, "Northern Crags - Altar of Cold Solitude / Torvald Bounty", 4 },
-                { TotemType::CHAMPION_TOTEM, "Royal Combat Arena - Apex Wave 25 / Gauntlet Victory", 5 }
+                { TotemType::CHAMPION_TOTEM, "Royal Combat Arena - Apex Boss Gauntlet Victory", 5 },
+                { TotemType::CONQUEROR_TOTEM, "Royal Combat Arena - Standard Wave 25 Victory", 5 }
             };
 
             int unlockedCount = 0;
@@ -1835,6 +1843,10 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Primal Trait]: Undying Warlord's Fortitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
                 FontManager::DrawTextWrapped("Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.",
                     (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 235, 185, 220 });
+            } else if (totems[s_inspectedTotem].type == TotemType::CONQUEROR_TOTEM) {
+                DrawText("[Squad]: 7 Tower Gladiator Companions", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 215, 120, 255, 255 });
+                FontManager::DrawTextWrapped("Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins.",
+                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 235, 205, 255, 220 });
             }
 
             // Divider

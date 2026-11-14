@@ -59,6 +59,22 @@ public:
     bool IsBossSummoned() const { return elementalBossSummoned; }
     bool IsBossDefeated() const { return elementalBossDefeated; }
     void SetBossDefeated(bool defeated) { elementalBossDefeated = defeated; }
+    float GetBossRespawnTimer() const { return elementalBossRespawnTimer; }
+    void TickCooldowns(float dt) {
+        if (elementalBossRespawnTimer > 0.0f) {
+            elementalBossRespawnTimer -= dt;
+            if (elementalBossRespawnTimer < 0.0f) elementalBossRespawnTimer = 0.0f;
+        }
+        if (doorCooldown > 0.0f) {
+            doorCooldown -= dt;
+            if (doorCooldown < 0.0f) doorCooldown = 0.0f;
+        }
+        for (auto& spawner : golemSpawners) {
+            if (!spawner.isAlive && spawner.respawnTimer > 0.0f) {
+                spawner.respawnTimer -= dt;
+            }
+        }
+    }
     void Reset() {
         elementalBossSummoned = false;
         elementalBossDefeated = false;
@@ -74,6 +90,7 @@ private:
     float altarRadius;
     bool elementalBossSummoned;
     bool elementalBossDefeated;
+    float elementalBossRespawnTimer = 0.0f;
     float entryBannerTimer;
     float doorCooldown;
 };

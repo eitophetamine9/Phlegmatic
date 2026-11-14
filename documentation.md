@@ -212,19 +212,21 @@ Grand stone hall (`1200x1100`) featuring King Kreptu's golden dais, marble colon
 Unlocked after defeating Knight Lenon (`[E]` at the eastern archway):
 
 * Mineral cavern populated by four armored **Ore Golems** (`7.0s` respawn) dropping Ore Scraps for smithing.
-* **Primordial Altar (`{ 1000, 320 }`)**: Awakens the **Elemental Golem (Primordial Titan)** boss, which drops the **Elemental Core Totem**, Ore Scraps, Silver Shingles, and Health Potions.
+* **Primordial Altar (`{ 1000, 320 }`)**: Awakens the **Elemental Golem (Primordial Titan)** boss, which drops the **Elemental Core Totem**, Ore Scraps, Silver Shingles, and Health Potions. Upon defeat, a 120-second (2-minute) dormancy recharge timer begins before the Titan can be summoned again.
 
 ### Act V: Restless Mist Forest & Altar of Whispers
 
-Located beyond Zyphden's western ramparts (`1800x1300` twilight woodland):
+Located beyond Zyphden's western ramparts (`1800x1300` twilight woodland), physically gated until Captain Lenon has been defeated in the courtyard spar:
 
+* **Western Archway Gate**: Refuses passage with royal decree feedback and displays `[E] WESTERN MIST GATE (LOCKED - SPAR WITH LENON FIRST)` until Lenon is defeated.
 * **Gale Bandits**: Swift dual-dagger ambushers and throwing-knife skirmishers dropping Silver Shingles and **Essence of Mist** (`35%` rate; no Ore Scraps).
 * **Altar of Whispers (`{ 1130, 650 }`)**: Offering `2x` Essence of Mist summons **The Gale Archer**, awarding Shadow Essence and a `15%` chance to claim the **Totem of Mist**.
 
 ### Act VI: Northern Crags & The Permafrost Crypts
 
-Northern alpine frontier beyond Zyphden's north gate (`2400x1500`):
+Northern alpine frontier beyond Zyphden's north mountain pass (`2400x1500`), physically gated until Captain Lenon has been defeated in the courtyard spar:
 
+* **Northern Mountain Pass**: Refuses passage with royal decree feedback and displays `[E] NORTHERN PASS (LOCKED - SPAR WITH LENON FIRST)` until Lenon is defeated.
 * **Frostbite & Blizzards**: Sub-zero chill slowly builds up (`-25%` move speed and `-40%` stamina regen at `100%`), thawed rapidly beside the Highland Bonfire or mitigated by **Frostwarden Attire** and **Glacial Thaw Draughts**.
 * **Outcast Ranger Torvald & Bounties**: Offers three repeatable/tiered hunting contracts (**Frostfang Cull**, **Glacial Shard Harvest**, **Highland Slayer**) beside breakable Frost Crystal nodes.
 * **Berserker Troll Warlord**: Summoned via the Blood Altar (`30s` rematch cooldown), guarding a `25%` drop chance for the **Totem of Insanity**.
@@ -235,8 +237,9 @@ Northern alpine frontier beyond Zyphden's north gate (`2400x1500`):
 
 Permanently unlocked from the Title Screen, Lobby portal, or Knight Lenon:
 
-* **25-Wave Survival Gauntlet**: Five escalating tiers culling Southern Cultists, Highland Trolls, Unleashed Ore Golems, and recurring Arena bosses (`Wave 5/10/15/20/25`, culminating in the **Crag Berserker Warlord**). Adhesive Bandages (`+30 HP`) spawn on the arena floor.
-* **3-Stage Apex Boss Gauntlet**: Accessed directly via Knight Lenon (`[G] APEX BOSS GAUNTLET`), chaining Zil's Remnant, the Elemental Golem Titan, and the Berserker Troll Warlord back-to-back.
+* **25-Wave Survival Gauntlet**: Five escalating tiers culling Southern Cultists, Highland Trolls, Unleashed Ore Golems, and recurring Arena bosses (`Wave 5/10/15/20/25`, culminating in the **Crag Berserker Warlord**). Conquering Wave 25 awards the **Grand Apex Victor's Crest** and the **Conqueror's Totem** (commanding 7 permanent tower companions).
+* **3-Stage Apex Boss Gauntlet**: Accessed directly via Knight Lenon (`[G] APEX BOSS GAUNTLET`), chaining Apex Remnant Zil (1,250 HP), Apex Primordial Titan (1,850 HP), and the Apex Berserker Troll Warlord (2,800 HP) back-to-back with a +50% lethality multiplier, radiant champion auras, and new Phase 4 attack patterns. Conquering the gauntlet exclusively awards the **Champion's Totem**, +2500 Shingles, +75 Ore Scraps, +10 Mist Essence, +10 Shadow Essence, and the **Apex Gauntlet Warlord Trophy**.
+* **Arena Bandage Balance**: Adhesive Bandages have been rebalanced (12% drop rate on enemy kill, max 2 simultaneous active ground bandages, 45s periodic wall dispenser, and zero free initial bandages).
 
 ---
 
@@ -452,7 +455,8 @@ Players can equip one active totem inside `[TAB]` -> Equipment Matrix (`Tab 1`):
 | **Crusader's Totem** | Knight Lenon (`25%` drop) | `+25%` Defense, `+35` Max HP, `+18%` DMG, Will of Atlas (`4s` invuln at `<20%` HP) | `-12%` Move Speed, `-20%` Attack Speed | Radiant Gold (`[255, 215, 80]`) |
 | **Elemental Core Totem** | Elemental Golem (Quarry) | Empowered Mini Golem (`460 HP`, `55 DEF`, `+4 HP/s` Regen; Slam `36 DMG`, Bash `32 DMG`, Spike `34 DMG`), Bearer Bolt (`54` DMG, `3s` CD) | `-10%` Move Speed, `35s` Companion Respawn | Molten Amber (`[255, 140, 45]`) |
 | **Totem of the Phlegmatic Core** | Shrine of Cold Solitude (North) | `+30` Max HP, `+25` Will, `+20%` Defense, `-80%` Knockback, `25%` Gray Health recovery, Chills enemies (`3s`) on hit & parry | `-8%` Move Speed, `-10%` Stamina Regen | Glacial Cyan (`[140, 220, 255]`) |
-| **Champion's Totem** | Royal Combat Arena (Apex Victory) | `+35%` DMG, `+30%` Defense, `+15%` Move Speed, `+35%` Stamina Regen, `-20%` Cooldowns, `+40` Will, `+50` Max HP, `+14.0 HP/s` Out-of-Combat Regen (`+2.0 HP/s` in combat) | Withered Vitality (`-70%` incoming healing from potions, drops, and kill-perks) | Champion Gold (`[245, 200, 60]`) |
+| **Champion's Totem** | Apex Boss Gauntlet Victory | `+35%` DMG, `+30%` Defense, `+15%` Move Speed, `+35%` Stamina Regen, `-20%` Cooldowns, `+40` Will, `+50` Max HP, `+14.0 HP/s` Out-of-Combat Regen (`+2.0 HP/s` in combat) | Withered Vitality (`-70%` incoming healing from potions, drops, and kill-perks) | Champion Gold (`[245, 200, 60]`) |
+| **Conqueror's Totem** | Royal Combat Arena (Wave 25) | `+20%` Defense, `+40` Max HP, `+25` Will, commands 7 permanent Tower Gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll with true enemy HP/DEF) | `-10%` Move Speed, `120s` all-must-die squad resurrection countdown | Imperial Purple (`[185, 45, 120]`) |
 
 ---
 
@@ -530,6 +534,14 @@ State coordination is decoupled cleanly across [`Game`](file:///c:/Users/Erick/P
 ### Procedural Acoustic Audio Synthesis
 
 [`SoundFX.cpp`](file:///c:/Users/Erick/Phlegmatic/src/core/SoundFX.cpp) synthesizes waveforms in memory via Raylib audio buffers (cathedral bells, metallic sword slashes & parry clangs, heavy impacts, howling blizzards, snow crunch footsteps, portcullis rumbles) without requiring external `.wav` dependencies.
+
+### Real-Time Modal Background Cooldown Engine
+
+[`Game::UpdateBackgroundCooldowns`](file:///c:/Users/Erick/Phlegmatic/src/states/Game.cpp) and [`Player::UpdateBackgroundTimers`](file:///c:/Users/Erick/Phlegmatic/src/entities/Player.cpp) decouple world time progression from modal display states. When viewing Inventory, Bestiary, Map, Storage Stash, or Controls modals, background clocks continuously tick:
+* **Boss Dormancy & Rematch Timers**: Elemental Golem 120s altar recharge, Knight Lenon rematch timer, and Berserker Troll blood altar cooldown.
+* **Companion Resurrection Countdown**: Conqueror Squad 120s all-7-must-die squad resurrection timer and Elemental Golem companion reconstruction.
+* **Player Attributes & Consumables**: Health potion cooldowns, armor set skill cooldowns, active buff decay, and passive out-of-combat regeneration.
+* **Diurnal Atmosphere & Spawners**: Day/Night celestial cycle and arena bandage drop timers.
 
 ### Custom Asset Drop Pipeline
 

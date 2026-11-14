@@ -172,6 +172,9 @@ void Player::Init(Vector2 startPos) {
 
     position = startPos;
     RelocateCompanionToPlayer();
+    if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+        RelocateTowerCompanions();
+    }
 
     maxHealth = GetMaxHealth();
 
@@ -260,6 +263,9 @@ void Player::Revive(Vector2 startPos, float hpPercent) {
 
     position = startPos;
     RelocateCompanionToPlayer();
+    if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+        RelocateTowerCompanions();
+    }
 
     maxHealth = GetMaxHealth();
 
@@ -585,6 +591,116 @@ void Player::RelocateCompanionToPlayer() {
     }
 }
 
+int Player::GetActiveTowerCompanionCount() const {
+    int count = 0;
+    for (const auto& c : towerCompanions) {
+        if (c.active && c.health > 0.0f) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void Player::InitTowerSquad() {
+    towerCompanions.clear();
+    towerCompanions.resize(7);
+
+    // 1. Tower Slasher (EnemyType::SLASHER)
+    towerCompanions[0].unitType = EnemyType::SLASHER;
+    towerCompanions[0].name = "Tower Slasher";
+    towerCompanions[0].maxHealth = 80.0f;
+    towerCompanions[0].health = 80.0f;
+    towerCompanions[0].defense = 8.0f;
+    towerCompanions[0].damage = 12.0f;
+    towerCompanions[0].radius = 20.0f;
+    towerCompanions[0].formationAngle = 0.0f * (2.0f * PI / 7.0f);
+
+    // 2. Tower Brute (EnemyType::BRUTE)
+    towerCompanions[1].unitType = EnemyType::BRUTE;
+    towerCompanions[1].name = "Tower Brute";
+    towerCompanions[1].maxHealth = 190.0f;
+    towerCompanions[1].health = 190.0f;
+    towerCompanions[1].defense = 32.0f;
+    towerCompanions[1].damage = 16.0f;
+    towerCompanions[1].radius = 28.0f;
+    towerCompanions[1].formationAngle = 1.0f * (2.0f * PI / 7.0f);
+
+    // 3. Tower Charger (EnemyType::CHARGER)
+    towerCompanions[2].unitType = EnemyType::CHARGER;
+    towerCompanions[2].name = "Tower Charger";
+    towerCompanions[2].maxHealth = 65.0f;
+    towerCompanions[2].health = 65.0f;
+    towerCompanions[2].defense = 12.0f;
+    towerCompanions[2].damage = 13.0f;
+    towerCompanions[2].radius = 18.0f;
+    towerCompanions[2].formationAngle = 2.0f * (2.0f * PI / 7.0f);
+
+    // 4. Tower Archer (EnemyType::ARCHER)
+    towerCompanions[3].unitType = EnemyType::ARCHER;
+    towerCompanions[3].name = "Tower Archer";
+    towerCompanions[3].maxHealth = 60.0f;
+    towerCompanions[3].health = 60.0f;
+    towerCompanions[3].defense = 6.0f;
+    towerCompanions[3].damage = 11.0f;
+    towerCompanions[3].radius = 18.0f;
+    towerCompanions[3].formationAngle = 3.0f * (2.0f * PI / 7.0f);
+
+    // 5. Tower Pyromancer (EnemyType::PYROMANCER)
+    towerCompanions[4].unitType = EnemyType::PYROMANCER;
+    towerCompanions[4].name = "Tower Pyromancer";
+    towerCompanions[4].maxHealth = 75.0f;
+    towerCompanions[4].health = 75.0f;
+    towerCompanions[4].defense = 10.0f;
+    towerCompanions[4].damage = 12.0f;
+    towerCompanions[4].radius = 20.0f;
+    towerCompanions[4].formationAngle = 4.0f * (2.0f * PI / 7.0f);
+
+    // 6. Tower Stone Golem (EnemyType::ORE_GOLEM)
+    towerCompanions[5].unitType = EnemyType::ORE_GOLEM;
+    towerCompanions[5].name = "Tower Stone Golem";
+    towerCompanions[5].maxHealth = 220.0f;
+    towerCompanions[5].health = 220.0f;
+    towerCompanions[5].defense = 45.0f;
+    towerCompanions[5].damage = 14.0f;
+    towerCompanions[5].radius = 26.0f;
+    towerCompanions[5].formationAngle = 5.0f * (2.0f * PI / 7.0f);
+
+    // 7. Tower Frost Troll (EnemyType::FROST_TROLL)
+    towerCompanions[6].unitType = EnemyType::FROST_TROLL;
+    towerCompanions[6].name = "Tower Frost Troll";
+    towerCompanions[6].maxHealth = 280.0f;
+    towerCompanions[6].health = 280.0f;
+    towerCompanions[6].defense = 24.0f;
+    towerCompanions[6].damage = 15.0f;
+    towerCompanions[6].radius = 24.0f;
+    towerCompanions[6].formationAngle = 6.0f * (2.0f * PI / 7.0f);
+
+    bool shouldActivate = (currentTotem == TotemType::CONQUEROR_TOTEM);
+    for (auto& c : towerCompanions) {
+        c.active = shouldActivate;
+        c.attackCooldown = 0.0f;
+        c.attackVisualTimer = 0.0f;
+        c.invulnTimer = 0.0f;
+    }
+    towerSquadRespawnTimer = 0.0f;
+    RelocateTowerCompanions();
+}
+
+void Player::RelocateTowerCompanions() {
+    if (towerCompanions.empty()) {
+        InitTowerSquad();
+    }
+    float baseAngle = facingAngle * DEG2RAD;
+    for (size_t i = 0; i < towerCompanions.size(); ++i) {
+        float angle = baseAngle + (float)i * (2.0f * PI / (float)towerCompanions.size());
+        Vector2 offset = { cosf(angle) * 72.0f, sinf(angle) * 72.0f };
+        towerCompanions[i].position = Vector2Add(position, offset);
+        towerCompanions[i].attackCooldown = 0.0f;
+        towerCompanions[i].invulnTimer = 0.0f;
+        towerCompanions[i].attackVisualTimer = 0.0f;
+    }
+}
+
 void Player::SetTotem(TotemType newTotem) {
     currentTotem = newTotem;
     inventory.UnlockTotem(newTotem);
@@ -604,6 +720,30 @@ void Player::SetTotem(TotemType newTotem) {
         }
     } else {
         companion.active = false;
+    }
+    if (newTotem == TotemType::CONQUEROR_TOTEM) {
+        if (towerCompanions.empty()) {
+            InitTowerSquad();
+        } else {
+            int living = GetActiveTowerCompanionCount();
+            if (living == 0 && towerSquadRespawnTimer <= 0.0f) {
+                for (auto& c : towerCompanions) {
+                    c.active = true;
+                    c.health = c.maxHealth;
+                    c.invulnTimer = 0.5f;
+                }
+                towerSquadRespawnTimer = 0.0f;
+            } else {
+                for (auto& c : towerCompanions) {
+                    if (c.health > 0.0f) c.active = true;
+                }
+            }
+            RelocateTowerCompanions();
+        }
+    } else {
+        for (auto& c : towerCompanions) {
+            c.active = false;
+        }
     }
     defense = GetDefense();
     will = GetWill();
@@ -1015,6 +1155,53 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             }
         }
         ++it;
+    }
+
+    // Conqueror's Totem & Tower Gladiators Squad Update
+    if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+        if (towerCompanions.empty()) {
+            InitTowerSquad();
+        }
+        int activeCount = GetActiveTowerCompanionCount();
+        if (activeCount == 0) {
+            // All 7 companions are defeated
+            if (towerSquadRespawnTimer <= 0.0f) {
+                towerSquadRespawnTimer = 120.0f; // 2 minutes respawn countdown begins
+                particles.SpawnFloatingText(position, "CONQUEROR SQUAD FALLEN! (2m Respawn)", Color{ 255, 90, 90, 255 }, 24.0f);
+            } else {
+                towerSquadRespawnTimer -= dt;
+                if (towerSquadRespawnTimer <= 0.0f) {
+                    towerSquadRespawnTimer = 0.0f;
+                    for (auto& c : towerCompanions) {
+                        c.active = true;
+                        c.health = c.maxHealth;
+                        c.invulnTimer = 1.0f;
+                        c.attackCooldown = 0.0f;
+                        c.attackVisualTimer = 0.0f;
+                    }
+                    RelocateTowerCompanions();
+                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                    particles.SpawnSparks(position, Color{ 200, 80, 255, 255 }, 40, 220.0f);
+                    SoundFX::PlayParrySuccess();
+                }
+            }
+        } else {
+            // At least one companion is still alive: squad cannot respawn yet
+            towerSquadRespawnTimer = 0.0f;
+            for (auto& c : towerCompanions) {
+                if (!c.active) continue;
+                if (c.invulnTimer > 0.0f) c.invulnTimer -= dt;
+                if (c.attackCooldown > 0.0f) c.attackCooldown -= dt;
+                if (c.attackVisualTimer > 0.0f) c.attackVisualTimer -= dt;
+                if (c.health < c.maxHealth) {
+                    c.health = fminf(c.maxHealth, c.health + 2.5f * dt);
+                }
+            }
+        }
+    } else {
+        for (auto& c : towerCompanions) {
+            c.active = false;
+        }
     }
 
     // Crusader's Totem & Will of Atlas Update
@@ -2147,6 +2334,103 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
     position = map.ResolveCollision(position, nextPos, radius);
 
+}
+
+void Player::UpdateBackgroundTimers(float dt, ParticleSystem& particles) {
+    if (!IsAlive()) return;
+
+    if (lightCooldown > 0.0f) lightCooldown -= dt;
+    if (heavyCooldown > 0.0f) heavyCooldown -= dt;
+    if (parryCooldown > 0.0f) parryCooldown -= dt;
+    if (dashCooldown > 0.0f) dashCooldown -= dt;
+    if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
+    if (potionCooldown > 0.0f) potionCooldown -= dt;
+    if (armorSkillCooldown > 0.0f) armorSkillCooldown -= dt;
+    if (armorSkillActiveTimer > 0.0f) armorSkillActiveTimer -= dt;
+    if (elementalProjectileCooldown > 0.0f) elementalProjectileCooldown -= dt;
+    if (willOfAtlasCooldown > 0.0f) willOfAtlasCooldown -= dt;
+    if (willOfAtlasTimer > 0.0f) willOfAtlasTimer -= dt;
+    if (stoneskinTimer > 0.0f) stoneskinTimer -= dt;
+    if (glacialImmunityTimer > 0.0f) glacialImmunityTimer -= dt;
+    if (berserkerTimer > 0.0f) berserkerTimer -= dt;
+    if (grayHealthTimer > 0.0f) grayHealthTimer -= dt;
+    if (tranceTimer > 0.0f) tranceTimer -= dt;
+    timeSinceCombat += dt;
+
+    if (currentTotem == TotemType::CHAMPION_TOTEM && health < GetMaxHealth()) {
+        health = fminf(GetMaxHealth(), health + 2.0f * dt);
+    }
+    if (timeSinceCombat >= 4.0f && health < GetMaxHealth()) {
+        float regenRate = (currentTotem == TotemType::CHAMPION_TOTEM) ? 14.0f : 8.0f;
+        health = fminf(GetMaxHealth(), health + regenRate * dt);
+    }
+    if (stamina < maxStamina) {
+        stamina = fminf(maxStamina, stamina + GetStaminaRegenRate() * dt);
+    }
+
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        if (!companion.active) {
+            companion.respawnTimer -= dt;
+            if (companion.respawnTimer <= 0.0f) {
+                companion.active = true;
+                companion.health = companion.maxHealth;
+                companion.respawnTimer = 0.0f;
+                companion.invulnTimer = 0.5f;
+                RelocateCompanionToPlayer();
+                particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+            }
+        } else {
+            if (companion.invulnTimer > 0.0f) companion.invulnTimer -= dt;
+            if (companion.health < companion.maxHealth) {
+                companion.health = fminf(companion.maxHealth, companion.health + 4.0f * dt);
+            }
+        }
+    }
+
+    if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+        int activeCount = GetActiveTowerCompanionCount();
+        if (activeCount == 0) {
+            if (towerSquadRespawnTimer <= 0.0f) {
+                towerSquadRespawnTimer = 120.0f;
+            } else {
+                towerSquadRespawnTimer -= dt;
+                if (towerSquadRespawnTimer <= 0.0f) {
+                    towerSquadRespawnTimer = 0.0f;
+                    for (auto& c : towerCompanions) {
+                        c.active = true;
+                        c.health = c.maxHealth;
+                        c.invulnTimer = 1.0f;
+                    }
+                    RelocateTowerCompanions();
+                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                }
+            }
+        } else {
+            towerSquadRespawnTimer = 0.0f;
+            for (auto& c : towerCompanions) {
+                if (!c.active) continue;
+                if (c.invulnTimer > 0.0f) c.invulnTimer -= dt;
+                if (c.attackCooldown > 0.0f) c.attackCooldown -= dt;
+                if (c.health < c.maxHealth) {
+                    c.health = fminf(c.maxHealth, c.health + 2.5f * dt);
+                }
+            }
+        }
+    }
+
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        mistFairy.flutterTime += dt;
+        mistFairy.healOrbTimer -= dt;
+        if (mistFairy.healOrbTimer <= 0.0f) {
+            mistFairy.healOrbTimer = 14.0f;
+            MistHealingOrb orb;
+            orb.position = mistFairy.position;
+            orb.lifetime = 20.0f;
+            orb.healAmount = 30.0f;
+            orb.active = true;
+            mistHealingOrbs.push_back(orb);
+        }
+    }
 }
 
 

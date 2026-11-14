@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 12, 2026
-Branch: ver.0.0.1k
-Release Version: 0.0.1k
+Generated: November 14, 2026
+Branch: ver.0.0.1l
+Release Version: 0.0.1l
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -797,5 +797,33 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Passive Health Regeneration Surge (+14.0 HP/s out-of-combat, +2.0 HP/s continuous in-combat) counterbalanced by Withered Vitality (-70% incoming healing from external potions, drops, and kill-perks).
   * Combat Audio & Controls: Added metallic unsheathe audio (SoundFX::PlayEquipWeapon()) and attack state reset on hotbar swap. Enabled mouse-click weapon swapping on HUD hotbar dock cards with hover highlights.
   * Frost Revenant telegraph tuning: Melee cone windup extended from 0.50s to 0.62s for fair dodge reaction windows.
+
+================================================================================
+16. VERSION 0.0.1l MILESTONES (INCREMENTS 1 - 4)
+================================================================================
+- Apex Boss Gauntlet Overhaul & Attack Patterns (Increment 1):
+  * Overhauled all three Apex Gauntlet champions: Apex Remnant Zil (1,250 HP, +12 DEF, 85 Will), Apex Primordial Titan (1,850 HP, +16 DEF, 100 Will), Apex Berserker Troll Warlord (2,800 HP, +20 DEF, 110 Will).
+  * Added +50% Apex lethality damage multiplier across all melee and projectile attacks via isApexBoss flag in CollisionSystem.
+  * Rendered radiant crimson-gold aura (Color{ 255, 55, 75 }) and overhead APEX CHAMPION badge in EnemyRenderer.
+  * New Boss Patterns: Apex Zil Phase 4 Solar Cross-Cataclysm (4-way cardinal holy beam cross detonation), Apex Titan Phase 4 Molten Tremor Ring & Lava Geyser Eruption (230px shockwave + 3 secondary magma bolts), Apex Berserker Troll Warlord 3-phase rotational melee pattern (Blood Whirlwind, Glacial Cleave Cone, Earth Rupture Slam).
+  * Rebalanced Arena Bandages: drop chance reduced from 35% to 12%, max active reduced from 4 to 2, periodic dispenser timer lengthened from 18s to 45s, and removed free opening wave bandage.
+  * Champion's Totem routed exclusively to Apex Boss Gauntlet with buffed loot (+2500 Shingles, +75 Scraps, +10 Mist, +10 Shadow).
+- Conqueror's Totem & 7 Permanent Tower Companions (Increment 2):
+  * Added TotemType::CONQUEROR_TOTEM (8th attunable totem; TOTEM_COUNT = 9, ATTUNABLE_TOTEM_COUNT = 8).
+  * Granted on clearing standard Wave 25 of the Royal Combat Arena.
+  * Stats: +20% Defense, +40 Max HP, +25 Will, Imperial Purple heraldry ([185, 45, 120]).
+  * 7 Permanent Tower Companions (Slasher 80 HP / 8 DEF / 12 DMG, Brute 190 HP / 32 DEF / 16 DMG, Charger 65 HP / 12 DEF / 13 DMG, Archer 60 HP / 6 DEF / 11 DMG, Pyromancer 75 HP / 10 DEF / 12 DMG, Stone Golem 220 HP / 45 DEF / 14 DMG, Frost Troll 280 HP / 24 DEF / 15 DMG) with true enemy base HP and defense.
+  * Orbital Leash Behavior: 7-point circular formation orbiting within 72px of player, auto-leashing back if distance exceeds 420px.
+  * All-7-Must-Die 120-Second Squad Resurrection: individual fallen companions do not respawn while squadmates live; 2-minute timer only starts when all 7 have perished, reviving all 7 simultaneously at full HP with overhead countdown UI (SQUAD RESPAWN: Xm Ys).
+- World Progression Gates Behind Knight Lenon (Increment 3):
+  * Physically locked Western Archway Gate (Restless Mist Forest) and Northern Mountain Pass (Northern Crags) until player defeats Knight Lenon in courtyard spar (questPhase >= ZyphdenQuestPhase::VICTORIOUS), matching Eastern Quarry Archway.
+  * Dynamic warning prompts and royal decree screen shake feedback when attempting to enter locked gates.
+  * Gated fast-travel stages 4-7 in Game::ExecuteFastTravel.
+- Elemental Golem Respawn Cooldown & Real-Time Background Timers (Increment 3):
+  * Added 120s (2-minute) dormancy recharge timer upon Elemental Golem defeat at the Primordial Altar, displaying real-time countdown prompt [E] PRIMORDIAL ALTAR (DORMANT - Xm Ys).
+  * Real-Time Background Cooldown Architecture: implemented Game::UpdateBackgroundCooldowns and Player::UpdateBackgroundTimers so boss respawns, companion squad resurrection, skill/potion cooldowns, day/night cycles, and arena spawners continue ticking even while in Inventory, Bestiary, Map, Stash, or Controls modals.
+- Comprehensive Documentation & Version Update (Increment 4):
+  * Updated README.md, VERSIONS.md, documentation.md, and PROJECT_CONTEXT.txt reflecting all v0.0.1l additions.
+
 
 

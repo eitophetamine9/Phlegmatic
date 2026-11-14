@@ -85,6 +85,15 @@ inline TotemStats GetTotemStats(TotemType type) {
                 1.35f, 1.30f, 1.15f, 1.35f, 0.80f, 40.0f, 50.0f,
                 Color{ 245, 200, 60, 255 }
             };
+        case TotemType::CONQUEROR_TOTEM:
+            return {
+                "Conqueror's Totem",
+                "A monolithic obsidian standard forged in the crucible of the 25-Wave Royal Combat Arena. Summons an undying vanguard of 7 Tower gladiators who stick close and fight by your side. Companions retain 100% of their base HP and defense with lowered offensive strike power (~40%). If all 7 fall in battle, the squad reconstitutes after a 2-minute recovery period.",
+                "Summons 7 Tower Companions (100% HP/DEF, 40% DMG), +20% DEF, +40 Max HP, +25 Will",
+                "Squad Wipe: All 7 must perish before the 2-minute revival cycle begins",
+                1.0f, 1.20f, 1.0f, 1.0f, 1.0f, 25.0f, 40.0f,
+                Color{ 185, 45, 120, 255 }
+            };
         case TotemType::NONE:
         default:
             return {

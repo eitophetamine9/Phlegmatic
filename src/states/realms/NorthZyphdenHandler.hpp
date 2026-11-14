@@ -112,6 +112,22 @@ public:
         bossRematchCooldown = 0.0f;
     }
 
+    void TickCooldowns(float dt) {
+        if (bossRematchCooldown > 0.0f) {
+            bossRematchCooldown -= dt;
+            if (bossRematchCooldown < 0.0f) bossRematchCooldown = 0.0f;
+        }
+        if (exitCooldown > 0.0f) {
+            exitCooldown -= dt;
+            if (exitCooldown < 0.0f) exitCooldown = 0.0f;
+        }
+        for (auto& spawner : spawners) {
+            if (!spawner.isAlive && spawner.respawnTimer > 0.0f) {
+                spawner.respawnTimer -= dt;
+            }
+        }
+    }
+
 private:
     Campfire highlandCampfire;
     std::vector<NorthMobSpawner> spawners;

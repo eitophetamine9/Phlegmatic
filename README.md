@@ -63,21 +63,17 @@
 
 ---
 
-## Current Version: 0.0.1k
+## Current Version: 0.0.1l
 
 > [!NOTE]
-> Phlegmatic is currently on **Version 0.0.1k**, succeeding Version 0.0.1j.
+> Phlegmatic is currently on **Version 0.0.1l**, succeeding Version 0.0.1k.
 >
-> ### Version 0.0.1k Highlights
-> * **`[TAB]` Inventory, `[B]` Bestiary & Modal Fixes**: Restored `[TAB]` as Inventory (`[I]` alias preserved), fixed the `[M]` Realm Map instant-close regression, fixed Humoral Bestiary tab routing with a dedicated `[B]` shortcut, and enabled top-right HUD clicks in northern/eastern realms.
-> * **3-Slot Weapon Hotbar & Rebound Quick Belt**: Equip up to 3 weapons via Inventory `[SLOT 1/2/3]` controls and switch mid-combat using `[1]`, `[2]`, `[3]` with full JSON save persistence. Potions moved cleanly to `[H]` (Heal), `[4]` (Stoneskin), `[5]` (Glacial Thaw), and `[6]` (Berserker Brew).
-> * **Enlarged Vector-Icon HUD**: Upgraded bottom-center action slots (`58x62` / `64x68`) with procedural vector weapon/potion/armor skill icons and replaced the bottom-right box with an enlarged 3-Slot Weapon Hotbar Dock (`64x66` / `70x72` per slot).
-> * **GLSL 330 Multiplicative Day-Night Shader**: Replaced flat color washes with an offscreen `RenderTexture2D` multiplicative lightmap, inverse-square point-light shaders, Purkinje composite tone-mapping, and full realm emitter registration.
-> * **Combat & Balance Reworks**: Removed the stagger-on-every-hit execution loop (replacing Phlegmatic Core's stun with `3.0s` Chill); reworked **Twin Glacial Cleavers** (`4-stage Fury of Cleaves`), **Sun-Forged Claymore** (`2-stage Solar Cataclysm`), and **Storm Glaive** (`2-stage Tempest Cyclone`); revamped **Frostwarden** (`FROST NOVA`, `6.0s` `45 HP` `ICE WARD`, `30%` Cold Resist, `+20%` heavy poise); buffed the **Elemental Core Golem Companion** (`460 HP`, `55 DEF`, `0.55s` hit i-frames, `+4 HP/s` regen, `35s` respawn, cycling Slam/Bash/Spike patterns); and rebalanced stamina/speed across Bow, Daggers, **Shadowstrider** (`~+21%` net nimble speed), **Totem of Mist**, and **Totem of Insanity** (`+18%` speed) while keeping heavy armor pacing smooth.
-> * **Save, Bestiary, Map & Loadout Persistence**: Fully serialized Equipment Loadout presets (`[ I ]`, `[ II ]`, `[ III ]`) across game reboots with auto-saving on inventory close; expanded campfire capacity to 7 persisting the Permafrost Crypts bonfire; added **STAGE #7: PERMAFROST CRYPTS** with live waypoint and fast-travel on the Realm Map; persisted Lore Fragment XV (`frag_15`) and added **Frost Revenant** as Bestiary entry #12.
-> * **Champion's Totem (8th Sacred Relic, 7th Attunable)**: Earned by conquering the Royal Combat Arena (Wave 25 / Apex Gauntlet). Imbues colossal martial buffs (+35% DMG, +30% DEF, +15% Speed, +35% Stamina Regen, -20% CDs, +40 Will, +50 Max HP) and surged passive health regeneration (+14 HP/s out of combat, +2 HP/s in combat) counter-balanced by *Withered Vitality* (-70% incoming healing from external potions and drops).
-> * **Combat Tactility & QoL**: Added metallic unsheathe audio cues upon hotbar swapping, clickable HUD hotbar dock cards, smooth attack state clearing on weapon swap, and tuned Frost Revenant melee cone windup (`0.50s -> 0.62s`).
-> * **Text Hygiene & Punctuation**: Normalized all non-ASCII UI, modal, and dialogue punctuation cleanly for robust bitmap font rendering.
+> ### Version 0.0.1l Highlights
+> * **Apex Boss Gauntlet Overhaul**: Remnant Zil, Primordial Titan, and Berserker Troll in the Apex Gauntlet have been heavily buffed with boosted HP (up to 2,800), increased defense and poise, a +50% global damage multiplier, radiant crimson-gold champion auras, and new boss attack patterns (Zil Phase 4 *Solar Cross-Cataclysm*, Titan Phase 4 *Molten Tremor Ring & Lava Geysers*, and Berserker Troll 3-phase rotational melee pattern).
+> * **Conqueror's Totem & 7 Permanent Tower Companions**: Conquering standard Wave 25 now awards the **Conqueror's Totem** (8th attunable primal relic, +20% DEF, +40 Max HP, +25 Will), which commands up to 7 permanent tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy base HP and defense. All 7 companions must perish before a 2-minute squad resurrection countdown begins.
+> * **Champion's Totem Exclusivity**: The Champion's Totem (+35% DMG, +30% DEF, +14 HP/s passive regen) is now exclusively awarded as the ultimate prize for clearing the Apex Boss Gauntlet. Arena adhesive bandage spawns have also been nerfed (12% drop rate, max 2 active, 45s periodic dispenser).
+> * **World Progression Gating Behind Knight Lenon**: The Western Archway Gate (Restless Mist Forest) and Northern Mountain Pass (Northern Crags) are now locked until Captain Lenon is defeated in the Zyphden courtyard spar, matching the Eastern Quarry Archway.
+> * **Elemental Golem Respawn Cooldown & Real-Time Background Cooldowns**: Defeating the Primordial Titan at the Quarry altar now triggers a 120-second dormancy cooldown before it can be summoned again. Boss respawn timers, companion resurrection timers, player skill and potion cooldowns, day/night cycles, and arena spawners now continue ticking in real-time even while inside inventory, bestiary, or map modals.
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 

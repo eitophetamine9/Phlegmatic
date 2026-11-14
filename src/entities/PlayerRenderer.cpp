@@ -1,6 +1,7 @@
 #include "PlayerRenderer.hpp"
 
 #include "Player.hpp"
+#include "Enemy.hpp"
 
 #include "../rendering/AssetManager.hpp"
 
@@ -1027,6 +1028,65 @@ void PlayerRenderer::Draw(const Player& player) {
         float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
         DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
         DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
+    }
+
+    // Friendly Tower Companions Squad (Conqueror's Totem: up to 7 gladiators)
+    if (player.GetTotem() == TotemType::CONQUEROR_TOTEM) {
+        const auto& squad = player.GetTowerCompanions();
+        for (const auto& comp : squad) {
+            if (!comp.active || comp.health <= 0.0f) continue;
+
+            // Ground shadow
+            DrawEllipse((int)comp.position.x, (int)(comp.position.y + comp.radius * 0.7f), comp.radius * 0.85f, comp.radius * 0.4f, Color{ 10, 10, 15, 120 });
+
+            // Unit base silhouette color
+            Color unitCol = Color{ 48, 50, 58, 255 };
+            switch (comp.unitType) {
+                case EnemyType::SLASHER: unitCol = Color{ 65, 32, 42, 255 }; break;
+                case EnemyType::BRUTE: unitCol = Color{ 45, 45, 54, 255 }; break;
+                case EnemyType::CHARGER: unitCol = Color{ 38, 44, 62, 255 }; break;
+                case EnemyType::ARCHER: unitCol = Color{ 38, 54, 44, 255 }; break;
+                case EnemyType::PYROMANCER: unitCol = Color{ 52, 32, 68, 255 }; break;
+                case EnemyType::ORE_GOLEM: unitCol = Color{ 58, 52, 46, 255 }; break;
+                case EnemyType::FROST_TROLL: unitCol = Color{ 42, 56, 68, 255 }; break;
+                default: break;
+            }
+
+            DrawCircleV(comp.position, comp.radius * 0.85f, unitCol);
+
+            // Imperial Conqueror purple and gold heraldic crest
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 215, 75, 160, 230 });
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius - 2.0f, Color{ 255, 215, 80, 180 });
+
+            // Active attack flash
+            if (comp.attackVisualTimer > 0.0f) {
+                DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 5.0f, Color{ 255, 235, 120, 240 });
+            }
+
+            // Overhead health bar
+            float barW = comp.radius * 1.6f;
+            float barH = 3.5f;
+            float barX = comp.position.x - barW * 0.5f;
+            float barY = comp.position.y - comp.radius - 7.0f;
+            DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
+            float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+            DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 215, 90, 175, 255 });
+            DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 45, 28, 52, 200 });
+        }
+
+        // Squad wiped out: show overhead 2-minute respawn timer near player
+        if (player.GetActiveTowerCompanionCount() == 0 && player.GetTowerSquadRespawnTimer() > 0.0f) {
+            int remainingSec = (int)ceilf(player.GetTowerSquadRespawnTimer());
+            int min = remainingSec / 60;
+            int sec = remainingSec % 60;
+            char timerBuf[64];
+            snprintf(timerBuf, sizeof(timerBuf), "SQUAD RESPAWN: %dm %02ds", min, sec);
+            int textW = FontManager::MeasureGameText(timerBuf, 11, GameFont::BODY);
+            Vector2 pPos = player.GetPosition();
+            DrawRectangle((int)(pPos.x - textW * 0.5f - 6), (int)(pPos.y - player.GetRadius() - 24), textW + 12, 16, Color{ 20, 12, 25, 210 });
+            DrawRectangleLines((int)(pPos.x - textW * 0.5f - 6), (int)(pPos.y - player.GetRadius() - 24), textW + 12, 16, Color{ 215, 80, 160, 220 });
+            FontManager::DrawGameText(timerBuf, pPos.x - textW * 0.5f, pPos.y - player.GetRadius() - 22, 11, Color{ 255, 215, 120, 255 }, GameFont::BODY);
+        }
     }
 
     // Friendly Mist Fairy Companion (Totem of Mist)

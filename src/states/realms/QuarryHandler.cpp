@@ -65,9 +65,7 @@ void QuarryHandler::Update(
         entryBannerTimer -= dt;
     }
 
-    if (doorCooldown > 0.0f) {
-        doorCooldown -= dt;
-    }
+    TickCooldowns(dt);
 
     // Player Death & Respawn
     if (!player.IsAlive()) {
@@ -174,7 +172,8 @@ void QuarryHandler::Update(
                 }
             } else if (it->GetType() == EnemyType::ELEMENTAL_GOLEM) {
                 elementalBossDefeated = true;
-                elementalBossSummoned = false; // Allow re-awakening!
+                elementalBossSummoned = false; // Allow re-awakening after cooldown!
+                elementalBossRespawnTimer = 120.0f; // 2-minute respawn cooldown before altar can be awakened again
 
                 // 25% drop chance for Elemental Core Totem
                 int roll = rand() % 100;
@@ -260,6 +259,14 @@ void QuarryHandler::Update(
 
         if (bossAlive) {
             particles.SpawnFloatingText(playerPos, "The Elemental Titan is already active in the arena!", Color{ 255, 120, 120, 255 }, 20.0f);
+            SoundFX::PlayHitImpact();
+        } else if (elementalBossRespawnTimer > 0.0f) {
+            int remSec = (int)ceilf(elementalBossRespawnTimer);
+            int m = remSec / 60;
+            int s = remSec % 60;
+            char cdBuf[128];
+            snprintf(cdBuf, sizeof(cdBuf), "The Primordial Altar is dormant! Recharging in %dm %02ds", m, s);
+            particles.SpawnFloatingText(playerPos, cdBuf, Color{ 255, 160, 80, 255 }, 20.0f);
             SoundFX::PlayHitImpact();
         } else {
             int unlockedCount = player.GetInventory().GetDiscoveredFragmentCount();
@@ -363,6 +370,13 @@ void QuarryHandler::Render(
         }
         if (bossAlive) {
             FontManager::DrawGameTextShadow("[E] PRIMORDIAL ALTAR (TITAN ENGAGED)", 880, 205, 12, Color{ 255, 110, 110, 240 });
+        } else if (elementalBossRespawnTimer > 0.0f) {
+            int remSec = (int)ceilf(elementalBossRespawnTimer);
+            int m = remSec / 60;
+            int s = remSec % 60;
+            char cdBuf[96];
+            snprintf(cdBuf, sizeof(cdBuf), "[E] PRIMORDIAL ALTAR (DORMANT - %dm %02ds)", m, s);
+            FontManager::DrawGameTextShadow(cdBuf, 840, 205, 12, Color{ 255, 160, 80, 240 });
         } else {
             int unlockedCount = player.GetInventory().GetDiscoveredFragmentCount();
             if (unlockedCount >= 10) {
