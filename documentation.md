@@ -185,8 +185,13 @@ The stone capital of the gale winds features cobblestone plazas, artisan worksho
 
 Stationed in the northern artisan quarter (`[E]` at the anvil):
 
-* **Weapon Forging & Tier Upgrades**: Upgrade unlocked weapons (`+1 Refined`, `+2 Masterwork`, or `Consecrated`) using Silver Shingles, Ore Scraps, Mist Essence, Shadow Essence, and Frost Shards.
-* **Masterwork Weapons & Armor Matrix**: Craft late-game armaments (`Twin Glacial Cleavers`, `Sun-Forged Claymore`, `Storm Glaive`, `Windrunner's Recurve`) and modular 3-piece armor sets (`Crusader Plate`, `Vanguard Bastion`, `Shadowstrider`, `Basalt Golem`, `Frostwarden Attire`).
+* **4 Dedicated Category Tabs**: Organizes the smithy into four specialized departments:
+  * `[1] VANGUARD WEAPONS (9)`: Standard and refined martial armaments across 3 pages.
+  * `[2] SACRED WEAPONS (2)`: Consecrated armaments including **Truth Seeker** (Holy Sunblade) and **Sovereign's Scepter** (Restorative Command Rod).
+  * `[3] PRIMAL TOTEMS (8)`: Relic empowerment and evolution across all 8 totems (Sanity, Insanity, Mist, Crusader, Elemental Core, Phlegmatic Core, Champion, Commander).
+  * `[4] ARMOR FORGE (15)`: Full modular 3-piece sets across Scrap Iron, Basalt Golem, Shadowstrider, Vanguard Bastion, and Frostwarden Attire.
+* **Sovereign's Scepter Crafting & Upgrades**: Forged from 14 Ore Scraps, 2 Mist Essences, 2 Shadow Essences, and 120 Shingles. Can be upgraded to Tier +1 (120 Shingles) and Masterwork Tier +2 (240 Shingles) to amplify summon pulse healing and sanctuary radiance.
+* **Primal Totem Leveling & Evolution**: Upgrade discovered relics from Tier I (Baseline) to Tier II (Empowered) and Tier III (Masterwork / Evolved Titan) using Shingles, Ore Scraps, and rare essences. Elemental Core Totem evolves into the colossal Commanding Elemental Golem titan with 3 mini golem sub-minions at Tier III.
 
 ### Hearthside Tavern, Provisions & Alchemy Workshop
 

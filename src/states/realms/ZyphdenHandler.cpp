@@ -2829,34 +2829,44 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     std::string mistStr = std::to_string(playerMist) + " Mist Ess";
     FontManager::DrawGameTextShadow(mistStr, (int)mistBadgeX + 28, (int)badgeY + 6, 12, Color{ 180, 250, 235, 255 });
 
-    // Category Tabs: [1] VANGUARD WEAPONS (8) | [2] SACRED RELICS (1) | [3] ARMOR FORGE (9)
-    if (IsKeyPressed(KEY_ONE)) { forgeTab = 0; weaponForgePage = 0; armorForgePage = 0; }
-    if (IsKeyPressed(KEY_TWO)) { forgeTab = 1; weaponForgePage = 0; armorForgePage = 0; }
-    if (IsKeyPressed(KEY_THREE)) { forgeTab = 2; weaponForgePage = 0; armorForgePage = 0; }
+    // Category Tabs: [1] VANGUARD WEAPONS (9) | [2] SACRED WEAPONS (2) | [3] PRIMAL TOTEMS (8) | [4] ARMOR FORGE (15)
+    if (IsKeyPressed(KEY_ONE)) { forgeTab = 0; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; }
+    if (IsKeyPressed(KEY_TWO)) { forgeTab = 1; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; }
+    if (IsKeyPressed(KEY_THREE)) { forgeTab = 2; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; }
+    if (IsKeyPressed(KEY_FOUR)) { forgeTab = 3; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; }
 
-    Rectangle tab1Rec = { modalX + 32.0f, modalY + 76.0f, 220.0f, 28.0f };
-    Rectangle tab2Rec = { modalX + 260.0f, modalY + 76.0f, 190.0f, 28.0f };
-    Rectangle tab3Rec = { modalX + 458.0f, modalY + 76.0f, 200.0f, 28.0f };
+    float tabW = 212.0f;
+    float tabGap = 14.0f;
+    Rectangle tab1Rec = { modalX + 32.0f, modalY + 76.0f, tabW, 28.0f };
+    Rectangle tab2Rec = { modalX + 32.0f + (tabW + tabGap), modalY + 76.0f, tabW, 28.0f };
+    Rectangle tab3Rec = { modalX + 32.0f + 2.0f * (tabW + tabGap), modalY + 76.0f, tabW, 28.0f };
+    Rectangle tab4Rec = { modalX + 32.0f + 3.0f * (tabW + tabGap), modalY + 76.0f, tabW, 28.0f };
 
     bool isT1Hov = CheckCollisionPointRec(mousePos, tab1Rec);
     bool isT2Hov = CheckCollisionPointRec(mousePos, tab2Rec);
     bool isT3Hov = CheckCollisionPointRec(mousePos, tab3Rec);
+    bool isT4Hov = CheckCollisionPointRec(mousePos, tab4Rec);
 
-    if (isT1Hov && isMousePressed) { forgeTab = 0; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
-    if (isT2Hov && isMousePressed) { forgeTab = 1; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
-    if (isT3Hov && isMousePressed) { forgeTab = 2; weaponForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
+    if (isT1Hov && isMousePressed) { forgeTab = 0; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
+    if (isT2Hov && isMousePressed) { forgeTab = 1; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
+    if (isT3Hov && isMousePressed) { forgeTab = 2; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
+    if (isT4Hov && isMousePressed) { forgeTab = 3; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; SoundFX::PlayButtonClick(); }
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (9)", (int)tab1Rec.x + 12, (int)tab1Rec.y + 7, 13, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (9)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 7, 12, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[2] SACRED RELICS (1)", (int)tab2Rec.x + 14, (int)tab2Rec.y + 7, 13, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[2] SACRED WEAPONS (2)", (int)tab2Rec.x + 14, (int)tab2Rec.y + 7, 12, (forgeTab == 1) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 40, 56, 82, 255 } : (isT3Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab3Rec, 0.25f, 4, (forgeTab == 2) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[3] ARMOR FORGE (15)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 13, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[3] PRIMAL TOTEMS (8)", (int)tab3Rec.x + 16, (int)tab3Rec.y + 7, 12, (forgeTab == 2) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+
+    DrawRectangleRounded(tab4Rec, 0.25f, 4, (forgeTab == 3) ? Color{ 40, 56, 82, 255 } : (isT4Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
+    DrawRectangleRoundedLines(tab4Rec, 0.25f, 4, (forgeTab == 3) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
+    FontManager::DrawGameTextShadow("[4] ARMOR FORGE (15)", (int)tab4Rec.x + 18, (int)tab4Rec.y + 7, 12, (forgeTab == 3) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     // Divider Line
     DrawLine((int)modalX + 28, (int)modalY + 112, (int)(modalX + modalW - 28), (int)modalY + 112, Color{ 70, 95, 135, 160 });
@@ -2864,8 +2874,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     int currentTabTotalPages = 1;
     int currentTabCurrentPage = 0;
 
-    if (forgeTab == 2) {
-        // TAB 3: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT, SHADOWSTRIDER, VANGUARD, FROSTWARDEN)
+    if (forgeTab == 3) {
+        // TAB 4: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT, SHADOWSTRIDER, VANGUARD, FROSTWARDEN)
         struct ArmorCraftRecipe {
             int category; // 0 = Helm, 1 = Chest, 2 = Legs
             int id;
@@ -3007,6 +3017,281 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 FontManager::DrawGameTextShadow(errMsg, (int)btnRec.x + (int)(btnRec.width - bw) / 2, (int)btnRec.y + 7, 12, Color{ 220, 110, 110, 220 });
             }
         }
+    } else if (forgeTab == 2) {
+        // TAB 3: PRIMAL TOTEMS (8) (PAGINATED 2x2: 4 TOTEMS PER PAGE)
+        struct TotemForgeRecipe {
+            TotemType type;
+            const char* name;
+            const char* subTitle;
+            int costShinglesT1;
+            int costScrapsT1;
+            int costShinglesT2;
+            int costScrapsT2;
+            int mistCostT2;
+            int shadowCostT2;
+            const char* perkT1;
+            const char* perkT2;
+            Color accentColor;
+            const char* discoveryHint;
+        };
+
+        TotemForgeRecipe totemRecipes[8] = {
+            {
+                TotemType::TOTEM_SANITY,
+                "Totem of Sanity",
+                "HUMORAL COGNITION",
+                120, 3, 240, 6, 0, 0,
+                "+22% Overall DMG (+7%), +25 Will, +5% Stamina Regen",
+                "+30% Overall DMG (+15%), +40 Will, +10% Stamina Regen, +20 Max HP",
+                Color{ 100, 235, 180, 255 },
+                "Awakening Pedestal in Ruined Castle"
+            },
+            {
+                TotemType::TOTEM_INSANITY,
+                "Totem of Insanity",
+                "BERSERKER FURY",
+                140, 4, 260, 8, 0, 2,
+                "+80% DMG (+160% below 40% HP), +22% Spd, +30% Atk Spd, -45% DEF",
+                "+100% DMG (+200% below 40% HP), +26% Spd, +35% Atk Spd, -40% DEF",
+                Color{ 255, 45, 60, 255 },
+                "Northern Crags - Berserker Troll Boss drop"
+            },
+            {
+                TotemType::TOTEM_MIST,
+                "Totem of Mist",
+                "WOODLAND VAPOR",
+                130, 3, 250, 6, 2, 0,
+                "Empowered Fairy (+28% Crit, +50% Crit Dmg, 12s Orbs +45 HP), +15% Stamina",
+                "Arch-Mist Fairy (+38% Crit, +70% Crit Dmg, 8s Orbs +60 HP, NO PENALTIES)",
+                Color{ 110, 240, 225, 255 },
+                "Restless Mist Forest - Gale Archer Boss drop"
+            },
+            {
+                TotemType::CRUSADER_TOTEM,
+                "Crusader's Totem",
+                "FORTRESS STANDARD",
+                150, 4, 270, 8, 0, 0,
+                "+32% DEF, +50 Max HP, +22% ATK | Will of Atlas: 5s Invuln (<20% HP, 45s CD)",
+                "+40% DEF, +70 Max HP, +28% ATK | Will of Atlas: 6s Invuln (<20% HP, 30s CD)",
+                Color{ 255, 215, 80, 255 },
+                "Zyphden - Spar with Knight Lenon drop"
+            },
+            {
+                TotemType::ELEMENTAL_CORE_TOTEM,
+                "Elemental Core Totem",
+                "PRIMORDIAL TITAN HEART",
+                160, 5, 300, 10, 2, 2,
+                "Empowered Mini Golem (600 HP, 65 DEF, +6/s Regen), +32% DEF, Bearer Bolt",
+                "EVOLVED TITAN: Commanding Golem (920 HP, 75 DEF) + SUMMONS 3 MINI GOLEMS!",
+                Color{ 255, 140, 45, 255 },
+                "Quarry Depths - Elemental Golem Boss drop"
+            },
+            {
+                TotemType::TOTEM_PHLEGMATIC_CORE,
+                "Totem of Phlegmatic Core",
+                "GLACIAL STOICISM",
+                140, 4, 260, 8, 0, 0,
+                "+50 Max HP, +35 Will, -90% Knockback, 35% Gray Health, Chill On Hit",
+                "+75 Max HP, +50 Will, COMPLETE KNOCKBACK IMMUNITY, 50% Gray Health",
+                Color{ 140, 220, 255, 255 },
+                "Northern Crags - Altar of Cold Solitude / Torvald Bounty"
+            },
+            {
+                TotemType::CHAMPION_TOTEM,
+                "Champion's Totem",
+                "WARLORD EFFIGY",
+                160, 5, 300, 10, 0, 0,
+                "+45% DMG, +38% DEF, +18% Spd, -25% CDs, +18 HP/s Regen (+4 combat)",
+                "+55% DMG, +45% DEF, +22% Spd, -30% CDs, +22 HP/s Regen (+6 combat)",
+                Color{ 245, 200, 60, 255 },
+                "Royal Combat Arena - Apex Boss Gauntlet Victory"
+            },
+            {
+                TotemType::COMMANDER_TOTEM,
+                "Commander's Totem",
+                "LEGION STANDARD",
+                160, 5, 300, 10, 2, 2,
+                "7 Veteran Gladiators (115% HP/DEF, 55% DMG), 90s squad resurrection",
+                "ROYAL VANGUARD: 7 Imperial Gladiators (135% HP/DEF, 70% DMG, +15% Spd, 60s Revive)",
+                Color{ 185, 45, 120, 255 },
+                "Royal Combat Arena - Standard Wave 25 Victory"
+            }
+        };
+
+        int totalTotems = 8;
+        int totemsPerPage = 4;
+        int totalTotemPages = (totalTotems + totemsPerPage - 1) / totemsPerPage;
+        if (totemForgePage < 0) totemForgePage = 0;
+        if (totemForgePage >= totalTotemPages) totemForgePage = totalTotemPages - 1;
+
+        if (IsKeyPressed(KEY_LEFT) || IsKeyPressed(KEY_A)) {
+            if (totemForgePage > 0) {
+                totemForgePage--;
+                SoundFX::PlayButtonClick();
+            }
+        }
+        if (IsKeyPressed(KEY_RIGHT) || IsKeyPressed(KEY_D)) {
+            if (totemForgePage < totalTotemPages - 1) {
+                totemForgePage++;
+                SoundFX::PlayButtonClick();
+            }
+        }
+
+        currentTabTotalPages = totalTotemPages;
+        currentTabCurrentPage = totemForgePage;
+
+        int startIndex = totemForgePage * totemsPerPage;
+        int endIndex = std::min(startIndex + totemsPerPage, totalTotems);
+
+        for (int i = startIndex; i < endIndex; ++i) {
+            int slot = i - startIndex;
+            int col = slot % 2;
+            int row = slot / 2;
+            float cardX = modalX + 32.0f + (float)col * 456.0f;
+            float cardY = modalY + 122.0f + (float)row * 224.0f;
+            float cardW = 436.0f;
+            float cardH = 210.0f;
+
+            Rectangle cardRec = { cardX, cardY, cardW, cardH };
+            bool isHov = CheckCollisionPointRec(mousePos, cardRec);
+
+            bool isOwned = player.GetInventory().HasTotem(totemRecipes[i].type);
+            int currentTier = player.GetInventory().GetTotemUpgrade(totemRecipes[i].type);
+            bool isMax = isOwned && (currentTier >= 2);
+            int shingleCost = (currentTier == 0) ? totemRecipes[i].costShinglesT1 : totemRecipes[i].costShinglesT2;
+            int scrapCost = (currentTier == 0) ? totemRecipes[i].costScrapsT1 : totemRecipes[i].costScrapsT2;
+            int mistCost = (currentTier == 1) ? totemRecipes[i].mistCostT2 : 0;
+            int shadowCost = (currentTier == 1) ? totemRecipes[i].shadowCostT2 : 0;
+
+            bool canAffordUpgrade = isOwned &&
+                                    (playerShingles >= shingleCost) &&
+                                    (playerScraps >= scrapCost) &&
+                                    (playerMist >= mistCost) &&
+                                    (playerShadow >= shadowCost);
+
+            // Card Background
+            DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
+            DrawRectangleRoundedLines(cardRec, 0.08f, 6, isMax ? Color{ 255, 215, 80, 220 } : (isHov ? totemRecipes[i].accentColor : Color{ 55, 75, 105, 180 }));
+
+            // Category Tag
+            FontManager::DrawGameTextShadow(totemRecipes[i].subTitle, (int)cardX + 18, (int)cardY + 14, 13, Color{ 160, 195, 235, 220 });
+
+            // Totem Title
+            FontManager::DrawGameTextShadow(totemRecipes[i].name, (int)cardX + 18, (int)cardY + 32, 17, Color{ 255, 255, 255, 255 }, Color{ 10, 12, 18, 240 }, 2, GameFont::TITLE);
+
+            // Action Button coordinates
+            float btnW = cardW - 32.0f;
+            float btnH = 30.0f;
+            float btnX = cardX + 16.0f;
+            float btnY = cardY + cardH - btnH - 8.0f;
+            Rectangle btnRec = { btnX, btnY, btnW, btnH };
+            bool isBtnHov = CheckCollisionPointRec(mousePos, btnRec);
+
+            if (!isOwned) {
+                // Not yet discovered
+                std::string badge = "[DISCOVERY REQUIRED]";
+                int tbw = FontManager::MeasureGameText(badge, 13, GameFont::BODY);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 22.0f }, 0.25f, 4, Color{ 25, 28, 38, 220 });
+                FontManager::DrawGameTextShadow(badge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 13, Color{ 140, 155, 180, 200 });
+
+                FontManager::DrawGameTextShadow("Relic has not yet been discovered in the realm.", (int)cardX + 18, (int)cardY + 54, 13, Color{ 160, 175, 195, 200 });
+                std::string reqLine = "LOCATION: " + std::string(totemRecipes[i].discoveryHint);
+                FontManager::DrawGameTextShadow(reqLine.c_str(), (int)cardX + 18, (int)cardY + 84, 13, Color{ 230, 150, 70, 220 });
+
+                DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 20, 22, 28, 180 });
+                DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 48, 54, 68, 180 });
+                const char* lockLabel = "LOCKED (UNATTUNED)";
+                int bw = FontManager::MeasureGameText(lockLabel, 13, GameFont::BODY);
+                FontManager::DrawGameTextShadow(lockLabel, (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 130, 140, 155, 190 });
+            } else {
+                // Relic is OWNED
+                std::string tierBadge;
+                Color tierCol;
+                if (currentTier == 0) {
+                    tierBadge = "[TIER I: BASELINE]";
+                    tierCol = Color{ 160, 180, 205, 220 };
+                } else if (currentTier == 1) {
+                    tierBadge = "[TIER II: EMPOWERED]";
+                    tierCol = Color{ 120, 215, 255, 255 };
+                } else {
+                    tierBadge = (totemRecipes[i].type == TotemType::ELEMENTAL_CORE_TOTEM) ? "[TIER III: EVOLVED TITAN]" : "[TIER III: MASTERWORK]";
+                    tierCol = Color{ 255, 215, 80, 255 };
+                }
+
+                int tbw = FontManager::MeasureGameText(tierBadge, 13, GameFont::BODY);
+                DrawRectangleRounded(Rectangle{ cardX + cardW - (float)tbw - 24.0f, cardY + 12.0f, (float)tbw + 14.0f, 22.0f }, 0.25f, 4, Color{ 20, 30, 45, 220 });
+                FontManager::DrawGameTextShadow(tierBadge.c_str(), (int)(cardX + cardW - (float)tbw - 17.0f), (int)cardY + 15, 13, tierCol);
+
+                TotemStats currentStats = GetTotemStats(totemRecipes[i].type, currentTier);
+                std::string curBuffStr = "Current: " + currentStats.buffText;
+                if (curBuffStr.length() > 50) curBuffStr = curBuffStr.substr(0, 48) + "...";
+                FontManager::DrawGameTextShadow(curBuffStr.c_str(), (int)cardX + 18, (int)cardY + 54, 13, Color{ 100, 245, 190, 240 });
+
+                FontManager::DrawGameTextShadow("NEXT FORGE UPGRADE:", (int)cardX + 18, (int)cardY + 76, 13, Color{ 255, 215, 80, 240 });
+
+                if (isMax) {
+                    FontManager::DrawGameTextShadow("Max primal mastery awakened. Relic is fully empowered.", (int)cardX + 18, (int)cardY + 98, 13, Color{ 255, 220, 100, 240 });
+                } else {
+                    const char* nextPerk = (currentTier == 0) ? totemRecipes[i].perkT1 : totemRecipes[i].perkT2;
+                    FontManager::DrawGameTextShadow(nextPerk, (int)cardX + 18, (int)cardY + 98, 13, Color{ 160, 235, 255, 240 });
+
+                    std::string costStr = "Cost: " + std::to_string(shingleCost) + " Shingles, " + std::to_string(scrapCost) + " Scraps";
+                    if (mistCost > 0) costStr += ", " + std::to_string(mistCost) + " Mist";
+                    if (shadowCost > 0) costStr += ", " + std::to_string(shadowCost) + " Shadow";
+                    FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 18, (int)cardY + 118, 13, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
+                }
+
+                if (isMax) {
+                    DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 35, 45, 60, 200 });
+                    DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 255, 215, 80, 180 });
+                    int bw = FontManager::MeasureGameText("MAX TIER AWAKENED", 13, GameFont::BODY);
+                    FontManager::DrawGameTextShadow("MAX TIER AWAKENED", (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 255, 220, 100, 255 });
+                } else {
+                    std::string btnLabel;
+                    if (currentTier == 0) {
+                        btnLabel = "UPGRADE TO TIER II (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                    } else {
+                        if (totemRecipes[i].type == TotemType::ELEMENTAL_CORE_TOTEM) {
+                            btnLabel = "EVOLVE TITAN (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                        } else {
+                            btnLabel = "AWAKEN TIER III (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                        }
+                    }
+
+                    if (canAffordUpgrade) {
+                        Color btnBg = isBtnHov ? Color{ 55, 80, 125, 255 } : Color{ 32, 48, 76, 240 };
+                        Color btnBorder = isBtnHov ? Color{ 255, 220, 95, 255 } : Color{ 80, 130, 200, 220 };
+                        DrawRectangleRounded(btnRec, 0.2f, 4, btnBg);
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, btnBorder);
+                        int bw = FontManager::MeasureGameText(btnLabel, 13, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(btnLabel.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 255, 255, 255, 255 });
+
+                        if (isBtnHov && isMousePressed) {
+                            player.GetInventory().SpendShingles(shingleCost);
+                            player.GetInventory().SpendOreScraps(scrapCost);
+                            if (mistCost > 0) player.GetInventory().SpendEssenceOfMist(mistCost);
+                            if (shadowCost > 0) player.GetInventory().SpendShadowEssence(shadowCost);
+                            player.GetInventory().UpgradeTotem(totemRecipes[i].type);
+                            if (player.GetTotem() == totemRecipes[i].type) {
+                                player.SetTotem(totemRecipes[i].type);
+                            }
+                            SoundFX::PlayCrusaderClash();
+                            SoundFX::PlayCoinPickup();
+                            particles.SpawnSparks(player.GetPosition(), totemRecipes[i].accentColor, 35, 220.0f);
+                            particles.AddScreenShake(4.5f, 0.18f);
+                            std::string feedback = std::string(totemRecipes[i].name) + " Upgraded!";
+                            particles.SpawnFloatingText(player.GetPosition(), feedback, Color{ 255, 220, 90, 255 }, 22.0f);
+                        }
+                    } else {
+                        DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
+                        DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
+                        std::string needStr = "INSUFFICIENT MATERIALS";
+                        int bw = FontManager::MeasureGameText(needStr, 12, GameFont::BODY);
+                        FontManager::DrawGameTextShadow(needStr.c_str(), (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 12, Color{ 220, 110, 110, 220 });
+                    }
+                }
+            }
+        }
     } else {
         struct ForgeEntry {
             WeaponType type;
@@ -3146,6 +3431,18 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     Color{ 140, 220, 255, 255 },
                     0, 0,
                     "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
+                },
+                {
+                    WeaponType::SOVEREIGN_SCEPTER,
+                    "Sovereign's Scepter",
+                    "COMMAND SCEPTER",
+                    2, 120, 240,
+                    "Radiant Grace +1 (+30 Minion Pulse Heal / +95 AoE Sanctuary)",
+                    "Sanctuary Masterwork +2 (+38 Pulse Heal / +120 AoE Sanctuary)",
+                    Color{ 255, 225, 110, 255 },
+                    14, 120,
+                    "Sacred command rod. Pure minion healing tool (+24 Pulse / +75 AoE).",
+                    2, 2
                 }
             };
         }
@@ -3236,11 +3533,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     FontManager::DrawGameTextShadow("FORGE CRAFTING COST:", (int)cardX + 18, (int)cardY + 80, 13, Color{ 255, 215, 80, 240 });
 
                     std::string costText = "";
-                    if (entries[i].craftMistCost > 0 || entries[i].craftShadowCost > 0) {
-                        costText = std::to_string(entries[i].craftMistCost) + " Mist Ess  +  " + std::to_string(entries[i].craftShadowCost) + " Shadow Ess  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
-                    } else {
-                        costText = std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  " + std::to_string(entries[i].craftShingleCost) + " Shingles";
-                    }
+                    if (entries[i].craftScrapCost > 0) costText += std::to_string(entries[i].craftScrapCost) + " Ore Scraps  +  ";
+                    if (entries[i].craftMistCost > 0) costText += std::to_string(entries[i].craftMistCost) + " Mist Ess  +  ";
+                    if (entries[i].craftShadowCost > 0) costText += std::to_string(entries[i].craftShadowCost) + " Shadow Ess  +  ";
+                    costText += std::to_string(entries[i].craftShingleCost) + " Shingles";
                     Color costCol = canAffordCraft ? Color{ 120, 255, 170, 255 } : Color{ 245, 110, 110, 255 };
                     FontManager::DrawGameTextShadow(costText.c_str(), (int)cardX + 18, (int)cardY + 102, 13, costCol);
 
@@ -3380,12 +3676,14 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
         if (isPrevHov && isMousePressed) {
             if (forgeTab == 0 && weaponForgePage > 0) weaponForgePage--;
-            else if (forgeTab == 2 && armorForgePage > 0) armorForgePage--;
+            else if (forgeTab == 2 && totemForgePage > 0) totemForgePage--;
+            else if (forgeTab == 3 && armorForgePage > 0) armorForgePage--;
             SoundFX::PlayButtonClick();
         }
         if (isNextHov && isMousePressed) {
             if (forgeTab == 0 && weaponForgePage < currentTabTotalPages - 1) weaponForgePage++;
-            else if (forgeTab == 2 && armorForgePage < currentTabTotalPages - 1) armorForgePage++;
+            else if (forgeTab == 2 && totemForgePage < currentTabTotalPages - 1) totemForgePage++;
+            else if (forgeTab == 3 && armorForgePage < currentTabTotalPages - 1) armorForgePage++;
             SoundFX::PlayButtonClick();
         }
 

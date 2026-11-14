@@ -1838,7 +1838,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                     DrawRectangleRounded(upgRec, 0.25f, 3, canUpg ? (isUpgHov ? Color{ 50, 140, 80, 255 } : Color{ 30, 95, 55, 230 }) : Color{ 30, 34, 44, 200 });
                     DrawRectangleRoundedLines(upgRec, 0.25f, 3, canUpg ? (isUpgHov ? Color{ 140, 255, 180, 255 } : Color{ 70, 180, 110, 220 }) : Color{ 55, 60, 75, 160 });
                     DrawText(curTotTier == 0 ? "TIER II [U]" : "EVOLVE [U]", (int)upgRec.x + (curTotTier == 0 ? 15 : 12), (int)upgRec.y + 5, 10, canUpg ? Color{ 240, 255, 245, 255 } : Color{ 140, 150, 165, 180 });
-                    if (isUpgHov && isMousePressed && canUpg) {
+                    if (((isUpgHov && isMousePressed) || IsKeyPressed(KEY_U)) && canUpg) {
                         player.GetInventory().SpendShingles(shingCost);
                         player.GetInventory().SpendOreScraps(scrapCost);
                         player.GetInventory().UpgradeTotem(totems[s_inspectedTotem].type);
@@ -1846,6 +1846,12 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                             player.SetTotem(totems[s_inspectedTotem].type);
                         }
                         SoundFX::PlayParrySuccess();
+                    }
+                    if (isUpgHov) {
+                        std::string costTip = TextFormat("Cost: %d Shingles, %d Scraps", shingCost, scrapCost);
+                        int ctw = FontManager::MeasureGameText(costTip, 10, GameFont::BODY);
+                        DrawRectangleRounded(Rectangle{ upgRec.x + upgRec.width - ctw - 16.0f, upgRec.y - 18.0f, (float)ctw + 12.0f, 16.0f }, 0.2f, 3, Color{ 10, 14, 22, 230 });
+                        DrawText(costTip.c_str(), (int)(upgRec.x + upgRec.width - ctw - 10.0f), (int)upgRec.y - 15, 10, canUpg ? Color{ 120, 255, 180, 255 } : Color{ 255, 110, 110, 255 });
                     }
                 }
             }

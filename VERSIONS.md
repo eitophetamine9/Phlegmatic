@@ -48,19 +48,22 @@
 * **Champion's Totem Routing**: Champion's Totem (+35% DMG, +30% DEF, +14 HP/s out-of-combat regen, -70% potion healing) is now exclusively awarded upon completing the Apex Boss Gauntlet alongside +2500 Shingles, +75 Scraps, +10 Mist Essence, and +10 Shadow Essence.
 
 #### 2. 3-Tier Totem Leveling System & Commanding Elemental Golem Evolution
-* **3-Tier Totem Upgrades at the Forge**: Players can now upgrade all 8 primal totems at Blacksmith Varek's Forge in Zyphden using Silver Shingles and Ore Scraps across Tier I, Tier II, and Tier III:
-  * *Tier I (Base)*: Default attunement potency.
-  * *Tier II (+1)*: Enhanced multipliers (+40% to +50% stat increases), requiring 250 Shingles and 20 Ore Scraps.
-  * *Tier III (+2)*: Masterwork apex potency (+80% to +100% stat increases), requiring 500 Shingles and 45 Ore Scraps.
+* **Dedicated Primal Totem Forge Tab in Blacksmith Varek's Forge**: Players can now upgrade all 8 primal totems directly at Blacksmith Varek's Forge in Zyphden under the new dedicated `[3] PRIMAL TOTEMS (8)` category tab, as well as via the Inventory inspection matrix (`[U]`):
+  * *Tier I (Base)*: Default attunement potency upon relic discovery.
+  * *Tier II (+1)*: Enhanced multipliers and companion scaling, requiring 120-160 Shingles and 3-5 Ore Scraps.
+  * *Tier III (+2 / Evolved Titan)*: Masterwork apex potency or full titan evolution, requiring 240-300 Shingles, 6-10 Ore Scraps, and rare Mist/Shadow Essences.
+  * Real-time cost evaluation and feedback banners prevent invalid upgrades while presenting transparent material requirements.
   * Integrated full save persistence in `SaveManager` (`totemUpgradeLevel[TOTEM_COUNT]`), UI badge display (`[TIER I]`, `[TIER II]`, `[TIER III]`), and Forge upgrade cards.
 * **Commanding Elemental Golem Evolution (Tier 3)**:
   * When the Elemental Core Totem reaches Tier 3, the Mini Golem companion permanently evolves into the colossal **Commanding Elemental Golem** titan (920 HP, 75 DEF, 28px body radius, +8 HP/s passive regen).
   * The Commanding Titan commands and summons **3 orbiting Mini Golems** (280 HP, 40 DEF, 18 DMG) that fight alongside it in vanguard formation.
-  * Defeated mini golems automatically reconstitute after 35 seconds, creating a self-sustaining frontline army.
+  * Defeated mini golems automatically reconstitute after 18 seconds, creating a self-sustaining frontline army.
 
-#### 3. Sovereign's Scepter (Weapon 12) & Weapon Damage Scaling Rebalance
-* **Sovereign's Scepter (Weapon Type 12)**:
-  * Introduced as a pure restorative healing armament unlocked upon completing Wave 25 of the Royal Combat Arena.
+#### 3. Sovereign's Scepter (Weapon 12), Forge Crafting & Arsenal Scaling
+* **Sovereign's Scepter Forge Crafting & Upgrades**:
+  * Sovereign's Scepter is fully craftable at Blacksmith Varek's Forge under `[2] SACRED WEAPONS (2)` using 14 Ore Scraps, 2 Mist Essences, 2 Shadow Essences, and 120 Shingles.
+  * Can be tempered to +1 (120 Shingles) and forged to Masterwork +2 (240 Shingles) to amplify heal beam output and sanctuary radiance.
+* **Pure Restorative Healing Armament**:
   * Minimal enemy offensive damage (4 DMG light, 0 DMG heavy) preventing direct combat cheese and focusing entirely on tactical summon sustain.
   * *Light Attack*: Emits a targeted restoration beam restoring +24 HP to nearby summons (+30 HP at +1, +38 HP at +2).
   * *Heavy Attack (Sanctuary Radiance)*: 360-degree radiant sanctuary wave expanding to 280px radius. Heals all active friendly summons (Commander Squad, Companion Golem, and Mini Golem sub-minions) for +75 HP (+95 HP at +1, +120 HP at +2), completely cleanses all debuffs (chill, burn, stagger), and grants +15 DEF and +20% move speed for 6 seconds.
@@ -78,13 +81,12 @@
   * *Twin Glacial Cleavers*: 18/78 -> 23/92 -> 28/108.
   * *Sovereign's Scepter*: 4/0 -> 5/0 -> 6/0 (healing +24/+75 -> +30/+95 -> +38/+120).
 
-#### 4. Commander's Totem, Spacing & Exact Enemy Procedural Sprites
+#### 4. Commander's Totem, Stationary Formations & Exact Enemy Sprites
 * **Renamed to Commander's Totem**: Renamed from Conqueror's Totem to Commander's Totem across all UI modals, tooltips, and codices.
+* **Stationary Formations & Lag Elimination**:
+  * Companions now lock to stationary relative anchors (120px perimeter) without continuous orbital spinning.
+  * Idle summons maintain a stay-put state with a 70px threshold, eliminating frame drops, mutual collision jitter, and player pushback oscillation.
 * **Player Damage Penalty**: Imposed an intentional -40% direct player attack damage penalty (`playerDamageMult = 0.60f`), shifting the player's role into a tactician commander who relies on summons and healing support.
-* **Loosened Vanguard Formation & Spacing**:
-  * Increased anchor orbit radius from 72px to 135px.
-  * Enforced personal space repulsion (<90px from player) preventing summons from hovering over or crowding the player.
-  * Added mutual companion-to-companion separation so summons do not clip into each other.
 * **1:1 Exact Enemy Procedural Sprites**:
   * Rendered all 7 summons using the exact procedural silhouette and equipment routines from `EnemyRenderer.cpp`: Slasher (curved scythe), Brute (spiked war mace), Charger (heavy lance & shield), Archer (recurve bow), Pyromancer (void staff), Ore Golem (stone plates & glowing core), and Frost Troll (glacial clubs & tusks).
   * Outfitted with imperial purple and gold crest pauldrons, overhead health bars, and green combat floaters.

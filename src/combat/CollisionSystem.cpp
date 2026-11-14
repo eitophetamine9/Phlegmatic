@@ -711,44 +711,32 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
     // Friendly Tower Companions Squad combat & movement (Commander's Totem)
     if (player.GetTotem() == TotemType::COMMANDER_TOTEM) {
         auto& squad = player.GetTowerCompanions();
-        float timeSec = (float)GetTime();
 
         for (size_t i = 0; i < squad.size(); ++i) {
             auto& comp = squad[i];
             if (!comp.active || comp.health <= 0.0f) continue;
 
-            float orbitAngle = comp.formationAngle + timeSec * 0.35f;
+            // Fixed stationary formation anchor (no continuous spinning or hovering)
             Vector2 anchorPos = {
-                player.GetPosition().x + cosf(orbitAngle) * 135.0f,
-                player.GetPosition().y + sinf(orbitAngle) * 135.0f
+                player.GetPosition().x + cosf(comp.formationAngle) * 120.0f,
+                player.GetPosition().y + sinf(comp.formationAngle) * 120.0f
             };
 
-            // Personal-space buffer: push away if crowding too close (<90px) to player
             float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
-            if (distToPlayer < 90.0f && distToPlayer > 0.001f) {
-                Vector2 pushDir = Vector2Normalize(Vector2Subtract(comp.position, player.GetPosition()));
-                comp.position = Vector2Add(comp.position, Vector2Scale(pushDir, (90.0f - distToPlayer) * 7.5f * dt));
-            }
 
-            // Mutual companion separation so units don't bunch up
-            for (size_t j = i + 1; j < squad.size(); ++j) {
-                if (!squad[j].active || squad[j].health <= 0.0f) continue;
-                float sepDist = Vector2Distance(comp.position, squad[j].position);
-                float minSep = comp.radius + squad[j].radius + 8.0f;
-                if (sepDist < minSep && sepDist > 0.001f) {
-                    Vector2 sepDir = Vector2Normalize(Vector2Subtract(comp.position, squad[j].position));
-                    float push = (minSep - sepDist) * 0.5f;
-                    comp.position = Vector2Add(comp.position, Vector2Scale(sepDir, push * 6.0f * dt));
-                    squad[j].position = Vector2Subtract(squad[j].position, Vector2Scale(sepDir, push * 6.0f * dt));
-                }
-            }
-
-            if (distToPlayer > 440.0f) {
+            // Teleport back if player ran or dashed far away
+            if (distToPlayer > 420.0f) {
                 comp.position = anchorPos;
                 comp.attackCooldown = 0.0f;
                 comp.invulnTimer = 0.3f;
                 particles.SpawnSparks(comp.position, Color{ 200, 80, 255, 200 }, 10, 80.0f);
                 continue;
+            }
+
+            // Gentle buffer only if player physically walks into the companion
+            if (distToPlayer < 70.0f && distToPlayer > 0.001f) {
+                Vector2 pushDir = Vector2Normalize(Vector2Subtract(comp.position, player.GetPosition()));
+                comp.position = Vector2Add(comp.position, Vector2Scale(pushDir, (70.0f - distToPlayer) * 3.5f * dt));
             }
 
             Enemy* nearestEnemy = nullptr;
@@ -847,11 +835,13 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                 }
             } else {
+                // Out of combat: STAY PUT if near stationary formation anchor
                 float distToAnchor = Vector2Distance(comp.position, anchorPos);
-                if (distToAnchor > 14.0f) {
+                if (distToAnchor > 70.0f) {
                     Vector2 toAnchor = Vector2Normalize(Vector2Subtract(anchorPos, comp.position));
                     comp.position = Vector2Add(comp.position, Vector2Scale(toAnchor, 220.0f * dt));
                 }
+                // When distToAnchor <= 70.0f: Minions stay completely still (no hovering, zero frame lag)
             }
 
             for (auto& enemy : enemies) {
