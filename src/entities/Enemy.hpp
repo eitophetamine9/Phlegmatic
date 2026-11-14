@@ -106,6 +106,9 @@ public:
     bool IsNightfallElite() const { return isNightfallElite; }
     void SetNightfallElite(bool elite);
 
+    bool IsApexBoss() const { return isApexBoss; }
+    void SetApexBoss(bool apex);
+
     friend class EnemyRenderer;
 
 private:
@@ -114,6 +117,7 @@ private:
     EnemyState state;
     bool isPerformingMeleeSmite;
     bool isNightfallElite = false;
+    bool isApexBoss = false;
     float quenchedTimer;
     float shatteredTimer;
 

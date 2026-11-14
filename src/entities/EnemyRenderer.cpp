@@ -158,6 +158,12 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         bodyColor = Color{ 16, 36, 56, 230 }; // Spectral chasm frost robe
     }
 
+    if (enemy.isApexBoss) {
+        float aPulse = (sinf((float)GetTime() * 5.0f) + 1.0f) * 0.5f;
+        DrawCircleGradient(enemy.position, enemy.radius * 2.6f, Color{ 255, 55, 75, (unsigned char)(75 + 45 * aPulse) }, Color{ 0, 0, 0, 0 });
+        DrawCircleLines((int)enemy.position.x, (int)enemy.position.y, enemy.radius + 7.0f + 3.0f * aPulse, Color{ 255, 215, 80, 230 });
+    }
+
     if (enemy.isNightfallElite) {
         float nPulse = (sinf((float)GetTime() * 4.5f) + 1.0f) * 0.5f;
         DrawCircleGradient(enemy.position, enemy.radius * 2.2f, Color{ 120, 35, 210, (unsigned char)(65 + 35 * nPulse) }, Color{ 0, 0, 0, 0 });
@@ -614,7 +620,9 @@ void EnemyRenderer::Draw(const Enemy& enemy) {
         DrawRectangleLines((int)barX, (int)barY, (int)barWidth, (int)barHeight, Color{ 40, 45, 60, 200 });
 
         // Overhead Humor / Status tag
-        if (enemy.IsNightfallElite()) {
+        if (enemy.IsApexBoss()) {
+            DrawText("APEX CHAMPION", (int)(enemy.position.x - 38.0f), (int)(barY - 9.0f), 8, Color{ 255, 80, 95, 255 });
+        } else if (enemy.IsNightfallElite()) {
             DrawText("NIGHTFALL ELITE", (int)(enemy.position.x - 36.0f), (int)(barY - 9.0f), 8, Color{ 205, 130, 255, 240 });
         } else if (enemy.IsChilled()) {
             DrawText("CHILLED", (int)(enemy.position.x - 19.0f), (int)(barY - 9.0f), 8, Color{ 135, 235, 255, 240 });

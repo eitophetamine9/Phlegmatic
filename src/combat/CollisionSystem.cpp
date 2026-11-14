@@ -318,6 +318,10 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
             else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
 
+            if (enemy.IsApexBoss()) {
+                baseDamage *= 1.50f; // +50% Apex Boss damage
+            }
+
             bool isColdAttack = (enemy.GetType() == EnemyType::FROST_TROLL ||
                                  enemy.GetType() == EnemyType::BERSERKER_TROLL ||
                                  enemy.GetType() == EnemyType::FROST_REVENANT);
@@ -612,6 +616,7 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDmg = 28.0f;
                 else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDmg = 46.0f;
                 else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
+                if (enemy.IsApexBoss()) baseDmg *= 1.50f;
                 float dmg = baseDmg * (100.0f / (100.0f + effDef));
                 comp.health -= dmg;
                 comp.invulnTimer = 0.55f;

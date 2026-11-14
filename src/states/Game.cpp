@@ -955,22 +955,7 @@ void Game::EnterArena(bool isBossGauntlet) {
 
 
     arenaBandages.clear();
-
-
-
-    bandageSpawnTimer = 14.0f;
-
-
-
-    AdhesiveBandage initBandage;
-
-
-
-    initBandage.position = { 1200.0f, 1050.0f };
-
-
-
-    arenaBandages.push_back(initBandage);
+    bandageSpawnTimer = 45.0f;
 
 
 
@@ -3721,10 +3706,10 @@ void Game::Update(float dt) {
 
             if (waveManager.IsBossGauntlet()) {
                 particles.SpawnFloatingText(player.GetPosition(), "APEX BOSS GAUNTLET CONQUERED!", Color{ 255, 230, 80, 255 }, 30.0f);
-                player.GetInventory().AddOreScraps(40);
-                player.GetInventory().AddShingles(1200);
-                player.GetInventory().AddEssenceOfMist(4);
-                player.GetInventory().AddShadowEssence(4);
+                player.GetInventory().AddOreScraps(75);
+                player.GetInventory().AddShingles(2500);
+                player.GetInventory().AddEssenceOfMist(10);
+                player.GetInventory().AddShadowEssence(10);
                 if (!player.GetInventory().HasQuestItem("item_boss_gauntlet_trophy")) {
                     player.GetInventory().AddQuestItem({
                         "item_boss_gauntlet_trophy",
@@ -3732,6 +3717,10 @@ void Game::Update(float dt) {
                         "A pristine triumphal standard bearing the sigils of Remnant Zil, the Primordial Titan, and the Berserker Troll, earned by defeating all three in consecutive battle.",
                         Color{ 255, 220, 90, 255 }
                     });
+                }
+                if (!player.GetInventory().HasTotem(TotemType::CHAMPION_TOTEM)) {
+                    player.GetInventory().UnlockTotem(TotemType::CHAMPION_TOTEM);
+                    particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CHAMPION'S TOTEM!", Color{ 255, 215, 80, 255 }, 28.0f);
                 }
             } else {
                 particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! (25/25)", Color{ 255, 230, 80, 255 }, 30.0f);
@@ -3749,10 +3738,6 @@ void Game::Update(float dt) {
                         Color{ 255, 215, 80, 255 }
                     });
                 }
-            }
-            if (!player.GetInventory().HasTotem(TotemType::CHAMPION_TOTEM)) {
-                player.GetInventory().UnlockTotem(TotemType::CHAMPION_TOTEM);
-                particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CHAMPION'S TOTEM!", Color{ 255, 215, 80, 255 }, 28.0f);
             }
             SoundFX::PlayCrusaderClash();
             SoundFX::PlayCoinPickup();
@@ -3899,26 +3884,11 @@ void Game::Update(float dt) {
             }
             if (kIdx >= 0) player.GetInventory().RecordEnemyKill(kIdx);
 
-            if (arenaBandages.size() < 4 && (rand() % 100) < 35) {
-
-
-
+            if (arenaBandages.size() < 2 && (rand() % 100) < 12) {
                 AdhesiveBandage b;
-
-
-
                 b.position = enemies[i].GetPosition();
-
-
-
                 arenaBandages.push_back(b);
-
-
-
                 particles.SpawnSparks(b.position, Color{ 80, 255, 140, 255 }, 14, 110.0f);
-
-
-
             }
 
 
@@ -3947,11 +3917,9 @@ void Game::Update(float dt) {
 
 
 
-        bandageSpawnTimer = 18.0f;
+        bandageSpawnTimer = 45.0f;
 
-
-
-        if (arenaBandages.size() < 4) {
+        if (arenaBandages.size() < 2) {
 
 
 

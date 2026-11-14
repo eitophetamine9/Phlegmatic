@@ -322,6 +322,7 @@ void WaveManager::SpawnGauntletStage(int stage, std::vector<Enemy>& enemies, std
         case 1:
             // Stage 1: Remnant Zil (Holy Champion) + 2 Iron Brutes
             enemies.emplace_back(EnemyType::ZIL_BOSS, Vector2{ center.x, center.y - 180.0f });
+            enemies.front().SetApexBoss(true);
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x - 240.0f, center.y + 120.0f });
             enemies.emplace_back(EnemyType::BRUTE, Vector2{ center.x + 240.0f, center.y + 120.0f });
             particles.SpawnFloatingText(center, "APEX STAGE I: REMNANT ZIL (CHAMPION)", Color{ 255, 220, 80, 255 }, 28.0f);
@@ -331,6 +332,7 @@ void WaveManager::SpawnGauntletStage(int stage, std::vector<Enemy>& enemies, std
         case 2:
             // Stage 2: Primordial Elemental Golem Titan + 2 Mini Elemental Golems
             enemies.emplace_back(EnemyType::ELEMENTAL_GOLEM, Vector2{ center.x, center.y - 180.0f });
+            enemies.front().SetApexBoss(true);
             enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x - 220.0f, center.y + 120.0f });
             enemies.emplace_back(EnemyType::MINI_ELEMENTAL_GOLEM, Vector2{ center.x + 220.0f, center.y + 120.0f });
             particles.SpawnFloatingText(center, "APEX STAGE II: PRIMORDIAL GOLEM TITAN", Color{ 255, 175, 50, 255 }, 28.0f);
@@ -341,6 +343,7 @@ void WaveManager::SpawnGauntletStage(int stage, std::vector<Enemy>& enemies, std
         default:
             // Stage 3: The Berserker Troll Warlord + 2 Frost Trolls
             enemies.emplace_back(EnemyType::BERSERKER_TROLL, Vector2{ center.x, center.y - 180.0f });
+            enemies.front().SetApexBoss(true);
             enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x - 240.0f, center.y + 130.0f });
             enemies.emplace_back(EnemyType::FROST_TROLL, Vector2{ center.x + 240.0f, center.y + 130.0f });
             particles.SpawnFloatingText(center, "APEX FINAL STAGE: CRAG BERSERKER WARLORD", Color{ 255, 45, 60, 255 }, 30.0f);

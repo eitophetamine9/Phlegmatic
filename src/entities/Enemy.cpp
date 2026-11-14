@@ -350,6 +350,36 @@ void Enemy::SetNightfallElite(bool elite) {
     }
 }
 
+void Enemy::SetApexBoss(bool apex) {
+    isApexBoss = apex;
+    if (apex) {
+        if (type == EnemyType::ZIL_BOSS) {
+            maxHealth = 1250.0f;
+            health = maxHealth;
+            defense = 38.0f;
+            will = 85.0f;
+            moveSpeed = 130.0f;
+        } else if (type == EnemyType::ELEMENTAL_GOLEM) {
+            maxHealth = 1850.0f;
+            health = maxHealth;
+            defense = 65.0f;
+            will = 105.0f;
+            moveSpeed = 115.0f;
+        } else if (type == EnemyType::BERSERKER_TROLL) {
+            maxHealth = 2800.0f;
+            health = maxHealth;
+            defense = 42.0f;
+            will = 110.0f;
+            moveSpeed = 195.0f;
+        } else {
+            maxHealth *= 1.40f;
+            health = maxHealth;
+            defense += 12.0f;
+            will += 25.0f;
+        }
+    }
+}
+
 std::string Enemy::GetName() const {
     std::string baseName = "UNKNOWN";
     switch (type) {
@@ -369,6 +399,9 @@ std::string Enemy::GetName() const {
         case EnemyType::FROST_TROLL: baseName = "FROST TROLL"; break;
         case EnemyType::BERSERKER_TROLL: baseName = "BERSERKER TROLL (CRAG WARLORD)"; break;
         case EnemyType::FROST_REVENANT: baseName = "FROST REVENANT (CHASM PHANTOM)"; break;
+    }
+    if (isApexBoss) {
+        return "APEX " + baseName;
     }
     if (isNightfallElite) {
         return "NIGHTFALL " + baseName;
@@ -547,7 +580,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ZIL_BOSS) {
-                    // Truth Seeker 4-phase combat pattern with telegraphed follow-up cleave:
+                    // Truth Seeker 4/5-phase combat pattern with telegraphed follow-up cleave and Apex Cross:
                     if (bossAttackPhase == 0) {
                         // Phase 0: Upward Radiant Slice (Line / Box AoE)
                         windupDuration = 0.58f;
@@ -574,7 +607,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.width = 24.0f;
                         telegraph.warningColor = Color{ 120, 230, 255, 210 };
                         isPerformingMeleeSmite = false; // Projectile deals damage!
-                    } else {
+                    } else if (bossAttackPhase == 3) {
                         // Phase 3: Telegraphed Follow-up Cleave (Damaging Melee Sweep!)
                         windupDuration = 0.42f; // Dedicated telegraph reaction window
                         stateTimer = windupDuration;
@@ -583,6 +616,14 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.arcAngle = 140.0f;
                         telegraph.warningColor = Color{ 255, 190, 50, 200 };
                         isPerformingMeleeSmite = true; // Melee hitbox deals damage!
+                    } else {
+                        // Phase 4 (APEX PATTERN): Solar Cross-Cataclysm
+                        windupDuration = 0.70f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 240.0f;
+                        telegraph.warningColor = Color{ 255, 60, 80, 225 };
+                        isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
                     // Lenon Vanguard 3-phase high-intensity combat pattern:
@@ -644,7 +685,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::ELEMENTAL_GOLEM) {
-                    // 4-Phase Elemental Titan Cycle
+                    // 4/5-Phase Elemental Titan Cycle
                     if (bossAttackPhase == 0) {
                         // Quad-Seismic Shockwave (Massive Circle AoE)
                         windupDuration = 0.75f;
@@ -671,7 +712,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.arcAngle = 160.0f;
                         telegraph.warningColor = Color{ 100, 215, 255, 210 };
                         isPerformingMeleeSmite = true;
-                    } else {
+                    } else if (bossAttackPhase == 3) {
                         // Storm Fissure Cleave (Heavy Charged Line AoE)
                         windupDuration = 0.55f;
                         stateTimer = windupDuration;
@@ -679,6 +720,51 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         telegraph.radius = 220.0f;
                         telegraph.width = 56.0f;
                         telegraph.warningColor = Color{ 190, 110, 255, 220 };
+                        isPerformingMeleeSmite = true;
+                    } else {
+                        // Phase 4 (APEX PATTERN): Molten Tremor Ring & Lava Geyser
+                        windupDuration = 0.80f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 230.0f;
+                        telegraph.warningColor = Color{ 255, 50, 40, 230 };
+                        isPerformingMeleeSmite = true;
+                    }
+                } else if (type == EnemyType::BERSERKER_TROLL) {
+                    if (isApexBoss) {
+                        if (bossAttackPhase == 0) {
+                            // Apex Phase 0: Highland Blood Whirlwind (Spinning Rush)
+                            windupDuration = 0.50f;
+                            stateTimer = windupDuration;
+                            telegraph.shape = TelegraphShape::CIRCLE;
+                            telegraph.radius = 180.0f;
+                            telegraph.warningColor = Color{ 255, 45, 60, 220 };
+                            isPerformingMeleeSmite = true;
+                        } else if (bossAttackPhase == 1) {
+                            // Apex Phase 1: Forward Glacial Cleave Cone
+                            windupDuration = 0.58f;
+                            stateTimer = windupDuration;
+                            telegraph.shape = TelegraphShape::CONE;
+                            telegraph.radius = 240.0f;
+                            telegraph.arcAngle = 140.0f;
+                            telegraph.warningColor = Color{ 100, 220, 255, 220 };
+                            isPerformingMeleeSmite = true;
+                        } else {
+                            // Apex Phase 2: Crag Earth Rupture Slam
+                            windupDuration = 0.65f;
+                            stateTimer = windupDuration;
+                            telegraph.shape = TelegraphShape::LINE;
+                            telegraph.radius = 260.0f;
+                            telegraph.width = 65.0f;
+                            telegraph.warningColor = Color{ 255, 140, 50, 220 };
+                            isPerformingMeleeSmite = true;
+                        }
+                    } else {
+                        windupDuration = 0.65f;
+                        stateTimer = windupDuration;
+                        telegraph.shape = TelegraphShape::CIRCLE;
+                        telegraph.radius = 140.0f;
+                        telegraph.warningColor = Color{ 255, 45, 60, 200 };
                         isPerformingMeleeSmite = true;
                     }
                 } else if (type == EnemyType::FROST_REVENANT) {
@@ -903,19 +989,31 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         // Phase 2: Truth Seeker Holy Beam Projectile
                         Vector2 spawnPos = { position.x + forwardDir.x * (radius + 10.0f), position.y + forwardDir.y * (radius + 10.0f) };
                         Vector2 projVel = { forwardDir.x * 420.0f, forwardDir.y * 420.0f };
-                        outProjectiles.emplace_back(spawnPos, projVel, 9.0f, 24.0f, ProjectileType::HOLY_BEAM, false);
+                        outProjectiles.emplace_back(spawnPos, projVel, 9.0f, isApexBoss ? 38.0f : 24.0f, ProjectileType::HOLY_BEAM, false);
                         SoundFX::PlayProjectileShoot();
                         particles.SpawnSparks(spawnPos, Color{ 140, 235, 255, 255 }, 16, 140.0f);
                         particles.AddScreenShake(3.5f, 0.12f);
-                    } else {
+                    } else if (bossAttackPhase == 3) {
                         // Phase 3: Telegraphed Follow-up Melee Cleave
                         particles.SpawnSlashTrail(position, forwardDir, Color{ 255, 190, 50, 255 });
                         particles.SpawnSparks(position, Color{ 255, 220, 80, 255 }, 22, 160.0f);
                         particles.AddScreenShake(6.0f, 0.20f);
                         SoundFX::PlayCrusaderClash();
+                    } else {
+                        // Phase 4 (APEX PATTERN): Solar Cross-Cataclysm - 4 cardinal holy beams!
+                        for (int b = 0; b < 4; ++b) {
+                            float bAngle = (facingAngle + (float)b * 90.0f) * DEG2RAD;
+                            Vector2 bDir = { cosf(bAngle), sinf(bAngle) };
+                            Vector2 bPos = { position.x + bDir.x * (radius + 8.0f), position.y + bDir.y * (radius + 8.0f) };
+                            Vector2 bVel = { bDir.x * 460.0f, bDir.y * 460.0f };
+                            outProjectiles.emplace_back(bPos, bVel, 10.0f, 38.0f, ProjectileType::HOLY_BEAM, false);
+                        }
+                        particles.SpawnSparks(position, Color{ 255, 230, 80, 255 }, 35, 240.0f);
+                        particles.AddScreenShake(8.0f, 0.28f);
+                        SoundFX::PlayCrusaderClash();
                     }
-                    // Cycle boss attack phase across 4 distinct stages
-                    bossAttackPhase = (bossAttackPhase + 1) % 4;
+                    int maxPhases = isApexBoss ? 5 : 4;
+                    bossAttackPhase = (bossAttackPhase + 1) % maxPhases;
                 } else if (type == EnemyType::KNIGHT_LENON_BOSS) {
                     float rad = facingAngle * DEG2RAD;
                     Vector2 forwardDir = { cosf(rad), sinf(rad) };
@@ -978,7 +1076,7 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         // Phase 1: Magma Boulder Fling (Fires ELEMENTAL_BOLT projectile)
                         Vector2 spawnPos = { position.x + forwardDir.x * (radius + 12.0f), position.y + forwardDir.y * (radius + 12.0f) };
                         Vector2 projVel = { forwardDir.x * 400.0f, forwardDir.y * 400.0f };
-                        outProjectiles.emplace_back(spawnPos, projVel, 10.0f, 26.0f, ProjectileType::ELEMENTAL_BOLT, false);
+                        outProjectiles.emplace_back(spawnPos, projVel, 10.0f, isApexBoss ? 38.0f : 26.0f, ProjectileType::ELEMENTAL_BOLT, false);
                         SoundFX::PlayProjectileShoot();
                         particles.SpawnSparks(spawnPos, Color{ 255, 100, 40, 255 }, 20, 160.0f);
                         particles.AddScreenShake(4.5f, 0.15f);
@@ -987,16 +1085,28 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         particles.AddScreenShake(6.0f, 0.20f);
                         particles.SpawnSparks(position, Color{ 120, 225, 255, 255 }, 28, 180.0f);
                         SoundFX::PlayCrusaderClash();
-                    } else {
+                    } else if (bossAttackPhase == 3) {
                         // Phase 3: Storm Fissure Cleave (Violet lightning fissure)
                         particles.SpawnSlashTrail(position, forwardDir, Color{ 200, 120, 255, 255 });
                         particles.SpawnSparks(position, Color{ 220, 140, 255, 255 }, 26, 200.0f);
                         particles.AddScreenShake(7.0f, 0.22f);
                         SoundFX::PlayHeavyAttack();
+                    } else {
+                        // Phase 4 (APEX PATTERN): Molten Tremor Ring & Lava Geyser Eruption
+                        particles.AddScreenShake(11.0f, 0.40f);
+                        particles.SpawnSparks(position, Color{ 255, 70, 30, 255 }, 48, 300.0f);
+                        SoundFX::PlayHeavyAttack();
+                        for (int m = -1; m <= 1; ++m) {
+                            float mAngle = (facingAngle + (float)m * 28.0f) * DEG2RAD;
+                            Vector2 mDir = { cosf(mAngle), sinf(mAngle) };
+                            Vector2 mPos = { position.x + mDir.x * (radius + 14.0f), position.y + mDir.y * (radius + 14.0f) };
+                            Vector2 mVel = { mDir.x * 380.0f, mDir.y * 380.0f };
+                            outProjectiles.emplace_back(mPos, mVel, 13.0f, 42.0f, ProjectileType::ELEMENTAL_BOLT, false);
+                        }
                     }
 
-                    // Cycle boss attack phase across 4 elemental phases
-                    bossAttackPhase = (bossAttackPhase + 1) % 4;
+                    int maxPhases = isApexBoss ? 5 : 4;
+                    bossAttackPhase = (bossAttackPhase + 1) % maxPhases;
                 } else if (type == EnemyType::MINI_ELEMENTAL_GOLEM) {
                     if (!isPerformingMeleeSmite) {
                         // 7-second Long-range Elemental Bolt projectile
@@ -1050,6 +1160,33 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
                         SoundFX::PlayHeavyAttack();
                     }
                     bossAttackPhase = (bossAttackPhase + 1) % 3;
+                } else if (type == EnemyType::BERSERKER_TROLL) {
+                    float rad = facingAngle * DEG2RAD;
+                    Vector2 forwardDir = { cosf(rad), sinf(rad) };
+                    if (isApexBoss) {
+                        if (bossAttackPhase == 0) {
+                            // Apex Phase 0: Highland Blood Whirlwind
+                            particles.SpawnSparks(position, Color{ 255, 40, 50, 255 }, 35, 220.0f);
+                            particles.AddScreenShake(8.5f, 0.25f);
+                            SoundFX::PlayHeavyAttack();
+                        } else if (bossAttackPhase == 1) {
+                            // Apex Phase 1: Glacial Cleave
+                            particles.SpawnSlashTrail(position, forwardDir, Color{ 120, 230, 255, 255 });
+                            particles.SpawnSparks(position, Color{ 140, 240, 255, 255 }, 30, 200.0f);
+                            particles.AddScreenShake(9.0f, 0.28f);
+                            SoundFX::PlayCrusaderClash();
+                        } else {
+                            // Apex Phase 2: Earth Rupture Slam
+                            particles.SpawnSparks(position, Color{ 255, 160, 50, 255 }, 40, 260.0f);
+                            particles.AddScreenShake(10.0f, 0.35f);
+                            SoundFX::PlayHeavyAttack();
+                        }
+                        bossAttackPhase = (bossAttackPhase + 1) % 3;
+                    } else {
+                        particles.SpawnSparks(position, Color{ 255, 45, 60, 255 }, 24, 160.0f);
+                        particles.AddScreenShake(7.0f, 0.22f);
+                        SoundFX::PlayHeavyAttack();
+                    }
                 }
             }
             break;
