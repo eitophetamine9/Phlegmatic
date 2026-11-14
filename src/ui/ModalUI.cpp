@@ -1965,7 +1965,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag", 3 },
                 { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 },
                 { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 },
-                { WeaponType::SOVEREIGN_SCEPTER, "Arena of Zyphden - Conqueror's Radiant Healer", 3 }
+                { WeaponType::SOVEREIGN_SCEPTER, "Varek's Forge - Crafted from Mist & Shadow Essences", 3 }
             };
 
             int unlockedCount = 0;

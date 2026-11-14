@@ -2854,7 +2854,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 40, 56, 82, 255 } : (isT1Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab1Rec, 0.25f, 4, (forgeTab == 0) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[1] VANGUARD WEAPONS (9)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 7, 12, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[1] WEAPON FORGE (11)", (int)tab1Rec.x + 10, (int)tab1Rec.y + 7, 12, (forgeTab == 0) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     DrawRectangleRounded(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 40, 56, 82, 255 } : (isT2Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab2Rec, 0.25f, 4, (forgeTab == 1) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
@@ -3315,6 +3315,18 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
         if (forgeTab == 0) {
             entries = {
                 {
+                    WeaponType::SOVEREIGN_SCEPTER,
+                    "Sovereign's Scepter",
+                    "SACRED SCEPTER",
+                    2, 120, 240,
+                    "Radiant Grace +1 (+30 Minion Pulse Heal / +95 AoE Sanctuary)",
+                    "Sanctuary Masterwork +2 (+38 Pulse Heal / +120 AoE Sanctuary)",
+                    Color{ 255, 225, 110, 255 },
+                    14, 120,
+                    "Sacred command rod. Pure minion healing tool (+24 Pulse / +75 AoE).",
+                    2, 2
+                },
+                {
                     WeaponType::SWORD,
                     "Crusader's Broadsword",
                     "BALANCED BLADE",
@@ -3417,10 +3429,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     18, 75,
                     "Dual Troll-horn cleavers. High-speed flurry & 4-stage Fury of Cleaves rupture.",
                     2, 3
-                }
-            };
-        } else {
-            entries = {
+                },
                 {
                     WeaponType::TRUTH_SEEKER,
                     "Truth Seeker",
@@ -3431,7 +3440,10 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     Color{ 140, 220, 255, 255 },
                     0, 0,
                     "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
-                },
+                }
+            };
+        } else {
+            entries = {
                 {
                     WeaponType::SOVEREIGN_SCEPTER,
                     "Sovereign's Scepter",
@@ -3443,6 +3455,17 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     14, 120,
                     "Sacred command rod. Pure minion healing tool (+24 Pulse / +75 AoE).",
                     2, 2
+                },
+                {
+                    WeaponType::TRUTH_SEEKER,
+                    "Truth Seeker",
+                    "HOLY SUNBLADE",
+                    1, 180, 0,
+                    "Consecration I (+6 Holy Beam Dmg -> 28, 32 Light / 96 Heavy)",
+                    "",
+                    Color{ 140, 220, 255, 255 },
+                    0, 0,
+                    "Ancient holy blade of Zil. Overcome his remnant at the Ruined Castle altar."
                 }
             };
         }
