@@ -75,7 +75,8 @@ enum class TotemType {
     CRUSADER_TOTEM,        // Zyphden Spar: +25% defense, +35 max HP, +18% attack, Will of Atlas, -12% speed
     ELEMENTAL_CORE_TOTEM,  // Quarry Boss: +25% DEF, Mini Golem (460 HP, 55 DEF, 3 patterns), 54 DMG bolt (3s CD), -10% speed
     TOTEM_PHLEGMATIC_CORE, // Northern Highland: -80% knockback, gray health recovery, chill counter
-    CHAMPION_TOTEM         // Royal Arena: +35% DMG, +30% DEF, +15% speed, +35% stam, -20% CDs, +40 Will, +50 HP, +14 HP/s regen (+2 in combat), -70% external healing
+    CHAMPION_TOTEM,        // Apex Gauntlet: +35% DMG, +30% DEF, +15% speed, +35% stam, -20% CDs, +40 Will, +50 HP, +14 HP/s regen (+2 in combat), -70% external healing
+    CONQUEROR_TOTEM        // Royal Arena Wave 25: 7 Tower Companions (full HP/DEF, 40% DMG, 2min squad respawn), +20% DEF, +40 HP, +25 Will
 };
 
 // The Medieval Four Humors Alignment
@@ -84,6 +85,25 @@ enum class HumorType {
     CHOLERIC,   // Cultists & Pyromancers & Inquisitor (Hot & Dry: Fire, Yellow Bile, Frenzy)
     MELANCHOLIC,// Iron Brutes & Void Casters & Zil Boss (Cold & Dry: Earth, Black Bile, Brittle Shells)
     SANGUINE    // Deathseeker Archers & Chargers & Knight Lenon (Hot & Moist: Air, Blood, Piercing Bleeds)
+};
+
+enum class EnemyType {
+    SLASHER,         // Cone sector telegraph (Melee)
+    BRUTE,           // Circle AoE ground slam telegraph (Heavy Melee)
+    CHARGER,         // Linear dash thrust telegraph (Dash Melee)
+    ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
+    PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
+    INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
+    ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
+    KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
+    ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
+    ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
+    MINI_ELEMENTAL_GOLEM, // Compact Elemental Golem minion summoned by Titan or player totem
+    GALE_BANDIT,          // Agile skirmisher rogue in Restless Mist Forest (drops Mist Essence, NO ore)
+    GALE_ARCHER_BOSS,     // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
+    FROST_TROLL,          // Northern Crags melee brute: fast dual club strikes
+    BERSERKER_TROLL,      // Northern Boss: Berserker Troll, drops Totem of Insanity
+    FROST_REVENANT        // Permafrost Crypts Boss: Ethereal frost phantom, ice spikes, teleport flurry
 };
 
 enum class AttackType {

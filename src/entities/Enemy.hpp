@@ -7,25 +7,6 @@
 #include <vector>
 #include <string>
 
-enum class EnemyType {
-    SLASHER,         // Cone sector telegraph (Melee)
-    BRUTE,           // Circle AoE ground slam telegraph (Heavy Melee)
-    CHARGER,         // Linear dash thrust telegraph (Dash Melee)
-    ARCHER,          // Laser aim line telegraph, piercing bolt (Ranged)
-    PYROMANCER,      // Fan spread telegraph, 3 void orbs (Caster)
-    INQUISITOR_BOSS, // Grand Boss: Nova, Beam, Teleport Smite
-    ZIL_BOSS,        // Zil's Fragment (1% Power): Truth Seeker upward slice, 360 dawnfire, holy beam
-    KNIGHT_LENON_BOSS,// Knight Lenon: Vanguard Captain, Royal Greatsword Lunge, Golden Whirlwind
-    ORE_GOLEM,       // Quarry Ore Golem: Heavy stone chassis, ground seismic slam, drops Ore Scraps
-    ELEMENTAL_GOLEM, // Secret Boss: Primordial Titan, quad-elemental shocks, fires elemental bolts
-    MINI_ELEMENTAL_GOLEM, // Compact Elemental Golem minion summoned by Titan or player totem
-    GALE_BANDIT,          // Agile skirmisher rogue in Restless Mist Forest (drops Mist Essence, NO ore)
-    GALE_ARCHER_BOSS,     // Restless Mist Forest Boss: Wind-dancer archer (15% Totem of Mist drop, drops Shadow Essence)
-    FROST_TROLL,          // Northern Crags melee brute: fast dual club strikes
-    BERSERKER_TROLL,      // Northern Boss: Berserker Troll, drops Totem of Insanity
-    FROST_REVENANT        // Permafrost Crypts Boss: Ethereal frost phantom, ice spikes, teleport flurry
-};
-
 enum class EnemyState {
     IDLE_CHASE,
     TELEGRAPH_WINDUP,

@@ -3730,6 +3730,10 @@ void Game::Update(float dt) {
                 player.GetInventory().AddShingles(200);
                 player.GetInventory().AddEssenceOfMist(6);
                 player.GetInventory().AddShadowEssence(5);
+                if (!player.GetInventory().HasTotem(TotemType::CONQUEROR_TOTEM)) {
+                    player.GetInventory().UnlockTotem(TotemType::CONQUEROR_TOTEM);
+                    particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CONQUEROR'S TOTEM!", Color{ 215, 120, 255, 255 }, 28.0f);
+                }
                 if (!player.GetInventory().HasQuestItem("item_arena_apex_crest")) {
                     player.GetInventory().AddQuestItem({
                         "item_arena_apex_crest",

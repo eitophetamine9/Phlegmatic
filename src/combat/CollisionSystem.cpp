@@ -634,6 +634,168 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
     }
 
+    // Friendly Tower Companions Squad combat & movement (Conqueror's Totem)
+    if (player.GetTotem() == TotemType::CONQUEROR_TOTEM) {
+        auto& squad = player.GetTowerCompanions();
+        float timeSec = (float)GetTime();
+
+        for (size_t i = 0; i < squad.size(); ++i) {
+            auto& comp = squad[i];
+            if (!comp.active || comp.health <= 0.0f) continue;
+
+            float orbitAngle = comp.formationAngle + timeSec * 0.45f;
+            Vector2 anchorPos = {
+                player.GetPosition().x + cosf(orbitAngle) * 72.0f,
+                player.GetPosition().y + sinf(orbitAngle) * 72.0f
+            };
+
+            float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
+            if (distToPlayer > 420.0f) {
+                comp.position = anchorPos;
+                comp.attackCooldown = 0.0f;
+                comp.invulnTimer = 0.3f;
+                particles.SpawnSparks(comp.position, Color{ 200, 80, 255, 200 }, 10, 80.0f);
+                continue;
+            }
+
+            Enemy* nearestEnemy = nullptr;
+            float nearestDist = 280.0f;
+            for (auto& enemy : enemies) {
+                if (!enemy.IsAlive()) continue;
+                if (Vector2Distance(player.GetPosition(), enemy.GetPosition()) > 380.0f) continue;
+                float d = Vector2Distance(comp.position, enemy.GetPosition());
+                if (d < nearestDist) {
+                    nearestDist = d;
+                    nearestEnemy = &enemy;
+                }
+            }
+
+            if (nearestEnemy) {
+                Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
+                Vector2 dir = Vector2Normalize(toEnemy);
+                if (dir.x == 0.0f && dir.y == 0.0f) dir = { 1.0f, 0.0f };
+                comp.facingDirection = (dir.x >= 0.0f) ? 1 : -1;
+
+                if (comp.unitType == EnemyType::ARCHER) {
+                    if (nearestDist < 120.0f) {
+                        comp.position = Vector2Subtract(comp.position, Vector2Scale(dir, 140.0f * dt));
+                    } else if (nearestDist > 200.0f) {
+                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, 160.0f * dt));
+                    }
+                    if (comp.attackCooldown <= 0.0f && nearestDist <= 260.0f) {
+                        comp.attackCooldown = 1.35f;
+                        comp.attackVisualTimer = 0.2f;
+                        Vector2 arrowVel = Vector2Scale(dir, 520.0f);
+                        Projectile arrow(comp.position, arrowVel, 6.0f, comp.damage, ProjectileType::BOLT, true);
+                        projectiles.push_back(arrow);
+                        particles.SpawnSparks(comp.position, Color{ 255, 215, 120, 255 }, 8, 90.0f);
+                        SoundFX::PlayLightAttack();
+                    }
+                } else if (comp.unitType == EnemyType::PYROMANCER) {
+                    if (nearestDist < 110.0f) {
+                        comp.position = Vector2Subtract(comp.position, Vector2Scale(dir, 130.0f * dt));
+                    } else if (nearestDist > 180.0f) {
+                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, 140.0f * dt));
+                    }
+                    if (comp.attackCooldown <= 0.0f && nearestDist <= 250.0f) {
+                        comp.attackCooldown = 1.45f;
+                        comp.attackVisualTimer = 0.2f;
+                        Vector2 orbVel = Vector2Scale(dir, 380.0f);
+                        Projectile orb(comp.position, orbVel, 8.0f, comp.damage, ProjectileType::VOID_ORB, true);
+                        projectiles.push_back(orb);
+                        particles.SpawnSparks(comp.position, Color{ 190, 80, 255, 255 }, 12, 100.0f);
+                        SoundFX::PlayLightAttack();
+                    }
+                } else {
+                    float speed = 200.0f;
+                    if (comp.unitType == EnemyType::CHARGER) speed = 245.0f;
+                    else if (comp.unitType == EnemyType::BRUTE) speed = 160.0f;
+                    else if (comp.unitType == EnemyType::ORE_GOLEM) speed = 150.0f;
+
+                    float engageRange = comp.radius + nearestEnemy->GetRadius() + 8.0f;
+                    if (nearestDist > engageRange) {
+                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, speed * dt));
+                    }
+
+                    if (comp.attackCooldown <= 0.0f && nearestDist <= engageRange + 12.0f) {
+                        float cd = 0.95f;
+                        float dmg = comp.damage;
+                        Vector2 knock = Vector2Scale(dir, 1.2f);
+                        if (comp.unitType == EnemyType::SLASHER) {
+                            cd = 0.85f;
+                            particles.SpawnSparks(comp.position, Color{ 255, 90, 90, 255 }, 10, 110.0f);
+                        } else if (comp.unitType == EnemyType::BRUTE) {
+                            cd = 1.40f;
+                            dmg += 4.0f;
+                            knock = Vector2Scale(dir, 2.0f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 18, 160.0f);
+                            nearestEnemy->ApplyStagger(0.35f);
+                        } else if (comp.unitType == EnemyType::CHARGER) {
+                            cd = 1.05f;
+                            knock = Vector2Scale(dir, 2.2f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 200, 50, 255 }, 14, 140.0f);
+                        } else if (comp.unitType == EnemyType::ORE_GOLEM) {
+                            cd = 1.35f;
+                            dmg += 2.0f;
+                            particles.SpawnSparks(comp.position, Color{ 210, 180, 130, 255 }, 16, 150.0f);
+                            nearestEnemy->ApplyArmorFracture(2.5f);
+                        } else if (comp.unitType == EnemyType::FROST_TROLL) {
+                            cd = 1.15f;
+                            particles.SpawnSparks(comp.position, Color{ 120, 215, 255, 255 }, 16, 140.0f);
+                            nearestEnemy->ApplyStagger(0.20f);
+                        }
+                        comp.attackCooldown = cd;
+                        comp.attackVisualTimer = 0.20f;
+                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.20f)) {
+                            handleEnemyDefeated(*nearestEnemy);
+                        }
+                        particles.SpawnFloatingText(nearestEnemy->GetPosition(), "-" + std::to_string((int)dmg), Color{ 220, 160, 255, 255 }, 18.0f);
+                        SoundFX::PlayHitImpact();
+                    }
+                }
+            } else {
+                float distToAnchor = Vector2Distance(comp.position, anchorPos);
+                if (distToAnchor > 14.0f) {
+                    Vector2 toAnchor = Vector2Normalize(Vector2Subtract(anchorPos, comp.position));
+                    comp.position = Vector2Add(comp.position, Vector2Scale(toAnchor, 220.0f * dt));
+                }
+            }
+
+            for (auto& enemy : enemies) {
+                if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
+                if (comp.invulnTimer > 0.0f) break;
+                if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 10.0f)) {
+                    float effDef = comp.defense;
+                    float baseDmg = 20.0f;
+                    if (enemy.GetType() == EnemyType::BRUTE) baseDmg = 38.0f;
+                    else if (enemy.GetType() == EnemyType::CHARGER) baseDmg = 22.0f;
+                    else if (enemy.GetType() == EnemyType::ORE_GOLEM) baseDmg = 26.0f;
+                    else if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM) baseDmg = 34.0f;
+                    else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDmg = 45.0f;
+                    else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDmg = 34.0f;
+                    else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
+                    else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDmg = 28.0f;
+                    else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDmg = 46.0f;
+                    else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
+                    if (enemy.IsApexBoss()) baseDmg *= 1.50f;
+                    float dmg = baseDmg * (100.0f / (100.0f + effDef));
+                    comp.health -= dmg;
+                    comp.invulnTimer = 0.55f;
+                    particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
+                    particles.SpawnSparks(comp.position, Color{ 215, 120, 160, 255 }, 10, 100.0f);
+                    if (comp.health <= 0.0f) {
+                        comp.active = false;
+                        comp.health = 0.0f;
+                        particles.SpawnFloatingText(comp.position, comp.name + " DEFEATED!", Color{ 255, 80, 90, 255 }, 22.0f);
+                        particles.SpawnSparks(comp.position, Color{ 200, 70, 100, 255 }, 25, 160.0f);
+                        SoundFX::PlayHitImpact();
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     // Shadowstrider Smoke Mist Poison DoT against enemies
     for (auto& smoke : player.GetSmokeMistZones()) {
         if (!smoke.active) continue;

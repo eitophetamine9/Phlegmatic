@@ -95,7 +95,7 @@ struct GameSaveData {
     bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false, false };
     bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false, false };
     bool unlockedLeggings[GameLimits::LEGGINGS_COUNT] = { true, false, false, false, false, false, false, false };
-    bool unlockedTotems[GameLimits::TOTEM_COUNT] = { true, false, false, false, false, false, false, false };
+    bool unlockedTotems[GameLimits::TOTEM_COUNT] = { true, false, false, false, false, false, false, false, false };
     bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false, false };
     int bestiaryKills[GameLimits::BESTIARY_COUNT] = { 0 };
     bool unlockedFragments[GameLimits::LORE_FRAGMENT_COUNT] = { false };
