@@ -12,7 +12,8 @@ enum class WeaponType {
     WINDRUNNER_RECURVE,
     SUN_CLAYMORE,
     STORM_GLAIVE,
-    GLACIAL_CLEAVER
+    GLACIAL_CLEAVER,
+    SOVEREIGN_SCEPTER
 };
 
 enum class ArmorType {

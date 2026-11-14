@@ -991,6 +991,52 @@ void PlayerRenderer::Draw(const Player& player) {
             AssetManager::DrawCleaver(rightHand, angleR, 45.0f, Color{ 145, 215, 245, 255 }, Color{ 65, 170, 220, 185 });
             AssetManager::DrawCleaver(leftHand, angleL, 45.0f, Color{ 145, 215, 245, 255 }, Color{ 65, 170, 220, 185 });
         }
+    } else if (player.currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+        float scepterAngle = player.facingAngle + 35.0f;
+        Color headCol = Color{ 140, 240, 255, 255 };
+        Color glowCol = Color{ 80, 215, 255, 235 };
+
+        if (player.currentAttack.type == AttackType::LIGHT) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            scepterAngle = player.facingAngle - 40.0f + progress * 80.0f;
+            AssetManager::DrawScepter(rightHand, scepterAngle, 44.0f, headCol, glowCol);
+
+            float startAngle = player.facingAngle - 45.0f;
+            float sweepAngle = progress * player.currentAttack.arcAngle;
+            DrawCircleSector(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 120, 235, 255, 50 });
+            DrawCircleSectorLines(player.position, player.currentAttack.range, startAngle, startAngle + sweepAngle, 16, Color{ 180, 245, 255, 220 });
+
+            // Forward holy beam pulse
+            float rad = player.facingAngle * DEG2RAD;
+            Vector2 tipPos = { player.position.x + cosf(rad) * player.currentAttack.range * progress, player.position.y + sinf(rad) * player.currentAttack.range * progress };
+            DrawCircleV(tipPos, 4.0f, Color{ 255, 255, 255, 240 });
+        } else if (player.currentAttack.type == AttackType::HEAVY) {
+            float progress = 1.0f - (player.currentAttack.timer / player.currentAttack.duration);
+            scepterAngle = player.facingAngle - 75.0f; // Held aloft
+            AssetManager::DrawScepter(rightHand, scepterAngle, 50.0f, Color{ 255, 245, 180, 255 }, Color{ 100, 230, 255, 255 });
+
+            // Expanding 360-degree Sanctuary Radiance circle (up to 280px radius)
+            float curR = player.currentAttack.range * (0.30f + 0.70f * progress);
+            unsigned char alpha = (unsigned char)(220 * (1.0f - progress * 0.4f));
+            DrawCircleV(player.position, curR, Color{ 100, 225, 255, (unsigned char)(35 * (1.0f - progress * 0.5f)) });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, curR, Color{ 160, 245, 255, alpha });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, curR * 0.85f, Color{ 255, 235, 140, (unsigned char)(alpha * 0.8f) });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, curR * 0.55f, Color{ 120, 220, 255, (unsigned char)(alpha * 0.6f) });
+
+            // Runic petals / rays in circular sanctuary
+            for (int r = 0; r < 8; r++) {
+                float rayAng = (r * 45.0f + progress * 40.0f) * DEG2RAD;
+                Vector2 rayInner = { player.position.x + cosf(rayAng) * (curR * 0.4f), player.position.y + sinf(rayAng) * (curR * 0.4f) };
+                Vector2 rayOuter = { player.position.x + cosf(rayAng) * (curR * 0.95f), player.position.y + sinf(rayAng) * (curR * 0.95f) };
+                DrawLineEx(rayInner, rayOuter, 2.0f, Color{ 220, 245, 255, (unsigned char)(180 * (1.0f - progress)) });
+            }
+        } else if (player.isHeavyWindingUp) {
+            scepterAngle = player.facingAngle - 90.0f;
+            AssetManager::DrawScepter(rightHand, scepterAngle, 46.0f, Color{ 255, 235, 160, 255 }, Color{ 120, 240, 255, 240 });
+            DrawCircleLines((int)player.position.x, (int)player.position.y, 38.0f, Color{ 120, 230, 255, 180 });
+        } else {
+            AssetManager::DrawScepter(rightHand, scepterAngle, 40.0f, headCol, glowCol);
+        }
     }
 
     // Active heavy finisher shockwave ring (extracted globally across all weapons & armor sets)
@@ -1006,6 +1052,9 @@ void PlayerRenderer::Draw(const Player& player) {
         } else if (player.currentWeapon == WeaponType::STORM_GLAIVE) {
             outerCol = Color{ 110, 245, 230, alpha };
             innerCol = Color{ 80, 220, 205, (unsigned char)(alpha * 0.25f) };
+        } else if (player.currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+            outerCol = Color{ 140, 240, 255, alpha };
+            innerCol = Color{ 180, 255, 240, (unsigned char)(alpha * 0.35f) };
         }
         DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius, outerCol);
         DrawCircleLines((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.78f, outerCol);

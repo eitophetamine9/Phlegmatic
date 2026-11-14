@@ -60,6 +60,8 @@ public:
         int attackPattern = 0;
         bool isCommandingTitan = false;
         float subMinionSummonCooldown = 0.0f;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
     } companion;
 
     struct MiniGolemSubMinion {
@@ -74,6 +76,8 @@ public:
         float attackVisualTimer = 0.0f;
         float formationAngle = 0.0f;
         float invulnTimer = 0.0f;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
     };
     MiniGolemSubMinion golemSubMinions[3];
 
@@ -102,6 +106,8 @@ public:
         float invulnTimer = 0.0f;
         float formationAngle = 0.0f;
         int facingDirection = 1;
+        float buffDefenseTimer = 0.0f;
+        float buffSpeedTimer = 0.0f;
     };
     std::vector<TowerCompanion> towerCompanions;
     float towerSquadRespawnTimer = 0.0f; // 2 minutes (120s), starts only when ALL 7 are dead
@@ -112,6 +118,7 @@ public:
     int GetActiveTowerCompanionCount() const;
     void InitTowerSquad();
     void RelocateTowerCompanions();
+    void HealAllSummons(float radius, float amount, bool grantBuffs, ParticleSystem& particles);
 
     // Friendly Mist Fairy Companion (Totem of Mist)
     struct MistFairy {

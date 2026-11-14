@@ -953,7 +953,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         }
 
         struct WepBtnInfo { WeaponType type; };
-        WepBtnInfo wepBtns[10] = {
+        WepBtnInfo wepBtns[11] = {
             { WeaponType::SWORD },
             { WeaponType::DAGGERS },
             { WeaponType::MACE },
@@ -963,7 +963,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             { WeaponType::WINDRUNNER_RECURVE },
             { WeaponType::SUN_CLAYMORE },
             { WeaponType::STORM_GLAIVE },
-            { WeaponType::GLACIAL_CLEAVER }
+            { WeaponType::GLACIAL_CLEAVER },
+            { WeaponType::SOVEREIGN_SCEPTER }
         };
         float wepBtnW = (leftW - 32.0f - (float)(std::size(wepBtns) - 1) * 4.0f) / (float)std::size(wepBtns);
         float wepBtnH = 42.0f;
@@ -1947,7 +1948,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 5. WEAPON ARSENAL GRID & INSPECTION
             // =========================================================
             struct WepListEntry { WeaponType type; const char* lockMsg; int tierPips; };
-            WepListEntry weps[10] = {
+            WepListEntry weps[11] = {
                 { WeaponType::SWORD, "Ruined Castle - Awakening Pedestal", 1 },
                 { WeaponType::DAGGERS, "Ruined Castle - Upper Gallery Pedestal", 1 },
                 { WeaponType::MACE, "Ruined Castle - North Crypt Pedestal", 2 },
@@ -1957,7 +1958,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { WeaponType::WINDRUNNER_RECURVE, "Varek's Forge - Crafted from Gale Archer Trophies", 3 },
                 { WeaponType::SUN_CLAYMORE, "Varek's Forge - Forged from Tempered Ore & Solar Slag", 3 },
                 { WeaponType::STORM_GLAIVE, "Varek's Forge - Forged from Gale Mist & Tempered Steel", 3 },
-                { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 }
+                { WeaponType::GLACIAL_CLEAVER, "Varek's Forge - Forged from Berserker Troll Horn", 3 },
+                { WeaponType::SOVEREIGN_SCEPTER, "Arena of Zyphden - Conqueror's Radiant Healer", 3 }
             };
 
             int unlockedCount = 0;
@@ -2114,6 +2116,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 DrawText("[Archetype]: 2-stage Tempest Cyclone grants i-frame surge, +15 Poise & Crescent Gale Wave.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 110, 245, 230, 240 });
             } else if (weps[s_inspectedWep].type == WeaponType::GLACIAL_CLEAVER) {
                 DrawText("[Archetype]: Dual-wielding frost barrage with 4-stage Fury of Cleaves heavy rupture.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 140, 225, 255, 240 });
+            } else if (weps[s_inspectedWep].type == WeaponType::SOVEREIGN_SCEPTER) {
+                DrawText("[Archetype]: Pure healing rod. Light pulse & 360-deg Sanctuary Radiance heal summons & grant +15 DEF/+20% SPD.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 120, 240, 255, 240 });
             } else {
                 DrawText("[Archetype]: Balanced physical weapon with high deflection composure.", (int)panelX + 14, (int)drawerListY + 153, 10, Color{ 160, 185, 215, 220 });
             }

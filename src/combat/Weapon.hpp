@@ -46,22 +46,22 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "Dual Daggers",
                 "Swift twin-blade flurry (9 stamina light strikes). Heavy attack unleashes a 3-stage combo: Shadow Puncture (invulnerable lunge applying Bleed), Backstab Cross-Slash (+40% bonus against bleeding/rear targets), and Vault Kick (staggers target and propels player backward).",
                 12.0f, 65.0f, 95.0f, 0.14f, 0.18f, 9.0f,
-                58.0f, 95.0f, 360.0f, 0.18f, 0.12f, 1.80f, 28.0f,
+                52.0f, 95.0f, 360.0f, 0.18f, 0.12f, 1.80f, 28.0f,
                 16.0f, 0.50f,
                 0, 1.0f, 0.0f, 1.0f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Dual Daggers +1";
-                stats.lightDamage = 15.0f;
-                stats.heavyDamage = 68.0f;
+                stats.lightDamage = 16.0f;
+                stats.heavyDamage = 66.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Dual Daggers +2";
-                stats.lightDamage = 18.0f;
+                stats.lightDamage = 20.0f;
                 stats.heavyDamage = 80.0f;
-                stats.critMultiplier = 1.10f;
+                stats.critMultiplier = 1.15f;
             }
             return stats;
 
@@ -70,22 +70,22 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "War Mace",
                 "Crushing heavy warhammer. Heavy attack unleashes a 2-stage devastating combo: Overhead Skull Crusher (hyper-armor, inflicts -20% Armor Fracture debuff for 4s), and Seismic Tremor (360-deg shockwave piercing 25% armor and knocking foes flat).",
                 24.0f, 80.0f, 85.0f, 0.28f, 0.52f, 22.0f,
-                78.0f, 150.0f, 360.0f, 0.45f, 0.35f, 3.20f, 36.0f,
+                76.0f, 150.0f, 360.0f, 0.45f, 0.35f, 3.20f, 36.0f,
                 26.0f, 1.25f,
                 0, 1.0f, 0.0f, 1.0f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "War Mace +1";
-                stats.lightDamage = 28.0f;
-                stats.heavyDamage = 92.0f;
+                stats.lightDamage = 30.0f;
+                stats.heavyDamage = 94.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "War Mace +2";
-                stats.lightDamage = 34.0f;
-                stats.heavyDamage = 108.0f;
-                stats.defensePierceBonus = 0.10f;
+                stats.lightDamage = 36.0f;
+                stats.heavyDamage = 112.0f;
+                stats.defensePierceBonus = 0.15f;
             }
             return stats;
 
@@ -102,7 +102,7 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Truth Seeker [Consecrated]";
                 stats.lightDamage = 28.0f;
-                stats.heavyDamage = 88.0f;
+                stats.heavyDamage = 90.0f;
                 stats.holyBeamDamage = 28.0f;
             }
             return stats;
@@ -119,14 +119,14 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Royal Halberd +1";
-                stats.lightDamage = 22.0f;
-                stats.heavyDamage = 72.0f;
+                stats.lightDamage = 23.0f;
+                stats.heavyDamage = 74.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Royal Halberd +2";
-                stats.lightDamage = 26.0f;
-                stats.heavyDamage = 88.0f;
+                stats.lightDamage = 28.0f;
+                stats.heavyDamage = 90.0f;
                 stats.defensePierceBonus = 0.20f;
                 stats.poiseMultiplier = 1.35f;
             }
@@ -137,21 +137,21 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "Twin Zephyr Daggers",
                 "Gale-forged dual curved blades pulsing with Shadow Essence. Light attack unleashes a rapid wind flurry (8 stamina). Heavy attack performs an evasive Shadow-Step with invulnerability frames, striking in a 360-deg whirlwind and leaving an explosive decoy.",
                 16.0f, 75.0f, 105.0f, 0.12f, 0.15f, 8.0f,
-                68.0f, 110.0f, 360.0f, 0.15f, 0.12f, 1.50f, 25.0f,
+                64.0f, 110.0f, 360.0f, 0.15f, 0.12f, 1.50f, 25.0f,
                 14.0f, 0.35f,
                 0, 1.0f, 0.15f, 1.15f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Twin Zephyr Daggers +1";
-                stats.lightDamage = 20.0f;
-                stats.heavyDamage = 80.0f;
+                stats.lightDamage = 21.0f;
+                stats.heavyDamage = 78.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Twin Zephyr Daggers +2";
-                stats.lightDamage = 25.0f;
-                stats.heavyDamage = 95.0f;
+                stats.lightDamage = 26.0f;
+                stats.heavyDamage = 94.0f;
                 stats.defensePierceBonus = 0.25f;
             }
             return stats;
@@ -160,22 +160,22 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
             stats = {
                 "Windrunner's Recurve",
                 "Acrobatic wind bow crafted from Gale Archer trophies. Light attack fires rapid wind arrows with an impact windburst AoE (30% weapon dmg). Heavy attack channels a Gale Piercer Drill Arrow with 50% defense pierce that shatters enemy armor and stuns foes.",
-                9.0f, 520.0f, 20.0f, 0.20f, 0.28f, 18.0f,
-                36.0f, 620.0f, 25.0f, 0.38f, 0.28f, 2.60f, 42.0f,
+                10.0f, 520.0f, 20.0f, 0.20f, 0.28f, 18.0f,
+                40.0f, 620.0f, 25.0f, 0.38f, 0.28f, 2.60f, 42.0f,
                 14.0f, 0.50f,
                 0, 1.30f, 0.50f, 1.25f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Windrunner's Recurve +1";
-                stats.lightDamage = 11.0f;
-                stats.heavyDamage = 44.0f;
+                stats.lightDamage = 14.0f;
+                stats.heavyDamage = 52.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Windrunner's Recurve +2";
-                stats.lightDamage = 13.0f;
-                stats.heavyDamage = 52.0f;
+                stats.lightDamage = 18.0f;
+                stats.heavyDamage = 64.0f;
                 stats.defensePierceBonus = 0.60f;
             }
             return stats;
@@ -185,7 +185,7 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "Sun-Forged Claymore",
                 "Colossal greatsword bathed in golden sunfire. Heavy attack unleashes a 2-stage Solar Cataclysm combo: Sunfire Crescent (inflicts 4s Solar Burn) into an overhead Solar Cataclysm Slam (+25% pierce, +30% vs burning foes).",
                 30.0f, 115.0f, 140.0f, 0.30f, 0.45f, 24.0f,
-                117.0f, 200.0f, 180.0f, 0.40f, 0.22f, 2.60f, 38.0f,
+                105.0f, 200.0f, 180.0f, 0.40f, 0.22f, 2.60f, 38.0f,
                 24.0f, 1.15f,
                 0, 1.40f, 0.15f, 1.0f, 0.0f
             };
@@ -193,13 +193,13 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Sun-Forged Claymore +1";
                 stats.lightDamage = 36.0f;
-                stats.heavyDamage = 139.0f;
+                stats.heavyDamage = 126.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Sun-Forged Claymore +2";
                 stats.lightDamage = 42.0f;
-                stats.heavyDamage = 162.0f;
+                stats.heavyDamage = 148.0f;
                 stats.defensePierceBonus = 0.25f;
                 stats.poiseMultiplier = 1.60f;
             }
@@ -210,7 +210,7 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "Storm Glaive",
                 "Aerodynamic wind polearm infused with condensed Gale Mist. Heavy attack unleashes a 2-stage Tempest Cyclone combo: Zephyr Surge Step (0.18s i-frame gale lunge) into Tempest Cyclone (+15 Composure on hit & piercing Crescent Gale Wave).",
                 20.0f, 155.0f, 55.0f, 0.18f, 0.28f, 12.0f,
-                100.0f, 180.0f, 360.0f, 0.26f, 0.18f, 2.00f, 28.0f,
+                90.0f, 180.0f, 360.0f, 0.26f, 0.18f, 2.00f, 28.0f,
                 16.0f, 0.70f,
                 0, 1.15f, 0.25f, 1.15f, 0.0f
             };
@@ -218,13 +218,13 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Storm Glaive +1";
                 stats.lightDamage = 25.0f;
-                stats.heavyDamage = 120.0f;
+                stats.heavyDamage = 110.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Storm Glaive +2";
                 stats.lightDamage = 31.0f;
-                stats.heavyDamage = 142.0f;
+                stats.heavyDamage = 132.0f;
                 stats.defensePierceBonus = 0.35f;
                 stats.critMultiplier = 1.25f;
             }
@@ -243,15 +243,38 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 stats.upgradeLevel = 1;
                 stats.name = "Twin Glacial Cleavers +1";
                 stats.lightDamage = 25.0f;
-                stats.heavyDamage = 54.0f;
+                stats.heavyDamage = 56.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Twin Glacial Cleavers +2";
-                stats.lightDamage = 31.0f;
-                stats.heavyDamage = 64.0f;
+                stats.lightDamage = 30.0f;
+                stats.heavyDamage = 66.0f;
                 stats.defensePierceBonus = 0.30f;
                 stats.poiseMultiplier = 1.45f;
+            }
+            return stats;
+
+        case WeaponType::SOVEREIGN_SCEPTER:
+            stats = {
+                "Sovereign's Scepter",
+                "Sacred rod of command bathed in radiant luminescence. Built as a pure healing weapon with minimal offensive power (4 DMG). Light attack unleashes an aura pulse restoring +24 HP (+30 at +1, +38 at +2) to nearby summons. Heavy attack channels Sanctuary Radiance: a full 360-degree AoE wave dealing 0 DMG to enemies while restoring +75 HP (+95 at +1, +120 at +2) to all active minions, purging debuffs and conferring +15 DEF and +20% move speed for 6 seconds.",
+                4.0f, 90.0f, 90.0f, 0.20f, 0.25f, 10.0f,
+                0.0f, 280.0f, 360.0f, 0.32f, 0.35f, 2.50f, 25.0f,
+                16.0f, 0.60f,
+                0, 1.0f, 0.0f, 1.0f, 0.0f
+            };
+            if (upgradeLevel >= 1) {
+                stats.upgradeLevel = 1;
+                stats.name = "Sovereign's Scepter +1";
+                stats.lightDamage = 5.0f;
+                stats.heavyDamage = 0.0f;
+            }
+            if (upgradeLevel >= 2) {
+                stats.upgradeLevel = 2;
+                stats.name = "Sovereign's Scepter +2";
+                stats.lightDamage = 6.0f;
+                stats.heavyDamage = 0.0f;
             }
             return stats;
 
@@ -261,21 +284,21 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
                 "Crusader Blade",
                 "Consecrated broadsword of the Order. Heavy attack executes a 3-stage martial combo: Crescent Cleave (restores +12 Composure), Shock Thrust (piercing line interrupting enemy windups), and Radiant Sunder (downward holy cleave dealing +50% bonus damage to staggered foes).",
                 18.0f, 75.0f, 110.0f, 0.22f, 0.35f, 15.0f,
-                88.0f, 125.0f, 160.0f, 0.22f, 0.38f, 2.20f, 30.0f,
+                75.0f, 125.0f, 160.0f, 0.22f, 0.38f, 2.20f, 30.0f,
                 20.0f, 0.85f,
                 0, 1.0f, 0.0f, 1.0f, 0.0f
             };
             if (upgradeLevel >= 1) {
                 stats.upgradeLevel = 1;
                 stats.name = "Crusader Blade +1";
-                stats.lightDamage = 22.0f;
-                stats.heavyDamage = 102.0f;
+                stats.lightDamage = 23.0f;
+                stats.heavyDamage = 92.0f;
             }
             if (upgradeLevel >= 2) {
                 stats.upgradeLevel = 2;
                 stats.name = "Crusader Blade +2";
-                stats.lightDamage = 26.0f;
-                stats.heavyDamage = 118.0f;
+                stats.lightDamage = 28.0f;
+                stats.heavyDamage = 110.0f;
                 stats.poiseMultiplier = 1.05f;
             }
             return stats;

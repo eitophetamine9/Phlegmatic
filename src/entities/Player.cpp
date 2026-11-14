@@ -738,6 +738,55 @@ void Player::RelocateTowerCompanions() {
     }
 }
 
+void Player::HealAllSummons(float radius, float amount, bool grantBuffs, ParticleSystem& particles) {
+    // 1. Companion Golem
+    if (companion.active && companion.health > 0.0f) {
+        float dx = companion.position.x - position.x;
+        float dy = companion.position.y - position.y;
+        if (dx * dx + dy * dy <= radius * radius) {
+            companion.health = fminf(companion.maxHealth, companion.health + amount);
+            if (grantBuffs) {
+                companion.buffDefenseTimer = 6.0f;
+                companion.buffSpeedTimer = 6.0f;
+            }
+            particles.SpawnFloatingText(companion.position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 18.0f);
+            particles.SpawnSparks(companion.position, Color{ 120, 255, 180, 255 }, 8, 80.0f);
+        }
+    }
+    // 2. Sub-Minion Golems
+    for (int i = 0; i < 3; i++) {
+        if (golemSubMinions[i].active && golemSubMinions[i].health > 0.0f) {
+            float dx = golemSubMinions[i].position.x - position.x;
+            float dy = golemSubMinions[i].position.y - position.y;
+            if (dx * dx + dy * dy <= radius * radius) {
+                golemSubMinions[i].health = fminf(golemSubMinions[i].maxHealth, golemSubMinions[i].health + amount);
+                if (grantBuffs) {
+                    golemSubMinions[i].buffDefenseTimer = 6.0f;
+                    golemSubMinions[i].buffSpeedTimer = 6.0f;
+                }
+                particles.SpawnFloatingText(golemSubMinions[i].position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 16.0f);
+                particles.SpawnSparks(golemSubMinions[i].position, Color{ 120, 255, 180, 255 }, 6, 60.0f);
+            }
+        }
+    }
+    // 3. Tower Companions
+    for (auto& tc : towerCompanions) {
+        if (tc.active && tc.health > 0.0f) {
+            float dx = tc.position.x - position.x;
+            float dy = tc.position.y - position.y;
+            if (dx * dx + dy * dy <= radius * radius) {
+                tc.health = fminf(tc.maxHealth, tc.health + amount);
+                if (grantBuffs) {
+                    tc.buffDefenseTimer = 6.0f;
+                    tc.buffSpeedTimer = 6.0f;
+                }
+                particles.SpawnFloatingText(tc.position, TextFormat("+%d HP", (int)amount), Color{ 100, 255, 140, 255 }, 16.0f);
+                particles.SpawnSparks(tc.position, Color{ 120, 255, 180, 255 }, 6, 60.0f);
+            }
+        }
+    }
+}
+
 void Player::SetTotem(TotemType newTotem) {
     currentTotem = newTotem;
     inventory.UnlockTotem(newTotem);
@@ -1148,6 +1197,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             if (companion.invulnTimer > 0.0f) {
                 companion.invulnTimer -= dt;
             }
+            if (companion.buffDefenseTimer > 0.0f) companion.buffDefenseTimer -= dt;
+            if (companion.buffSpeedTimer > 0.0f) companion.buffSpeedTimer -= dt;
             float regenRate = (gTier == 2) ? 8.0f : ((gTier == 1) ? 6.0f : 4.0f);
             if (companion.health < companion.maxHealth) {
                 companion.health = fminf(companion.maxHealth, companion.health + regenRate * dt);
@@ -1178,6 +1229,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                         if (golemSubMinions[i].invulnTimer > 0.0f) golemSubMinions[i].invulnTimer -= dt;
                         if (golemSubMinions[i].attackCooldown > 0.0f) golemSubMinions[i].attackCooldown -= dt;
                         if (golemSubMinions[i].attackVisualTimer > 0.0f) golemSubMinions[i].attackVisualTimer -= dt;
+                        if (golemSubMinions[i].buffDefenseTimer > 0.0f) golemSubMinions[i].buffDefenseTimer -= dt;
+                        if (golemSubMinions[i].buffSpeedTimer > 0.0f) golemSubMinions[i].buffSpeedTimer -= dt;
                     }
                 }
             }
@@ -1291,6 +1344,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 if (c.invulnTimer > 0.0f) c.invulnTimer -= dt;
                 if (c.attackCooldown > 0.0f) c.attackCooldown -= dt;
                 if (c.attackVisualTimer > 0.0f) c.attackVisualTimer -= dt;
+                if (c.buffDefenseTimer > 0.0f) c.buffDefenseTimer -= dt;
+                if (c.buffSpeedTimer > 0.0f) c.buffSpeedTimer -= dt;
                 if (c.health < c.maxHealth) {
                     c.health = fminf(c.maxHealth, c.health + 2.5f * dt);
                 }
@@ -1665,6 +1720,10 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
             particles.SpawnSparks(position, Color{ 255, 220, 60, 220 }, 2, 50.0f);
 
+        } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+            particles.SpawnSparks(position, Color{ 120, 240, 255, 220 }, 3, 55.0f);
+
         } else if (currentWeapon == WeaponType::MACE) {
 
             particles.SpawnSparks(position, Color{ 255, 140, 40, 200 }, 2, 45.0f);
@@ -1918,6 +1977,33 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 particles.SpawnSparks(position, Color{ 180, 242, 255, 255 }, 14, 150.0f);
                 velocity.x += forwardDir.x * 135.0f;
                 velocity.y += forwardDir.y * 135.0f;
+
+            } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+                // Sovereign's Scepter Heavy: Sanctuary Radiance (Full 360-degree AoE wave)
+                // Pure healing rod: deals 0 damage to enemies, but heals all friendly summons within 280px
+                currentAttack.range = 280.0f;
+                currentAttack.arcAngle = 360.0f;
+                currentAttack.damage = 0.0f;
+                currentAttack.duration = 0.35f;
+                currentAttack.timer = 0.35f;
+                currentAttack.knockback = 50.0f;
+                currentAttack.defensePierce = 0.0f;
+                currentAttack.isFrontalCircle = false;
+                currentAttack.hasShockwave = false;
+
+                int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
+                float scepHeal = (scepUpg >= 2) ? 120.0f : ((scepUpg >= 1) ? 95.0f : 75.0f);
+                HealAllSummons(280.0f, scepHeal, true, particles);
+
+                SoundFX::PlayHeal();
+                particles.AddScreenShake(3.0f, 0.22f);
+                shockwaveActive = true;
+                shockwaveTimer = 0.38f;
+                shockwaveRadius = 280.0f;
+                shockwavePos = position;
+                particles.SpawnSparks(position, Color{ 255, 235, 120, 255 }, 35, 220.0f);
+                particles.SpawnFloatingText(position, "SANCTUARY RADIANCE!", Color{ 120, 240, 255, 255 }, 24.0f);
 
             } else {
 
@@ -3033,6 +3119,21 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
         SoundFX::PlayLightAttack();
         particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 220, 255, 255 });
         particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 180, 235, 255, 255 }, 12, 130.0f);
+
+    } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
+
+        currentAttack.range = stats.lightRange;
+        currentAttack.arcAngle = stats.lightArc;
+        currentAttack.damage = stats.lightDamage * GetTotemDamageMultiplier();
+        currentAttack.knockback = 50.0f;
+        currentAttack.defensePierce = 0.0f;
+        SoundFX::PlayLightAttack();
+        SoundFX::PlayHeal();
+        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 235, 255, 255 });
+        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 160, 245, 255, 255 }, 12, 110.0f);
+        int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
+        float scepHeal = (scepUpg >= 2) ? 38.0f : ((scepUpg >= 1) ? 30.0f : 24.0f);
+        HealAllSummons(stats.lightRange + 45.0f, scepHeal, false, particles);
 
     } else {
 
