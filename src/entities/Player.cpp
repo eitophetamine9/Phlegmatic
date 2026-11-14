@@ -579,12 +579,49 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
     }
 }
 
+int Player::GetActiveGolemSubMinionCount() const {
+    int count = 0;
+    for (int i = 0; i < 3; ++i) {
+        if (golemSubMinions[i].active && golemSubMinions[i].health > 0.0f) {
+            count++;
+        }
+    }
+    return count;
+}
+
+void Player::InitGolemSubMinions() {
+    for (int i = 0; i < 3; ++i) {
+        golemSubMinions[i].active = true;
+        golemSubMinions[i].maxHealth = 280.0f;
+        golemSubMinions[i].health = 280.0f;
+        golemSubMinions[i].defense = 40.0f;
+        golemSubMinions[i].damage = 18.0f;
+        golemSubMinions[i].radius = 14.0f;
+        golemSubMinions[i].attackCooldown = 0.0f;
+        golemSubMinions[i].attackVisualTimer = 0.0f;
+        golemSubMinions[i].invulnTimer = 0.0f;
+        golemSubMinions[i].formationAngle = (float)i * (2.0f * 3.14159265f / 3.0f);
+    }
+    RelocateGolemSubMinions();
+}
+
+void Player::RelocateGolemSubMinions() {
+    for (int i = 0; i < 3; ++i) {
+        float ang = golemSubMinions[i].formationAngle;
+        Vector2 offset = { cosf(ang) * 48.0f, sinf(ang) * 48.0f };
+        golemSubMinions[i].position = Vector2Add(companion.position, offset);
+    }
+}
+
 void Player::RelocateCompanionToPlayer() {
     float sideAngle = (facingAngle - 90.0f) * DEG2RAD;
     Vector2 offset = { cosf(sideAngle) * 36.0f, sinf(sideAngle) * 36.0f };
     companion.position = Vector2Add(position, offset);
     companion.attackCooldown = 0.0f;
     companion.invulnTimer = 0.0f;
+    if (companion.isCommandingTitan) {
+        RelocateGolemSubMinions();
+    }
     if (currentTotem == TotemType::TOTEM_MIST) {
         mistFairy.active = true;
         mistFairy.position = { position.x - 32.0f, position.y - 20.0f };
@@ -713,6 +750,27 @@ void Player::SetTotem(TotemType newTotem) {
         mistFairy.active = false;
     }
     if (newTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        int tier = inventory.GetTotemUpgrade(TotemType::ELEMENTAL_CORE_TOTEM);
+        if (tier == 0) {
+            companion.maxHealth = 460.0f;
+            companion.defense = 55.0f;
+            companion.damage = 32.0f;
+            companion.radius = 16.0f;
+            companion.isCommandingTitan = false;
+        } else if (tier == 1) {
+            companion.maxHealth = 600.0f;
+            companion.defense = 65.0f;
+            companion.damage = 40.0f;
+            companion.radius = 18.0f;
+            companion.isCommandingTitan = false;
+        } else {
+            companion.maxHealth = 920.0f;
+            companion.defense = 75.0f;
+            companion.damage = 48.0f;
+            companion.radius = 28.0f;
+            companion.isCommandingTitan = true;
+            InitGolemSubMinions();
+        }
         if (!companion.active && companion.respawnTimer <= 0.0f) {
             companion.active = true;
             companion.health = companion.maxHealth;
@@ -720,8 +778,9 @@ void Player::SetTotem(TotemType newTotem) {
         }
     } else {
         companion.active = false;
+        for (int i = 0; i < 3; ++i) golemSubMinions[i].active = false;
     }
-    if (newTotem == TotemType::CONQUEROR_TOTEM) {
+    if (newTotem == TotemType::COMMANDER_TOTEM) {
         if (towerCompanions.empty()) {
             InitTowerSquad();
         } else {
@@ -752,15 +811,16 @@ void Player::SetTotem(TotemType newTotem) {
 
 float Player::GetTotemDamageMultiplier() const {
     float mult = 1.0f;
+    int tier = inventory.GetTotemUpgrade(currentTotem);
     if (currentTotem == TotemType::TOTEM_INSANITY) {
         float maxHp = GetMaxHealth();
         if (maxHp > 0.0f && (health / maxHp) <= 0.40f) {
-            mult = 2.35f; // Low-health blood frenzy: surges from +65% (1.65f) to +135% (2.35f) more damage
+            mult = (tier == 2) ? 3.00f : ((tier == 1) ? 2.60f : 2.35f);
         } else {
-            mult = 1.65f; // Baseline: +65% overall damage
+            mult = (tier == 2) ? 2.00f : ((tier == 1) ? 1.80f : 1.65f);
         }
     } else {
-        mult = GetTotemStats(currentTotem).damageMultiplier;
+        mult = GetTotemStats(currentTotem, tier).damageMultiplier;
     }
     if (berserkerTimer > 0.0f) {
         mult *= 1.30f; // +30% Damage while Berserker Draught active
@@ -772,7 +832,7 @@ float Player::GetMaxHealth() const {
     float bonus = GetHelmetStats(equippedHelmet).maxHpBonus
                 + GetChestplateStats(equippedChestplate).maxHpBonus
                 + GetLeggingsStats(equippedLeggings).maxHpBonus
-                + GetTotemStats(currentTotem).maxHpBonus;
+                + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
         bonus += 50.0f; // +50 Max HP
     }
@@ -794,7 +854,7 @@ float Player::GetDefense() const {
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
         raw += 25.0f;
     }
-    float total = raw * GetTotemStats(currentTotem).defenseMultiplier;
+    float total = raw * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).defenseMultiplier;
     if (stoneskinTimer > 0.0f) {
         total *= 1.40f; // +40% Physical Defense while Stoneskin Tonic active
     }
@@ -806,7 +866,7 @@ float Player::GetWill() const {
                     + GetHelmetStats(equippedHelmet).willBonus
                     + GetChestplateStats(equippedChestplate).willBonus
                     + GetLeggingsStats(equippedLeggings).willBonus
-                    + GetTotemStats(currentTotem).willBonus;
+                    + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).willBonus;
     if (HasFullArmorSet(ArmorSet::CRUSADER_PLATE)) {
         totalWill += 25.0f;
     }
@@ -817,7 +877,7 @@ float Player::GetSpeed() const {
     float speedMult = GetHelmetStats(equippedHelmet).speedModifier
                     * GetChestplateStats(equippedChestplate).speedModifier
                     * GetLeggingsStats(equippedLeggings).speedModifier
-                    * GetTotemStats(currentTotem).speedMultiplier;
+                    * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
         speedMult *= 1.10f; // +10% Set Move Speed (~+21% total with light pieces)
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
@@ -1065,6 +1125,8 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
     }
 
     if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        int gTier = inventory.GetTotemUpgrade(TotemType::ELEMENTAL_CORE_TOTEM);
+        companion.isCommandingTitan = (gTier >= 2);
         if (!companion.active) {
             companion.respawnTimer -= dt;
             if (companion.respawnTimer <= 0.0f) {
@@ -1073,7 +1135,12 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
                 companion.respawnTimer = 0.0f;
                 companion.invulnTimer = 0.5f;
                 RelocateCompanionToPlayer();
-                particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+                if (companion.isCommandingTitan) {
+                    InitGolemSubMinions();
+                    particles.SpawnFloatingText(position, "COMMANDING TITAN RECONSTRUCTED!", Color{ 255, 180, 50, 255 }, 26.0f);
+                } else {
+                    particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+                }
                 particles.SpawnSparks(companion.position, Color{ 255, 170, 50, 255 }, 25, 180.0f);
                 SoundFX::PlayParrySuccess();
             }
@@ -1081,12 +1148,43 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
             if (companion.invulnTimer > 0.0f) {
                 companion.invulnTimer -= dt;
             }
+            float regenRate = (gTier == 2) ? 8.0f : ((gTier == 1) ? 6.0f : 4.0f);
             if (companion.health < companion.maxHealth) {
-                companion.health = fminf(companion.maxHealth, companion.health + 4.0f * dt);
+                companion.health = fminf(companion.maxHealth, companion.health + regenRate * dt);
+            }
+
+            // Tier 3 Commanding Titan Sub-Minions logic
+            if (companion.isCommandingTitan) {
+                if (GetActiveGolemSubMinionCount() < 3) {
+                    companion.subMinionSummonCooldown -= dt;
+                    if (companion.subMinionSummonCooldown <= 0.0f) {
+                        companion.subMinionSummonCooldown = 18.0f;
+                        for (int i = 0; i < 3; ++i) {
+                            if (!golemSubMinions[i].active || golemSubMinions[i].health <= 0.0f) {
+                                golemSubMinions[i].active = true;
+                                golemSubMinions[i].health = golemSubMinions[i].maxHealth;
+                                golemSubMinions[i].invulnTimer = 0.5f;
+                                float ang = (float)i * (2.0f * 3.14159265f / 3.0f);
+                                golemSubMinions[i].position = Vector2Add(companion.position, { cosf(ang) * 45.0f, sinf(ang) * 45.0f });
+                                particles.SpawnFloatingText(golemSubMinions[i].position, "MINI GOLEM SUMMONED!", Color{ 255, 180, 50, 255 }, 20.0f);
+                                particles.SpawnSparks(golemSubMinions[i].position, Color{ 255, 160, 50, 255 }, 16, 120.0f);
+                                break;
+                            }
+                        }
+                    }
+                }
+                for (int i = 0; i < 3; ++i) {
+                    if (golemSubMinions[i].active) {
+                        if (golemSubMinions[i].invulnTimer > 0.0f) golemSubMinions[i].invulnTimer -= dt;
+                        if (golemSubMinions[i].attackCooldown > 0.0f) golemSubMinions[i].attackCooldown -= dt;
+                        if (golemSubMinions[i].attackVisualTimer > 0.0f) golemSubMinions[i].attackVisualTimer -= dt;
+                    }
+                }
             }
         }
     } else {
         companion.active = false;
+        for (int i = 0; i < 3; ++i) golemSubMinions[i].active = false;
     }
 
     // Totem of Mist & Mist Fairy Companion Update

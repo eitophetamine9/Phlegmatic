@@ -48,6 +48,9 @@ void Inventory::InitDefault() {
     for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
         weaponUpgradeLevel[i] = 0;
     }
+    for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        totemUpgradeLevel[i] = 0;
+    }
 
     // Initial quest item: Knight's Signet
     questItems.push_back({

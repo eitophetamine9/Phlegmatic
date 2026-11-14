@@ -1148,6 +1148,7 @@ void Game::SaveActiveGame() {
         data.unlockedLeggings[i] = player.GetInventory().HasLeggings((LeggingsType)i);
     }
     for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        data.totemUpgrades[i] = player.GetInventory().GetTotemUpgrade((TotemType)i);
         data.unlockedTotems[i] = player.GetInventory().HasTotem((TotemType)i);
     }
     for (int i = 0; i < GameLimits::CAMPFIRE_COUNT; ++i) {
@@ -1324,6 +1325,7 @@ void Game::LoadActiveGame(int slotIndex) {
         }
     }
     for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        player.GetInventory().SetTotemUpgrade((TotemType)i, data.totemUpgrades[i]);
         if (data.unlockedTotems[i]) {
             player.GetInventory().UnlockTotem((TotemType)i);
         }

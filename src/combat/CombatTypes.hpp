@@ -76,7 +76,8 @@ enum class TotemType {
     ELEMENTAL_CORE_TOTEM,  // Quarry Boss: +25% DEF, Mini Golem (460 HP, 55 DEF, 3 patterns), 54 DMG bolt (3s CD), -10% speed
     TOTEM_PHLEGMATIC_CORE, // Northern Highland: -80% knockback, gray health recovery, chill counter
     CHAMPION_TOTEM,        // Apex Gauntlet: +35% DMG, +30% DEF, +15% speed, +35% stam, -20% CDs, +40 Will, +50 HP, +14 HP/s regen (+2 in combat), -70% external healing
-    CONQUEROR_TOTEM        // Royal Arena Wave 25: 7 Tower Companions (full HP/DEF, 40% DMG, 2min squad respawn), +20% DEF, +40 HP, +25 Will
+    COMMANDER_TOTEM,       // Royal Arena Wave 25: 7 Tower Companions (full HP/DEF, 40% DMG, 2min squad respawn), +20% DEF, +40 HP, +25 Will, -40% Player Attack DMG
+    CONQUEROR_TOTEM = COMMANDER_TOTEM
 };
 
 // The Medieval Four Humors Alignment

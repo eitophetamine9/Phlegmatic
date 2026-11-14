@@ -546,20 +546,21 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 int pattern = comp.attackPattern % 3;
                 if (pattern == 2 && nearestDist <= 280.0f) {
                     // Pattern 3: Piercing Elemental Spike Throw
-                    comp.attackCooldown = 0.95f;
+                    comp.attackCooldown = comp.isCommandingTitan ? 0.75f : 0.95f;
                     comp.attackPattern = (comp.attackPattern + 1) % 3;
                     Vector2 spikeVel = Vector2Scale(dir, 500.0f);
-                    Projectile spike(comp.position, spikeVel, 9.0f, 34.0f, ProjectileType::ELEMENTAL_SPIKE, true, 0.30f);
+                    float spikeDmg = comp.isCommandingTitan ? 48.0f : 34.0f;
+                    Projectile spike(comp.position, spikeVel, 9.0f, spikeDmg, ProjectileType::ELEMENTAL_SPIKE, true, 0.30f);
                     spike.SetPiercing(true);
                     projectiles.push_back(spike);
                     particles.SpawnSparks(comp.position, Color{ 255, 190, 60, 255 }, 16, 150.0f);
                     SoundFX::PlayLightAttack();
-                } else if (pattern == 0 && nearestDist <= 55.0f) {
-                    // Pattern 1: Heavy AoE Slam (80px radius)
-                    comp.attackCooldown = 0.95f;
+                } else if (pattern == 0 && nearestDist <= (comp.isCommandingTitan ? 75.0f : 55.0f)) {
+                    // Pattern 1: Heavy AoE Slam (80px or 115px radius)
+                    comp.attackCooldown = comp.isCommandingTitan ? 0.85f : 0.95f;
                     comp.attackPattern = (comp.attackPattern + 1) % 3;
-                    float slamDmg = comp.damage + 4.0f; // 36 DMG
-                    float slamRadius = 80.0f;
+                    float slamDmg = comp.damage + (comp.isCommandingTitan ? 8.0f : 4.0f); // 36 or 56 DMG
+                    float slamRadius = comp.isCommandingTitan ? 115.0f : 80.0f;
                     for (auto& target : enemies) {
                         if (!target.IsAlive()) continue;
                         if (Vector2Distance(comp.position, target.GetPosition()) <= slamRadius + target.GetRadius()) {
@@ -570,25 +571,25 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                             }
                         }
                     }
-                    particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, 24, 180.0f);
-                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM SLAM! -" + std::to_string((int)slamDmg), Color{ 100, 245, 180, 255 }, 20.0f);
+                    particles.SpawnSparks(comp.position, Color{ 100, 255, 180, 255 }, comp.isCommandingTitan ? 32 : 24, 200.0f);
+                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), (comp.isCommandingTitan ? "TITAN SLAM! -" : "GOLEM SLAM! -") + std::to_string((int)slamDmg), Color{ 100, 245, 180, 255 }, 22.0f);
                     SoundFX::PlayHitImpact();
-                } else if (nearestDist <= 65.0f) {
+                } else if (nearestDist <= (comp.isCommandingTitan ? 85.0f : 65.0f)) {
                     // Pattern 2: Forward Bash Knockback + Armor Fracture + Brief Stagger
-                    comp.attackCooldown = 0.95f;
+                    comp.attackCooldown = comp.isCommandingTitan ? 0.80f : 0.95f;
                     comp.attackPattern = (comp.attackPattern + 1) % 3;
-                    comp.position = Vector2Add(comp.position, Vector2Scale(dir, fminf(18.0f, nearestDist * 0.4f)));
-                    float bashDmg = comp.damage; // 32 DMG
-                    Vector2 strongKnock = Vector2Scale(dir, 1.8f);
+                    comp.position = Vector2Add(comp.position, Vector2Scale(dir, fminf(comp.isCommandingTitan ? 24.0f : 18.0f, nearestDist * 0.4f)));
+                    float bashDmg = comp.damage; // 32 or 48 DMG
+                    Vector2 strongKnock = Vector2Scale(dir, comp.isCommandingTitan ? 2.2f : 1.8f);
                     if (nearestEnemy->TakeDamage(bashDmg, strongKnock, particles, 0.25f)) {
                         handleEnemyDefeated(*nearestEnemy);
                     }
                     if (nearestEnemy->IsAlive()) {
-                        nearestEnemy->ApplyArmorFracture(3.0f);
+                        nearestEnemy->ApplyArmorFracture(comp.isCommandingTitan ? 4.5f : 3.0f);
                         nearestEnemy->ApplyStagger(nearestEnemy->IsBoss() ? 0.25f : 0.50f);
                     }
                     particles.SpawnSparks(nearestEnemy->GetPosition(), Color{ 255, 160, 50, 255 }, 20, 160.0f);
-                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), "GOLEM BASH! -" + std::to_string((int)bashDmg), Color{ 255, 185, 70, 255 }, 20.0f);
+                    particles.SpawnFloatingText(nearestEnemy->GetPosition(), (comp.isCommandingTitan ? "TITAN BASH! -" : "GOLEM BASH! -") + std::to_string((int)bashDmg), Color{ 255, 185, 70, 255 }, 20.0f);
                     SoundFX::PlayHitImpact();
                 }
             }
@@ -596,6 +597,79 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             if (distToPlayer > 56.0f) {
                 Vector2 toPlayer = Vector2Normalize(Vector2Subtract(player.GetPosition(), comp.position));
                 comp.position = Vector2Add(comp.position, Vector2Scale(toPlayer, 230.0f * dt));
+            }
+        }
+
+        // Tier 3 Commanding Titan Sub-Minions AI
+        if (comp.isCommandingTitan) {
+            auto* subMinions = player.GetGolemSubMinions();
+            for (int s = 0; s < 3; ++s) {
+                auto& sm = subMinions[s];
+                if (!sm.active || sm.health <= 0.0f) continue;
+                if (sm.attackCooldown > 0.0f) sm.attackCooldown -= dt;
+
+                Enemy* smTarget = nullptr;
+                float smNearestDist = 200.0f;
+                for (auto& enemy : enemies) {
+                    if (!enemy.IsAlive()) continue;
+                    float d = Vector2Distance(sm.position, enemy.GetPosition());
+                    if (d < smNearestDist) {
+                        smNearestDist = d;
+                        smTarget = &enemy;
+                    }
+                }
+
+                float distToTitan = Vector2Distance(sm.position, comp.position);
+                if (distToTitan > 260.0f) {
+                    float sAngle = sm.formationAngle;
+                    sm.position = Vector2Add(comp.position, { cosf(sAngle) * 44.0f, sinf(sAngle) * 44.0f });
+                    particles.SpawnSparks(sm.position, Color{ 255, 175, 50, 200 }, 8, 80.0f);
+                } else if (smTarget) {
+                    Vector2 toEnemy = Vector2Subtract(smTarget->GetPosition(), sm.position);
+                    Vector2 sDir = Vector2Normalize(toEnemy);
+                    if (sDir.x == 0.0f && sDir.y == 0.0f) sDir = { 1.0f, 0.0f };
+                    if (smNearestDist > 32.0f) {
+                        sm.position = Vector2Add(sm.position, Vector2Scale(sDir, 195.0f * dt));
+                    }
+                    if (sm.attackCooldown <= 0.0f && smNearestDist <= 42.0f) {
+                        sm.attackCooldown = 0.90f;
+                        sm.attackVisualTimer = 0.20f;
+                        float smDmg = sm.damage;
+                        if (smTarget->TakeDamage(smDmg, Vector2Scale(sDir, 1.2f), particles, 0.15f)) {
+                            handleEnemyDefeated(*smTarget);
+                        }
+                        particles.SpawnSparks(sm.position, Color{ 255, 180, 50, 255 }, 10, 100.0f);
+                        particles.SpawnFloatingText(smTarget->GetPosition(), "-" + std::to_string((int)smDmg), Color{ 255, 180, 50, 255 }, 16.0f);
+                        SoundFX::PlayHitImpact();
+                    }
+                } else {
+                    float sAngle = sm.formationAngle + (float)GetTime() * 0.8f;
+                    Vector2 sAnchor = Vector2Add(comp.position, { cosf(sAngle) * 48.0f, sinf(sAngle) * 48.0f });
+                    if (Vector2Distance(sm.position, sAnchor) > 10.0f) {
+                        Vector2 toA = Vector2Normalize(Vector2Subtract(sAnchor, sm.position));
+                        sm.position = Vector2Add(sm.position, Vector2Scale(toA, 180.0f * dt));
+                    }
+                }
+
+                for (auto& enemy : enemies) {
+                    if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
+                    if (sm.invulnTimer > 0.0f) break;
+                    if (Vector2Distance(sm.position, enemy.GetPosition()) <= (sm.radius + enemy.GetRadius() + 10.0f)) {
+                        float effDef = sm.defense;
+                        float baseDmg = 20.0f;
+                        if (enemy.IsApexBoss()) baseDmg *= 1.50f;
+                        float takeDmg = baseDmg * (100.0f / (100.0f + effDef));
+                        sm.health -= takeDmg;
+                        sm.invulnTimer = 0.50f;
+                        particles.SpawnFloatingText(sm.position, "-" + std::to_string((int)takeDmg), Color{ 255, 120, 80, 255 }, 16.0f);
+                        if (sm.health <= 0.0f) {
+                            sm.active = false;
+                            particles.SpawnFloatingText(sm.position, "MINI GOLEM SHATTERED!", Color{ 255, 80, 90, 255 }, 18.0f);
+                            particles.SpawnSparks(sm.position, Color{ 255, 140, 50, 255 }, 16, 120.0f);
+                        }
+                        break;
+                    }
+                }
             }
         }
 

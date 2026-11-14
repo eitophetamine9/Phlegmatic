@@ -1012,22 +1012,69 @@ void PlayerRenderer::Draw(const Player& player) {
         DrawCircle((int)player.shockwavePos.x, (int)player.shockwavePos.y, curRadius * 0.4f, innerCol);
     }
 
-    // Friendly Mini Elemental Golem Companion
+    // Friendly Mini Elemental Golem / Commanding Titan Companion
     if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active) {
         const auto& comp = player.GetCompanion();
-        DrawCircleV(comp.position, comp.radius * 0.9f, Color{ 48, 52, 60, 255 });
-        DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 100, 240, 180, 230 });
-        float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 6.0f);
-        DrawCircleV(comp.position, 5.0f * cPulse, Color{ 100, 255, 170, 255 });
+        DrawEllipse((int)comp.position.x, (int)(comp.position.y + comp.radius * 0.7f), comp.radius * 0.9f, comp.radius * 0.45f, Color{ 10, 10, 15, 140 });
 
-        float barW = 28.0f;
-        float barH = 4.0f;
-        float barX = comp.position.x - barW * 0.5f;
-        float barY = comp.position.y - comp.radius - 8.0f;
-        DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
-        float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
-        DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
-        DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
+        if (comp.isCommandingTitan) {
+            // Evolved Commanding Titan: Heavy basalt armor plates, glowing runic crown & magma core
+            DrawCircleV(comp.position, comp.radius, Color{ 36, 40, 48, 255 });
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 255, 160, 50, 240 });
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius + 3.0f, Color{ 255, 215, 80, 180 });
+            for (int k = 0; k < 5; ++k) {
+                float a = (float)k * (3.14159265f / 4.0f) - 3.14159265f * 0.5f;
+                Vector2 spk = { comp.position.x + cosf(a) * (comp.radius + 5.0f), comp.position.y + sinf(a) * (comp.radius + 5.0f) };
+                DrawCircleV(spk, 3.0f, Color{ 255, 180, 60, 255 });
+            }
+            float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 5.0f);
+            DrawCircleV(comp.position, 8.0f * cPulse, Color{ 255, 160, 40, 255 });
+            DrawCircleV(comp.position, 4.0f, Color{ 255, 240, 180, 255 });
+
+            float barW = 38.0f;
+            float barH = 5.0f;
+            float barX = comp.position.x - barW * 0.5f;
+            float barY = comp.position.y - comp.radius - 12.0f;
+            DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
+            float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+            DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 255, 160, 50, 255 });
+            DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 45, 25, 20, 200 });
+
+            // Render 3 Mini Golems in escort formation
+            const auto* subMinions = player.GetGolemSubMinions();
+            for (int s = 0; s < 3; ++s) {
+                const auto& sm = subMinions[s];
+                if (!sm.active || sm.health <= 0.0f) continue;
+                DrawEllipse((int)sm.position.x, (int)(sm.position.y + sm.radius * 0.7f), sm.radius * 0.85f, sm.radius * 0.4f, Color{ 10, 10, 15, 120 });
+                DrawCircleV(sm.position, sm.radius * 0.9f, Color{ 52, 56, 65, 255 });
+                DrawCircleLines((int)sm.position.x, (int)sm.position.y, sm.radius, Color{ 100, 240, 180, 220 });
+                float smPulse = 0.8f + 0.2f * sinf((float)GetTime() * 7.0f + s * 2.0f);
+                DrawCircleV(sm.position, 3.5f * smPulse, Color{ 100, 255, 170, 255 });
+
+                float sBarW = 20.0f;
+                float sBarH = 3.0f;
+                float sBarX = sm.position.x - sBarW * 0.5f;
+                float sBarY = sm.position.y - sm.radius - 6.0f;
+                DrawRectangle((int)sBarX, (int)sBarY, (int)sBarW, (int)sBarH, Color{ 20, 20, 26, 220 });
+                float smPct = fmaxf(0.0f, sm.health / sm.maxHealth);
+                DrawRectangle((int)sBarX, (int)sBarY, (int)(sBarW * smPct), (int)sBarH, Color{ 80, 240, 160, 255 });
+                DrawRectangleLines((int)sBarX, (int)sBarY, (int)sBarW, (int)sBarH, Color{ 30, 45, 60, 200 });
+            }
+        } else {
+            DrawCircleV(comp.position, comp.radius * 0.9f, Color{ 48, 52, 60, 255 });
+            DrawCircleLines((int)comp.position.x, (int)comp.position.y, comp.radius, Color{ 100, 240, 180, 230 });
+            float cPulse = 0.8f + 0.2f * sinf((float)GetTime() * 6.0f);
+            DrawCircleV(comp.position, 5.0f * cPulse, Color{ 100, 255, 170, 255 });
+
+            float barW = 28.0f;
+            float barH = 4.0f;
+            float barX = comp.position.x - barW * 0.5f;
+            float barY = comp.position.y - comp.radius - 8.0f;
+            DrawRectangle((int)barX, (int)barY, (int)barW, (int)barH, Color{ 20, 20, 26, 220 });
+            float pct = fmaxf(0.0f, comp.health / comp.maxHealth);
+            DrawRectangle((int)barX, (int)barY, (int)(barW * pct), (int)barH, Color{ 80, 240, 160, 255 });
+            DrawRectangleLines((int)barX, (int)barY, (int)barW, (int)barH, Color{ 30, 45, 60, 200 });
+        }
     }
 
     // Friendly Tower Companions Squad (Conqueror's Totem: up to 7 gladiators)

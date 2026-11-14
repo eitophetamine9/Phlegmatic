@@ -234,6 +234,10 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             SaveHelpers::ParseJsonArray(line, outData.weaponUpgrades, [](const std::string& token) {
                 return SaveHelpers::SafeParseInt(token, 0);
             });
+        } else if (line.find("\"totemUpgrades\"") != std::string::npos) {
+            SaveHelpers::ParseJsonArray(line, outData.totemUpgrades, [](const std::string& token) {
+                return SaveHelpers::SafeParseInt(token, 0);
+            });
         } else if (line.find("\"unlockedWeapons\"") != std::string::npos) {
             SaveHelpers::ParseJsonArray(line, outData.unlockedWeapons, [](const std::string& token) {
                 return SaveHelpers::SafeParseBool(token, false);
@@ -364,6 +368,13 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"weaponUpgrades\": [";
     for (int i = 0; i < GameLimits::WEAPON_COUNT; ++i) {
         file << data.weaponUpgrades[i] << (i < GameLimits::WEAPON_COUNT - 1 ? ", " : "");
+    }
+    file << "],\n";
+
+    // Totem upgrades
+    file << "  \"totemUpgrades\": [";
+    for (int i = 0; i < GameLimits::TOTEM_COUNT; ++i) {
+        file << data.totemUpgrades[i] << (i < GameLimits::TOTEM_COUNT - 1 ? ", " : "");
     }
     file << "],\n";
 

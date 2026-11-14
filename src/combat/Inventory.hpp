@@ -263,6 +263,21 @@ public:
         if (idx >= 0 && idx < GameLimits::WEAPON_COUNT) weaponUpgradeLevel[idx]++;
     }
 
+    // Totem Upgrades (Tier I = 0, Tier II = 1, Tier III = 2)
+    int GetTotemUpgrade(TotemType type) const {
+        int idx = (int)type;
+        if (idx >= 0 && idx < GameLimits::TOTEM_COUNT) return totemUpgradeLevel[idx];
+        return 0;
+    }
+    void SetTotemUpgrade(TotemType type, int level) {
+        int idx = (int)type;
+        if (idx >= 0 && idx < GameLimits::TOTEM_COUNT) totemUpgradeLevel[idx] = level;
+    }
+    void UpgradeTotem(TotemType type) {
+        int idx = (int)type;
+        if (idx >= 0 && idx < GameLimits::TOTEM_COUNT && totemUpgradeLevel[idx] < 2) totemUpgradeLevel[idx]++;
+    }
+
     // Campfire Waypoints (1: Castle, 2: Crossroads, 3: Zyphden, 4: Quarry, 5: Forest, 6: North Zyphden, 7: Permafrost Crypts)
     bool unlockedCampfires[GameLimits::CAMPFIRE_COUNT] = { true, false, false, false, false, false, false };
     bool IsCampfireUnlocked(int id) const {
@@ -345,4 +360,5 @@ private:
     int berserkerDraughts = 0;
     PlayerStash stash;
     int weaponUpgradeLevel[GameLimits::WEAPON_COUNT] = { 0 };
+    int totemUpgradeLevel[GameLimits::TOTEM_COUNT] = { 0 };
 };

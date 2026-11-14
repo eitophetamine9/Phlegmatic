@@ -91,6 +91,7 @@ struct GameSaveData {
     int loadoutTotems[GameLimits::LOADOUT_COUNT] = { 0, 0, 0 };
     bool loadoutConfigured[GameLimits::LOADOUT_COUNT] = { true, false, false };
     int weaponUpgrades[GameLimits::WEAPON_COUNT] = { 0 };
+    int totemUpgrades[GameLimits::TOTEM_COUNT] = { 0 };
     bool unlockedWeapons[GameLimits::WEAPON_COUNT] = { true, true, false, false, false, false, false, false, false, false, false };
     bool unlockedHelmets[GameLimits::HELMET_COUNT] = { true, false, false, false, false, false, false, false };
     bool unlockedChestplates[GameLimits::CHESTPLATE_COUNT] = { true, false, false, false, false, false, false, false };
