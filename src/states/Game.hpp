@@ -77,6 +77,7 @@ private:
     void ReturnFromArena();
     void SaveActiveGame();
     void ExecuteFastTravel(int stageId);
+    void UpdateBackgroundCooldowns(float dt);
     void LoadActiveGame(int slotIndex);
 
     GameState currentState;

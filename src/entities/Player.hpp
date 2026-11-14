@@ -15,6 +15,7 @@ public:
 
     void Init(Vector2 startPos);
     void Update(float dt, const GameMap& map, Vector2 mouseWorldPos, ParticleSystem& particles);
+    void UpdateBackgroundTimers(float dt, ParticleSystem& particles);
     void Draw() const;
 
     // Movement & Combat triggers

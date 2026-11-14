@@ -2336,6 +2336,103 @@ void Player::Update(float dt, const GameMap& map, Vector2 mouseWorldPos, Particl
 
 }
 
+void Player::UpdateBackgroundTimers(float dt, ParticleSystem& particles) {
+    if (!IsAlive()) return;
+
+    if (lightCooldown > 0.0f) lightCooldown -= dt;
+    if (heavyCooldown > 0.0f) heavyCooldown -= dt;
+    if (parryCooldown > 0.0f) parryCooldown -= dt;
+    if (dashCooldown > 0.0f) dashCooldown -= dt;
+    if (counterBuffTimer > 0.0f) counterBuffTimer -= dt;
+    if (potionCooldown > 0.0f) potionCooldown -= dt;
+    if (armorSkillCooldown > 0.0f) armorSkillCooldown -= dt;
+    if (armorSkillActiveTimer > 0.0f) armorSkillActiveTimer -= dt;
+    if (elementalProjectileCooldown > 0.0f) elementalProjectileCooldown -= dt;
+    if (willOfAtlasCooldown > 0.0f) willOfAtlasCooldown -= dt;
+    if (willOfAtlasTimer > 0.0f) willOfAtlasTimer -= dt;
+    if (stoneskinTimer > 0.0f) stoneskinTimer -= dt;
+    if (glacialImmunityTimer > 0.0f) glacialImmunityTimer -= dt;
+    if (berserkerTimer > 0.0f) berserkerTimer -= dt;
+    if (grayHealthTimer > 0.0f) grayHealthTimer -= dt;
+    if (tranceTimer > 0.0f) tranceTimer -= dt;
+    timeSinceCombat += dt;
+
+    if (currentTotem == TotemType::CHAMPION_TOTEM && health < GetMaxHealth()) {
+        health = fminf(GetMaxHealth(), health + 2.0f * dt);
+    }
+    if (timeSinceCombat >= 4.0f && health < GetMaxHealth()) {
+        float regenRate = (currentTotem == TotemType::CHAMPION_TOTEM) ? 14.0f : 8.0f;
+        health = fminf(GetMaxHealth(), health + regenRate * dt);
+    }
+    if (stamina < maxStamina) {
+        stamina = fminf(maxStamina, stamina + GetStaminaRegenRate() * dt);
+    }
+
+    if (currentTotem == TotemType::ELEMENTAL_CORE_TOTEM) {
+        if (!companion.active) {
+            companion.respawnTimer -= dt;
+            if (companion.respawnTimer <= 0.0f) {
+                companion.active = true;
+                companion.health = companion.maxHealth;
+                companion.respawnTimer = 0.0f;
+                companion.invulnTimer = 0.5f;
+                RelocateCompanionToPlayer();
+                particles.SpawnFloatingText(position, "MINI GOLEM RECONSTRUCTED!", Color{ 120, 245, 180, 255 }, 24.0f);
+            }
+        } else {
+            if (companion.invulnTimer > 0.0f) companion.invulnTimer -= dt;
+            if (companion.health < companion.maxHealth) {
+                companion.health = fminf(companion.maxHealth, companion.health + 4.0f * dt);
+            }
+        }
+    }
+
+    if (currentTotem == TotemType::CONQUEROR_TOTEM) {
+        int activeCount = GetActiveTowerCompanionCount();
+        if (activeCount == 0) {
+            if (towerSquadRespawnTimer <= 0.0f) {
+                towerSquadRespawnTimer = 120.0f;
+            } else {
+                towerSquadRespawnTimer -= dt;
+                if (towerSquadRespawnTimer <= 0.0f) {
+                    towerSquadRespawnTimer = 0.0f;
+                    for (auto& c : towerCompanions) {
+                        c.active = true;
+                        c.health = c.maxHealth;
+                        c.invulnTimer = 1.0f;
+                    }
+                    RelocateTowerCompanions();
+                    particles.SpawnFloatingText(position, "CONQUEROR SQUAD RESURRECTED!", Color{ 215, 120, 255, 255 }, 26.0f);
+                }
+            }
+        } else {
+            towerSquadRespawnTimer = 0.0f;
+            for (auto& c : towerCompanions) {
+                if (!c.active) continue;
+                if (c.invulnTimer > 0.0f) c.invulnTimer -= dt;
+                if (c.attackCooldown > 0.0f) c.attackCooldown -= dt;
+                if (c.health < c.maxHealth) {
+                    c.health = fminf(c.maxHealth, c.health + 2.5f * dt);
+                }
+            }
+        }
+    }
+
+    if (currentTotem == TotemType::TOTEM_MIST) {
+        mistFairy.flutterTime += dt;
+        mistFairy.healOrbTimer -= dt;
+        if (mistFairy.healOrbTimer <= 0.0f) {
+            mistFairy.healOrbTimer = 14.0f;
+            MistHealingOrb orb;
+            orb.position = mistFairy.position;
+            orb.lifetime = 20.0f;
+            orb.healAmount = 30.0f;
+            orb.active = true;
+            mistHealingOrbs.push_back(orb);
+        }
+    }
+}
+
 
 
 void Player::TriggerDash(ParticleSystem& particles) {

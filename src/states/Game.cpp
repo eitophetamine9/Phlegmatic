@@ -435,6 +435,11 @@ void Game::EnterNorthZyphden() {
 }
 
 void Game::ExecuteFastTravel(int stageId) {
+    if (stageId >= 4 && stageId <= 7 && zyphdenHandler.GetQuestPhase() < (int)ZyphdenQuestPhase::VICTORIOUS) {
+        SoundFX::PlayHitImpact();
+        particles.SpawnFloatingText(player.GetPosition(), "LOCKED: Spar with Captain Lenon before venturing beyond Zyphden!", Color{ 255, 120, 120, 255 }, 22.0f);
+        return;
+    }
     switch (stageId) {
         case 1: // Ruined Castle
             StartRealmTransition(
@@ -515,6 +520,25 @@ void Game::ExecuteFastTravel(int stageId) {
             break;
         default:
             break;
+    }
+}
+
+void Game::UpdateBackgroundCooldowns(float dt) {
+    // 1. Tick player cooldowns, companion respawns, passive regen, and buff timers
+    player.UpdateBackgroundTimers(dt, particles);
+
+    // 2. Realm boss rematch & respawn cooldowns and mob spawners
+    zyphdenHandler.TickCooldowns(dt);
+    quarryHandler.TickCooldowns(dt);
+    northZyphdenHandler.TickCooldowns(dt);
+    restlessMistForestHandler.TickCooldowns(dt);
+
+    // 3. World Day/Night clock
+    map.GetTimeOfDay().Update(dt);
+
+    // 4. Arena periodic bandage spawn timer
+    if (currentState == GameState::ARENA) {
+        bandageSpawnTimer -= dt;
     }
 }
 
@@ -1797,8 +1821,7 @@ void Game::Update(float dt) {
 
 
     if (showControlsModal) {
-
-
+        UpdateBackgroundCooldowns(dt);
 
         if (pressC || pressEsc) {
 
@@ -1901,8 +1924,7 @@ void Game::Update(float dt) {
 
 
     if (showInventoryModal) {
-
-
+        UpdateBackgroundCooldowns(dt);
 
         if (currentState == GameState::RUINED_CASTLE && tutorial.GetStep() == TutorialStep::INVENTORY_CHECK) {
 
@@ -2010,8 +2032,7 @@ void Game::Update(float dt) {
 
 
     if (showMapModal) {
-
-
+        UpdateBackgroundCooldowns(dt);
 
         if (pressM || pressEsc) {
 
@@ -2108,6 +2129,7 @@ void Game::Update(float dt) {
     }
 
     if (showStashModal) {
+        UpdateBackgroundCooldowns(dt);
         if (pressEsc || IsKeyPressed(KEY_T)) {
             showStashModal = false;
             SoundFX::PlayButtonClick();
