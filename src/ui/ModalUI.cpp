@@ -509,15 +509,19 @@ static void DrawTotemSlotIcon(Vector2 center, TotemType totem, float scale, bool
     }
 }
 
-static void DrawTotemBuffDebuffText(const std::string& buffText, const std::string& nerfText, int x, int y, int fontSize) {
-    std::string bStr = "[+] " + buffText;
-    DrawText(bStr.c_str(), x, y, fontSize, Color{ 100, 245, 190, 240 });
-    int bw = FontManager::MeasureGameText(bStr, fontSize, GameFont::BODY);
-    std::string sep = " | ";
-    DrawText(sep.c_str(), x + bw, y, fontSize, Color{ 160, 175, 195, 180 });
-    int sw = FontManager::MeasureGameText(sep, fontSize, GameFont::BODY);
-    std::string nStr = "[-] " + nerfText;
-    DrawText(nStr.c_str(), x + bw + sw, y, fontSize, Color{ 255, 90, 90, 255 });
+static int DrawTotemBuffDebuffText(const std::string& buffText, const std::string& nerfText, int x, int y, int fontSize, int maxWidth = 420) {
+    int curY = y;
+    if (!buffText.empty()) {
+        std::string bStr = "[+] " + buffText;
+        FontManager::DrawTextWrapped(bStr, x, curY, maxWidth, fontSize, 2, Color{ 100, 245, 190, 240 });
+        curY += FontManager::MeasureTextWrappedHeight(bStr, maxWidth, fontSize, 2) + 4;
+    }
+    if (!nerfText.empty()) {
+        std::string nStr = "[-] " + nerfText;
+        FontManager::DrawTextWrapped(nStr, x, curY, maxWidth, fontSize, 2, Color{ 255, 90, 90, 255 });
+        curY += FontManager::MeasureTextWrappedHeight(nStr, maxWidth, fontSize, 2) + 4;
+    }
+    return curY;
 }
 
 static void DrawEquipmentBubble(Rectangle rec, bool isSelected, bool isHovered, bool isEquipped, bool isLocked, int tierPips = 0, bool showEye = false, bool eyeHidden = false) {
@@ -1814,47 +1818,66 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // Divider
             DrawLine((int)panelX + 14, (int)drawerListY + 74, (int)(panelX + panelW - 14), (int)drawerListY + 74, Color{ 45, 62, 90, 180 });
 
-            // Totem Buff and RED Debuff Text
-            DrawText("RELIC RESONANCES & HARMONIES", (int)panelX + 14, (int)drawerListY + 82, 11, Color{ 255, 215, 90, 240 });
-            DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)panelX + 14, (int)drawerListY + 100, 12);
+            int maxContentW = (int)panelW - 28;
+            int curY = (int)drawerListY + 82;
 
-            // Special notes for totems
+            // Totem Buff and RED Debuff Text
+            DrawText("RELIC RESONANCES & HARMONIES", (int)panelX + 14, curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 16;
+            curY = DrawTotemBuffDebuffText(st.buffText, st.nerfText, (int)panelX + 14, curY, maxContentW, 11);
+
+            // Special notes for totems with dynamic height
+            std::string traitHeader = "";
+            std::string traitDesc = "";
+            Color traitColor = Color{ 255, 215, 80, 255 };
+
             if (totems[s_inspectedTotem].type == TotemType::CRUSADER_TOTEM) {
-                DrawText("[Passive]: Will of Atlas", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
-                FontManager::DrawTextWrapped("When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+                traitHeader = "[Passive]: Will of Atlas";
+                traitDesc = "When Health falls below 20%, automatically awakens 4 seconds of complete invulnerability (60s cooldown).";
+                traitColor = Color{ 255, 215, 80, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::ELEMENTAL_CORE_TOTEM) {
-                DrawText("[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 150, 50, 255 });
-                FontManager::DrawTextWrapped("Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+                traitHeader = "[Companion]: Mini Elemental Golem (460 HP, 55 DEF, +4/s Regen)";
+                traitDesc = "Cycles 3 patterns: Heavy AoE Slam (36 DMG, 80px), Forward Bash Fracture (32 DMG), and Piercing Spike Throw (34 DMG). Respawns in 35s.";
+                traitColor = Color{ 255, 150, 50, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_MIST) {
-                DrawText("[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 110, 245, 225, 255 });
-                FontManager::DrawTextWrapped("A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 215, 230, 255, 220 });
+                traitHeader = "[Companion]: Mist Fairy (+20% Crit, +35% Crit Dmg)";
+                traitDesc = "A loyal vapor sprite circles the bearer, guiding critical strikes and periodically generating restorative mist healing orbs (+30 HP).";
+                traitColor = Color{ 110, 245, 225, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_INSANITY) {
-                DrawText("[Trait]: Reckless Blood Frenzy", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 75, 75, 255 });
-                FontManager::DrawTextWrapped("Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 185, 185, 220 });
+                traitHeader = "[Trait]: Reckless Blood Frenzy";
+                traitDesc = "Bestows +65% overall damage, +18% speed, and +25% attack speed, but cuts defense by 50% and causes bearer to suffer x1.5 incoming damage. When Health drops below 40%, overall damage surges to +135%!";
+                traitColor = Color{ 255, 75, 75, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::TOTEM_PHLEGMATIC_CORE) {
-                DrawText("[Signature]: Phlegmatic Apathy & Cold Solitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 130, 225, 255, 255 });
-                FontManager::DrawTextWrapped("Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 200, 240, 255, 220 });
+                traitHeader = "[Signature]: Phlegmatic Apathy & Cold Solitude";
+                traitDesc = "Grants -80% knockback received, +30 Max HP, +25 Will, and converts 25% of sustained damage into temporary Gray Health that can be reclaimed by landing counter-attacks. Chills foes on hit.";
+                traitColor = Color{ 130, 225, 255, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::CHAMPION_TOTEM) {
-                DrawText("[Primal Trait]: Undying Warlord's Fortitude", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 255, 215, 80, 255 });
-                FontManager::DrawTextWrapped("Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 255, 235, 185, 220 });
+                traitHeader = "[Primal Trait]: Undying Warlord's Fortitude";
+                traitDesc = "Bestows +35% overall damage, +30% armor defense, +15% move speed, +35% stamina recovery, -20% cooldowns, +40 Will, +50 Max HP, and surges passive health regeneration to +14 HP/s (+2 HP/s in combat). However, all potions and external healing received are reduced by 70%.";
+                traitColor = Color{ 255, 215, 80, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::CONQUEROR_TOTEM) {
-                DrawText("[Squad]: 7 Tower Gladiator Companions", (int)panelX + 14, (int)drawerListY + 120, 11, Color{ 215, 120, 255, 255 });
-                FontManager::DrawTextWrapped("Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins.",
-                    (int)panelX + 14, (int)drawerListY + 135, (int)panelW - 28, 11, 3, Color{ 235, 205, 255, 220 });
+                traitHeader = "[Squad]: 7 Tower Gladiator Companions";
+                traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins.";
+                traitColor = Color{ 215, 120, 255, 255 };
+            }
+
+            if (!traitHeader.empty()) {
+                curY += 2;
+                DrawText(traitHeader.c_str(), (int)panelX + 14, curY, 11, traitColor);
+                curY += 15;
+                FontManager::DrawTextWrapped(traitDesc, (int)panelX + 14, curY, maxContentW, 11, 3, Color{ 215, 230, 255, 220 });
+                curY += FontManager::MeasureTextWrappedHeight(traitDesc, maxContentW, 11, 3) + 8;
             }
 
             // Divider
-            DrawLine((int)panelX + 14, (int)drawerListY + 175, (int)(panelX + panelW - 14), (int)drawerListY + 175, Color{ 45, 62, 90, 180 });
+            curY += 2;
+            DrawLine((int)panelX + 14, curY, (int)(panelX + panelW - 14), curY, Color{ 45, 62, 90, 180 });
+            curY += 8;
 
             // Lore
-            DrawText("RELIC LORE & CODEX", (int)panelX + 14, (int)drawerListY + 183, 11, Color{ 255, 215, 90, 240 });
-            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, (int)drawerListY + 201, (int)panelW - 28, 11, 4, Color{ 185, 205, 230, 220 });
+            DrawText("RELIC LORE & CODEX", (int)panelX + 14, curY, 11, Color{ 255, 215, 90, 240 });
+            curY += 16;
+            FontManager::DrawTextWrapped(st.description, (int)panelX + 14, curY, maxContentW, 11, 3, Color{ 185, 205, 230, 220 });
 
             // Source at bottom
             float sourceY = drawerListY + panelH - 32.0f;
