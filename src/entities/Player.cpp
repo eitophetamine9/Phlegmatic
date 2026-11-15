@@ -671,70 +671,70 @@ void Player::InitTowerSquad() {
     // 1. Tower Slasher (EnemyType::SLASHER)
     towerCompanions[0].unitType = EnemyType::SLASHER;
     towerCompanions[0].name = "Tower Slasher";
-    towerCompanions[0].maxHealth = 80.0f;
-    towerCompanions[0].health = 80.0f;
-    towerCompanions[0].defense = 8.0f;
-    towerCompanions[0].damage = 12.0f;
+    towerCompanions[0].maxHealth = 65.0f;
+    towerCompanions[0].health = 65.0f;
+    towerCompanions[0].defense = 6.0f;
+    towerCompanions[0].damage = 9.0f;
     towerCompanions[0].radius = 20.0f;
     towerCompanions[0].formationAngle = 0.0f * (2.0f * PI / 7.0f);
 
     // 2. Tower Brute (EnemyType::BRUTE)
     towerCompanions[1].unitType = EnemyType::BRUTE;
     towerCompanions[1].name = "Tower Brute";
-    towerCompanions[1].maxHealth = 190.0f;
-    towerCompanions[1].health = 190.0f;
-    towerCompanions[1].defense = 32.0f;
-    towerCompanions[1].damage = 16.0f;
+    towerCompanions[1].maxHealth = 135.0f;
+    towerCompanions[1].health = 135.0f;
+    towerCompanions[1].defense = 20.0f;
+    towerCompanions[1].damage = 12.0f;
     towerCompanions[1].radius = 28.0f;
     towerCompanions[1].formationAngle = 1.0f * (2.0f * PI / 7.0f);
 
     // 3. Tower Charger (EnemyType::CHARGER)
     towerCompanions[2].unitType = EnemyType::CHARGER;
     towerCompanions[2].name = "Tower Charger";
-    towerCompanions[2].maxHealth = 65.0f;
-    towerCompanions[2].health = 65.0f;
-    towerCompanions[2].defense = 12.0f;
-    towerCompanions[2].damage = 13.0f;
+    towerCompanions[2].maxHealth = 55.0f;
+    towerCompanions[2].health = 55.0f;
+    towerCompanions[2].defense = 8.0f;
+    towerCompanions[2].damage = 10.0f;
     towerCompanions[2].radius = 18.0f;
     towerCompanions[2].formationAngle = 2.0f * (2.0f * PI / 7.0f);
 
     // 4. Tower Archer (EnemyType::ARCHER)
     towerCompanions[3].unitType = EnemyType::ARCHER;
     towerCompanions[3].name = "Tower Archer";
-    towerCompanions[3].maxHealth = 60.0f;
-    towerCompanions[3].health = 60.0f;
-    towerCompanions[3].defense = 6.0f;
-    towerCompanions[3].damage = 11.0f;
+    towerCompanions[3].maxHealth = 50.0f;
+    towerCompanions[3].health = 50.0f;
+    towerCompanions[3].defense = 4.0f;
+    towerCompanions[3].damage = 8.0f;
     towerCompanions[3].radius = 18.0f;
     towerCompanions[3].formationAngle = 3.0f * (2.0f * PI / 7.0f);
 
     // 5. Tower Pyromancer (EnemyType::PYROMANCER)
     towerCompanions[4].unitType = EnemyType::PYROMANCER;
     towerCompanions[4].name = "Tower Pyromancer";
-    towerCompanions[4].maxHealth = 75.0f;
-    towerCompanions[4].health = 75.0f;
-    towerCompanions[4].defense = 10.0f;
-    towerCompanions[4].damage = 12.0f;
+    towerCompanions[4].maxHealth = 60.0f;
+    towerCompanions[4].health = 60.0f;
+    towerCompanions[4].defense = 6.0f;
+    towerCompanions[4].damage = 9.0f;
     towerCompanions[4].radius = 20.0f;
     towerCompanions[4].formationAngle = 4.0f * (2.0f * PI / 7.0f);
 
     // 6. Tower Stone Golem (EnemyType::ORE_GOLEM)
     towerCompanions[5].unitType = EnemyType::ORE_GOLEM;
     towerCompanions[5].name = "Tower Stone Golem";
-    towerCompanions[5].maxHealth = 220.0f;
-    towerCompanions[5].health = 220.0f;
-    towerCompanions[5].defense = 45.0f;
-    towerCompanions[5].damage = 14.0f;
+    towerCompanions[5].maxHealth = 150.0f;
+    towerCompanions[5].health = 150.0f;
+    towerCompanions[5].defense = 28.0f;
+    towerCompanions[5].damage = 10.0f;
     towerCompanions[5].radius = 26.0f;
     towerCompanions[5].formationAngle = 5.0f * (2.0f * PI / 7.0f);
 
     // 7. Tower Frost Troll (EnemyType::FROST_TROLL)
     towerCompanions[6].unitType = EnemyType::FROST_TROLL;
     towerCompanions[6].name = "Tower Frost Troll";
-    towerCompanions[6].maxHealth = 280.0f;
-    towerCompanions[6].health = 280.0f;
-    towerCompanions[6].defense = 24.0f;
-    towerCompanions[6].damage = 15.0f;
+    towerCompanions[6].maxHealth = 175.0f;
+    towerCompanions[6].health = 175.0f;
+    towerCompanions[6].defense = 16.0f;
+    towerCompanions[6].damage = 11.0f;
     towerCompanions[6].radius = 24.0f;
     towerCompanions[6].formationAngle = 6.0f * (2.0f * PI / 7.0f);
 

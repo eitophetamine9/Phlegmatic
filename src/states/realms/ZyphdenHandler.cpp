@@ -3159,8 +3159,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "Commander's Totem",
                 "LEGION STANDARD",
                 160, 0, 300, 0, 0, 0,
-                "7 Veteran Gladiators (115% HP/DEF, 55% DMG), 90s squad resurrection",
-                "ROYAL VANGUARD: 7 Imperial Gladiators (135% HP/DEF, 70% DMG, +15% Spd, 60s Revive)",
+                "7 Tower Gladiators (+10% HP/DEF, 45% DMG, no stagger lock), 90s squad resurrection",
+                "ROYAL VANGUARD: 7 Imperial Gladiators (+20% HP/DEF, 55% DMG, +10% Spd, 60s Revive)",
                 Color{ 185, 45, 120, 255 },
                 "Royal Combat Arena - Standard Wave 25 Victory",
                 6, 12

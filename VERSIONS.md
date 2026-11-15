@@ -80,6 +80,22 @@
   * Used to awaken Arena-related totems (*Champion's Totem* and *Commander's Totem*) to Tier 2 (6 tokens) and Tier 3 (12 tokens).
   * Full integration with SaveManager, inventory pouches, storage stash, and HUD material monitors.
 
+#### 7. Commander Totem Balance Nerf & Enemy Anti-Stunlock Architecture
+* **Infinite Stagger Elimination**:
+  * Stripped hard stagger infliction from Tower Companion basic attacks (Brute stagger removed; Frost Troll stagger replaced with a 1.5s Chill debuff).
+  * Reduced companion attack knockback forces (0.4f - 0.8f vs 1.4f - 2.4f) to eliminate endless enemy juggles.
+  * Lengthened companion attack cooldown timers across all classes (e.g. Slasher 1.25s vs 0.8s, Brute 1.85s vs 1.3s, Archer 1.8s vs 1.3s, Pyromancer 1.9s vs 1.4s, Ore Golem 1.7s vs 1.25s, Frost Troll 1.6s vs 1.1s) for deliberate, rhythmic combat pacing.
+  * Lowered companion defense pierce from 20-25% to 10%.
+* **Enemy Anti-Stunlock & Poise Safeguards**:
+  * Implemented `antiStunlockTimer` on `Enemy`: after suffering any stagger, enemies gain an un-staggerable grace window (1.2 seconds for regular enemies, 2.5 seconds for bosses).
+  * Stagger duration inflicted on bosses is automatically reduced by 60%.
+* **Companion Stat Rebalancing**:
+  * Rebalanced baseline Tower Squad stats in `InitTowerSquad()`: reduced combined squad health pool from 970 HP to 690 HP (Slasher 65 HP / 9 DMG, Brute 135 HP / 12 DMG, Charger 55 HP / 10 DMG, Archer 50 HP / 8 DMG, Pyromancer 60 HP / 9 DMG, Ore Golem 150 HP / 10 DMG, Frost Troll 175 HP / 11 DMG).
+  * Rebalanced Commander Totem relic bonuses across tiers:
+    * Tier 0: +18% Defense, +35 Max HP, +20 Will.
+    * Tier 1: +24% Defense, +50 Max HP, +28 Will, +10% companion HP/DEF, 45% DMG, 90s squad resurrection.
+    * Tier 2: +30% Defense, +70 Max HP, +38 Will, +20% companion HP/DEF, 55% DMG, +10% Speed, 60s squad resurrection.
+
 ---
 
 ## Version 0.0.1l - Apex Boss Escalation, Totem Leveling, Commanding Titan, Sovereign's Scepter & Commander's Legion

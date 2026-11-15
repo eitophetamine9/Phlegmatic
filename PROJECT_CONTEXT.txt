@@ -833,6 +833,29 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Introduced Challenge Tokens awarded at wave milestones (Wave 5: +3, Wave 10: +6, Wave 15: +9, Wave 20: +12, Wave 25: +18, Apex Gauntlet: +25).
   * Challenge Tokens are used to craft Commander's Uniform pieces (8, 14, 10 tokens) and upgrade Champion's Totem & Commander's Totem to Tier 2 (6 tokens) and Tier 3 (12 tokens).
   * Storage stash and inventory pouch serialization in SaveManager.
+- Commander Totem Rebalance & Enemy Anti-Stunlock Architecture:
+  * Eliminated permanent stagger locking caused by companion hordes.
+  * Companion Attack Rebalance:
+    - Stripped stagger infliction from all companion basic attacks (Brute stagger removed; Frost Troll stagger replaced with 1.5s Chill).
+    - Reduced knockback forces by ~65-75% across all companions (0.4f - 0.8f vs 1.4f - 2.4f) to prevent juggle locks.
+    - Lengthened companion attack cooldowns across all classes by 40-50% (Slasher 1.25s, Brute 1.85s, Charger 1.45s, Archer 1.80s, Pyromancer 1.90s, Ore Golem 1.70s, Frost Troll 1.60s).
+    - Reduced companion defense pierce from 20-25% to 10%.
+  * Enemy Anti-Stunlock & Poise Safeguards:
+    - Added antiStunlockTimer to Enemy: upon taking any stagger (including player hits), enemies gain an un-staggerable poise grace window (1.2s for normal enemies, 2.5s for bosses).
+    - Boss stagger durations are automatically reduced by 60%.
+  * Rebalanced Baseline Companion Stats in InitTowerSquad:
+    - Combined squad HP reduced from 970 HP to 690 HP.
+    - Slasher: 65 HP, 6 DEF, 9 DMG (was 80 HP, 8 DEF, 12 DMG).
+    - Brute: 135 HP, 20 DEF, 12 DMG (was 190 HP, 32 DEF, 21 DMG).
+    - Charger: 55 HP, 8 DEF, 10 DMG (was 65 HP, 12 DEF, 13 DMG).
+    - Archer: 50 HP, 4 DEF, 8 DMG (was 60 HP, 6 DEF, 11 DMG).
+    - Pyromancer: 60 HP, 6 DEF, 9 DMG (was 75 HP, 10 DEF, 12 DMG).
+    - Stone Golem: 150 HP, 28 DEF, 10 DMG (was 220 HP, 45 DEF, 17 DMG).
+    - Frost Troll: 175 HP, 16 DEF, 11 DMG (was 280 HP, 24 DEF, 15 DMG).
+  * Rebalanced Commander Totem Relic Progression:
+    - Tier 0: +18% DEF, +35 Max HP, +20 Will.
+    - Tier 1: +24% DEF, +50 Max HP, +28 Will, +10% companion HP/DEF, 45% DMG, 90s squad resurrection.
+    - Tier 2: +30% DEF, +70 Max HP, +38 Will, +20% companion HP/DEF, 55% DMG, +10% Speed, 60s squad resurrection.
 
 - Apex Boss Gauntlet Overhaul & Attack Patterns (Increment 1):
   * Overhauled all three Apex Gauntlet champions: Apex Remnant Zil (1,250 HP, +12 DEF, 85 Will), Apex Primordial Titan (1,850 HP, +16 DEF, 100 Will), Apex Berserker Troll Warlord (2,800 HP, +20 DEF, 110 Will).

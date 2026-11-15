@@ -1935,16 +1935,16 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 traitColor = Color{ 255, 215, 80, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::COMMANDER_TOTEM) {
                 if (curTotTier >= 2) {
-                    traitHeader = "[Royal Legion]: 7 Imperial Gladiators (135% HP/DEF, 70% DMG)";
-                    traitDesc = "Commands an undying royal vanguard with +35% Health and Defense, 70% base damage, +15% move speed, and rapid 60-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Royal Legion]: 7 Imperial Gladiators (+20% HP/DEF, 55% DMG)";
+                    traitDesc = "Commands an undying royal vanguard with +20% Health and Defense, 55% base damage, +10% move speed, non-staggering rhythmic strikes, and rapid 60-second squad resurrection. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 255, 160, 220, 255 };
                 } else if (curTotTier == 1) {
-                    traitHeader = "[Squad]: 7 Veteran Gladiators (115% HP/DEF, 55% DMG)";
-                    traitDesc = "Commands an empowered vanguard with 115% HP/DEF, 55% strike power, and 90-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Squad]: 7 Veteran Gladiators (+10% HP/DEF, 45% DMG)";
+                    traitDesc = "Commands an empowered vanguard with +10% HP/DEF, 45% strike power, non-staggering tactical strikes, and 90-second squad resurrection. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 235, 130, 240, 255 };
                 } else {
-                    traitHeader = "[Squad]: 7 Tower Gladiator Companions (100% HP/DEF, 40% DMG)";
-                    traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Squad]: 7 Tower Gladiator Companions (Non-Staggering Strikes)";
+                    traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with rebalanced stats and non-staggering tactical strikes. All 7 must perish before the 2-minute squad resurrection countdown begins. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 215, 120, 255, 255 };
                 }
             }

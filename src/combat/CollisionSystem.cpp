@@ -952,14 +952,14 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     if (comp.attackCooldown <= 0.0f && nearestDist <= 270.0f) {
                         comp.attackVisualTimer = 0.2f;
                         if (comp.unitType == EnemyType::ARCHER) {
-                            comp.attackCooldown = 1.30f;
+                            comp.attackCooldown = 1.80f;
                             Vector2 arrowVel = Vector2Scale(dir, 520.0f);
                             Projectile arrow(comp.position, arrowVel, 6.0f, comp.damage, ProjectileType::BOLT, true);
                             projectiles.push_back(arrow);
                             particles.SpawnSparks(comp.position, Color{ 255, 215, 120, 255 }, 8, 90.0f);
                             SoundFX::PlayLightAttack();
                         } else {
-                            comp.attackCooldown = 1.40f;
+                            comp.attackCooldown = 1.90f;
                             Vector2 orbVel = Vector2Scale(dir, 380.0f);
                             Projectile orb(comp.position, orbVel, 8.0f, comp.damage, ProjectileType::VOID_ORB, true);
                             projectiles.push_back(orb);
@@ -976,28 +976,25 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
 
                     if (comp.attackCooldown <= 0.0f && nearestDist <= engageRange + 16.0f) {
-                        float cd = 1.0f;
+                        float cd = 1.60f;
                         float dmg = comp.damage;
-                        Vector2 knock = Vector2Scale(dir, 1.8f);
+                        Vector2 knock = Vector2Scale(dir, 0.5f);
                         if (comp.unitType == EnemyType::BRUTE) {
-                            cd = 1.30f;
-                            dmg += 5.0f;
-                            knock = Vector2Scale(dir, 2.4f);
-                            particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 18, 160.0f);
-                            nearestEnemy->ApplyStagger(0.40f);
+                            cd = 1.85f;
+                            knock = Vector2Scale(dir, 0.6f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 14, 120.0f);
                         } else if (comp.unitType == EnemyType::ORE_GOLEM) {
-                            cd = 1.25f;
-                            dmg += 3.0f;
-                            particles.SpawnSparks(comp.position, Color{ 210, 180, 130, 255 }, 16, 150.0f);
-                            nearestEnemy->ApplyArmorFracture(3.0f);
+                            cd = 1.70f;
+                            particles.SpawnSparks(comp.position, Color{ 210, 180, 130, 255 }, 14, 120.0f);
+                            nearestEnemy->ApplyArmorFracture(2.0f);
                         } else if (comp.unitType == EnemyType::FROST_TROLL) {
-                            cd = 1.10f;
-                            particles.SpawnSparks(comp.position, Color{ 120, 215, 255, 255 }, 16, 140.0f);
-                            nearestEnemy->ApplyStagger(0.25f);
+                            cd = 1.60f;
+                            particles.SpawnSparks(comp.position, Color{ 120, 215, 255, 255 }, 14, 120.0f);
+                            nearestEnemy->ApplyChill(1.5f);
                         }
                         comp.attackCooldown = cd;
                         comp.attackVisualTimer = 0.20f;
-                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.25f)) {
+                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.10f)) {
                             handleEnemyDefeated(*nearestEnemy);
                         }
                         particles.SpawnFloatingText(nearestEnemy->GetPosition(), "-" + std::to_string((int)dmg), Color{ 220, 160, 255, 255 }, 18.0f);
@@ -1012,18 +1009,17 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
 
                     if (comp.attackCooldown <= 0.0f && nearestDist <= engageRange + 12.0f) {
-                        float cd = (comp.unitType == EnemyType::SLASHER) ? 0.80f : 1.0f;
+                        float cd = (comp.unitType == EnemyType::SLASHER) ? 1.25f : 1.45f;
                         float dmg = comp.damage;
-                        Vector2 knock = Vector2Scale(dir, 1.4f);
+                        Vector2 knock = Vector2Scale(dir, (comp.unitType == EnemyType::SLASHER) ? 0.4f : 0.8f);
                         if (comp.unitType == EnemyType::SLASHER) {
-                            particles.SpawnSparks(comp.position, Color{ 255, 90, 90, 255 }, 10, 110.0f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 90, 90, 255 }, 10, 100.0f);
                         } else {
-                            knock = Vector2Scale(dir, 2.2f);
-                            particles.SpawnSparks(comp.position, Color{ 255, 200, 50, 255 }, 14, 140.0f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 200, 50, 255 }, 12, 110.0f);
                         }
                         comp.attackCooldown = cd;
                         comp.attackVisualTimer = 0.20f;
-                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.20f)) {
+                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.10f)) {
                             handleEnemyDefeated(*nearestEnemy);
                         }
                         particles.SpawnFloatingText(nearestEnemy->GetPosition(), "-" + std::to_string((int)dmg), Color{ 220, 160, 255, 255 }, 18.0f);

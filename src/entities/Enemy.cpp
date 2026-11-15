@@ -460,6 +460,10 @@ void Enemy::Update(float dt, Vector2 playerPos, const GameMap& map, ParticleSyst
         }
     }
 
+    if (antiStunlockTimer > 0.0f) {
+        antiStunlockTimer -= dt;
+    }
+
     // Humoral status effect timers
     if (quenchedTimer > 0.0f) {
         quenchedTimer -= dt;
