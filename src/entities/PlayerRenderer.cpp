@@ -206,6 +206,19 @@ void PlayerRenderer::Draw(const Player& player) {
         }
     }
 
+    // Commander's Uniform Rallying Command Aura
+    if (player.armorSkillActiveTimer > 0.0f && player.HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        float pulse = 0.7f + 0.3f * sinf((float)GetTime() * 8.0f);
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 16.0f, Color{ 235, 80, 140, (unsigned char)(210 * pulse) });
+        DrawCircleLines((int)player.position.x, (int)player.position.y, player.radius + 22.0f, Color{ 255, 215, 80, (unsigned char)(160 * pulse) });
+        for (int i = 0; i < 4; ++i) {
+            float ang = i * (2.0f * 3.14159265f / 4.0f) + (float)GetTime() * 3.0f;
+            Vector2 p1 = { player.position.x + cosf(ang) * (player.radius + 10.0f), player.position.y + sinf(ang) * (player.radius + 10.0f) };
+            Vector2 p2 = { player.position.x + cosf(ang) * (player.radius + 24.0f), player.position.y + sinf(ang) * (player.radius + 24.0f) };
+            DrawLineEx(p1, p2, 2.0f, Color{ 255, 215, 80, 240 });
+        }
+    }
+
 
 
     Vector2 dir = { cosf(player.facingAngle * DEG2RAD), sinf(player.facingAngle * DEG2RAD) };

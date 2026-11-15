@@ -233,28 +233,28 @@ inline TotemStats GetTotemStats(TotemType type, int tier = 0) {
             if (tier == 1) {
                 return {
                     "Commander's Totem [Tier II]",
-                    "An empowered obsidian standard. Strengthens your 7 gladiators (+15% HP/DEF, 55% strike power) and lowers squad recovery time to 90 seconds.",
-                    "Summons 7 Tower Gladiators (115% HP/DEF, 55% DMG), +28% DEF, +60 Max HP, +35 Will",
+                    "An empowered obsidian standard. Strengthens your 7 gladiators (+10% HP/DEF, 45% strike power, non-staggering strikes) and lowers squad recovery time to 90 seconds.",
+                    "Summons 7 Tower Gladiators (+10% HP/DEF, 45% DMG), +24% DEF, +50 Max HP, +28 Will",
                     "-40% Player Attack Damage | All 7 summons must perish before 90s resurrection begins",
-                    0.60f, 1.28f, 1.0f, 1.0f, 1.0f, 35.0f, 60.0f,
+                    0.60f, 1.24f, 1.0f, 1.0f, 1.0f, 28.0f, 50.0f,
                     Color{ 205, 65, 145, 255 }, 1
                 };
             } else if (tier == 2) {
                 return {
                     "Commander's Totem [Tier III (Mastered)]",
-                    "The Royal Imperial Vanguard Standard. Commands elite gladiators with supreme resilience (135% HP/DEF, 70% strike power, +15% move speed) and a rapid 60s squad revival!",
-                    "ROYAL IMPERIAL VANGUARD: 7 Gladiators (135% HP/DEF, 70% DMG, +15% Speed), +36% DEF, +85 Max HP, +50 Will",
+                    "The Royal Imperial Vanguard Standard. Commands elite gladiators with balanced resilience (+20% HP/DEF, 55% strike power, +10% move speed) and a rapid 60s squad revival!",
+                    "ROYAL IMPERIAL VANGUARD: 7 Gladiators (+20% HP/DEF, 55% DMG, +10% Speed), +30% DEF, +70 Max HP, +38 Will",
                     "-40% Player Attack Damage | All 7 summons must perish before 60s resurrection begins",
-                    0.60f, 1.36f, 1.0f, 1.0f, 1.0f, 50.0f, 85.0f,
+                    0.60f, 1.30f, 1.0f, 1.0f, 1.0f, 38.0f, 70.0f,
                     Color{ 225, 80, 170, 255 }, 2
                 };
             }
             return {
                 "Commander's Totem",
-                "A monolithic obsidian standard forged in the crucible of the 25-Wave Royal Combat Arena. Summons an undying vanguard of 7 Tower gladiators who stick close and fight by your side. Companions retain 100% of their base HP and defense with lowered offensive strike power (~40%). Bearer's direct attack damage is reduced by 40% as the legion wages war on your behalf. If all 7 fall in battle, the squad reconstitutes after a 2-minute recovery period.",
-                "Summons 7 Tower Gladiators (100% HP/DEF, 40% DMG), +20% DEF, +40 Max HP, +25 Will",
+                "A monolithic obsidian standard forged in the crucible of the 25-Wave Royal Combat Arena. Summons an undying vanguard of 7 Tower gladiators holding tactical role formations. Companions deal controlled, non-staggering strikes to prevent unfair stun-locking. Bearer's direct attack damage is reduced by 40% as the legion wages war on your behalf. If all 7 fall in battle, the squad reconstitutes after a 2-minute recovery period.",
+                "Summons 7 Tower Gladiators (Tactical Role Formations), +18% DEF, +35 Max HP, +20 Will",
                 "-40% Player Attack Damage | All 7 summons must perish before 2-min resurrection begins",
-                0.60f, 1.20f, 1.0f, 1.0f, 1.0f, 25.0f, 40.0f,
+                0.60f, 1.18f, 1.0f, 1.0f, 1.0f, 20.0f, 35.0f,
                 Color{ 185, 45, 120, 255 }, 0
             };
         }

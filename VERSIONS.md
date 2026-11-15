@@ -6,6 +6,7 @@
 
 ## Table of Versions
 
+- [Version 0.0.1m - Companion Role Formations & Natural AI, Sovereign's Scepter 360 AoE Light Heal, Enemy Aggro Interception, Frostwarden Highland Crafting, Commander's Uniform & Arena Challenge Tokens](#version-001m---companion-role-formations--natural-ai-sovereigns-scepter-360-aoe-light-heal-enemy-aggro-interception-frostwarden-highland-crafting-commanders-uniform--arena-challenge-tokens)
 - [Version 0.0.1l - Apex Boss Escalation, Totem Leveling, Commanding Titan, Sovereign's Scepter & Commander's Legion](#version-001l---apex-boss-escalation-totem-leveling-commanding-titan-sovereigns-scepter--commanders-legion)
 - [Version 0.0.1k - 3-Slot Weapon Hotbar, Enlarged Icon HUD, GLSL Lighting & Combat Reworks](#version-001k---3-slot-weapon-hotbar-enlarged-icon-hud-glsl-lighting--combat-reworks)
 - [Version 0.0.1j - Combat Executions, Alchemy Workshop, Phlegmatic Core & Caverns](#version-001j---combat-executions-alchemy-workshop-phlegmatic-core--caverns)
@@ -17,6 +18,83 @@
 - [Version 0.0.1d - Input Architecture, Royal Halberd & Tactical HUD](#version-001d---input-architecture-royal-halberd--tactical-hud)
 - [Version 0.0.1c - Interactive Realm Cartography & Quarry Mines](#version-001c---interactive-realm-cartography--quarry-mines)
 - [Version 0.0.1b - Typography, Multi-Slot Persistence & Economy](#version-001b---typography-multi-slot-persistence--economy)
+
+---
+
+## Version 0.0.1m - Companion Role Formations & Natural AI, Sovereign's Scepter 360 AoE Light Heal, Enemy Aggro Interception, Frostwarden Highland Crafting, Commander's Uniform & Arena Challenge Tokens
+
+### Major Features & Balance Revisions Implemented
+
+#### 1. Sovereign's Scepter Full-Circle (360 Degree) AoE Light Heal & Healing Amplification
+* **360-Degree Radial Light Attack**: Upgraded the Sovereign's Scepter light attack from a narrow directional beam into a full-circle 160px radius restorative aura around the caster.
+* **Higher Healing Output**:
+  * Light Attack heal increased to +55 HP at Tier 0, +75 HP at Tier 1, and +95 HP at Tier 2 (up from +24/+30/+38 HP).
+  * Heavy Attack (Sanctuary Radiance) maintains massive +75/+95/+120 HP bursts alongside debuff cleansing and defense buffs.
+* **Balanced Cooldown & Stamina**:
+  * Light attack cooldown adjusted to 0.85 seconds (up from 0.45s) and stamina cost tuned to 16.0 to demand deliberate timing during combat skirmishes.
+  * Emits radial green and golden blessing wave particles and overhead floating heal text.
+
+#### 2. Companion Role Formations & Natural Movement AI
+* **Role-Based Tactical Anchoring**: Companions dynamically reposition relative to the active combat threat vector:
+  * *Vanguard Tanks (Knight Lenon, Iron Brute, Charger, Ore Golem, Frost Troll, Commanding Titan)*: Advance +80px in front of the player along the line of engagement to intercept incoming strikes.
+  * *Ranged Artillery (Wind Archer, Void Pyromancer, Fairy)*: Withdraw -110px behind the player to maintain unobstructed line of sight and firing distance.
+  * *Skirmishers & Flankers (Slasher, Mini Golems)*: Fan out laterally (+-85px perpendicular to threat) to encircle enemies.
+* **Natural Movement & Anti-Stacking**:
+  * Integrated soft-repulsion separation force (1.6x combined radius) preventing companion stacking and visual clutter.
+  * Idle breathing oscillation providing subtle, organic movement when resting out of combat.
+
+#### 3. Dynamic Enemy Aggro & Companion Threat System
+* **Dynamic Threat Valuation**: Implemented `GetTargetPositionForEnemy` in `Player`:
+  * Tanks generate 2.6x threat weighting, actively taunting foes away from the player.
+  * Skirmishers generate 1.1x threat, the player generates 1.0x baseline threat, and ranged units generate 0.5x threat.
+* **Complete Aggro Interception**:
+  * Enemies track and target threatened companions across all realm handlers (Crossroads, Frost Caverns, Quarry, Mist Forest, Ruined Castle, Zyphden, and North Zyphden).
+  * Enemy melee sweeps, telegraph swings, and projectiles collide with and inflict damage upon friendly summons, allowing vanguard tanks to block hits intended for the player.
+
+#### 4. Frostwarden Armor Crafting Re-adjustment
+* **Strict Highland Regional Economy**:
+  * Rebalanced Frostwarden armor crafting recipes at Blacksmith Varek's Forge to exclusively consume materials harvested from the Northern Crags and Frost Caverns.
+  * *Frostwarden Fur Cowl*: 6 Frost Shards (0 Ore Scraps, 0 Shingles, 0 Mist, 0 Shadow).
+  * *Frostwarden Pelt Hauberk*: 10 Frost Shards (0 Ore Scraps, 0 Shingles, 0 Mist, 0 Shadow).
+  * *Frostwarden Spiked Greaves*: 8 Frost Shards (0 Ore Scraps, 0 Shingles, 0 Mist, 0 Shadow).
+
+#### 5. Commander's Uniform (Armor Set 8)
+* **Dedicated Summoner / Commander Armor Set**:
+  * *Commander's Peaked Cap (Helmet)*: +6 DEF, +15 Max HP, +10% Evade, +15 Will.
+  * *Commander's Parade Coat (Chestplate)*: +14 DEF, +25 Max HP, +15% Evade, -35% Direct Weapon Damage.
+  * *Commander's Riding Trousers (Leggings)*: +6 DEF, +10% Evade, +20% Move Speed.
+  * *Full Set Perk*: +40 Max HP, +20% Move Speed, extended 0.35s dodge i-frame window, -35% direct player weapon damage penalty, +35% companion HP and DEF, +25% companion outgoing damage.
+  * *Active Skill [V] Rallying Call*: 8-second rally buffing all active companions with +30% Attack Speed, +25% Move Speed, and enveloping the commander in a gilded quad-banner aura.
+
+#### 6. Arena Challenge Tokens & Arena Totem Leveling
+* **Arena Drop Rebalance**: Nerfed regular material drops from the Royal Combat Arena to prevent resource flooding.
+* **Milestone Challenge Tokens**: Awarded at key arena milestones:
+  * Wave 5: +3 Challenge Tokens.
+  * Wave 10: +6 Challenge Tokens.
+  * Wave 15: +9 Challenge Tokens.
+  * Wave 20: +12 Challenge Tokens.
+  * Wave 25: +18 Challenge Tokens.
+  * Apex Boss Gauntlet Victory: +25 Challenge Tokens.
+* **Crafting & Totem Attunement**:
+  * Used to forge Commander's Uniform pieces (8 / 14 / 10 tokens).
+  * Used to awaken Arena-related totems (*Champion's Totem* and *Commander's Totem*) to Tier 2 (6 tokens) and Tier 3 (12 tokens).
+  * Full integration with SaveManager, inventory pouches, storage stash, and HUD material monitors.
+
+#### 7. Commander Totem Balance Nerf & Enemy Anti-Stunlock Architecture
+* **Infinite Stagger Elimination**:
+  * Stripped hard stagger infliction from Tower Companion basic attacks (Brute stagger removed; Frost Troll stagger replaced with a 1.5s Chill debuff).
+  * Reduced companion attack knockback forces (0.4f - 0.8f vs 1.4f - 2.4f) to eliminate endless enemy juggles.
+  * Lengthened companion attack cooldown timers across all classes (e.g. Slasher 1.25s vs 0.8s, Brute 1.85s vs 1.3s, Archer 1.8s vs 1.3s, Pyromancer 1.9s vs 1.4s, Ore Golem 1.7s vs 1.25s, Frost Troll 1.6s vs 1.1s) for deliberate, rhythmic combat pacing.
+  * Lowered companion defense pierce from 20-25% to 10%.
+* **Enemy Anti-Stunlock & Poise Safeguards**:
+  * Implemented `antiStunlockTimer` on `Enemy`: after suffering any stagger, enemies gain an un-staggerable grace window (1.2 seconds for regular enemies, 2.5 seconds for bosses).
+  * Stagger duration inflicted on bosses is automatically reduced by 60%.
+* **Companion Stat Rebalancing**:
+  * Rebalanced baseline Tower Squad stats in `InitTowerSquad()`: reduced combined squad health pool from 970 HP to 690 HP (Slasher 65 HP / 9 DMG, Brute 135 HP / 12 DMG, Charger 55 HP / 10 DMG, Archer 50 HP / 8 DMG, Pyromancer 60 HP / 9 DMG, Ore Golem 150 HP / 10 DMG, Frost Troll 175 HP / 11 DMG).
+  * Rebalanced Commander Totem relic bonuses across tiers:
+    * Tier 0: +18% Defense, +35 Max HP, +20 Will.
+    * Tier 1: +24% Defense, +50 Max HP, +28 Will, +10% companion HP/DEF, 45% DMG, 90s squad resurrection.
+    * Tier 2: +30% Defense, +70 Max HP, +38 Will, +20% companion HP/DEF, 55% DMG, +10% Speed, 60s squad resurrection.
 
 ---
 

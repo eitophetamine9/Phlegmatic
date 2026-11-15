@@ -119,6 +119,13 @@ inline HelmetStats GetHelmetStats(HelmetType type) {
                 7.0f, 15.0f, 1.02f, 1.04f, 20.0f,
                 Color{ 38, 56, 72, 255 }, Color{ 140, 220, 245, 255 }, ArmorSet::FROSTWARDEN
             };
+        case HelmetType::COMMANDER_CAP:
+            return {
+                "Commander's Bicorn Cap",
+                "Regal imperial navy bicorn cap trimmed with gold bullion lace, sharpening battlefield awareness.",
+                6.0f, 15.0f, 1.06f, 1.05f, 15.0f,
+                Color{ 28, 42, 68, 255 }, Color{ 245, 210, 80, 255 }, ArmorSet::COMMANDERS_UNIFORM
+            };
         case HelmetType::NONE:
         default:
             return {
@@ -180,6 +187,13 @@ inline ChestplateStats GetChestplateStats(ChestplateType type) {
                 "Heavy riveted iron breastplate draped with thick white beast fur and jagged bone studs.",
                 15.0f, 25.0f, 0.98f, 1.02f, 18.0f,
                 Color{ 32, 48, 64, 255 }, Color{ 210, 235, 250, 255 }, ArmorSet::FROSTWARDEN
+            };
+        case ChestplateType::COMMANDER_COAT:
+            return {
+                "Commander's Regimental Coat",
+                "Tailored imperial navy wool tunic with gilded brass frogging, instilling unbreakable courage in summons.",
+                14.0f, 25.0f, 1.08f, 1.08f, 18.0f,
+                Color{ 24, 38, 62, 255 }, Color{ 245, 210, 80, 255 }, ArmorSet::COMMANDERS_UNIFORM
             };
         case ChestplateType::NONE:
         default:
@@ -243,6 +257,13 @@ inline LeggingsStats GetLeggingsStats(LeggingsType type) {
                 7.0f, 10.0f, 1.0f, 1.0f, 12.0f,
                 Color{ 42, 54, 70, 255 }, Color{ 160, 205, 230, 255 }, ArmorSet::FROSTWARDEN
             };
+        case LeggingsType::COMMANDER_TROUSERS:
+            return {
+                "Commander's Officer Trousers",
+                "Tailored navy trousers and polished riding boots for nimble field maneuvers and evasive footwork.",
+                6.0f, 10.0f, 1.06f, 1.05f, 12.0f,
+                Color{ 20, 32, 52, 255 }, Color{ 245, 210, 80, 255 }, ArmorSet::COMMANDERS_UNIFORM
+            };
         case LeggingsType::NONE:
         default:
             return {
@@ -269,6 +290,8 @@ inline ArmorSet GetMatchingArmorSet(HelmetType h, ChestplateType c, LeggingsType
         return ArmorSet::BASALT_GOLEM;
     if (h == HelmetType::FROSTWARDEN_HOOD && c == ChestplateType::FROSTWARDEN_HAUBERK && l == LeggingsType::FROSTWARDEN_GREAVES)
         return ArmorSet::FROSTWARDEN;
+    if (h == HelmetType::COMMANDER_CAP && c == ChestplateType::COMMANDER_COAT && l == LeggingsType::COMMANDER_TROUSERS)
+        return ArmorSet::COMMANDERS_UNIFORM;
     return ArmorSet::NONE;
 }
 
@@ -343,6 +366,16 @@ inline ArmorSetInfo GetArmorSetInfo(ArmorSet set) {
                 "FROST NOVA",
                 "Unleashes a 190px crystalline Frost Nova dealing 75 frost damage, stunning non-bosses for 1.2s, infusing 4s Chill and -20% Armor Fracture, and bestowing a 6s Ice Ward (45 HP shield that retaliates against melee hits for 18 frost dmg & 3s Chill).",
                 28.0f
+            };
+        case ArmorSet::COMMANDERS_UNIFORM:
+            return {
+                ArmorSet::COMMANDERS_UNIFORM,
+                "Commander's Regalia",
+                "Grand Tactician",
+                "+40 Max HP, +20% Move Speed, +35% Dodge Evasion i-frames. Summons gain +40% Max HP, +25 Defense, and +35% Damage. [Command Trade-off]: Player direct weapon damage reduced by -35%.",
+                "RALLYING HORN",
+                "Sounds a golden battle horn ([V] key, 22s CD), cleansing debuffs from all active summons and empowering them with +50% Attack Speed and +25 Defense for 8 seconds with rallying crest circles.",
+                22.0f
             };
         case ArmorSet::NONE:
         default:

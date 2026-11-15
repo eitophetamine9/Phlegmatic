@@ -318,6 +318,13 @@ static void DrawHelmetSlotIcon(Vector2 center, HelmetType helmet, float scale, b
             DrawLineEx({ center.x - 10.0f * scale, center.y + 6.0f * scale }, { center.x + 10.0f * scale, center.y + 6.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 235, 248, 255, 255 } : glowCol);
             break;
         }
+        case HelmetType::COMMANDER_CAP: {
+            Color capCol = isUnlocked ? Color{ 48, 25, 45, 255 } : baseCol;
+            DrawRectangleRounded(Rectangle{ center.x - 11.0f * scale, center.y - 7.0f * scale, 22.0f * scale, 12.0f * scale }, 0.25f, 4, capCol);
+            DrawLineEx({ center.x - 12.0f * scale, center.y + 4.0f * scale }, { center.x + 12.0f * scale, center.y + 4.0f * scale }, 3.0f * scale, isUnlocked ? Color{ 235, 80, 140, 255 } : glowCol);
+            DrawCircleV({ center.x, center.y - 2.0f * scale }, 3.0f * scale, isUnlocked ? Color{ 255, 215, 80, 255 } : glowCol);
+            break;
+        }
         case HelmetType::NONE:
         default:
             DrawCircleLines((int)center.x, (int)center.y, 8.0f * scale, Color{ 70, 85, 105, 160 });
@@ -372,6 +379,13 @@ static void DrawChestplateSlotIcon(Vector2 center, ChestplateType chest, float s
             DrawRectangleRounded(Rectangle{ center.x - 11.0f * scale, center.y - 10.0f * scale, 22.0f * scale, 22.0f * scale }, 0.15f, 4, cuirassCol);
             DrawCircleV(center, 4.0f * scale, isUnlocked ? Color{ 140, 225, 255, 255 } : glowCol);
             DrawLineEx({ center.x - 9.0f * scale, center.y - 8.0f * scale }, { center.x + 9.0f * scale, center.y - 8.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 235, 248, 255, 255 } : glowCol);
+            break;
+        }
+        case ChestplateType::COMMANDER_COAT: {
+            Color coatCol = isUnlocked ? Color{ 45, 22, 42, 255 } : baseCol;
+            DrawRectangleRounded(Rectangle{ center.x - 11.0f * scale, center.y - 11.0f * scale, 22.0f * scale, 23.0f * scale }, 0.2f, 4, coatCol);
+            DrawLineEx({ center.x - 11.0f * scale, center.y - 8.0f * scale }, { center.x + 11.0f * scale, center.y + 10.0f * scale }, 2.5f * scale, isUnlocked ? Color{ 255, 215, 80, 255 } : glowCol);
+            DrawCircleV({ center.x, center.y }, 3.5f * scale, isUnlocked ? Color{ 235, 80, 140, 255 } : glowCol);
             break;
         }
         case ChestplateType::NONE:
@@ -436,6 +450,14 @@ static void DrawLeggingsSlotIcon(Vector2 center, LeggingsType legs, float scale,
             DrawRectangleRounded(Rectangle{ center.x + 1.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, greaveCol);
             DrawLineEx({ center.x - 8.0f * scale, center.y + 5.0f * scale }, { center.x - 1.0f * scale, center.y + 5.0f * scale }, 2.0f * scale, isUnlocked ? Color{ 160, 230, 255, 255 } : glowCol);
             DrawLineEx({ center.x + 1.0f * scale, center.y + 5.0f * scale }, { center.x + 8.0f * scale, center.y + 5.0f * scale }, 2.0f * scale, isUnlocked ? Color{ 160, 230, 255, 255 } : glowCol);
+            break;
+        }
+        case LeggingsType::COMMANDER_TROUSERS: {
+            Color pantsCol = isUnlocked ? Color{ 40, 20, 38, 255 } : baseCol;
+            DrawRectangleRounded(Rectangle{ center.x - 8.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, pantsCol);
+            DrawRectangleRounded(Rectangle{ center.x + 1.0f * scale, center.y - 10.0f * scale, 7.0f * scale, 20.0f * scale }, 0.2f, 4, pantsCol);
+            DrawLineEx({ center.x - 8.0f * scale, center.y - 8.0f * scale }, { center.x - 8.0f * scale, center.y + 8.0f * scale }, 1.5f * scale, isUnlocked ? Color{ 255, 215, 80, 255 } : glowCol);
+            DrawLineEx({ center.x + 8.0f * scale, center.y - 8.0f * scale }, { center.x + 8.0f * scale, center.y + 8.0f * scale }, 1.5f * scale, isUnlocked ? Color{ 255, 215, 80, 255 } : glowCol);
             break;
         }
         case LeggingsType::NONE:
@@ -1151,23 +1173,25 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
         DrawText("CONSUMABLES & ESSENCES", (int)leftX + 16, (int)secMatY + 6, 14, Color{ 255, 215, 90, 240 });
 
         struct MatSlot { const char* label; int count; Color col; const char* tag; };
-        MatSlot matSlots[5] = {
+        MatSlot matSlots[7] = {
             { "POTIONS", player.GetInventory().GetHealthPotionCount(), Color{ 235, 75, 75, 255 }, "[H] Heal" },
             { "SHINGLES", player.GetInventory().GetShingles(), Color{ 215, 225, 245, 255 }, "Currency" },
             { "ORE SCRAP", player.GetInventory().GetOreScraps(), Color{ 235, 165, 65, 255 }, "Forge Ore" },
+            { "FROST", player.GetInventory().GetFrostShards(), Color{ 130, 220, 255, 255 }, "Highland" },
             { "MIST ESS.", player.GetInventory().GetEssenceOfMist(), Color{ 90, 225, 210, 255 }, "Summoning" },
-            { "SHADOW", player.GetInventory().GetShadowEssence(), Color{ 180, 105, 255, 255 }, "Core Relic" }
+            { "SHADOW", player.GetInventory().GetShadowEssence(), Color{ 180, 105, 255, 255 }, "Core Relic" },
+            { "TOKENS", player.GetInventory().GetChallengeTokens(), Color{ 245, 75, 140, 255 }, "Arena" }
         };
-        float matW = (leftW - 32.0f - 16.0f) / 5.0f;
+        float matW = (leftW - 32.0f - 24.0f) / 7.0f;
         float matH = 50.0f;
         for (int m = 0; m < (int)std::size(matSlots); ++m) {
             Rectangle mRec = { leftX + 16.0f + (float)m * (matW + 4.0f), secMatY + 24.0f, matW, matH };
             DrawRectangleRounded(mRec, 0.12f, 4, Color{ 18, 23, 34, 220 });
             DrawRectangleRoundedLines(mRec, 0.12f, 4, Color{ 45, 60, 85, 180 });
-            DrawText(matSlots[m].label, (int)mRec.x + 6, (int)mRec.y + 4, 11, Color{ 145, 165, 190, 210 });
+            DrawText(matSlots[m].label, (int)mRec.x + 4, (int)mRec.y + 4, 10, Color{ 145, 165, 190, 210 });
             std::string countStr = "x" + std::to_string(matSlots[m].count);
-            DrawText(countStr.c_str(), (int)mRec.x + 6, (int)mRec.y + 19, 14, matSlots[m].col);
-            DrawText(matSlots[m].tag, (int)mRec.x + 6, (int)mRec.y + 35, 10, Color{ 120, 135, 155, 190 });
+            DrawText(countStr.c_str(), (int)mRec.x + 4, (int)mRec.y + 19, 13, matSlots[m].col);
+            DrawText(matSlots[m].tag, (int)mRec.x + 4, (int)mRec.y + 35, 9, Color{ 120, 135, 155, 190 });
         }
 
         // -------------------------------------------------------------
@@ -1315,7 +1339,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 1. HELMET ARMORY GRID & INSPECTION
             // =========================================================
             struct HelmEntry { HelmetType type; const char* lockMsg; int tierPips; };
-            HelmEntry helms[8] = {
+            HelmEntry helms[9] = {
                 { HelmetType::NONE, "Unarmored default", 0 },
                 { HelmetType::COMMONERS_HOOD, "Ruined Castle - Awakening Pedestal", 1 },
                 { HelmetType::CRUSADER_HELM, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
@@ -1323,7 +1347,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { HelmetType::SHADOW_COWL, "Varek's Forge - Craft with Mist Essence", 3 },
                 { HelmetType::SCRAP_SALLET, "Blacksmith Varek - Armor Forge", 2 },
                 { HelmetType::BASALT_GREATHELM, "Blacksmith Varek - Armor Forge", 3 },
-                { HelmetType::FROSTWARDEN_HOOD, "Blacksmith Varek - Highland Troll Crafting", 3 }
+                { HelmetType::FROSTWARDEN_HOOD, "Blacksmith Varek - Highland Frost Shard Crafting", 3 },
+                { HelmetType::COMMANDER_CAP, "Blacksmith Varek - Arena Challenge Crafting", 3 }
             };
 
             int unlockedCount = 0;
@@ -1455,7 +1480,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 2. CHESTPLATE ARMORY GRID & INSPECTION
             // =========================================================
             struct ChestEntry { ChestplateType type; const char* lockMsg; int tierPips; };
-            ChestEntry chests[8] = {
+            ChestEntry chests[9] = {
                 { ChestplateType::NONE, "Unarmored default", 0 },
                 { ChestplateType::COMMONERS_TUNIC, "Ruined Castle - Awakening Pedestal", 1 },
                 { ChestplateType::CRUSADER_CUIRASS, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
@@ -1463,7 +1488,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { ChestplateType::SHADOW_GARB, "Varek's Forge - Craft with Mist Essence", 3 },
                 { ChestplateType::SCRAP_CUIRASS, "Blacksmith Varek - Armor Forge", 2 },
                 { ChestplateType::BASALT_CUIRASS, "Blacksmith Varek - Armor Forge", 3 },
-                { ChestplateType::FROSTWARDEN_HAUBERK, "Blacksmith Varek - Highland Troll Crafting", 3 }
+                { ChestplateType::FROSTWARDEN_HAUBERK, "Blacksmith Varek - Highland Frost Shard Crafting", 3 },
+                { ChestplateType::COMMANDER_COAT, "Blacksmith Varek - Arena Challenge Crafting", 3 }
             };
 
             int unlockedCount = 0;
@@ -1595,7 +1621,7 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
             // 3. LEGGINGS ARMORY GRID & INSPECTION
             // =========================================================
             struct LegEntry { LeggingsType type; const char* lockMsg; int tierPips; };
-            LegEntry legs[8] = {
+            LegEntry legs[9] = {
                 { LeggingsType::NONE, "Unarmored default", 0 },
                 { LeggingsType::COMMONERS_BREECHES, "Ruined Castle - Awakening Pedestal", 1 },
                 { LeggingsType::CRUSADER_GREAVES, "Zyphden - Defeat Knight Lenon in courtyard spar", 2 },
@@ -1603,7 +1629,8 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 { LeggingsType::SHADOW_LEGGINGS, "Varek's Forge - Craft with Mist Essence", 3 },
                 { LeggingsType::SCRAP_GREAVES, "Blacksmith Varek - Armor Forge", 2 },
                 { LeggingsType::BASALT_GREAVES, "Blacksmith Varek - Armor Forge", 3 },
-                { LeggingsType::FROSTWARDEN_GREAVES, "Blacksmith Varek - Highland Troll Crafting", 3 }
+                { LeggingsType::FROSTWARDEN_GREAVES, "Blacksmith Varek - Highland Frost Shard Crafting", 3 },
+                { LeggingsType::COMMANDER_TROUSERS, "Blacksmith Varek - Arena Challenge Crafting", 3 }
             };
 
             int unlockedCount = 0;
@@ -1908,16 +1935,16 @@ bool ModalUI::DrawInventory(int windowWidth, int windowHeight, Vector2 mousePos,
                 traitColor = Color{ 255, 215, 80, 255 };
             } else if (totems[s_inspectedTotem].type == TotemType::COMMANDER_TOTEM) {
                 if (curTotTier >= 2) {
-                    traitHeader = "[Royal Legion]: 7 Imperial Gladiators (135% HP/DEF, 70% DMG)";
-                    traitDesc = "Commands an undying royal vanguard with +35% Health and Defense, 70% base damage, +15% move speed, and rapid 60-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Royal Legion]: 7 Imperial Gladiators (+20% HP/DEF, 55% DMG)";
+                    traitDesc = "Commands an undying royal vanguard with +20% Health and Defense, 55% base damage, +10% move speed, non-staggering rhythmic strikes, and rapid 60-second squad resurrection. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 255, 160, 220, 255 };
                 } else if (curTotTier == 1) {
-                    traitHeader = "[Squad]: 7 Veteran Gladiators (115% HP/DEF, 55% DMG)";
-                    traitDesc = "Commands an empowered vanguard with 115% HP/DEF, 55% strike power, and 90-second squad resurrection. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Squad]: 7 Veteran Gladiators (+10% HP/DEF, 45% DMG)";
+                    traitDesc = "Commands an empowered vanguard with +10% HP/DEF, 45% strike power, non-staggering tactical strikes, and 90-second squad resurrection. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 235, 130, 240, 255 };
                 } else {
-                    traitHeader = "[Squad]: 7 Tower Gladiator Companions (100% HP/DEF, 40% DMG)";
-                    traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with true enemy HP and Defense. All 7 must perish before the 2-minute squad resurrection countdown begins. Reduces bearer's attack damage by 40%.";
+                    traitHeader = "[Squad]: 7 Tower Gladiator Companions (Non-Staggering Strikes)";
+                    traitDesc = "Commands a loyal legion of 7 tower gladiators (Slasher, Brute, Charger, Archer, Pyromancer, Stone Golem, Frost Troll) with rebalanced stats and non-staggering tactical strikes. All 7 must perish before the 2-minute squad resurrection countdown begins. Reduces bearer's attack damage by 40%.";
                     traitColor = Color{ 215, 120, 255, 255 };
                 }
             }
@@ -4483,6 +4510,7 @@ bool ModalUI::DrawStorageStash(int windowWidth, int windowHeight, Vector2 mouseP
         { 2, "Frost Shards", inv.GetFrostShards(), stash.frostShards, Color{ 130, 220, 255, 255 } },
         { 3, "Essence of Mist", inv.GetEssenceOfMist(), stash.essenceOfMist, Color{ 120, 240, 200, 255 } },
         { 4, "Shadow Essence", inv.GetShadowEssence(), stash.shadowEssence, Color{ 190, 120, 255, 255 } },
+        { 9, "Challenge Tokens", inv.GetChallengeTokens(), stash.challengeTokens, Color{ 245, 75, 140, 255 } },
         { 5, "Health Potions", inv.GetHealthPotionCount(), stash.healthPotions, Color{ 255, 80, 95, 255 } },
         { 6, "Stoneskin Tonics", inv.GetStoneskinTonicCount(), stash.stoneskinTonics, Color{ 230, 160, 60, 255 } },
         { 7, "Glacial Draughts", inv.GetGlacialDraughtCount(), stash.glacialDraughts, Color{ 100, 200, 255, 255 } },
@@ -4505,7 +4533,7 @@ bool ModalUI::DrawStorageStash(int windowWidth, int windowHeight, Vector2 mouseP
     DrawRectangleRoundedLines(Rectangle{ rightX, paneY, paneW, paneH }, 0.03f, 4, Color{ 190, 150, 60, 200 });
     FontManager::DrawGameTextShadow("VAULT STASH TRUNK (STORED)", (int)rightX + 16, (int)paneY + 12, 12, Color{ 255, 220, 110, 255 });
 
-    float rowH = 40.0f;
+    float rowH = 37.0f;
     float rowStartY = paneY + 36.0f;
 
     for (size_t i = 0; i < entries.size(); ++i) {
@@ -4602,6 +4630,7 @@ bool ModalUI::DrawStorageStash(int windowWidth, int windowHeight, Vector2 mouseP
         inv.DepositItem(2, inv.GetFrostShards());
         inv.DepositItem(3, inv.GetEssenceOfMist());
         inv.DepositItem(4, inv.GetShadowEssence());
+        inv.DepositItem(9, inv.GetChallengeTokens());
         SoundFX::PlayButtonClick();
     }
 

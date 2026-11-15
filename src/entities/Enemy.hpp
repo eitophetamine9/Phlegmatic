@@ -35,9 +35,13 @@ public:
     Vector2 GetPosition() const { return position; }
     void SetPosition(Vector2 p) { position = p; }
     void ApplyStagger(float duration) {
+        if (antiStunlockTimer > 0.0f) return;
+        float effDuration = IsBoss() ? duration * 0.40f : duration;
+        if (effDuration <= 0.05f) return;
         state = EnemyState::STUNNED;
-        stunDuration = duration;
-        stateTimer = duration;
+        stunDuration = effDuration;
+        stateTimer = effDuration;
+        antiStunlockTimer = effDuration + (IsBoss() ? 2.5f : 1.2f);
     }
     float GetRadius() const { return radius; }
     float GetFacingAngle() const { return facingAngle; }
@@ -128,6 +132,7 @@ private:
     float strikeDuration;
     float recoveryDuration;
     float stunDuration;
+    float antiStunlockTimer = 0.0f;
 
     float stateTimer;
     bool hasDamagedPlayer;

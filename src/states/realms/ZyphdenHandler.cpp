@@ -957,7 +957,7 @@ void ZyphdenHandler::Update(
     if (!isDialogueOpen) {
         if (!inTavern && !inForge && !inRoyalKeep) {
             for (auto& enemy : enemies) {
-                enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+                enemy.Update(dt, player.GetTargetPositionForEnemy(enemy.GetPosition(), enemy.GetRadius()), map, particles, projectiles);
             }
         }
 
@@ -2787,47 +2787,68 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     int playerScraps = player.GetInventory().GetOreScraps();
     int playerMist = player.GetInventory().GetEssenceOfMist();
     int playerShadow = player.GetInventory().GetShadowEssence();
+    int playerFrost = player.GetInventory().GetFrostShards();
+    int playerTokens = player.GetInventory().GetChallengeTokens();
 
-    float badgeH = 26.0f;
-    float badgeY = modalY + 18.0f;
+    float badgeH = 24.0f;
+    float row1Y = modalY + 14.0f;
+    float row2Y = modalY + 42.0f;
 
+    // Row 1 (Currency & Martial Tokens):
     // 1. Shingles Badge
-    float shingleBadgeW = 120.0f;
+    float shingleBadgeW = 106.0f;
     float shingleBadgeX = modalX + modalW - shingleBadgeW - 28.0f;
-    DrawRectangleRounded(Rectangle{ shingleBadgeX, badgeY, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
-    DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, badgeY, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
-    DrawRectanglePro(Rectangle{ shingleBadgeX + 16.0f, badgeY + 13.0f, 9.0f, 9.0f }, Vector2{ 4.5f, 4.5f }, 45.0f, Color{ 220, 235, 255, 255 });
-    DrawPolyLines(Vector2{ shingleBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, Color{ 100, 135, 180, 255 });
+    DrawRectangleRounded(Rectangle{ shingleBadgeX, row1Y, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 20, 26, 40, 240 });
+    DrawRectangleRoundedLines(Rectangle{ shingleBadgeX, row1Y, shingleBadgeW, badgeH }, 0.25f, 4, Color{ 140, 180, 225, 220 });
+    DrawRectanglePro(Rectangle{ shingleBadgeX + 14.0f, row1Y + 12.0f, 8.0f, 8.0f }, Vector2{ 4.0f, 4.0f }, 45.0f, Color{ 220, 235, 255, 255 });
     std::string shingleStr = std::to_string(playerShingles) + " Shingles";
-    FontManager::DrawGameTextShadow(shingleStr, (int)shingleBadgeX + 30, (int)badgeY + 6, 12, Color{ 230, 245, 255, 255 });
+    FontManager::DrawGameTextShadow(shingleStr, (int)shingleBadgeX + 26, (int)row1Y + 5, 11, Color{ 230, 245, 255, 255 });
 
     // 2. Ore Scraps Badge
-    float scrapBadgeW = 128.0f;
+    float scrapBadgeW = 112.0f;
     float scrapBadgeX = shingleBadgeX - scrapBadgeW - 8.0f;
-    DrawRectangleRounded(Rectangle{ scrapBadgeX, badgeY, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 26, 22, 16, 240 });
-    DrawRectangleRoundedLines(Rectangle{ scrapBadgeX, badgeY, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 225, 175, 55, 220 });
-    DrawPoly(Vector2{ scrapBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, Color{ 255, 195, 55, 255 });
-    DrawPolyLinesEx(Vector2{ scrapBadgeX + 16.0f, badgeY + 13.0f }, 4, 6.5f, 45.0f, 1.5f, Color{ 255, 235, 140, 255 });
-    std::string scrapStr = std::to_string(playerScraps) + " Ore Scraps";
-    FontManager::DrawGameTextShadow(scrapStr, (int)scrapBadgeX + 30, (int)badgeY + 6, 12, Color{ 255, 225, 120, 255 });
+    DrawRectangleRounded(Rectangle{ scrapBadgeX, row1Y, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 26, 22, 16, 240 });
+    DrawRectangleRoundedLines(Rectangle{ scrapBadgeX, row1Y, scrapBadgeW, badgeH }, 0.25f, 4, Color{ 225, 175, 55, 220 });
+    DrawPoly(Vector2{ scrapBadgeX + 14.0f, row1Y + 12.0f }, 4, 5.5f, 45.0f, Color{ 255, 195, 55, 255 });
+    std::string scrapStr = std::to_string(playerScraps) + " Scraps";
+    FontManager::DrawGameTextShadow(scrapStr, (int)scrapBadgeX + 26, (int)row1Y + 5, 11, Color{ 255, 225, 120, 255 });
 
-    // 3. Shadow Essence Badge
-    float shadowBadgeW = 124.0f;
-    float shadowBadgeX = scrapBadgeX - shadowBadgeW - 8.0f;
-    DrawRectangleRounded(Rectangle{ shadowBadgeX, badgeY, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 26, 18, 36, 240 });
-    DrawRectangleRoundedLines(Rectangle{ shadowBadgeX, badgeY, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 190, 110, 255, 220 });
-    DrawPoly(Vector2{ shadowBadgeX + 16.0f, badgeY + 13.0f }, 5, 6.0f, 0.0f, Color{ 200, 120, 255, 255 });
-    std::string shadowStr = std::to_string(playerShadow) + " Shadow Ess";
-    FontManager::DrawGameTextShadow(shadowStr, (int)shadowBadgeX + 30, (int)badgeY + 6, 12, Color{ 225, 180, 255, 255 });
+    // 3. Challenge Tokens Badge
+    float tokenBadgeW = 116.0f;
+    float tokenBadgeX = scrapBadgeX - tokenBadgeW - 8.0f;
+    DrawRectangleRounded(Rectangle{ tokenBadgeX, row1Y, tokenBadgeW, badgeH }, 0.25f, 4, Color{ 36, 18, 28, 240 });
+    DrawRectangleRoundedLines(Rectangle{ tokenBadgeX, row1Y, tokenBadgeW, badgeH }, 0.25f, 4, Color{ 245, 75, 140, 220 });
+    DrawCircle((int)(tokenBadgeX + 14.0f), (int)(row1Y + 12.0f), 5.0f, Color{ 255, 80, 160, 255 });
+    std::string tokenStr = std::to_string(playerTokens) + " Tokens";
+    FontManager::DrawGameTextShadow(tokenStr, (int)tokenBadgeX + 26, (int)row1Y + 5, 11, Color{ 255, 180, 220, 255 });
 
-    // 4. Mist Essence Badge
-    float mistBadgeW = 114.0f;
+    // Row 2 (Elemental & Regional Essences):
+    // 4. Shadow Essence Badge
+    float shadowBadgeW = 106.0f;
+    float shadowBadgeX = modalX + modalW - shadowBadgeW - 28.0f;
+    DrawRectangleRounded(Rectangle{ shadowBadgeX, row2Y, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 26, 18, 36, 240 });
+    DrawRectangleRoundedLines(Rectangle{ shadowBadgeX, row2Y, shadowBadgeW, badgeH }, 0.25f, 4, Color{ 190, 110, 255, 220 });
+    DrawPoly(Vector2{ shadowBadgeX + 14.0f, row2Y + 12.0f }, 5, 5.5f, 0.0f, Color{ 200, 120, 255, 255 });
+    std::string shadowStr = std::to_string(playerShadow) + " Shadow";
+    FontManager::DrawGameTextShadow(shadowStr, (int)shadowBadgeX + 26, (int)row2Y + 5, 11, Color{ 225, 180, 255, 255 });
+
+    // 5. Mist Essence Badge
+    float mistBadgeW = 112.0f;
     float mistBadgeX = shadowBadgeX - mistBadgeW - 8.0f;
-    DrawRectangleRounded(Rectangle{ mistBadgeX, badgeY, mistBadgeW, badgeH }, 0.25f, 4, Color{ 16, 28, 32, 240 });
-    DrawRectangleRoundedLines(Rectangle{ mistBadgeX, badgeY, mistBadgeW, badgeH }, 0.25f, 4, Color{ 100, 235, 215, 220 });
-    DrawCircle((int)(mistBadgeX + 16.0f), (int)(badgeY + 13.0f), 5.5f, Color{ 110, 245, 220, 255 });
-    std::string mistStr = std::to_string(playerMist) + " Mist Ess";
-    FontManager::DrawGameTextShadow(mistStr, (int)mistBadgeX + 28, (int)badgeY + 6, 12, Color{ 180, 250, 235, 255 });
+    DrawRectangleRounded(Rectangle{ mistBadgeX, row2Y, mistBadgeW, badgeH }, 0.25f, 4, Color{ 16, 28, 32, 240 });
+    DrawRectangleRoundedLines(Rectangle{ mistBadgeX, row2Y, mistBadgeW, badgeH }, 0.25f, 4, Color{ 100, 235, 215, 220 });
+    DrawCircle((int)(mistBadgeX + 14.0f), (int)(row2Y + 12.0f), 5.0f, Color{ 110, 245, 220, 255 });
+    std::string mistStr = std::to_string(playerMist) + " Mist";
+    FontManager::DrawGameTextShadow(mistStr, (int)mistBadgeX + 26, (int)row2Y + 5, 11, Color{ 180, 250, 235, 255 });
+
+    // 6. Frost Shards Badge
+    float frostBadgeW = 116.0f;
+    float frostBadgeX = mistBadgeX - frostBadgeW - 8.0f;
+    DrawRectangleRounded(Rectangle{ frostBadgeX, row2Y, frostBadgeW, badgeH }, 0.25f, 4, Color{ 16, 26, 38, 240 });
+    DrawRectangleRoundedLines(Rectangle{ frostBadgeX, row2Y, frostBadgeW, badgeH }, 0.25f, 4, Color{ 130, 220, 255, 220 });
+    DrawPoly(Vector2{ frostBadgeX + 14.0f, row2Y + 12.0f }, 3, 5.5f, 0.0f, Color{ 140, 230, 255, 255 });
+    std::string frostStr = std::to_string(playerFrost) + " Frost";
+    FontManager::DrawGameTextShadow(frostStr, (int)frostBadgeX + 26, (int)row2Y + 5, 11, Color{ 180, 235, 255, 255 });
 
     // Category Tabs: [1] VANGUARD WEAPONS (9) | [2] SACRED WEAPONS (2) | [3] PRIMAL TOTEMS (8) | [4] ARMOR FORGE (15)
     if (IsKeyPressed(KEY_ONE)) { forgeTab = 0; weaponForgePage = 0; totemForgePage = 0; armorForgePage = 0; }
@@ -2866,7 +2887,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
     DrawRectangleRounded(tab4Rec, 0.25f, 4, (forgeTab == 3) ? Color{ 40, 56, 82, 255 } : (isT4Hov ? Color{ 28, 38, 56, 220 } : Color{ 18, 24, 36, 180 }));
     DrawRectangleRoundedLines(tab4Rec, 0.25f, 4, (forgeTab == 3) ? Color{ 255, 215, 80, 240 } : Color{ 60, 80, 110, 200 });
-    FontManager::DrawGameTextShadow("[4] ARMOR FORGE (15)", (int)tab4Rec.x + 18, (int)tab4Rec.y + 7, 12, (forgeTab == 3) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
+    FontManager::DrawGameTextShadow("[4] ARMOR FORGE (18)", (int)tab4Rec.x + 18, (int)tab4Rec.y + 7, 12, (forgeTab == 3) ? Color{ 255, 225, 100, 255 } : Color{ 180, 200, 225, 220 });
 
     // Divider Line
     DrawLine((int)modalX + 28, (int)modalY + 112, (int)(modalX + modalW - 28), (int)modalY + 112, Color{ 70, 95, 135, 160 });
@@ -2875,7 +2896,7 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
     int currentTabCurrentPage = 0;
 
     if (forgeTab == 3) {
-        // TAB 4: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT, SHADOWSTRIDER, VANGUARD, FROSTWARDEN)
+        // TAB 4: ARMOR FORGE (PAGINATED 2x2: SCRAP, BASALT, SHADOWSTRIDER, VANGUARD, FROSTWARDEN, COMMANDER)
         struct ArmorCraftRecipe {
             int category; // 0 = Helm, 1 = Chest, 2 = Legs
             int id;
@@ -2889,27 +2910,32 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             const char* desc;
             int mistCost;
             int shadowCost;
+            int frostCost;
+            int challengeTokenCost;
         };
 
-        ArmorCraftRecipe armorRecipes[15] = {
-            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw slag.", 0, 0 },
-            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap breastplate. Stout physical resilience.", 0, 0 },
-            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal greaves granting stable footwork.", 0, 0 },
-            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic crest imbued with primordial earth.", 0, 0 },
-            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron.", 0, 0 },
-            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense stone greaves that crush gravel with each step.", 0, 0 },
-            { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Mist-woven cowl that sharpens wind reflexes.", 2, 1 },
-            { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence.", 4, 2 },
-            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1 },
-            { 0, (int)HelmetType::VANGUARD_GREATHELM, "Vanguard Greathelm", "HELMET", 12, 45, "+8 Def | +10 HP | +20 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Impenetrable full-face visor built for frontline assault.", 0, 0 },
-            { 1, (int)ChestplateType::VANGUARD_CHEST, "Vanguard Bastion Mail", "CHESTPLATE", 18, 65, "+16 Def | +30 HP | +12 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Heavy iron hauberk and pauldron plates for frontline sieges.", 0, 0 },
-            { 2, (int)LeggingsType::VANGUARD_GREAVES, "Vanguard Heavy Legguards", "LEGGINGS", 14, 50, "+8 Def | +10 HP | +8 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Massive banded greaves anchoring against concussive impacts.", 0, 0 },
-            { 0, (int)HelmetType::FROSTWARDEN_HOOD, "Frostwarden Fur Cowl", "HELMET", 14, 60, "+7 Def | +15 HP | +20 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Polar bear and troll fur-trimmed cowl. Cold immunity.", 1, 2 },
-            { 1, (int)ChestplateType::FROSTWARDEN_HAUBERK, "Frostwarden Pelt Hauberk", "CHESTPLATE", 22, 90, "+15 Def | +25 HP | +18 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Heavy iron breastplate draped with thick white beast fur.", 2, 3 },
-            { 2, (int)LeggingsType::FROSTWARDEN_GREAVES, "Frostwarden Spiked Greaves", "LEGGINGS", 14, 60, "+7 Def | +10 HP | +12 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Spiked steel boots granting sure footing on sheer icy scree.", 1, 2 }
+        ArmorCraftRecipe armorRecipes[18] = {
+            { 0, (int)HelmetType::SCRAP_SALLET, "Scrap-Iron Sallet", "HELMET", 6, 20, "+6 Def | +15 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Crude beaten iron sallet forged from raw slag.", 0, 0, 0, 0 },
+            { 1, (int)ChestplateType::SCRAP_CUIRASS, "Forged Scrap Cuirass", "CHESTPLATE", 10, 35, "+10 Def | +15 HP | +8 Will", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Riveted scrap breastplate. Stout physical resilience.", 0, 0, 0, 0 },
+            { 2, (int)LeggingsType::SCRAP_GREAVES, "Reinforced Scrap Greaves", "LEGGINGS", 8, 25, "+5 Def | +5 HP | +2% Spd", "Set: Forged Scrap Iron", Color{ 240, 180, 70, 255 }, "Banded metal greaves granting stable footwork.", 0, 0, 0, 0 },
+            { 0, (int)HelmetType::BASALT_GREATHELM, "Basalt Golem Greathelm", "HELMET", 14, 50, "+10 Def | +15 HP | +25 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Carved volcanic crest imbued with primordial earth.", 0, 0, 0, 0 },
+            { 1, (int)ChestplateType::BASALT_CUIRASS, "Basalt Plated Bastion", "CHESTPLATE", 20, 70, "+18 Def | +30 HP | +15 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Monolithic volcanic plates bound with tempered iron.", 0, 0, 0, 0 },
+            { 2, (int)LeggingsType::BASALT_GREAVES, "Basalt Heavy Greaves", "LEGGINGS", 12, 40, "+8 Def | +10 HP | +10 Will", "Set: Basalt Golem", Color{ 255, 140, 40, 255 }, "Dense stone greaves that crush gravel with each step.", 0, 0, 0, 0 },
+            { 0, (int)HelmetType::SHADOW_COWL, "Shadowstrider Cowl", "HELMET", 0, 30, "+8 Def | +12 Will | +5% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Mist-woven cowl that sharpens wind reflexes.", 2, 1, 0, 0 },
+            { 1, (int)ChestplateType::SHADOW_GARB, "Shadowstrider Doublet", "CHESTPLATE", 0, 50, "+12 Def | +20 HP | +8% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Supple dark mantle bound with shadow essence.", 4, 2, 0, 0 },
+            { 2, (int)LeggingsType::SHADOW_LEGGINGS, "Shadowstrider Tights", "LEGGINGS", 0, 40, "+6 Def | +10 Will | +12% Speed", "Set: Shadowstrider", Color{ 110, 245, 220, 255 }, "Lightweight leather leggings for silent, agile strides.", 3, 1, 0, 0 },
+            { 0, (int)HelmetType::VANGUARD_GREATHELM, "Vanguard Greathelm", "HELMET", 12, 45, "+8 Def | +10 HP | +20 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Impenetrable full-face visor built for frontline assault.", 0, 0, 0, 0 },
+            { 1, (int)ChestplateType::VANGUARD_CHEST, "Vanguard Bastion Mail", "CHESTPLATE", 18, 65, "+16 Def | +30 HP | +12 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Heavy iron hauberk and pauldron plates for frontline sieges.", 0, 0, 0, 0 },
+            { 2, (int)LeggingsType::VANGUARD_GREAVES, "Vanguard Heavy Legguards", "LEGGINGS", 14, 50, "+8 Def | +10 HP | +8 Will", "Set: Vanguard Bastion", Color{ 245, 75, 75, 255 }, "Massive banded greaves anchoring against concussive impacts.", 0, 0, 0, 0 },
+            { 0, (int)HelmetType::FROSTWARDEN_HOOD, "Frostwarden Fur Cowl", "HELMET", 0, 0, "+7 Def | +15 HP | +20 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Highland troll fur cowl. Requires Highland Frost Shards only.", 0, 0, 6, 0 },
+            { 1, (int)ChestplateType::FROSTWARDEN_HAUBERK, "Frostwarden Pelt Hauberk", "CHESTPLATE", 0, 0, "+15 Def | +25 HP | +18 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Highland troll fur mantle. Requires Highland Frost Shards only.", 0, 0, 10, 0 },
+            { 2, (int)LeggingsType::FROSTWARDEN_GREAVES, "Frostwarden Spiked Greaves", "LEGGINGS", 0, 0, "+7 Def | +10 HP | +12 Will", "Set: Frostwarden", Color{ 140, 220, 245, 255 }, "Highland troll spiked boots. Requires Highland Frost Shards only.", 0, 0, 8, 0 },
+            { 0, (int)HelmetType::COMMANDER_CAP, "Commander's Peaked Cap", "HELMET", 0, 35, "+6 Def | +15 HP | +10% Evade | +Will", "Set: Commander's Uniform", Color{ 235, 80, 140, 255 }, "Gilded officer peaked cap inspiring cohort discipline.", 0, 0, 0, 8 },
+            { 1, (int)ChestplateType::COMMANDER_COAT, "Commander's Parade Coat", "CHESTPLATE", 0, 60, "+14 Def | +25 HP | +15% Evade | -35% Dmg", "Set: Commander's Uniform", Color{ 235, 80, 140, 255 }, "Regal parade mantle. Empowers companions at cost of personal fury.", 0, 0, 0, 14 },
+            { 2, (int)LeggingsType::COMMANDER_TROUSERS, "Commander's Trousers", "LEGGINGS", 0, 40, "+6 Def | +10% Evade | +20% Speed", "Set: Commander's Uniform", Color{ 235, 80, 140, 255 }, "High-grade cavalry trousers for rapid tactical positioning.", 0, 0, 0, 10 }
         };
 
-        int totalRecipes = 15;
+        int totalRecipes = 18;
         int itemsPerPage = 4;
         int totalPages = (totalRecipes + itemsPerPage - 1) / itemsPerPage;
         if (armorForgePage < 0) armorForgePage = 0;
@@ -2953,7 +2979,9 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             bool canAfford = (playerScraps >= armorRecipes[i].scrapCost &&
                               playerShingles >= armorRecipes[i].shingleCost &&
                               playerMist >= armorRecipes[i].mistCost &&
-                              playerShadow >= armorRecipes[i].shadowCost);
+                              playerShadow >= armorRecipes[i].shadowCost &&
+                              playerFrost >= armorRecipes[i].frostCost &&
+                              playerTokens >= armorRecipes[i].challengeTokenCost);
 
             DrawRectangleRounded(cardRec, 0.08f, 6, isOwned ? Color{ 22, 28, 40, 240 } : (isHov ? Color{ 26, 32, 48, 230 } : Color{ 18, 22, 34, 210 }));
             DrawRectangleRoundedLines(cardRec, 0.08f, 6, isOwned ? Color{ 60, 160, 110, 200 } : (isHov ? armorRecipes[i].accentColor : Color{ 55, 75, 105, 180 }));
@@ -2970,7 +2998,12 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
             // Cost line
             std::string costStr;
-            if (armorRecipes[i].mistCost > 0 || armorRecipes[i].shadowCost > 0) {
+            if (armorRecipes[i].frostCost > 0) {
+                costStr = "Cost: " + std::to_string(armorRecipes[i].frostCost) + " Frost Shards";
+            } else if (armorRecipes[i].challengeTokenCost > 0) {
+                costStr = "Cost: " + std::to_string(armorRecipes[i].challengeTokenCost) + " Challenge Tokens  +  " +
+                          std::to_string(armorRecipes[i].shingleCost) + " Shingles";
+            } else if (armorRecipes[i].mistCost > 0 || armorRecipes[i].shadowCost > 0) {
                 costStr = "Cost: " + std::to_string(armorRecipes[i].mistCost) + " Mist Ess  +  " +
                           std::to_string(armorRecipes[i].shadowCost) + " Shadow Ess  +  " +
                           std::to_string(armorRecipes[i].shingleCost) + " Shingles";
@@ -3000,6 +3033,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     if (armorRecipes[i].shingleCost > 0) player.GetInventory().SpendShingles(armorRecipes[i].shingleCost);
                     if (armorRecipes[i].mistCost > 0) player.GetInventory().SpendEssenceOfMist(armorRecipes[i].mistCost);
                     if (armorRecipes[i].shadowCost > 0) player.GetInventory().SpendShadowEssence(armorRecipes[i].shadowCost);
+                    if (armorRecipes[i].frostCost > 0) player.GetInventory().SpendFrostShards(armorRecipes[i].frostCost);
+                    if (armorRecipes[i].challengeTokenCost > 0) player.GetInventory().SpendChallengeTokens(armorRecipes[i].challengeTokenCost);
                     if (armorRecipes[i].category == 0) player.SetHelmet((HelmetType)armorRecipes[i].id);
                     else if (armorRecipes[i].category == 1) player.SetChestplate((ChestplateType)armorRecipes[i].id);
                     else if (armorRecipes[i].category == 2) player.SetLeggings((LeggingsType)armorRecipes[i].id);
@@ -3012,7 +3047,11 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             } else {
                 DrawRectangleRounded(btnRec, 0.2f, 4, Color{ 28, 20, 24, 200 });
                 DrawRectangleRoundedLines(btnRec, 0.2f, 4, Color{ 110, 50, 55, 180 });
-                const char* errMsg = (armorRecipes[i].mistCost > 0 || armorRecipes[i].shadowCost > 0) ? "INSUFFICIENT ESSENCES OR SHINGLES" : "INSUFFICIENT ORE SCRAPS OR SHINGLES";
+                const char* errMsg = "INSUFFICIENT MATERIALS";
+                if (armorRecipes[i].frostCost > 0) errMsg = "INSUFFICIENT FROST SHARDS";
+                else if (armorRecipes[i].challengeTokenCost > 0) errMsg = "INSUFFICIENT TOKENS OR SHINGLES";
+                else if (armorRecipes[i].mistCost > 0 || armorRecipes[i].shadowCost > 0) errMsg = "INSUFFICIENT ESSENCES OR SHINGLES";
+                else errMsg = "INSUFFICIENT ORE SCRAPS OR SHINGLES";
                 int bw = FontManager::MeasureGameText(errMsg, 12, GameFont::BODY);
                 FontManager::DrawGameTextShadow(errMsg, (int)btnRec.x + (int)(btnRec.width - bw) / 2, (int)btnRec.y + 7, 12, Color{ 220, 110, 110, 220 });
             }
@@ -3033,6 +3072,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             const char* perkT2;
             Color accentColor;
             const char* discoveryHint;
+            int tokenCostT1 = 0;
+            int tokenCostT2 = 0;
         };
 
         TotemForgeRecipe totemRecipes[8] = {
@@ -3044,7 +3085,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "+22% Overall DMG (+7%), +25 Will, +5% Stamina Regen",
                 "+30% Overall DMG (+15%), +40 Will, +10% Stamina Regen, +20 Max HP",
                 Color{ 100, 235, 180, 255 },
-                "Awakening Pedestal in Ruined Castle"
+                "Awakening Pedestal in Ruined Castle",
+                0, 0
             },
             {
                 TotemType::TOTEM_INSANITY,
@@ -3054,7 +3096,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "+80% DMG (+160% below 40% HP), +22% Spd, +30% Atk Spd, -45% DEF",
                 "+100% DMG (+200% below 40% HP), +26% Spd, +35% Atk Spd, -40% DEF",
                 Color{ 255, 45, 60, 255 },
-                "Northern Crags - Berserker Troll Boss drop"
+                "Northern Crags - Berserker Troll Boss drop",
+                0, 0
             },
             {
                 TotemType::TOTEM_MIST,
@@ -3064,7 +3107,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "Empowered Fairy (+28% Crit, +50% Crit Dmg, 12s Orbs +45 HP), +15% Stamina",
                 "Arch-Mist Fairy (+38% Crit, +70% Crit Dmg, 8s Orbs +60 HP, NO PENALTIES)",
                 Color{ 110, 240, 225, 255 },
-                "Restless Mist Forest - Gale Archer Boss drop"
+                "Restless Mist Forest - Gale Archer Boss drop",
+                0, 0
             },
             {
                 TotemType::CRUSADER_TOTEM,
@@ -3074,7 +3118,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "+32% DEF, +50 Max HP, +22% ATK | Will of Atlas: 5s Invuln (<20% HP, 45s CD)",
                 "+40% DEF, +70 Max HP, +28% ATK | Will of Atlas: 6s Invuln (<20% HP, 30s CD)",
                 Color{ 255, 215, 80, 255 },
-                "Zyphden - Spar with Knight Lenon drop"
+                "Zyphden - Spar with Knight Lenon drop",
+                0, 0
             },
             {
                 TotemType::ELEMENTAL_CORE_TOTEM,
@@ -3084,7 +3129,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "Empowered Mini Golem (600 HP, 65 DEF, +6/s Regen), +32% DEF, Bearer Bolt",
                 "EVOLVED TITAN: Commanding Golem (920 HP, 75 DEF) + SUMMONS 3 MINI GOLEMS!",
                 Color{ 255, 140, 45, 255 },
-                "Quarry Depths - Elemental Golem Boss drop"
+                "Quarry Depths - Elemental Golem Boss drop",
+                0, 0
             },
             {
                 TotemType::TOTEM_PHLEGMATIC_CORE,
@@ -3094,27 +3140,30 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                 "+50 Max HP, +35 Will, -90% Knockback, 35% Gray Health, Chill On Hit",
                 "+75 Max HP, +50 Will, COMPLETE KNOCKBACK IMMUNITY, 50% Gray Health",
                 Color{ 140, 220, 255, 255 },
-                "Northern Crags - Altar of Cold Solitude / Torvald Bounty"
+                "Northern Crags - Altar of Cold Solitude / Torvald Bounty",
+                0, 0
             },
             {
                 TotemType::CHAMPION_TOTEM,
                 "Champion's Totem",
                 "WARLORD EFFIGY",
-                160, 5, 300, 10, 0, 0,
+                160, 0, 300, 0, 0, 0,
                 "+45% DMG, +38% DEF, +18% Spd, -25% CDs, +18 HP/s Regen (+4 combat)",
                 "+55% DMG, +45% DEF, +22% Spd, -30% CDs, +22 HP/s Regen (+6 combat)",
                 Color{ 245, 200, 60, 255 },
-                "Royal Combat Arena - Apex Boss Gauntlet Victory"
+                "Royal Combat Arena - Apex Boss Gauntlet Victory",
+                6, 12
             },
             {
                 TotemType::COMMANDER_TOTEM,
                 "Commander's Totem",
                 "LEGION STANDARD",
-                160, 5, 300, 10, 2, 2,
-                "7 Veteran Gladiators (115% HP/DEF, 55% DMG), 90s squad resurrection",
-                "ROYAL VANGUARD: 7 Imperial Gladiators (135% HP/DEF, 70% DMG, +15% Spd, 60s Revive)",
+                160, 0, 300, 0, 0, 0,
+                "7 Tower Gladiators (+10% HP/DEF, 45% DMG, no stagger lock), 90s squad resurrection",
+                "ROYAL VANGUARD: 7 Imperial Gladiators (+20% HP/DEF, 55% DMG, +10% Spd, 60s Revive)",
                 Color{ 185, 45, 120, 255 },
-                "Royal Combat Arena - Standard Wave 25 Victory"
+                "Royal Combat Arena - Standard Wave 25 Victory",
+                6, 12
             }
         };
 
@@ -3162,12 +3211,14 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
             int scrapCost = (currentTier == 0) ? totemRecipes[i].costScrapsT1 : totemRecipes[i].costScrapsT2;
             int mistCost = (currentTier == 1) ? totemRecipes[i].mistCostT2 : 0;
             int shadowCost = (currentTier == 1) ? totemRecipes[i].shadowCostT2 : 0;
+            int tokenCost = (currentTier == 0) ? totemRecipes[i].tokenCostT1 : totemRecipes[i].tokenCostT2;
 
             bool canAffordUpgrade = isOwned &&
                                     (playerShingles >= shingleCost) &&
                                     (playerScraps >= scrapCost) &&
                                     (playerMist >= mistCost) &&
-                                    (playerShadow >= shadowCost);
+                                    (playerShadow >= shadowCost) &&
+                                    (playerTokens >= tokenCost);
 
             // Card Background
             DrawRectangleRounded(cardRec, 0.08f, 6, isHov ? Color{ 22, 28, 42, 240 } : Color{ 17, 21, 31, 230 });
@@ -3235,9 +3286,14 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     const char* nextPerk = (currentTier == 0) ? totemRecipes[i].perkT1 : totemRecipes[i].perkT2;
                     FontManager::DrawGameTextShadow(nextPerk, (int)cardX + 18, (int)cardY + 98, 13, Color{ 160, 235, 255, 240 });
 
-                    std::string costStr = "Cost: " + std::to_string(shingleCost) + " Shingles, " + std::to_string(scrapCost) + " Scraps";
-                    if (mistCost > 0) costStr += ", " + std::to_string(mistCost) + " Mist";
-                    if (shadowCost > 0) costStr += ", " + std::to_string(shadowCost) + " Shadow";
+                    std::string costStr;
+                    if (tokenCost > 0) {
+                        costStr = "Cost: " + std::to_string(shingleCost) + " Shingles, " + std::to_string(tokenCost) + " Challenge Tokens";
+                    } else {
+                        costStr = "Cost: " + std::to_string(shingleCost) + " Shingles, " + std::to_string(scrapCost) + " Scraps";
+                        if (mistCost > 0) costStr += ", " + std::to_string(mistCost) + " Mist";
+                        if (shadowCost > 0) costStr += ", " + std::to_string(shadowCost) + " Shadow";
+                    }
                     FontManager::DrawGameTextShadow(costStr.c_str(), (int)cardX + 18, (int)cardY + 118, 13, canAffordUpgrade ? Color{ 255, 225, 100, 255 } : Color{ 240, 100, 100, 255 });
                 }
 
@@ -3248,13 +3304,21 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
                     FontManager::DrawGameTextShadow("MAX TIER AWAKENED", (int)btnX + (int)(btnW - (float)bw) / 2, (int)btnY + 7, 13, Color{ 255, 220, 100, 255 });
                 } else {
                     std::string btnLabel;
-                    if (currentTier == 0) {
-                        btnLabel = "UPGRADE TO TIER II (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
-                    } else {
-                        if (totemRecipes[i].type == TotemType::ELEMENTAL_CORE_TOTEM) {
-                            btnLabel = "EVOLVE TITAN (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                    if (tokenCost > 0) {
+                        if (currentTier == 0) {
+                            btnLabel = "UPGRADE TO TIER II (" + std::to_string(shingleCost) + " SH, " + std::to_string(tokenCost) + " TOKENS)";
                         } else {
-                            btnLabel = "AWAKEN TIER III (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                            btnLabel = "AWAKEN TIER III (" + std::to_string(shingleCost) + " SH, " + std::to_string(tokenCost) + " TOKENS)";
+                        }
+                    } else {
+                        if (currentTier == 0) {
+                            btnLabel = "UPGRADE TO TIER II (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                        } else {
+                            if (totemRecipes[i].type == TotemType::ELEMENTAL_CORE_TOTEM) {
+                                btnLabel = "EVOLVE TITAN (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                            } else {
+                                btnLabel = "AWAKEN TIER III (" + std::to_string(shingleCost) + " SH, " + std::to_string(scrapCost) + " SCRAPS)";
+                            }
                         }
                     }
 
@@ -3268,7 +3332,8 @@ void ZyphdenHandler::DrawForgeModal(Player& player, ParticleSystem& particles, i
 
                         if (isBtnHov && isMousePressed) {
                             player.GetInventory().SpendShingles(shingleCost);
-                            player.GetInventory().SpendOreScraps(scrapCost);
+                            if (scrapCost > 0) player.GetInventory().SpendOreScraps(scrapCost);
+                            if (tokenCost > 0) player.GetInventory().SpendChallengeTokens(tokenCost);
                             if (mistCost > 0) player.GetInventory().SpendEssenceOfMist(mistCost);
                             if (shadowCost > 0) player.GetInventory().SpendShadowEssence(shadowCost);
                             player.GetInventory().UpgradeTotem(totemRecipes[i].type);

@@ -242,7 +242,7 @@ void FrostCavernsHandler::Update(
             LootDrop::SpawnFromEnemy(enemies[i], lootDrops);
             enemies.erase(enemies.begin() + i);
         } else {
-            enemies[i].Update(dt, player.GetPosition(), map, particles, projectiles);
+            enemies[i].Update(dt, player.GetTargetPositionForEnemy(enemies[i].GetPosition(), enemies[i].GetRadius()), map, particles, projectiles);
             ++i;
         }
     }

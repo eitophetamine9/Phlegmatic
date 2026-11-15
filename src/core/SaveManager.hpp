@@ -15,6 +15,7 @@ struct SaveSlotSummary {
     int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int challengeTokens = 0;
     int stoneskinTonics = 0;
     int glacialDraughts = 0;
     int berserkerDraughts = 0;
@@ -24,6 +25,7 @@ struct SaveSlotSummary {
     int stashFrostShards = 0;
     int stashEssenceOfMist = 0;
     int stashShadowEssence = 0;
+    int stashChallengeTokens = 0;
     int stashPotions = 0;
     int stashStoneskinTonics = 0;
     int stashGlacialDraughts = 0;
@@ -60,6 +62,7 @@ struct GameSaveData {
     int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int challengeTokens = 0;
     int stoneskinTonics = 0;
     int glacialDraughts = 0;
     int berserkerDraughts = 0;
@@ -69,6 +72,7 @@ struct GameSaveData {
     int stashFrostShards = 0;
     int stashEssenceOfMist = 0;
     int stashShadowEssence = 0;
+    int stashChallengeTokens = 0;
     int stashPotions = 0;
     int stashStoneskinTonics = 0;
     int stashGlacialDraughts = 0;

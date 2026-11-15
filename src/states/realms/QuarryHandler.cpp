@@ -121,7 +121,7 @@ void QuarryHandler::Update(
     // Update active enemies
     for (auto& enemy : enemies) {
         if (enemy.IsAlive()) {
-            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPositionForEnemy(enemy.GetPosition(), enemy.GetRadius()), map, particles, projectiles);
         }
     }
 

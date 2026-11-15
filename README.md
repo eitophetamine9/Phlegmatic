@@ -63,19 +63,19 @@
 
 ---
 
-## Current Version: 0.0.1l
+## Current Version: 0.0.1m
 
 > [!NOTE]
-> Phlegmatic is currently on **Version 0.0.1l**, succeeding Version 0.0.1k.
+> Phlegmatic is currently on **Version 0.0.1m**, succeeding Version 0.0.1l.
 >
-> ### Version 0.0.1l Highlights
-> * **Apex Boss Gauntlet Difficulty Escalation**: Pinnacle challenge tuning for Remnant Zil (2,200 HP, 50 DEF), Primordial Titan (3,400 HP, 75 DEF), and Berserker Troll Warlord (4,800 HP, 58 DEF) with 1.85x-2.0x damage multipliers, 25% faster windups, 30% lower recovery, deadlier wave reinforcements, and an intense <35% HP Enrage Phase (+20% speed, -15% windup, -25% recovery, crimson fury aura).
-> * **3-Tier Totem Leveling & Commanding Titan Evolution**: All 8 primal totems can now be leveled across Tier I, Tier II, and Tier III at Blacksmith Varek's Forge under `[3] PRIMAL TOTEMS (8)` as well as via the Inventory inspection matrix (`[U]`). At Tier 3, the Elemental Core Totem evolves the mini golem companion into the colossal **Commanding Elemental Golem** titan (920 HP, 75 DEF), which commands and summons 3 orbiting Mini Golems (280 HP, 40 DEF, 18 DMG) with independent combat AI and auto-resurrection.
-> * **Sovereign's Scepter (Weapon 12) & Forge Crafting**: Pure restorative command rod craftable at Blacksmith Varek's Forge under `[2] SACRED WEAPONS` using 14 Ore Scraps, 2 Mist Essences, 2 Shadow Essences, and 120 Shingles. Deals negligible offensive damage (4 DMG light, 0 DMG heavy) while delivering vital support to summons (+24 HP targeted beam; +75 HP full 360-degree AoE Sanctuary Radiance radius heal with debuff cleansing and defensive/speed buffs). Standardized weapon damage scaling across +0/+1/+2 tiers for all 11 offensive weapons.
-> * **Commander's Totem, Stationary Formations & Exact Enemy Silhouettes**: Conquering standard Wave 25 awards the **Commander's Totem** (8th attunable primal relic, +20% DEF, +40 Max HP, +25 Will, -40% player direct damage penalty), commanding up to 7 permanent tower gladiators. Companions feature stationary formation anchors and stay-put idle states eliminating frame drop lag, and are rendered using 1:1 exact procedural silhouettes and gear matching true in-game hostiles.
-> * **Procedural Shadowstrider Decoy**: Overhauled decoy clone into a distinct procedural hooded silhouette with glowing violet slit eyes, crossed spectral daggers, and lifetime countdown ring.
-> * **Modal Inspection Card Auto-Wrap**: Overhauled modal relic drawer cards with dynamic vertical flow and dual text wrapping, completely eliminating horizontal line overflows and vertical collisions with lore text.
-> * **World Progression Gating & Real-Time Background Cooldowns**: Western Mist Forest and Northern Crags are physically locked until Captain Lenon is defeated in courtyard sparring. Boss rematch timers, companion squad resurrection timers, player skill and potion cooldowns, day/night cycles, and arena spawners continue ticking in real-time even while inside inventory, bestiary, or map modals.
+> ### Version 0.0.1m Highlights
+> * **Sovereign's Scepter 360-Degree AoE Light Heal**: Light attack upgraded into a full-circle 160px radial restorative aura healing friendly summons for +55 / +75 / +95 HP (Tiers 0/1/2) on a 0.85s cooldown with radial particle waves. Heavy attack continues delivering +75 / +95 / +120 HP Sanctuary Radiance with debuff cleansing and defense/speed buffs.
+> * **Companion Role Formations & Natural Movement AI**: Companions dynamically anchor based on role relative to the combat threat vector: Vanguard tanks advance +80px in front to form a frontline shield; ranged artillery withdraw -110px behind to maintain clear fire corridors; skirmishers fan out +-85px laterally. Soft-repulsion separation prevents stacking, combined with natural idle breathing.
+> * **Dynamic Enemy Threat & Companion Aggro Interception**: Enemies evaluate threats dynamically. Vanguard tanks draw 2.6x threat weighting (taunt effect), pulling enemy focus. Enemy melee strikes, telegraph sweeps, and projectiles collide with and inflict damage upon companions, allowing tanks to intercept attacks intended for the player.
+> * **Frostwarden Highland Crafting**: Rebalanced Frostwarden armor recipes at Blacksmith Varek's Forge to consume exclusively Highland Frost Shards (6 Cowl, 10 Hauberk, 8 Greaves; 0 scraps, shingles, or essences).
+> * **Commander's Uniform (Armor Set 8)**: New 3-piece armor set crafted using Arena Challenge Tokens and Shingles. Built for commanders/summoners: grants player evasion (+10% / +15% / +10%), +40 Max HP, +20% Move Speed, extended 0.35s dodge i-frame window, and empowers summons with +35% HP/DEF and +25% DMG, balanced by a -35% direct player weapon damage penalty. Active Skill `[V]` **Rallying Call** surges companions with +30% Attack Speed and +25% Move Speed for 8 seconds.
+> * **Arena Challenge Tokens & Totem Upgrades**: Nerfed regular material drops from the Royal Combat Arena and introduced Challenge Tokens awarded at milestone waves (Waves 5, 10, 15, 20, 25, and Apex Gauntlet). Tokens are used to craft the Commander's Uniform and upgrade arena totems (*Champion's Totem* and *Commander's Totem*) to Tier 2 and Tier 3.
+> * **Commander Totem Rebalance & Anti-Stunlock System**: Eliminated infinite stagger locks caused by companion swarms. Stripped hard stagger from companion basic attacks, reduced knockback forces, lengthened attack cadences, and nerfed baseline squad health pool (690 total HP). Enemies now feature an un-staggerable poise grace window (`antiStunlockTimer`: 1.2s regular, 2.5s bosses) with 60% reduced stun duration on bosses.
 >
 > For full technical breakdowns, system architectures, mathematical formulas, and complete version release notes, please consult **[DOCUMENTATION.md](documentation.md)** and **[VERSIONS.md](VERSIONS.md)**.
 

@@ -574,6 +574,32 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
             particles.SpawnSparks(position, Color{ 180, 245, 255, 255 }, 42, 250.0f);
             break;
         }
+        case ArmorSet::COMMANDERS_UNIFORM: {
+            armorSkillActiveTimer = 8.0f;
+            if (companion.active && companion.health > 0.0f) {
+                companion.buffDefenseTimer = 8.0f;
+                companion.buffSpeedTimer = 8.0f;
+            }
+            for (int s = 0; s < 3; ++s) {
+                if (golemSubMinions[s].active) {
+                    golemSubMinions[s].buffDefenseTimer = 8.0f;
+                    golemSubMinions[s].buffSpeedTimer = 8.0f;
+                }
+            }
+            for (auto& comp : towerCompanions) {
+                if (comp.active) {
+                    comp.buffDefenseTimer = 8.0f;
+                    comp.buffSpeedTimer = 8.0f;
+                }
+            }
+
+            SoundFX::PlayParrySuccess();
+            SoundFX::PlayCrusaderClash();
+            particles.AddScreenShake(6.0f, 0.22f);
+            particles.SpawnFloatingText(position, "RALLYING HORN! +50% ATK SPD / +25 DEF", Color{ 255, 215, 80, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 255, 220, 90, 255 }, 40, 220.0f);
+            break;
+        }
         default:
             break;
     }
@@ -645,70 +671,70 @@ void Player::InitTowerSquad() {
     // 1. Tower Slasher (EnemyType::SLASHER)
     towerCompanions[0].unitType = EnemyType::SLASHER;
     towerCompanions[0].name = "Tower Slasher";
-    towerCompanions[0].maxHealth = 80.0f;
-    towerCompanions[0].health = 80.0f;
-    towerCompanions[0].defense = 8.0f;
-    towerCompanions[0].damage = 12.0f;
+    towerCompanions[0].maxHealth = 65.0f;
+    towerCompanions[0].health = 65.0f;
+    towerCompanions[0].defense = 6.0f;
+    towerCompanions[0].damage = 9.0f;
     towerCompanions[0].radius = 20.0f;
     towerCompanions[0].formationAngle = 0.0f * (2.0f * PI / 7.0f);
 
     // 2. Tower Brute (EnemyType::BRUTE)
     towerCompanions[1].unitType = EnemyType::BRUTE;
     towerCompanions[1].name = "Tower Brute";
-    towerCompanions[1].maxHealth = 190.0f;
-    towerCompanions[1].health = 190.0f;
-    towerCompanions[1].defense = 32.0f;
-    towerCompanions[1].damage = 16.0f;
+    towerCompanions[1].maxHealth = 135.0f;
+    towerCompanions[1].health = 135.0f;
+    towerCompanions[1].defense = 20.0f;
+    towerCompanions[1].damage = 12.0f;
     towerCompanions[1].radius = 28.0f;
     towerCompanions[1].formationAngle = 1.0f * (2.0f * PI / 7.0f);
 
     // 3. Tower Charger (EnemyType::CHARGER)
     towerCompanions[2].unitType = EnemyType::CHARGER;
     towerCompanions[2].name = "Tower Charger";
-    towerCompanions[2].maxHealth = 65.0f;
-    towerCompanions[2].health = 65.0f;
-    towerCompanions[2].defense = 12.0f;
-    towerCompanions[2].damage = 13.0f;
+    towerCompanions[2].maxHealth = 55.0f;
+    towerCompanions[2].health = 55.0f;
+    towerCompanions[2].defense = 8.0f;
+    towerCompanions[2].damage = 10.0f;
     towerCompanions[2].radius = 18.0f;
     towerCompanions[2].formationAngle = 2.0f * (2.0f * PI / 7.0f);
 
     // 4. Tower Archer (EnemyType::ARCHER)
     towerCompanions[3].unitType = EnemyType::ARCHER;
     towerCompanions[3].name = "Tower Archer";
-    towerCompanions[3].maxHealth = 60.0f;
-    towerCompanions[3].health = 60.0f;
-    towerCompanions[3].defense = 6.0f;
-    towerCompanions[3].damage = 11.0f;
+    towerCompanions[3].maxHealth = 50.0f;
+    towerCompanions[3].health = 50.0f;
+    towerCompanions[3].defense = 4.0f;
+    towerCompanions[3].damage = 8.0f;
     towerCompanions[3].radius = 18.0f;
     towerCompanions[3].formationAngle = 3.0f * (2.0f * PI / 7.0f);
 
     // 5. Tower Pyromancer (EnemyType::PYROMANCER)
     towerCompanions[4].unitType = EnemyType::PYROMANCER;
     towerCompanions[4].name = "Tower Pyromancer";
-    towerCompanions[4].maxHealth = 75.0f;
-    towerCompanions[4].health = 75.0f;
-    towerCompanions[4].defense = 10.0f;
-    towerCompanions[4].damage = 12.0f;
+    towerCompanions[4].maxHealth = 60.0f;
+    towerCompanions[4].health = 60.0f;
+    towerCompanions[4].defense = 6.0f;
+    towerCompanions[4].damage = 9.0f;
     towerCompanions[4].radius = 20.0f;
     towerCompanions[4].formationAngle = 4.0f * (2.0f * PI / 7.0f);
 
     // 6. Tower Stone Golem (EnemyType::ORE_GOLEM)
     towerCompanions[5].unitType = EnemyType::ORE_GOLEM;
     towerCompanions[5].name = "Tower Stone Golem";
-    towerCompanions[5].maxHealth = 220.0f;
-    towerCompanions[5].health = 220.0f;
-    towerCompanions[5].defense = 45.0f;
-    towerCompanions[5].damage = 14.0f;
+    towerCompanions[5].maxHealth = 150.0f;
+    towerCompanions[5].health = 150.0f;
+    towerCompanions[5].defense = 28.0f;
+    towerCompanions[5].damage = 10.0f;
     towerCompanions[5].radius = 26.0f;
     towerCompanions[5].formationAngle = 5.0f * (2.0f * PI / 7.0f);
 
     // 7. Tower Frost Troll (EnemyType::FROST_TROLL)
     towerCompanions[6].unitType = EnemyType::FROST_TROLL;
     towerCompanions[6].name = "Tower Frost Troll";
-    towerCompanions[6].maxHealth = 280.0f;
-    towerCompanions[6].health = 280.0f;
-    towerCompanions[6].defense = 24.0f;
-    towerCompanions[6].damage = 15.0f;
+    towerCompanions[6].maxHealth = 175.0f;
+    towerCompanions[6].health = 175.0f;
+    towerCompanions[6].defense = 16.0f;
+    towerCompanions[6].damage = 11.0f;
     towerCompanions[6].radius = 24.0f;
     towerCompanions[6].formationAngle = 6.0f * (2.0f * PI / 7.0f);
 
@@ -721,6 +747,63 @@ void Player::InitTowerSquad() {
     }
     towerSquadRespawnTimer = 0.0f;
     RelocateTowerCompanions();
+}
+
+Vector2 Player::GetTargetPositionForEnemy(Vector2 enemyPos, float enemyRadius) const {
+    if (shadowDecoy.active) return shadowDecoy.position;
+
+    Vector2 bestTarget = position;
+    float bestThreatScore = 0.0f;
+
+    // Player base threat
+    float distToPlayer = Vector2Distance(enemyPos, position);
+    bestThreatScore = 1.0f / (distToPlayer + 25.0f);
+
+    // Companion Golem (Elemental Golem / Titan)
+    if (companion.active && companion.health > 0.0f) {
+        float d = Vector2Distance(enemyPos, companion.position);
+        float golemThreat = 2.5f / (d + 20.0f);
+        if (golemThreat > bestThreatScore) {
+            bestThreatScore = golemThreat;
+            bestTarget = companion.position;
+        }
+    }
+
+    // Mini Golem Sub-Minions
+    if (companion.isCommandingTitan) {
+        for (int s = 0; s < 3; ++s) {
+            if (golemSubMinions[s].active && golemSubMinions[s].health > 0.0f) {
+                float d = Vector2Distance(enemyPos, golemSubMinions[s].position);
+                float smThreat = 1.6f / (d + 20.0f);
+                if (smThreat > bestThreatScore) {
+                    bestThreatScore = smThreat;
+                    bestTarget = golemSubMinions[s].position;
+                }
+            }
+        }
+    }
+
+    // Tower Companions
+    for (const auto& comp : towerCompanions) {
+        if (!comp.active || comp.health <= 0.0f) continue;
+        float d = Vector2Distance(enemyPos, comp.position);
+        float roleMult = 1.0f;
+        if (comp.unitType == EnemyType::BRUTE || comp.unitType == EnemyType::ORE_GOLEM || comp.unitType == EnemyType::FROST_TROLL) {
+            roleMult = 2.6f; // Frontline tank taunt
+        } else if (comp.unitType == EnemyType::SLASHER || comp.unitType == EnemyType::CHARGER) {
+            roleMult = 1.1f; // Skirmisher
+        } else if (comp.unitType == EnemyType::ARCHER || comp.unitType == EnemyType::PYROMANCER) {
+            roleMult = 0.5f; // Ranged backline
+        }
+
+        float compThreat = roleMult / (d + 20.0f);
+        if (compThreat > bestThreatScore) {
+            bestThreatScore = compThreat;
+            bestTarget = comp.position;
+        }
+    }
+
+    return bestTarget;
 }
 
 void Player::RelocateTowerCompanions() {
@@ -874,6 +957,9 @@ float Player::GetTotemDamageMultiplier() const {
     if (berserkerTimer > 0.0f) {
         mult *= 1.30f; // +30% Damage while Berserker Draught active
     }
+    if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        mult *= 0.65f; // -35% direct weapon damage trade-off for commander/summoner
+    }
     return mult;
 }
 
@@ -884,6 +970,8 @@ float Player::GetMaxHealth() const {
                 + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
         bonus += 50.0f; // +50 Max HP
+    } else if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        bonus += 40.0f; // +40 Max HP
     }
     return Config::PLAYER_MAX_HEALTH + bonus;
 }
@@ -929,6 +1017,8 @@ float Player::GetSpeed() const {
                     * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
         speedMult *= 1.10f; // +10% Set Move Speed (~+21% total with light pieces)
+    } else if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        speedMult *= 1.20f; // +20% Set Move Speed
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
         speedMult *= 0.96f;
     }
@@ -2652,7 +2742,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
 
     isDashing = true;
 
-    iFrameTimer = HasFullArmorSet(ArmorSet::SHADOWSTRIDER) ? 0.35f : 0.25f; // Extended 0.35s I-Frame window!
+    iFrameTimer = (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) || HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) ? 0.35f : 0.25f; // Extended 0.35s I-Frame window!
 
 
 
@@ -3123,17 +3213,23 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
 
         currentAttack.range = stats.lightRange;
-        currentAttack.arcAngle = stats.lightArc;
+        currentAttack.arcAngle = 360.0f;
+        currentAttack.isFrontalCircle = false;
         currentAttack.damage = stats.lightDamage * GetTotemDamageMultiplier();
-        currentAttack.knockback = 50.0f;
+        currentAttack.knockback = 60.0f;
         currentAttack.defensePierce = 0.0f;
         SoundFX::PlayLightAttack();
         SoundFX::PlayHeal();
-        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 235, 255, 255 });
-        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 160, 245, 255, 255 }, 12, 110.0f);
+        particles.SpawnSparks(position, Color{ 140, 235, 255, 255 }, 20, 140.0f);
+        particles.SpawnSparks(position, Color{ 255, 235, 120, 220 }, 14, 110.0f);
+        shockwaveActive = true;
+        shockwaveTimer = 0.22f;
+        shockwaveRadius = stats.lightRange;
+        shockwavePos = position;
         int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
-        float scepHeal = (scepUpg >= 2) ? 38.0f : ((scepUpg >= 1) ? 30.0f : 24.0f);
-        HealAllSummons(stats.lightRange + 45.0f, scepHeal, false, particles);
+        float scepHeal = (scepUpg >= 2) ? 95.0f : ((scepUpg >= 1) ? 75.0f : 55.0f);
+        HealAllSummons(stats.lightRange, scepHeal, false, particles);
+        particles.SpawnFloatingText(position, "RESTORING BURST! +" + std::to_string((int)scepHeal), Color{ 130, 240, 255, 255 }, 20.0f);
 
     } else {
 

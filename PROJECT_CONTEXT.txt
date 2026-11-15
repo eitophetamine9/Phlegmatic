@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 14, 2026
-Branch: ver.0.0.1l
-Release Version: 0.0.1l
+Generated: November 15, 2026
+Branch: ver.0.0.1m
+Release Version: 0.0.1m
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -799,8 +799,64 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Frost Revenant telegraph tuning: Melee cone windup extended from 0.50s to 0.62s for fair dodge reaction windows.
 
 ================================================================================
-16. VERSION 0.0.1l MILESTONES (INCREMENTS 1 - 5)
+17. VERSION 0.0.1m MILESTONES (COMPANION ROLES, SCEPTER AOE, COMMANDER ARMOR & TOKENS)
 ================================================================================
+- Sovereign's Scepter 360-Degree AoE Light Heal & Cooldown Tuning:
+  * Upgraded light attack to an omnipresent full-circle radial aura (160px radius, 360-degree arc) healing summons for +55 / +75 / +95 HP (Tiers 0/1/2).
+  * Cooldown lengthened to 0.85s (up from 0.45s) and stamina cost set to 16.0 to demand deliberate timing.
+  * Added radial blessing particle burst and floating heal indicators.
+- Companion Role Behaviors & Natural Movement:
+  * Dynamic role anchoring relative to combat threat vector:
+    - Vanguard tanks (Knight Lenon, Iron Brute, Charger, Ore Golem, Frost Troll, Commanding Titan) step +80px in front of player.
+    - Ranged artillery (Wind Archer, Void Pyromancer, Fairy) fall back -110px behind player.
+    - Flankers & Skirmishers (Slasher, Mini Golems) fan out +-85px laterally.
+  * Soft-repulsion separation force preventing companion stacking, plus subtle idle breathing oscillation.
+- Dynamic Enemy Aggro & Interception:
+  * Enemies evaluate threat dynamically via Player::GetTargetPositionForEnemy:
+    - Tanks draw 2.6x threat weighting (taunt effect).
+    - Skirmishers draw 1.1x threat, player draws 1.0x baseline threat, and ranged units draw 0.5x threat.
+  * Melee sweeps, telegraph arcs, and projectiles collide with and inflict damage upon companions.
+- Frostwarden Armor Highland Crafting Adjustment:
+  * Rebalanced recipes to strictly consume regional Frost Shards:
+    - Frostwarden Fur Cowl: 6 Frost Shards (0 Scraps, 0 Shingles, 0 Mist, 0 Shadow).
+    - Frostwarden Pelt Hauberk: 10 Frost Shards.
+    - Frostwarden Spiked Greaves: 8 Frost Shards.
+- Commander's Uniform (Armor Set 8):
+  * Dedicated armor set benefiting summoner/tactician playstyles:
+    - Commander's Peaked Cap: +6 DEF, +15 Max HP, +10% Evade, +15 Will.
+    - Commander's Parade Coat: +14 DEF, +25 Max HP, +15% Evade, -35% Direct Weapon Damage.
+    - Commander's Riding Trousers: +6 DEF, +10% Evade, +20% Move Speed.
+    - Full Set Trait: +40 Max HP, +20% Move Speed, extended 0.35s dodge i-frame window, -35% direct weapon damage penalty, +35% companion HP/DEF, +25% companion DMG.
+    - Active Skill [V] Rallying Call: 8s buff granting summons +30% Attack Speed and +25% Move Speed with quad-banner aura.
+- Arena Challenge Tokens & Economy Rebalance:
+  * Nerfed regular material drops from Royal Combat Arena.
+  * Introduced Challenge Tokens awarded at wave milestones (Wave 5: +3, Wave 10: +6, Wave 15: +9, Wave 20: +12, Wave 25: +18, Apex Gauntlet: +25).
+  * Challenge Tokens are used to craft Commander's Uniform pieces (8, 14, 10 tokens) and upgrade Champion's Totem & Commander's Totem to Tier 2 (6 tokens) and Tier 3 (12 tokens).
+  * Storage stash and inventory pouch serialization in SaveManager.
+- Commander Totem Rebalance & Enemy Anti-Stunlock Architecture:
+  * Eliminated permanent stagger locking caused by companion hordes.
+  * Companion Attack Rebalance:
+    - Stripped stagger infliction from all companion basic attacks (Brute stagger removed; Frost Troll stagger replaced with 1.5s Chill).
+    - Reduced knockback forces by ~65-75% across all companions (0.4f - 0.8f vs 1.4f - 2.4f) to prevent juggle locks.
+    - Lengthened companion attack cooldowns across all classes by 40-50% (Slasher 1.25s, Brute 1.85s, Charger 1.45s, Archer 1.80s, Pyromancer 1.90s, Ore Golem 1.70s, Frost Troll 1.60s).
+    - Reduced companion defense pierce from 20-25% to 10%.
+  * Enemy Anti-Stunlock & Poise Safeguards:
+    - Added antiStunlockTimer to Enemy: upon taking any stagger (including player hits), enemies gain an un-staggerable poise grace window (1.2s for normal enemies, 2.5s for bosses).
+    - Boss stagger durations are automatically reduced by 60%.
+  * Rebalanced Baseline Companion Stats in InitTowerSquad:
+    - Combined squad HP reduced from 970 HP to 690 HP.
+    - Slasher: 65 HP, 6 DEF, 9 DMG (was 80 HP, 8 DEF, 12 DMG).
+    - Brute: 135 HP, 20 DEF, 12 DMG (was 190 HP, 32 DEF, 21 DMG).
+    - Charger: 55 HP, 8 DEF, 10 DMG (was 65 HP, 12 DEF, 13 DMG).
+    - Archer: 50 HP, 4 DEF, 8 DMG (was 60 HP, 6 DEF, 11 DMG).
+    - Pyromancer: 60 HP, 6 DEF, 9 DMG (was 75 HP, 10 DEF, 12 DMG).
+    - Stone Golem: 150 HP, 28 DEF, 10 DMG (was 220 HP, 45 DEF, 17 DMG).
+    - Frost Troll: 175 HP, 16 DEF, 11 DMG (was 280 HP, 24 DEF, 15 DMG).
+  * Rebalanced Commander Totem Relic Progression:
+    - Tier 0: +18% DEF, +35 Max HP, +20 Will.
+    - Tier 1: +24% DEF, +50 Max HP, +28 Will, +10% companion HP/DEF, 45% DMG, 90s squad resurrection.
+    - Tier 2: +30% DEF, +70 Max HP, +38 Will, +20% companion HP/DEF, 55% DMG, +10% Speed, 60s squad resurrection.
+
 - Apex Boss Gauntlet Overhaul & Attack Patterns (Increment 1):
   * Overhauled all three Apex Gauntlet champions: Apex Remnant Zil (1,250 HP, +12 DEF, 85 Will), Apex Primordial Titan (1,850 HP, +16 DEF, 100 Will), Apex Berserker Troll Warlord (2,800 HP, +20 DEF, 110 Will).
   * Added +50% Apex lethality damage multiplier across all melee and projectile attacks via isApexBoss flag in CollisionSystem.
