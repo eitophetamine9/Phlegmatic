@@ -349,7 +349,7 @@ void CrossroadsHandler::Update(
 
     for (auto& enemy : enemies) {
 
-        enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+        enemy.Update(dt, player.GetTargetPositionForEnemy(enemy.GetPosition(), enemy.GetRadius()), map, particles, projectiles);
 
     }
 

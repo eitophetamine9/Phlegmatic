@@ -193,7 +193,7 @@ void RuinedCastleHandler::Update(
 
         // Update enemies
         for (auto& enemy : enemies) {
-            enemy.Update(dt, player.GetTargetPosition(), map, particles, projectiles);
+            enemy.Update(dt, player.GetTargetPositionForEnemy(enemy.GetPosition(), enemy.GetRadius()), map, particles, projectiles);
         }
 
         // Update projectiles

@@ -262,44 +262,47 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
         }
     }
 
-    // 2. Enemy melee strikes vs player (ONLY pure melee strikes, NOT ranged attacks!)
-    for (auto& enemy : enemies) {
-        if (!enemy.IsAlive() || !enemy.IsInStrike()) continue;
-        if (!enemy.HasMeleeHitbox()) continue; // Skip ranged enemies; their projectiles deal damage!
-
-        TelegraphIndicator tel = enemy.GetTelegraph();
-        bool playerHit = false;
-
+    auto CheckTelegraphAgainstCircle = [](const TelegraphIndicator& tel, Vector2 enemyPos, Vector2 targetPos, float targetRadius) -> bool {
         if (tel.shape == TelegraphShape::CONE) {
-            float dx = playerPos.x - enemy.GetPosition().x;
-            float dy = playerPos.y - enemy.GetPosition().y;
+            float dx = targetPos.x - enemyPos.x;
+            float dy = targetPos.y - enemyPos.y;
             float dist = sqrtf(dx * dx + dy * dy);
-            if (dist <= tel.radius + playerRadius) {
+            if (dist <= tel.radius + targetRadius) {
                 float hitAngle = atan2f(dy, dx) * RAD2DEG;
                 float diff = fabsf(hitAngle - tel.angle);
                 while (diff > 180.0f) diff = 360.0f - diff;
                 if (diff <= (tel.arcAngle * 0.5f + 12.0f)) {
-                    playerHit = true;
+                    return true;
                 }
             }
         } else if (tel.shape == TelegraphShape::CIRCLE) {
-            float dx = playerPos.x - enemy.GetPosition().x;
-            float dy = playerPos.y - enemy.GetPosition().y;
+            float dx = targetPos.x - enemyPos.x;
+            float dy = targetPos.y - enemyPos.y;
             float dist = sqrtf(dx * dx + dy * dy);
-            if (dist <= tel.radius + playerRadius) {
-                playerHit = true;
+            if (dist <= tel.radius + targetRadius) {
+                return true;
             }
         } else if (tel.shape == TelegraphShape::LINE) {
             float rad = tel.angle * DEG2RAD;
             Vector2 dir = { cosf(rad), sinf(rad) };
             Vector2 normal = { -dir.y, dir.x };
-            Vector2 toPlayer = { playerPos.x - enemy.GetPosition().x, playerPos.y - enemy.GetPosition().y };
-            float projDist = toPlayer.x * dir.x + toPlayer.y * dir.y;
-            float perpDist = fabsf(toPlayer.x * normal.x + toPlayer.y * normal.y);
-            if (projDist >= -playerRadius && projDist <= tel.radius + playerRadius && perpDist <= (tel.width * 0.5f + playerRadius)) {
-                playerHit = true;
+            Vector2 toTarget = { targetPos.x - enemyPos.x, targetPos.y - enemyPos.y };
+            float projDist = toTarget.x * dir.x + toTarget.y * dir.y;
+            float perpDist = fabsf(toTarget.x * normal.x + toTarget.y * normal.y);
+            if (projDist >= -targetRadius && projDist <= tel.radius + targetRadius && perpDist <= (tel.width * 0.5f + targetRadius)) {
+                return true;
             }
         }
+        return false;
+    };
+
+    // 2. Enemy melee strikes vs player and companions (ONLY pure melee strikes, NOT ranged attacks!)
+    for (auto& enemy : enemies) {
+        if (!enemy.IsAlive() || !enemy.IsInStrike()) continue;
+        if (!enemy.HasMeleeHitbox()) continue; // Skip ranged enemies; their projectiles deal damage!
+
+        TelegraphIndicator tel = enemy.GetTelegraph();
+        bool playerHit = CheckTelegraphAgainstCircle(tel, enemy.GetPosition(), playerPos, playerRadius);
 
         if (playerHit) {
             enemy.MarkDamagedPlayer();
@@ -376,6 +379,93 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                 }
             }
+        } else {
+            // Check if enemy telegraph hit any active friendly companions!
+            float baseDamage = 18.0f;
+            if (enemy.GetType() == EnemyType::BRUTE) baseDamage = 38.0f;
+            else if (enemy.GetType() == EnemyType::CHARGER) baseDamage = 22.0f;
+            else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDamage = 45.0f;
+            else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDamage = 34.0f;
+            else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDamage = 34.0f;
+            else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDamage = 28.0f;
+            else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDamage = 46.0f;
+            else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDamage = 38.0f;
+            if (enemy.IsApexBoss()) baseDamage *= 1.50f;
+
+            // 1. Check Companion Golem
+            if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active && player.GetCompanion().health > 0.0f) {
+                auto& comp = player.GetCompanion();
+                if (comp.invulnTimer <= 0.0f && CheckTelegraphAgainstCircle(tel, enemy.GetPosition(), comp.position, comp.radius)) {
+                    enemy.MarkDamagedPlayer();
+                    float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 25.0f : 0.0f);
+                    float dmg = baseDamage * (100.0f / (100.0f + effDef));
+                    comp.health -= dmg;
+                    comp.invulnTimer = 0.40f;
+                    particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
+                    particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 14, 120.0f);
+                    SoundFX::PlayHitImpact();
+                    if (comp.health <= 0.0f) {
+                        comp.health = 0.0f;
+                        comp.active = false;
+                        comp.respawnTimer = 35.0f;
+                        particles.SpawnFloatingText(comp.position, comp.isCommandingTitan ? "TITAN CRUMBLES!" : "GOLEM DESTROYED!", Color{ 255, 80, 90, 255 }, 22.0f);
+                        particles.SpawnSparks(comp.position, Color{ 200, 70, 100, 255 }, 25, 160.0f);
+                    }
+                    continue;
+                }
+            }
+
+            // 2. Check Sub-Minions (Commanding Titan)
+            if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().isCommandingTitan) {
+                auto* subMinions = player.GetGolemSubMinions();
+                bool hitSub = false;
+                for (int s = 0; s < 3; ++s) {
+                    auto& sm = subMinions[s];
+                    if (!sm.active || sm.health <= 0.0f || sm.invulnTimer > 0.0f) continue;
+                    if (CheckTelegraphAgainstCircle(tel, enemy.GetPosition(), sm.position, sm.radius)) {
+                        enemy.MarkDamagedPlayer();
+                        float effDef = sm.defense + (sm.buffDefenseTimer > 0.0f ? 25.0f : 0.0f);
+                        float dmg = baseDamage * (100.0f / (100.0f + effDef));
+                        sm.health -= dmg;
+                        sm.invulnTimer = 0.40f;
+                        particles.SpawnFloatingText(sm.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 16.0f);
+                        particles.SpawnSparks(sm.position, Color{ 255, 160, 60, 255 }, 10, 90.0f);
+                        SoundFX::PlayHitImpact();
+                        if (sm.health <= 0.0f) {
+                            sm.health = 0.0f;
+                            sm.active = false;
+                        }
+                        hitSub = true;
+                        break;
+                    }
+                }
+                if (hitSub) continue;
+            }
+
+            // 3. Check Tower Companions
+            if (player.GetTotem() == TotemType::COMMANDER_TOTEM) {
+                auto& squad = player.GetTowerCompanions();
+                for (auto& comp : squad) {
+                    if (!comp.active || comp.health <= 0.0f || comp.invulnTimer > 0.0f) continue;
+                    if (CheckTelegraphAgainstCircle(tel, enemy.GetPosition(), comp.position, comp.radius)) {
+                        enemy.MarkDamagedPlayer();
+                        float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 25.0f : 0.0f);
+                        float dmg = baseDamage * (100.0f / (100.0f + effDef));
+                        comp.health -= dmg;
+                        comp.invulnTimer = 0.40f;
+                        particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
+                        particles.SpawnSparks(comp.position, Color{ 220, 120, 255, 255 }, 12, 110.0f);
+                        SoundFX::PlayHitImpact();
+                        if (comp.health <= 0.0f) {
+                            comp.active = false;
+                            comp.health = 0.0f;
+                            particles.SpawnFloatingText(comp.position, comp.name + " DEFEATED!", Color{ 255, 80, 90, 255 }, 20.0f);
+                            particles.SpawnSparks(comp.position, Color{ 200, 70, 100, 255 }, 20, 140.0f);
+                        }
+                        break;
+                    }
+                }
+            }
         }
     }
 
@@ -448,6 +538,45 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                         player.ApplyBleed(3.0f, particles);
                     }
                     proj.Destroy();
+                }
+            } else {
+                // Hostile projectile vs Companions (frontline tanks intercept & block)
+                if (player.GetTotem() == TotemType::ELEMENTAL_CORE_TOTEM && player.GetCompanion().active && player.GetCompanion().health > 0.0f) {
+                    auto& comp = player.GetCompanion();
+                    if (proj.CheckCollisionWithCircle(comp.position, comp.radius)) {
+                        float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 25.0f : 0.0f);
+                        float pDmg = proj.GetDamage() * (100.0f / (100.0f + effDef));
+                        comp.health -= pDmg;
+                        particles.SpawnFloatingText(comp.position, "BLOCK -" + std::to_string((int)pDmg), Color{ 255, 175, 75, 255 }, 17.0f);
+                        particles.SpawnSparks(comp.position, Color{ 255, 190, 60, 255 }, 12, 100.0f);
+                        SoundFX::PlayHitImpact();
+                        proj.Destroy();
+                        if (comp.health <= 0.0f) {
+                            comp.health = 0.0f;
+                            comp.active = false;
+                            comp.respawnTimer = 35.0f;
+                        }
+                    }
+                }
+                if (proj.IsActive() && player.GetTotem() == TotemType::COMMANDER_TOTEM) {
+                    auto& squad = player.GetTowerCompanions();
+                    for (auto& comp : squad) {
+                        if (!comp.active || comp.health <= 0.0f) continue;
+                        if (proj.CheckCollisionWithCircle(comp.position, comp.radius)) {
+                            float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 25.0f : 0.0f);
+                            float pDmg = proj.GetDamage() * (100.0f / (100.0f + effDef));
+                            comp.health -= pDmg;
+                            particles.SpawnFloatingText(comp.position, "BLOCK -" + std::to_string((int)pDmg), Color{ 255, 175, 75, 255 }, 17.0f);
+                            particles.SpawnSparks(comp.position, Color{ 220, 150, 255, 255 }, 10, 90.0f);
+                            SoundFX::PlayHitImpact();
+                            proj.Destroy();
+                            if (comp.health <= 0.0f) {
+                                comp.active = false;
+                                comp.health = 0.0f;
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         } else {
@@ -711,18 +840,67 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
     // Friendly Tower Companions Squad combat & movement (Commander's Totem)
     if (player.GetTotem() == TotemType::COMMANDER_TOTEM) {
         auto& squad = player.GetTowerCompanions();
+        Vector2 playerPos = player.GetPosition();
+
+        // 1. Identify primary threat vector
+        Enemy* nearestThreat = nullptr;
+        float minThreatDist = 450.0f;
+        for (auto& enemy : enemies) {
+            if (!enemy.IsAlive()) continue;
+            float d = Vector2Distance(playerPos, enemy.GetPosition());
+            if (d < minThreatDist) {
+                minThreatDist = d;
+                nearestThreat = &enemy;
+            }
+        }
+
+        Vector2 threatDir;
+        if (nearestThreat) {
+            threatDir = Vector2Normalize(Vector2Subtract(nearestThreat->GetPosition(), playerPos));
+            if (threatDir.x == 0.0f && threatDir.y == 0.0f) threatDir = { 1.0f, 0.0f };
+        } else {
+            float rad = player.GetFacingAngle() * DEG2RAD;
+            threatDir = { cosf(rad), sinf(rad) };
+        }
+        Vector2 lateralDir = { -threatDir.y, threatDir.x };
+
+        int tankIdx = 0;
+        int rangedIdx = 0;
+        int skirmishIdx = 0;
 
         for (size_t i = 0; i < squad.size(); ++i) {
             auto& comp = squad[i];
             if (!comp.active || comp.health <= 0.0f) continue;
+            if (comp.invulnTimer > 0.0f) comp.invulnTimer -= dt;
+            if (comp.attackCooldown > 0.0f) comp.attackCooldown -= dt;
+            if (comp.attackVisualTimer > 0.0f) comp.attackVisualTimer -= dt;
+            if (comp.buffDefenseTimer > 0.0f) comp.buffDefenseTimer -= dt;
+            if (comp.buffSpeedTimer > 0.0f) comp.buffSpeedTimer -= dt;
 
-            // Fixed stationary formation anchor (no continuous spinning or hovering)
-            Vector2 anchorPos = {
-                player.GetPosition().x + cosf(comp.formationAngle) * 120.0f,
-                player.GetPosition().y + sinf(comp.formationAngle) * 120.0f
-            };
+            // Classify role and compute dynamic anchor position
+            Vector2 anchorPos;
+            bool isTank = (comp.unitType == EnemyType::BRUTE || comp.unitType == EnemyType::ORE_GOLEM || comp.unitType == EnemyType::FROST_TROLL);
+            bool isRanged = (comp.unitType == EnemyType::ARCHER || comp.unitType == EnemyType::PYROMANCER);
+            bool isSkirmisher = (comp.unitType == EnemyType::SLASHER || comp.unitType == EnemyType::CHARGER);
 
-            float distToPlayer = Vector2Distance(comp.position, player.GetPosition());
+            if (isTank) {
+                // Frontline tanks form a defensive wall 80px in front of player
+                float spread = ((float)tankIdx - 1.0f) * 44.0f;
+                tankIdx++;
+                anchorPos = Vector2Add(Vector2Add(playerPos, Vector2Scale(threatDir, 80.0f)), Vector2Scale(lateralDir, spread));
+            } else if (isRanged) {
+                // Ranged units stay 110px BEHIND player
+                float spread = ((float)rangedIdx - 0.5f) * 52.0f;
+                rangedIdx++;
+                anchorPos = Vector2Add(Vector2Subtract(playerPos, Vector2Scale(threatDir, 110.0f)), Vector2Scale(lateralDir, spread));
+            } else {
+                // Skirmishers flank on the sides
+                float sideSign = (skirmishIdx == 0) ? -1.0f : 1.0f;
+                skirmishIdx++;
+                anchorPos = Vector2Add(Vector2Add(playerPos, Vector2Scale(threatDir, 35.0f)), Vector2Scale(lateralDir, sideSign * 85.0f));
+            }
+
+            float distToPlayer = Vector2Distance(comp.position, playerPos);
 
             // Teleport back if player ran or dashed far away
             if (distToPlayer > 420.0f) {
@@ -734,16 +912,16 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
             }
 
             // Gentle buffer only if player physically walks into the companion
-            if (distToPlayer < 70.0f && distToPlayer > 0.001f) {
-                Vector2 pushDir = Vector2Normalize(Vector2Subtract(comp.position, player.GetPosition()));
-                comp.position = Vector2Add(comp.position, Vector2Scale(pushDir, (70.0f - distToPlayer) * 3.5f * dt));
+            if (distToPlayer < 45.0f && distToPlayer > 0.001f) {
+                Vector2 pushDir = Vector2Normalize(Vector2Subtract(comp.position, playerPos));
+                comp.position = Vector2Add(comp.position, Vector2Scale(pushDir, (45.0f - distToPlayer) * 3.5f * dt));
             }
 
             Enemy* nearestEnemy = nullptr;
-            float nearestDist = 280.0f;
+            float nearestDist = 320.0f;
             for (auto& enemy : enemies) {
                 if (!enemy.IsAlive()) continue;
-                if (Vector2Distance(player.GetPosition(), enemy.GetPosition()) > 380.0f) continue;
+                if (Vector2Distance(playerPos, enemy.GetPosition()) > 420.0f) continue;
                 float d = Vector2Distance(comp.position, enemy.GetPosition());
                 if (d < nearestDist) {
                     nearestDist = d;
@@ -751,79 +929,97 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                 }
             }
 
+            float speedMult = (comp.buffSpeedTimer > 0.0f) ? 1.25f : 1.0f;
+
             if (nearestEnemy) {
                 Vector2 toEnemy = Vector2Subtract(nearestEnemy->GetPosition(), comp.position);
                 Vector2 dir = Vector2Normalize(toEnemy);
                 if (dir.x == 0.0f && dir.y == 0.0f) dir = { 1.0f, 0.0f };
                 comp.facingDirection = (dir.x >= 0.0f) ? 1 : -1;
 
-                if (comp.unitType == EnemyType::ARCHER) {
-                    if (nearestDist < 120.0f) {
-                        comp.position = Vector2Subtract(comp.position, Vector2Scale(dir, 140.0f * dt));
-                    } else if (nearestDist > 200.0f) {
-                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, 160.0f * dt));
+                if (isRanged) {
+                    // Ranged: Kite away if enemy gets too close, or shoot from backline
+                    if (nearestDist < 125.0f) {
+                        comp.position = Vector2Subtract(comp.position, Vector2Scale(dir, 140.0f * speedMult * dt));
+                    } else if (nearestDist > 220.0f) {
+                        // Smoothly align toward anchor
+                        float distToAnchor = Vector2Distance(comp.position, anchorPos);
+                        if (distToAnchor > 25.0f) {
+                            Vector2 toA = Vector2Normalize(Vector2Subtract(anchorPos, comp.position));
+                            comp.position = Vector2Add(comp.position, Vector2Scale(toA, 150.0f * speedMult * dt));
+                        }
                     }
-                    if (comp.attackCooldown <= 0.0f && nearestDist <= 260.0f) {
-                        comp.attackCooldown = 1.35f;
+                    if (comp.attackCooldown <= 0.0f && nearestDist <= 270.0f) {
                         comp.attackVisualTimer = 0.2f;
-                        Vector2 arrowVel = Vector2Scale(dir, 520.0f);
-                        Projectile arrow(comp.position, arrowVel, 6.0f, comp.damage, ProjectileType::BOLT, true);
-                        projectiles.push_back(arrow);
-                        particles.SpawnSparks(comp.position, Color{ 255, 215, 120, 255 }, 8, 90.0f);
-                        SoundFX::PlayLightAttack();
+                        if (comp.unitType == EnemyType::ARCHER) {
+                            comp.attackCooldown = 1.30f;
+                            Vector2 arrowVel = Vector2Scale(dir, 520.0f);
+                            Projectile arrow(comp.position, arrowVel, 6.0f, comp.damage, ProjectileType::BOLT, true);
+                            projectiles.push_back(arrow);
+                            particles.SpawnSparks(comp.position, Color{ 255, 215, 120, 255 }, 8, 90.0f);
+                            SoundFX::PlayLightAttack();
+                        } else {
+                            comp.attackCooldown = 1.40f;
+                            Vector2 orbVel = Vector2Scale(dir, 380.0f);
+                            Projectile orb(comp.position, orbVel, 8.0f, comp.damage, ProjectileType::VOID_ORB, true);
+                            projectiles.push_back(orb);
+                            particles.SpawnSparks(comp.position, Color{ 190, 80, 255, 255 }, 12, 100.0f);
+                            SoundFX::PlayLightAttack();
+                        }
                     }
-                } else if (comp.unitType == EnemyType::PYROMANCER) {
-                    if (nearestDist < 110.0f) {
-                        comp.position = Vector2Subtract(comp.position, Vector2Scale(dir, 130.0f * dt));
-                    } else if (nearestDist > 180.0f) {
-                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, 140.0f * dt));
+                } else if (isTank) {
+                    // Tank: Advance towards enemy, intercept charges, hold frontline
+                    float speed = 195.0f * speedMult;
+                    float engageRange = comp.radius + nearestEnemy->GetRadius() + 10.0f;
+                    if (nearestDist > engageRange) {
+                        comp.position = Vector2Add(comp.position, Vector2Scale(dir, speed * dt));
                     }
-                    if (comp.attackCooldown <= 0.0f && nearestDist <= 250.0f) {
-                        comp.attackCooldown = 1.45f;
-                        comp.attackVisualTimer = 0.2f;
-                        Vector2 orbVel = Vector2Scale(dir, 380.0f);
-                        Projectile orb(comp.position, orbVel, 8.0f, comp.damage, ProjectileType::VOID_ORB, true);
-                        projectiles.push_back(orb);
-                        particles.SpawnSparks(comp.position, Color{ 190, 80, 255, 255 }, 12, 100.0f);
-                        SoundFX::PlayLightAttack();
+
+                    if (comp.attackCooldown <= 0.0f && nearestDist <= engageRange + 16.0f) {
+                        float cd = 1.0f;
+                        float dmg = comp.damage;
+                        Vector2 knock = Vector2Scale(dir, 1.8f);
+                        if (comp.unitType == EnemyType::BRUTE) {
+                            cd = 1.30f;
+                            dmg += 5.0f;
+                            knock = Vector2Scale(dir, 2.4f);
+                            particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 18, 160.0f);
+                            nearestEnemy->ApplyStagger(0.40f);
+                        } else if (comp.unitType == EnemyType::ORE_GOLEM) {
+                            cd = 1.25f;
+                            dmg += 3.0f;
+                            particles.SpawnSparks(comp.position, Color{ 210, 180, 130, 255 }, 16, 150.0f);
+                            nearestEnemy->ApplyArmorFracture(3.0f);
+                        } else if (comp.unitType == EnemyType::FROST_TROLL) {
+                            cd = 1.10f;
+                            particles.SpawnSparks(comp.position, Color{ 120, 215, 255, 255 }, 16, 140.0f);
+                            nearestEnemy->ApplyStagger(0.25f);
+                        }
+                        comp.attackCooldown = cd;
+                        comp.attackVisualTimer = 0.20f;
+                        if (nearestEnemy->TakeDamage(dmg, knock, particles, 0.25f)) {
+                            handleEnemyDefeated(*nearestEnemy);
+                        }
+                        particles.SpawnFloatingText(nearestEnemy->GetPosition(), "-" + std::to_string((int)dmg), Color{ 220, 160, 255, 255 }, 18.0f);
+                        SoundFX::PlayHitImpact();
                     }
                 } else {
-                    float speed = 200.0f;
-                    if (comp.unitType == EnemyType::CHARGER) speed = 245.0f;
-                    else if (comp.unitType == EnemyType::BRUTE) speed = 160.0f;
-                    else if (comp.unitType == EnemyType::ORE_GOLEM) speed = 150.0f;
-
+                    // Skirmisher: Flank and charge in for rapid strikes
+                    float speed = (comp.unitType == EnemyType::CHARGER ? 250.0f : 215.0f) * speedMult;
                     float engageRange = comp.radius + nearestEnemy->GetRadius() + 8.0f;
                     if (nearestDist > engageRange) {
                         comp.position = Vector2Add(comp.position, Vector2Scale(dir, speed * dt));
                     }
 
                     if (comp.attackCooldown <= 0.0f && nearestDist <= engageRange + 12.0f) {
-                        float cd = 0.95f;
+                        float cd = (comp.unitType == EnemyType::SLASHER) ? 0.80f : 1.0f;
                         float dmg = comp.damage;
-                        Vector2 knock = Vector2Scale(dir, 1.2f);
+                        Vector2 knock = Vector2Scale(dir, 1.4f);
                         if (comp.unitType == EnemyType::SLASHER) {
-                            cd = 0.85f;
                             particles.SpawnSparks(comp.position, Color{ 255, 90, 90, 255 }, 10, 110.0f);
-                        } else if (comp.unitType == EnemyType::BRUTE) {
-                            cd = 1.40f;
-                            dmg += 4.0f;
-                            knock = Vector2Scale(dir, 2.0f);
-                            particles.SpawnSparks(comp.position, Color{ 255, 160, 60, 255 }, 18, 160.0f);
-                            nearestEnemy->ApplyStagger(0.35f);
-                        } else if (comp.unitType == EnemyType::CHARGER) {
-                            cd = 1.05f;
+                        } else {
                             knock = Vector2Scale(dir, 2.2f);
                             particles.SpawnSparks(comp.position, Color{ 255, 200, 50, 255 }, 14, 140.0f);
-                        } else if (comp.unitType == EnemyType::ORE_GOLEM) {
-                            cd = 1.35f;
-                            dmg += 2.0f;
-                            particles.SpawnSparks(comp.position, Color{ 210, 180, 130, 255 }, 16, 150.0f);
-                            nearestEnemy->ApplyArmorFracture(2.5f);
-                        } else if (comp.unitType == EnemyType::FROST_TROLL) {
-                            cd = 1.15f;
-                            particles.SpawnSparks(comp.position, Color{ 120, 215, 255, 255 }, 16, 140.0f);
-                            nearestEnemy->ApplyStagger(0.20f);
                         }
                         comp.attackCooldown = cd;
                         comp.attackVisualTimer = 0.20f;
@@ -835,45 +1031,28 @@ void CollisionSystem::CheckCombatCollisions(Player& player, std::vector<Enemy>& 
                     }
                 }
             } else {
-                // Out of combat: STAY PUT if near stationary formation anchor
+                // Out of combat / repositioning towards role anchor
                 float distToAnchor = Vector2Distance(comp.position, anchorPos);
-                if (distToAnchor > 70.0f) {
+                if (distToAnchor > 14.0f) {
                     Vector2 toAnchor = Vector2Normalize(Vector2Subtract(anchorPos, comp.position));
-                    comp.position = Vector2Add(comp.position, Vector2Scale(toAnchor, 220.0f * dt));
+                    comp.position = Vector2Add(comp.position, Vector2Scale(toAnchor, 210.0f * speedMult * dt));
+                } else {
+                    // Natural idle breathing and subtle wander
+                    comp.position.x += sinf((float)GetTime() * 1.5f + (float)i * 1.2f) * 0.15f;
                 }
-                // When distToAnchor <= 70.0f: Minions stay completely still (no hovering, zero frame lag)
             }
+        }
 
-            for (auto& enemy : enemies) {
-                if (!enemy.IsAlive() || !enemy.IsInStrike() || !enemy.HasMeleeHitbox()) continue;
-                if (comp.invulnTimer > 0.0f) break;
-                if (Vector2Distance(comp.position, enemy.GetPosition()) <= (comp.radius + enemy.GetRadius() + 10.0f)) {
-                    float effDef = comp.defense + (comp.buffDefenseTimer > 0.0f ? 15.0f : 0.0f);
-                    float baseDmg = 20.0f;
-                    if (enemy.GetType() == EnemyType::BRUTE) baseDmg = 38.0f;
-                    else if (enemy.GetType() == EnemyType::CHARGER) baseDmg = 22.0f;
-                    else if (enemy.GetType() == EnemyType::ORE_GOLEM) baseDmg = 26.0f;
-                    else if (enemy.GetType() == EnemyType::ELEMENTAL_GOLEM) baseDmg = 34.0f;
-                    else if (enemy.GetType() == EnemyType::INQUISITOR_BOSS) baseDmg = 45.0f;
-                    else if (enemy.GetType() == EnemyType::ZIL_BOSS) baseDmg = 34.0f;
-                    else if (enemy.GetType() == EnemyType::KNIGHT_LENON_BOSS) baseDmg = 34.0f;
-                    else if (enemy.GetType() == EnemyType::FROST_TROLL) baseDmg = 28.0f;
-                    else if (enemy.GetType() == EnemyType::BERSERKER_TROLL) baseDmg = 46.0f;
-                    else if (enemy.GetType() == EnemyType::FROST_REVENANT) baseDmg = 36.0f;
-                    if (enemy.IsApexBoss()) baseDmg *= 1.50f;
-                    float dmg = baseDmg * (100.0f / (100.0f + effDef));
-                    comp.health -= dmg;
-                    comp.invulnTimer = 0.55f;
-                    particles.SpawnFloatingText(comp.position, "-" + std::to_string((int)dmg), Color{ 255, 120, 80, 255 }, 18.0f);
-                    particles.SpawnSparks(comp.position, Color{ 215, 120, 160, 255 }, 10, 100.0f);
-                    if (comp.health <= 0.0f) {
-                        comp.active = false;
-                        comp.health = 0.0f;
-                        particles.SpawnFloatingText(comp.position, comp.name + " DEFEATED!", Color{ 255, 80, 90, 255 }, 22.0f);
-                        particles.SpawnSparks(comp.position, Color{ 200, 70, 100, 255 }, 25, 160.0f);
-                        SoundFX::PlayHitImpact();
-                        break;
-                    }
+        // Mutual companion soft collision separation (prevents stacking!)
+        for (size_t a = 0; a < squad.size(); ++a) {
+            if (!squad[a].active || squad[a].health <= 0.0f) continue;
+            for (size_t b = a + 1; b < squad.size(); ++b) {
+                if (!squad[b].active || squad[b].health <= 0.0f) continue;
+                float d = Vector2Distance(squad[a].position, squad[b].position);
+                if (d < 30.0f && d > 0.001f) {
+                    Vector2 push = Vector2Scale(Vector2Normalize(Vector2Subtract(squad[a].position, squad[b].position)), (30.0f - d) * 3.0f * dt);
+                    squad[a].position = Vector2Add(squad[a].position, push);
+                    squad[b].position = Vector2Subtract(squad[b].position, push);
                 }
             }
         }

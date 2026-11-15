@@ -178,6 +178,7 @@ public:
     // Position
     Vector2 GetPosition() const { return position; }
     Vector2 GetTargetPosition() const { return shadowDecoy.active ? shadowDecoy.position : position; }
+    Vector2 GetTargetPositionForEnemy(Vector2 enemyPos, float enemyRadius = 20.0f) const;
     void SetPosition(Vector2 pos) {
         position = pos;
         if (companion.active || (companion.position.x == 0.0f && companion.position.y == 0.0f)) {

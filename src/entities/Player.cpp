@@ -723,6 +723,63 @@ void Player::InitTowerSquad() {
     RelocateTowerCompanions();
 }
 
+Vector2 Player::GetTargetPositionForEnemy(Vector2 enemyPos, float enemyRadius) const {
+    if (shadowDecoy.active) return shadowDecoy.position;
+
+    Vector2 bestTarget = position;
+    float bestThreatScore = 0.0f;
+
+    // Player base threat
+    float distToPlayer = Vector2Distance(enemyPos, position);
+    bestThreatScore = 1.0f / (distToPlayer + 25.0f);
+
+    // Companion Golem (Elemental Golem / Titan)
+    if (companion.active && companion.health > 0.0f) {
+        float d = Vector2Distance(enemyPos, companion.position);
+        float golemThreat = 2.5f / (d + 20.0f);
+        if (golemThreat > bestThreatScore) {
+            bestThreatScore = golemThreat;
+            bestTarget = companion.position;
+        }
+    }
+
+    // Mini Golem Sub-Minions
+    if (companion.isCommandingTitan) {
+        for (int s = 0; s < 3; ++s) {
+            if (golemSubMinions[s].active && golemSubMinions[s].health > 0.0f) {
+                float d = Vector2Distance(enemyPos, golemSubMinions[s].position);
+                float smThreat = 1.6f / (d + 20.0f);
+                if (smThreat > bestThreatScore) {
+                    bestThreatScore = smThreat;
+                    bestTarget = golemSubMinions[s].position;
+                }
+            }
+        }
+    }
+
+    // Tower Companions
+    for (const auto& comp : towerCompanions) {
+        if (!comp.active || comp.health <= 0.0f) continue;
+        float d = Vector2Distance(enemyPos, comp.position);
+        float roleMult = 1.0f;
+        if (comp.unitType == EnemyType::BRUTE || comp.unitType == EnemyType::ORE_GOLEM || comp.unitType == EnemyType::FROST_TROLL) {
+            roleMult = 2.6f; // Frontline tank taunt
+        } else if (comp.unitType == EnemyType::SLASHER || comp.unitType == EnemyType::CHARGER) {
+            roleMult = 1.1f; // Skirmisher
+        } else if (comp.unitType == EnemyType::ARCHER || comp.unitType == EnemyType::PYROMANCER) {
+            roleMult = 0.5f; // Ranged backline
+        }
+
+        float compThreat = roleMult / (d + 20.0f);
+        if (compThreat > bestThreatScore) {
+            bestThreatScore = compThreat;
+            bestTarget = comp.position;
+        }
+    }
+
+    return bestTarget;
+}
+
 void Player::RelocateTowerCompanions() {
     if (towerCompanions.empty()) {
         InitTowerSquad();
