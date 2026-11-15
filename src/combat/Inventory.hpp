@@ -40,6 +40,7 @@ struct PlayerStash {
     int frostShards = 0;
     int essenceOfMist = 0;
     int shadowEssence = 0;
+    int challengeTokens = 0;
     int healthPotions = 0;
     int stoneskinTonics = 0;
     int glacialDraughts = 0;
@@ -174,6 +175,18 @@ public:
     bool SpendFrostShards(int count) {
         if (frostShards >= count) {
             frostShards -= count;
+            return true;
+        }
+        return false;
+    }
+
+    // Material: Challenge Tokens (Royal Combat Arena)
+    int GetChallengeTokens() const { return challengeTokens; }
+    void SetChallengeTokens(int count) { challengeTokens = count >= 0 ? count : 0; }
+    void AddChallengeTokens(int count) { challengeTokens += count; }
+    bool SpendChallengeTokens(int count) {
+        if (challengeTokens >= count) {
+            challengeTokens -= count;
             return true;
         }
         return false;
@@ -355,6 +368,7 @@ private:
     int frostShards = 0;   // Material: Frost Shards (from Highland Frost Crystals)
     int essenceOfMist = 0; // Material: Essence of Mist (from Gale Bandits)
     int shadowEssence = 0; // Material: Shadow Essence (from Gale Archer Boss)
+    int challengeTokens = 0; // Material: Challenge Tokens (from Royal Combat Arena)
     int stoneskinTonics = 0;
     int glacialDraughts = 0;
     int berserkerDraughts = 0;

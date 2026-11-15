@@ -574,6 +574,32 @@ void Player::TriggerArmorSkill(ParticleSystem& particles) {
             particles.SpawnSparks(position, Color{ 180, 245, 255, 255 }, 42, 250.0f);
             break;
         }
+        case ArmorSet::COMMANDERS_UNIFORM: {
+            armorSkillActiveTimer = 8.0f;
+            if (companion.active && companion.health > 0.0f) {
+                companion.buffDefenseTimer = 8.0f;
+                companion.buffSpeedTimer = 8.0f;
+            }
+            for (int s = 0; s < 3; ++s) {
+                if (golemSubMinions[s].active) {
+                    golemSubMinions[s].buffDefenseTimer = 8.0f;
+                    golemSubMinions[s].buffSpeedTimer = 8.0f;
+                }
+            }
+            for (auto& comp : towerCompanions) {
+                if (comp.active) {
+                    comp.buffDefenseTimer = 8.0f;
+                    comp.buffSpeedTimer = 8.0f;
+                }
+            }
+
+            SoundFX::PlayParrySuccess();
+            SoundFX::PlayCrusaderClash();
+            particles.AddScreenShake(6.0f, 0.22f);
+            particles.SpawnFloatingText(position, "RALLYING HORN! +50% ATK SPD / +25 DEF", Color{ 255, 215, 80, 255 }, 24.0f);
+            particles.SpawnSparks(position, Color{ 255, 220, 90, 255 }, 40, 220.0f);
+            break;
+        }
         default:
             break;
     }
@@ -931,6 +957,9 @@ float Player::GetTotemDamageMultiplier() const {
     if (berserkerTimer > 0.0f) {
         mult *= 1.30f; // +30% Damage while Berserker Draught active
     }
+    if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        mult *= 0.65f; // -35% direct weapon damage trade-off for commander/summoner
+    }
     return mult;
 }
 
@@ -941,6 +970,8 @@ float Player::GetMaxHealth() const {
                 + GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).maxHpBonus;
     if (HasFullArmorSet(ArmorSet::VANGUARD_BASTION)) {
         bonus += 50.0f; // +50 Max HP
+    } else if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        bonus += 40.0f; // +40 Max HP
     }
     return Config::PLAYER_MAX_HEALTH + bonus;
 }
@@ -986,6 +1017,8 @@ float Player::GetSpeed() const {
                     * GetTotemStats(currentTotem, inventory.GetTotemUpgrade(currentTotem)).speedMultiplier;
     if (HasFullArmorSet(ArmorSet::SHADOWSTRIDER)) {
         speedMult *= 1.10f; // +10% Set Move Speed (~+21% total with light pieces)
+    } else if (HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) {
+        speedMult *= 1.20f; // +20% Set Move Speed
     } else if (HasFullArmorSet(ArmorSet::BASALT_GOLEM)) {
         speedMult *= 0.96f;
     }
@@ -2709,7 +2742,7 @@ void Player::TriggerDash(ParticleSystem& particles) {
 
     isDashing = true;
 
-    iFrameTimer = HasFullArmorSet(ArmorSet::SHADOWSTRIDER) ? 0.35f : 0.25f; // Extended 0.35s I-Frame window!
+    iFrameTimer = (HasFullArmorSet(ArmorSet::SHADOWSTRIDER) || HasFullArmorSet(ArmorSet::COMMANDERS_UNIFORM)) ? 0.35f : 0.25f; // Extended 0.35s I-Frame window!
 
 
 

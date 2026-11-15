@@ -32,7 +32,8 @@ enum class HelmetType {
     SHADOW_COWL,
     SCRAP_SALLET,
     BASALT_GREATHELM,
-    FROSTWARDEN_HOOD
+    FROSTWARDEN_HOOD,
+    COMMANDER_CAP
 };
 
 enum class ChestplateType {
@@ -43,7 +44,8 @@ enum class ChestplateType {
     SHADOW_GARB,
     SCRAP_CUIRASS,
     BASALT_CUIRASS,
-    FROSTWARDEN_HAUBERK
+    FROSTWARDEN_HAUBERK,
+    COMMANDER_COAT
 };
 
 enum class LeggingsType {
@@ -54,7 +56,8 @@ enum class LeggingsType {
     SHADOW_LEGGINGS,
     SCRAP_GREAVES,
     BASALT_GREAVES,
-    FROSTWARDEN_GREAVES
+    FROSTWARDEN_GREAVES,
+    COMMANDER_TROUSERS
 };
 
 enum class ArmorSet {
@@ -65,7 +68,8 @@ enum class ArmorSet {
     SHADOWSTRIDER,
     FORGED_SCRAP_IRON,
     BASALT_GOLEM,
-    FROSTWARDEN
+    FROSTWARDEN,
+    COMMANDERS_UNIFORM
 };
 
 enum class TotemType {

@@ -65,6 +65,8 @@ bool SaveManager::LoadSummary(int slotIndex, SaveSlotSummary& outSummary) {
             outSummary.essenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"shadowEssence\"") != std::string::npos) {
             outSummary.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"challengeTokens\"") != std::string::npos) {
+            outSummary.challengeTokens = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"galeArcherDefeated\"") != std::string::npos) {
             outSummary.galeArcherDefeated = SaveHelpers::ExtractBoolValue(line, false);
         } else if (line.find("\"elementalGolemDefeated\"") != std::string::npos) {
@@ -144,6 +146,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.essenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"shadowEssence\"") != std::string::npos) {
             outData.shadowEssence = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"challengeTokens\"") != std::string::npos) {
+            outData.challengeTokens = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"stoneskinTonics\"") != std::string::npos) {
             outData.stoneskinTonics = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"glacialDraughts\"") != std::string::npos) {
@@ -160,6 +164,8 @@ bool SaveManager::LoadGame(int slotIndex, GameSaveData& outData) {
             outData.stashEssenceOfMist = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"stashShadowEssence\"") != std::string::npos) {
             outData.stashShadowEssence = SaveHelpers::ExtractIntValue(line, 0);
+        } else if (line.find("\"stashChallengeTokens\"") != std::string::npos) {
+            outData.stashChallengeTokens = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"stashPotions\"") != std::string::npos) {
             outData.stashPotions = SaveHelpers::ExtractIntValue(line, 0);
         } else if (line.find("\"stashStoneskinTonics\"") != std::string::npos) {
@@ -309,6 +315,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"frostShards\": " << data.frostShards << ",\n";
     file << "  \"essenceOfMist\": " << data.essenceOfMist << ",\n";
     file << "  \"shadowEssence\": " << data.shadowEssence << ",\n";
+    file << "  \"challengeTokens\": " << data.challengeTokens << ",\n";
     file << "  \"stoneskinTonics\": " << data.stoneskinTonics << ",\n";
     file << "  \"glacialDraughts\": " << data.glacialDraughts << ",\n";
     file << "  \"berserkerDraughts\": " << data.berserkerDraughts << ",\n";
@@ -317,6 +324,7 @@ bool SaveManager::SaveGame(int slotIndex, const GameSaveData& data) {
     file << "  \"stashFrostShards\": " << data.stashFrostShards << ",\n";
     file << "  \"stashEssenceOfMist\": " << data.stashEssenceOfMist << ",\n";
     file << "  \"stashShadowEssence\": " << data.stashShadowEssence << ",\n";
+    file << "  \"stashChallengeTokens\": " << data.stashChallengeTokens << ",\n";
     file << "  \"stashPotions\": " << data.stashPotions << ",\n";
     file << "  \"stashStoneskinTonics\": " << data.stashStoneskinTonics << ",\n";
     file << "  \"stashGlacialDraughts\": " << data.stashGlacialDraughts << ",\n";

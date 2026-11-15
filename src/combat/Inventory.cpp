@@ -512,6 +512,11 @@ void Inventory::DepositItem(int itemId, int count) {
             berserkerDraughts -= count;
             stash.berserkerDraughts += count;
             break;
+        case 9: // Challenge Tokens
+            count = (count > challengeTokens) ? challengeTokens : count;
+            challengeTokens -= count;
+            stash.challengeTokens += count;
+            break;
     }
 }
 
@@ -562,6 +567,11 @@ void Inventory::WithdrawItem(int itemId, int count) {
             count = (count > stash.berserkerDraughts) ? stash.berserkerDraughts : count;
             stash.berserkerDraughts -= count;
             berserkerDraughts += count;
+            break;
+        case 9: // Challenge Tokens
+            count = (count > stash.challengeTokens) ? stash.challengeTokens : count;
+            stash.challengeTokens -= count;
+            challengeTokens += count;
             break;
     }
 }

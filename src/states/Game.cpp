@@ -1092,6 +1092,7 @@ void Game::SaveActiveGame() {
     data.frostShards = player.GetInventory().GetFrostShards();
     data.essenceOfMist = player.GetInventory().GetEssenceOfMist();
     data.shadowEssence = player.GetInventory().GetShadowEssence();
+    data.challengeTokens = player.GetInventory().GetChallengeTokens();
     data.stoneskinTonics = player.GetInventory().GetStoneskinTonicCount();
     data.glacialDraughts = player.GetInventory().GetGlacialDraughtCount();
     data.berserkerDraughts = player.GetInventory().GetBerserkerDraughtCount();
@@ -1101,6 +1102,7 @@ void Game::SaveActiveGame() {
     data.stashFrostShards = stash.frostShards;
     data.stashEssenceOfMist = stash.essenceOfMist;
     data.stashShadowEssence = stash.shadowEssence;
+    data.stashChallengeTokens = stash.challengeTokens;
     data.stashPotions = stash.healthPotions;
     data.stashStoneskinTonics = stash.stoneskinTonics;
     data.stashGlacialDraughts = stash.glacialDraughts;
@@ -1280,6 +1282,7 @@ void Game::LoadActiveGame(int slotIndex) {
     player.GetInventory().SetFrostShards(data.frostShards);
     player.GetInventory().SetEssenceOfMist(data.essenceOfMist);
     player.GetInventory().SetShadowEssence(data.shadowEssence);
+    player.GetInventory().SetChallengeTokens(data.challengeTokens);
     player.GetInventory().SetStoneskinTonicCount(data.stoneskinTonics);
     player.GetInventory().SetGlacialDraughtCount(data.glacialDraughts);
     player.GetInventory().SetBerserkerDraughtCount(data.berserkerDraughts);
@@ -1289,6 +1292,7 @@ void Game::LoadActiveGame(int slotIndex) {
     stash.frostShards = data.stashFrostShards;
     stash.essenceOfMist = data.stashEssenceOfMist;
     stash.shadowEssence = data.stashShadowEssence;
+    stash.challengeTokens = data.stashChallengeTokens;
     stash.healthPotions = data.stashPotions;
     stash.stoneskinTonics = data.stashStoneskinTonics;
     stash.glacialDraughts = data.stashGlacialDraughts;
@@ -3729,11 +3733,12 @@ void Game::Update(float dt) {
             currentState = GameState::VICTORY;
 
             if (waveManager.IsBossGauntlet()) {
-                particles.SpawnFloatingText(player.GetPosition(), "APEX BOSS GAUNTLET CONQUERED!", Color{ 255, 230, 80, 255 }, 30.0f);
-                player.GetInventory().AddOreScraps(75);
-                player.GetInventory().AddShingles(2500);
-                player.GetInventory().AddEssenceOfMist(10);
-                player.GetInventory().AddShadowEssence(10);
+                particles.SpawnFloatingText(player.GetPosition(), "APEX BOSS GAUNTLET CONQUERED! +25 CHALLENGE TOKENS", Color{ 255, 230, 80, 255 }, 30.0f);
+                player.GetInventory().AddChallengeTokens(25);
+                player.GetInventory().AddOreScraps(20);
+                player.GetInventory().AddShingles(150);
+                player.GetInventory().AddEssenceOfMist(3);
+                player.GetInventory().AddShadowEssence(3);
                 if (!player.GetInventory().HasQuestItem("item_boss_gauntlet_trophy")) {
                     player.GetInventory().AddQuestItem({
                         "item_boss_gauntlet_trophy",
@@ -3747,13 +3752,14 @@ void Game::Update(float dt) {
                     particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: CHAMPION'S TOTEM!", Color{ 255, 215, 80, 255 }, 28.0f);
                 }
             } else {
-                particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! (25/25)", Color{ 255, 230, 80, 255 }, 30.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "APEX ARENA CLEARED! +18 CHALLENGE TOKENS", Color{ 255, 230, 80, 255 }, 30.0f);
 
                 // Grand Apex Victory Reward (Wave 25)
-                player.GetInventory().AddOreScraps(60);
-                player.GetInventory().AddShingles(200);
-                player.GetInventory().AddEssenceOfMist(6);
-                player.GetInventory().AddShadowEssence(5);
+                player.GetInventory().AddChallengeTokens(18);
+                player.GetInventory().AddOreScraps(15);
+                player.GetInventory().AddShingles(50);
+                player.GetInventory().AddEssenceOfMist(2);
+                player.GetInventory().AddShadowEssence(2);
                 if (!player.GetInventory().HasTotem(TotemType::COMMANDER_TOTEM)) {
                     player.GetInventory().UnlockTotem(TotemType::COMMANDER_TOTEM);
                     particles.SpawnFloatingText(player.GetPosition(), "UNLOCKED: COMMANDER'S TOTEM!", Color{ 215, 120, 255, 255 }, 28.0f);
@@ -3778,43 +3784,40 @@ void Game::Update(float dt) {
             int newWave = waveManager.GetCurrentWave();
             if (newWave == 6) {
                 // Milestone 1 (Wave 5 Cleared)
-                player.GetInventory().AddOreScraps(10);
-                player.GetInventory().AddShingles(30);
-                player.GetInventory().AddEssenceOfMist(1);
+                player.GetInventory().AddChallengeTokens(3);
+                player.GetInventory().AddOreScraps(3);
+                player.GetInventory().AddShingles(10);
                 SoundFX::PlayCoinPickup();
                 SoundFX::PlayParrySuccess();
                 particles.SpawnSparks(player.GetPosition(), Color{ 100, 235, 215, 255 }, 25, 180.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 1 (WAVE 5): +10 SCRAPS, +30 SHINGLES, +1 MIST ESSENCE!", Color{ 100, 235, 215, 255 }, 24.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 1 (WAVE 5): +3 CHALLENGE TOKENS, +3 SCRAPS, +10 SHINGLES!", Color{ 100, 235, 215, 255 }, 24.0f);
             } else if (newWave == 11) {
                 // Milestone 2 (Wave 10 Cleared)
-                player.GetInventory().AddOreScraps(20);
-                player.GetInventory().AddShingles(60);
-                player.GetInventory().AddEssenceOfMist(2);
-                player.GetInventory().AddShadowEssence(1);
+                player.GetInventory().AddChallengeTokens(6);
+                player.GetInventory().AddOreScraps(5);
+                player.GetInventory().AddShingles(20);
                 SoundFX::PlayCoinPickup();
                 SoundFX::PlayParrySuccess();
                 particles.SpawnSparks(player.GetPosition(), Color{ 190, 110, 255, 255 }, 28, 200.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 2 (WAVE 10): +20 SCRAPS, +60 SHINGLES, +1 SHADOW ESSENCE!", Color{ 190, 110, 255, 255 }, 24.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 2 (WAVE 10): +6 CHALLENGE TOKENS, +5 SCRAPS, +20 SHINGLES!", Color{ 190, 110, 255, 255 }, 24.0f);
             } else if (newWave == 16) {
                 // Milestone 3 (Wave 15 Cleared)
-                player.GetInventory().AddOreScraps(30);
-                player.GetInventory().AddShingles(90);
-                player.GetInventory().AddEssenceOfMist(3);
-                player.GetInventory().AddShadowEssence(2);
+                player.GetInventory().AddChallengeTokens(9);
+                player.GetInventory().AddOreScraps(8);
+                player.GetInventory().AddShingles(30);
                 SoundFX::PlayCoinPickup();
                 SoundFX::PlayParrySuccess();
                 particles.SpawnSparks(player.GetPosition(), Color{ 255, 215, 80, 255 }, 30, 220.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 3 (WAVE 15): +30 SCRAPS, +90 SHINGLES, +2 SHADOW ESSENCE!", Color{ 255, 215, 80, 255 }, 24.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 3 (WAVE 15): +9 CHALLENGE TOKENS, +8 SCRAPS, +30 SHINGLES!", Color{ 255, 215, 80, 255 }, 24.0f);
             } else if (newWave == 21) {
                 // Milestone 4 (Wave 20 Cleared - Primordial Titan Defeated)
-                player.GetInventory().AddOreScraps(40);
-                player.GetInventory().AddShingles(120);
-                player.GetInventory().AddEssenceOfMist(4);
-                player.GetInventory().AddShadowEssence(3);
+                player.GetInventory().AddChallengeTokens(12);
+                player.GetInventory().AddOreScraps(10);
+                player.GetInventory().AddShingles(40);
                 SoundFX::PlayCoinPickup();
                 SoundFX::PlayParrySuccess();
                 particles.SpawnSparks(player.GetPosition(), Color{ 255, 160, 40, 255 }, 32, 240.0f);
-                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 4 (WAVE 20): +40 SCRAPS, +120 SHINGLES, +4 MIST, +3 SHADOW ESSENCE!", Color{ 255, 160, 40, 255 }, 24.0f);
+                particles.SpawnFloatingText(player.GetPosition(), "MILESTONE 4 (WAVE 20): +12 CHALLENGE TOKENS, +10 SCRAPS, +40 SHINGLES!", Color{ 255, 160, 40, 255 }, 24.0f);
             }
         }
 
