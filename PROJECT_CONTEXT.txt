@@ -1,9 +1,9 @@
 ================================================================================
                     PHLEGMATIC - COMPREHENSIVE PROJECT CONTEXT
 ================================================================================
-Generated: November 14, 2026
-Branch: ver.0.0.1l
-Release Version: 0.0.1l
+Generated: November 15, 2026
+Branch: ver.0.0.1m
+Release Version: 0.0.1m
 Engine / Framework: C++17 / Raylib 6.2 (MinGW-w64 GCC)
 Repository: eitophetamine9/Phlegmatic
 Target Platforms: Windows x64 (Direct Win32/OpenGL execution via Raylib)
@@ -799,8 +799,41 @@ LATEST UPDATES & INCREMENT HIGHLIGHTS (v0.0.1i)
   * Frost Revenant telegraph tuning: Melee cone windup extended from 0.50s to 0.62s for fair dodge reaction windows.
 
 ================================================================================
-16. VERSION 0.0.1l MILESTONES (INCREMENTS 1 - 5)
+17. VERSION 0.0.1m MILESTONES (COMPANION ROLES, SCEPTER AOE, COMMANDER ARMOR & TOKENS)
 ================================================================================
+- Sovereign's Scepter 360-Degree AoE Light Heal & Cooldown Tuning:
+  * Upgraded light attack to an omnipresent full-circle radial aura (160px radius, 360-degree arc) healing summons for +55 / +75 / +95 HP (Tiers 0/1/2).
+  * Cooldown lengthened to 0.85s (up from 0.45s) and stamina cost set to 16.0 to demand deliberate timing.
+  * Added radial blessing particle burst and floating heal indicators.
+- Companion Role Behaviors & Natural Movement:
+  * Dynamic role anchoring relative to combat threat vector:
+    - Vanguard tanks (Knight Lenon, Iron Brute, Charger, Ore Golem, Frost Troll, Commanding Titan) step +80px in front of player.
+    - Ranged artillery (Wind Archer, Void Pyromancer, Fairy) fall back -110px behind player.
+    - Flankers & Skirmishers (Slasher, Mini Golems) fan out +-85px laterally.
+  * Soft-repulsion separation force preventing companion stacking, plus subtle idle breathing oscillation.
+- Dynamic Enemy Aggro & Interception:
+  * Enemies evaluate threat dynamically via Player::GetTargetPositionForEnemy:
+    - Tanks draw 2.6x threat weighting (taunt effect).
+    - Skirmishers draw 1.1x threat, player draws 1.0x baseline threat, and ranged units draw 0.5x threat.
+  * Melee sweeps, telegraph arcs, and projectiles collide with and inflict damage upon companions.
+- Frostwarden Armor Highland Crafting Adjustment:
+  * Rebalanced recipes to strictly consume regional Frost Shards:
+    - Frostwarden Fur Cowl: 6 Frost Shards (0 Scraps, 0 Shingles, 0 Mist, 0 Shadow).
+    - Frostwarden Pelt Hauberk: 10 Frost Shards.
+    - Frostwarden Spiked Greaves: 8 Frost Shards.
+- Commander's Uniform (Armor Set 8):
+  * Dedicated armor set benefiting summoner/tactician playstyles:
+    - Commander's Peaked Cap: +6 DEF, +15 Max HP, +10% Evade, +15 Will.
+    - Commander's Parade Coat: +14 DEF, +25 Max HP, +15% Evade, -35% Direct Weapon Damage.
+    - Commander's Riding Trousers: +6 DEF, +10% Evade, +20% Move Speed.
+    - Full Set Trait: +40 Max HP, +20% Move Speed, extended 0.35s dodge i-frame window, -35% direct weapon damage penalty, +35% companion HP/DEF, +25% companion DMG.
+    - Active Skill [V] Rallying Call: 8s buff granting summons +30% Attack Speed and +25% Move Speed with quad-banner aura.
+- Arena Challenge Tokens & Economy Rebalance:
+  * Nerfed regular material drops from Royal Combat Arena.
+  * Introduced Challenge Tokens awarded at wave milestones (Wave 5: +3, Wave 10: +6, Wave 15: +9, Wave 20: +12, Wave 25: +18, Apex Gauntlet: +25).
+  * Challenge Tokens are used to craft Commander's Uniform pieces (8, 14, 10 tokens) and upgrade Champion's Totem & Commander's Totem to Tier 2 (6 tokens) and Tier 3 (12 tokens).
+  * Storage stash and inventory pouch serialization in SaveManager.
+
 - Apex Boss Gauntlet Overhaul & Attack Patterns (Increment 1):
   * Overhauled all three Apex Gauntlet champions: Apex Remnant Zil (1,250 HP, +12 DEF, 85 Will), Apex Primordial Titan (1,850 HP, +16 DEF, 100 Will), Apex Berserker Troll Warlord (2,800 HP, +20 DEF, 110 Will).
   * Added +50% Apex lethality damage multiplier across all melee and projectile attacks via isApexBoss flag in CollisionSystem.
