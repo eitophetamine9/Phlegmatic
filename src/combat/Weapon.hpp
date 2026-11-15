@@ -258,8 +258,8 @@ inline WeaponStats GetWeaponStats(WeaponType type, int upgradeLevel = 0) {
         case WeaponType::SOVEREIGN_SCEPTER:
             stats = {
                 "Sovereign's Scepter",
-                "Sacred rod of command bathed in radiant luminescence. Built as a pure healing weapon with minimal offensive power (4 DMG). Light attack unleashes an aura pulse restoring +24 HP (+30 at +1, +38 at +2) to nearby summons. Heavy attack channels Sanctuary Radiance: a full 360-degree AoE wave dealing 0 DMG to enemies while restoring +75 HP (+95 at +1, +120 at +2) to all active minions, purging debuffs and conferring +15 DEF and +20% move speed for 6 seconds.",
-                4.0f, 90.0f, 90.0f, 0.20f, 0.25f, 10.0f,
+                "Sacred rod of command bathed in radiant luminescence. Built as a pure healing weapon with minimal offensive power (4 DMG). Light attack unleashes an expanding full-circle 360-degree healing wave restoring +55 HP (+75 at +1, +95 at +2) to all summons within 160px on a 0.85s cooldown. Heavy attack channels Sanctuary Radiance: a massive 360-degree AoE wave dealing 0 DMG to enemies while restoring +75 HP (+95 at +1, +120 at +2) to all active minions, purging debuffs and conferring +15 DEF and +20% move speed for 6 seconds.",
+                4.0f, 160.0f, 360.0f, 0.28f, 0.85f, 16.0f,
                 0.0f, 280.0f, 360.0f, 0.32f, 0.35f, 2.50f, 25.0f,
                 16.0f, 0.60f,
                 0, 1.0f, 0.0f, 1.0f, 0.0f

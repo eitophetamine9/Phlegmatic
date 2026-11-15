@@ -3123,17 +3123,23 @@ void Player::TriggerLightAttack(ParticleSystem& particles) {
     } else if (currentWeapon == WeaponType::SOVEREIGN_SCEPTER) {
 
         currentAttack.range = stats.lightRange;
-        currentAttack.arcAngle = stats.lightArc;
+        currentAttack.arcAngle = 360.0f;
+        currentAttack.isFrontalCircle = false;
         currentAttack.damage = stats.lightDamage * GetTotemDamageMultiplier();
-        currentAttack.knockback = 50.0f;
+        currentAttack.knockback = 60.0f;
         currentAttack.defensePierce = 0.0f;
         SoundFX::PlayLightAttack();
         SoundFX::PlayHeal();
-        particles.SpawnSlashTrail(position, forwardDir, Color{ 140, 235, 255, 255 });
-        particles.SpawnSparks(Vector2{ position.x + forwardDir.x * 55.0f, position.y + forwardDir.y * 55.0f }, Color{ 160, 245, 255, 255 }, 12, 110.0f);
+        particles.SpawnSparks(position, Color{ 140, 235, 255, 255 }, 20, 140.0f);
+        particles.SpawnSparks(position, Color{ 255, 235, 120, 220 }, 14, 110.0f);
+        shockwaveActive = true;
+        shockwaveTimer = 0.22f;
+        shockwaveRadius = stats.lightRange;
+        shockwavePos = position;
         int scepUpg = inventory.GetWeaponUpgrade(WeaponType::SOVEREIGN_SCEPTER);
-        float scepHeal = (scepUpg >= 2) ? 38.0f : ((scepUpg >= 1) ? 30.0f : 24.0f);
-        HealAllSummons(stats.lightRange + 45.0f, scepHeal, false, particles);
+        float scepHeal = (scepUpg >= 2) ? 95.0f : ((scepUpg >= 1) ? 75.0f : 55.0f);
+        HealAllSummons(stats.lightRange, scepHeal, false, particles);
+        particles.SpawnFloatingText(position, "RESTORING BURST! +" + std::to_string((int)scepHeal), Color{ 130, 240, 255, 255 }, 20.0f);
 
     } else {
 
